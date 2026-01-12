@@ -1,0 +1,26 @@
+﻿@using Blazor.Shared.SystemInformation.Enums;
+@using Blazor.Shared.SystemInformation.Models;
+@using System.Drawing;
+@using Blazor.Shared.SystemInformation.Services
+
+<div class="systeminfo-monitor-diagramm systeminfo-font-bold">
+    <canvas id="dashboardCanvas" width="252" height="176"></canvas>
+    <div id="tooltip">
+        <div class="tooltip-pointer"></div>
+        <div class="tooltip-header"></div>
+        <table class="tooltip-table">
+            <tr>
+                <td class="label">Min:</td>
+                <td class="value"></td>
+            </tr>
+            <tr>
+                <td class="label">Avg:</td>
+                <td class="value"></td>
+            </tr>
+            <tr>
+                <td class="label">Max:</td>
+                <td class="value"></td>
+            </tr>
+        </table>
+    </div>
+</div>

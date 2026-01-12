@@ -1,0 +1,64 @@
+﻿@using Blazor.Shared.Network.ControlPanels.Ntp.Services
+@using Blazor.Shared.Settings.Components
+@using ViciOne.Ui.Localization.Resources
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
+@inherits NetworkControlPanelBase<NtpControlPanelState>
+
+<DescriptionBanner Title="@TechnicalTerms.NtpSettingPlural" IconCssClass="@_cluster1IconCssClasses">
+    @Localization.NtpControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@TechnicalTerms.NtpServerPlural" Expanded="@State.NtpServersEnabled">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.NtpServersEnabled" @bind-Value:after="BeginEdit" />
+        </Expander>
+        
+        <ChildContent>
+            @foreach (var a in State.NtpServerDetails.Select((ntpServerDetail, index) => new { NtpServerDetail = ntpServerDetail, Index = index }))
+            {
+                <SettingsField Label="@TechnicalTerms.NtpServer" @key="a.Index">
+                    <SettingsFieldTextBox Placeholder="@Localization.NtpControlPanel.NtpServerFieldPlaceholder"
+                                          @bind-Value="a.NtpServerDetail.IpAddressOrHostname"
+                                          @bind-Value:after="BeginEdit"/>
+                </SettingsField>
+            }
+
+            <SettingsStepper MinusEnabled="@(State.NtpServerDetails.Count > 1)"
+                             OnPlus="@AddNtpServerDetail"
+                             OnMinus="@RemoveNtpServerDetail"
+                             OnPlusMinus="BeginEdit" />
+        </ChildContent>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@Localization.NtpControlPanel.FallbackNtpServerPlural">
+        @if (State.FallbackNtpServerDetails.Count > 0)
+        {
+            @foreach (var a in State.FallbackNtpServerDetails.Select((ntpServerDetail, index) => new { NtpServerDetail = ntpServerDetail, Index = index }))
+            {
+                <SettingsField Label="@Localization.NtpControlPanel.FallbackNtpServer" @key="a.Index">
+                    @a.NtpServerDetail.IpAddressOrHostname
+                </SettingsField>
+            }
+
+            @if (State.NtpServersEnabled)
+            {
+                <SettingsFieldSeparator />
+                <SettingsField Label="@Localization.NtpControlPanel.CopyDefaultServersToServerList">
+                    <SettingsFieldButton
+                        Text="@Localization.NtpControlPanel.AddDefaultServersButtonLabel"
+                        OnClick="@CopyDefaultNtpServersToServerList"
+                        IconCssClass="@MonochromeIconName.Duplicate.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()"
+                    />
+                </SettingsField>
+            }
+        }
+        else
+        {
+            <InformationBannerSettingsField Text="@Localization.NtpControlPanel.NoFallbackNtpServerAvailable" />
+        }
+    </SettingsGroup>
+</SettingsLayout>

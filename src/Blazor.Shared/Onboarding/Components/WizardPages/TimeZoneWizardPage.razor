@@ -1,0 +1,13 @@
+﻿@using Blazor.Shared.Onboarding.Services
+@using Blazor.Shared.Settings.DateAndTime.Components
+@using Sdk.Client.Wizards.Components
+
+@inherits WizardPage<TimeZoneWizardPageState>
+
+<DescriptionBanner Title="@Localization.TimeZoneWizardPage.DescriptionBannerTitle" IconCssClass="@_descriptionBannerIconCssClass">
+    @Localization.TimeZoneWizardPage.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <TimeZoneSettingsGroup @bind-SelectedTimeZoneId="State.SelectedTimeZoneId" @bind-SelectedTimeZoneId:after="BeginEdit" />
+</SettingsLayout>

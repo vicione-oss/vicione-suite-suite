@@ -1,0 +1,73 @@
+﻿@use "../../Styles/design/colors";
+@use "../../../../shared/styles/colors-staged";
+@use "../../../../shared/styles/nav-tiles/variables";
+@use 'sass:color';
+
+.nav-tile-container {
+    position: relative;
+
+    margin: variables.$container-margin variables.$container-margin * 2 variables.$container-margin 0px;
+
+    overflow: hidden;
+
+    height: variables.$container-width-no-span;
+
+    &.horizontal-span-one {
+        width: variables.$container-width-no-span;
+    }
+
+    &.horizontal-span-two {
+        width: variables.$container-width-no-span * 2 + variables.$container-margin * 2; // increase by 2 times margin to get same width as two small tiles displayed next to each other
+    }
+
+    @mixin span-tile()
+    {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    $background-color: color.adjust(colors-staged.$color-content, $alpha: -0.3);
+
+    .nav-tile-container__link {
+        @include span-tile();
+
+        padding: variables.$link-padding;
+        text-decoration: none;
+        cursor: pointer;
+
+        background: $background-color;
+        color: colors.$color-font;
+
+        ::deep .content-loading-indication {
+            width: 100%;
+            height: 100%;
+
+            .content-wrapper {
+                height: inherit; // ensures icon placement on the lower right works correctly
+            }
+        }
+    }
+
+    &:not(.disabled):not(.loading) {
+        .nav-tile-container__link {
+            &:hover,
+            &:focus,
+            &:focus-visible {
+                background-color: color.adjust($background-color, $alpha: -0.1);
+                color: colors.$color-font-light;
+            }
+        }
+    }
+
+    &.disabled {
+        filter: brightness(0.6) grayscale(1);
+    }
+
+    &.disabled, &.loading {
+        .nav-tile-container__link {
+            cursor: default;
+            pointer-events: none;
+        }
+    }
+}

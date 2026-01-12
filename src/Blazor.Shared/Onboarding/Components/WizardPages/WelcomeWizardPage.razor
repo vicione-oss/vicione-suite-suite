@@ -1,0 +1,46 @@
+﻿@using Blazor.Shared.Onboarding.Services
+@using Sdk.Client.Wizards.Components
+@using Sdk.Client.Wizards.Services
+@using ViciOne.Ui.Localization.Resources
+
+@inherits WizardPage<WizardPageState>
+
+<DescriptionBanner Title="@($"{CommonVocabulary.Welcome} !")" IconCssClass="@_descriptionBannerIconCssClass">
+    @string.Format(Localization.WelcomeWizardPage.DescriptionBannerContent, Onboarding.Localization.Wizard.Title)
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@Localization.WelcomeWizardPage.SettingsGroupTitle">
+        <SettingsInformation>
+            <div class="settings-information-layout">
+                <div class="left">
+                    <strong>@Localization.WelcomeWizardPage.InitialTaskCaption</strong>
+
+                    <ul>
+                        @if (_isWizardWithPasswordPage)
+                        {
+                            <li>@Localization.WelcomeWizardPage.InitialTask1</li>
+                        }
+                        <li>@Localization.WelcomeWizardPage.InitialTask2</li>
+                    </ul>
+
+                    <p>
+                        @Localization.WelcomeWizardPage.IntermediateSentence
+                    </p>
+
+                    <strong>@Localization.WelcomeWizardPage.PrivacyNotesCaption</strong>
+
+                    <ul>
+                        <li>@Localization.WelcomeWizardPage.PrivacyNote1</li>
+                        <li>@Localization.WelcomeWizardPage.PrivacyNote2</li>
+                        <li>@Localization.WelcomeWizardPage.PrivacyNote3</li>
+                    </ul>
+                </div>
+                
+                <div class="right">
+                    <img src="@_deviceImageSrc" alt="@CommonVocabulary.Device" /> 
+                </div>
+            </div>
+        </SettingsInformation>
+    </SettingsGroup>
+</SettingsLayout>

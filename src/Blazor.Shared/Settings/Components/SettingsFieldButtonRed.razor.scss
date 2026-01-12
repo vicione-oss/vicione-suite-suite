@@ -1,0 +1,15 @@
+﻿@use "../../Styles/design/colors";
+@use "../../../../shared/styles/colors-staged";
+@use 'sass:color';
+
+.wrapper {
+    ::deep .red-button:not([disabled]) {
+        color: colors.$color-font-light;
+        background-color: colors-staged.$color-red;
+        border-color: color.change(colors-staged.$color-red, $alpha: 0.8);
+
+        &:hover {
+            border-color: color.adjust(colors-staged.$color-red, $lightness: -15%);
+        }
+    }
+}

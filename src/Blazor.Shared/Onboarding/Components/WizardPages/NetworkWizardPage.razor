@@ -1,0 +1,130 @@
+﻿@using Blazor.Shared.Components
+@using Blazor.Shared.Onboarding.Extensions
+@using Blazor.Shared.Onboarding.Services
+@using Blazor.Shared.Settings.NetworkInterface.Components
+@using Sdk.Client.Wizards.Components
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@inherits WizardPage<NetworkWizardPageState>
+
+<DescriptionBanner Title="@Localization.NetworkWizardPage.DescriptionBannerTitle" IconCssClass="@_descriptionBannerIconCssClass">
+    @Localization.NetworkWizardPage.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@Localization.NetworkWizardPage.RulesAndGuidelinesTitle" @bind-Expanded="State.RulesAndGuidelinesExpanded">
+        <SettingsInformation>
+            <div class="rules-and-guidelines">
+                <ul>
+                    <li>
+                        <strong>@Localization.NetworkWizardPage.Rule1</strong>
+
+                        <ul>
+                            <li>@string.Format(Localization.NetworkWizardPage.Rule1a, State.LocalNetwork.GetFriendlyName())</li>
+                            <li>@string.Format(Localization.NetworkWizardPage.Rule1b, State.InternetConnection.GetFriendlyName())</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li>
+                        <strong>@Localization.NetworkWizardPage.Rule2</strong>
+
+                        <ul>
+                            <li>@Localization.NetworkWizardPage.Rule2a</li>
+                            <li>@Localization.NetworkWizardPage.Rule2b</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li>
+                        <strong>@Localization.NetworkWizardPage.Rule3</strong>
+
+                        <ul>
+                            <li>@Localization.NetworkWizardPage.Rule3a</li>
+                            <li>@Localization.NetworkWizardPage.Rule3b</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li>
+                        <strong>@Localization.NetworkWizardPage.TermsExplained</strong>
+
+                        <ul>
+                            <li>
+                                @TechnicalTerms.IpAddress
+
+                                <ul>
+                                    <li>@Localization.NetworkWizardPage.IpAddressExplanation</li>
+                                    <li>@(CommonVocabulary.Example): 192.168.1.100</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <ul>
+                            <li>
+                                @TechnicalTerms.SubnetMask
+
+                                <ul>
+                                    <li>@Localization.NetworkWizardPage.SubnetMaskExplanation</li>
+                                    <li>@(CommonVocabulary.Example): 255.255.0.0</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <ul>
+                            <li>
+                                @TechnicalTerms.DefaultGateway
+
+                                <ul>
+                                    <li>@Localization.NetworkWizardPage.DefaultGatewayExplanation</li>
+                                    <li>@(CommonVocabulary.Example): 192.168.1.1</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <strong>@Localization.NetworkWizardPage.IntermediateSentence</strong>
+            </div>
+        </SettingsInformation>
+    </SettingsGroup>
+
+    <IpV4SettingsGroup Title="@State.InternetConnection.GetFriendlyNameVerbose()"
+                       @bind-ConfigurationMode="State.InternetConnection.ConfigurationMode"
+                       @bind-IpAddress="State.InternetConnection.IpAddress"
+                       @bind-SubnetMask="State.InternetConnection.SubnetMask"
+                       @bind-DefaultGateway="State.InternetConnection.DefaultGateway"
+                       Changed="BeginEdit" 
+                       HasManualConfiguredDnsServers="@(!string.IsNullOrEmpty(State.InternetConnection.DnsServer))">
+
+        <AdditionalSettingsFields>
+
+            <SettingsField Label="@TechnicalTerms.DnsServer">
+                <SettingsFieldTextBox Placeholder="@TechnicalTerms.DnsServer" @bind-Value="State.InternetConnection.DnsServer" @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+        </AdditionalSettingsFields>
+    </IpV4SettingsGroup>
+
+    <IpV4SettingsGroup Title="@State.LocalNetwork.GetFriendlyNameVerbose()"
+                       @bind-ConfigurationMode="State.LocalNetwork.ConfigurationMode"
+                       @bind-IpAddress="State.LocalNetwork.IpAddress"
+                       @bind-SubnetMask="State.LocalNetwork.SubnetMask"
+                       @bind-DefaultGateway="State.LocalNetwork.DefaultGateway"
+                       Changed="BeginEdit"
+                       HasManualConfiguredDnsServers="@(!string.IsNullOrEmpty(State.LocalNetwork.DnsServer))">
+
+        <AdditionalSettingsFields>
+
+            <SettingsField Label="@TechnicalTerms.DnsServer">
+                <SettingsFieldTextBox Placeholder="@TechnicalTerms.DnsServer" @bind-Value="State.LocalNetwork.DnsServer" @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+        </AdditionalSettingsFields>
+    </IpV4SettingsGroup>
+</SettingsLayout>

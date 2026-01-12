@@ -1,0 +1,16 @@
+﻿@using Blazor.Shared.Settings.DateAndTime.Components
+@using Blazor.Shared.UserInterface.ControlPanels.DateAndTime.Services
+@using Sdk.Client.ControlPanels.Services
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<DateAndTimeControlPanelState>
+
+<ControlPanelPage Title="@TechnicalTerms.SystemDefault">
+    <DescriptionBanner Title="@Localization.SystemDefaultControlPanelPage.DescriptionBannerTitle" IconCssClass="@_timerIconCssClasses">
+        @Localization.SystemDefaultControlPanelPage.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        <TimeZoneSettingsGroup @bind-SelectedTimeZoneId="State.SelectedTimeZoneId" @bind-SelectedTimeZoneId:after="BeginEdit" />
+    </SettingsLayout>
+</ControlPanelPage>

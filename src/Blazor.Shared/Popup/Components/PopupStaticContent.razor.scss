@@ -1,0 +1,6 @@
+﻿ @use "../../Styles/popup-master-detail-layout" as popup-master-detail-layout;
+
+.popup-static-content {
+    padding-left: popup-master-detail-layout.$detail-padding-left-right;
+    padding-right: popup-master-detail-layout.$detail-padding-left-right;
+}

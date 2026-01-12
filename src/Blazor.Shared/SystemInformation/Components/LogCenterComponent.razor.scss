@@ -1,0 +1,32 @@
+﻿@use "../../Styles/design/colors";
+@use "../../../../shared/styles/typography";
+
+.systeminfo-log-center-head-frame {
+    height: 32px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+
+    .systeminfo-log-center-head {
+        height: 21px;
+        font-size: 14px;
+        color: colors.$color-font-light;
+        font-weight: typography.$font-weight-regular;
+        letter-spacing: 0.2px;
+        line-height: 20px;
+    }
+
+    .systeminfo-log-center-tail {
+        height: 21px;
+        font-size: 12px;
+        color: colors.$color-font;
+        font-weight: typography.$font-weight-light;
+        letter-spacing: 0.2px;
+        line-height: 20px;
+        margin-left: auto;
+    }
+}
+
+.systeminfo-open-log-center {
+    font-size: 14px;
+}

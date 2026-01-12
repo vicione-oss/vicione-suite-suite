@@ -1,0 +1,14 @@
+@using Blazor.Shared
+@using Blazor.Shared.Logging
+@using Sdk.Authorization
+
+@attribute [Route(Constants.LogViewRoute)]
+
+<AuthorizeView Policy="@ModulePolicyProvider.GetPolicy(Core.Shared.Constants.SystemModuleId, AccessLevel.Full)">
+    <Authorized>
+        <LogViewComponent />
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not supposed to be here</p>
+    </NotAuthorized>
+</AuthorizeView>

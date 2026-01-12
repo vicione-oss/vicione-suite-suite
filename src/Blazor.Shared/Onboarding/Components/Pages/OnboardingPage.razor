@@ -1,0 +1,14 @@
+﻿@using Blazor.Shared.Onboarding.Components.Pages
+@using Sdk.Client.Components.Wallpaper
+@using Sdk.Client.Components.Wallpaper.Enums
+@using Sdk.Client.Wizards.Components
+
+@attribute [Route(Constants.Route)]
+
+<Wallpaper Image="Blazor.Shared.Constants.WallpaperImage" BaseUri="Blazor.Shared.Constants.WallpaperBaseUri" />
+
+<Wizard Title="@Localization.Wizard.Title"
+        Context="@OnboardingWizardContext"
+        AllowExit="true"
+        @bind-Visible="_wizardVisible"
+        @bind-Visible:after="WizardClosed" />

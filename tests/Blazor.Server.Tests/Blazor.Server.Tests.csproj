@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Blazor.Server.Tests</AssemblyName>
+    <RootNamespace>Blazor.Server.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Blazor.Server.Backend\Blazor.Server.Backend.csproj" />
+    <ProjectReference Include="..\TestModule.Backend\TestModule.Backend.csproj" />
+    <ProjectReference Include="..\TestModule.Client\TestModule.Client.csproj" />
+  </ItemGroup>
+
+</Project>

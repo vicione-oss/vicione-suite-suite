@@ -1,0 +1,32 @@
+﻿@use "../../Styles/design/colors";
+@use "../../../../shared/styles/colors-staged";
+@use 'sass:color';
+
+.control-panel-container {
+    color: colors.$color-font-light;
+    height: 100%;
+
+    .spacer {
+        height: 40px;
+    }
+}
+
+@mixin span-loading-indication-container()
+{
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+}
+
+.content-loading-indication-container {
+     background: color.adjust(colors-staged.$color-content, $alpha: -0.3);
+
+     @include span-loading-indication-container();
+
+    ::deep .content-loading-indication {
+        display: block;
+        height: 100%;
+    }
+}

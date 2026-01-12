@@ -1,0 +1,23 @@
+﻿@using ViciOne.Ui.Shared.Dx.Components.Scrolling
+
+@{
+    var cssClasses = new List<string> { "popup-scroll-container" };
+
+    if (!string.IsNullOrWhiteSpace(CssClass))
+        cssClasses.AddRange(CssClass.Split(" "));
+}
+
+<div class="@string.Join(" ", cssClasses)">
+    <div class="popup-scroll-container__allocation-container">
+        <div class="popup-scroll-container__content">
+            @Content
+        </div>
+
+        @if (AfterContent is not null)
+        {
+            <div class="after-content-container">
+                @AfterContent
+            </div>
+        }
+    </div>
+</div>

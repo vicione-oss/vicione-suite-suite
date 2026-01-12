@@ -1,0 +1,169 @@
+﻿@using Blazor.Shared.Profile.Components
+@using Blazor.Shared.Profile.Extensions
+@using Blazor.Shared.Profile.NotificationArea.Enums
+@using Blazor.Shared.Profile.NotificationArea.Extensions
+@using Sdk.Client.Components.LinkButton
+@using ViciOne.Ui.Blazor.Components.Button
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication
+@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication.Enums
+@using ViciOne.Ui.Blazor.Components.TextBox
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.Shared.Dx.Components.Scrolling
+@using ViciOne.Ui.Blazor.Components.ComboBox
+
+@if (_userProfile != null)
+{
+    <div>
+        <div class="content-layout">
+            <div class="top" style="background-image: url(@Icon.UserPattern.GetPath())">
+                <div class="user-profile-avatar">@_userProfile.GetInitialLetters()</div>
+                <div class="user-profile-digest">
+                    @{
+                        var hasFullName = _userProfile.HasFullName();
+                        var hasOccupation = !string.IsNullOrWhiteSpace(_userProfile.Occupation);
+                    }
+                    <div class="user-profile-digest-layout has-items">
+                        <div class="items">
+                            @if (hasFullName)
+                            {
+                                <div class="item full-name">@_userProfile.GetFullName()</div>
+                            }
+                            else
+                            {
+                                <div class="item full-name">@_userProfile.UserName</div>
+                            }
+                            @if (hasOccupation)
+                            {
+                                <div class="item occupation">@_userProfile.Occupation</div>
+                            }
+                        </div>
+
+                        @if (_canEditUserData)
+                        {
+                            var editButtonIconCssClasses = new List<string> { "icon" };
+
+                            if (_editUserDataStarted)
+                                editButtonIconCssClasses.Add("active");
+
+                            <div class="edit-button-container">
+                                <button class="edit-button" @onclick="@EditUserData">
+                                    <MonochromeIcon Name="@MonochromeIconName.Edit" Size="@MonochromeIconSize.SmallMedium" CssClass="@string.Join(" ", editButtonIconCssClasses)" />
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <ScrollContainer CssClass="center">
+                @if (_editUserDataStarted && _userProfile is not null)
+                {
+                    <div class="user-profile-edit-form">
+                        <div class="header">
+                            <span>@Localization.ProfileNotificationElementFlyoutContent.EditUserData</span>
+                        </div>
+                        <div class="fields">
+                            <div class="field-group">
+                                <label class="label">@TechnicalTerms.Username</label>
+                                <TextBox CssClass="text-box" Value="@_userProfile.UserName.Value" ReadOnly="true" />
+                                <label class="label">@CommonVocabulary.FirstName</label>
+                                <TextBox CssClass="text-box" @bind-Value="_userProfile.Firstname" />
+                                <label class="label">@CommonVocabulary.Surname</label>
+                                <TextBox CssClass="text-box" @bind-Value="_userProfile.Lastname" />
+                                <label class="label">@CommonVocabulary.Title</label>
+                                <TextBox CssClass="text-box" @bind-Value="_userProfile.Title" />
+                                <label class="label">@CommonVocabulary.Occupation</label>
+                                <TextBox CssClass="text-box" @bind-Value="_userProfile.Occupation" />
+                                <label class="label">@CommonVocabulary.Department</label>
+                                <TextBox CssClass="text-box" @bind-Value="_userProfile.Department" />
+                            </div>
+                            <div class="field-group">
+                                <label class="label">@CommonVocabulary.Email</label>
+                                <TextBox CssClass="text-box" @bind-Value="_userProfile.Email" />
+                                <label class="label">@CommonVocabulary.Cellphone</label>
+                                <TextBox CssClass="text-box" @bind-Value="_userProfile.Mobile" />
+                            </div>
+                            <div class="field-group">
+                                <label class="label">@CommonVocabulary.Language</label>
+                                <ComboBox CssClass="combo-box"
+                                          Items="@_availableCultures"
+                                          ValueSelector="@(i => i.Value)"
+                                          TextSelector="@(i => i.Text)"
+                                          @bind-Value="_selectedCulture"
+                                          @bind-Value:after="CultureChanged"/>
+
+                                <label class="label">@CommonVocabulary.TimeZone</label>
+                                
+                                <ContentLoadingIndication Visible="@_availableTimeZonesLoading" Kind="@LoadingIndicationKind.SpinnerLeft">
+                                    <ComboBox CssClass="combo-box"
+                                              Items="@_availableTimeZones"
+                                              ValueSelector="@(i => i.Value)"
+                                              TextSelector="@(i => i.Text)"
+                                              @bind-Value="_selectedTimeZone"
+                                              @bind-Value:after="TimeZoneChanged" />
+                                </ContentLoadingIndication>
+                            </div>
+                        </div>
+
+                        @if (_errorMessage is not null)
+                        {
+                            <div class="validation-area">
+                                @_errorMessage
+                            </div>
+                        }
+
+                        <div class ="action-buttons">
+                            <Button CssClass="edit-action-button"
+                                    Text="@CommonVocabulary.Confirm"
+                                    Size="ButtonSize.Small"
+                                    OnClick="@ConfirmUserDataAsync" />
+
+                            <Button CssClass="cancel-action-button"
+                                    Text="@CommonVocabulary.Cancel"
+                                    Size="ButtonSize.Small"
+                                    OnClick="@CancelUserData" />
+                        </div>
+                    </div>
+                }
+@* Removed until functionality implemented
+                <div class="flags">
+                    <label class="flag-label">@CommonVocabulary.Absence</label>
+                    <Switch Size="SwitchSize.Large"
+                            CssClass="flag-switch"
+                            @bind-Value:get="@_absence"
+                            @bind-Value:set="@ChangeStateAbsence" />
+                    <label class="flag-label">@CommonVocabulary.NotificationPlural</label>
+                    <Switch Size="SwitchSize.Large"
+                            CssClass="flag-switch"
+                            @bind-Value:get="@_notifications"
+                            @bind-Value:set="@ChangeStateNotification" />
+                </div>
+*@
+                <div class="ticket-center">
+                    <TicketCenterComponent Urgent=@TicketCenterUrgentProvider.GetUrgent()
+                                           Today=@TicketCenterTodayProvider.GetToday()
+                                           ThisWeek=@TicketCenterThisWeekProvider.GetThisWeek()
+                                           Soon=@TicketCenterSoonProvider.GetSoon() />
+                </div>
+
+                <div class="overflow-area"></div>
+            </ScrollContainer>
+            <div class="bottom">
+                <div class="change-password">
+                    <LinkButton IconName="@MonochromeIconName.LockActive"
+                                CssClass="change-password-button"
+                                Text="@Localization.ProfileNotificationElementFlyoutContent.ChangePassword"
+                                OnClick="@(() => NavigationManager.NavigateTo("/account/change-password", true))" />
+                </div>
+                <div class="sign-out">
+                    <LinkButton IconName="@MonochromeIconName.Exit"
+                                CssClass="sign-out-button"
+                                Text="@CommonVocabulary.SignOutVerb"
+                                OnClick="@BeginSignOut" />
+                </div>
+            </div>
+        </div>
+    </div>
+}

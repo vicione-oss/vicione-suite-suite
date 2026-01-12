@@ -1,0 +1,27 @@
+﻿@using Microsoft.AspNetCore.Mvc.ViewEngines
+@inject ICompositeViewEngine Engine
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <base href="~/" />
+    <title>@(ViewBag.Title)</title>
+    <link href="_content/ViciOne.Ui.Shared.Dx/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="_content/ViciOne.Suite.Blazor.Shared/css/suite.css" rel="stylesheet" />
+    <link href="css/login.css" rel="stylesheet" />
+    <link rel="icon" type="image/icon" href="_content/ViciOne.Suite.Blazor.Shared/favicon.ico" />
+    <script src="_content/ViciOne.Suite.Blazor.Shared/js/login-hc.js"></script>
+</head>
+
+<body>
+    <main class="login-layout-main-content">
+        <div class="login-layout-main-body">
+            @(RenderBody())
+        </div>
+    </main>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

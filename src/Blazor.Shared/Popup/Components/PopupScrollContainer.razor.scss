@@ -1,0 +1,33 @@
+﻿@use "../../Styles/design/scrollbar";
+
+.popup-scroll-container {
+    flex-grow: 1;
+
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    .popup-scroll-container__allocation-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: 0;
+
+        overflow: hidden;
+
+        .popup-scroll-container__content {
+            height: 100%;
+
+            overflow: auto;
+        }
+    }
+
+    &:has(.after-content-container) {
+        .popup-scroll-container__content {
+            padding-bottom: 40px !important;
+        }
+    }
+
+    @include scrollbar.adjust-styles();
+}

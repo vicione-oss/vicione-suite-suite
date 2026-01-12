@@ -1,0 +1,13 @@
+﻿@if (_navTiles?.Count > 0)
+{
+    <div class="nav-tile-panel">
+        <h4>@Heading</h4>
+
+        <div class="nav-tile-panel-content">
+            @foreach (var navTile in _navTiles)
+            {
+                <NavTileContainer NavTileComponentType="@navTile.ComponentType" NavTileState="@navTile.State" @key="navTile" />
+            }
+        </div>
+    </div>
+}

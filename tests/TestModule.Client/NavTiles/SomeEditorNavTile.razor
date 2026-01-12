@@ -1,0 +1,11 @@
+﻿@using Sdk.Client.Modules
+@using Sdk.Client.NavTiles.Components
+
+@inherits NavTileBase
+
+<NavTileStandardContent Headline="Some editor"
+                        Subline="Some editor nav tile"
+                        IconSrc="@(ModuleAssetHelper.GetModuleIconPath<TestSomeEditorClientModule>("realtime.svg"))"
+                        IconAlt="Some editor icon"
+                        OnContentLoading="@ContentLoading"
+                        OnContentReady="@ContentReady" />

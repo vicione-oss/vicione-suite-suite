@@ -1,0 +1,38 @@
+﻿using AwesomeAssertions;
+using Blazor.Shared.Connections.Services;
+using Blazor.Shared.Tests.Connections.Extensions;
+using Bunit;
+using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Sdk.Client.ControlPanels.Services;
+using Sdk.Connections.Contracts;
+using Xunit;
+
+namespace Blazor.Shared.Tests.Connections.Services;
+
+public sealed class ConnectionControlPanelResetHandlerTests
+{
+    [Fact]
+    public async Task Should_throw_if_connection_from_state_can_not_be_found()
+    {
+        // Arrange
+        var connection = ConnectionFactory.SQLiteConnection;
+
+        var services = new ServiceCollection()
+            .AddScoped(_ => Substitute.For<ISuiteConnectionService>())
+            .AddScoped(_ => Substitute.For<IConnectionTypeRegistry>().Setup())
+            .AddScoped<IControlPanelResetHandler<ConnectionControlPanelState>, ConnectionControlPanelResetHandler>();
+
+        using var serviceProvider = services.BuildServiceProvider();
+
+        var state = new ConnectionControlPanelState { ConnectionId = connection.Id };
+
+        var resetHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<ConnectionControlPanelState>>();
+
+        // Act
+        var action = async () => await resetHandler.Reset(state, CancellationToken.None);
+
+        // Assert
+        await action.Should().ThrowAsync<InvalidOperationException>();
+    }
+}

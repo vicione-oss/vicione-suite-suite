@@ -1,0 +1,15 @@
+﻿@using Blazor.Shared
+@using Blazor.Shared.SystemInformation.Components
+@using Sdk.Authorization
+
+@attribute [Route(Constants.ProcessRoute)]
+
+<AuthorizeView Policy="@ModulePolicyProvider.GetPolicy(Core.Shared.Constants.SystemModuleId, AccessLevel.Full, Constants.LogViewFeature)">
+    <Authorized>
+        <ProcessComponent />
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not supposed to be here</p>
+    </NotAuthorized>
+</AuthorizeView>
+

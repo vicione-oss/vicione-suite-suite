@@ -1,0 +1,13 @@
+﻿@page "/account/logout"
+@* This route needs to be set this way, otherwise the "MapRazorPages" method would map it to "identity/account/logout". *@
+
+@model Blazor.Server.Backend.Areas.Identity.Pages.Account.LogoutModel
+
+@{
+    ViewData["Title"] = "Log out";
+}
+
+<header>
+    <h1>@ViewData["Title"]</h1>
+    <p>You have successfully logged out of the application.</p>
+</header>

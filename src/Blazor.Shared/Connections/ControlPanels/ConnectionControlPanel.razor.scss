@@ -1,0 +1,12 @@
+﻿@use "../../Styles/design/colors";
+
+.suite-tag-edit-box {
+    width: 100%;
+    overflow: hidden; // ensures that DxTabBox does not exceed boundaries of its container when tags with very long text exist
+}
+
+.failure {
+    color: colors.$color-error;
+    margin: 8px 0px;
+    margin-left: 8px;
+}

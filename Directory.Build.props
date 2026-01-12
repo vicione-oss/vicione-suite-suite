@@ -1,0 +1,99 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- Versionierung -->
+    <PropertyGroup>
+        <VersionWithSuffix>$([System.IO.File]::ReadAllText('$(MsBuildThisFileDirectory)VERSION').Trim())</VersionWithSuffix>
+        <!-- Version 0.1.0 ist der Standard, wenn gar keine Version gefunden wird -->
+        <VersionPrefix Condition="$(VersionWithSuffix) == ''">0.1.0</VersionPrefix>
+        <VersionPrefix Condition="$(VersionWithSuffix.Contains('-')) == true">$(VersionWithSuffix.Substring(0, $(VersionWithSuffix.IndexOf('-'))))</VersionPrefix>
+        <VersionPrefix Condition="$(VersionWithSuffix.Contains('-')) == false">$(VersionWithSuffix)</VersionPrefix>
+        <!-- Im Standardfall gibt es keinen Suffix, wenn doch wird dieser angegeben -->
+        <VersionSuffix></VersionSuffix>
+        <VersionSuffix Condition="$(VersionWithSuffix.Contains('-')) == true">$(VersionWithSuffix.Substring($(VersionWithSuffix.IndexOf('-'))))</VersionSuffix>
+        <VersionSuffix Condition="$(VersionSuffix.Contains('-')) == true">$(VersionSuffix.Substring(1))</VersionSuffix>
+        <!-- Im Standardfall ist die PackageVersion gleich der normalen "Version" -->
+        <PackageVersion>$(VersionPrefix)</PackageVersion>
+        <PackageVersion Condition="$(VersionSuffix) != ''">$(PackageVersion)-$(VersionSuffix)</PackageVersion>
+        <!-- Wenn ein PackageVersionSuffix gegeben ist, wird dieser statt des normalen VersionPrefix verwendet -->
+        <PackageVersion Condition="$(PackageVersionSuffix) != ''">$(VersionPrefix).$(PackageVersionSuffix)</PackageVersion>
+    </PropertyGroup>
+
+    <!-- Eigenschaften für alle Projekte des Repos -->
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+        <!-- general information -->
+        <Description>-</Description>
+        <Product>ViciOne Suite</Product>
+        <Company>ifm software</Company>
+        <Year>$([System.DateTime]::Now.Year)</Year>
+        <Copyright>Copyright © $(Company) $(Year)</Copyright>
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <SatelliteResourceLanguages>en;de</SatelliteResourceLanguages>
+        <!-- code quality -->
+        <WarningsNotAsErrors>612,618</WarningsNotAsErrors>
+        <NoWarn Condition="'$(CI)' == ''">$(NoWarn);NU1507</NoWarn>
+        <!-- NuGet security -->
+        <NuGetAuditMode>all</NuGetAuditMode>
+    </PropertyGroup>
+
+    <!-- Für Repos die Projekte enthalten die als NuGet Paket veröffentlicht werden -->
+    <PropertyGroup>
+        <!-- https://docs.microsoft.com/de-de/nuget/reference/msbuild-targets -->
+        <PackageProjectUrl>https://gitlab.i40.ifm-datalink.net/acx/vo-suite/vo-suite</PackageProjectUrl>
+        <Authors>$(Company)</Authors>
+    </PropertyGroup>
+    
+    <!-- Testprojekte nicht packen und nicht publishen -->
+    <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('Tests')) Or $(MSBuildProjectDirectory.Contains('tests'))">
+        <IsPackable>false</IsPackable>
+        <IsPublishable>false</IsPublishable>
+        <CompressionEnabled>false</CompressionEnabled>
+    </PropertyGroup>
+
+    <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('tests'))">
+        <Content Include="$(MSBuildThisFileDirectory)xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <!-- Testprojekten die Test.SDK-/XUnit-Paket-Referenzen hinzufuegen -->
+    <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests')) Or $(MSBuildProjectName.EndsWith('Tests.Tools'))">
+        <PackageReference Include="AwesomeAssertions" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="xunit" />
+        <PackageReference Include="JunitXml.TestLogger" />
+        <PackageReference Include="xunit.runner.visualstudio">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="NSubstitute" />
+        <PackageReference Include="NSubstitute.Analyzers.CSharp">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="ViciOne.Suite.Sdk.Testing" />
+    </ItemGroup>
+
+    <!-- Toolsprojekte nicht publishen -->
+    <PropertyGroup Condition="$(MSBuildProjectDirectory.Contains('tools'))">
+        <IsPublishable>false</IsPublishable>
+    </PropertyGroup>
+    
+    <!-- For all client projects -->
+    <PropertyGroup Condition="$(ProjectName.EndsWith('.Client'))">
+        <!-- https://github.com/koenvzeijl/AspNetCore.SassCompiler/issues/160 -->
+        <SassCompilerEnableWatcher>false</SassCompilerEnableWatcher>
+    </PropertyGroup>
+
+    <!-- SDK-Assemblies aus den BackendModul-Ordnern entfernen -->
+    <Target Name="EnsureSdkGetsRemovedIssue" AfterTargets="GenerateDepsFile" Condition="'$(Configuration)' == 'Release' And $(ProjectName.EndsWith('.Backend'))">
+        <ItemGroup>
+            <FilesToClean Include="$(TargetDir)ViciOne.Suite.Sdk.*" />
+        </ItemGroup>
+        <Delete Files="@(FilesToClean)"></Delete>
+    </Target>
+</Project>

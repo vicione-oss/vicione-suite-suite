@@ -1,0 +1,87 @@
+﻿@using Blazor.Shared.Popup.Components
+@using Blazor.Shared.Popup.Enums
+@using Blazor.Shared.Wizards.Extensions
+@using Blazor.Shared.Wizards.Models
+@using Blazor.Shared.Wizards.Services
+@using Microsoft.AspNetCore.Components.Sections
+@using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using PopupConstants = Blazor.Shared.Popup.Constants
+
+@typeparam TContext
+
+@if (_initialized)
+{
+    <PopupMasterDetailLayout>
+
+        <Navigation>
+            <div class="wizard-stepper-container" style="min-height: @PopupConstants.PopupHeightPx">
+                <WizardStepper Steps="@State.Steps" ActiveStep="@State.ActiveStep" />
+            </div>
+        </Navigation>
+
+        <ContentHeader>
+            @Title
+        </ContentHeader>
+
+        <BeforeContent>
+            <PopupDetailSeparator />
+        </BeforeContent>
+
+        <Content>
+            @{
+                var wizardPageRegistryItem = _contentRenderCycle.Items.FirstOrDefault();
+                if (wizardPageRegistryItem is not null)
+                {
+                    var wizardPageState = wizardPageRegistryItem.State;
+
+                    <AdvancedErrorBoundary @key="wizardPageRegistryItem">
+                        <WizardPageContainer WizardPageRegistryItem="@wizardPageRegistryItem"
+                                             WizardBodyContentRenderCycle="@_contentRenderCycle"
+                                             HasGenericLoadingOverlay="@(LoadingIndicationPlacementBehavior.Placement == LoadingIndicationPlacement.Overlay)"
+                                             OnWizardOperationStarted="@WizardOperationStarted"/>
+                    </AdvancedErrorBoundary>
+                }
+            }
+        </Content>
+
+        <ContentActionButtons>
+            <PopupContentActionButtonContainer Enabled="@(LoadingIndicationPlacementBehavior.Placement == LoadingIndicationPlacement.None)"
+                                               ErrorMessageVisible="@(State.LastSaveErrorResults.Count > 0)"
+                                               ShowLoadingIndication="@(LoadingIndicationPlacementBehavior.Placement == LoadingIndicationPlacement.ContentActionButtons)">
+                <ErrorMessage>
+                    @foreach (var lastSaveErrorResult in State.LastSaveErrorResults)
+                    {
+                        <div>@lastSaveErrorResult.Message</div>
+                    }
+                </ErrorMessage>
+
+                <Buttons>
+                    <PopupContentActionButton IconName="MonochromeIconName.ArrowNavigationLightLeft"
+                                              Text="@CommonVocabulary.BackVerb"
+                                              Enabled="@State.BackButtonEnabled"
+                                              OnClick="@BackButtonClick" />
+
+                    <PopupContentActionButton IconName="MonochromeIconName.ArrowNavigationLightRight"
+                                              Text="@CommonVocabulary.Next"
+                                              Enabled="@State.NextButtonEnabled"
+                                              OnClick="@NextButtonClick" />
+
+                    <PopupContentActionButton IconName="MonochromeIconName.Check"
+                                              Text="@CommonVocabulary.FinishVerb"
+                                              Enabled="@State.FinishButtonEnabled"
+                                              OnClick="@FinishButtonClick" />
+
+                    @if (AllowExit)
+                    {
+                        <PopupContentActionButton IconName="MonochromeIconName.CloseMedium"
+                                                  Text="@CommonVocabulary.ExitVerb"
+                                                  OnClick="@ExitButtonClick" />
+                    }
+                </Buttons>
+            </PopupContentActionButtonContainer>
+        </ContentActionButtons>
+
+    </PopupMasterDetailLayout>
+}

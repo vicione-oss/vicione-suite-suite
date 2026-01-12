@@ -1,0 +1,51 @@
+﻿@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using System.Reflection
+@using Sdk.Client.Components.Wallpaper
+@using Sdk.Client.Components.Wallpaper.Enums
+
+<div class="account-layout">
+    <Wallpaper Image="Constants.WallpaperImage" BaseUri="Constants.WallpaperBaseUri" />
+
+    <div class="interaction-center">
+        <div class="left-side">
+            <div class="heading">
+                @Heading
+            </div>
+            <div class="content">
+                @LeftSideContent
+            </div>
+            <div class="spacer" />
+        </div>
+        <div class="right-side">
+
+            @if (LoginDesignService.Design == LoginDesign.Default)
+            {
+                <div class="title">
+                    <img src="@SvgIcon.Vicione.GetPath()" draggable="false" />
+                </div>
+            }
+            else if (LoginDesignService.Design == LoginDesign.MoneoConnect)
+            {
+                <label class="title moneo-connect">
+                    <label class="moneo">moneo</label>
+                    <label class="seperator">|</label>
+                    connect
+                </label>
+            }
+
+            <div class="logo">
+                <img src="@SvgIcon.IfmLogo.GetPath()" draggable="false" />
+            </div>
+
+            <div class="version-information">
+                <div>ifm software gmbh @(CopyrightYearProvider.Year)</div>
+                <div class="version-number" title="@InstanceInformation.Local.Version">ViciOne Suite @InstanceInformation.Local.Version</div>
+                @if (InstanceInformation.Local.BranchName is not null)
+                {
+                    <div class="version-number" title="@InstanceInformation.Local.BranchName">@InstanceInformation.Local.BranchName</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,90 @@
+﻿@use "../Styles/design/colors";
+@use "../../../shared/styles/colors-staged";
+@use "../../../shared/styles/variables";
+
+.mqtt-viewer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .mqtt-toolbar {
+        padding: variables.$toolbar-padding;
+        border-bottom: 1px solid colors.$color-border;
+
+
+        ::deep .connection-button {
+
+            &.connected {
+                color: colors-staged.$color-light-green;
+                border-color: colors-staged.$color-light-green;
+            }
+        }
+
+        .refresh-box {
+            display: inline-grid;
+            grid-template-columns: auto auto;
+            grid-column-gap: 5px;
+            align-content: center;
+
+            label {
+                margin-top: 3px;
+            }
+        }
+    }
+
+    .mqtt-content {
+        display: grid;
+        grid-template-rows: 1fr 1fr min-content;
+        grid-template-columns: 1fr 1fr min-content;
+        grid-template-areas:
+            "list list filter" "list list filter" "message message filter";
+        height: 100%;
+        padding: 0;
+
+        .list {
+            grid-area: list;
+        }
+
+        .message {
+            grid-area: message;
+
+            .message-details {
+                display: grid;
+                grid-template-rows: 35px auto;
+                min-height: 300px;
+
+                ::deep .button--medium {
+                    border: none;
+                    align-content: space-between;
+                }
+            }
+
+            ::deep dxbl-memo-editor {
+                height: 100%;
+            }
+        }
+
+        .filter {
+            grid-area: filter;
+        }
+
+        ::deep .headline-container {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        /* these two make dxgrid using the correct space */
+        ::deep .mqtt-rel-container {
+            position: relative;
+        }
+
+        ::deep .mqtt-abs-container {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+    }
+}

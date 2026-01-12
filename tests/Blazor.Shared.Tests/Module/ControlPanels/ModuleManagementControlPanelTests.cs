@@ -1,0 +1,56 @@
+﻿using Blazor.Shared.Module.ControlPanels;
+using Blazor.Shared.Module.ControlPanels.Extensions;
+using Blazor.Shared.Module.Services;
+using Blazor.Shared.Services;
+using Blazor.Shared.Settings.Extensions;
+using Blazor.Tests.Tools;
+using Bunit;
+using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Sdk.Client.ControlPanels.Services;
+using Xunit;
+
+namespace Blazor.Shared.Tests.Module.ControlPanels;
+
+public class ModuleManagementControlPanelTests
+{
+    private readonly IModuleManagementService _moduleManagementService = Substitute.For<IModuleManagementService>();
+
+    private static TestContext SetupTestContext(IModuleManagementService moduleManagementService)
+    {
+        var ctx = new TestContext();
+
+        ctx.SetupSuiteServicesWithBlazorDx(setup =>
+        {
+            setup.Services.AddScoped(_ => Substitute.For<ISuiteControlService>())
+                .AddScoped(_ => moduleManagementService)
+                .AddControlPanelInfrastructure()
+                .AddModuleManagementControlPanel();
+        });
+
+        return ctx;
+    }
+
+    [Fact]
+    public void Should_render_component()
+    {
+        // Arrange
+        var state = new ModuleManagementControlPanelState();
+
+        using var ctx = SetupTestContext(_moduleManagementService);
+
+        _moduleManagementService.GetModuleMetadata(false, Arg.Any<CancellationToken>())
+            .Returns(new Core.Shared.Modules.Requests.GetModuleMetadataBundlesResponse([]));
+
+        var registry = ctx.Services.GetRequiredService<IControlPanelRegistry<SharedClientModule>>();
+        var registryItem = registry.First();
+
+        // Act
+        var component = ctx.RenderComponent<ModuleManagementControlPanel>(builder => builder
+            .Add(c => c.State, state)
+            .AddCascadingValue(registryItem));
+
+        // Assert
+        Assert.NotNull(component);
+    }
+}

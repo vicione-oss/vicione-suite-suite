@@ -1,0 +1,38 @@
+﻿@using ViciOne.Ui.Localization.Resources
+
+<SettingsGroup Title="@Localization.TestSettings.GroupTitle">
+    <SettingsField Label="@CommonVocabulary.Action" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+        <SettingsFieldButton Text="@Localization.TestSettings.TestConnection"
+                             IconCssClass="@_refreshIconCssClasses"
+                             Enabled="@Model.CanBeTested"
+                             OnClick="@TestConnectionButtonClick" />
+    </SettingsField>
+
+    <SettingsField Label="@CommonVocabulary.Result" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+        @if (Model.TestResult is not null)
+        {
+            @if (Model.TestResult.Success)
+            {
+                <span class="success">@Localization.TestSettings.TestSuccess</span>
+            }
+            else
+            {
+                <div class="failure">
+                    <span>@Model.TestResult?.ErrorInfo?.Message</span>
+                </div>
+            }
+        }
+        else
+        {
+            if (Model.CanBeTested)
+            {
+                @Localization.TestSettings.NoTestRunExecutedYet
+            }
+            else
+            {
+                @Localization.TestSettings.ConnectionCannotBeTested
+            }
+        }
+    </SettingsField>
+    
+</SettingsGroup>

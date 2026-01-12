@@ -1,0 +1,39 @@
+﻿@using Blazor.Shared.Onboarding.Services
+@using Sdk.Client.Wizards.Components
+@using ViciOne.Ui.Localization.Resources
+
+@inherits WizardPage<HostnameWizardPageState>
+
+<DescriptionBanner Title="@Localization.HostnameWizardPage.DescriptionBannerTitle" IconCssClass="@_descriptionBannerIconCssClass">
+    @Localization.HostnameWizardPage.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@Localization.HostnameWizardPage.RulesAndGuidelinesTitle" @bind-Expanded="State.RulesAndGuidelinesExpanded">
+        <SettingsInformation>
+            <div class="rules-and-guidelines">
+                <ul>
+                    <li><strong>@Localization.HostnameWizardPage.Rule1</strong></li>
+                    <li>
+                        <strong>@Localization.HostnameWizardPage.Rule2</strong>
+
+                        <ul>
+                            <li>@string.Format(Localization.HostnameWizardPage.Rule2a, State.HostnameMaximumLength)</li>
+                            <li>@Localization.HostnameWizardPage.Rule2b</li>
+                            <li>@Localization.HostnameWizardPage.Rule2c</li>
+                            <li>@Localization.HostnameWizardPage.Rule2d</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <strong>@Localization.HostnameWizardPage.StepPurposeNotice</strong>
+            </div>
+        </SettingsInformation>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@Localization.HostnameWizardPage.EnterHostnameTitle">
+        <SettingsField Label="@TechnicalTerms.Hostname">
+            <SettingsFieldTextBox Placeholder="@TechnicalTerms.Hostname" @bind-Value="@State.Hostname" @bind-Value:after="BeginEdit" />
+        </SettingsField>
+    </SettingsGroup>
+</SettingsLayout>

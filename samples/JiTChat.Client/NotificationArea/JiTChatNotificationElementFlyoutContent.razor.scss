@@ -1,0 +1,79 @@
+﻿@use "../Styles/design/colors";
+@use "../../../shared/styles/colors-staged";
+@use "../../../shared/styles/typography";
+
+.jit-chat-message {
+    border-width: 1px;
+    border-radius: 11px;
+    background-color: colors-staged.$color-background-modal;
+    max-width: 80%;
+    padding: 1.6px;
+    margin: 8px;
+    align-self: flex-end;
+}
+
+.jit-chat-message > p {
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 14px;
+    font-weight: typography.$font-weight-medium;
+}
+
+.jit-chat-messages {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+}
+
+.jit-chat-my-message {
+    background-color: colors.$color-background-darker;
+    align-self: flex-start;
+}
+
+.jit-chat-input {
+    display: flex;
+    flex-direction: row;
+    padding: 16px 8px 8px;
+    justify-content: space-between;
+}
+
+.jit-chat-input > p {
+    margin: 3px;
+}
+
+.jit-chat-message-info > p {
+    font-size: 12px;
+    font-weight: typography.$font-weight-light;
+    margin: 0 3px;
+}
+
+.jit-chat-timestamp {
+    align-self: center;
+}
+
+.jit-chat-timestamp > p {
+    font-size: 12px;
+    font-weight: typography.$font-weight-light;
+    margin: 0 3px;
+}
+
+.jit-chat-content {
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    display: flex;
+}
+
+::deep .jit-chat-text-input {
+    width: 100%;
+}
+
+::deep .jit-chat-text-input > .input-group {
+    display: contents;
+}
+
+.jit-chat-input > .btn {
+    margin-left: 3px;
+    padding-top: 1.6px;
+    padding-bottom: 1.6px;
+}

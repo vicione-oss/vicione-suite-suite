@@ -1,0 +1,65 @@
+﻿@using Microsoft.Extensions.Hosting
+@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication
+@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication.Enums
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <link href="_content/ViciOne.Suite.Blazor.Shared/css/mdi.min.css" rel="stylesheet" />
+    <link href="_content/ViciOne.Ui.Shared.Dx/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="_content/ViciOne.Ui.Shared.Dx/css/dx-bootstrap-custom.css" rel="stylesheet" />
+    <link href="_content/ViciOne.Suite.Blazor.Shared/css/jquery-ui.min.css" rel="stylesheet" />
+    <link href="_content/ViciOne.Suite.Blazor.Shared/css/suite.css" rel="stylesheet" />
+    <link href="@RenderModeProvider.AppStyleSheet" rel="stylesheet" />
+    <link rel="icon" type="image/icon" href="_content/ViciOne.Suite.Blazor.Shared/favicon.ico" />
+    <HeadOutlet @rendermode="RenderModeProvider.HeaderRenderMode" />
+</head>
+<body>
+    <Routes @rendermode="RenderModeProvider.ContentRenderMode" />
+    <div id="blazor-error-ui">
+        @if (Env.IsDevelopment())
+        {
+            <text>
+                An unhandled exception has occurred. See browser dev tools for details.
+            </text>
+        }
+        else
+        {
+            <text>
+                An error has occurred. This app may no longer respond until reloaded.
+            </text>
+        }
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <div id="components-reconnect-modal">
+        <AccountLayout>
+            <Heading>@_title</Heading>
+            <LeftSideContent>
+                <div class="interruption">
+                    <div>@_interruptionText</div>
+                    <div>@_redirectText</div>
+                    <div>@_waitText</div>
+                    <ContentLoadingIndication Visible=true Kind="@LoadingIndicationKind.SpinnerCenter">
+                        &nbsp;
+                    </ContentLoadingIndication> 
+                </div>
+                <div class="failed">
+                    <div>@_wentWrongText</div>
+                    <div>@_administratorText</div>
+                </div>
+            </LeftSideContent>
+        </AccountLayout>
+    </div>
+
+    <script src="_framework/blazor.web.js" autostart="false"></script>
+    <script src="_content/ViciOne.Ui.Shared.Dx/scripts/vicione-ui-shared-dx.min.js"></script>
+    <script src="_content/ViciOne.Suite.Blazor.Shared/js/reconnect.js"></script>
+    <script async src="_content/ViciOne.Suite.Blazor.Shared/js/loadjs.min.js"></script>
+    <script async src="_content/ViciOne.Suite.Blazor.Shared/js/suite.js"></script>
+</body>
+</html>

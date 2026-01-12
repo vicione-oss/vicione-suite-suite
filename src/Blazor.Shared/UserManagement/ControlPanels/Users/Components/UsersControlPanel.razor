@@ -1,0 +1,58 @@
+﻿@using Blazor.Shared.UserManagement.ControlPanels.Users.Services
+@using Core.Shared.UserManagement.Contracts
+@using Sdk.Client.ControlPanels.Services
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<UsersControlPanelState>
+
+<div class="users-control-panel">
+    <DescriptionBanner Title="@Localization.UsersControlPanel.DescriptionBannerTitle" IconCssClass="@_descriptionBannerIconCssClass">
+        @Localization.UsersControlPanel.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <Grid Items="@_usersQueryable" Virtualize="true" CssClass="users-grid">
+        <ActionButtons>
+            <AddGridActionButton OnClick="@AddUser" />
+            <EditGridActionButton Enabled="@_isSingleUserSelected" OnClick="@EditSelectedUser" />
+            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedUsers" />
+        </ActionButtons>
+
+        <Filter>
+            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+        </Filter>
+
+        <ChildContent>
+            <ItemSelectColumn KeySelector="@(item => item.UserName)" Selection="@UserGridItemSelection" />
+
+            <TemplateColumn Title="@TechnicalTerms.Username">
+                @context.UserName
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Email">
+                @context.Email
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Description">
+            </TemplateColumn>
+
+            <TemplateColumn Title="@($"2FA {CommonVocabulary.Status}")">
+                @TechnicalTerms.Disabled
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Status">
+                @CommonVocabulary.NormalVerb
+            </TemplateColumn>
+
+            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                              Navigate="@(async (UserProfile item) => await EditUser(item))" />
+        </ChildContent>
+
+        <Footer>
+            <SelectionFooter GridSelection="UserGridItemSelection" />
+        </Footer>
+    </Grid>
+</div>

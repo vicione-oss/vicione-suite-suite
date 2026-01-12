@@ -1,0 +1,14 @@
+dotnet_diagnostic.VO2001.severity = warning # Members should be grouped by type, then sorted in predefined order
+
+dotnet_diagnostic.VO2002.severity = warning # Wrong field order
+vicione_code_quality.VO2002.with_alphabetical_order = false # Wrong field order, fields should be grouped by keyword only, no alphabetical ordering in the second pass
+
+dotnet_diagnostic.VO2003.severity = none # Properties should be grouped by first attribute, then sorted in alphabetical order
+dotnet_diagnostic.VO2004.severity = none # Events should be sorted in alphabetical order
+dotnet_diagnostic.VO2005.severity = warning # Constructors should be grouped by keyword, then sorted by number of parameters in ascending order
+dotnet_diagnostic.VO2006.severity = none # Methods should be sorted in alphabetical order
+
+dotnet_diagnostic.VO2007.severity = error # Base implementation is not called in all possible control flow paths
+dotnet_diagnostic.VO2008.severity = none # Property assignments in the object initializer are not sorted alphabetically by property name
+dotnet_diagnostic.VO2009.severity = none # Property assignments in the constructor are not sorted alphabetically by property name
+

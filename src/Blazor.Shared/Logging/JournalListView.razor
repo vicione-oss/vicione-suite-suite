@@ -1,0 +1,23 @@
+﻿@using System.Globalization
+@using ViciOne.Ui.Blazor.Components.Button
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
+
+<div class="journal-background">
+    @if (LoadMore is not null)
+    {
+        <Button OnClick="LoadMore" Text="Load More" CssClass="journal-button"/>
+    }
+    <ul class="journal-list">
+        @foreach (var entry in Entries)
+        {
+            <li>
+                @ComposeHeader(entry)
+                <span class="@GetClassFromPriority(entry.Priority)">@entry.Message</span>
+            </li>
+        }
+    </ul>
+    @if (ErrorMessage is not null)
+    {
+        <span class="journal-error">@ErrorMessage</span>
+    }
+</div>

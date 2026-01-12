@@ -1,0 +1,192 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DescriptionBannerContent" xml:space="preserve">
+    <value>Verwalten Sie grundlegende Informationen, Einstellungen und Diagnosefunktionen der ausgewählten Netzwerkschnittstelle.</value>
+  </data>
+  <data name="DescriptionBannerTitle" xml:space="preserve">
+    <value>Allgemeine Einstellungen für {0}</value>
+  </data>
+  <data name="GeneralInformation" xml:space="preserve">
+    <value>Allgemeine Informationen</value>
+  </data>
+  <data name="GeneralInformationDescription" xml:space="preserve">
+    <value>Hier werden die aktuellen Netzwerkeinstellungen angezeigt. Diese Informationen umfassen wichtige Verbindungs- und Netzwerkdetails. In diesem Bereich können keine Änderungen vorgenommen werden.</value>
+  </data>
+  <data name="InformationHtml" xml:space="preserve">
+    <value>&lt;p&gt;Die Verbindungsprüfung beinhaltet die folgenden Prüfungen:&lt;/p&gt;
+
+&lt;ul&gt;
+    &lt;li&gt;Konfiguration der Standard-Route&lt;/li&gt;
+    &lt;li&gt;Verfügbarkeit des Gateways&lt;/li&gt;
+    &lt;li&gt;Internetverbindung&lt;/li&gt;
+    &lt;li&gt;Verfügbarkeit und Funktion des DNS-Servers&lt;/li&gt;
+    &lt;li&gt;Status der Netzwerkschnittstelle&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Falls für die Netzwerkschnittstelle ein VLAN konfiguriert ist, wird der Verbindungstest über die virtuelle VLAN-Schnittstelle durchgeführt.&lt;/p&gt;
+
+&lt;p&gt;Beim Rücksetzen der Schnittstelle auf Standardeinstellungen werden die IP-Adressen, Netzwerkmasken und der Standardgateway gelöscht sowie die Schnittstelle auf DHCP konfiguriert.&lt;/p&gt;</value>
+  </data>
+  <data name="InterfaceEnabledSettingsGroupTitle" xml:space="preserve">
+    <value>Schnittstelle aktiviert</value>
+  </data>
+  <data name="InterfaceName" xml:space="preserve">
+    <value>Bezeichnung der Schnittstelle</value>
+  </data>
+  <data name="InterfaceNameSettingsGroupTitle" xml:space="preserve">
+    <value>Schnittstelle</value>
+  </data>
+  <data name="Ipv4Address" xml:space="preserve">
+    <value>IPv4 Adresse</value>
+  </data>
+  <data name="Ipv4Configuration" xml:space="preserve">
+    <value>IPv4 Konfiguration</value>
+  </data>
+  <data name="Ipv4DefaultGateway" xml:space="preserve">
+    <value>IPv4 Standardgateway</value>
+  </data>
+  <data name="Ipv4SubnetMask" xml:space="preserve">
+    <value>IPv4 Subnetzmaske</value>
+  </data>
+  <data name="IsDefaultGatewayAvailable" xml:space="preserve">
+    <value>Standardgateway verfügbar</value>
+  </data>
+  <data name="IsDefaultRouteConfigured" xml:space="preserve">
+    <value>Standardroute konfiguriert</value>
+  </data>
+  <data name="IsDnsFunctional" xml:space="preserve">
+    <value>DNS funktional</value>
+  </data>
+  <data name="IsInternetAvailable" xml:space="preserve">
+    <value>Internet verfügbar</value>
+  </data>
+  <data name="NetworkSegmentation" xml:space="preserve">
+    <value>Network Segmentation</value>
+  </data>
+  <data name="ResetThisInterfaceToFactoryDefault" xml:space="preserve">
+    <value>Schnittstelle auf Standardeinstellung zurücksetzen</value>
+  </data>
+  <data name="TestConnection" xml:space="preserve">
+    <value>Verbindung prüfen</value>
+  </data>
+  <data name="VLanIdSettingsFieldSubline" xml:space="preserve">
+    <value>Standard: 1 - 1005, Erweitert: 1006 - 4094</value>
+  </data>
+</root>

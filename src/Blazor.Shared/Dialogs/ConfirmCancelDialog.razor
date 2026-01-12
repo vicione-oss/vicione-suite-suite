@@ -1,0 +1,20 @@
+﻿@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Shared.Dx.Components
+
+<DxDialog @ref="@_refDialog"
+        Closing="@OnCancel"
+        Header="@HeaderText" 
+        Height="35%"
+        IsTextOnly="true"
+        Width="35%">
+    <Body>
+        @Body
+    </Body>
+    <Footer>
+        <DxDialogFooterButton OnClick="@OnConfirm"
+                              Text="@CommonVocabulary.Confirm" />
+
+        <DxDialogFooterButton OnClick="@OnCancel"
+                              Text="@CommonVocabulary.Cancel" />
+    </Footer>
+</DxDialog>

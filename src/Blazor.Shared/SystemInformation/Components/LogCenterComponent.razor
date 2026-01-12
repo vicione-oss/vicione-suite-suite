@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Sdk.Authorization
+@using Sdk.Client.Components.LinkButton
+@using Sdk.Client.Components.Strip;
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<div class="systeminfo-log-center-head-frame">
+    <div class="systeminfo-log-center-head">
+        @Localization.LogCenterComponent.LogCenter
+    </div>
+    <div class="systeminfo-log-center-tail">
+        @GetMinutesLabel()
+    </div>
+</div>
+
+<AuthorizeView Policy="@ModulePolicyProvider.GetPolicy(Core.Shared.Constants.SystemModuleId, AccessLevel.Full, Constants.LogViewFeature)">
+    <Authorized>
+        @foreach (var entry in GetEntries())
+        {
+            <StripComponent Headline="@(string.IsNullOrEmpty(entry.FilterEntry.DisplayName) ? entry.Key : entry.FilterEntry.DisplayName)"
+                            Subline="@CombineText(entry.LogEntry)"
+                            Color="@CalculateColorFromThreshold(entry.LogEntry)"
+                            IconName="@CalculateIconFromThreshold(entry.LogEntry)"
+                            OnClick="@(() => OpenJournal(entry.FilterEntry))" />
+        }
+
+        <div class="systeminfo-open-log-center">
+            <LinkButton IconName="@MonochromeIconName.OpenInNewWindow"
+                        Text="@string.Format(UserActions.OpenSomething, TechnicalTerms.Journal)"
+                        OnClick="@OpenJournal" />
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        @foreach (var entry in GetEntries())
+        {
+            <StripComponent Headline="@(entry.FilterEntry?.DisplayName ?? entry.Key)"
+                            Subline="@CombineText(entry.LogEntry)"
+                            Color="@CalculateColorFromThreshold(entry.LogEntry)"
+                            IconName="@CalculateIconFromThreshold(entry.LogEntry)" />
+        }
+    </NotAuthorized>
+</AuthorizeView>

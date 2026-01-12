@@ -1,0 +1,58 @@
+﻿@use "./../../../../shared/styles/typography";
+@use "./../../../../shared/styles/overflow";
+@use "../../Styles/tabs/mixins" as tabs;
+
+$color-cpu: rgb(103, 183, 76);
+$color-ram: rgb(255, 206, 0);
+$color-hdd: rgb(114, 149, 194);
+$color-net: rgb(255, 150, 0);
+
+.systeminfo-monitor {
+    margin-bottom: 56px;
+
+    .systeminfo-tabs {
+        @include tabs.styles($tab-size: "small");
+        overflow-x: visible;
+    }
+
+    .systeminfo-open-monitor {
+        height: 17px;
+    }
+}
+
+.systeminfo-log-center {
+    $color-grey: rgb(102, 102, 102);
+    $color-blue: rgb(114, 149, 194);
+    $color-green: rgb(103, 183, 76);
+    $color-yellow: rgb(255, 206, 0);
+    $color-red: rgb(227, 75, 53);
+    --log-center-color-grey: #{$color-grey};
+    --log-center-color-blue: #{$color-blue};
+    --log-center-color-green: #{$color-green};
+    --log-center-color-yellow: #{$color-yellow};
+    --log-center-color-red: #{$color-red};
+    margin-bottom: 62px;
+    width: 251px;
+}
+
+.systeminfo-hw-sw {
+    margin-bottom: 15px;
+}
+
+.restart-and-shutdown {
+    height: 118px;
+    overflow: hidden;
+
+    > div:first-child {
+        margin-top: 19px;
+    }
+
+    > div:last-child {
+        margin-bottom: 16px;
+    }
+
+    > div {
+        height: 17px;
+        margin-bottom: 18px;
+    }
+}

@@ -1,0 +1,31 @@
+@page
+@using Blazor.Shared
+@using Sdk.Client.Components.Wallpaper.Extensions
+
+@model Blazor.Server.Backend.Areas.Identity.Pages.Account.RegisterConfirmation
+
+@{
+    ViewData["BackgroundImagePath"] = Constants.WallpaperImage.GetPath(Constants.WallpaperBaseUri);
+}
+
+<div class="background-test" style="--background-url: url(@(ViewData["BackgroundImagePath"]))">
+    <div class="interaction-center">
+        <div class="left-side">
+            <div class="heading">
+                @ViewData["Title"]
+            </div>
+            <div class="content">
+                You need to confirm your email address before you can log in.
+
+                <strong>You should have received an email</strong> with a confirmation link when your account was first
+                created.
+            </div>
+            <div>
+                <a asp-area="Identity" asp-page="/Account/ResendEmailConfirmation">If you didn't click here.</a>
+            </div>
+            <div class="spacer"></div>
+        </div>
+        <partial name="_InstanceInformation" />
+    </div>
+</div>
+

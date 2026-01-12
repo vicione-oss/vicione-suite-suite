@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Test.UiHost.Backend</AssemblyName>
+    <RootNamespace>TestUiHost</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core.UiHosting\Core.UiHosting.csproj" />        
+  </ItemGroup>
+
+</Project>

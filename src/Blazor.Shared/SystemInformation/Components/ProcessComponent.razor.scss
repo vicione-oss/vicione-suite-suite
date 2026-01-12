@@ -1,0 +1,134 @@
+﻿@use "../../Styles/design/colors";
+@use "../../../../shared/styles/colors-staged";
+@use 'sass:color';
+
+.layout {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: min-content auto;
+    padding: 16px 40px;
+}
+
+.information-wrapper {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: auto 400px;
+    grid-template-rows: auto min-content;
+    padding-bottom: 8px;
+}
+
+.hardware-overview {
+    display: grid;
+    width: min-content;
+    grid-row-start: 1;
+    grid-row-end: 3;
+    line-height: 20px;
+    grid-template-columns: max-content 200px auto;
+    grid-gap: 8px;
+
+    .value {
+        text-align: right;
+    }
+}
+
+.outer-bar {
+    width: 100%;
+    height: 20px;
+    background-color: transparent;
+    border: 1px solid color.adjust(colors.$color-font-light, $alpha: -0.8);
+    border-radius: 3px;
+    padding: 1px;
+
+    .inner-bar {
+        height: 100%;
+        border-radius: inherit;
+
+        &.cpu {
+            width: var(--cpuWidth);
+            background-color: #95ee11;
+        }
+
+        &.ram {
+            width: var(--ramWidth);
+            background-color: #ffcd00;
+        }
+
+        &.hdd {
+            width: var(--hddWidth);
+            background-color: #7394c1;
+        }
+
+        &.net {
+            width: var(--netWidth);
+            background-color: #ff9600;
+        }
+    }
+}
+
+.search-container {
+    width: 100%;
+    grid-row-start: 2;
+
+    ::deep .search-box {
+        width: 100%;
+    }
+}
+
+.processes-grid {
+    color: #bababa;
+    overflow: auto;
+}
+
+.res, .virt, .cpu {
+    .header-template {
+        white-space: nowrap;
+    }
+}
+
+.header-template {
+    > div {
+        border-top: 1px solid colors-staged.$color-content-hover;
+        border-bottom: 1px solid colors-staged.$color-content-hover;
+        padding: 16px var(--width-padding);
+    }
+
+    > span {
+        padding: 0px 0px 8px 16px;
+        display: block;
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 1em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+table {
+    --width-padding: 8px;
+    border: none;
+    width: 100%;
+
+    tbody {
+        > tr:nth-child(even) > td {
+            background-color: color.adjust(colors.$color-background-darker, $lightness: 2%);
+        }
+    }
+
+    td {
+        align-content: start;
+        padding: 11px 0px 11px var(--width-padding);
+    }
+
+    th {
+        align-content: end;
+        background-color: colors.$color-background-darker;
+        font-size: 14px;
+        font-weight: normal;
+        line-height: 1em;
+        position: sticky;
+        top: 0px;
+    }
+}

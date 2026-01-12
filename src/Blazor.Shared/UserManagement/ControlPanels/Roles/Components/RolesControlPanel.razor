@@ -1,0 +1,47 @@
+﻿@using Blazor.Shared.UserManagement.ControlPanels.Roles.Services
+@using Core.Shared.UserManagement.Contracts
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+@using Sdk.UserManagement.Contracts
+
+@inherits ControlPanelBase<RolesControlPanelState>
+
+<div class="roles-control-panel">
+    <DescriptionBanner Title="@Localization.RolesControlPanel.DescriptionBannerTitle" IconCssClass="@_descriptionBannerIconCssClass">
+        @Localization.RolesControlPanel.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <Grid Items="@_rolesQueryable" Virtualize="true" CssClass="roles-grid">
+        <ActionButtons>
+            <AddGridActionButton OnClick="@AddRole" />
+            <EditGridActionButton Enabled="@_isSingleRoleSelected" OnClick="@EditSelectedRole" />
+            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedRoles" />
+        </ActionButtons>
+
+        <Filter>
+            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+        </Filter>
+
+        <ChildContent>
+            <ItemSelectColumn KeySelector="@(item => item.Name)" Selection="RoleGridItemSelection" />
+
+            <TemplateColumn Title="@CommonVocabulary.Name">
+                @context.Name
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Description">
+                @context.Description
+            </TemplateColumn>
+
+            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                              Navigate="@(async (Role item) => await EditRole(item))" />
+        </ChildContent>
+
+        <Footer>
+            <SelectionFooter GridSelection="RoleGridItemSelection" />
+        </Footer>
+    </Grid>
+</div>

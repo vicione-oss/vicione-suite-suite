@@ -1,0 +1,41 @@
+﻿@using Blazor.Shared.NotificationArea.Components
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<div class="top-bar">
+    <a @onclick="@NavigateToRootPage"
+       class="top-bar-app-menu">
+       
+        <MonochromeIcon Name="@MonochromeIconName.GeneralMenu" Size="@MonochromeIconSize.SmallMedium" />
+    </a>
+
+    <div class="top-bar-app-name"
+         id="content-desktop">
+
+        <a @onclick="@NavigateToRootPage">
+            @LayoutService.InstanceTitle
+        </a>
+        @if (!string.IsNullOrWhiteSpace(LayoutService.TitleBarText))
+        {
+            <span id="content-desktop-app-name">
+                - @LayoutService.TitleBarText
+            </span>
+        }
+        else if (!string.IsNullOrWhiteSpace(LayoutService.TitleBarAppName))
+        {
+            <span id="content-desktop-app-name">
+                - @LayoutService.TitleBarAppName
+            </span>
+        }
+    </div>
+
+    <div @onclick="@NavigateToRootPage"
+         class="top-bar-app-name"
+         id="content-mobile">
+        <span></span>
+    </div>
+
+    <div class="top-bar-notification-area">
+        <NotificationElementGrid />
+    </div>
+</div>

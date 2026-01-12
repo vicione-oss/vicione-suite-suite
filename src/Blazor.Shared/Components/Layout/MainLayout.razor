@@ -1,0 +1,41 @@
+﻿@using Blazor.Shared.MessageBanner.Components
+@using Blazor.Shared.Settings.Components
+@using Blazor.Shared.UserManagement.Components
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
+@using ViciOne.Ui.Blazor.Components.Popup.Components
+@using ViciOne.Ui.Blazor.Components.Tooltip.Components
+@using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
+
+@inherits LayoutComponentBase
+
+<main class="layout-main-content @(_isTemplateLogin ? "template-login" : string.Empty)">
+    <PageTitle>@LayoutService.InstanceName</PageTitle>
+
+    @if (!_isTemplateLogin)
+    {
+        <div>
+            <TopBar />
+        </div>
+    }
+
+    <div class="layout-main-body">
+        <LoadingSpinner Visible="@LayoutService.IsLoadingOverlayVisible" />
+
+        <AdvancedErrorBoundary PrepareRecover="@OnPrepareRecover">
+            <ChildContent>
+                @Body
+            </ChildContent>
+        </AdvancedErrorBoundary>
+
+        <MessageBannerDialog />
+        <MasterHealthObserver />
+        <SystemRestartObserver />
+        <TooltipDisplay />
+    </div>
+
+    <PopupRoot />
+    <SettingsPopup />
+
+    <LanguageCookieUpdater />
+    <AuthenticationCookieUpdater />
+</main>

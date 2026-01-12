@@ -1,0 +1,82 @@
+﻿@using Blazor.Shared.Popup.Components
+@using Blazor.Shared.Settings.Models
+@using Microsoft.AspNetCore.Components.Sections
+@using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
+@using ViciOne.Ui.Blazor.Components.Extensions
+
+<div class="control-panel-carousel">
+    @{
+        ControlPanelPageRegistry.BeginUpdate();
+        try
+        {
+            for (var itemIndex = 0; itemIndex < _items.Count; itemIndex++)
+            {
+                var item = _items[itemIndex];
+
+                var itemCssClasses = new List<string> { "control-panel-carousel__item" };
+                var itemAttributes = new Dictionary<string, object>();
+                var renderControlPanel = false;
+
+                if (_itemTransitions.TryPeek(out var itemTransition))
+                {
+                    if (item.ControlPanelRegistryItem == itemTransition.From || item.ControlPanelRegistryItem == itemTransition.To)
+                        renderControlPanel = true;
+                    else
+                        itemCssClasses.Add("hidden");
+
+                    if (item.ControlPanelRegistryItem == itemTransition.Animation.Item)
+                    {
+                        renderControlPanel = true;
+
+                        itemCssClasses.Add(itemTransition.Animation.Kind.ToString().ToDashCase());
+                        itemAttributes.Add("style", $"--animation-duration: {itemTransition.Animation.DurationMs}ms");
+                    }
+                }
+                else
+                {
+                    if (item.Active)
+                        renderControlPanel = true;
+                    else
+                        itemCssClasses.Add("hidden");
+                }
+
+                itemAttributes.Add("class", string.Join(" ", itemCssClasses));
+
+                var descriptionBannerSectionId = new DescriptionBannerSectionId();
+                var controlPanelLoadingIndicationSectionId = new ControlPanelLoadingIndicationSectionId();
+
+                <div @attributes="itemAttributes" @key="itemIndex">
+                    @if (renderControlPanel)
+                    {
+                        <AdvancedErrorBoundary @key="item">
+                            <PopupContentLayout>
+                                <PopupStaticContent>
+                                    <SectionOutlet SectionId="descriptionBannerSectionId" />
+                                </PopupStaticContent>
+
+                                <PopupScrollContainer CssClass="content-scroll-container">
+                                    <Content>
+                                        <CascadingValue Value="descriptionBannerSectionId">
+                                            <ControlPanelContainer ControlPanelRegistryItem="item.ControlPanelRegistryItem"
+                                                                   LoadingIndicationSectionId="controlPanelLoadingIndicationSectionId" />
+                                        </CascadingValue>
+                                    </Content>
+
+                                    <AfterContent>
+                                        <PopupOverflowEffect CssClass="content-overflow"/>
+
+                                        <SectionOutlet SectionId="controlPanelLoadingIndicationSectionId" />
+                                    </AfterContent>
+                                </PopupScrollContainer>
+                            </PopupContentLayout>
+                        </AdvancedErrorBoundary>
+                    }
+                </div>
+            }
+        }
+        finally
+        {
+            ControlPanelPageRegistry.EndUpdate();
+        }
+    }
+</div>

@@ -1,0 +1,7 @@
+﻿@use "../../../Styles/onboarding-wizard/mixins";
+
+.settings-network-interface-details {
+    display: contents;
+
+    @include mixins.summary-settings-information-label-value-divs();
+}

@@ -1,0 +1,8 @@
+@forward "../../../../../../node_modules/@fontsource/noto-sans/scss/metadata" as font-*;
+
+$font-weight-extralight: 200; // maps to Sketch font family "NotoSans-ExtraLight"
+$font-weight-light: 300; // maps to Sketch font family "NotoSans-Light"
+$font-weight-regular: 400; // maps to Sketch font family "NotoSans-Regular"
+$font-weight-medium: 500; // maps to Sketch font family "NotoSans-Medium"
+
+$font-directory-base: "./../fonts";

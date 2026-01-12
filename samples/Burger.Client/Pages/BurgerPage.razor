@@ -1,0 +1,77 @@
+﻿@using Sdk.Authorization
+@inherits ModulePageBase<BurgerClientModule>
+@attribute [Route(BurgerClientModule.ModuleRoute)]
+@attribute [ModuleAuthorize<BurgerClientModule>]
+
+<div class="burger-page">
+    <div class="burger-toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
+                           BeginGroup="true"
+                           IconCssClass="mdi mdi-cube-send"
+                           Click="@SubmitBurgerOrder"
+                           Text="SubmitBurgerOrder" />
+
+            <DxToolbarItem Alignment="ToolbarItemAlignment.Left"
+                           BeginGroup="true"
+                           Text="Compose your burger:"
+                           Enabled="false" />
+
+            <DxToolbarItem Text="Cheese"
+                           Click="@(() => { Burger.Cheese = !Burger.Cheese; })"
+                           @bind-Checked="@Burger.Cheese" />
+
+            <DxToolbarItem Text="Pickle"
+                           Click="@(() => { Burger.Pickle = !Burger.Pickle; })"
+                           @bind-Checked="@Burger.Pickle" />
+
+            <DxToolbarItem Text="Ketchup"
+                           Click="@(() => { Burger.Ketchup = !Burger.Ketchup; })"
+                           @bind-Checked="@Burger.Ketchup" />
+
+            <DxToolbarItem Text="Mustard"
+                           Click="@(() => { Burger.Mustard = !Burger.Mustard; })"
+                           @bind-Checked="@Burger.Mustard" />
+
+            <DxToolbarItem Text="BarbecueSauce"
+                           Click="@(() => { Burger.BarbecueSauce = !Burger.BarbecueSauce; })"
+                           @bind-Checked="@Burger.BarbecueSauce" />
+
+            <DxToolbarItem Text="Onion"
+                           Click="@(() => { Burger.Onion = !Burger.Onion; })"
+                           @bind-Checked="@Burger.Onion" />
+
+            <DxToolbarItem Text="Lettuce"
+                           Click="@(() => { Burger.Lettuce = !Burger.Lettuce; })"
+                           @bind-Checked="@Burger.Lettuce" />
+
+            <DxToolbarItem Text="Error"
+                           Click="@(() => { throw new InvalidOperationException("You wanted this!"); })" />
+        </DxToolbar>
+    </div>
+    <div class="burger-table">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">OrderId</th>
+                <th scope="col">State</th>
+                <th scope="col">Description</th>
+                <th scope="col">Created</th>
+                <th scope="col">Delivered</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var order in BurgerService.Orders)
+            {
+                <tr id="@order.OrderId">
+                    <th scope="row">@order.OrderId</th>
+                    <td>@order.State</td>
+                    <td>@order.Description</td>
+                    <td>@order.OrderedWhen</td>
+                    <td>@order.DeliveredWhen</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

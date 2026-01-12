@@ -1,0 +1,10 @@
+﻿@{
+    var cssClasses = new List<string> { "overflow-wrapper" };
+
+    if (!string.IsNullOrWhiteSpace(CssClass))
+        cssClasses.AddRange(CssClass.Split(" "));
+}
+
+<div class="@string.Join(" ", cssClasses)">
+    <div class="overflow-area" />
+</div>

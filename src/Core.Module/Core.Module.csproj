@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Core.Module</AssemblyName>
+    <RootNamespace>Core.Module</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" />
+    <PackageReference Include="minisign-net" />
+    <PackageReference Include="Semver" />
+    <PackageReference Include="System.IO.Abstractions" />
+    <PackageReference Include="System.Reflection.MetadataLoadContext" />
+    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ViciOne.Suite.Core.OS" />
+    <InternalsVisibleTo Include="ViciOne.Suite.Core.Module.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core.UiHosting\Core.UiHosting.csproj" />
+  </ItemGroup>
+
+</Project>

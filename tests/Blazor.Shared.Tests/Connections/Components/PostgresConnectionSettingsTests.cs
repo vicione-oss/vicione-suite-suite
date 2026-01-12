@@ -1,0 +1,52 @@
+﻿using Blazor.Shared.Connections.Components;
+using Blazor.Shared.Tests.Connections.Extensions;
+using Blazor.Tests.Tools;
+using Bunit;
+using Sdk.Connections.Extensions;
+using Sdk.Testing.Client;
+using ViciOne.Ui.Localization.Resources;
+using Xunit;
+
+namespace Blazor.Shared.Tests.Connections.Components;
+
+public class PostgresConnectionSettingsTests
+{
+    [Fact]
+    public void ComponentGetsRendered()
+    {
+        // Arrange
+        var connection = ConnectionFactory.PostgresConnection.GetPostgresConnection();
+        using var ctx = new TestContext();
+        ctx.SetupSuiteServicesWithBlazorDx();
+
+        // Act
+        var component = ctx.RenderComponent<PostgresConnectionSettings>(parameters =>
+        {
+            parameters.Add(c => c.Connection, connection);
+        });
+
+        // Assert
+        Assert.NotNull(component);
+    }
+
+
+    [Fact]
+    public void FieldsBindToModel()
+    {
+        // Arrange
+        var connection = ConnectionFactory.PostgresConnection.GetPostgresConnection();
+        using var ctx = new TestContext();
+        ctx.SetupSuiteServicesWithBlazorDx();
+
+        // Act
+        var component = ctx.RenderComponent<PostgresConnectionSettings>(parameters =>
+        {
+            parameters.Add(c => c.Connection, connection);
+        });
+
+        // Assert
+        Assert.NotNull(connection);
+
+        component.AssertSettingsFieldTextBox(TechnicalTerms.ConnectionString, connection.ConnectionString);
+    }
+}

@@ -1,0 +1,45 @@
+﻿@page "/account/login"
+@* This route needs to be set this way, otherwise the "MapRazorPages" method would map it to "identity/account/login". *@
+
+@model Blazor.Server.Backend.Areas.Identity.Pages.Account.LoginModel
+
+<div class="background-test" style="--background-url: url(@(ViewData["BackgroundImagePath"]))">
+    <div class="interaction-center">
+        <div class="left-side">
+            <div class="heading">
+                @ViewData["Title"]
+            </div>
+            <div class="content">
+                <form id="account" method="post">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div>
+                        <input asp-for="Input.Username" class="text-input" autofocus placeholder="@ViewData["User"]" />
+                    </div>
+                    <div>
+                        <input asp-for="Input.Password" class="text-input password last"
+                               placeholder="@ViewData["Password"]" />
+                    </div>
+                    <div class="remember-forgot-section">
+                        <div class="remember-me">
+                            <input class="form-check-input" type="checkbox" asp-for="Input.RememberMe" style="flex: 1">
+                            <span class="text">
+                                @Html.DisplayNameFor(m => m.Input.RememberMe)
+                            </span>
+                        </div>
+
+                        @if (Model.SenderStatus.IsConfigured())
+                        {
+                            <div class="forgot-password">
+                                <a asp-page="/Account/ForgotPassword" asp-area="Identity">Forgot your password?</a>
+                            </div>
+                        }
+                    </div>
+                    <button type="submit" class="action-button">@ViewData["Title"]</button>
+                    <div id="blazor-disconnect-info" class="blazor-disconnect-info">@ViewData["Disconnected"]</div>
+                </form>
+            </div>
+            <div class="spacer"></div>
+        </div>
+        <partial name="_InstanceInformation" />
+    </div>
+</div>

@@ -1,0 +1,209 @@
+﻿using System.IO.Abstractions;
+using System.Reflection;
+using Core.Module.Options;
+using Core.OS.Connections.Extensions;
+using Core.OS.DataProtection.Extensions;
+using Core.OS.DbContext;
+using Core.OS.DbContext.Extensions;
+using Core.OS.HostManagement.Extensions;
+using Core.OS.Instance;
+using Core.OS.Instance.Extensions;
+using Core.OS.Logging;
+using Core.OS.Mail;
+using Core.OS.Mail.Extensions;
+using Core.OS.MessageBus.Extensions;
+using Core.OS.MessageBus.MassTransit.Configuration;
+using Core.OS.Modules;
+using Core.OS.Modules.Services;
+using Core.OS.Monitoring.Extensions;
+using Core.OS.UserManagement.Configuration;
+using Core.OS.UserManagement.Extensions;
+using Core.Shared;
+using Core.Shared.HostManagement;
+using Core.Shared.Logging;
+using Core.Shared.UserManagement.Contracts;
+using MassTransit.Logging;
+using MassTransit.Monitoring;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
+using OpenTelemetry;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+
+namespace Core.OS.Extensions;
+
+internal static class IServiceCollectionExtensions
+{
+    public static IServiceCollection ConfigureAndValidateOptions(this IServiceCollection services,
+        InstanceOptions instanceOptions)
+    {
+        services.AddSuiteOptions<InstanceOptions>(InstanceOptions.ConfigSection);
+        services.AddSuiteOptions<UserManagementOptions>(UserManagementOptions.ConfigSection);
+        services.AddSuiteOptions<ModuleLoaderOptions>(ModuleLoaderOptions.ConfigSection);
+        services.AddSuiteOptions<MessageBusOptions>(MessageBusOptions.ConfigSection);
+        services.AddSuiteOptions<LoggingOptions>(LoggingOptions.ConfigSection);
+        services.AddSuiteOptions<HostManagementOptions>(HostManagementOptions.ConfigSection);
+        services.AddSuiteOptions<ArtifactRepositoryOptions>(ArtifactRepositoryOptions.ConfigSection);
+
+        services.AddTransient<ILogOptions>(s => s.GetRequiredService<IOptions<LoggingOptions>>().Value)
+            .Configure<HealthCheckPublisherOptions>(options =>
+            {
+                options.Delay = TimeSpan.FromSeconds(instanceOptions.HealthChecks?.PublishDelayInSeconds ?? 30);
+                options.Timeout = options.Period
+                    = TimeSpan.FromSeconds(instanceOptions.HealthChecks?.PublishIntervalInSeconds ?? 60);
+                //Timeout is the same as the period
+            });
+
+        return services;
+    }
+
+    public static IServiceCollection AddServices(this IServiceCollection services,
+        IFileSystem fileSystem,
+        ConfigurationManager config,
+        IModuleHost moduleHost)
+    {
+        services.AddCoreServices(fileSystem, config, moduleHost);
+        services.AddMailing();
+        services.AddSystemMonitoring(config);
+        services.AddJournalService();
+        services.ConfigureDataProtection();
+
+        return services;
+    }
+
+    internal static IServiceCollection AddCoreServices(this IServiceCollection services,
+        IFileSystem fileSystem,
+        ConfigurationManager config,
+        IModuleHost moduleHost)
+    {
+        var instanceOptions = config.GetInstanceOptions();
+        var messageBusOptions = config.GetMessageBusOptions();
+
+        services
+            .AddSingleton(fileSystem)
+            .AddCoreDbContexts()
+            .AddInstanceServices(instanceOptions, messageBusOptions.UseInMemoryBus)
+            .AddConnectionServices();
+
+        var userManagementOptions = config.GetUserManagementOptions();
+        var smtpOptions = config.GetSmtpOptions();
+        // ui host might not know identity or suite user
+        moduleHost.AddUiHostServices(services,
+            (svc) =>
+            {
+                return svc
+                    .AddIdentity<SuiteUser, SuiteRole>(options =>
+                    {
+                        options.SignIn.RequireConfirmedAccount
+                            = userManagementOptions.RequireAccountVerificationToLogIn && smtpOptions is not null;
+                        options.Password.RequiredLength = Constants.MinimumPasswordLength;
+
+                        options.User.RequireUniqueEmail = true;
+                    })
+                    .AddEntityFrameworkStores<UserDbContext>()
+                    .AddDefaultTokenProviders();
+            });
+
+        // here we should have a valid configuration and loaded assemblies
+        moduleHost.AddModuleServices(services);
+
+#if DEBUG
+        services.AddHostedService<ApplicationPartsLogger>();
+#endif
+
+        // MessageBus
+        services.AddMassTransitMessageBus(config,
+            moduleHost.ConfigureBusRegistrationConfigurator,
+            moduleHost.GetModuleAssemblies()
+                .Union(
+                [
+                    Assembly.GetExecutingAssembly()
+                ])
+                .ToArray());
+
+        // The following must come after the MessageBus is ready
+        services.AddHostedService<ApplicationWorker>();
+
+        services.AddHealthChecks()
+            .AddInstanceHealthChecks(instanceOptions);
+
+        services.AddHostManagement(config);
+        services.AddUserManagement();
+
+        services.AddMemoryCache();
+
+        return services;
+    }
+
+    private static IServiceCollection AddCoreDbContexts(this IServiceCollection services)
+    {
+        services.AddCoreDbContext<IApplicationDbContext, ApplicationDbContextSqlite, ApplicationDbContextPostgres>(
+            ApplicationDbContext.DbSchemaName);
+
+        services.AddCoreDbContext<IUserDbContext, UserDbContextSqlite, UserDbContextPostgres>(
+            UserDbContext.DbSchemaName);
+
+        return services;
+    }
+
+    internal static IServiceCollection AddSuiteOpenTelemetry(this IServiceCollection services,
+        IConfiguration configuration,
+        InstanceOptions instanceOptions,
+        IFileSystem fileSystem)
+    {
+        const string OtelEndpoint = "OTEL_EXPORTER_OTLP_ENDPOINT";
+        const string OtelAdditionalMeters = "OTEL_ADDITIONAL_METERS";
+        const string OtelAdditionalSources = "OTEL_ADDITIONAL_SOURCES";
+
+        if (IsDisabled())
+            return services;
+
+        services
+            .AddOpenTelemetry()
+            .ConfigureResource(b =>
+                b.AddService(
+                        Assembly.GetExecutingAssembly().GetName().Name ?? "vicione-suite",
+                        serviceNamespace: "vicione",
+                        serviceVersion: Assembly.GetExecutingAssembly()
+                            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                            ?.InformationalVersion,
+                        serviceInstanceId: fileSystem.GetLocalInstanceIdFilePath(instanceOptions),
+                        autoGenerateServiceInstanceId: false)
+                    .AddAttributes(
+                    [
+                        new("process.pid", Environment.ProcessId),
+                    ]))
+            .WithTracing(b => ConfigureTracing(b, configuration))
+            .WithMetrics(b => ConfigureMetrics(b, configuration))
+            .UseOtlpExporter();
+
+        return services;
+
+        bool IsDisabled() => string.IsNullOrEmpty(configuration.GetValue<string?>(OtelEndpoint));
+
+        static void ConfigureTracing(TracerProviderBuilder builder, IConfiguration configuration)
+        {
+            builder
+                .AddAspNetCoreInstrumentation()
+                .AddSource(DiagnosticHeaders.DefaultListenerName);
+
+            var additionalSources = configuration.GetSection(OtelAdditionalSources).Get<string[]>() ?? [];
+            foreach (var source in additionalSources)
+                builder.AddSource(source);
+        }
+
+        static void ConfigureMetrics(MeterProviderBuilder builder, IConfiguration configuration)
+        {
+            builder
+                .AddRuntimeInstrumentation()
+                .AddAspNetCoreInstrumentation()
+                .AddMeter(InstrumentationOptions.MeterName);
+
+            var additionalMeters = configuration.GetSection(OtelAdditionalMeters).Get<string[]>() ?? [];
+            foreach (var meter in additionalMeters)
+                builder.AddMeter(meter);
+        }
+    }
+}

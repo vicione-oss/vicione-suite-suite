@@ -1,0 +1,265 @@
+﻿@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services
+@using Blazor.Shared.Settings.NetworkInterface.Components
+@using Blazor.Shared.Settings.NetworkInterface.Enums
+@using Blazor.Shared.Settings.NetworkInterface.Enums.Extensions
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Localization.Extensions
+@using ViciOne.Ui.Localization.Resources
+
+@inherits NetworkControlPanelBase<NetworkInterfaceControlPanelState>
+
+<ControlPanelPage Title="@CommonVocabulary.General">
+    <DescriptionBanner Title="@string.Format(Localization.GeneralControlPanelPage.DescriptionBannerTitle, State.Name)"
+                       IconCssClass="@_cluster1IconCssClasses">
+
+        @Localization.GeneralControlPanelPage.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        <SettingsGroup Title="@Localization.GeneralControlPanelPage.InterfaceNameSettingsGroupTitle">
+            <SettingsField Label="@Localization.GeneralControlPanelPage.InterfaceName">
+                <SettingsFieldTextBox Enabled="false" Value="@State.Name" />
+            </SettingsField>
+        </SettingsGroup>
+
+        <SettingsGroup Title="@Localization.GeneralControlPanelPage.InterfaceEnabledSettingsGroupTitle" Expanded="@State.Enabled">
+            <Expander>
+                <SwitchExpander @bind-Value="@State.Enabled" @bind-Value:after="InterfaceEnabledChanged" />
+            </Expander>
+
+            <ChildContent>
+                <SettingsField Label="@Localization.GeneralControlPanelPage.TestConnection" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.TestVerb" Enabled="@(!_testConnectionRunning)" OnClick="TestConnectionButtonClick" />
+                </SettingsField>
+
+                @if (_testConnectionExecutedAtLeastOnce && _testConnectionResult is not null)
+                {
+                    <SettingsField Label="@Localization.GeneralControlPanelPage.IsDefaultRouteConfigured" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                        @_testConnectionResult.IsDefaultRouteConfigured.LocalizeYesNo()
+                    </SettingsField>
+
+                    <SettingsField Label="@Localization.GeneralControlPanelPage.IsDefaultGatewayAvailable" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                        @_testConnectionResult.IsDefaultGatewayAvailable.LocalizeYesNo()
+                    </SettingsField>
+
+                    <SettingsField Label="@Localization.GeneralControlPanelPage.IsInternetAvailable" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                        @_testConnectionResult.IsInternetAvailable.LocalizeYesNo()
+                    </SettingsField>
+
+                    <SettingsField Label="@Localization.GeneralControlPanelPage.IsDnsFunctional" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                        @_testConnectionResult.IsDnsFunctional.LocalizeYesNo()
+                    </SettingsField>
+
+                    <SettingsField Label="@CommonVocabulary.State" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                        @_testConnectionResult.State
+                    </SettingsField>
+                }
+
+                <SettingsField Label="@Localization.GeneralControlPanelPage.ResetThisInterfaceToFactoryDefault">
+                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.ResetVerb" Enabled="false" />
+                </SettingsField>
+            </ChildContent>
+        </SettingsGroup>
+
+        <SettingsGroup Title="@Localization.GeneralControlPanelPage.GeneralInformation" @bind-Expanded="State.GeneralInformationExpanded">
+            <SettingsInformation>
+                <div class="description">
+                    @Localization.GeneralControlPanelPage.GeneralInformationDescription
+                </div>
+            </SettingsInformation>
+
+            <SettingsField Label="@CommonVocabulary.State">
+                @(_testConnectionResult is null ? CommonVocabulary.Unknown : _testConnectionResult.State)
+            </SettingsField>
+
+            <div class="section" data-expanded="@State.GeneralInformationExpanded">
+                <SettingsField Label="@TechnicalTerms.MacAddress">
+                    @GetPhysicalAddress()
+                </SettingsField>
+            </div>
+
+            @foreach (var address in State.GetIpv4Addresses(SystemConfigurationService))
+            {
+                <div class="section" data-expanded="@State.GeneralInformationExpanded">
+                    <SettingsField Label="@Localization.GeneralControlPanelPage.Ipv4Configuration">
+                        @address.Configuration.ToLocalizedString()
+                    </SettingsField>
+
+                    <SettingsField Label="@Localization.GeneralControlPanelPage.Ipv4Address">
+                        @address.Address
+                    </SettingsField>
+                
+                    <SettingsField Label="@Localization.GeneralControlPanelPage.Ipv4SubnetMask">
+                        @address.Subnet
+                    </SettingsField>
+                
+                    <SettingsField Label="@Localization.GeneralControlPanelPage.Ipv4DefaultGateway">
+                        @address.Gateway
+                    </SettingsField>
+                </div>
+            }
+
+            <div class="section" data-expanded="@State.GeneralInformationExpanded">
+                <SettingsField Label="@TechnicalAcronyms.VLan">
+                    @State.GetVlanInformation(SystemConfigurationService)
+                </SettingsField>
+            </div>
+
+            <div class="section" data-expanded="@State.GeneralInformationExpanded">
+                <SettingsField Label="@TechnicalTerms.DnsServer">
+                    <div class="dns-server-grid">
+                        @if (!SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Any() &&
+                             !State.GetDhcpDnsNameServers(SystemConfigurationService).Any())
+                        {
+                            <div>@TechnicalTerms.Disabled</div>
+                        }
+
+                        @foreach (var nameServer in SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers)
+                        {
+                            <div>@nameServer.ToString()</div>
+                        }
+
+                        @foreach (var nameServer in State.GetDhcpDnsNameServers(SystemConfigurationService))
+                        {
+                            <div>@nameServer.ToString() (@IpConfigurationMode.AutomaticDhcp.ToLocalizedString())</div>
+                        }
+                    </div>
+                </SettingsField>
+            </div>
+        </SettingsGroup>
+    </SettingsLayout>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@TechnicalAcronyms.TcpIp">
+    <DescriptionBanner Title="@string.Format(Localization.TcpIpControlPanelPage.DescriptionBannerTitle, State.Name)"
+                       IconCssClass="@_cluster1IconCssClasses">
+
+        @Localization.TcpIpControlPanelPage.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        <IpV4SettingsGroup Title="@Localization.TcpIpControlPanelPage.IPv4ConfigurationSettingsGroupTitle"
+                           @bind-ConfigurationMode="State.IpV4ConfigurationMode"
+                           @bind-ConfigurationMode:after="IpV4ConfigurationModeChanged"
+                           @bind-IpAddress="State.FirstIpV4Detail.IpAddress"
+                           @bind-SubnetMask="State.FirstIpV4Detail.SubnetMask"
+                           @bind-DefaultGateway="State.DefaultGateway"
+                           Changed="BeginEdit"
+                           HasManualConfiguredDnsServers="@SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Any()">
+
+            <AdditionalSettingsFields>
+                <SettingsStepper PlusEnabled="@(State.AdditionalIpV4Details.Count == 0)"
+                                 MinusEnabled="false"
+                                 OnPlus="@AddAdditionalIPv4Detail"
+                                 OnPlusMinus="BeginEdit" />
+
+                @foreach (var i in State.AdditionalIpV4Details.Select((ipV4Detail, index) => new { IpV4Detail = ipV4Detail, Index = index }))
+                {
+                    var ipAddressLabel = TechnicalTerms.IpAddress;
+                    var ipAddressFieldKey = new NetworkInterfaceFieldKey { DetailIndex = i.Index, FieldIndex = 0 };
+
+                    var subnetMaskLabel = TechnicalTerms.SubnetMask;
+                    var subnetMaskFieldKey = new NetworkInterfaceFieldKey { DetailIndex = i.Index, FieldIndex = 1 };
+
+                    <SettingsFieldSeparator />
+
+                    <SettingsField Label="@ipAddressLabel" @key="ipAddressFieldKey">
+                        <SettingsFieldTextBox Placeholder="@ipAddressLabel" @bind-Value="i.IpV4Detail.IpAddress" @bind-Value:after="BeginEdit" />
+                    </SettingsField>
+
+                    <SettingsField Label="@subnetMaskLabel" @key="subnetMaskFieldKey">
+                        <SettingsFieldTextBox Placeholder="@subnetMaskLabel" @bind-Value="i.IpV4Detail.SubnetMask" @bind-Value:after="BeginEdit" />
+                    </SettingsField>
+
+                    <SettingsStepper PlusEnabled="@(i.Index == State.AdditionalIpV4Details.Count - 1)"
+                                     MinusEnabled="true"
+                                     OnPlus="@AddAdditionalIPv4Detail"
+                                     OnMinus="@(() => RemoveAdditionalIPv4Detail(i.IpV4Detail))"
+                                     OnPlusMinus="BeginEdit"
+                                     @key="i.Index" />
+                }
+
+
+            </AdditionalSettingsFields>
+        </IpV4SettingsGroup>
+
+        @if (State.IpV4ConfigurationMode == IpConfigurationMode.AutomaticDhcp)
+        {
+            <SettingsGroup Title="@TechnicalTerms.DhcpLease" @bind-Expanded="State.DhcpLeaseSettingsGroupExpanded">
+                <SettingsField Label="@Localization.TcpIpControlPanelPage.LeaseDuration" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @_dhcpLeaseDuration.Localize()
+                </SettingsField>
+
+                <SettingsField Label="@Localization.TcpIpControlPanelPage.LeaseStart" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @_dhcpLeaseStart.LocalizeFullDateLongTime()
+                </SettingsField>
+
+                <SettingsField Label="@Localization.TcpIpControlPanelPage.LeaseEnd" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @_dhcpLeaseEnd.LocalizeFullDateLongTime()
+                </SettingsField>
+
+                <SettingsField Label="@Localization.TcpIpControlPanelPage.LastFetch" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @SystemConfigurationService.LastDhcpLeaseFetchUtc.AdjustToTimeZone(TimeProvider.LocalTimeZone).LocalizeFullDateLongTime()
+                </SettingsField>
+
+                <SettingsField Label="@string.Format(UserActions.RenewSomething, TechnicalTerms.DhcpLease)" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.Renew" OnClick="@RenewDhcpLease" />
+                </SettingsField>
+            </SettingsGroup>
+        }
+
+        <SettingsGroup Title="@($"{TechnicalAcronyms.VLan} 802.1Q - {Localization.GeneralControlPanelPage.NetworkSegmentation}")" Expanded="@State.VLanEnabled">
+            <Expander>
+                <SwitchExpander @bind-Value="@State.VLanEnabled" @bind-Value:after="BeginEdit" />
+            </Expander>
+
+            <ChildContent>
+                <SettingsField Label="@Constants.VLanIdLabel">
+                    <SettingsFieldTextBox Placeholder="@Constants.VLanIdLabel" Subline="@Localization.GeneralControlPanelPage.VLanIdSettingsFieldSubline" @bind-Value="State.VLanId" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </ChildContent>
+        </SettingsGroup>
+    </SettingsLayout>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@Localization.HardwareControlPanelPage.Hardware">
+    <DescriptionBanner Title="@Localization.HardwareControlPanelPage.DescriptionBannerTitle"
+                       IconCssClass="@_cluster1IconCssClasses">
+
+        @Localization.HardwareControlPanelPage.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        <SettingsGroup Title="@Localization.HardwareControlPanelPage.MacAddressManuallySettingsGroupTitle" Expanded="@State.MacAddressManually">
+            <Expander>
+                <SwitchExpander @bind-Value="@State.MacAddressManually" @bind-Value:after="MacAddressManuallyChanged" />
+            </Expander>
+
+            <ChildContent>
+                <SettingsField Label="@Localization.HardwareControlPanelPage.MacAddress">
+                    <SettingsFieldTextBox Placeholder="@Localization.HardwareControlPanelPage.MacAddressFieldPlaceholder"
+                                          @bind-Value="State.MacAddress"
+                                          @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </ChildContent>
+        </SettingsGroup>
+
+        <SettingsGroup Title="@Localization.HardwareControlPanelPage.HardwareInformationSettingsGroupTitle">
+            <SettingsField Label="@Localization.HardwareControlPanelPage.PhysicalAddressMac">
+                @GetPhysicalAddress()
+            </SettingsField>
+        </SettingsGroup>
+    </SettingsLayout>
+</ControlPanelPage>
+
+<OkDialog HeaderText="@CommonVocabulary.Error"
+          Show="@_showErrorDialog"
+          OnConfirm="() => _showErrorDialog = false">
+    <Body>
+        <p>
+             @(_errorMessage is null ? CommonPhrases.AnUnknownErrorOccurred : string.Format(Localization.TcpIpControlPanelPage.ErrorBody, _errorMessage))
+        </p>
+    </Body>
+</OkDialog>

@@ -1,0 +1,60 @@
+﻿@use "../../../../shared/styles/colors-staged";
+@use 'sass:color';
+
+#components-reconnect-modal {
+    display: none;
+    width: 100%;
+    height: 100%;
+
+    .interaction-center {
+        .left-side {
+            .interruption {
+                flex-direction: column;
+                row-gap: 16px;
+
+                .content-loading-indication {
+                    top: 24px;
+                }
+            }
+
+            .failed {
+                flex-direction: column;
+                row-gap: 16px;
+            }
+        }
+    }
+}
+
+#components-reconnect-modal.components-reconnect-show, #components-reconnect-modal.components-reconnect-hide, #components-reconnect-modal.components-reconnect-rejected {
+    .interruption {
+        display: flex;
+    }
+
+    .failed {
+        display: none;
+    }
+}
+
+#components-reconnect-modal.components-reconnect-failed {
+    .interruption {
+        display: none !important;
+    }
+
+    .failed {
+        display: flex !important;
+    }
+}
+
+#components-reconnect-modal.components-reconnect-show,
+#components-reconnect-modal.components-reconnect-hide,
+#components-reconnect-modal.components-reconnect-rejected,
+#components-reconnect-modal.components-reconnect-failed {
+    display: flex;
+    position: fixed;
+    top: 0;
+    z-index: 1100000;
+}
+
+#components-reconnect-modal.components-reconnect-hide {
+    display: none !important;
+}

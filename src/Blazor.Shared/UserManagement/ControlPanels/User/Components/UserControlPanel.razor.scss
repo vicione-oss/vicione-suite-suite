@@ -1,0 +1,12 @@
+﻿.roles-control-panel-page {
+    display: contents;
+
+    ::deep .roles-grid {
+        max-height: 100%;
+    }
+}
+
+.enabled-switch-container {
+    display: grid;
+    place-content: center;
+}

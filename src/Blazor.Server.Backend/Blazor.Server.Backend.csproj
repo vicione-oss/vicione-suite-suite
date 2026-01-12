@@ -1,0 +1,144 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Blazor.Server.Backend</AssemblyName>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <RootNamespace>Blazor.Server.Backend</RootNamespace>
+    <CompressionEnabled>false</CompressionEnabled>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- https://github.com/koenvzeijl/AspNetCore.SassCompiler/issues/160 -->
+    <SassCompilerEnableWatcher>false</SassCompilerEnableWatcher>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Blazor.DevAssets\Blazor.DevAssets.csproj" />
+    <ProjectReference Include="..\Blazor.Shared\Blazor.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
+    <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
+    <PackageReference Include="System.IO.Abstractions" />
+    <PackageReference Include="ViciOne.Ui.Design" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <!-- Prevent Microsoft.NET.Sdk.Razor from copying unnecessary file -->
+  <ItemGroup>
+    <Content Update="sasscompiler.json;" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Pack="False" />
+    <Content Update="package*.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" Pack="False" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Pages/*.razor.css" CssScope="suite-server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ViciOne.Suite.Blazor.Server.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\ChangePassword.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ChangePassword.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\Common.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Common.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\ForgotPassword.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ForgotPassword.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\Login.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Login.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\Register.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Register.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\ResendEmailConfirmation.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ResendEmailConfirmation.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Models\Localization\Validation.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Validation.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ChangePassword.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ChangePassword.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\Common.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Common.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ForgotPassword.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ForgotPassword.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\Login.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Login.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\Register.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Register.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ResendEmailConfirmation.de.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ResendEmailConfirmation.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResendEmailConfirmation.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Models\Localization\Validation.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Validation.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Target Name="DeleteDevExpressWwwrootContent" AfterTargets="Publish">
+    <ItemGroup>
+      <!-- it's worth removing it to save ~17MB -->
+      <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\devextreme\dx.all.debug.js" />
+      <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\analytics-core\dx-analytics-core.js" />
+      <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\analytics-core\dx-querybuilder.js" />      
+    </ItemGroup>
+
+    <RemoveDir Directories="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Themes" />
+    
+    <Delete Files="@(FilesToDelete)">
+      <Output TaskParameter="DeletedFiles" ItemName="DeletedList" />
+    </Delete>
+    
+    <Message Text="Deleted DexExpress themes and '@(DeletedList)'" Importance="high" />
+  </Target>
+
+  <Target Name="DeleteWwwrootIdentityContent" AfterTargets="Publish">
+    <RemoveDir Directories="$(PublishDir)\wwwroot\Identity" />
+    <Message Text="Deleted identity web content" Importance="high" />
+  </Target>
+
+  <Target Name="ConfigureDesignTargets" BeforeTargets="BeforeDesignTargets">
+    <PropertyGroup>
+      <ColorsScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/colors</ColorsScssOutputFolder>
+      <ScrollbarScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/scrollbar</ScrollbarScssOutputFolder>
+    </PropertyGroup>
+  </Target>
+
+</Project>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Icon/Standard/arrow-back</title>
+    <g id="Icon/Standard/arrow-back" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="icon/standard/arrow-back" fill="#FFFFFF" points="11.8 15 17.4 9.39999998 16 7.99999997 7.99999998 16 16 24 17.4 22.6 11.8 17 24 17 24 15"></polygon>
+        <rect id="rectangle" x="0" y="0" width="32" height="32"></rect>
+    </g>
+</svg>

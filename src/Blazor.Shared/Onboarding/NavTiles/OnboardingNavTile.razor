@@ -1,0 +1,10 @@
+﻿@using Sdk.Client.NavTiles.Components
+
+@inherits NavTileBase
+
+<NavTileStandardContent Headline="@Localization.OnboardingNavTile.Headline"
+                        Subline="@Localization.OnboardingNavTile.Subline"
+                        IconSrc="@_iconSrc"
+                        IconAlt="@Localization.OnboardingNavTile.Headline"
+                        OnContentLoading="@ContentLoading"
+                        OnContentReady="@ContentReady" />

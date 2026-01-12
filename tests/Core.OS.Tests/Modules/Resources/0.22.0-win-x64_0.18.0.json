@@ -1,0 +1,88 @@
+﻿{
+    "Name": "ViciOne.Suite.ClusterManagement",
+    "Title": "Cluster Management",
+    "Description": "Use this module to manage and edit the Cluster",
+    "Version": "0.22.0",
+    "MinSuiteSdkVersion": "0.17.0",
+    "Company": "ifm software",
+    "ProjectUrl": "https://gitlab.i40.ifm-datalink.net/acx/vo-suite/modules/cluster-mgmt",
+    "ReadmeUrl": "https://gitlab.i40.ifm-datalink.net/acx/vo-suite/modules/cluster-mgmt/-/blob/master/README.md?ref_type=heads",
+    "Published": "2024-10-02T12:23:15.997857+00:00",
+    "Options": [
+        {
+            "Key": "MqttRpcTimeout",
+            "DefaultValue": "100",
+            "IsRequired": true,
+            "OptionType": "Number"
+        },
+        {
+            "Key": "EngineHostExecutable",
+            "DefaultValue": "ViciOne.ManagedEngine.Host",
+            "IsRequired": false,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "EngineHostsDirectory",
+            "DefaultValue": "EngineHosts",
+            "IsRequired": true,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "EngineHostVersionsDirectory",
+            "DefaultValue": "Versions",
+            "IsRequired": true,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "EngineHostArchitecture",
+            "IsRequired": false,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "EngineHostVersion",
+            "DefaultValue": "0.21.0",
+            "IsRequired": true,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "FunctionBlockDirectory",
+            "DefaultValue": "FunctionBlocks",
+            "IsRequired": true,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "IoddDirectory",
+            "DefaultValue": "Iodds",
+            "IsRequired": true,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "IoddArchiveName",
+            "IsRequired": false,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "PackageApi",
+            "DefaultValue": "https://nexus.nsc-gmbh.de/repository/raw-fb-server",
+            "IsRequired": true,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "PackageUser",
+            "IsRequired": true,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "PackagePassword",
+            "IsRequired": true,
+            "IsPassword": true,
+            "OptionType": "Text"
+        },
+        {
+            "Key": "SnapshotDirectory",
+            "DefaultValue": "Snapshots",
+            "IsRequired": true,
+            "OptionType": "Text"
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+﻿.description {
+    padding-bottom: 9px;
+}
+
+.section {
+    display: contents;
+
+    &[data-expanded] {
+        ::deep .settings-field:first-child {
+            padding-top: 12px;
+        }
+    }
+}
+
+.dns-server-grid {
+    display: grid;
+    justify-items: end;
+}

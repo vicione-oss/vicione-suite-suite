@@ -1,0 +1,25 @@
+﻿@use "../design/colors";
+@use "./../../../../shared/styles/animations/mixins" as animations;
+
+// applies a lucent appearance with a transparent background, no borders and
+// accent coloring on hover / focus for text / icons displayed in the button
+@mixin lucent-styling() {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+
+    display: inline-flex;
+
+    color: inherit;
+    @include animations.color();
+
+    &:hover {
+        color: colors.$color-accent-hover;
+    }
+
+    &:focus {
+        outline: none;
+        color: colors.$color-accent;
+    }
+}

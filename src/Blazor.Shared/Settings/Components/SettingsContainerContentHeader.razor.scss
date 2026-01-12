@@ -1,0 +1,39 @@
+﻿@use "./../../Styles/typography/fonts/noto-sans/variables" as noto-sans;
+@use "./../../Styles/tabs/mixins" as tabs;
+@use "./../../Styles/buttons/mixins" as buttons;
+
+.settings-container-content-header {
+    height: inherit;
+
+    display: grid;
+    grid-template-areas: "navigate-back-button control-panel-title-or-tabs";
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 100%;
+    align-items: center;
+
+    &:has(.navigate-back-button) {
+        $margin-left: -8px;
+        margin-left: $margin-left;
+
+        grid-column-gap: 0 - $margin-left;
+    }
+
+    .navigate-back-button {
+        grid-area: navigate-back-button;
+
+        @include buttons.lucent-styling();
+    }
+
+    .tab-control-container {
+        grid-area: control-panel-title-or-tabs;
+
+        @include tabs.styles($tab-size: "large");
+    }
+
+    .control-panel-title {
+        grid-area: control-panel-title-or-tabs;
+
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}

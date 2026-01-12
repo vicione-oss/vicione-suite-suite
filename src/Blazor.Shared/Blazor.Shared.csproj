@@ -1,0 +1,918 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Blazor.Shared</AssemblyName>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RootNamespace>Blazor.Shared</RootNamespace>
+    <CompressionEnabled>false</CompressionEnabled>
+  </PropertyGroup>
+
+  <!--
+    Disable fingerprinting as wrong fingerprints are applied in this project
+    https://github.com/dotnet/aspnetcore/issues/58976#issuecomment-2478995005
+  -->
+  <PropertyGroup>
+    <StaticWebAssetFingerprintingEnabled>false</StaticWebAssetFingerprintingEnabled>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- https://github.com/koenvzeijl/AspNetCore.SassCompiler/issues/160 -->
+    <SassCompilerEnableWatcher>false</SassCompilerEnableWatcher>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
+    <PackageReference Include="DevExpress.Blazor" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Riok.Mapperly" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="StronglyTypedId" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="TimeZoneNames" />
+    <PackageReference Include="ViciOne.Journal" />
+    <PackageReference Include="ViciOne.Suite.Sdk.Client" />
+    <PackageReference Include="ViciOne.SystemMonitoring" />
+    <PackageReference Include="ViciOne.Ui.Blazor.Components" />
+    <PackageReference Include="ViciOne.Ui.Design" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="ViciOne.Ui.Localization" />
+    <PackageReference Include="ViciOne.Ui.MonochromeIcons.Assets">
+      <PrivateAssets>all</PrivateAssets><!-- avoids include of CSS isolation bundle -->
+      <ExcludeAssets>runtime</ExcludeAssets><!-- don't depend on assembly at runtime -->
+    </PackageReference>
+    <PackageReference Include="ViciOne.Ui.MonochromeIcons.Components" />
+    <PackageReference Include="ViciOne.Ui.Shared.Dx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core.Shared\Core.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ViciOne.Suite.Blazor.Shared.Tests" />
+    <InternalsVisibleTo Include="ViciOne.Suite.Burger.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="sasscompiler.json" />
+    <None Include="sasscompiler.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Admin\Logging\Localization\LogView.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>LogView.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\ControlPanels\Localization\ConnectionControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ConnectionControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\ControlPanels\Localization\ConnectionsControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ConnectionsControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\Services\Localization\SuiteConnectionService.Designer.cs">
+      <DependentUpon>SuiteConnectionService.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Instance\ControlPanels\Localization\InstanceControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InstanceControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Instance\ControlPanels\Localization\UpdateControlPanel.Designer.cs">
+      <DependentUpon>UpdateControlPanel.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Instance\ControlPanels\Localization\InstancesControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InstancesControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Instance\Localization\Common.Designer.cs">
+      <DependentUpon>Common.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Instance\Services\Localization\InstanceControlPanelSaveHandler.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>InstanceControlPanelSaveHandler.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Instance\Services\Localization\UpdateControlPanelSaveHandler.Designer.cs">
+      <DependentUpon>UpdateControlPanelSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Localization\RestartSuite.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RestartSuite.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Module\ControlPanels\Localization\ModuleManagementControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ModuleManagementControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Dialogs\Localization\ErrorDialog.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ErrorDialog.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Help\NotificationArea\Localization\HelpNotificationElementFlyoutContent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>HelpNotificationElementFlyoutContent.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Localization\ValidationTerms.Designer.cs">
+      <DependentUpon>ValidationTerms.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Localization\App.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>App.resx</DependentUpon>
+    </Compile>
+    <Compile Update="MessageBanner\Localization\MessageBanner.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MessageBanner.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Components\Pages\Localization\IndexPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IndexPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Module\ControlPanels\Localization\ModuleOptionDeclarationCollectionGrid.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ModuleOptionDeclarationCollectionGrid.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Module\Services\Localization\ModuleManagementControlPanelSaveHandler.Designer.cs">
+      <DependentUpon>ModuleManagementControlPanelSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Mqtt\Localization\MqttViewer.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MqttViewer.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Network\ControlPanels\Dns\Components\Localization\DnsControlPanel.Designer.cs">
+      <DependentUpon>DnsControlPanel.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\HardwareControlPanelPage.Designer.cs">
+      <DependentUpon>HardwareControlPanelPage.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\TcpIpControlPanelPage.Designer.cs">
+      <DependentUpon>TcpIpControlPanelPage.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\GeneralControlPanelPage.Designer.cs">
+      <DependentUpon>GeneralControlPanelPage.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\NetworkInterface\Services\Localization\NetworkInterfaceControlPanelSaveHandler.Designer.cs">
+      <DependentUpon>NetworkInterfaceControlPanelSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\Ntp\Components\Localization\NtpControlPanel.Designer.cs">
+      <DependentUpon>NtpControlPanel.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\Proxies\Components\Localization\ProxySettingsGroup.Designer.cs">
+      <DependentUpon>ProxySettingsGroup.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\Proxies\Components\Localization\ProxiesControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ProxiesControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\ControlPanels\Localization\TagControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TagControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Network\ControlPanels\Proxies\Services\Localization\ProxiesControlPanelSaveHandler.Designer.cs">
+      <DependentUpon>ProxiesControlPanelSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\RemoteAccess\Components\Localization\RemoteAccessControlPanel.Designer.cs">
+      <DependentUpon>RemoteAccessControlPanel.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\Services\Validators\Localization\IpAddressValidator.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>IpAddressValidator.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Onboarding\Components\WizardPages\Localization\HostnameWizardPage.Designer.cs">
+      <DependentUpon>HostnameWizardPage.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Components\WizardPages\Localization\NetworkWizardPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NetworkWizardPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Onboarding\Components\WizardPages\Localization\PasswordWizardPage.Designer.cs">
+      <DependentUpon>PasswordWizardPage.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Components\WizardPages\Localization\SummaryNetworkInterfaceDetails.Designer.cs">
+      <DependentUpon>SummaryNetworkInterfaceDetails.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Components\WizardPages\Localization\TimeZoneWizardPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TimeZoneWizardPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Onboarding\Components\WizardPages\Localization\SummaryWizardPage.Designer.cs">
+      <DependentUpon>SummaryWizardPage.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Components\WizardPages\Localization\WelcomeWizardPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>WelcomeWizardPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Onboarding\Localization\Wizard.Designer.cs">
+      <DependentUpon>Wizard.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Localization\SettingsFieldLabels.Designer.cs">
+      <DependentUpon>SettingsFieldLabels.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\NavTiles\Localization\OnboardingNavTile.Designer.cs">
+      <DependentUpon>OnboardingNavTile.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Services\Localization\PasswordWizardPageSaveHandler.Designer.cs">
+      <DependentUpon>PasswordWizardPageSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Services\Localization\NetworkWizardPageSaveHandler.Designer.cs">
+      <DependentUpon>NetworkWizardPageSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Services\Localization\SummaryWizardPageResetHandler.Designer.cs">
+      <DependentUpon>SummaryWizardPageResetHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Services\Localization\CommonWizardOperations.Designer.cs">
+      <DependentUpon>CommonWizardOperations.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Services\Localization\ValidationMessages.Designer.cs">
+      <DependentUpon>ValidationMessages.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Services\Localization\SummaryWizardPageSaveHandler.Designer.cs">
+      <DependentUpon>SummaryWizardPageSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Onboarding\Services\Validators\Localization\HostnameValidator.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>HostnameValidator.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Popup\Factories\Localization\TimedMessagesFactory.Designer.cs">
+      <DependentUpon>TimedMessagesFactory.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Profile\Localization\TicketCenterComponent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TicketCenterComponent.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Profile\NotificationArea\Localization\ProfileNotificationElementFlyoutContent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ProfileNotificationElementFlyoutContent.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Components\UnsavedChangesPopup\Localization\UnsavedChangesPopup.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UnsavedChangesPopup.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Settings\Components\Localization\SettingsContainer.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SettingsContainer.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Settings\DateAndTime\Components\Localization\TimeZoneSettingsGroup.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TimeZoneSettingsGroup.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Settings\DateAndTime\Localization\ErrorMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ErrorMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Settings\NetworkInterface\Enums\Localization\IpConfigurationMode.Designer.cs">
+      <DependentUpon>IpConfigurationMode.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="SystemInformation\Components\Localization\LogCenterComponent.Designer.cs">
+      <DependentUpon>LogCenterComponent.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="SystemInformation\Components\Localization\ProcessComponent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ProcessComponent.resx</DependentUpon>
+    </Compile>  
+    <Compile Update="SystemInformation\NotificationArea\Localization\SystemInformationNotificationElementFlyoutContent.Designer.cs">
+      <DependentUpon>SystemInformationNotificationElementFlyoutContent.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="SystemInformation\Localization\Common.Designer.cs">
+      <DependentUpon>Common.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Settings\NotificationArea\Localization\SettingsNotificationElementFlyoutContent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SettingsNotificationElementFlyoutContent.resx</DependentUpon>
+    </Compile>
+    <Compile Update="UserInterface\ControlPanels\Language\Components\Localization\SystemDefaultControlPanelPage.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SystemDefaultControlPanelPage.resx</DependentUpon>
+    </Compile>
+    <Compile Update="UserInterface\ControlPanels\Language\Services\Localization\LanguageControlPanelSaveHandler.Designer.cs">
+      <DependentUpon>LanguageControlPanelSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UserInterface\ControlPanels\Theme\Components\Localization\SystemDefaultControlPanelPage.Designer.cs">
+      <DependentUpon>SystemDefaultControlPanelPage.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UserManagement\Components\Localization\PermissionGrid.Designer.cs">
+      <DependentUpon>PermissionGrid.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UserManagement\ControlPanels\Roles\Components\Localization\RolesControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RolesControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="UserManagement\ControlPanels\Role\Components\Localization\RoleControlPanel.Designer.cs">
+      <DependentUpon>RoleControlPanel.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UserManagement\ControlPanels\Role\Services\Localization\RoleControlPanelResetHandler.Designer.cs">
+      <DependentUpon>RoleControlPanelResetHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UserManagement\ControlPanels\Users\Components\Localization\UsersControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UsersControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="UserManagement\ControlPanels\User\Components\Localization\UserControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UserControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\Components\Localization\MqttSettings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MqttSettings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\Components\Localization\TestSettings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TestSettings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Instances\Localization\Instance.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Instance.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Instances\Localization\Instances.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Instances.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\ControlPanels\Localization\TagsControlPanelPageContent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TagsControlPanelPageContent.resx</DependentUpon>
+    </Compile>
+    <Compile Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelSaveHandler.Designer.cs">
+      <DependentUpon>UserControlPanelSaveHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UserManagement\Localization\Labels.Designer.cs">
+      <DependentUpon>Labels.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelResetHandler.Designer.cs">
+      <DependentUpon>UserControlPanelResetHandler.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="UserManagement\Services\Validators\Localization\RepeatPasswordValidator.Designer.cs">
+      <DependentUpon>RepeatPasswordValidator.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Wizards\Components\Localization\WizardBody.Designer.cs">
+      <DependentUpon>WizardBody.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Admin\Logging\Localization\LogView.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>LogView.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Localization\ConnectionControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ConnectionControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Localization\ConnectionsControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ConnectionsControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\Services\Localization\SuiteConnectionService.resx">
+      <LastGenOutput>SuiteConnectionService.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Localization\UpdateControlPanel.resx">
+      <LastGenOutput>UpdateControlPanel.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\Localization\Common.resx">
+      <LastGenOutput>Common.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\Services\Localization\InstanceControlPanelSaveHandler.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InstanceControlPanelSaveHandler.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\Services\Localization\UpdateControlPanelSaveHandler.resx">
+      <LastGenOutput>UpdateControlPanelSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\RestartSuite.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>RestartSuite.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleOptionDeclarationCollectionGrid.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ModuleOptionDeclarationCollectionGrid.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleManagementControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ModuleManagementControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Dialogs\Localization\ErrorDialog.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorDialog.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Help\NotificationArea\Localization\HelpNotificationElementFlyoutContent.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>HelpNotificationElementFlyoutContent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\ValidationTerms.resx">
+      <LastGenOutput>ValidationTerms.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\App.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>App.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="MessageBanner\Localization\MessageBanner.resx">
+      <LastGenOutput>MessageBanner.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Components\Pages\Localization\IndexPage.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>IndexPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Module\Services\Localization\ModuleManagementControlPanelSaveHandler.resx">
+      <LastGenOutput>ModuleManagementControlPanelSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\Dns\Components\Localization\DnsControlPanel.resx">
+      <LastGenOutput>DnsControlPanel.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\HardwareControlPanelPage.resx">
+      <LastGenOutput>HardwareControlPanelPage.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\TcpIpControlPanelPage.resx">
+      <LastGenOutput>TcpIpControlPanelPage.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\GeneralControlPanelPage.resx">
+      <LastGenOutput>GeneralControlPanelPage.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Services\Localization\NetworkInterfaceControlPanelSaveHandler.resx">
+      <LastGenOutput>NetworkInterfaceControlPanelSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\Ntp\Components\Localization\NtpControlPanel.resx">
+      <LastGenOutput>NtpControlPanel.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\Proxies\Components\Localization\ProxySettingsGroup.resx">
+      <LastGenOutput>ProxySettingsGroup.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\Proxies\Components\Localization\ProxiesControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ProxiesControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Localization\TagControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TagControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\Proxies\Services\Localization\ProxiesControlPanelSaveHandler.resx">
+      <LastGenOutput>ProxiesControlPanelSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\RemoteAccess\Components\Localization\RemoteAccessControlPanel.resx">
+      <LastGenOutput>RemoteAccessControlPanel.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\Services\Validators\Localization\IpAddressValidator.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>IpAddressValidator.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Components\WizardPages\Localization\HostnameWizardPage.resx">
+      <LastGenOutput>HostnameWizardPage.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Components\WizardPages\Localization\PasswordWizardPage.resx">
+      <LastGenOutput>PasswordWizardPage.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Components\WizardPages\Localization\NetworkWizardPage.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>NetworkWizardPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Components\WizardPages\Localization\SummaryNetworkInterfaceDetails.resx">
+      <LastGenOutput>SummaryNetworkInterfaceDetails.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Components\WizardPages\Localization\TimeZoneWizardPage.resx">
+      <LastGenOutput>TimeZoneWizardPage.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Components\WizardPages\Localization\SummaryWizardPage.resx">
+      <LastGenOutput>SummaryWizardPage.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Components\WizardPages\Localization\WelcomeWizardPage.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>WelcomeWizardPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Localization\Wizard.resx">
+      <LastGenOutput>Wizard.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Localization\SettingsFieldLabels.resx">
+      <LastGenOutput>SettingsFieldLabels.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\NavTiles\Localization\OnboardingNavTile.resx">
+      <LastGenOutput>OnboardingNavTile.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Services\Localization\PasswordWizardPageSaveHandler.resx">
+      <LastGenOutput>PasswordWizardPageSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Services\Localization\NetworkWizardPageSaveHandler.resx">
+      <LastGenOutput>NetworkWizardPageSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Services\Localization\SummaryWizardPageResetHandler.resx">
+      <LastGenOutput>SummaryWizardPageResetHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Services\Localization\CommonWizardOperations.resx">
+      <LastGenOutput>CommonWizardOperations.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Services\Localization\ValidationMessages.resx">
+      <LastGenOutput>ValidationMessages.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Services\Localization\SummaryWizardPageSaveHandler.resx">
+      <LastGenOutput>SummaryWizardPageSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Onboarding\Services\Validators\Localization\HostnameValidator.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>HostnameValidator.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Popup\Factories\Localization\TimedMessagesFactory.resx">
+      <LastGenOutput>TimedMessagesFactory.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Profile\Localization\TicketCenterComponent.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TicketCenterComponent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Profile\NotificationArea\Localization\ProfileNotificationElementFlyoutContent.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ProfileNotificationElementFlyoutContent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Settings\DateAndTime\Components\Localization\TimeZoneSettingsGroup.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TimeZoneSettingsGroup.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Components\UnsavedChangesPopup\Localization\UnsavedChangesPopup.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>UnsavedChangesPopup.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Settings\Components\Localization\SettingsContainer.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SettingsContainer.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Settings\DateAndTime\Localization\ErrorMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Settings\NetworkInterface\Enums\Localization\IpConfigurationMode.resx">
+      <LastGenOutput>IpConfigurationMode.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="SystemInformation\Components\Localization\LogCenterComponent.resx">
+      <LastGenOutput>LogCenterComponent.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="SystemInformation\Components\Localization\ProcessComponent.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ProcessComponent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>  
+    <EmbeddedResource Update="SystemInformation\NotificationArea\Localization\SystemInformationNotificationElementFlyoutContent.resx">
+      <LastGenOutput>SystemInformationNotificationElementFlyoutContent.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="SystemInformation\Localization\Common.resx">
+      <LastGenOutput>Common.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Settings\NotificationArea\Localization\SettingsNotificationElementFlyoutContent.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SettingsNotificationElementFlyoutContent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserInterface\ControlPanels\Language\Components\Localization\SystemDefaultControlPanelPage.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SystemDefaultControlPanelPage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserInterface\ControlPanels\Language\Services\Localization\LanguageControlPanelSaveHandler.resx">
+      <LastGenOutput>LanguageControlPanelSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserInterface\ControlPanels\Theme\Components\Localization\SystemDefaultControlPanelPage.resx">
+      <LastGenOutput>SystemDefaultControlPanelPage.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\Components\Localization\PermissionGrid.resx">
+      <LastGenOutput>PermissionGrid.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\Roles\Components\Localization\RolesControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>RolesControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\Role\Components\Localization\RoleControlPanel.resx">
+      <LastGenOutput>RoleControlPanel.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\Role\Services\Localization\RoleControlPanelResetHandler.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\Role\Services\Localization\RoleControlPanelResetHandler.resx">
+      <LastGenOutput>RoleControlPanelResetHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\Users\Components\Localization\UsersControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>UsersControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\User\Components\Localization\UserControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>UserControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Localization\InstanceControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InstanceControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Localization\InstancesControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InstancesControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Mqtt\Localization\MqttViewer.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MqttViewer.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\Components\Localization\MqttSettings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MqttSettings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\Components\Localization\TestSettings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TestSettings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Localization\TagsControlPanelPageContent.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TagsControlPanelPageContent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Localization\TagsControlPanelPageContent.de.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TagsControlPanelPageContent.de.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelSaveHandler.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelSaveHandler.resx">
+      <LastGenOutput>UserControlPanelSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\Localization\Labels.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\Localization\Labels.resx">
+      <LastGenOutput>Labels.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelResetHandler.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelResetHandler.resx">
+      <LastGenOutput>UserControlPanelResetHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\Services\Validators\Localization\RepeatPasswordValidator.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\Services\Validators\Localization\RepeatPasswordValidator.resx">
+      <LastGenOutput>RepeatPasswordValidator.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Wizards\Components\Localization\WizardBody.resx">
+      <LastGenOutput>WizardBody.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Target Name="ConfigureMonochromeIcons" BeforeTargets="BeforeMonochromeIconTargets">
+    <ItemGroup>
+      <MonochromeIcon Include="add-user" Size="32" />
+      <MonochromeIcon Include="arrow-navigation-light-left" Size="16" />
+      <MonochromeIcon Include="arrow-navigation-light-right" Size="16" />
+      <MonochromeIcon Include="check" Size="16;24" />
+      <MonochromeIcon Include="chevron" Size="16" />
+      <MonochromeIcon Include="close-medium" Size="16;32" />
+      <MonochromeIcon Include="cluster-1" Size="32" />
+      <MonochromeIcon Include="connectivity" Size="24;32" />
+      <MonochromeIcon Include="dataflow-solid" Size="32" />
+      <MonochromeIcon Include="duplicate" Size="16" />
+      <MonochromeIcon Include="edit" Size="16;24" />
+      <MonochromeIcon Include="edit-host" Size="32" />
+      <MonochromeIcon Include="error-full" Size="24" />
+      <MonochromeIcon Include="exit" Size="16;32" />
+      <MonochromeIcon Include="expander-light-left" Size="48" />
+      <MonochromeIcon Include="expander-light-right" Size="24" />
+      <MonochromeIcon Include="export" Size="16" />
+      <MonochromeIcon Include="external-link" Size="16" />
+      <MonochromeIcon Include="folder" Size="16" />
+      <MonochromeIcon Include="filter-light" Size="32" />
+      <MonochromeIcon Include="gear-light" Size="24" />
+      <MonochromeIcon Include="gear-solid" Size="24" />
+      <MonochromeIcon Include="general-menu" Size="24" />
+      <MonochromeIcon Include="help-light" Size="24" />
+      <MonochromeIcon Include="help-solid" Size="24" />
+      <MonochromeIcon Include="import" Size="16" />
+      <MonochromeIcon Include="info-outlined" Size="24" />
+      <MonochromeIcon Include="instructions" Size="32" />
+      <MonochromeIcon Include="key-light" Size="24" />
+      <MonochromeIcon Include="keychain-light" Size="24" />
+      <MonochromeIcon Include="language" Size="32" />
+      <MonochromeIcon Include="lock-active" Size="16" />
+      <MonochromeIcon Include="network-topology" Size="32" />
+      <MonochromeIcon Include="open-in-new-window" Size="16;32" />
+      <MonochromeIcon Include="permission-none" Size="16" />
+      <MonochromeIcon Include="permission-view-and-edit" Size="16" />
+      <MonochromeIcon Include="permission-view-only" Size="16" />
+      <MonochromeIcon Include="refresh" Size="16;24;32" />
+      <MonochromeIcon Include="reload" Size="16;24" />
+      <MonochromeIcon Include="redo" Size="16" />
+      <MonochromeIcon Include="show" Size="32" />
+      <MonochromeIcon Include="save-outline" Size="32" />
+      <MonochromeIcon Include="switch-off" Size="16;32" />
+      <MonochromeIcon Include="system-messages-light" Size="24" />
+      <MonochromeIcon Include="system-messages-solid" Size="24" />
+      <MonochromeIcon Include="tagging" Size="32" />
+      <MonochromeIcon Include="this-week" Size="24" />
+      <MonochromeIcon Include="test-tube-solid" Size="32" />
+      <MonochromeIcon Include="timer" Size="24;32" />
+      <MonochromeIcon Include="today" Size="24" />
+      <MonochromeIcon Include="urgent" Size="24" />
+      <MonochromeIcon Include="user-interface-light" Size="24" />
+      <MonochromeIcon Include="user-light" Size="24;32" />
+      <MonochromeIcon Include="user-solid" Size="24" />
+      <MonochromeIcon Include="warning-full" Size="24" />
+      <MonochromeIcon Include="wizard" Size="32" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+        <_Parameter1>Year</_Parameter1>
+        <_Parameter2>$(Year)</_Parameter2>
+      </AssemblyAttribute>
+    </ItemGroup>
+
+    <PropertyGroup>
+      <MonochromeIconSvgOutputFolder>$(MSBuildProjectDirectory)/wwwroot/icons/monochrome-icons</MonochromeIconSvgOutputFolder>
+      <MonochromeIconScssOutputFolder>$(MSBuildProjectDirectory)/Styles/icons/monochrome-icons</MonochromeIconScssOutputFolder>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="ConfigureDxLib" BeforeTargets="BeforeDxLibTargets">
+    <PropertyGroup>
+      <DxLibScrollingScssOutputFolder>$(MSBuildProjectDirectory)/Styles/scrolling</DxLibScrollingScssOutputFolder>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="ConfigureSdkClientUnpack" BeforeTargets="BeforeWallpaperTargets">
+    <PropertyGroup>
+      <WallpaperImagesOutputFolder>$(MSBuildProjectDirectory)/wwwroot/images/wallpapers</WallpaperImagesOutputFolder>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="ConfigureDesignTargets" BeforeTargets="BeforeDesignTargets">
+    <PropertyGroup>
+      <ColorsScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/colors</ColorsScssOutputFolder>
+      <TypographyScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/typography</TypographyScssOutputFolder>
+      <PopupScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/popup</PopupScssOutputFolder>
+      <ScrollbarScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/scrollbar</ScrollbarScssOutputFolder>
+    </PropertyGroup>
+  </Target>
+
+</Project>

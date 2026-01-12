@@ -1,0 +1,51 @@
+﻿@use "../../Styles/design/colors";
+@use "../../../../shared/styles/typography";
+
+@use 'sass:color';
+
+.input {
+    ::deep #item-upload {
+        display: none;
+    }
+}
+
+.input-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #b1b1b1;
+    border-radius: 4px;
+    background-color: inherit;
+    color: color.change(colors.$color-font-light, $alpha: 0.8);
+    font-family: inherit;
+    font-weight: typography.$font-weight-light;
+    letter-spacing: 0.4px;
+    height: 26px;
+    font-size: 12px;
+    padding: 6px 8px 6px 6px;
+
+    ::deep .icon {
+        margin-right: 8px;
+    }
+
+    &:hover {
+        border-color: colors.$color-font-light;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: colors.$color-font-light;
+    }
+}
+
+.wrapper {
+    display: flex;
+    justify-content: flex-end;
+    gap: 24px;
+}
+
+.information-wrapper {
+    padding-left: 32px;
+}

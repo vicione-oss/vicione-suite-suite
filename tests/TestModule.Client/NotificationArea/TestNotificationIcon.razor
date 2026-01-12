@@ -1,0 +1,24 @@
+﻿@using Sdk.Client.NotificationArea.Services
+
+<h3>TestNotificationIcon</h3>
+
+@code {
+    [CascadingParameter]
+    public required NotificationElementState NotificationElementState { get; set; }
+
+    protected override void OnInitialized()
+        => NotificationElementState.Changed += OnNotificationElementStateChanged;
+
+    public void Dispose()
+    {
+        NotificationElementState.Changed -= OnNotificationElementStateChanged;
+
+        GC.SuppressFinalize(this);
+    }
+
+    private void OnNotificationElementStateChanged(NotificationElementStateChangedEventArgs args)
+    {
+        if (args.PropertyNames.Contains(nameof(NotificationElementState.IsActive)))
+            InvokeAsync(StateHasChanged);
+    }
+}

@@ -1,0 +1,28 @@
+@using Blazor.Shared
+@using Blazor.Shared.Logging
+@using Sdk.Authorization
+
+@attribute [Route(Constants.JournalViewRoute)]
+
+<AuthorizeView Policy="@ModulePolicyProvider.GetPolicy(Core.Shared.Constants.SystemModuleId, AccessLevel.Full, Constants.LogViewFeature)">
+    <Authorized>
+        @if (OperatingSystem.IsLinux())
+        {
+            @if (Follow)
+            {
+                <JournalFollowView Filter="@Filter" />
+            }
+            else
+            {
+                <JournalView Filter="@Filter" />
+            }
+        }
+        else
+        {
+            <p>Journal view is only available on Linux</p>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not supposed to be here</p>
+    </NotAuthorized>
+</AuthorizeView>

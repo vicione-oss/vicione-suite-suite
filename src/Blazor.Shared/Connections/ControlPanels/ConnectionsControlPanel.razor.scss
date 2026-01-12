@@ -1,0 +1,21 @@
+﻿.connection-control-panel-page {
+    display: contents;
+    
+    ::deep .connections-grid {
+        max-height: 100%;
+
+        .icon-wrapper {
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .connection-name-container {
+        display: block;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+

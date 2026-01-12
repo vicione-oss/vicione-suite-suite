@@ -1,0 +1,54 @@
+﻿.mqtt-messages {
+    display: grid;
+    grid-template-rows: 40px auto;
+    height: 100%;
+
+    .mqtt-filtered {
+        ::deep .mqtt-grid {
+            overflow: auto;
+            height: 100%;
+        }
+
+        ::deep .grid-row-message {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .mqtt-all {
+        ::deep .dxbl-grid .dxbl-grid-table > tbody > tr > td:not(.dxbl-grid-expand-button-cell):first-of-type {
+            padding-left: 0 !important;
+        }
+
+        ::deep .mqtt-grid {
+            overflow: auto;
+            height: 100%;
+
+            thead {
+                display: none;
+            }
+        }
+
+        ::deep .mqtt-row, .mqtt-row-alt {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-rows: 18px 18px;
+            align-content: center;
+            padding: 2px 5px 2px 5px;
+        }
+
+        ::deep .mqtt-row-cell {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        ::deep .mqtt-row-message {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+}
+

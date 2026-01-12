@@ -1,0 +1,45 @@
+﻿@use "../../Styles/design/colors";
+@use "../../Styles/typography/fonts/noto-sans/variables" as noto-sans;
+
+.ticket-center-container {
+    .ticket-center-head-frame {
+        height: 20px;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+
+        .ticket-center-head {
+            color: colors.$color-font-light;
+            text-align: left;
+            font-size: 14px;
+            font-weight: noto-sans.$font-weight-regular;
+            letter-spacing: 0.2px;
+        }
+    }
+
+    .open-ticket-center {
+        ::deep .open-ticket-center-button {
+            // override standard values
+            height: 17px;
+            padding-top: 0px;
+            padding-left: 0px;
+            display: flex;
+            gap: 0px;
+            align-items: center;
+
+            color: colors.$color-font;
+            font-size: 12px;
+            font-weight: noto-sans.$font-weight-light;
+            letter-spacing: 0.4px;
+
+            .icon {
+                color: colors.$color-accent;
+                margin-right: 8px;
+            }
+
+            &:hover {
+                color: colors.$color-font-light;
+            }
+        }
+    }
+}

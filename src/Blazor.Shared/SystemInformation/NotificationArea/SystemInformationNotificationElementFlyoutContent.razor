@@ -1,0 +1,97 @@
+﻿@using Blazor.Shared.Components.Layout
+@using Blazor.Shared.SystemInformation.Components
+@using Microsoft.AspNetCore.Components.Authorization
+@using Sdk.Authorization
+@using Sdk.Client.Components.LinkButton
+@using Sdk.Client.NotificationArea.Components.Layout
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@if (_authState != null)
+{
+    <NotificationElementFlyoutContentLayout>
+        <Main>
+            <div class="systeminfo-monitor">
+                <div class="systeminfo-tabs">
+                    <DxTabs>
+                        <DxTabPage Text="@TwentyFourHoursLabel">
+                            <SystemMonitoringComponent TimeSpanHours="24" />
+                        </DxTabPage>
+                        <DxTabPage Text="@OneHourLabel">
+                            <SystemMonitoringComponent TimeSpanHours="1" />
+                        </DxTabPage>
+                    </DxTabs>
+                </div>
+                <AuthorizeView Policy="@ModulePolicyProvider.GetPolicy(Core.Shared.Constants.SystemModuleId, AccessLevel.Full, Constants.LogViewFeature)">
+                    <Authorized>
+                        <div class="systeminfo-open-monitor">
+                            <LinkButton IconName="@MonochromeIconName.OpenInNewWindow"
+                                        Text="@Localization.SystemInformationNotificationElementFlyoutContent.OpenMonitor"
+                                        OnClick="@OpenMonitor" />
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+
+            <div class="systeminfo-log-center">
+                <LogCenterComponent />
+            </div>
+
+            <div class="systeminfo-hw-sw">
+                <SoftAndHardwareComponent />
+            </div>
+        </Main>
+
+        <Footer>
+            <AuthorizeView Policy="@SysAdminPolicy">
+                <Authorized>
+                    @*restart and shutdown section*@
+                    <div class="restart-and-shutdown">                        
+                        <div>
+                            <LinkButton IconName="@MonochromeIconName.SwitchOff"
+                                        Text="@Localization.SystemInformationNotificationElementFlyoutContent.ShutdownSystem"
+                                        OnClick="@(() => _shutdownDialogVisible = true)" />
+                        </div>
+                        <div>
+                            <LinkButton IconName="@MonochromeIconName.Refresh"
+                                        Text="@Localization.SystemInformationNotificationElementFlyoutContent.RestartSystem"
+                                        OnClick="@(() => _restartSystemDialogVisible = true)" />
+                        </div>
+                        <div>
+                            <LinkButton IconName="@MonochromeIconName.Refresh"
+                                        Text="@Localization.SystemInformationNotificationElementFlyoutContent.Restart"
+                                        OnClick="@(() => _restartDialogVisible = true)" />
+                        </div>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+        </Footer>
+    </NotificationElementFlyoutContentLayout>
+
+    <ConfirmCancelDialog Show="_restartSystemDialogVisible"
+                         HeaderText="@Localization.SystemInformationNotificationElementFlyoutContent.RestartSystemDialogHeader"
+                         OnConfirm="@(async () => await RestartSystem())"
+                         OnCancel="@(() => _restartSystemDialogVisible = false)">
+        <Body>
+            @Localization.SystemInformationNotificationElementFlyoutContent.RestartSystemDialogBody
+        </Body>
+    </ConfirmCancelDialog>
+
+    <ConfirmCancelDialog Show="_restartDialogVisible"
+                         HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
+                         OnConfirm="@(async () => await RestartSuite())"
+                         OnCancel="@(() => _restartDialogVisible = false)">
+        <Body>
+            @Blazor.Shared.Localization.RestartSuite.DialogBody
+        </Body>
+    </ConfirmCancelDialog>
+
+    <ConfirmCancelDialog Show="_shutdownDialogVisible"
+                         HeaderText="@Localization.SystemInformationNotificationElementFlyoutContent.ShutdownSystemDialogHeader"
+                         OnConfirm="@(async () => await ShutdownSystem())"
+                         OnCancel="@(() => _shutdownDialogVisible = false)">
+        <Body>
+            @Localization.SystemInformationNotificationElementFlyoutContent.ShutdownSystemDialogBody
+        </Body>
+    </ConfirmCancelDialog>
+}

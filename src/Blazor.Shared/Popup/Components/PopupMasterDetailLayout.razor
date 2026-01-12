@@ -1,0 +1,69 @@
+﻿@using Blazor.Shared.Popup.Enums
+
+@{
+    var cssClasses = new List<string> { "popup-master-detail-layout" };
+
+    var hasMasterHeader = !string.IsNullOrWhiteSpace(PopupTitle);
+    if (hasMasterHeader)
+        cssClasses.Add("has-master-header");
+}
+
+<div class="@string.Join(" ", cssClasses)">
+    @if (hasMasterHeader)
+    {
+        <div class="master-header">
+            @PopupTitle
+        </div>
+    }
+
+    <div class="detail-header">
+        <div class="detail-header__content">
+            @ContentHeader
+        </div>
+
+        @if (PopupActionButtons is not null)
+        {
+            <div class="detail-header__popup-action-buttons">
+                @PopupActionButtons
+            </div>
+        }
+    </div>
+
+    <div class="master">
+        @if (BeforeNavigation is not null)
+        {
+            <div class="master__before-navigation">
+                @BeforeNavigation
+            </div>
+        }
+
+        @Navigation
+    </div>
+
+    <div class="detail">
+        @if (BeforeContent is not null)
+        {
+            <div class="detail__before-content">
+                @BeforeContent
+            </div>
+        }
+
+        <div class="detail__content">
+            @Content
+        </div>
+
+        @if (ContentActionButtonsVisible && ContentActionButtons is not null)
+        {
+            <PopupDetailSeparator />
+
+            <div class="detail__action-buttons">
+                @ContentActionButtons
+            </div>
+        }
+    </div>
+
+    @if (LoadingOverlay is not null)
+    {
+        @LoadingOverlay
+    }
+</div>

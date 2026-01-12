@@ -1,0 +1,34 @@
+﻿@use "../../Styles/design/colors";
+
+$action-button-spacing: 24px;
+
+.popup-content-action-button-container {
+    display: flex;
+    justify-content: flex-end;
+
+    .error-message {
+        flex-grow: 1;
+
+        font-size: medium;
+
+        padding-right: $action-button-spacing;
+
+        color: colors.$color-error;
+    }
+
+    .content-loading-indication__content {
+        width: 100px;
+    }
+
+    ::deep button {
+        flex-shrink: 0;
+
+        &:not(:last-of-type) {
+            margin-right: $action-button-spacing;
+        }
+        &:first-of-type {
+            margin-left: 28px;
+        }
+    }
+}
+

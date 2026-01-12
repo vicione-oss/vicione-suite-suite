@@ -1,0 +1,46 @@
+﻿@using Sdk.Client.Extensions
+@using Sdk.Client.NavTiles.Components
+@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication
+@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication.Enums
+
+@{
+    var containerCssClasses = new List<string>
+    {
+        "nav-tile-container", $"horizontal-span-{NavTileState.HorizontalSpan.ToString().ToHyphenSeparated()}"
+    };
+
+    if (!NavTileState.Enabled)
+        containerCssClasses.Add("disabled");
+
+    if (NavTileState.IsLoading)
+        containerCssClasses.Add("loading");
+}
+
+<div class="@string.Join(" ", containerCssClasses)">
+    @{
+        var linkAttributes = new Dictionary<string, object>();
+
+        if (NavTileState.Enabled)
+        {
+            if (string.IsNullOrWhiteSpace(NavTileState.LinkTarget))
+                linkAttributes.Add("href", "#");
+            else
+                linkAttributes.Add("href", NavTileState.LinkTarget);
+        }
+
+        if (NavTileState.IsLoading)
+            linkAttributes.Add("tabindex", "-1");
+    }
+
+    <a class="nav-tile-container__link" @attributes="@linkAttributes" @onclick="LinkClicked" @onclick:preventDefault="true">
+        <ContentLoadingIndication Visible="@NavTileState.IsLoading" Kind="@LoadingIndicationKind.SpinnerCenter">
+            @{
+                var navTileParameters = new Dictionary<string, object?>
+                {
+                    { nameof(NavTileBase.State), NavTileState }
+                };
+            }
+            <DynamicComponent Type="@NavTileComponentType" Parameters="@navTileParameters" @ref="_navTile" />
+        </ContentLoadingIndication>
+    </a>
+</div>

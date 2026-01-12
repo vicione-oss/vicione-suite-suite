@@ -1,0 +1,22 @@
+﻿@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication
+@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication.Enums
+
+<div class="popup-content-action-button-container">
+    @if (ErrorMessageVisible && ErrorMessage is not null)
+    {
+        <div class="error-message">
+            @ErrorMessage
+        </div>
+    }
+
+    <ContentLoadingIndication Visible="@ShowLoadingIndication" Kind="@LoadingIndicationKind.SpinnerRight">
+        @if (ShowLoadingIndication)
+        {
+            <div class="content-loading-indication__content" />
+        }
+    </ContentLoadingIndication>
+
+    <CascadingValue Value="@Enabled" Name="@CascadingEnabledParameterName">
+        @Buttons
+    </CascadingValue>
+</div>

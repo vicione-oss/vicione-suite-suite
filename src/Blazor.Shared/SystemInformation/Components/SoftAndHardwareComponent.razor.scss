@@ -1,0 +1,50 @@
+﻿@use "../../Styles/design/colors";
+@use "../../../../shared/styles/typography";
+
+.systeminfo-sw-section {
+    margin-bottom: 30px;
+}
+
+.systeminfo-hw-section {
+    margin-bottom: 15px;
+}
+
+.systeminfo-hw-sw-header-frame {
+    height: 32px;
+    display: flex;
+    align-items: center;
+
+    .systeminfo-hw-sw-header {
+        font-size: 14px;
+        letter-spacing: 0.2px;
+        text-align: left;
+        line-height: 20px;
+        color: colors.$color-font-light;
+        font-weight: typography.$font-weight-regular;
+    }
+}
+
+.systeminfo-hw-sw-row {
+    height: 17px;
+    display: flex;
+    margin-bottom: 8px;
+
+    div:first-child {
+        flex-shrink: 0;
+        flex-basis: 100px;
+        font-size: 12px;
+        letter-spacing: 0.4px;
+        color: colors.$color-font;
+        font-weight: typography.$font-weight-light;
+    }
+
+    div:last-child {
+        font-size: 12px;
+        color: colors.$color-font-light;
+        font-weight: typography.$font-weight-regular;
+        letter-spacing: 0.4px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}

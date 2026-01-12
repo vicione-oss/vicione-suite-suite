@@ -1,0 +1,111 @@
+﻿@using Blazor.Shared.Network.ControlPanels.Dns.Models
+@using Blazor.Shared.Network.ControlPanels.Dns.Services
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Localization.Resources
+
+@inherits NetworkControlPanelBase<DnsControlPanelState>
+
+<DescriptionBanner Title="@TechnicalTerms.DnsSettingPlural" IconCssClass="@_cluster1IconCssClasses">
+    @Localization.DnsControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@TechnicalTerms.Host">
+        <SettingsField Label="@TechnicalTerms.Hostname">
+            <SettingsFieldTextBox Placeholder="@TechnicalTerms.Hostname" @bind-Value="State.Hostname" @bind-Value:after="BeginEdit" />
+        </SettingsField>
+
+        <SettingsGroup Title="@Localization.DnsControlPanel.UseManualDnsSuffixSettingsGroupTitle"
+                       Subline="@Localization.DnsControlPanel.UseManualDnsSuffixSettingsGroupSubline"
+                       Expanded="State.DnsSuffixEnabled">
+            <Expander>
+                <SwitchExpander @bind-Value="@State.DnsSuffixEnabled" @bind-Value:after="BeginEdit" />
+            </Expander>
+
+            <ChildContent>
+                <SettingsField Label="@TechnicalTerms.DnsSuffix">
+                    <SettingsFieldTextBox Placeholder="@TechnicalTerms.DnsSuffix" @bind-Value="State.DnsSuffix" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </ChildContent>
+        </SettingsGroup>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@TechnicalTerms.MulticastDns" Expanded="@State.MulticastDnsEnabled">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.MulticastDnsEnabled" @bind-Value:after="BeginEdit" />
+        </Expander>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@TechnicalTerms.DnsServer" Expanded="@State.DnsEnabled">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.DnsEnabled" @bind-Value:after="BeginEdit" />
+        </Expander>
+
+        <ChildContent>
+            @foreach (var a in State.DnsDetails.Select((dnsDetail, index) => new { DnsDetail = dnsDetail, Index = index }))
+            {
+                var ipAddressLabel = TechnicalTerms.IpAddress;
+
+                <SettingsField Label="@ipAddressLabel" @key="a.Index">
+                    <SettingsFieldTextBox Placeholder="@ipAddressLabel" @bind-Value="a.DnsDetail.IpAddress" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            }
+
+            <SettingsStepper MinusEnabled="@(State.DnsDetails.Count > 1)" OnPlus="@AddDnsDetail" OnMinus="@RemoveDnsDetail" OnPlusMinus="BeginEdit" />
+        </ChildContent>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@TechnicalTerms.SearchDomainPlural" Expanded="@State.SearchDomainsEnabled">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.SearchDomainsEnabled" @bind-Value:after="BeginEdit" />
+        </Expander>
+
+        <ChildContent>
+            @foreach (var a in State.SearchDomainDetails.Select((searchDomainDetail, index) => new { SearchDomainDetail = searchDomainDetail, Index = index }))
+            {
+                <SettingsField Label="@TechnicalTerms.DnsDomain" @key="a.Index">
+                    <SettingsFieldTextBox Placeholder="@TechnicalTerms.DomainName" @bind-Value="a.SearchDomainDetail.IpAddress" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            }
+
+            <SettingsStepper MinusEnabled="@(State.SearchDomainDetails.Count > 1)" OnPlus="@AddSearchDomainDetail" OnMinus="@RemoveSearchDomainDetail" OnPlusMinus="BeginEdit" />
+        </ChildContent>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@TechnicalTerms.StaticHostPlural" Expanded="@State.StaticHostsEnabled">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.StaticHostsEnabled" @bind-Value:after="BeginEdit" />
+        </Expander>
+
+        <ChildContent>
+            @foreach (var i in State.StaticHostDetails.Select((staticHostDetail, index) => new { StaticHostDetail = staticHostDetail, Index = index }))
+            {
+                var ipAddressLabel = TechnicalTerms.IpAddress;
+                var ipAddressFieldKey = new NetworkInterfaceFieldKey { DetailIndex = i.Index, FieldIndex = 0 };
+
+                var hostnameLabel = TechnicalTerms.Hostname;
+                var hostnameFieldKey = new NetworkInterfaceFieldKey { DetailIndex = i.Index, FieldIndex = 1 };
+
+                if (i.Index > 0)
+                {
+                    <SettingsFieldSeparator />
+                }
+
+                <SettingsField Label="@ipAddressLabel" @key="ipAddressFieldKey">
+                    <SettingsFieldTextBox Placeholder="@ipAddressLabel" @bind-Value="i.StaticHostDetail.IpAddress" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@hostnameLabel" @key="hostnameFieldKey">
+                    <SettingsFieldTextBox Placeholder="@hostnameLabel" @bind-Value="i.StaticHostDetail.Hostname" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsStepper PlusEnabled="@(i.Index == State.StaticHostDetails.Count - 1)"
+                                 MinusEnabled="@(i.Index > 0)"
+                                 OnPlus="@AddStaticHostDetail"
+                                 OnMinus="@(() => RemoveStaticHostDetail(i.StaticHostDetail))"
+                                 OnPlusMinus="BeginEdit"
+                                 @key="i.Index" />
+            }
+        </ChildContent>
+    </SettingsGroup>
+</SettingsLayout>

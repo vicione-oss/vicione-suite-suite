@@ -1,0 +1,727 @@
+default:
+  image: mcr.microsoft.com/dotnet/sdk:9.0
+
+stages:
+  - build
+  - test
+  - artifacts
+  - packaging
+  - devrelease
+  - review
+  - deploy
+  - release
+  - release-public
+
+include:
+  - project: 'acx/tooling/templates'
+    file: '/CI-Templates/v2/dotnet.yml'
+
+#################### Rules
+
+.rules_default_branch: &rules_default_branch
+  if : '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+.rules_default_branch_manual: &rules_default_branch_manual
+  if : '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  when: manual
+  allow_failure: true
+
+.rules_merge_request: &rules_merge_request
+  if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+.rules_merge_request_manual: &rules_merge_request_manual
+  if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  when: manual
+  allow_failure: true
+
+.rules_web: &rules_web
+  if: '$CI_PIPELINE_SOURCE == "web"'
+
+.rules_web_manual: &rules_web_manual
+  if: '$CI_PIPELINE_SOURCE == "web"'
+  when: manual
+  allow_failure: true
+
+.rules_tag_manual: &rules_tag_manual
+  if: '$CI_COMMIT_TAG'
+  when: manual
+  allow_failure: true
+
+.install_nodejs: &install_nodejs
+  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  - apt update && apt install -y nodejs
+
+.install_npm_packages: &install_npm_packages
+  - npm install
+
+.run_npm_scripts: &run_npm_scripts
+  - npm run build
+
+.run_eslint: &run_eslint
+  - npx eslint .
+
+#################### Global
+
+before_script:
+  - *install_nodejs
+  - *install_npm_packages
+  - *run_npm_scripts
+  - *run_eslint
+ 
+.patch_version: &patch_version
+  - VERSION=undefined
+  - if [ ! -z "$CI_COMMIT_REF_NAME" ]; then VERSION=$(sed 's/[^0-9a-zA-Z-]//g' <<< ${CI_COMMIT_SHORT_SHA}-$CI_COMMIT_REF_NAME); fi
+  - if [ ! -z "$CI_COMMIT_TAG" ]; then VERSION="$CI_COMMIT_TAG (${CI_COMMIT_SHORT_SHA})"; fi
+  - sed -i -E "s/##VERSION_REF##/$VERSION/g" src/Core.OS/version.json
+
+.jfrog-package-release:
+  stage: deploy
+  image: releases-docker.jfrog.io/jfrog/jfrog-cli-v2-jf
+  variables:
+    SERVER: "https://ifm.jfrog.io/artifactory"
+    USER: ${Raw_User_RW_JFrog}
+    PASSWORD: ${Raw_PW_RW_JFrog}
+    REPOSITORY_DESTINATION: "vicione-suite-dev"
+  before_script:
+    - apk add --no-cache curl
+    - curl -s https://nexus.nsc-gmbh.de/repository/minio-client/linux-amd64/mc -o /usr/bin/mc
+    - chmod +x /usr/bin/mc
+    - mc alias set myminio "${S3_Url}" "${S3_User}" "${S3_PW}"
+    - jf config add --user $USER --password ${PASSWORD} --artifactory-url ${SERVER} jfrog
+    - jf config use jfrog
+  script:
+    - APP_PIPELINE="${CI_PIPELINE_ID}"
+    - APP_VERSION="$(cat VERSION)"
+    - HMS_VERSION="$(cat VERSION_HOSTMANAGEMENT)"
+    - APP_TAG="${CI_COMMIT_TAG}"
+    - VERSION="${APP_VERSION}"
+    - if [[ -z "${APP_TAG}" ]]; then VERSION="${VERSION}~${APP_PIPELINE}"; fi
+    - |
+      artifacts=(
+        "vicione-suite_${VERSION}_amd64.deb"
+        "vicione-suite_${VERSION}_arm64.deb"
+        "suite-${APP_PIPELINE}-linux-x64.tar.gz"
+        "suite-${APP_PIPELINE}-linux-arm64.tar.gz"
+        "vicione-suite_${VERSION}_amd64_${HMS_VERSION}.json"
+        "vicione-suite_${VERSION}_arm64_${HMS_VERSION}.json"
+      )
+    - |
+      printf "%s\n" "${artifacts[@]}" >> artifacts.list
+
+      for artifact in "${artifacts[@]}"; do
+        echo "Processing artifact: ${artifact}"
+
+        # Download from Minio
+        case "${artifact}" in
+          *.deb)
+            echo "Downloading from Minio: ${artifact}"
+            mc cp "myminio/acx/${artifact}" "./${artifact}"
+            ;;
+        esac
+
+        # Create Metadata files
+        case "${artifact}" in
+          *.json)
+            echo "Creating metadata: ${artifact}"
+            cat "suite-metadata.json" > "${artifact}"
+            ;;
+        esac
+
+        # Upload files to JFrog
+        case "${artifact}" in
+          *.deb|*.json)
+            if [ -f "${artifact}" ]; then
+              echo "Uploading to JFrog: ${artifact}"
+              jf rt upload "${artifact}" "${REPOSITORY_DESTINATION}/suites/${artifact}"
+            else
+              echo "WARNING: ${artifact} not found locally, skipping upload"
+            fi
+            ;;
+        esac
+
+        # Remove from Minio
+        case "${artifact}" in
+          *.deb|*.tar.gz)
+            echo "Removing from Minio: ${artifact}"
+            mc rm "myminio/acx/${artifact}" || echo "WARNING: failed to remove ${artifact} from Minio"
+            ;;
+        esac
+      done
+  artifacts:
+    paths:
+      - vicione-suite_*.deb
+      - artifacts.list
+  tags:
+    - linux
+    - docker
+    - x64
+  when: manual
+  rules:
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+
+#################### Build stage
+
+Validation:
+  stage: build
+  script:
+    # must be case-sensitive, but gets generated case-insensitive by Visual Studio
+    - |
+      if grep -i 'nuget.config' src/Core.OS/Dockerfile &> /dev/null; then
+        if ! grep 'NuGet.Config' src/Core.OS/Dockerfile &> /dev/null; then
+          echo 'wrong casing of "NuGet.Config" in src/Core.OS/Dockerfile';
+          grep -i 'nuget.config' src/Core.OS/Dockerfile && false;
+        fi
+      fi
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch
+    - <<: *rules_merge_request
+    - <<: *rules_web
+  tags:
+    - linux
+    - docker
+    - x64
+
+####################  Test stage
+
+xUnit x64:
+  variables:
+    ARCH: 'x64'
+    FILTER: 'Category!=System & Category!=ManualDbTest'
+  extends: .dotnet-test-xunit
+  artifacts:
+    reports:
+      junit: artifacts/tests/*-test-report.xml
+
+xUnit arm64:
+  variables:
+    ARCH: 'arm64'
+    FILTER: 'Category!=System & Category!=ManualDbTest'
+  extends: .dotnet-test-xunit
+  artifacts:
+    reports:
+      junit: artifacts/tests/*-test-report.xml
+  tags:
+    - linux
+    - docker
+    - arm64
+
+#################### Artifacts stage
+
+Create artifacts x64:
+  stage: artifacts
+  variables:
+    DOTNET_ARCH: 'linux-x64'
+  before_script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    - curl -s https://nexus.nsc-gmbh.de/repository/minio-client/linux-amd64/mc -o mc
+    - chmod +x mc
+    - ./mc alias set myminio "${S3_Url}" "${S3_User}" "${S3_PW}"
+    - *install_nodejs
+    - *install_npm_packages
+    - *run_npm_scripts
+    - *run_eslint
+  script:
+    - ./build/deploy.sh --create-artifacts --platform 'linux-x64' --environment 'Minimal'    
+    - du -sh ./artifacts/
+    - tar cfz artifacts.tar.gz ./artifacts/ start.sh
+    - ./mc cp artifacts.tar.gz myminio/acx/suite-${CI_PIPELINE_ID}-${DOTNET_ARCH}.tar.gz
+  artifacts:
+    paths:
+      - artifacts.tar.gz
+    expire_in: 30 days
+  tags:
+    - linux
+    - docker
+    - x64
+  when: manual
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch
+    - <<: *rules_merge_request
+    - <<: *rules_web
+
+Create artifacts arm64:
+  stage: artifacts
+  variables:
+    DOTNET_ARCH: 'linux-arm64'
+  before_script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    - curl -s https://nexus.nsc-gmbh.de/repository/minio-client/linux-arm64/mc -o mc
+    - chmod +x mc
+    - ./mc alias set myminio "${S3_Url}" "${S3_User}" "${S3_PW}"
+    - *install_nodejs
+    - *install_npm_packages
+    - *run_npm_scripts
+    - *run_eslint
+  script:
+    - ./build/deploy.sh --create-artifacts --platform 'linux-arm64' --environment 'Minimal'    
+    - du -sh ./artifacts/
+    - tar cfz artifacts.tar.gz ./artifacts/ start.sh
+    - ./mc cp artifacts.tar.gz myminio/acx/suite-${CI_PIPELINE_ID}-${DOTNET_ARCH}.tar.gz
+  artifacts:
+    paths:
+      - artifacts.tar.gz
+    expire_in: 30 days
+  tags:
+    - linux
+    - docker
+    - arm64
+  when: manual
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch
+    - <<: *rules_merge_request
+    - <<: *rules_web
+
+Versioning:
+  stage: artifacts
+  before_script: []
+  script:
+    - echo "APP_PIPELINE=${CI_PIPELINE_ID}" >>version.env
+    - echo "APP_VERSION=$(cat VERSION)" >>version.env
+    - echo "APP_TAG=${CI_COMMIT_TAG}" >>version.env
+    - cat version.env
+  artifacts:
+    reports:
+      dotenv: version.env
+    expire_in: 30 days
+  tags:
+    - linux
+    - docker
+  when: manual
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch
+    - <<: *rules_merge_request
+    - <<: *rules_web
+
+#################### Packaging stage
+
+trigger deb packaging:
+  stage: packaging
+  variables:
+    APP_PIPELINE: ${APP_PIPELINE}
+    APP_VERSION: ${APP_VERSION}
+    APP_TAG: ${APP_TAG}
+  trigger:
+    project: 'acx/vicione/suite/deb-packaging'
+    strategy: depend
+  needs:
+    - "Create artifacts arm64"
+    - "Create artifacts x64"
+    - job: "Versioning"
+      artifacts: true
+  when: manual
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch
+    - <<: *rules_merge_request
+    - <<: *rules_web
+
+#################### Review stage
+
+Publish only:
+  stage: review
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/review.sh
+    # publish the solution
+    - export DEBUG=true
+    - build/review.sh --publish-only
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  tags:
+    - linux
+    - docker
+    - x64
+
+Start DigitalOcean:
+  stage: review
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/review.sh
+    # create / update the review instance
+    - build/review.sh
+  artifacts:
+    paths:
+      - debug.pub
+      - debug
+    reports:
+      dotenv: deploy.env
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    url: https://$DROPLET_IP
+    on_stop: Stop DigitalOcean
+    auto_stop_in: 1 day
+  tags:
+    - linux
+    - docker
+    - x64
+
+Stop DigitalOcean:
+  stage: review
+  before_script: []
+  script:
+    # set execution permission
+    - chmod +x build/review.sh
+    # destroy the environment
+    - build/review.sh --stop-review
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: review/$CI_COMMIT_REF_SLUG
+    action: stop
+  tags:
+    - linux
+    - docker
+    - x64
+
+Cleanup orphanded deployments:
+  stage: build
+  script:
+    # set execution permission
+    - chmod +x build/review.sh
+    # destroy the environment
+    - build/review.sh --cleanup-orphanes
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  dependencies: []
+  tags:
+    - linux
+    - docker
+    - x64
+
+Prepare Host for new Snapshot:
+  stage: build
+  script:
+    # set execution permission
+    - chmod +x build/review.sh
+    # destroy the environment
+    - build/review.sh --prepare-snapshot
+  rules:
+    - if: $PREPARE_SNAPSHOT
+  dependencies: []
+  tags:
+    - linux
+    - docker
+    - x64
+
+####################  Deploy stage
+
+Cloud master:
+  stage: deploy
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/deploy.sh
+    # create / update the cloud master instance
+    - PRESERVE_DATA_PARAM=''
+    - if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi;
+    - build/deploy.sh --host '159.89.13.71' --environment 'Master' "${PRESERVE_DATA_PARAM}"
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: deployments/cloud-master
+    url: https://159.89.13.71
+  tags:
+    - linux
+    - docker
+    - x64
+
+Cloud presentation:
+  stage: deploy
+  variables:
+    PRESERVE_DATA: true
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/deploy.sh
+    # create / update the cloud presentation instance
+    - PRESERVE_DATA_PARAM=''
+    - if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi;
+    - build/deploy.sh --host '167.71.50.41' --environment 'Standalone' "${PRESERVE_DATA_PARAM}"
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: deployments/cloud-presentation
+    url: https://167.71.50.41
+  tags:
+    - linux
+    - docker
+    - x64
+
+Internal slave01:
+  stage: deploy
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/deploy.sh
+    # create / update the slave instance
+    - PRESERVE_DATA_PARAM=''
+    - if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi;
+    - build/deploy.sh --host '10.45.24.192' --environment 'Slave' "${PRESERVE_DATA_PARAM}"
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: deployments/internal-slave01
+    url: https://10.45.24.192
+  tags:
+    - linux
+    - docker
+    - x64
+
+Internal minimal:
+  stage: deploy
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/deploy.sh
+    # create / update the feature instance
+    - PRESERVE_DATA_PARAM=''
+    - if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi;
+    - build/deploy.sh --host '10.45.24.155' --platform linux-arm64 --environment 'Minimal' "${PRESERVE_DATA_PARAM}"
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: deployments/minimal
+    url: https://10.45.24.155
+  tags:
+    - linux
+    - docker
+    - x64
+
+Internal ec20-4 server 1:
+  stage: deploy
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/deploy.sh
+    # create / update the ec20-4 instance
+    - PRESERVE_DATA_PARAM=''
+    - if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi;
+    - build/deploy.sh --host '10.45.24.156' --platform linux-arm64 --environment 'Standalone' "${PRESERVE_DATA_PARAM}"
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: deployments/internal-ec20-4-server-1
+    url: https://10.45.24.156
+  tags:
+    - linux
+    - docker
+    - x64
+
+Internal ec20-4 server 2:
+  stage: deploy
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/deploy.sh
+    # create / update the ec20-4 instance
+    - PRESERVE_DATA_PARAM=''
+    - if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi;
+    - build/deploy.sh --host '10.45.24.157' --platform linux-arm64 --environment 'Standalone' "${PRESERVE_DATA_PARAM}"
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: deployments/internal-ec20-4-server-2
+    url: https://10.45.24.157
+  tags:
+    - linux
+    - docker
+    - x64
+
+Internal ec20-4 server 3:
+  stage: deploy
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/deploy.sh
+    # create / update the ec20-4 instance
+    - PRESERVE_DATA_PARAM=''
+    - if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi;
+    - build/deploy.sh --host '10.45.24.158' --platform linux-arm64 --environment 'Standalone' "${PRESERVE_DATA_PARAM}"
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: deployments/internal-ec20-4-server-3
+    url: https://10.45.24.158
+  tags:
+    - linux
+    - docker
+    - x64
+
+Internal rpi5 server 1:
+  stage: deploy
+  script:
+    - !reference [.nuget_credentials]
+    - *patch_version
+    # set execution permission
+    - chmod +x build/deploy.sh
+    # create / update the rpi5 instance
+    - PRESERVE_DATA_PARAM=''
+    - if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi;
+    - build/deploy.sh --host '10.45.24.201' --platform linux-arm64 --environment 'Standalone' "${PRESERVE_DATA_PARAM}"
+  rules:
+    - <<: *rules_tag_manual
+    - <<: *rules_default_branch_manual
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+  dependencies: []
+  environment:
+    name: deployments/internal-rpi5-server-1
+    url: https://10.45.24.201
+  tags:
+    - linux
+    - docker
+    - x64
+
+Docker jFrog dev release:
+  extends: .dotnet-deploy-docker
+  stage: devrelease
+  variables:
+    DOCKER_HUB: 'jfrog.i40.ifm-datalink.net'
+    REPO: 'jfrog.i40.ifm-datalink.net/vicione-docker-local'
+    IMAGE_NAME: 'vicionesuite'
+    DOCKERFILE: 'src/Core.OS/Dockerfile'
+  script:
+    - !reference [.nuget_credentials]
+    - !reference [.set_version]
+    - !reference [.docker_login]
+    - *patch_version
+    - TAG="ci-${VERSION}"
+    - echo "${TAG}"
+    - docker buildx create --name mybuilder --use --bootstrap
+    - docker buildx build --push --platform linux/amd64,linux/arm64 -t "${REPO}/${IMAGE_NAME}:${TAG}" -f "${DOCKERFILE}" .
+    - !reference [.docker_logout]
+
+Prerelease Packages to JFrog:
+  extends: .jfrog-package-release
+  variables:
+    SERVER: "https://ifm.jfrog.io/artifactory"
+    USER: ${Raw_User_RW_JFrog}
+    PASSWORD: ${Raw_PW_RW_JFrog}
+    REPOSITORY_DESTINATION: "vicione-suite-dev"
+  needs:
+    - "trigger deb packaging"
+
+#################### Release stage
+
+Docker jFrog:
+  extends: .dotnet-release-docker
+  variables:
+    DOCKER_HUB: 'jfrog.i40.ifm-datalink.net'
+    REPO: 'jfrog.i40.ifm-datalink.net/vicione-docker-local'
+    IMAGE_NAME: 'vicionesuite'
+    DOCKERFILE: 'src/Core.OS/Dockerfile'
+    ARCH: 'x64'
+  script:
+    - !reference [.nuget_credentials]
+    - !reference [.set_version]
+    - !reference [.docker_login]
+    - *patch_version
+    - TAG="${VERSION}"
+    - echo "${TAG}"
+    - docker buildx create --name mybuilder --use --bootstrap
+    - docker buildx build --push --platform linux/amd64,linux/arm64 -t "${REPO}/${IMAGE_NAME}:${TAG}" -f "${DOCKERFILE}" .
+    - !reference [.docker_logout]
+
+Release Packages to JFrog:
+  extends: .jfrog-package-release
+  stage: release
+  variables:
+    SERVER: "https://ifm.jfrog.io/artifactory"
+    USER: ${Raw_User_RW_JFrog}
+    PASSWORD: ${Raw_PW_RW_JFrog}
+    REPOSITORY_DESTINATION: "vicione-suite-staging"
+  needs:
+    - "trigger deb packaging"
+  rules:
+    - <<: *rules_tag_manual
+
+#################### Release Public stage
+
+Public-Release Packages to JFrog:
+  extends: .jfrog-package-release
+  stage: release-public
+  variables:
+    SERVER: "https://ifm.jfrog.io/artifactory"
+    USER: ${Raw_User_RW_JFrog}
+    PASSWORD: ${Raw_PW_RW_JFrog}
+    REPOSITORY_SOURCE: "vicione-suite-staging"
+    REPOSITORY_DESTINATION: "vicione-suite"
+  script:
+    - |
+      while IFS= read -r artifact; do
+        echo "Processing artifact: ${artifact}"
+
+        # Move to public repository
+        case "${artifact}" in
+          *.deb|*.json)
+            source="${REPOSITORY_SOURCE}/*/${artifact}"
+            destination="${REPOSITORY_DESTINATION}/${artifact}"
+            echo "Moving artifact: from \"${REPOSITORY_SOURCE}\" to \"${REPOSITORY_DESTINATION}\""
+            jf rt mv "${source}" "${destination}"
+            ;;
+        esac
+      done < artifacts.list
+  needs:
+    - "Release Packages to JFrog"
+  rules:
+    - <<: *rules_tag_manual

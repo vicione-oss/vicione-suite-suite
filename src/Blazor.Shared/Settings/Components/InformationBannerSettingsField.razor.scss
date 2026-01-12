@@ -1,0 +1,32 @@
+﻿@use "../../Styles/design/colors";
+
+.information-banner-settings-field-content {
+    width: 100%;
+
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-areas:
+        "icon text"
+        "placeholder button";
+    justify-content: start;
+    align-items: baseline; // enable alignment of icon and text vertically on the same base line *1
+    gap: 10px;
+
+    .icon {
+        grid-area: icon;
+
+        color: colors.$color-font-light;
+    }
+
+    .text {
+        grid-area: text;
+
+        align-self: center; // required to make *1 work
+
+        color: colors.$color-font-light;
+    }
+
+    .button {
+        grid-area: button;
+    }
+}

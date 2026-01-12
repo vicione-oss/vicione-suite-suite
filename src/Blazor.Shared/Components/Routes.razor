@@ -1,0 +1,38 @@
+﻿@using Blazor.Shared.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
+
+<HeadContent>
+    @foreach (var stylesheet in _moduleStylesheets)
+    {
+        <link href="@stylesheet" rel="stylesheet" />
+    }
+</HeadContent>
+
+<Router AppAssembly="@typeof(Routes).Assembly" AdditionalAssemblies="@_additionalAssemblies">
+    <Found Context="routeData">
+        @if (_initialized)
+        {
+            <AuthorizeRouteView DefaultLayout="@typeof(MainLayout)" RouteData="@routeData">
+
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        NavigationService.RedirectToSignIn();
+                    }
+                    else
+                    {
+                        <p>@Localization.App.NotAllowed</p>
+                    }
+                </NotAuthorized>
+
+                <Authorizing>
+                    <div class="authorizing-container">
+                        <h5>@Localization.App.AuthenticationInProgress</h5>
+                        <LoadingSpinner Visible="true" />
+                    </div>
+                </Authorizing>
+            </AuthorizeRouteView>
+        }
+    </Found>
+</Router>

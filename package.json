@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "name": "vicione.suite",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:mdi && npm run build:typography && npm run js:minify:client",
+    "build:debug": "npm run build:mdi && npm run build:typography && npm run js:minify:client",
+    "build:mdi": "npm run copy:mdi-font && npm run css:mdi-min",
+    "build:typography": "npm run copy:noto-sans-font-200 && npm run copy:noto-sans-font-300 && npm run copy:noto-sans-font-400 && npm run copy:noto-sans-font-500 && npm run copy:noto-sans-font-600 && npm run copy:roboto-font-400",
+    "copy:mdi-font": "copyfiles-fixed -f ./node_modules/@mdi/font/fonts/materialdesignicons-webfont.woff2 ./src/Blazor.Shared/wwwroot/fonts/",
+    "copy:roboto-font-400": "copyfiles-fixed -f ./node_modules/@fontsource/roboto/files/roboto-latin-400-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/roboto",
+    "copy:noto-sans-font-200": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-200-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
+    "copy:noto-sans-font-300": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-300-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
+    "copy:noto-sans-font-400": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
+    "copy:noto-sans-font-500": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-500-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
+    "copy:noto-sans-font-600": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-600-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
+    "css:mdi-min": "sass ./src/Blazor.Shared/Styles/_mdi-custom.scss ./src/Blazor.Shared/wwwroot/css/mdi.min.css --style=compressed --no-source-map",
+    "css:mdi": "sass ./src/Blazor.Shared/Styles/_mdi-custom.scss ./src/Blazor.Shared/wwwroot/css/mdi.css --no-source-map",
+    "js:minify:client": "uglifyjs ./src/Blazor.Shared/Scripts/* -o ./src/Blazor.Shared/wwwroot/js/suite.js"
+  },
+  "devDependencies": {
+    "@fontsource-utils/scss": "^0.2.0",
+    "@fontsource/noto-sans": "^5.1.1",
+    "@fontsource/roboto": "^5.1.1",
+    "@mdi/font": "^6.9.96",
+    "@types/blazor__javascript-interop": "3.1.7",
+    "@typescript-eslint/eslint-plugin": "8.19.1",
+    "@typescript-eslint/parser": "8.19.1",
+    "copyfiles-fixed": "^2.4.3",
+    "eslint": "^9.31.0",
+    "eslint-config-xo": "^0.46.0",
+    "eslint-config-xo-typescript": "^7.0.0",
+    "jquery-ui-dist": "1.13.1",
+    "sass": "^1.53.0",
+    "typescript": "^5.7.3",
+    "uglify-js": "^3.16.2"
+  }
+}

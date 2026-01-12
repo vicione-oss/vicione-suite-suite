@@ -1,0 +1,26 @@
+﻿.version-grid {
+    display: grid;
+    grid-auto-flow: column;
+    column-gap: 8px;
+    align-items: start;
+}
+
+.version-select {
+    width: 130px;
+
+    ::deep select {
+        width: 130px;
+    }
+}
+
+.module-option-declaration-collection-grid-container {
+    justify-self: stretch; // allow grid to fully stretch in horizontal direction
+}
+
+.add-module-option-buttons {
+    // settings adopted from .dirty-state-action-buttons
+    display: grid;
+    grid-auto-flow: column;
+    column-gap: 8px;
+    align-items: start;
+}

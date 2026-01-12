@@ -1,0 +1,37 @@
+﻿@using Blazor.Shared.Network.ControlPanels.Proxies.Services
+@using Sdk.Client.Components.Settings.Expanders
+
+@inherits NetworkControlPanelBase<ProxiesControlPanelState>
+
+<DescriptionBanner Title="@Localization.ProxiesControlPanel.DescriptionBannerTitle" IconCssClass="@_cluster1IconCssClasses">
+    @Localization.ProxiesControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <ProxySettingsGroup Title="@Localization.ProxiesControlPanel.HttpProxySettingsGroupTitle" Settings="@State.HttpProxySettings" OnEdit="@BeginEdit" />
+    <ProxySettingsGroup Title="@Localization.ProxiesControlPanel.HttpsProxySettingsGroupTitle" Settings="@State.HttpsProxySettings" OnEdit="@BeginEdit" />    
+    <ProxySettingsGroup Title="@Localization.ProxiesControlPanel.FtpProxySettingsGroupTitle" Settings="@State.FtpProxySettings" OnEdit="@BeginEdit" />
+    <ProxySettingsGroup Title="@Localization.ProxiesControlPanel.SftpProxySettingsGroupTitle" Settings="@State.SftpProxySettings" OnEdit="@BeginEdit" />
+
+    <SettingsGroup Title="@Localization.ProxiesControlPanel.DoNotProxyListSettingsGroupTitle" Expanded="@State.DoNotProxyListEnabled">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.DoNotProxyListEnabled" @bind-Value:after="BeginEdit" />
+        </Expander>
+
+        <ChildContent>
+            @foreach (var i in State.DoNotProxyDetails.Select((doNotProxyDetail, index) => new { DoNotProxyDetail = doNotProxyDetail, Index = index }))
+            {
+                <SettingsField Label="@Localization.ProxiesControlPanel.DoNotProxyListFieldLabel" @key="i.Index">
+                    <SettingsFieldTextBox Placeholder="@Localization.ProxiesControlPanel.DoNotProxyListFieldTextBoxPlaceholder"
+                                          @bind-Value="i.DoNotProxyDetail.HostnameOrIp"
+                                          @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            }
+
+            <SettingsStepper MinusEnabled="@(State.DoNotProxyDetails.Count > 1)"
+                             OnPlus="@AddDoNotProxyDetail"
+                             OnMinus="@RemoveDoNotProxyDetail"
+                             OnPlusMinus="BeginEdit" />
+        </ChildContent>
+    </SettingsGroup>
+</SettingsLayout>

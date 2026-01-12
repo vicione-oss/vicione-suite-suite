@@ -1,0 +1,44 @@
+﻿@using Blazor.Shared.UserManagement.Components
+@using Blazor.Shared.UserManagement.ControlPanels.Role.Services
+@using Blazor.Shared.UserManagement.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@inherits ControlPanelBase<RoleControlPanelState>
+
+<ControlPanelPage Title="@Localization.RoleControlPanel.Info">
+    <DescriptionBanner Title="@GetDescriptionBannerTitle()">
+        @GetDescriptionBannerContent()
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        @if (State.Role is not null)
+        {
+            <SettingsGroup Title="@CommonVocabulary.Role" @bind-Expanded="@State.RoleSettingsGroupExpanded">
+                <SettingsField Label="@CommonVocabulary.Name">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Name" Enabled="@(!State.IsEditMode)" Value="@State.Role.Name" ValueChanged="RoleNameTextBoxValueChanged" />
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.Description">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Description" Enabled="@(!State.Role.Managed)" @bind-Value="@State.Role.Description" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </SettingsGroup>
+        }
+    </SettingsLayout>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@TechnicalTerms.PermissionPlural">
+    <DescriptionBanner Title="@(string.Format(Localization.RoleControlPanel.PermissionsDescriptionBannerTitle, State.RoleName))">
+        @Localization.RoleControlPanel.PermissionsDescriptionBannerContent
+    </DescriptionBanner>
+
+    <PermissionGrid Items="State.FilteredGridItems"
+                    @bind-Filter="@State.FilterText"
+                    @bind-Filter:after="@(() => GridItemService.UpdateGridItems(State))"
+                    AccessLevelChanged="@(async (i) => await AccessLevelChangedAsync(i))"
+                    Disabled="@(State.Role?.Managed ?? false)" />
+</ControlPanelPage>

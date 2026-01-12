@@ -1,0 +1,14 @@
+﻿@use "../../Styles/design/colors";
+@use "../../../../shared/styles/colors-staged";
+
+.failure {
+    color: colors.$color-error;
+    margin: 8px 0px;
+    margin-left: 8px;
+}
+
+.success {
+    color: colors-staged.$color-add;
+    margin: 8px 0;
+    margin-left: 8px;
+}

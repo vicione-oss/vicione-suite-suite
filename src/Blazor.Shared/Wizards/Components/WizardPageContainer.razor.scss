@@ -1,0 +1,27 @@
+﻿.wizard-page-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    overflow: hidden;
+
+    &.blur {
+        filter: blur(5px);
+    }
+
+    .content-preliminary-spacing {
+        flex-basis: 48px;
+    }
+
+    $page-padding: 0px 32px;
+
+    ::deep .page-scroll-container {
+        .popup-scroll-container__content {
+            padding: $page-padding;
+        }
+    }
+
+    ::deep .page-overflow {
+        padding: $page-padding;
+    }
+}

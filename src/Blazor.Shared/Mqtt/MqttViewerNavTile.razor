@@ -1,0 +1,17 @@
+﻿@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using Sdk.Authorization
+@using Sdk.Client.NavTiles.Attributes
+@using Sdk.Client.NavTiles.Components
+@using Sdk.Client.NavTiles.Enums
+
+@attribute [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
+
+@inherits NavTileBase
+
+<NavTileStandardContent Headline="@Localization.MqttViewer.Title"
+                        Subline="@Localization.MqttViewer.Description"
+                        IconSrc="@SvgIcon.CloudConnection.GetPath()"
+                        IconAlt="@Localization.MqttViewer.Title"
+                        OnContentLoading="@ContentLoading"
+                        OnContentReady="@(ContentReady)" />

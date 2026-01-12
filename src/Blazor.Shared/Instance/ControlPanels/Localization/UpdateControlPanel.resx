@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BackupDescriptionBannerContent" xml:space="preserve">
+    <value>Create a manual backup of the current system settings or restore a backup.</value>
+  </data>
+  <data name="BackupDescriptionBannerTitle" xml:space="preserve">
+    <value>System backup and restore</value>
+  </data>
+  <data name="BackupErrorText" xml:space="preserve">
+    <value>The uploaded file is not in the correct format. Please only use *.zip files.</value>
+  </data>
+  <data name="BackupErrorTitle" xml:space="preserve">
+    <value>Error occured</value>
+  </data>
+  <data name="BackupExportConfigurationFile" xml:space="preserve">
+    <value>Export configuration file:</value>
+  </data>
+  <data name="BackupExportText" xml:space="preserve">
+    <value>Manually export a system configuration backup file (.zip) and save it to your computer. Please note that this will only save your configuration, not any other data.</value>
+  </data>
+  <data name="BackupGroupTitle" xml:space="preserve">
+    <value>Manual backup</value>
+  </data>
+  <data name="BackupRestoreConfigurationFile" xml:space="preserve">
+    <value>Restore configuration file:</value>
+  </data>
+  <data name="BackupRestoreText" xml:space="preserve">
+    <value>Restore the system configuration from an external backup file (.zip). Please note that this will only restore your configuration, not any other data.</value>
+  </data>
+  <data name="DescriptionBannerContent" xml:space="preserve">
+    <value>During the update process, the system may require a restart to apply changes, and users are encouraged to back up important data to avoid potential loss. Once the update is complete, it is recommended to verify that all functionalities are operating correctly and perform a system diagnostic if necessary.</value>
+  </data>
+  <data name="EraseAllData" xml:space="preserve">
+    <value>Erase all data</value>
+  </data>
+  <data name="FetchAvailableVersionsError" xml:space="preserve">
+    <value>Fetching available versions failed. See logs for further details.</value>
+  </data>
+  <data name="FetchingAvailableVersions" xml:space="preserve">
+    <value>Fetching available versions ...</value>
+  </data>
+  <data name="ResetConfirmationText" xml:space="preserve">
+    <value>I understand all my data will be deleted forever and unrecoverable.</value>
+  </data>
+  <data name="ResetConfirmationTitle" xml:space="preserve">
+    <value>Your data will be completely removed and the device will be restored to its default settings. Are you sure you want to continue?</value>
+  </data>
+  <data name="ResetDescriptionBannerContent" xml:space="preserve">
+    <value>Reset your applications and Host Management to their default settings. This will delete all data created by applications and reset all settings managed by Host Management.
+Note: This does not reset the operating system. Files or changes made directly to the system via console (such as custom drivers, modified configuration files, or added files) will remain unchanged.</value>
+  </data>
+  <data name="ResetDescriptionBannerTitle" xml:space="preserve">
+    <value>Reset to default configuration</value>
+  </data>
+  <data name="ResetDevice" xml:space="preserve">
+    <value>Reset this device:</value>
+  </data>
+  <data name="ResetGroupTitle" xml:space="preserve">
+    <value>Reset system</value>
+  </data>
+  <data name="ResetText" xml:space="preserve">
+    <value>Warning: This action deletes all application data and resets Host Management settings to their default values. This cannot be undone. Make sure to back up any important application data before proceeding!</value>
+  </data>
+  <data name="VersionChangedBannerContent" xml:space="preserve">
+    <value>The application will shutdown, install the selected version and restart on confirmation.</value>
+  </data>
+  <data name="ResetInProgressMessage" xml:space="preserve">
+    <value>Preparing reset. The system will be restarted immediately.</value>
+  </data>
+  <data name="BackupRestoreInProgress" xml:space="preserve">
+    <value>Restoring backup file in progress. System will be restarted immediately.</value>
+  </data>
+  <data name="BackupFileLimitReached" xml:space="preserve">
+    <value>The file size is limited to 15MB.</value>
+  </data>
+  <data name="UpdateTitle" xml:space="preserve">
+    <value>System update</value>
+  </data>
+  <data name="FlashDevice" xml:space="preserve">
+    <value>Flash device</value>
+  </data>
+  <data name="SwuFilenameChangedBannerContent" xml:space="preserve">
+    <value>The application will shut down to start the flash process for the device using the specified file. After a successful flash process, the application is restarted.</value>
+  </data>
+  <data name="SwuFileUploadPlaceholder" xml:space="preserve">
+    <value>Choose a .swu file or drag &amp; drop it here.</value>
+  </data>
+</root>

@@ -1,0 +1,80 @@
+﻿@using Blazor.Shared.Popup.Components
+@using Blazor.Shared.Popup.Enums
+@using Blazor.Shared.Wizards.ContentOverlays.Components
+@using Blazor.Shared.Wizards.ContentOverlays.Models
+@using Blazor.Shared.Wizards.Extensions
+@using Microsoft.AspNetCore.Components.Sections
+@using Sdk.Client.Wizards.Components
+@using Sdk.Client.Wizards.Services
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Models
+
+@{
+    if (_wizardPageState is null)
+        return;
+
+    var hasCustomOverlay = _wizardPageState.HasLoadingOverlay();
+
+    var cssClasses = new List<string>
+    {
+        "wizard-page-container"
+    };
+
+    if (HasGenericLoadingOverlay || hasCustomOverlay)
+        cssClasses.Add("blur");
+
+    var contentOverlaySectionId = new ContentOverlaySectionId();
+    var descriptionBannerSectionId = new DescriptionBannerSectionId();
+}
+
+<div class="@string.Join(" ", cssClasses)">
+    <PopupContentLayout>
+        <div class="content-preliminary-spacing"></div>
+
+        <PopupStaticContent>
+            <SectionOutlet SectionId="descriptionBannerSectionId" />
+        </PopupStaticContent>
+
+        <PopupScrollContainer CssClass="page-scroll-container">
+            <Content>
+                <CascadingValue Value="contentOverlaySectionId">
+                    <CascadingValue Value="descriptionBannerSectionId">
+                        <DynamicComponent Type="@WizardPageRegistryItem.ComponentType" Parameters="@_wizardPageParameters" />
+                    </CascadingValue>
+                </CascadingValue>
+            </Content>
+
+            <AfterContent>
+                <PopupOverflowEffect CssClass="page-overflow"/>
+            </AfterContent>
+        </PopupScrollContainer>
+    </PopupContentLayout>
+</div>
+
+@if (hasCustomOverlay)
+{
+    <SectionOutlet SectionId="contentOverlaySectionId" />
+
+    @if (_wizardPageState.CurrentOperation is not null)
+    {
+        var estimatedDurationMs = _wizardPageState.CurrentOperation.EstimatedDurationMs + 10000 ?? -1;
+
+        var displayDuration = estimatedDurationMs != -1 ?
+            ((int)(Math.Ceiling(estimatedDurationMs / 1000.0)))
+                : estimatedDurationMs;
+
+        var timedMessage = new TimedMessage
+        {
+            Message = _wizardPageState.CurrentOperation.Description ?? string.Empty,
+            DisplayDuration = displayDuration
+        };
+
+        <LoadingContentOverlay TimedMessage="@timedMessage" />
+    }
+}
+else
+{
+    if (HasGenericLoadingOverlay)
+    {
+        <LoadingContentOverlay />
+    }
+}

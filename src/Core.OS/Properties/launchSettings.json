@@ -1,0 +1,31 @@
+﻿{
+    "profiles": {
+        "Blazor.Server": {
+            "commandName": "Project",
+            "launchBrowser": false,
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "applicationUrl": "https://localhost:5001;http://localhost:5000"
+        },
+        "Backend-Slave1": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "Kestrel__Endpoints__Http__Url": "http://localhost:6000",
+                "Kestrel__Endpoints__Https__Url": "https://localhost:6001"
+            },
+            "applicationUrl": "https://localhost:6001;http://localhost:6000"
+        },
+        "Docker": {
+            "commandName": "Docker",
+            "launchBrowser": true,
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+            "publishAllPorts": true,
+            "useSSL": true
+        }
+    }
+}

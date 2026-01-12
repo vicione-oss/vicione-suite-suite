@@ -1,0 +1,16 @@
+﻿.module-option-declaration-collection-grid {
+    ::deep .key-column {
+        white-space: nowrap;
+    }
+
+    ::deep .value-column {
+        width: 100%;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: max-content;
+        grid-column-gap: 5px;
+    }
+}

@@ -1,0 +1,44 @@
+﻿.journal-background {
+    background-color: black;
+    font-family: monospace;
+    height: 100%;
+    overflow: auto;
+
+    ::deep .journal-button {
+        margin: 10px 0px 5px 5px
+    }
+
+    .journal-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        margin-left: 6px;
+
+        .priority-emergency, .priority-alert, .priority-critical {
+            color: indianred;
+            font-weight: bold;
+        }
+
+        .priority-error {
+            color: indianred;
+        }
+
+        .priority-warning {
+            color: khaki;
+        }
+
+        .priority-notice, .priority-information {
+            color: white;
+        }
+
+        .priority-debug {
+            color: gray;
+        }
+    }
+
+    .journal-error {
+        margin: 10px 0px 5px 5px;
+        color: indianred;
+        font-weight: bold;
+    }
+}

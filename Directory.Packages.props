@@ -1,0 +1,89 @@
+﻿<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <HostManagementVersion>1.2.0</HostManagementVersion>
+    <MassTransitVersion>8.5.7</MassTransitVersion>
+    <ViciOneUiMonochromeIconsVersion>3.10.0</ViciOneUiMonochromeIconsVersion>
+    <ViciOneSuiteSdkVersion>1.2.0-ci1968091</ViciOneSuiteSdkVersion>
+    <DotNetVersion>9.0.11</DotNetVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.4.0" />
+    <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
+    <PackageVersion Include="AspNetCore.SassCompiler" Version="1.94.2" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
+    <PackageVersion Include="DevExpress.Blazor" Version="24.2.12" />
+    <PackageVersion Include="Fluid.Core" Version="2.31.0" />
+    <PackageVersion Include="HostManagement.Shared" Version="$(HostManagementVersion)" />
+    <PackageVersion Include="HostManagement.Shared.Communication" Version="$(HostManagementVersion)" />
+    <PackageVersion Include="MailKit" Version="4.14.1" />
+    <PackageVersion Include="MassTransit" Version="$(MassTransitVersion)" />
+    <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="$(MassTransitVersion)" />
+    <PackageVersion Include="MassTransit.RabbitMQ" Version="$(MassTransitVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authorization" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.UI" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Localization" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.TypeScript.MSBuild" Version="5.9.3" />
+    <PackageVersion Include="minisign-net" Version="1.0.0" />
+    <PackageVersion Include="MQTTnet" Version="5.0.1.1416" />
+    <PackageVersion Include="Npgsql" Version="9.0.4" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
+    <PackageVersion Include="Semver" Version="3.0.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Journal" Version="0.7.0" />
+    <PackageVersion Include="Serilog.Sinks.SyslogMessages" Version="4.0.0" />
+    <PackageVersion Include="StronglyTypedId" Version="0.2.1" />
+    <PackageVersion Include="System.IO.Abstractions" Version="22.1.0" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(DotNetVersion)" />
+    <PackageVersion Include="TimeZoneNames" Version="7.0.0" />
+    <PackageVersion Include="ViciOne.Journal" Version="0.7.0" />
+    <PackageVersion Include="ViciOne.Suite.Sdk" Version="$(ViciOneSuiteSdkVersion)" />
+    <PackageVersion Include="ViciOne.Suite.Sdk.Backend" Version="$(ViciOneSuiteSdkVersion)" />
+    <PackageVersion Include="ViciOne.Suite.Sdk.Client" Version="$(ViciOneSuiteSdkVersion)" />
+    <PackageVersion Include="ViciOne.Suite.Sdk.Deployment" Version="$(ViciOneSuiteSdkVersion)" />
+    <PackageVersion Include="ViciOne.SystemMonitoring" Version="0.10.0" />
+    <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="4.3.0" />
+    <PackageVersion Include="ViciOne.Ui.Design" Version="1.2.0" />
+    <PackageVersion Include="ViciOne.Ui.Localization" Version="2.35.0" />
+    <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Assets" Version="$(ViciOneUiMonochromeIconsVersion)" />
+    <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Components" Version="$(ViciOneUiMonochromeIconsVersion)" />
+    <PackageVersion Include="ViciOne.Ui.Shared.Dx" Version="0.19.0" />
+    <PackageVersion Include="ViciOne.Ui.Shared.Extreme" Version="0.19.0" />
+    <!--Used for tests only:-->
+    <PackageVersion Include="AutoFixture" Version="4.18.1" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.3.0" />
+    <PackageVersion Include="bunit" Version="1.40" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="Extensions.Logging.NSubstitute" Version="1.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="9.9.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="System.IO.Abstractions.TestingHelpers" Version="22.1.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
+    <PackageVersion Include="xunit.extensibility.core" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="ViciOne.Suite.Sdk.Testing" Version="$(ViciOneSuiteSdkVersion)" />
+    <!--Used for test report generation-->
+    <PackageVersion Include="JunitXml.TestLogger" Version="7.0.2" />
+    <!--Used for tools only:-->
+    <PackageVersion Include="CommandLineParser" Version="2.9.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(DotNetVersion)" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,49 @@
+﻿@using ViciOne.Ui.Blazor.Components.CheckBox
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
+<div class="tags-control-panel-page-content">
+    <DescriptionBanner Title="@TechnicalTerms.TagPlural" IconCssClass="@MonochromeIconName.Tagging.GetCssClasses().ToSpaceSeparated()">
+        @Localization.TagsControlPanelPageContent.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <Grid Items="@_tagsQueryable" Virtualize="true" CssClass="tags-grid">
+        <ActionButtons>
+            <AddGridActionButton OnClick="@AddTag" />
+            <EditGridActionButton Enabled="@_isSingleTagSelected" OnClick="@EditSelectedTag" />
+            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedTags" />
+        </ActionButtons>
+
+        <Filter>
+            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+        </Filter>
+
+        <ChildContent>
+            <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@TagGridItemSelection" />
+
+            <TemplateColumn Title="@TechnicalTerms.Id">
+                @context.Id
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Text">
+                @context.Text
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Protected">
+                <CheckBox Enabled="false" Value="@context.Protected" />
+            </TemplateColumn>
+
+            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                              Navigate="@(async (Tag item) => await EditTag(item))" />
+        </ChildContent>
+
+        <Footer>
+            <SelectionFooter GridSelection="TagGridItemSelection" />
+        </Footer>
+    </Grid>
+</div>

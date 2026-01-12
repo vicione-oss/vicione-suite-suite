@@ -1,0 +1,12 @@
+@using Sdk.Client.Components.Settings
+@using Sdk.Client.Connections
+@using Sdk.Connections.Contracts
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ConnectionSettingsComponentBase<SQLiteConnection>
+
+<SettingsField Label="@TechnicalTerms.ConnectionString">
+    <SettingsFieldTextBox Placeholder="@TechnicalTerms.ConnectionString"
+                          @bind-Value="@Connection.ConnectionString"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>

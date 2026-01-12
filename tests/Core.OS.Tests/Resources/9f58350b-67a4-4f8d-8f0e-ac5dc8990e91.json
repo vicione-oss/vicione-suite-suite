@@ -1,0 +1,436 @@
+﻿[
+    {
+        "Key": "_NO_DEBUG_HEAP",
+        "Value": "1"
+    },
+    {
+        "Key": "windir",
+        "Value": "C:\\WINDOWS"
+    },
+    {
+        "Key": "USERPROFILE",
+        "Value": "C:\\Users\\username"
+    },
+    {
+        "Key": "USERNAME",
+        "Value": "username"
+    },
+    {
+        "Key": "USERDOMAIN_ROAMINGPROFILE",
+        "Value": "INTRAIFM"
+    },
+    {
+        "Key": "USERDOMAIN",
+        "Value": "INTRAIFM"
+    },
+    {
+        "Key": "USERDNSDOMAIN",
+        "Value": "INTRA.IFM"
+    },
+    {
+        "Key": "URLS",
+        "Value": "https://localhost:6001;http://localhost:6000"
+    },
+    {
+        "Key": "UATDATA",
+        "Value": "C:\\WINDOWS\\CCM\\UATData\\D9F8C395-CAB8-491d-B8AC-179A1FE1BE77"
+    },
+    {
+        "Key": "TMP",
+        "Value": "C:\\Users\\username\\AppData\\Local\\Temp"
+    },
+    {
+        "Key": "TEMP",
+        "Value": "C:\\Users\\username\\AppData\\Local\\Temp"
+    },
+    {
+        "Key": "SystemRoot",
+        "Value": "C:\\WINDOWS"
+    },
+    {
+        "Key": "SystemDrive",
+        "Value": "C:"
+    },
+    {
+        "Key": "SSF_LIBRARY_PATH_64",
+        "Value": "C:\\Program Files\\SAP\\FrontEnd\\SecureLogin\\lib\\sapcrypto.dll"
+    },
+    {
+        "Key": "SSF_LIBRARY_PATH",
+        "Value": "C:\\Program Files (x86)\\SAP\\FrontEnd\\SecureLogin\\lib\\sapcrypto.dll"
+    },
+    {
+        "Key": "snow_agent",
+        "Value": "C:\\Program Files\\Snow Software\\Inventory\\Agent"
+    },
+    {
+        "Key": "SNC_LIB_64",
+        "Value": "C:\\Program Files\\SAP\\FrontEnd\\SecureLogin\\lib\\sapcrypto.dll"
+    },
+    {
+        "Key": "SNC_LIB",
+        "Value": "C:\\Program Files (x86)\\SAP\\FrontEnd\\SecureLogin\\lib\\sapcrypto.dll"
+    },
+    {
+        "Key": "SESSIONNAME",
+        "Value": "Console"
+    },
+    {
+        "Key": "SECUDIR",
+        "Value": "C:\\Program Files (x86)\\SAP\\FrontEnd\\SAPgui"
+    },
+    {
+        "Key": "ROOT",
+        "Value": "C:\\Program Files\\dotnet"
+    },
+    {
+        "Key": "PUBLIC",
+        "Value": "C:\\Users\\Public"
+    },
+    {
+        "Key": "PSModulePath",
+        "Value": "C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files (x86)\\Microsoft Azure Information Protection\\Powershell"
+    },
+    {
+        "Key": "ProgramW6432",
+        "Value": "C:\\Program Files"
+    },
+    {
+        "Key": "ProgramFiles(x86)",
+        "Value": "C:\\Program Files (x86)"
+    },
+    {
+        "Key": "ProgramFiles",
+        "Value": "C:\\Program Files"
+    },
+    {
+        "Key": "ProgramData",
+        "Value": "C:\\ProgramData"
+    },
+    {
+        "Key": "PROCESSOR_REVISION",
+        "Value": "5000"
+    },
+    {
+        "Key": "PROCESSOR_LEVEL",
+        "Value": "25"
+    },
+    {
+        "Key": "PROCESSOR_IDENTIFIER",
+        "Value": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD"
+    },
+    {
+        "Key": "PROCESSOR_ARCHITECTURE",
+        "Value": "AMD64"
+    },
+    {
+        "Key": "PATHEXT",
+        "Value": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC"
+    },
+    {
+        "Key": "Path",
+        "Value": "C:\\Program Files\\Microsoft\\jdk-11.0.12.7-hotspot\\bin;C:\\ProgramData\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\Microsoft VS Code\\bin;C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\;C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\;C:\\Program Files\\nodejs\\;C:\\Program Files\\PuTTY\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Git\\cmd;C:\\Users\\username\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\username\\AppData\\Roaming\\npm;C:\\Program Files (x86)\\Sophos\\Sophos SSL VPN Client\\bin;C:\\Users\\username\\.dotnet\\tools"
+    },
+    {
+        "Key": "OS",
+        "Value": "Windows_NT"
+    },
+    {
+        "Key": "OneDrive",
+        "Value": "C:\\Users\\username\\OneDrive - ifm electronic gmbh"
+    },
+    {
+        "Key": "NUMBER_OF_PROCESSORS",
+        "Value": "12"
+    },
+    {
+        "Key": "NEXTHINK",
+        "Value": "C:\\Program Files\\Nexthink"
+    },
+    {
+        "Key": "MqttClient"
+    },
+    {
+        "Key": "MqttClient:WebSocketClient"
+    },
+    {
+        "Key": "MqttClient:WebSocketClient:UserName",
+        "Value": "user"
+    },
+    {
+        "Key": "MqttClient:WebSocketClient:TopicFilter",
+        "Value": "data"
+    },
+    {
+        "Key": "MqttClient:WebSocketClient:Port",
+        "Value": "5001"
+    },
+    {
+        "Key": "MqttClient:WebSocketClient:Password",
+        "Value": "xxx"
+    },
+    {
+        "Key": "MqttClient:WebSocketClient:Endpoint",
+        "Value": "wss://localhost/mqtt"
+    },
+    {
+        "Key": "MqttClient:ServiceClient"
+    },
+    {
+        "Key": "MqttClient:ServiceClient:UserName",
+        "Value": "user"
+    },
+    {
+        "Key": "MqttClient:ServiceClient:Port",
+        "Value": "1883"
+    },
+    {
+        "Key": "MqttClient:ServiceClient:Password",
+        "Value": "xxx"
+    },
+    {
+        "Key": "MqttClient:ServiceClient:Endpoint",
+        "Value": "localhost"
+    },
+    {
+        "Key": "ModuleLoader"
+    },
+    {
+        "Key": "ModuleLoader:UseDebugModules",
+        "Value": "True"
+    },
+    {
+        "Key": "ModuleLoader:ModulesPath",
+        "Value": "Modules"
+    },
+    {
+        "Key": "MessageBus"
+    },
+    {
+        "Key": "MessageBus:UseInMemoryBus",
+        "Value": "False"
+    },
+    {
+        "Key": "MessageBus:RabbitMq"
+    },
+    {
+        "Key": "MessageBus:RabbitMq:QueueLifetimeInDays",
+        "Value": "1"
+    },
+    {
+        "Key": "MessageBus:RabbitMq:MessageLifetimeInDays",
+        "Value": "1"
+    },
+    {
+        "Key": "MessageBus:RabbitMq:ConnectionString",
+        "Value": "amqp://guest:guest@localhost:5672"
+    },
+    {
+        "Key": "MessageBus:RabbitMq:AutoDeleteQueues",
+        "Value": "True"
+    },
+    {
+        "Key": "LOGONSERVER",
+        "Value": "\\\\DETT8W003"
+    },
+    {
+        "Key": "Logging"
+    },
+    {
+        "Key": "Logging:Resources"
+    },
+    {
+        "Key": "Logging:Resources:Memory"
+    },
+    {
+        "Key": "Logging:Resources:Memory:LimitInPercent",
+        "Value": "75"
+    },
+    {
+        "Key": "Logging:Resources:Memory:LimitInMb",
+        "Value": "1024"
+    },
+    {
+        "Key": "Logging:Resources:Memory:AutoStart",
+        "Value": "False"
+    },
+    {
+        "Key": "Logging:LogTargets"
+    },
+    {
+        "Key": "Logging:LogTargets:0",
+        "Value": "Console"
+    },
+    {
+        "Key": "Logging:LogPath",
+        "Value": "AppData"
+    },
+    {
+        "Key": "Logging:LogLevel"
+    },
+    {
+        "Key": "Logging:LogLevel:Microsoft.EntityFrameworkCore",
+        "Value": "Error"
+    },
+    {
+        "Key": "Logging:LogLevel:Microsoft.AspNetCore.Authentication",
+        "Value": "Warning"
+    },
+    {
+        "Key": "Logging:LogLevel:Microsoft",
+        "Value": "Error"
+    },
+    {
+        "Key": "Logging:LogLevel:Default",
+        "Value": "Information"
+    },
+    {
+        "Key": "LOCALAPPDATA",
+        "Value": "C:\\Users\\username\\AppData\\Local"
+    },
+    {
+        "Key": "Kestrel"
+    },
+    {
+        "Key": "Kestrel:Endpoints"
+    },
+    {
+        "Key": "Kestrel:Endpoints:Https"
+    },
+    {
+        "Key": "Kestrel:Endpoints:Https:Url",
+        "Value": "http://localhost:6001"
+    },
+    {
+        "Key": "Kestrel:Endpoints:Https:StoreName",
+        "Value": "My"
+    },
+    {
+        "Key": "Kestrel:Endpoints:Https:StoreLocation",
+        "Value": "CurrentUser"
+    },
+    {
+        "Key": "Kestrel:Endpoints:Http"
+    },
+    {
+        "Key": "Kestrel:Endpoints:Http:Url",
+        "Value": "http://localhost:6000"
+    },
+    {
+        "Key": "Instance"
+    },
+    {
+        "Key": "Instance:Type",
+        "Value": "Slave"
+    },
+    {
+        "Key": "Instance:HealthChecks"
+    },
+    {
+        "Key": "Instance:HealthChecks:PublishIntervalInSeconds",
+        "Value": "3600"
+    },
+    {
+        "Key": "Instance:HealthChecks:PublishDelayInSeconds",
+        "Value": "60"
+    },
+    {
+        "Key": "Instance:HomeDirectory",
+        "Value": "AppData"
+    },
+    {
+        "Key": "Instance:CacheDirectory",
+        "Value": "Cache"
+    },
+    {
+        "Key": "IDEA_INITIAL_DIRECTORY",
+        "Value": "D:\\Repos\\vo-suite"
+    },
+    {
+        "Key": "HOMEPATH",
+        "Value": "\\Users\\username"
+    },
+    {
+        "Key": "HOMEDRIVE",
+        "Value": "C:"
+    },
+    {
+        "Key": "FPS_BROWSER_USER_PROFILE_STRING",
+        "Value": "Default"
+    },
+    {
+        "Key": "FPS_BROWSER_APP_PROFILE_STRING",
+        "Value": "Internet Explorer"
+    },
+    {
+        "Key": "ENVIRONMENT",
+        "Value": "Development"
+    },
+    {
+        "Key": "DriverData",
+        "Value": "C:\\Windows\\System32\\Drivers\\DriverData"
+    },
+    {
+        "Key": "DOTNET_ROOT",
+        "Value": "C:\\Program Files\\dotnet"
+    },
+    {
+        "Key": "contentRoot",
+        "Value": "vo-suite\\src\\Core.OS"
+    },
+    {
+        "Key": "ConnectionStrings"
+    },
+    {
+        "Key": "ConnectionStrings:Postgres",
+        "Value": ""
+    },
+    {
+        "Key": "ComSpec",
+        "Value": "C:\\WINDOWS\\system32\\cmd.exe"
+    },
+    {
+        "Key": "COMPUTERNAME",
+        "Value": "IFM-XXX"
+    },
+    {
+        "Key": "COMPLUS_FORCEENC",
+        "Value": "1"
+    },
+    {
+        "Key": "CommonProgramW6432",
+        "Value": "C:\\Program Files\\Common Files"
+    },
+    {
+        "Key": "CommonProgramFiles(x86)",
+        "Value": "C:\\Program Files (x86)\\Common Files"
+    },
+    {
+        "Key": "CommonProgramFiles",
+        "Value": "C:\\Program Files\\Common Files"
+    },
+    {
+        "Key": "ASPNETCORE_URLS",
+        "Value": "https://localhost:6001;http://localhost:6000"
+    },
+    {
+        "Key": "ASPNETCORE_ENVIRONMENT",
+        "Value": "Development"
+    },
+    {
+        "Key": "applicationName",
+        "Value": "ViciOne.Suite.Core.OS"
+    },
+    {
+        "Key": "APPDATA",
+        "Value": "C:\\Users\\usename\\AppData\\Roaming"
+    },
+    {
+        "Key": "ALLUSERSPROFILE",
+        "Value": "C:\\ProgramData"
+    },
+    {
+        "Key": "AllowedHosts",
+        "Value": "*"
+    }
+]

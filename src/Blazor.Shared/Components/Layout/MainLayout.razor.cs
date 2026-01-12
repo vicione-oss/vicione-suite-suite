@@ -1,0 +1,49 @@
+﻿using System.ComponentModel;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Sdk.Client.Services;
+
+namespace Blazor.Shared.Components.Layout;
+
+public sealed partial class MainLayout : IDisposable
+{
+    private bool _isTemplateLogin;
+
+    [Inject] private ILayoutService LayoutService { get; set; } = default!;
+#pragma warning disable CS0618 // Type or member is obsolete
+    [Inject] private IClientModuleService ModuleService { get; set; } = default!;
+#pragma warning restore CS0618
+    [Inject] private IServiceProvider ServiceProvider { get; set; } = default!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState>? ExistingCascadedAuthenticationState { get; set; }
+
+    public void Dispose()
+    {
+        LayoutService.PropertyChanged -= LayoutService_PropertyChanged;
+    }
+
+    private void LayoutService_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        => InvokeAsync(StateHasChanged);
+
+    protected override void OnInitialized()
+    {
+        LayoutService.PropertyChanged += LayoutService_PropertyChanged;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ExistingCascadedAuthenticationState is not null)
+        {
+            await ModuleService.OnUserAuthenticated(ServiceProvider, (await ExistingCascadedAuthenticationState).User);
+
+            _isTemplateLogin = NavigationManager.Uri.Contains("template/", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    private static void OnPrepareRecover(Exception error)
+    {
+        // We now can prepare the recovery but we don't know what the loaded module was doing to provoke the issue
+        // so a simple restore can be enough but could also fail again and again.
+        // The exception will be logged by the ErrorBoundary component.
+    }
+}

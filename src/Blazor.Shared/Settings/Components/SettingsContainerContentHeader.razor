@@ -1,0 +1,40 @@
+﻿@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<div class="settings-container-content-header">
+    @if (SettingsModuleState.ShowNavigateBackButton)
+    {
+        <button class="navigate-back-button" @onclick="@NavigateBackButtonClick">
+            <MonochromeIcon CssClass="icon" Name="@MonochromeIconName.ExpanderLightLeft" Size="MonochromeIconSize.MediumLarge" />
+        </button>
+    }
+
+    @{
+        var controlPanelPages = ControlPanelPageRegistry
+            .Where(i => i.ControlPanelRegistryItem == _activeControlPanelRegistryItem)
+            .Select(i => i.ControlPanelPage)
+            .ToList();
+
+        if (controlPanelPages.Count > 0)
+        {
+            var activeControlPanelPage = _activeControlPanelRegistryItem is not null ? ActiveControlPanelPageProvider.GetActiveControlPanelPage(_activeControlPanelRegistryItem) : null;
+            var activeControlPanelPageIndex = activeControlPanelPage is not null ? controlPanelPages.IndexOf(activeControlPanelPage) : 0;
+
+            <div class="tab-control-container">
+                <DxTabs ActiveTabIndex="activeControlPanelPageIndex" ScrollMode="TabsScrollMode.NavButtons">
+                    @foreach (var controlPanelPage in controlPanelPages)
+                    {
+                        <DxTab CssClass="control-panel-page-tab" Text="@controlPanelPage.Title" Click="@ControlPanelPageTabClick"></DxTab>
+                    }
+                </DxTabs>
+            </div>
+        }
+        else
+        {
+            <div class="control-panel-title">
+                @GetControlPanelTitle()
+            </div>
+        }
+    }
+</div>

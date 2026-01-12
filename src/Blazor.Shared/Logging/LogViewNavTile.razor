@@ -1,0 +1,18 @@
+﻿@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using Sdk.Authorization
+@using Sdk.Client.NavTiles.Attributes
+@using Sdk.Client.NavTiles.Components
+@using Sdk.Client.NavTiles.Enums
+
+@inherits NavTileBase
+
+@attribute [InitialNavTile<SharedClientModule>(LinkTarget = Constants.JournalViewRoute, Group = NavTileGroup.Administration)]
+@attribute [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full, Constants.LogViewFeature)]
+
+<NavTileStandardContent Headline="@Localization.LogView.LogViewTitle"
+                        Subline="@Localization.LogView.LogViewDescription"
+                        IconSrc="@SvgIcon.History.GetPath()"
+                        IconAlt="@Localization.LogView.LogViewTitle"
+                        OnContentLoading="@ContentLoading"
+                        OnContentReady="@(ContentReady)" />

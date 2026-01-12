@@ -1,0 +1,161 @@
+﻿using System.IO.Abstractions;
+using System.Runtime.InteropServices;
+using Core.Module.Contracts;
+using Core.Module.Utils;
+using Sdk.Backend.Artifacts;
+using Sdk.Modules;
+
+namespace Core.Module;
+
+public sealed class ModuleArtifactRepository(IArtifactRepository artifactRepository, IFileSystem fileSystem) : IModuleArtifactRepository
+{
+    private const string ModulesBaseFolder = "modules"; // Base folder in the repository
+
+    public async Task<ModulePackageDownloadResult[]> DownloadAndExtract(string modulesPath, IEnumerable<ModuleDependencyPackage> packages, CancellationToken cancellationToken)
+        => await Task.WhenAll(packages.Select(mp => DownloadAndExtract(modulesPath, mp, cancellationToken)));
+
+    public async Task<ModulePackageDownloadResult> DownloadAndExtract(string modulesPath, ModuleDependencyPackage package, CancellationToken cancellationToken)
+    {
+        var targetPath = fileSystem.Path.Combine(
+        [
+            modulesPath,
+            package.Name,
+            package.Version,
+        ]);
+
+        var result = new ModulePackageDownloadResult(package);
+
+        try
+        {
+            // target path e.g. /path/to/modules/name/version
+            if (ModuleVersionExists(targetPath))
+            {
+                result.Skipped = true;
+                return result;
+            }
+
+            // try to find the matching artifact on the repository                      
+            var moduleArtifact = await QueryModuleArtifact(package, cancellationToken)
+                ?? throw new InvalidOperationException($"Can't find artifact for package='{package.Name}' version='{package.Version}'");
+
+            // download the module zip and extract it
+            await artifactRepository.DownloadAndExtract(moduleArtifact, targetPath, cancellationToken);
+
+            // because the metadata is not part of the zip we try download it and put it into module directory.            
+            // we don't know with which sdk version the module got published
+            // we have to query a matching one by package version                       
+            var metadataPath = fileSystem.Path.Combine(targetPath, ModuleHelpers.GetLocalMetadataFileName(package.Name));
+            await using var metadataDownloadStream = await GetMetadataDownloadStream(package, cancellationToken);
+            await using var metadataFileStream = fileSystem.FileStream.New(metadataPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+
+            await metadataDownloadStream.CopyToAsync(metadataFileStream, cancellationToken);
+        }
+        catch (Exception e)
+        {
+            result.Error = e;
+        }
+
+        return result;
+    }
+
+    public async Task<ModuleMetadata?> GetModuleMetadata(ModuleDependencyPackage package, CancellationToken cancellationToken = default)
+    {
+        var metadataStream = await GetMetadataDownloadStream(package, cancellationToken);
+        return await System.Text.Json.JsonSerializer.DeserializeAsync<ModuleMetadata?>(metadataStream, ModuleSerializerOptions.GetOptions(), cancellationToken);
+    }
+
+    public async Task<Stream> GetMetadataDownloadStream(ModuleDependencyPackage package,
+        CancellationToken cancellationToken = default)
+    {
+        // Find the specific metadata asset using AQL
+        // 0.33.0-ci1632286-win-x64_0.28.0.json
+        // -> .../vicione-suite/modules/ViciOne.Suite.ClusterManagement/0.32.1-linux-arm64.zip
+        var aqlQuery = artifactRepository.CreateQueryBuilder()
+            .AndPathMatches($"{ModulesBaseFolder}/{package.Name}")
+            .AndNameMatches($"*{package.Version}-{RuntimeInformation.RuntimeIdentifier}_*.json")
+            .OrderByDescending("path", "name")
+            .Build();
+
+        var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+        var artifactoryAsset = result.Artifacts.FirstOrDefault()
+            ?? throw new InvalidOperationException($"No metadata asset found for module '{package.Name}' v{package.Version}");
+
+        return await artifactRepository.Download(artifactoryAsset, cancellationToken);
+    }
+
+    public async Task<ModuleMetadata?> GetModuleMetadata(IArtifact metadataArtifact, CancellationToken cancellationToken = default)
+    {
+        var metadataStream = await artifactRepository.Download(metadataArtifact, cancellationToken);
+        return await System.Text.Json.JsonSerializer.DeserializeAsync<ModuleMetadata?>(metadataStream, ModuleSerializerOptions.GetOptions(), cancellationToken);
+    }
+
+    public async Task<List<IArtifact>> QueryModuleArtifacts(CancellationToken cancellationToken = default)
+    {
+        var aqlQuery = artifactRepository.CreateQueryBuilder()
+            .AndPathMatches($"{ModulesBaseFolder}/*")
+            .AndNameMatches($"*{RuntimeInformation.RuntimeIdentifier}.zip")
+            .OrderByDescending("path", "name")
+            .Build();
+
+        var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+
+        return [.. result.Artifacts];
+    }
+
+    public async Task<List<IArtifact>> QueryModuleMetadataArtifacts(Version? sdkVersion = null,
+        CancellationToken cancellationToken = default)
+    {
+        var queryBuilder = artifactRepository.CreateQueryBuilder()
+            .AndPathMatches($"{ModulesBaseFolder}/*")
+            .AndNameMatches($"{CreateNameMatchFilter(sdkVersion)}.json")
+            .OrderByDescending("path", "name");
+
+        var aqlQuery = queryBuilder.Build();
+        var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+
+        return [.. result.Artifacts];
+    }
+
+    public async Task<IArtifact?> QueryModuleArtifact(ModuleDependencyPackage package,
+        CancellationToken cancellationToken = default)
+    {
+        var queryBuilder = artifactRepository.CreateQueryBuilder()
+            .AndPathMatches($"{ModulesBaseFolder}/{package.Name}")
+            .AndNameMatches($"{package.Version}-{RuntimeInformation.RuntimeIdentifier}.zip");
+
+        // 0.28.0-ci1523472-linux-arm64_0.25.0.json        
+        var aqlQuery = queryBuilder.Build();
+        var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+
+        return result.Artifacts.FirstOrDefault();
+    }
+
+    public async Task<IArtifact?> QueryLatestModuleMetadataArtifact(Version sdkVersion,
+        string packageName,
+        CancellationToken cancellationToken = default)
+    {
+        var queryBuilder = artifactRepository.CreateQueryBuilder()
+            .AndPathMatches($"{ModulesBaseFolder}/{packageName}")
+            .AndNameMatches($"{CreateNameMatchFilter(sdkVersion)}.json")
+            .OrderByDescending("name");
+
+        var aqlQuery = queryBuilder.Build();
+        var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+
+        // Map, Filter in C#, Find Latest
+        return result.Artifacts
+            .FirstOrDefault(); // AQL already sorted, first item after filtering is latest
+    }
+
+    private static string CreateNameMatchFilter(Version? sdkVersion)
+    {
+        if (sdkVersion is null)
+            return $"*{RuntimeInformation.RuntimeIdentifier}*";
+
+        // We limit to major.minor version and allow different patch versions
+        return $"*{RuntimeInformation.RuntimeIdentifier}*_{sdkVersion.Major}.{sdkVersion.Minor}.*";
+    }
+
+    private bool ModuleVersionExists(string modulePath)
+        => fileSystem.Directory.Exists(modulePath) && fileSystem.Directory.GetFiles(modulePath).Length > 0;
+}

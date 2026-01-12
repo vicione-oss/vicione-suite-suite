@@ -1,0 +1,18 @@
+﻿@using Blazor.Shared.Components.UnsavedChangesPopup
+@using ViciOne.Ui.Blazor.Components.Popup.Components
+@using PopupConstants = Blazor.Shared.Popup.Constants
+
+<Popup Height="@PopupConstants.PopupHeightPx"
+       Width="@PopupConstants.PopupWidthPx"
+       ZIndex="@PopupConstants.PopupZIndex"
+       @bind-Visible="SettingsPopupState.Visible">
+
+    <SettingsContainer @ref="_settingsContainer"
+                       OnClose="@SettingsContainerOnClose"
+                       OnShowUnsavedChangesPopup="(() => _showUnsavedChangesPopup = true)" />
+</Popup>
+
+<UnsavedChangesPopup OnCancel="@OnCancelUnsavedChanges"
+                     OnRevert="@OnRevertUnsavedChanges"
+                     OnSave="@OnSaveUnsavedChanges"
+                     Visible="@_showUnsavedChangesPopup" />

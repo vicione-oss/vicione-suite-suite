@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <filter id="table-a" width="168.6%" height="196%" x="-34.3%" y="-48%" filterUnits="objectBoundingBox">
+      <feOffset dy="2" in="SourceAlpha" result="shadowOffsetOuter1"/>
+      <feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="2"/>
+      <feColorMatrix in="shadowBlurOuter1" result="shadowMatrixOuter1" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0"/>
+      <feMerge>
+        <feMergeNode in="shadowMatrixOuter1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="table-b" x1="22.483%" x2="69.977%" y1="16.296%" y2="84.522%">
+      <stop offset="0%" stop-color="#FF9229"/>
+      <stop offset="100%" stop-color="#FF7D00"/>
+    </linearGradient>
+    <path id="table-c" d="M0,0.225 L10.5,0.225 L10.5,7.225 L0,7.225 L0,0.225 Z M12.25,0.225 L22.75,0.225 L22.75,7.225 L12.25,7.225 L12.25,0.225 Z M24.5,0.225 L35,0.225 L35,7.225 L24.5,7.225 L24.5,0.225 Z"/>
+    <filter id="table-d" width="102.9%" height="114.3%" x="-1.4%" y="-7.1%" filterUnits="objectBoundingBox">
+      <feOffset dx="1" in="SourceAlpha" result="shadowOffsetInner1"/>
+      <feComposite in="shadowOffsetInner1" in2="SourceAlpha" k2="-1" k3="1" operator="arithmetic" result="shadowInnerInner1"/>
+      <feColorMatrix in="shadowInnerInner1" values="0 0 0 0 1   0 0 0 0 0.621165668   0 0 0 0 0.262863005  0 0 0 1 0"/>
+    </filter>
+    <linearGradient id="table-e" x1="26.46%" x2="100%" y1="0%" y2="111.642%">
+      <stop offset="0%" stop-color="#D9D9D9"/>
+      <stop offset="100%" stop-color="#9A9A9A"/>
+    </linearGradient>
+    <path id="table-f" d="M12.25,10.725 L22.75,10.725 L22.75,14.225 L12.25,14.225 L12.25,10.725 Z M12.25,15.975 L22.75,15.975 L22.75,19.475 L12.25,19.475 L12.25,15.975 Z M12.25,21.225 L22.75,21.225 L22.75,24.725 L12.25,24.725 L12.25,21.225 Z M0,10.725 L10.5,10.725 L10.5,14.225 L0,14.225 L0,10.725 Z M0,15.975 L10.5,15.975 L10.5,19.475 L0,19.475 L0,15.975 Z M0,21.225 L10.5,21.225 L10.5,24.725 L0,24.725 L0,21.225 Z M24.5,10.725 L35,10.725 L35,14.225 L24.5,14.225 L24.5,10.725 Z M24.5,15.975 L35,15.975 L35,19.475 L24.5,19.475 L24.5,15.975 Z M24.5,21.225 L35,21.225 L35,24.725 L24.5,24.725 L24.5,21.225 Z"/>
+    <filter id="table-g" width="101.4%" height="103.6%" x="-.7%" y="-1.8%" filterUnits="objectBoundingBox">
+      <feOffset dx="-.5" dy="-.5" in="SourceAlpha" result="shadowOffsetInner1"/>
+      <feComposite in="shadowOffsetInner1" in2="SourceAlpha" k2="-1" k3="1" operator="arithmetic" result="shadowInnerInner1"/>
+      <feColorMatrix in="shadowInnerInner1" values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 0.179404438 0"/>
+    </filter>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <rect width="48" height="48"/>
+    <g filter="url(#table-a)" transform="translate(7 12)">
+      <use fill="url(#table-b)" xlink:href="#table-c"/>
+      <use fill="#000" filter="url(#table-d)" xlink:href="#table-c"/>
+      <use fill="url(#table-e)" xlink:href="#table-f"/>
+      <use fill="#000" filter="url(#table-g)" xlink:href="#table-f"/>
+    </g>
+  </g>
+</svg>

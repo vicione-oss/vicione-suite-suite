@@ -1,0 +1,35 @@
+﻿@use "../design/colors";
+
+@use "sass:color";
+
+@mixin informational-content-styles() {
+    strong {
+        display: block;
+    }
+
+    ul, strong + strong {
+        margin-top: 15px;
+    }
+
+    ul ul {
+        margin-top: 0px;
+
+        list-style: outside;
+    }
+
+    ul + ul {
+        margin-top: 15px !important;
+    }
+}
+
+@mixin summary-settings-information-label-value-divs() {
+    & > div:nth-of-type(odd) {
+        color: colors.$color-font-light;
+    }
+
+    & > div:nth-of-type(even) {
+        color: color.change(colors.$color-font-light, $alpha: 0.6);
+
+        text-align: right;
+    }
+}

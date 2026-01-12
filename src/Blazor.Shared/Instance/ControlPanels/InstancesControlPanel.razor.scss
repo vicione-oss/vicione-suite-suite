@@ -1,0 +1,7 @@
+﻿.instances-control-panel {
+    display: contents;
+
+    ::deep .instances-grid {
+        max-height: 100%;
+    }
+}

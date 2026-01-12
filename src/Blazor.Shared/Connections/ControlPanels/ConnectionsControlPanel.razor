@@ -1,0 +1,79 @@
+﻿@using Blazor.Shared.Connections.Contracts
+@using Blazor.Shared.Connections.Services
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@inherits ControlPanelBase<ConnectionsControlPanelState>
+
+<ControlPanelPage Title="@TechnicalTerms.ConnectionPlural">
+    <div class="connection-control-panel-page">
+        <DescriptionBanner Title="@Localization.ConnectionsControlPanel.DescriptionBannerTitle"
+                           IconCssClass="@_descriptionBannerIconCssClass">
+            @Localization.ConnectionsControlPanel.DescriptionBannerContent
+        </DescriptionBanner>
+
+        <Grid Items="_connectionsQueryable" Virtualize="true" CssClass="connections-grid">
+            <ActionButtons>
+                <AddGridActionButton OnClick="@AddNewItem" />
+
+                <EditGridActionButton Enabled="@_isSingleItemSelected" OnClick="@EditSelectedItem" />
+
+                <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
+                                        OnClick="@DeleteSelectedItems" />
+            </ActionButtons>
+
+            <Filter>
+                <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+            </Filter>
+
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@GridItemSelection" />
+
+                <TemplateColumn Title="@CommonVocabulary.Name">
+                    <span class="connection-name-container"
+                          title="@context.Name">
+
+                        @context.Name
+                    </span>
+                </TemplateColumn>
+
+                <TemplateColumn Title="@CommonVocabulary.Description">
+                    @context.Description
+                </TemplateColumn>
+
+                <TemplateColumn Title="@TechnicalTerms.Type">
+                    @(ConnectionTypeUiRegistry.TryGetDisplayName(context.Type, out var displayName) ? displayName : context.Type.Name)
+                </TemplateColumn>
+
+                <TemplateColumn Title="@TechnicalTerms.TagPlural">
+                    @string.Join(", ", GetTags(context))
+                </TemplateColumn>
+                
+                <TemplateColumn Title="@Localization.ConnectionControlPanel.Managed">
+                    @if (context.Connection.Managed)
+                    {
+                        <div class="icon-wrapper">
+                            <MonochromeIcon Name="MonochromeIconName.Check" Size="MonochromeIconSize.Small" />
+                        </div>
+                    }
+                </TemplateColumn>
+
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@(async (EditConnectionModel item) => await EditItem(item))" />
+            </ChildContent>
+
+            <Footer>
+                <SelectionFooter GridSelection="GridItemSelection" />
+            </Footer>
+        </Grid>
+    </div>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@TechnicalTerms.TagPlural">
+    <TagsControlPanelPageContent State="State" BeginEdit="@(async () => await BeginEdit())" />
+</ControlPanelPage>
