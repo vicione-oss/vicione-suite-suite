@@ -1,0 +1,18 @@
+@use "./../../../shared/styles/colors";
+@use "./../../../shared/styles/variables";
+
+.burger-page {
+    display: grid;
+    grid-row-gap: 6px;
+    grid-template-rows: 48px auto;
+    height: 100%;
+
+    .burger-toolbar {
+        padding: variables.$toolbar-padding;
+        border-bottom: 1px solid colors.$color-border;
+    }
+
+    .burger-table {
+        padding: variables.$content-padding;
+    }
+}

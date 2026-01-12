@@ -1,0 +1,106 @@
+﻿@use "../../../../shared/styles/colors";
+@use "../../../../shared/styles/typography";
+
+@mixin styles($tab-size) {
+
+    $tab-font-size: 24px;
+    $tab-height: 36px;
+    $tab-margin-right: 32px;
+    $tab-font-weight-default: typography.$font-weight-light;
+    $tab-font-weight-active: typography.$font-weight-regular;
+
+    $tab-line-trickness: 2px;
+    $tab-line-color-hover: colors.$color-font-light;
+    $tab-line-color-active: colors.$color-accent;
+
+    $tab-font-color-default: colors.$color-font;
+    $tab-font-color-active: colors.$color-font-light;
+    $tab-font-color-hover: colors.$color-font-light;
+
+    $tab-text-padding-bottom: 1px;
+
+    @if $tab-size == "small" {
+        $tab-font-size: 14px;
+        $tab-height: 27px;
+        $tab-margin-right: 16px;
+        $tab-text-padding-bottom: 4px;
+    }
+
+    $tab-text-line-height: $tab-height - $tab-text-padding-bottom - $tab-line-trickness;
+
+    overflow-x: hidden; // show horizontal scroll handles when tabs exceed the available horizontal space
+
+    ::deep .dxbl-tabs {
+        --dxbl-tabs-bg: transparent;
+        --dxbl-tabs-separator-border-width: 0px;
+         --dxbl-tabs-font-size: #{$tab-font-size};
+
+        .dxbl-tabs-tablist {
+            > .dxbl-tabs-scroll-btn-prev {
+                margin-right: 24px;
+            }
+
+            > .dxbl-tabs-scroll-btn-next {
+                margin-left: 24px;
+            }
+
+            > .dxbl-scroll-viewer {
+                > .dxbl-scroll-viewer-content {
+                    > ul {
+                        > li {
+                            > .dxbl-tabs-item:not(.dxbl-tabs-tmpl):not(.dxbl-disabled):not(:disabled) {
+                                --dxbl-text-line-height: #{$tab-text-line-height};
+
+                                --dxbl-tabs-tab-padding-x: 0;
+                                --dxbl-tabs-tab-padding-y: #{$tab-text-padding-bottom};
+                                padding-top: 0;
+
+                                --dxbl-tabs-tab-border-color: transparent;
+
+                                margin-right: $tab-margin-right;
+                                font-weight: $tab-font-weight-default;
+
+                                border-top-width: 0px;
+                                border-left-width: 0px;
+                                border-right-width: 0px;
+                                border-bottom-width: $tab-line-trickness;
+
+                                height: $tab-height;
+
+                                color: $tab-font-color-default;
+
+                                &.dxbl-active {
+                                    font-weight: $tab-font-weight-active;
+                                    color: $tab-font-color-active;
+                                    border-bottom-color: $tab-line-color-active !important;
+
+                                    &:hover {
+                                        border-bottom-color: $tab-line-color-active;
+                                    }
+                                }
+
+                                &:not(.dxbl-active) {
+                                    &:hover {
+                                        color: $tab-font-color-hover;
+                                        border-bottom-color: $tab-line-color-hover;
+
+                                        &:before {
+                                            display: none;
+                                        }
+                                    }
+                                }
+
+                                .dxbl-text {
+                                    --dxbl-text-font-size: #{$tab-font-size};
+                                    --dxbl-text-border-width: 0px;
+                                    --dxbl-text-padding-y: 0px;
+                                    letter-spacing: .2px;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

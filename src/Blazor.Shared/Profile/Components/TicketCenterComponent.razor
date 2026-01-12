@@ -1,0 +1,39 @@
+﻿@using Sdk.Client.Components.LinkButton
+@using Sdk.Client.Components.Strip
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<div class="ticket-center-container">
+    @* Removed until functionality implemented
+    <div class="ticket-center-head-frame">
+        <div class="ticket-center-head">
+            @Localization.TicketCenterComponent.TicketCenter
+        </div>
+    </div>
+
+    <div class="ticket-center-strip-component">
+        <StripComponent Headline="@Urgent.DueDateLevel"
+                        Subline="@Urgent.Message"
+                        Color="@Urgent.Color"
+                        IconName="@MonochromeIconName.Urgent"/>
+        <StripComponent Headline="@Today.DueDateLevel"
+                        Subline="@Today.Message"
+                        Color="@Today.Color"
+                        IconName="@MonochromeIconName.Today"/>
+        <StripComponent Headline="@ThisWeek.DueDateLevel"
+                        Subline="@ThisWeek.Message"
+                        Color="@ThisWeek.Color"
+                        IconName="@MonochromeIconName.ThisWeek"/>
+        <StripComponent Headline="@Soon.DueDateLevel"
+                        Subline="@Soon.Message"
+                        Color="@Soon.Color"
+                        IconName="@MonochromeIconName.Timer"/>
+    </div>
+
+    <div class="open-ticket-center">
+        <LinkButton IconName="@MonochromeIconName.OpenInNewWindow"
+                    CssClass="open-ticket-center-button"
+                    Text="@Localization.TicketCenterComponent.OpenTicketCenter"
+                    OnClick="@OpenTicketCenter"/>
+    </div>
+    *@
+</div>

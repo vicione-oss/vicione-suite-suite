@@ -1,0 +1,18 @@
+﻿.wizard-stepper-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+
+    padding-top: 74px;
+    padding-bottom: 74px;
+    
+    background-color: #292929;
+
+    & ::deep > div:first-child {
+        flex-grow: 1;
+    }
+}
+
+.content-preliminary-spacing {
+    flex-basis: 48px;
+}

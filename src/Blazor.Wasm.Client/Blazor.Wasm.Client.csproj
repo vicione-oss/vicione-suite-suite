@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" TreatAsLocalProperty="SelfContained">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Blazor.Wasm.Client</AssemblyName>
+    <!-- to avoid DevExpress Wasm-Runtime failure on publish -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <RootNamespace>Blazor.Wasm.Client</RootNamespace>
+    <SelfContained>true</SelfContained>
+    <CompressionEnabled>false</CompressionEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
+    <!-- this package reference is needed to provide _framework/blazor.webassembly.js -->
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Blazor.Shared\Blazor.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ViciOne.Suite.Blazor.Wasm.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Localization\BlazorWasmClientModule.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BlazorWasmClientModule.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Localization\BlazorWasmClientModule.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>BlazorWasmClientModule.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  
+  <Target Name="DeleteUnusedWwwrootContent" AfterTargets="Publish">
+    <RemoveDir Directories="$(PublishDir)\wwwroot\Identity;$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Themes" />
+    <Message Text="Deleted Dx themes and identity web content" Importance="high" />
+  </Target>
+</Project>

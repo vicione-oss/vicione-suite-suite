@@ -1,0 +1,14 @@
+﻿.time-zone-map {
+    position: relative;
+    overflow: hidden;
+
+    .time-zone-map-bg, .time-zone {
+        width: 100%
+    }
+
+    .time-zone {
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+}

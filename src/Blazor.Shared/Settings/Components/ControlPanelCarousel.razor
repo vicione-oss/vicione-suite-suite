@@ -1,0 +1,71 @@
+﻿@using Blazor.Shared.Popup.Components
+@using Microsoft.AspNetCore.Components.Sections
+@using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
+@using ViciOne.Ui.Blazor.Components.Extensions
+
+<div class="control-panel-carousel">
+    @{
+        ControlPanelPageRegistry.BeginUpdate();
+        try
+        {
+            for (var itemIndex = 0; itemIndex < _items.Count; itemIndex++)
+            {
+                var item = _items[itemIndex];
+
+                var itemCssClasses = new List<string> { "control-panel-carousel__item" };
+                var itemAttributes = new Dictionary<string, object>();
+                var renderControlPanel = false;
+
+                if (_itemTransitions.TryPeek(out var itemTransition))
+                {
+                    if (item.ControlPanelRegistryItem == itemTransition.From || item.ControlPanelRegistryItem == itemTransition.To)
+                        renderControlPanel = true;
+                    else
+                        itemCssClasses.Add("hidden");
+
+                    if (item.ControlPanelRegistryItem == itemTransition.Animation.Item)
+                    {
+                        renderControlPanel = true;
+
+                        itemCssClasses.Add(itemTransition.Animation.Kind.ToString().ToDashCase());
+                        itemAttributes.Add("style", $"--animation-duration: {itemTransition.Animation.DurationMs}ms");
+                    }
+                }
+                else
+                {
+                    if (item.Active)
+                        renderControlPanel = true;
+                    else
+                        itemCssClasses.Add("hidden");
+                }
+
+                itemAttributes.Add("class", string.Join(" ", itemCssClasses));
+
+                var descriptionBannerSectionId = new DescriptionBannerSectionId();
+
+                <div @attributes="itemAttributes" @key="itemIndex">
+                    @if (renderControlPanel)
+                    {
+                        <AdvancedErrorBoundary @key="item">
+                            <PopupContentLayout>
+                                <PopupStaticContent>
+                                    <SectionOutlet SectionId="descriptionBannerSectionId" />
+                                </PopupStaticContent>
+
+                                <PopupScrollableContent>
+                                    <CascadingValue Value="descriptionBannerSectionId">
+                                        <ControlPanelContainer ControlPanelRegistryItem="item.ControlPanelRegistryItem" />
+                                    </CascadingValue>
+                                </PopupScrollableContent>
+                            </PopupContentLayout>
+                        </AdvancedErrorBoundary>
+                    }
+                </div>
+            }
+        }
+        finally
+        {
+            ControlPanelPageRegistry.EndUpdate();
+        }
+    }
+</div>

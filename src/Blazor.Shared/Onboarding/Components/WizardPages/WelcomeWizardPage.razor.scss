@@ -1,0 +1,25 @@
+﻿@use "../../../Styles/onboarding-wizard/mixins";
+
+.settings-information-layout {
+    display: grid;
+    grid-template-areas: "left right";
+    grid-template-columns: auto min-content;
+
+    .left {
+        grid-area: left;
+
+        padding-right: 64px;
+
+        @include mixins.informational-content-styles();
+    }
+
+    .right {
+        grid-area: right;
+
+        align-self: center;
+
+        img {
+            width: 140px;
+        }
+    }
+}

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Blazor.DevAssets</AssemblyName>
+    <RootNamespace>Blazor.DevAssets</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
+    <PackageReference Include="ViciOne.Suite.Sdk.Client" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core.UiHosting\Core.UiHosting.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ViciOne.Suite.Blazor.DevAssets.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+</Project>

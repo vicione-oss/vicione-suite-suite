@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <UserSecretsId>9a435bcc-1f49-40aa-8148-4f70c48a16dc</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+    <AssemblyName>ViciOne.Suite.Core.OS</AssemblyName>
+    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsWindows)'=='true'">
+    <DefineConstants>Windows</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="HostManagement\Resources\GetSystemConfigurationResult.json" />
+    <Content Remove="Modules\initial-modules.json" />
+    <EmbeddedResource Include="HostManagement\Resources\GetSystemConfigurationResult.json" />
+    <EmbeddedResource Include="Modules\initial-modules.json" />
+  </ItemGroup>
+
+  <!-- Prevent copying unnecessary file -->
+  <ItemGroup>
+    <Content Update="appsettings.Development.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" />
+    <PackageReference Include="HostManagement.Shared.Communication" />
+    <PackageReference Include="MassTransit.RabbitMQ" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Riok.Mapperly" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Expressions" />
+    <PackageReference Include="Serilog.Sinks.Journal" />
+    <PackageReference Include="Serilog.Sinks.SyslogMessages" />
+    <PackageReference Include="ViciOne.Journal" />
+    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
+    <PackageReference Include="ViciOne.Ui.Localization" />
+    <PackageReference Include="ViciOne.SystemMonitoring" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core.UiHosting\Core.UiHosting.csproj" />
+    <ProjectReference Include="..\Core.Module\Core.Module.csproj" />
+    <ProjectReference Include="..\Core.Shared\Core.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ViciOne.Suite.Core.OS.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    <InternalsVisibleTo Include="ViciOne.Suite.Blazor.Server.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- it has to exist for web projects! don't delete it! -->
+    <Folder Include="wwwroot" />
+  </ItemGroup>
+
+</Project>

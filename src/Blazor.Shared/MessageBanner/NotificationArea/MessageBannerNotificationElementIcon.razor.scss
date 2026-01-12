@@ -1,0 +1,20 @@
+﻿.icon-wrapper {
+    width: 32px;
+    height: 32px;
+    animation-name: blink;
+    animation-duration: 60s;
+    animation-iteration-count: infinite;
+    animation-timing-function: steps(1, end);
+    filter: brightness(0) saturate(100%) invert(95%) sepia(1%) saturate(115%) hue-rotate(330deg) brightness(95%) contrast(93%);
+
+    > img {
+        width: inherit;
+        height: inherit;
+    }
+}
+
+@keyframes blink {
+    98%, 100% {
+        filter: var(--icon-color);
+    }
+}

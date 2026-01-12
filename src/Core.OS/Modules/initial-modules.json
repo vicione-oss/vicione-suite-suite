@@ -1,0 +1,5 @@
+﻿{
+    "Name": "ViciOne.Module.ApiManifest",
+    "Description": "Define module versions to be synchronized per api",
+    "Packages": []
+}

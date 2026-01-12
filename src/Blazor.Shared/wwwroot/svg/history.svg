@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <filter id="history-a" width="163.2%" height="160%" x="-31.6%" y="-30%" filterUnits="objectBoundingBox">
+      <feOffset dy="2" in="SourceAlpha" result="shadowOffsetOuter1"/>
+      <feGaussianBlur in="shadowOffsetOuter1" result="shadowBlurOuter1" stdDeviation="2"/>
+      <feColorMatrix in="shadowBlurOuter1" result="shadowMatrixOuter1" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0"/>
+      <feMerge>
+        <feMergeNode in="shadowMatrixOuter1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="history-b" x1="33.308%" x2="85.455%" y1="0%" y2="111.642%">
+      <stop offset="0%" stop-color="#D9D9D9"/>
+      <stop offset="100%" stop-color="#9A9A9A"/>
+    </linearGradient>
+    <path id="history-c" d="M29.9982568,-5.68434189e-14 C31.103789,-5.68434189e-14 32.0000923,0.893058588 32.0000923,1.99386388 L32.0000923,19.4961492 C31.341673,19.2626592 30.6556507,19.0880847 29.9482745,18.978715 L29.9487181,1.87192118 L2.05854368,1.87192118 L2.05854368,36.1280789 L18.2922283,36.1290059 C18.6781388,36.7987248 19.1291824,37.425698 19.6366348,38.0011445 L1.99641611,38 C0.893825943,38 -2.84217094e-14,37.0981493 -2.84217094e-14,36.0104577 L-2.84217094e-14,1.98954233 C-2.84217094e-14,0.890748438 0.889261728,-5.68434189e-14 2.00174332,-5.68434189e-14 L29.9982568,-5.68434189e-14 Z M6.00000002,22.0000001 L6.00000002,20.0000001 L18,20.0000001 L18,22.0000001 L6.00000002,22.0000001 Z M26,16 L26,18 L6.00000002,18 L6.00000002,16 L26,16 Z M26,12.0000001 L26,14.0000001 L6.00000002,14.0000001 L6.00000002,12.0000001 L26,12.0000001 Z M26,8.00000002 L26,10 L6.00000002,10 L6.00000002,8.00000002 L26,8.00000002 Z"/>
+    <filter id="history-d" width="103.1%" height="102.6%" x="-1.6%" y="-1.3%" filterUnits="objectBoundingBox">
+      <feOffset dx="-1" dy="-1" in="SourceAlpha" result="shadowOffsetInner1"/>
+      <feComposite in="shadowOffsetInner1" in2="SourceAlpha" k2="-1" k3="1" operator="arithmetic" result="shadowInnerInner1"/>
+      <feColorMatrix in="shadowInnerInner1" values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 0.179404438 0"/>
+    </filter>
+    <linearGradient id="history-e" x1="22.483%" x2="69.977%" y1="16.296%" y2="84.522%">
+      <stop offset="0%" stop-color="#FF9229"/>
+      <stop offset="100%" stop-color="#FF7D00"/>
+    </linearGradient>
+    <path id="history-f" d="M28.0000001,20.0000001 C33.5228476,20.0000001 38.0000001,24.4771526 38.0000001,30.0000001 C38.0000001,35.5228476 33.5228476,40.0000001 28.0000001,40.0000001 C22.4771526,40.0000001 18.0000001,35.5228476 18.0000001,30.0000001 C18.0000001,24.4771526 22.4771526,20.0000001 28.0000001,20.0000001 Z M28.0000001,22.0000001 C23.5817221,22.0000001 20.0000001,25.5817221 20.0000001,30.0000001 C20.0000001,34.4182781 23.5817221,38.0000001 28.0000001,38.0000001 C32.4182781,38.0000001 36.0000001,34.4182781 36.0000001,30.0000001 C36.0000001,25.5817221 32.4182781,22.0000001 28.0000001,22.0000001 Z M29.0000001,24.0000001 L29.0000001,29.5000001 L34.0000001,29.5000001 L34.0000001,31.5000001 L27.0000001,31.5000001 L27.0000001,24.0000001 L29.0000001,24.0000001 Z"/>
+    <filter id="history-g" width="105%" height="105%" x="-2.5%" y="-2.5%" filterUnits="objectBoundingBox">
+      <feOffset dx="1" in="SourceAlpha" result="shadowOffsetInner1"/>
+      <feComposite in="shadowOffsetInner1" in2="SourceAlpha" k2="-1" k3="1" operator="arithmetic" result="shadowInnerInner1"/>
+      <feColorMatrix in="shadowInnerInner1" values="0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 0.200857736 0"/>
+    </filter>
+  </defs>
+  <g fill="none" fill-rule="evenodd" filter="url(#history-a)" transform="translate(6 4)">
+    <use fill="url(#history-b)" xlink:href="#history-c"/>
+    <use fill="#000" filter="url(#history-d)" xlink:href="#history-c"/>
+    <use fill="url(#history-e)" xlink:href="#history-f"/>
+    <use fill="#000" filter="url(#history-g)" xlink:href="#history-f"/>
+  </g>
+</svg>

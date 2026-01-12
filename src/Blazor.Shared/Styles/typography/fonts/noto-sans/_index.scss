@@ -1,0 +1,16 @@
+﻿@use "variables";
+@use "../../../../../../node_modules/@fontsource-utils/scss/src/mixins" as font-source-utils;
+@use "../../../../../../node_modules/@fontsource/noto-sans/scss/mixins" as noto-sans;
+
+// https://github.com/fontsource/fontsource/blob/main/packages/scss/README.md
+@include font-source-utils.faces(
+  $metadata: noto-sans.$metadata,
+  $subsets: latin,
+  $weights:
+    (
+        variables.$font-weight-light,
+        variables.$font-weight-regular,
+        variables.$font-weight-medium
+    ),
+  $directory: "#{variables.$font-directory-base}/noto-sans"
+);

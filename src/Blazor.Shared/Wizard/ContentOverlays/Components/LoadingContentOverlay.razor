@@ -1,0 +1,16 @@
+﻿@using Microsoft.AspNetCore.Components.Sections
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
+
+<OptionalSectionContent SectionId="@SectionId">
+    <div class="loading-overlay">
+        <LoadingSpinner Messages="_timedMessages" Visible="true">
+            <div class="loader-container">
+                <div class="loader"></div>
+            </div>
+
+            <LoadingSpinnerMessage CssClass="message" Visible="@context.Message.Visible">
+                @context.Message.Text
+            </LoadingSpinnerMessage>
+        </LoadingSpinner>
+    </div>
+</OptionalSectionContent>

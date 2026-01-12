@@ -1,0 +1,39 @@
+﻿@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Localization.Resources
+
+<SettingsGroup Title="@Title" Expanded="@Settings.Enabled">
+    <Expander>
+        <SwitchExpander @bind-Value="@Settings.Enabled" @bind-Value:after="BeginEdit" />
+    </Expander>
+
+    <ChildContent>
+        <SettingsField Label="@TechnicalTerms.Server">
+            <SettingsFieldTextBox Placeholder="@TechnicalTerms.Server" @bind-Value="Settings.Server" @bind-Value:after="BeginEdit" />
+        </SettingsField>
+
+        <SettingsField Label="@TechnicalTerms.Port">
+            <SettingsFieldTextBox Placeholder="@TechnicalTerms.Port" @bind-Value="Settings.Port" @bind-Value:after="BeginEdit" />
+        </SettingsField>
+
+        <SettingsGroup Title="@Localization.ProxySettingsGroup.PasswordSettingsGroupTitle"
+                       Subline="@Localization.ProxySettingsGroup.PasswordSettingsGroupSubline"
+                       Expanded="@Settings.PasswordRequired">
+            <Expander>
+                <SwitchExpander @bind-Value="@Settings.PasswordRequired" @bind-Value:after="BeginEdit" />
+            </Expander>
+
+            <ChildContent>
+                <SettingsField Label="@TechnicalTerms.Username">
+                    <SettingsFieldTextBox Placeholder="@TechnicalTerms.Username" @bind-Value="Settings.Username" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.Password">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Password"
+                                          Password="true"
+                                          @bind-Value="Settings.Password"
+                                          @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </ChildContent>
+        </SettingsGroup>
+    </ChildContent>
+</SettingsGroup>

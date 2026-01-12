@@ -1,0 +1,8 @@
+﻿@use "./../../../../shared/styles/variables.scss";
+
+.notification-element-grid {
+    display: grid;
+    grid-auto-columns: variables.$top-bar-height;
+    grid-auto-rows: variables.$top-bar-height;
+    grid-auto-flow: column;
+}

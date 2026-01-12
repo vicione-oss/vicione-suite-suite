@@ -1,0 +1,31 @@
+﻿@using Blazor.Shared.Network.ControlPanels.RemoteAccess.Services
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Localization.Resources
+
+@inherits NetworkControlPanelBase<RemoteAccessControlPanelState>
+
+<ControlPanelPage Title="@TechnicalTerms.Terminal">
+    <DescriptionBanner IconCssClass="@_cluster1IconCssClasses" Title="@Localization.RemoteAccessControlPanel.DescriptionBannerTitle">
+        @Localization.RemoteAccessControlPanel.DescriptionBannerContent
+        @if (State.Terminal.CanMoneoRc) // This whole logic should be moved to the moneo connect module somehow
+        {
+            @(" " + Localization.RemoteAccessControlPanel.DescriptionBannerContentMoneo)
+        }
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        <SettingsGroup Title="@TechnicalAcronyms.Ssh" Expanded="@State.Terminal.IsSecureShell">
+            <Expander>
+                <SwitchExpander @bind-Value="@State.Terminal.IsSecureShell" @bind-Value:after="@IsSecureShellChanged" Enabled="@State.Terminal.CanSecureShell" />
+            </Expander>
+        </SettingsGroup>
+        @if (State.Terminal.CanMoneoRc) // This whole logic should be moved to the moneo connect module somehow
+        {
+            <SettingsGroup Title="moneo|remoteConnect" Expanded="@State.Terminal.IsMoneoRc">
+                <Expander>
+                    <SwitchExpander @bind-Value="@State.Terminal.IsMoneoRc" @bind-Value:after="@IsMoneoRcChanged" Enabled="@State.Terminal.CanMoneoRc"/>
+                </Expander>
+            </SettingsGroup>
+        }
+    </SettingsLayout>
+</ControlPanelPage>

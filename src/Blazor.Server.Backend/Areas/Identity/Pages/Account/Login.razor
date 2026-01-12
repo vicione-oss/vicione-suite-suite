@@ -1,0 +1,63 @@
+﻿@page "/template/Login"
+@using Blazor.Server.Backend.Components
+@using Blazor.Server.Backend.Enums
+@using Blazor.Shared.Components
+@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.Blazor.Components.CheckBox
+@using ViciOne.Ui.Blazor.Components.TextBox
+@using ViciOne.Ui.Localization.Resources
+
+<PageTitle>@Localization.Login.Title</PageTitle>
+<AccountLayout>
+    <Heading>@Localization.Login.Title</Heading>
+    <LeftSideContent>
+        <EditForm method="post" OnValidSubmit="LoginUser" FormName="login" Model="Input">
+            <DataAnnotationsValidator />
+
+            <TextInputField @bind-Value="@Input.Username"
+                            Valid="@(context.FieldCssClass(() => Input.Username) == "valid" ? true : false)"
+                            Placeholder="@CommonVocabulary.User"
+                            Attributes="@(new() { { "autocomplete", "username" }, { "aria-required", true } })" />
+            <div class="password">
+                <TextInputField @bind-Value="@Input.Password"
+                                Password="true"
+                                Valid="@(context.FieldCssClass(() => Input.Password) == "valid" ? true : false)"
+                                Placeholder="@CommonVocabulary.Password"
+                                Attributes="@(new() { { "aria-required", true } })" />
+            </div>
+
+            <div class="remember-forgot-section"> 
+                 <div>
+                     <label class="remember-me">
+                         <CheckBox Value="@Input.RememberMe"/>
+                         <span class="text">@Localization.Login.RememberMe</span>
+                     </label>
+                 </div> 
+            
+                 <div>
+                     <NavigationField Route="/template/forgot-password">
+                         <Content>
+                            @Localization.Login.ForgotPassword
+                         </Content>
+                     </NavigationField>
+                 </div>
+             </div>
+
+            <div class="button-section">
+                <AccountButton Text="@Localization.Login.Title" ButtonType="AccountButtonType.Active" Submit="true" />
+
+                <NavigationField Route="/template/register">
+                    <Content>
+                        <img src="@(SvgIcon.UserOutline.GetPath())" />
+
+                        <label>@Localization.Login.NoAccountYet</label>
+                        <label>@Localization.Login.RegisterNewUser</label>
+                    </Content>
+                </NavigationField>
+            </div>
+        </EditForm>
+    </LeftSideContent>
+</AccountLayout>

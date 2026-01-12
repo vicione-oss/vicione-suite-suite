@@ -1,0 +1,8 @@
+﻿.popup-content-layout {
+    display: flex;
+    flex-direction: column;
+
+    position: relative; // give content something to align on
+
+    height: 100%; // required to allow PopupScrollableContent to span over remaining height after PopupStaticContent
+}

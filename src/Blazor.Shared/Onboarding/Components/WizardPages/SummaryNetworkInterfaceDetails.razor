@@ -1,0 +1,23 @@
+﻿@using Blazor.Shared.Settings.NetworkInterface.Enums
+@using Blazor.Shared.Settings.NetworkInterface.Enums.Extensions
+@using ViciOne.Ui.Localization.Resources
+
+<div class="settings-network-interface-details">
+    <div>@Localization.SummaryNetworkInterfaceDetails.ConfigurationMode</div>
+    <div>@NetworkInterfaceConfiguration.ConfigurationMode.ToLocalizedString()</div>
+
+    @if (NetworkInterfaceConfiguration.ConfigurationMode == IpConfigurationMode.Manual)
+    {
+        <div>@TechnicalTerms.IpAddress</div>
+        <div>@NetworkInterfaceConfiguration.IpAddress</div>
+
+        <div>@TechnicalTerms.SubnetMask</div>
+        <div>@NetworkInterfaceConfiguration.SubnetMask</div>
+
+        <div>@TechnicalTerms.DefaultGateway</div>
+        <div>@NetworkInterfaceConfiguration.DefaultGateway</div>
+
+        <div>@TechnicalTerms.DnsServer</div>
+        <div>@NetworkInterfaceConfiguration.DnsServer</div>
+    }
+</div>

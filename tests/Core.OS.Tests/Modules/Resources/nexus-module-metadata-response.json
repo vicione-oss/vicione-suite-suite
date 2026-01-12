@@ -1,0 +1,68 @@
+﻿{
+    "items": [
+        {
+            "downloadUrl": "https://nexus.nsc-gmbh.de/repository/raw-fb-server/modules/ViciOne.Suite.ClusterManagement/0.22.0-win-x64_0.18.0.json",
+            "path": "/modules/ViciOne.Suite.ClusterManagement/0.22.0-win-x64_0.18.0.json",
+            "id": "cmF3LWZiLXNlcnZlcjozNTg2MTYzOQ",
+            "repository": "raw-fb-server",
+            "format": "raw",
+            "checksum": {
+                "sha1": "166e76844e7f7b73c02d9735897e62a8f58afc05",
+                "sha256": "614c996615ccc4ae7a1df64d9f4c4715ff73e15fda390580e0c0680c7fef0299",
+                "sha512": "054b2165f1c9952737fb34b70ef97d440e7e815f84d874cd76dca7722f6bbd8339c55b7470d39bbb70c3fc24ebdab19eeb36c40d92b55043358d4749d130eb0f",
+                "md5": "caf63965190cccb26eda6c34daaf14ae"
+            },
+            "contentType": "application/json",
+            "lastModified": "2024-10-29T11:21:56.907+00:00",
+            "lastDownloaded": "2024-11-04T09:30:34.052+00:00",
+            "uploader": "ci.raw.rw",
+            "uploaderIp": "88.198.254.181",
+            "fileSize": 10630,
+            "blobCreated": null,
+            "blobStoreName": null
+        },
+        {
+            "downloadUrl": "https://nexus.nsc-gmbh.de/repository/raw-fb-server/modules/ViciOne.Suite.DeviceManagement/0.5.0-win-x64_0.18.0.json",
+            "path": "/modules/ViciOne.Suite.DeviceManagement/0.5.0-win-x64_0.18.0.json",
+            "id": "cmF3LWZiLXNlcnZlcjoxMDJjODM2Nw",
+            "repository": "raw-fb-server",
+            "format": "raw",
+            "checksum": {
+                "sha1": "034daf986518595237243fdf35fd97be3dc13df7",
+                "sha256": "ba94043611d6e223692ec3dc48239dee61e59b01ca367b7635e61e9d0a764ec7",
+                "sha512": "84066aea644da3a27c356bf5c0d4045ec58a40fc0cedc759067ab0659a3f1b24436a1d7b6e97a27600a660b0d0229a46a50b0ac4ad5daa3bfdbbc6f31af92420",
+                "md5": "303f7d5b00f3545a15b95376b9119409"
+            },
+            "contentType": "application/json",
+            "lastModified": "2024-10-29T11:39:19.844+00:00",
+            "lastDownloaded": "2024-11-04T09:30:34.342+00:00",
+            "uploader": "ci.raw.rw",
+            "uploaderIp": "88.198.254.181",
+            "fileSize": 3796,
+            "blobCreated": null,
+            "blobStoreName": null
+        },
+        {
+            "downloadUrl": "https://nexus.nsc-gmbh.de/repository/raw-fb-server/modules/ViciOne.Suite.ClusterManagement/ci-1399909-win-x64_0.18.0.json",
+            "path": "/modules/ViciOne.Suite.ClusterManagement/ci-1399909-win-x64_0.18.0.json",
+            "id": "cmF3LWZiLXNlcnZlcjphYjA1ZDI2ZA",
+            "repository": "raw-fb-server",
+            "format": "raw",
+            "checksum": {
+                "sha1": "1654fa2195475c4eb2821a0bc131cd30df3212fb",
+                "sha256": "ef5f2d2ad5851421e6cb34c199cc6122c20fa0ee0758537b9720a94d02cec2f1",
+                "sha512": "d3f5c2d7e0985dfa1bef0419e0fef2f1ee830789451e351423e96d8f591c686cdb7d312af96c1cfca8a286d57c4b5f34e8956917196b6a9096d6ec5113a2ca69",
+                "md5": "393c616527242284bfca3ac8e5c25468"
+            },
+            "contentType": "application/json",
+            "lastModified": "2024-10-29T08:40:28.785+00:00",
+            "lastDownloaded": "2024-11-04T10:03:03.984+00:00",
+            "uploader": "ci.raw.rw",
+            "uploaderIp": "88.198.254.181",
+            "fileSize": 10634,
+            "blobCreated": null,
+            "blobStoreName": null
+        }        
+    ],
+    "continuationToken": null
+}

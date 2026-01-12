@@ -1,0 +1,58 @@
+﻿using TestModule.Backend.Contracts;
+
+namespace TestModule.Backend.Helpers;
+
+internal class SeedData
+{
+    public static List<SimpleDataTypes> DefaultSeedDataSimpleDataTypes()
+        =>
+        [
+                new SimpleDataTypes()
+                {
+                    Id = 1,
+                    MachineId = Guid.NewGuid(),
+                    MachineDescription = "Presse für Stoßfänger",
+                    MachineName = "Presse T1000",
+                    Users = 4,
+                    Built = new DateTime(2001, 2, 12, 0, 0, 0, DateTimeKind.Utc),
+                    Created = new DateTime(2012, 12, 12, 0, 0, 0, DateTimeKind.Utc)
+                },
+                new SimpleDataTypes()
+                {
+                    Id = 2,
+                    MachineId = Guid.NewGuid(),
+                    MachineDescription = "Presse für Stoßfänger - T2000",
+                    MachineName = "Presse T2000",
+                    Users = 3,
+                    Built = new DateTime(2010, 6, 10,  0, 0, 0, DateTimeKind.Utc),
+                    Created = DateTime.UtcNow
+                },
+                new SimpleDataTypes()
+                {
+                    Id = 3,
+                    MachineId = Guid.NewGuid(),
+                    MachineDescription = "Presse für Stoßfänger - T5000",
+                    MachineName = "Presse T5000",
+                    Users = 1,
+                    Built = new DateTime(2011, 11, 30, 0, 0, 0, DateTimeKind.Utc),
+                    Created = new DateTime(2017, 1, 09, 0, 0, 0, DateTimeKind.Utc)
+                }
+        ];
+
+    public static List<SimpleEmployees> DefaultDataSimpleEmployees()
+        =>
+        [
+            new SimpleEmployees()
+            {
+                emp_no = 1,
+                Name = "Hans.Wurst",
+                Salutaion = SimpleEmployees.Gender.Mr
+            },
+            new SimpleEmployees()
+            {
+                emp_no = 2,
+                Name = "Karla.Kolumna",
+                Salutaion = SimpleEmployees.Gender.Mrs
+            }
+        ];
+}

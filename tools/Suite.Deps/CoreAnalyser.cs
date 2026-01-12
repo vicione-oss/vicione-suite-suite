@@ -1,0 +1,160 @@
+﻿using System.IO.Abstractions;
+using System.Reflection;
+using Core.Module;
+using Core.Module.Extensions;
+using Core.Module.Options;
+using Microsoft.Extensions.DependencyModel;
+using Sdk.Modules;
+
+namespace Suite.Deps;
+
+internal static class CoreAnalyser
+{
+    private static readonly string[] NativeExtraLibs = ["e_sqlite3"];
+
+    public static Task Execute(CoreAnalyserOptions options)
+    {
+        var context = CreateSuiteDependencyContext(options, new FileSystem());
+
+        WriteHeader(context, options);
+
+        // all the runtime libraries provided by core or uihost
+        foreach (var library in GetRuntimeLibraryModels(context))
+        {
+            Console.WriteLine(options.Version ? $"{library.FileName}:{library.Version}" : library.FileName);
+        }
+
+        // native libraries shipped by Cores.OS on linux
+        foreach (var library in NativeExtraLibs)
+        {
+            // https://learn.microsoft.com/en-us/dotnet/standard/native-interop/native-library-loading#library-name-variations
+            Console.WriteLine($"lib{library}");
+            Console.WriteLine($"lib{library}.so");
+            Console.WriteLine($"{library}.so");
+        }
+
+        // asset libraries provided by uihost
+        foreach (var assets in GetAssetLibraries(context))
+        {
+            Console.WriteLine($"/wwwroot/_content/{assets.Name}");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static void WriteHeader(SuiteDependencyContext context, CoreAnalyserOptions options)
+    {
+        if (!options.Header)
+            return;
+
+        var sdkAssembly = Assembly.GetAssembly(typeof(IModule));
+        if (sdkAssembly is null)
+            throw new MissingMemberException(nameof(sdkAssembly));
+
+        // use sdk version that suite uses
+        var sdkAssemblyName = sdkAssembly.GetName();
+        var sdkVersion = context.Core.RuntimeLibraries.First(k => k.Name == sdkAssemblyName.Name);
+
+        Console.WriteLine($"#SDK:{sdkVersion.Name}:v{sdkVersion.Version}");
+        Console.WriteLine($"#RUNTIMES:{string.Join(',', options.Runtimes)}");
+        Console.WriteLine($"#LANGUAGES:{string.Join(',', options.Languages)}");
+    }
+
+    private static SuiteDependencyContext CreateSuiteDependencyContext(CoreAnalyserOptions options, IFileSystem fileSystem)
+    {
+        var rootedSuitePath = fileSystem.GetRootedPath(options.SuitePath);
+        var config = ConfigurationUtils.GetSuiteConfiguration(rootedSuitePath, options.Environment);
+        var coreDepsJsonFile = ConfigurationUtils.GetCoreDepsJsonFilePath(rootedSuitePath);
+        var loaderOptions = ConfigurationUtils.GetSuiteModuleLoaderOptions(config, rootedSuitePath);
+
+        // we only need to check core and blazor.server        
+        var moduleOptions = new Dictionary<string, Core.Module.Contracts.ModuleOptions>
+        {
+            {
+                Constants.BlazorServerModuleId, config.GetUiHostOptions(Constants.BlazorServerModuleId) ?? new UiHostOptions()
+            },
+            {
+                Constants.BlazorWasmModuleId, config.GetUiHostOptions(Constants.BlazorWasmModuleId) ?? new UiHostOptions()
+            },
+        };
+
+        var context = new SuiteDependencyContextBuilder()
+            .WithCore(coreDepsJsonFile)
+            .WithUiHost(loaderOptions, moduleOptions)
+            .WithBackendModules(loaderOptions, moduleOptions)
+            .WithClientModules(loaderOptions, moduleOptions)
+            .WithMappingDisabled()
+            .Build(fileSystem);
+
+        if (context.UiHosts.Count <= 0)
+            throw new InvalidOperationException("No ui host was found");
+
+        if (context.UiHosts.Count > 2)
+            throw new InvalidOperationException("Only 2 ui hosts supported");
+
+        return context;
+    }
+
+    private static IEnumerable<FileVersionModel> GetRuntimeLibraryModels(SuiteDependencyContext context)
+    {
+        var uiHostLibraries = context.UiHosts.Count == 1
+            ? context.UiHosts[0].RuntimeLibraries
+            : context.UiHosts[0]
+                .RuntimeLibraries.IntersectBy(context.UiHosts[1]
+                        .RuntimeLibraries.Select(k => new
+                        {
+                            k.Name,
+                            k.Version
+                        }),
+                    k => new
+                    {
+                        k.Name,
+                        k.Version
+                    });
+
+        // remove the dll reference files - they are not of interest
+        var coreAndHostLibraries = context.Core.RuntimeLibraries.Union(uiHostLibraries)
+            .Where(k => k.Type != "reference")
+            .DistinctBy(k => k.Name);
+
+        // the runtime libraries defined in deps.json do not match the published assemblies - don't ask me why :(
+        return coreAndHostLibraries
+            .Select(k => new FileVersionModel(GetExistingAssemblyPath(k), k.Version))
+            .Where(k => !string.IsNullOrEmpty(k.FileName))
+            .DistinctBy(k => k.FileName)
+            .OrderBy(k => k.FileName);
+
+        string? GetExistingAssemblyPath(RuntimeLibrary rtl)
+        {
+            var assemblyPath = context.GetCoreContextRuntimeLibraryPath(rtl.Name, rtl.Version);
+            if (!string.IsNullOrEmpty(assemblyPath))
+            {
+                return Path.GetFileName(assemblyPath);
+            }
+
+            var fallbackPath = Path.Combine(context.Core.AssemblyFolder, $"{rtl.Name}.dll");
+            if (File.Exists(fallbackPath))
+                return Path.GetFileName(fallbackPath);
+
+            return null;
+        }
+    }
+
+    private record FileVersionModel(string? FileName, string? Version);
+
+    private static IEnumerable<AssetLibrary> GetAssetLibraries(SuiteDependencyContext context)
+    {
+        var uiHostAssets = context.UiHosts.Count == 1
+            ? context.UiHosts[0].RuntimeAssets
+            : context.UiHosts[0].RuntimeAssets.IntersectBy(context.UiHosts[1].RuntimeAssets.Select(k => k.Name), k => k.Name);
+
+        // this one gets packed to modules referencing Ui.Shared lib and needs to be removed (>20mb)
+        var manualLibraries = new[] { new AssetLibrary("DevExpress.Blazor.Themes", "") };
+
+        return context.Core.RuntimeAssets
+            .Union(uiHostAssets)
+            .Union(manualLibraries)
+            .DistinctBy(k => k.Name)
+            .OrderBy(k => k.Name);
+    }
+}

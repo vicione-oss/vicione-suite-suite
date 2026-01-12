@@ -1,0 +1,11 @@
+﻿@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@if (NotificationElementState.IsActive)
+{
+    <MonochromeIcon Name="MonochromeIconName.GearSolid" Size="MonochromeIconSize.SmallMedium" />
+}
+else
+{
+    <MonochromeIcon Name="MonochromeIconName.GearLight" Size="MonochromeIconSize.SmallMedium" />
+}

@@ -1,0 +1,34 @@
+﻿@using Burger.Public.Contracts
+@using Sdk.Client.Components.Settings
+@using Sdk.Client.Connections
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Blazor.Components.SpinEdit
+@using ViciOne.Ui.Blazor.Components.CheckBox
+
+@inherits ConnectionSettingsComponentBase<BurgerConnection>
+
+<SettingsField Label="Patty type">
+    <SettingsFieldTextBox Placeholder="Patty type"
+                          @bind-Value="@Connection.PattyType"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="Bun type">
+    <SettingsFieldTextBox Placeholder="BunType"
+                          @bind-Value="@Connection.BunType"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="Patties">
+    <SpinEdit @bind-Value="@Connection.Patties"
+              @bind-Value:after="NotifyChanged"
+              Interval="1"
+              Minimum="1"
+              Maximum="4"
+              IsRastered="true" />
+</SettingsField>
+
+<SettingsField Label="Cheese">
+    <CheckBox @bind-Value="@Connection.Cheese"
+              @bind-Value:after="NotifyChanged" />
+</SettingsField>

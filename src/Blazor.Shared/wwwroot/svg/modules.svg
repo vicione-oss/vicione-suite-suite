@@ -1,0 +1,35 @@
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='48' height='48'
+     viewBox='0 0 48 48'>
+  <defs>
+    <linearGradient id='my-modules-a' x1='41.089%' x2='68.928%' y1='0%' y2='111.642%'>
+      <stop offset='0%' stop-color='#7E7E7E' />
+      <stop offset='100%' stop-color='#595959' />
+    </linearGradient>
+    <path id='my-modules-b'
+          d='M3.34099996,32.7738458 L9.34099996,22.381541 L21.341,22.381541 L27.341,32.7738458 L21.341,43.1661506 L9.34099996,43.1661506 L3.34099996,32.7738458 Z M10.6642694,10.6541905 L14.4142695,4.15899996 L21.9142695,4.15899996 L25.6642694,10.6541905 L21.9142695,17.1493811 L14.4142695,17.1493811 L10.6642694,10.6541905 Z' />
+    <filter id='my-modules-c' width='102.1%' height='101.3%' x='-1%' y='-.6%' filterUnits='objectBoundingBox'>
+      <feOffset dx='-.5' dy='-.5' in='SourceAlpha' result='shadowOffsetInner1' />
+      <feComposite in='shadowOffsetInner1' in2='SourceAlpha' k2='-1' k3='1' operator='arithmetic'
+                   result='shadowInnerInner1' />
+      <feColorMatrix in='shadowInnerInner1' values='0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 0.179404438 0' />
+    </filter>
+    <linearGradient id='my-modules-d' x1='22.483%' x2='69.977%' y1='24.724%' y2='75.89%'>
+      <stop offset='0%' stop-color='#FF9229' />
+      <stop offset='100%' stop-color='#FF7D00' />
+    </linearGradient>
+    <polygon id='my-modules-e'
+             points='26.665 22.322 31.165 14.528 40.165 14.528 44.665 22.322 40.165 30.116 31.165 30.116' />
+    <filter id='my-modules-f' width='105.6%' height='106.4%' x='-2.8%' y='-3.2%' filterUnits='objectBoundingBox'>
+      <feOffset dx='1' in='SourceAlpha' result='shadowOffsetInner1' />
+      <feComposite in='shadowOffsetInner1' in2='SourceAlpha' k2='-1' k3='1' operator='arithmetic'
+                   result='shadowInnerInner1' />
+      <feColorMatrix in='shadowInnerInner1' values='0 0 0 0 1   0 0 0 0 1   0 0 0 0 1  0 0 0 0.200857736 0' />
+    </filter>
+  </defs>
+  <g fill='none' fill-rule='evenodd'>
+    <use fill='url(#my-modules-a)' xlink:href='#my-modules-b' />
+    <use fill='#000' filter='url(#my-modules-c)' xlink:href='#my-modules-b' />
+    <use fill='url(#my-modules-d)' xlink:href='#my-modules-e' />
+    <use fill='#000' filter='url(#my-modules-f)' xlink:href='#my-modules-e' />
+  </g>
+</svg>

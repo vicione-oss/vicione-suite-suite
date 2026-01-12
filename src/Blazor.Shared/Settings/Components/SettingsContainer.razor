@@ -1,0 +1,122 @@
+﻿@using Blazor.Shared.Popup.Components
+@using Blazor.Shared.Popup.Enums
+@using Blazor.Shared.Settings.Extensions
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Blazor.Components.Button
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Blazor.Components.SearchBox
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
+@if (_initialized)
+{
+    <div class="settings-container">
+        <PopupMasterDetailLayout PopupTitle="@Localization.SettingsContainer.Title"
+                                 ContentActionButtonsVisible="@ControlPanelService.IsDirty">
+            <PopupActionButtons>
+                <PopupActionButton IconName="MonochromeIconName.CloseMedium" OnClick="@PopupCloseActionButtonClick" />
+            </PopupActionButtons>
+
+            <BeforeNavigation>
+                <SearchBox Placeholder="@($"{CommonVocabulary.SearchVerb} ...")" Enabled="false" />
+            </BeforeNavigation>
+
+            <Navigation>
+                @foreach (var settingsGroup in _settingsGroups)
+                {
+                    <DxAccordion ExpandMode="AccordionExpandMode.SingleOrNone"
+                                 ExpandCollapseAction="AccordionExpandCollapseAction.HeaderClick"
+                                 RootItemExpandButtonDisplayMode="AccordionExpandButtonDisplayMode.None"
+                                 BeforeExpand="@(async args => await OnBeforeExpandAccordionItem(args, settingsGroup))"
+                                 BeforeCollapse="@(args => OnBeforeCollapseAccordionItem(args, settingsGroup))"
+                                 @key="settingsGroup">
+                        <Items>
+                            @foreach (var settingsCategory in _settingsCategoryMaps[settingsGroup].Values.Sort())
+                            {
+                                var isExpanded = State.ExpandedSettingsCategory == settingsCategory;
+
+                                var isActive = false;
+                                if (!_settingsEntriesMap.TryGetValue(settingsGroup, settingsCategory, out var  entriesEnumerable))
+                                    continue;
+
+                                var settingsEntries =  entriesEnumerable.ToList();
+                                isActive = _activeSettingsEntry is not null && settingsEntries.Contains(_activeSettingsEntry);
+                                string? iconCssClass = settingsCategory.IconCssClass;
+                                string? iconUrl = settingsCategory.IconUrl?.ToString();
+
+                                if (iconCssClass is null && iconUrl is null)
+                                {
+                                    var firstSettingsEntry = settingsEntries.FirstOrDefault();
+                                    if (firstSettingsEntry is not null)
+                                        iconUrl = firstSettingsEntry.IconPath;
+
+                                    if (iconUrl is null)
+                                        iconCssClass = "empty-icon";
+                                }
+
+                                <DxAccordionItem Attributes="@(new Dictionary<string, object>() {{"title", settingsCategory.Title}})"
+                                                 Text="@settingsCategory.Title"
+                                                 Expanded="@isExpanded"
+                                                 CssClass="@(isActive ? "active" : null)"
+                                                 IconCssClass="@iconCssClass"
+                                                 IconUrl="@iconUrl"
+                                                 @key="@settingsCategory.Title">
+                                    <ContentTemplate>
+                                        @foreach (var settingsEntry in settingsEntries)
+                                        {
+                                            var cssClasses = new List<string> { "menu-entry" };
+
+                                            if (settingsEntry == _activeSettingsEntry)
+                                                cssClasses.Add("active");
+
+                                            <div class="@string.Join(" ", cssClasses)" @onclick="() => OnSettingsEntryClick(settingsEntry)" @key=@settingsEntry.ControlPanelRegistryItem>
+                                                <div class="menu-entry-guideline"></div>
+                                                <div class="menu-entry-text">@settingsEntry.Title</div>
+                                            </div>
+                                        }
+                                    </ContentTemplate>
+                                </DxAccordionItem>
+                            }
+                        </Items>
+                    </DxAccordion>
+                }
+            </Navigation>
+
+            <ContentHeader>
+                <SettingsContainerContentHeader />
+            </ContentHeader>
+
+            <Content>
+                <ControlPanelCarousel />
+            </Content>
+
+            <ContentActionButtons>
+                <PopupContentActionButtonContainer Enabled="@(LoadingIndicationPlacementBehavior.Placement == LoadingIndicationPlacement.None)"
+                                                   ErrorMessageVisible="@(LastSaveResult != null && !LastSaveResult.Success)"
+                                                   ShowLoadingIndication="@(LoadingIndicationPlacementBehavior.Placement == LoadingIndicationPlacement.ContentActionButtons)">
+                    <ErrorMessage>
+                        @LastSaveResult?.Error
+                    </ErrorMessage>
+
+                    <Buttons>
+                        <PopupContentActionButton IconName="MonochromeIconName.Check"
+                                                  Text="@CommonVocabulary.Confirm"
+                                                  CssClass="popup-content-action-button--confirm"
+                                                  OnClick="@SaveChildState" />
+
+                        <PopupContentActionButton IconName="MonochromeIconName.CloseMedium"
+                                                  Text="@CommonVocabulary.Cancel"
+                                                  OnClick="@RevertChildState" />
+                    </Buttons>
+                </PopupContentActionButtonContainer>
+            </ContentActionButtons>
+
+            <LoadingOverlay>
+                <LoadingSpinner Messages="@LoadingSpinnerTimedMessages"
+                                Visible="@(LoadingIndicationPlacementBehavior.Placement == LoadingIndicationPlacement.Overlay)" />
+            </LoadingOverlay>
+
+        </PopupMasterDetailLayout>
+    </div>
+}

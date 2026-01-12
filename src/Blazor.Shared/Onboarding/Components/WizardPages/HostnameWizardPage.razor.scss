@@ -1,0 +1,5 @@
+﻿@use "../../../Styles/onboarding-wizard/mixins";
+
+.rules-and-guidelines {
+    @include mixins.informational-content-styles();
+}

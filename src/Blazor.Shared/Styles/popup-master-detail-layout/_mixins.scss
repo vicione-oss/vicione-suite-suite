@@ -1,0 +1,15 @@
+﻿@use "../scrolling/scroll-container";
+@use "../scrolling/scrollbar";
+@use "../../../../shared/styles/colors";
+@use 'sass:color';
+
+@mixin adjust-scrolling($scroll-container-offset-x)
+{
+    @include scroll-container.adjust-styles($width: 6px, $offset-x: $scroll-container-offset-x, $offset-y: 0px);
+
+    @include scrollbar.adjust-styles(
+        $bg: color.adjust(colors.$color-theme, $alpha: -0.6),
+        $bg-hover: color.adjust(colors.$color-theme, $alpha: -0.6),
+        $slider-bg: #494949,
+        $border-width: 0px);
+}

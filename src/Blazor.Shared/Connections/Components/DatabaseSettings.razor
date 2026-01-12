@@ -1,0 +1,18 @@
+@using Sdk.Client.Connections
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ConnectionSettingsComponentBase<DatabaseConnection>
+
+<SettingsField Label="@TechnicalTerms.DatabaseType">
+    <SettingsFieldComboBox Items="@_connectionTypes"
+                           ValueSelector="@(item => item.Value)"
+                           TextSelector="@(item => item.Text)"
+                           @bind-Value="@Connection.DatabaseType"
+                           @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@TechnicalTerms.ConnectionString">
+    <SettingsFieldTextBox Placeholder="@TechnicalTerms.ConnectionString"
+                          @bind-Value="@Connection.ConnectionString"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>

@@ -1,0 +1,126 @@
+﻿@using Sdk.Modules
+@using ViciOne.Ui.Blazor.Components.Button
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Blazor.Components.CheckBox
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footer
+@using ViciOne.Ui.Blazor.Components.SpinEdit
+@using ViciOne.Ui.Blazor.Components.TextBox
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<div class="module-option-declaration-collection-grid">
+    <Grid Items="_itemsQueryable">
+        <ActionButtons>
+            <AddGridActionButton Text="@Localization.ModuleOptionDeclarationCollectionGrid.AddBooleanOptionButtonText"
+                                 OnClick="@(async () => await AddButtonClickAsync(ModuleOptionType.Boolean))" />
+
+            <AddGridActionButton Text="@Localization.ModuleOptionDeclarationCollectionGrid.AddNumericOptionButtonText"
+                                 OnClick="@(async () => await AddButtonClickAsync(ModuleOptionType.Number))" />
+
+            <AddGridActionButton Text="@Localization.ModuleOptionDeclarationCollectionGrid.AddTextOptionButtonText"
+                                 OnClick="@(async () => await AddButtonClickAsync(ModuleOptionType.Text))" />
+
+            <DeleteGridActionButton Enabled="@_canDelete"
+                                    OnClick="@DeleteGridActionButtonClick" />
+        </ActionButtons>
+
+        <Filter>
+            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+        </Filter>
+
+        <ChildContent>
+            <ItemSelectColumn KeySelector="@(item => item.Key)" Selection="@ItemSelection" />
+
+            <TemplateColumn Title="@CommonVocabulary.Key" Class="key-column">
+                @if (_editContext is not null && _editContext.ModuleOptionDeclaration == context)
+                {
+                    <TextBox @bind-Value="_editContext.Key" Valid="@_editContext.KeyValid" />
+                }
+                else
+                {
+                    @context.Key
+                }
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Value" Class="value-column">
+                @if (_editContext?.ModuleOptionDeclaration == context)
+                {
+                    if (_editContext is EditContext<bool> booleanEditContext)
+                    {
+                        <CheckBox @bind-Value="booleanEditContext.Value" />
+                    }
+                    else if (_editContext is EditContext<float> floatEditContext)
+                    {
+                        <SpinEdit @bind-Value="floatEditContext.Value"
+                                  Interval="1f"
+                                  Minimum="float.MinValue"
+                                  Maximum="float.MaxValue" />
+                    }
+                    else if (_editContext is EditContext<int> integerEditContext)
+                    {
+                        <SpinEdit @bind-Value="integerEditContext.Value"
+                                  Interval="1"
+                                  Minimum="int.MinValue"
+                                  Maximum="int.MaxValue" />
+                    }
+                    else if (_editContext is EditContext<string?> stringEditContext)
+                    {
+                        <TextBox @bind-Value="stringEditContext.Value" 
+                                 Password="@_editContext.ModuleOptionDeclaration.IsPassword" />
+                    }
+                }
+                else
+                {
+                    if (context.OptionType == ModuleOptionType.Boolean)
+                    {
+                        if (bool.TryParse(context.Value?.ToString(), out var value) && value)
+                        {
+                            <MonochromeIcon Name="MonochromeIconName.Check" Size="MonochromeIconSize.Small" />
+                        }
+                        else
+                        {
+                            <MonochromeIcon Name="MonochromeIconName.CloseMedium" Size="MonochromeIconSize.Small" />
+                        }
+                    }
+                    else
+                    {
+                        if (context.IsPassword && context.Value != Core.Shared.Constants.SetByEnvironmentMarker)
+                        {
+                            @PasswordDisplayDummy
+                        }
+                        else
+                        {
+                            @context.Value   
+                        }
+                    }
+                }
+            </TemplateColumn>
+
+            <TemplateColumn>
+                <div class="action-buttons">
+                    @if (_editContext is not null && _editContext.ModuleOptionDeclaration == context)
+                    {
+                        <Button Size="ButtonSize.Small" IconCssClass="@s_saveButtonIconCssClass" Title="@CommonVocabulary.Save" OnClick="@SaveButtonClick" />
+                        <Button Size="ButtonSize.Small" IconCssClass="@s_cancelButtonIconCssClass" Title="@CommonVocabulary.Cancel" OnClick="@CancelButtonClick" />
+                    }
+                    else
+                    {
+                        <Button Enabled="@(context.Value != Core.Shared.Constants.SetByEnvironmentMarker)"
+                                IconCssClass="@s_editButtonIconCssClass"
+                                Size="ButtonSize.Small" 
+                                Title="@CommonVocabulary.EditVerb" 
+                                OnClick="@(() => EditButtonClick(context))" />
+                    }
+                </div>
+            </TemplateColumn>
+        </ChildContent>
+
+        <Footer>
+            <SelectionFooter ItemCount="_itemsQueryable?.Count()" GridSelection="ItemSelection" />
+        </Footer>
+    </Grid>
+</div>

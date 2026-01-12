@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Core.Hosting</AssemblyName>
+    <RootNamespace>Core.UiHosting</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="ViciOne.Suite.Sdk" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,17 @@
+﻿<div>
+    <h3>@Help?.Title</h3>
+
+    <div class="text-container">
+        @foreach (var text in _helpText)
+        {
+            @if (text.StartsWith("link"))
+            {
+                @GetFragment(this, text)
+            }
+            else
+            {
+                @text
+            }
+        }
+    </div>
+</div>

@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="AutoFixture" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\samples\JiTChat.Backend\JiTChat.Backend.csproj" />
+    <ProjectReference Include="..\..\samples\JiTChat.Client\JiTChat.Client.csproj" />
+    <ProjectReference Include="..\Blazor.Tests.Tools\Blazor.Tests.Tools.csproj" />
+  </ItemGroup>
+
+</Project>

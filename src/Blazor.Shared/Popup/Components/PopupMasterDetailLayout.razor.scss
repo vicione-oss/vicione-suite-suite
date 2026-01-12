@@ -1,0 +1,173 @@
+﻿@use "../../Styles/popup-master-detail-layout/variables";
+@use "../../Styles/popup-master-detail-layout/mixins";
+@use "../../Styles/scrolling/scroll-container";
+@use "../../Styles/scrolling/scrollbar";
+@use "./../../../../shared/styles/colors";
+@use "./../../../../shared/styles/overflow";
+@use 'sass:color';
+
+.popup-master-detail-layout {
+    position: relative;
+
+    height: 100%;
+
+    display: grid;
+    grid-template-areas:
+        "master detail-header"
+        "master detail";
+    grid-template-columns: 220px auto;
+    grid-template-rows: auto 1fr;
+
+    &.has-master-header {
+        grid-template-areas:
+            "master-header detail-header"
+            "master detail";
+    }
+
+    overflow: hidden;
+
+    backdrop-filter: blur(10px);
+
+    $background-color-light: rgba(65, 65, 65, 0.75); // todo: where to pull this from colors.scss?
+    $background-color-dark: rgba(51, 51, 51, 0.90); // todo: where to pull this from colors.scss?
+    $overflow-color: rgba(48, 48, 48); // todo: where to pull this from colors.scss?
+
+    $border-radius: 5px;
+    border-radius: $border-radius;
+
+    $master-padding-left-right: 20px;
+
+    $master-detail-header-font-size: 24px;
+
+    @mixin common-header-styles()
+    {
+        font-size: 24px;
+        padding-top: 32px;
+        padding-bottom: 32px;
+    }
+
+    .master-header {
+        grid-area: master-header;
+
+        @include common-header-styles();
+
+        background-color: $background-color-light;
+        border-top-left-radius: $border-radius;
+
+        padding-left: $master-padding-left-right;
+        padding-right: $master-padding-left-right;
+    }
+
+    .detail-header {
+        grid-area: detail-header;
+
+        @include common-header-styles();
+
+        background-color: $background-color-dark;
+        border-top-right-radius: $border-radius;
+
+        padding-left: variables.$detail-padding-left-right;
+        padding-right: variables.$detail-padding-left-right;
+
+        display: grid;
+        grid-template-areas: "content spacer popup-action-buttons";
+        grid-template-columns: minmax(10px, 1fr) 48px auto; // minmax() to https://css-tricks.com/preventing-a-grid-blowout
+
+        .detail-header__content {
+            grid-area: content;
+
+            height: 36px;
+        }
+
+        .detail-header__popup-action-buttons {
+            grid-area: popup-action-buttons;
+
+            display: flex;
+            flex-wrap: nowrap;
+            align-self: start;
+        }
+    }
+
+    .master {
+        grid-area: master;
+
+        background-color: $background-color-light;
+        border-bottom-left-radius: $border-radius;
+
+        display: flex;
+        flex-direction: column;
+
+        overflow: hidden;
+
+        .master__before-navigation {
+            padding-left: $master-padding-left-right;
+            padding-right: $master-padding-left-right;
+            padding-top: 7px;
+            padding-bottom: 32px;
+        }
+
+        ::deep .master__navigation {
+            flex-grow: 1;
+
+            @include mixins.adjust-scrolling($scroll-container-offset-x: 2px);
+        }
+    }
+
+    &:not(.has-master-header) {
+        .master {
+            border-top-left-radius: $border-radius;
+        }
+    }
+
+    .detail {
+        grid-area: detail;
+
+        background-color: $background-color-dark;
+        border-bottom-right-radius: $border-radius;
+
+        display: flex;
+        flex-direction: column;
+
+        overflow: hidden;
+
+        .detail__before-content {
+        }
+
+        .detail__content {
+            flex-grow: 1;
+
+            position: relative; // give content with absolute positioning something to align on
+
+            .overflow-wrapper {
+                width: 100%;
+                height: 40px;
+                padding: 0px 32px;
+                position: absolute;
+                bottom: 0;
+
+                .overflow-area {
+                    height: inherit;
+                    background: linear-gradient(to bottom, color.change($overflow-color, $alpha: 0), $overflow-color);
+                }
+            }
+        }
+
+        .detail__separator {
+            flex-basis: 1px;
+
+            display: flex;
+            padding-left: 16px;
+            padding-right: 16px;
+
+            &::before {
+                content: " ";
+                flex-grow: 1;
+                background-color: #616161; // todo: where to pull this from colors.scss?
+            }
+        }
+
+        .detail__action-buttons {
+            padding: 24px variables.$detail-padding-left-right;
+        }
+    }
+}

@@ -1,0 +1,47 @@
+﻿@use "../../../shared/styles/colors.scss";
+
+.login-layout-main-body {
+    position: relative;
+
+    > h5 {
+        color: colors.$color-accent;
+        padding-top: 16px;
+        text-align: center;
+    }
+
+    .login-layout-main-content {
+        height: 100%;
+        overflow: hidden;
+    }
+}
+
+.login-nav-border {
+    border-bottom: 1px solid colors.$color-accent-dark !important;
+
+    .top-bar-app-name {
+        cursor: default;
+        font-size: 22px;
+        margin-bottom: 2px;
+        overflow: hidden;
+        white-space: nowrap;
+
+        > a {
+            color: colors.$color-font;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        > a:hover {
+            color: colors.$color-font;
+            text-decoration: none;
+        }
+    }
+}
+
+.login-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+}

@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Core.OS.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core.OS\Core.OS.csproj" />
+    <ProjectReference Include="..\Core.Tests.Tools\Core.Tests.Tools.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Modules\Resources\0.22.0-win-x64_0.18.0.json" />
+    <None Remove="Modules\Resources\0.5.0-win-x64_0.18.0.json" />
+    <None Remove="Modules\Resources\ci-1399909-win-x64_0.18.0.json" />
+    <None Remove="Modules\Resources\nexus-module-assets-response-0.json" />
+    <None Remove="Modules\Resources\nexus-module-assets-response-1.json" />
+    <None Remove="Modules\Resources\nexus-module-assets-response-2.json" />
+    <None Remove="Modules\Resources\nexus-module-assets-response-3.json" />
+    <None Remove="Modules\Resources\nexus-module-assets-response-4.json" />
+    <None Remove="Modules\Resources\nexus-module-assets-response-5.json" />
+    <None Remove="Modules\Resources\nexus-module-metadata-response.json" />
+    <None Remove="Persistence\Resources\suite-backup.zip" />
+    <None Remove="Resources\9f58350b-67a4-4f8d-8f0e-ac5dc8990e91.json" />
+    <EmbeddedResource Include="Instance\Resources\suite-backup.zip" />
+    <EmbeddedResource Include="Modules\Resources\ci-1399909-win-x64_0.18.0.json" />
+    <EmbeddedResource Include="Modules\Resources\0.22.0-win-x64_0.18.0.json" />
+    <EmbeddedResource Include="Modules\Resources\0.5.0-win-x64_0.18.0.json" />
+    <EmbeddedResource Include="Modules\Resources\nexus-module-assets-response-0.json" />
+    <EmbeddedResource Include="Modules\Resources\nexus-module-assets-response-1.json" />
+    <EmbeddedResource Include="Modules\Resources\nexus-module-assets-response-2.json" />
+    <EmbeddedResource Include="Modules\Resources\nexus-module-assets-response-3.json" />
+    <EmbeddedResource Include="Modules\Resources\nexus-module-assets-response-4.json" />
+    <EmbeddedResource Include="Modules\Resources\nexus-module-assets-response-5.json" />
+    <EmbeddedResource Include="Modules\Resources\nexus-module-metadata-response.json" />
+    <EmbeddedResource Include="Resources\9f58350b-67a4-4f8d-8f0e-ac5dc8990e91.json" />
+  </ItemGroup>
+
+</Project>

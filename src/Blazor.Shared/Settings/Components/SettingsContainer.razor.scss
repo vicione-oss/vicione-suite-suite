@@ -1,0 +1,179 @@
+﻿@use "../../Styles/popup/variables" as popup;
+@use "./../../../../shared/styles/colors";
+@use 'sass:color';
+
+.settings-container {
+    height: 100%;
+
+    ::deep .master {
+        @mixin background-color-transition() {
+            transition: background-color .2s linear;
+        }
+
+        .search-box {
+            width: 100%;
+        }
+
+        .dxbl-accordion {
+
+            // General resets
+            --bs-body-bg: transparent;
+            
+            .dxbl-group {
+                --dxbl-group-border-radius: 0px;
+
+                --dxbl-group-font-size: 12px;
+                --dxbl-group-color: #{colors.$color-font-light};
+
+                .dxbl-group-header {
+                    --dxbl-group-header-font-size: 14px;
+                    --dxbl-group-header-font-weight: #{popup.$font-weight};
+
+                    &::before {
+                        display: none;
+                    }
+
+                    .dxbl-text {
+                        --dxbl-text-border-width: 0px;
+                        --dxbl-text-padding-x: 10px;
+                    }
+                }
+            }
+
+            // General styles
+            &:not(:last-child) {
+                margin-bottom: 40px;
+            }
+
+            // Menu item 1st level
+            .dxbl-accordion-group {
+                --dxbl-accordion-group-border-width: 0;
+
+                &:not(:first-child) {
+                    margin-top: 8px;
+                }
+
+                $hover-bg: color.adjust(colors.$color-theme-inverted, $alpha: -0.95);
+
+                .dxbl-accordion-group-header {
+                    @include background-color-transition();
+
+                    --dxbl-group-header-bg: transparent;
+                    --dxbl-group-header-color: #{colors.$color-font-light};
+                    --dxbl-group-header-padding-x: 24px;
+                    --dxbl-group-header-padding-y: 0px;
+
+                    --dxbl-accordion-group-header-text-padding-y: 0px;
+
+                    --dxbl-accordion-group-header-hover-bg: #{$hover-bg};
+                    --dxbl-accordion-group-header-hover-color: #{colors.$color-font-light};
+
+                    --dxbl-accordion-group-item-spacing: 0px;
+
+                    border-radius: 0;
+                    min-height: 40px;
+
+                    .dxbl-accordion-item-content {
+                        grid-column-gap: 10px;
+                        overflow: hidden;
+
+                        .dxbl-image {
+                            width: 24px;
+                            height: 24px;
+                        }
+
+                        .dxbl-text {
+                            padding: 0px;
+                            overflow: inherit;
+
+                            .dxbl-accordion-item-text {
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                            }
+                        }
+                    }
+                }
+
+                &.active {
+                    .dxbl-accordion-group-header {
+                        --dxbl-group-header-font-weight: 400;
+                    }
+                }
+
+                // Menu item 2nd level
+                .menu-entry {
+                    @include background-color-transition();
+
+                    min-height: 28px;
+
+                    display: grid;
+                    grid-template-areas: "guideline spacer text";
+                    grid-template-columns: 2px 21px 1fr;
+
+                    padding-left: 35px;
+
+                    cursor: pointer;
+
+                    $guideline-bg: $hover-bg;
+                    $guideline-protution: 6px;
+
+                    margin-top: $guideline-protution;
+                    margin-bottom: $guideline-protution;
+
+                    &:first-child {
+                        margin-top: $guideline-protution + 8px;
+                    }
+
+                    .menu-entry-guideline {
+                        grid-area: guideline;
+
+                        background-color: $guideline-bg;
+
+                        margin-top: 0 - $guideline-protution;
+                        margin-bottom: 0 - $guideline-protution;
+
+                        position: relative;
+
+                        &:before {
+                            content: "";
+
+                            position: absolute;
+                            left: 0;
+                            right: 0;
+                            top: $guideline-protution;
+                            bottom: $guideline-protution;
+
+                            background-color: var(--menu-entry-guideline-before-bg, transparent);
+                            @include background-color-transition();
+                        }
+                    }
+
+                    .menu-entry-text {
+                        grid-area: text;
+
+                        align-self: center;
+
+                        letter-spacing: 0.4px;
+                    }
+
+                    &:hover {
+                        background-color: $guideline-bg;
+
+                        .menu-entry-guideline {
+                            --menu-entry-guideline-before-bg: #{color.adjust($guideline-bg, $alpha: +0.25)};
+                        }
+                    }
+
+                    &.active {
+                        font-weight: 400;
+
+                        .menu-entry-guideline {
+                            --menu-entry-guideline-before-bg: #{colors.$color-accent};
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,90 @@
+﻿using System.Globalization;
+using Blazor.Shared.Network.ControlPanels.Proxies.Models;
+using Blazor.Shared.Network.Extensions;
+using Blazor.Shared.Network.Models;
+using Blazor.Shared.Network.Services;
+using Core.Shared.HostManagement.Services;
+using HostManagement.Shared.Contracts;
+using HostManagement.Shared.Contracts.Network;
+using Microsoft.Extensions.Logging;
+using Sdk.Client.ControlPanels.Models;
+using Sdk.Client.Infrastructure;
+
+namespace Blazor.Shared.Network.ControlPanels.Proxies.Services;
+
+internal sealed class ProxiesControlPanelSaveHandler(IUiMediator mediator, ISystemConfigurationService systemConfigurationService, ILogger<ProxiesControlPanelSaveHandler> logger)
+    : NetworkControlPanelSaveHandlerBase<ProxiesControlPanelState>(mediator, systemConfigurationService, logger)
+{
+    protected override ISaveInternalResult SaveInternal(ProxiesControlPanelState state)
+    {
+        var networkProxySettings = new NetworkProxySettings();
+
+        if (SaveProxySettings(state.HttpProxySettings, networkProxySettings.HTTP) is SaveErrorResult httpProxySaveErrorResult)
+            return new SaveInternalErrorResult(httpProxySaveErrorResult.Message, httpProxySaveErrorResult.ErrorCode);
+
+        if (SaveProxySettings(state.HttpsProxySettings, networkProxySettings.HTTPS) is SaveErrorResult httpsProxySaveErrorResult)
+            return new SaveInternalErrorResult(httpsProxySaveErrorResult.Message, httpsProxySaveErrorResult.ErrorCode);
+
+        if (SaveProxySettings(state.SocksProxySettings, networkProxySettings.SOCKS) is SaveErrorResult socksProxySaveErrorResult)
+            return new SaveInternalErrorResult(socksProxySaveErrorResult.Message, socksProxySaveErrorResult.ErrorCode);
+
+        if (SaveProxySettings(state.FtpProxySettings, networkProxySettings.FTP) is SaveErrorResult ftpProxySaveErrorResult)
+            return new SaveInternalErrorResult(ftpProxySaveErrorResult.Message, ftpProxySaveErrorResult.ErrorCode);
+
+        if (SaveProxySettings(state.SftpProxySettings, networkProxySettings.SFTP) is SaveErrorResult sftpProxySaveErrorResult)
+            return new SaveInternalErrorResult(sftpProxySaveErrorResult.Message, sftpProxySaveErrorResult.ErrorCode);
+
+        // do not use proxy settings
+        {
+            networkProxySettings.DoNotProxyListEnabled = state.DoNotProxyListEnabled;
+
+            // filter out fieldsets not filled and remove duplicates
+            state.DoNotProxyDetails = [.. state.DoNotProxyDetails.Where(d => !string.IsNullOrWhiteSpace(d.HostnameOrIp)).Distinct()];
+
+            networkProxySettings.DoNotProxyList.Clear();
+            networkProxySettings.DoNotProxyList.AddRange(state.DoNotProxyDetails.Select(d => d.HostnameOrIp));
+
+            state.DoNotProxyDetails.EnsureAtLeastOneItemExists();
+        }
+
+        var systemConfiguration = new SystemConfiguration
+        {
+            NetworkInterfacesSettings = SystemConfigurationService.SystemConfiguration.NetworkInterfacesSettings,
+            NetworkDNSSettings = SystemConfigurationService.SystemConfiguration.NetworkDNSSettings,
+            NetworkProxySettings = networkProxySettings,
+            NetworkNTPSettings = SystemConfigurationService.SystemConfiguration.NetworkNTPSettings,
+            Services = SystemConfigurationService.SystemConfiguration.Services
+        };
+
+        return new SystemConfigurationSaveInternalResult(systemConfiguration);
+    }
+
+    private static ISaveResult SaveProxySettings(ProxySettings proxySettings, NetworkProxyDetail proxyDetail)
+    {
+        proxyDetail.Enabled = proxySettings.Enabled;
+        proxyDetail.Server = proxySettings.Server;
+
+        if (int.TryParse(proxySettings.Port, out var port))
+        {
+            proxyDetail.Port = port;
+        }
+        else
+        {
+            if (proxyDetail.Enabled)
+                return new SaveErrorResult(string.Format(CultureInfo.CurrentCulture, Localization.ProxiesControlPanelSaveHandler.PortIsNotAnUnsignedInteger, proxySettings.Port));
+        }
+
+        if (proxySettings.PasswordRequired)
+        {
+            proxyDetail.Username = proxySettings.Username;
+            proxyDetail.Password = proxySettings.Password;
+        }
+        else
+        {
+            proxyDetail.Username = null;
+            proxyDetail.Password = null;
+        }
+
+        return new SaveSuccessResult();
+    }
+}

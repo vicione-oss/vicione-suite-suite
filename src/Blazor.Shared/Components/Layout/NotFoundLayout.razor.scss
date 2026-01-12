@@ -1,0 +1,10 @@
+﻿@use "./../../../../shared/styles/colors.scss";
+
+.address-not-found-container {
+    padding: 16px;
+    text-align: center;
+
+    > h1 {
+        color: colors.$color-accent-dark;
+    }
+}

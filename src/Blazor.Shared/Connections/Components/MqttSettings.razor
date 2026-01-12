@@ -1,0 +1,72 @@
+﻿@using Sdk.Client.Connections
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Blazor.Components.SpinEdit
+@using ViciOne.Ui.Blazor.Components.CheckBox
+
+@inherits ConnectionSettingsComponentBase<MqttConnection>
+
+<SettingsField Label="@($"{TechnicalAcronyms.Mqtt} {TechnicalTerms.Protocol}")">
+    <SettingsFieldComboBox Items="@_connectionTypes"
+                           ValueSelector="@(item => item.Value)"
+                           TextSelector="@(item => item.Text)"
+                           @bind-Value="@Connection.Protocol"
+                           @bind-Value:after="NotifyChanged" />
+
+</SettingsField>
+
+<SettingsField Label="@CommonVocabulary.Address">
+    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Address"
+                          @bind-Value="@Connection.Address"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@TechnicalTerms.Username">
+    <SettingsFieldTextBox Placeholder="@TechnicalTerms.Username"
+                          @bind-Value="@Connection.Username"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+
+<SettingsField Label="@CommonVocabulary.Password">
+    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Password"
+                          @bind-Value="@Connection.Password"
+                          @bind-Value:after="NotifyChanged"
+                          Password="true" />
+</SettingsField>
+
+<SettingsField Label="@TechnicalTerms.Port">
+    <SpinEdit @bind-Value="@Connection.Port"
+              @bind-Value:after="NotifyChanged"
+              Interval="1"
+              Minimum="1"
+              Maximum="65535"
+              IsRastered="true" />
+</SettingsField>
+
+<SettingsField Label="@Localization.MqttSettings.ClientId">
+    <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.ClientId"
+                          @bind-Value="@Connection.ClientId"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@Localization.MqttSettings.CleanSession">
+    <CheckBox @bind-Value="@Connection.CleanSession"
+              @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@Localization.MqttSettings.WillTopic">
+    <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.WillTopic"
+                          @bind-Value="@Connection.WillTopic"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@Localization.MqttSettings.WillMessage">
+    <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.WillMessage"
+                          @bind-Value="@Connection.WillMessage"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@Localization.MqttSettings.WillRetain">
+    <CheckBox @bind-Value="@Connection.WillRetain"
+              @bind-Value:after="NotifyChanged" />
+</SettingsField>

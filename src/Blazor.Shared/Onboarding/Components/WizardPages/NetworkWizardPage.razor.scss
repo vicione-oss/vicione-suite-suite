@@ -1,0 +1,14 @@
+﻿@use "../../../Styles/onboarding-wizard/mixins";
+
+.rules-and-guidelines {
+    @include mixins.informational-content-styles();
+
+    .rules-and-guidelines__footer {
+        display: flex;
+        gap: 42px;
+        margin-top: 15px;
+    }
+}
+
+
+

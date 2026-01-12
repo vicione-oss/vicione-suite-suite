@@ -1,0 +1,35 @@
+﻿@page "/template/resend-email-confirmation"
+@using Blazor.Server.Backend.Components
+@using Blazor.Server.Backend.Enums
+@using Blazor.Shared.Components
+@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization
+@using ViciOne.Ui.Localization.Resources
+
+<PageTitle>@Localization.ResendEmailConfirmation.Title</PageTitle>
+
+<AccountLayout>
+    <Heading>@Localization.ResendEmailConfirmation.Title</Heading>
+    <LeftSideContent>
+        <EditForm method="post" OnValidSubmit="ResendEmail" FormName="resend-email-confirmation" Model="Input">
+            <DataAnnotationsValidator />
+
+            <TextInputField @bind-Value="@Input.Email"
+                            Valid="@(context.FieldCssClass(() => Input.Email) == "valid" ? true : false)"
+                            Placeholder="@CommonVocabulary.Email"
+                            Attributes="@(new() { { "autocomplete", "email" }, { "aria-required", true } })" />
+
+            <div class="button-section">
+                <AccountButton Text="@Localization.ResendEmailConfirmation.ResendConfirmationEmail" ButtonType="AccountButtonType.Active" Submit="true" />
+                <NavigationField Route="/template/login">
+                    <Content>
+                        <img src="@(SvgIcon.Back.GetPath())" />
+
+                        <label>@Localization.Common.NavigateToLoginPage</label>
+                    </Content>
+                </NavigationField>
+            </div>
+        </EditForm>
+    </LeftSideContent>
+</AccountLayout>

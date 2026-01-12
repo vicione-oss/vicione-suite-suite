@@ -1,0 +1,22 @@
+﻿@use "../../../shared/styles/colors.scss";
+
+.dxbl-tabs {
+    > ul.nav.nav-tabs {
+        border: none;
+        padding: 0 8px;
+
+        .nav-link {
+            color: colors.$color-accent;
+
+            &.active {
+                background-color: colors.$color-accent;
+                border: none;
+                color: colors.$color-font;
+            }
+        }
+    }
+}
+
+.dxbl-btn.dxbl-toolbar-btn:not(.dxbl-disabled) {
+    border: 1px solid colors.$color-border;
+}

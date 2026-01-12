@@ -1,0 +1,15 @@
+﻿@use "variables";
+
+.popup--suite {
+  --dxbl-popup-font-family: #{variables.$font-family};
+  --dxbl-popup-font-size: 12px;
+  --dxbl-popup-body-padding-x: 0;
+  --dxbl-popup-body-padding-y: 0;
+  --dxbl-popup-border-radius: 0;
+  --dxbl-popup-border-width: 0;
+  --dxbl-popup-border-style: none;
+  --dxbl-popup-bg: transparent;
+
+  font-weight: #{variables.$font-weight};
+  letter-spacing: #{variables.$letter-spacing};
+}

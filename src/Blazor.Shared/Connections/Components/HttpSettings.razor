@@ -1,0 +1,16 @@
+﻿@using Sdk.Client.Connections
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ConnectionSettingsComponentBase<HttpConnection>
+
+<SettingsField Label="@CommonVocabulary.Address">
+    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Address"
+                          @bind-Value="@Connection.BaseAddress"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@TechnicalTerms.ApiKey">
+    <SettingsFieldTextBox Placeholder="@TechnicalTerms.ApiKey"
+                          @bind-Value="@Connection.ApiKey"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>

@@ -1,0 +1,23 @@
+﻿@using PopupConstants = Blazor.Shared.Popup.Constants
+
+<DxPopup @ref="_dxPopup"
+         @bind-Visible="SettingsPopupState.Visible"
+         CloseOnEscape="true"
+         CloseOnOutsideClick="false"
+         Closing="@OnClosing"
+         Height="@PopupConstants.PopupHeightPx"
+         Width="@PopupConstants.PopupWidthPx"
+         ZIndex="@PopupConstants.PopupZIndex"
+         CssClass="popup--suite"
+         ShowHeader="false">
+    <BodyContentTemplate>
+        <SettingsContainer @ref="_settingsContainer"
+                           OnClose="@SettingsContainerOnClose"
+                           OnHasUnsavedChanges="(() => _showUnsavedChangesPopup = true)" />
+    </BodyContentTemplate>
+</DxPopup>
+
+<UnsavedChangesPopup OnCancel="@OnCancelUnsavedChanges"
+                     OnRevert="@OnRevertUnsavedChanges"
+                     OnSave="@OnSaveUnsavedChanges"
+                     Visible="@_showUnsavedChangesPopup" />

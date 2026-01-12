@@ -1,0 +1,218 @@
+﻿@using Blazor.Shared.Components.FileDropZone
+@using Blazor.Shared.Instance.Services
+@using Microsoft.AspNetCore.Components.Forms
+@using Blazor.Shared.Settings.Components
+@using Sdk.Client.Components.Settings.Expanders
+@using Sdk.Client.ControlPanels.Services
+@using System.Globalization
+@using ViciOne.Ui.Blazor.Components.CheckBox
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@inherits ControlPanelBase<UpdateControlPanelState>
+
+<ControlPanelPage Title="@Localization.UpdateControlPanel.UpdateTitle">
+    <DescriptionBanner IconCssClass="@_refreshIconCssClass" Title="@Localization.UpdateControlPanel.UpdateTitle">
+        @Localization.UpdateControlPanel.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        @if (State.FetchingVersions)
+        {
+            <SettingsGroup Title="@TechnicalTerms.Version" Expanded="true">
+                <SettingsInformation>
+                    @Localization.UpdateControlPanel.FetchingAvailableVersions
+                </SettingsInformation>
+            </SettingsGroup>
+        }
+        else if (State.VersionComboBoxItems is not null)
+        {
+            @if (State.SelectedVersionChanged)
+            {
+                <SettingsGroup Title="@TechnicalTerms.Version" Expanded="@IsDifferentVersionSelected">
+                    <Expander>
+                        <ComboBoxExpander Items="@State.VersionComboBoxItems"
+                                          ValueSelector="@(i => i.Value)"
+                                          TextSelector="@(i => i.Text)"
+                                          @bind-Value="State.SelectedVersion"
+                                          @bind-Value:after="SelectedVersionChanged" />
+                    </Expander>
+
+                    <ChildContent>
+                        <InformationBannerSettingsField Text="@Localization.UpdateControlPanel.VersionChangedBannerContent"
+                                                        Visible="@IsDifferentVersionSelected" />
+                    </ChildContent>
+                </SettingsGroup>
+            }
+            else
+            {
+                <SettingsGroup Title="@TechnicalTerms.Version" Expanded="@IsDifferentVersionSelected">
+                    <Expander>
+                        <ComboBoxExpander Items="@State.VersionComboBoxItems"
+                                          ValueSelector="@(i => i.Value)"
+                                          TextSelector="@(i => i.Text)"
+                                          @bind-Value="State.SelectedVersion"
+                                          @bind-Value:after="SelectedVersionChanged" />
+                    </Expander>
+                </SettingsGroup>
+            }
+        }
+        else
+        {
+            <SettingsGroup Title="@TechnicalTerms.Version" Expanded="true">
+                <SettingsInformation>
+                    @if (State.FetchAvailableVersionsError is not null)
+                    {
+                        @State.FetchAvailableVersionsError
+                    }
+                    else
+                    {
+                        @CommonPhrases.AnUnknownErrorOccurred
+                    }
+                </SettingsInformation>
+            </SettingsGroup>
+        }
+
+        <SettingsGroup Title="@Localization.UpdateControlPanel.FlashDevice" Expanded="@State.FlashDeviceEnabled">
+            <Expander>
+                <SwitchExpander @bind-Value="@State.FlashDeviceEnabled" @bind-Value:after="BeginEdit" />
+            </Expander>
+
+            <ChildContent>
+                <SettingsField Label="@TechnicalTerms.Image">
+                    <SettingsFieldFileUpload @bind-Filename="State.SwuFilename"
+                                             Placeholder="@Localization.UpdateControlPanel.SwuFileUploadPlaceholder"
+                                             UploadTicket="State.SwuFileUploadTicket"
+                                             UploadHandler="StreamUploadHandler"
+                                             Accept="@Core.Shared.Constants.DeviceImageFileExtension"
+                                             MaximumAllowedSize="@Core.Shared.Constants.DeviceImageMaximumAllowedSize"
+                                             OnUploadStart="SwuFileUploadStart"
+                                             OnUploadSuccess="SwuFileUploadSuccess"
+                                             OnUploadError="SwuFileUploadError" />
+                </SettingsField>
+
+                <InformationBannerSettingsField Text="@Localization.UpdateControlPanel.SwuFilenameChangedBannerContent"
+                                                Visible="@State.SwuFilenameChangedBannerVisible" />
+            </ChildContent>
+        </SettingsGroup>
+    </SettingsLayout>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@string.Format(CultureInfo.CurrentUICulture, CommonPatterns.ThisAndThat, TechnicalTerms.Backup, TechnicalTerms.Restore)">
+    <DescriptionBanner IconCssClass="@_saveIconCssClasses" Title="@Localization.UpdateControlPanel.BackupDescriptionBannerTitle">
+        @Localization.UpdateControlPanel.BackupDescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        <SettingsGroup Title="@Localization.UpdateControlPanel.BackupGroupTitle" @bind-Expanded="@State.BackupGroupExpanded">
+            <SettingsInformation>
+                @Localization.UpdateControlPanel.BackupExportText
+            </SettingsInformation>
+
+            <SettingsField Label="@Localization.UpdateControlPanel.BackupExportConfigurationFile" IsLoading="@_isExportInProgress" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+                <SettingsFieldButton Text="@CommonVocabulary.ExportVerb"
+                                     IconCssClass="@_exportIconCssClasses"
+                                     OnClick="OnExportButtonClick"
+                                     Enabled="@(!_isRestoreInProgress && !_isExportInProgress)"/>
+            </SettingsField>
+
+            <SettingsFieldSeparator />
+
+            <SettingsInformation>
+                @Localization.UpdateControlPanel.BackupRestoreText
+            </SettingsInformation>
+
+            <SettingsField Label="@Localization.UpdateControlPanel.BackupRestoreConfigurationFile" IsLoading="@_isRestoreInProgress" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+                <label class="input-label" for="item-upload">
+                    <MonochromeIcon Name="MonochromeIconName.Reload" Size="MonochromeIconSize.Small" CssClass="icon" />
+
+                    @CommonVocabulary.RestoreVerb
+                </label>
+
+                <div class="input">
+                    <InputFile id="item-upload"
+                               accept="@(Core.Shared.Constants.BackupFileExtension)"
+                               OnChange="OnRestoreFileChange" disabled="@_isRestoreInProgress"/>
+                </div>
+            </SettingsField>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <SettingsField Label="@CommonVocabulary.Error">
+                    @_errorMessage
+                </SettingsField>
+            }
+
+        </SettingsGroup>
+    </SettingsLayout>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@CommonVocabulary.ResetVerb">
+    <DescriptionBanner IconCssClass="@_refreshIconCssClass" Title="@Localization.UpdateControlPanel.ResetDescriptionBannerTitle">
+        @Localization.UpdateControlPanel.ResetDescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        <SettingsGroup Title="@Localization.UpdateControlPanel.ResetGroupTitle" @bind-Expanded="@State.RestoreGroupExpanded">
+            <SettingsInformation>
+                @Localization.UpdateControlPanel.ResetText
+            </SettingsInformation>
+
+            <SettingsField Label="@Localization.UpdateControlPanel.ResetDevice">
+                <SettingsFieldButtonRed Text="@CommonVocabulary.ResetVerb"
+                                        IconCssClass="@_refreshButtonIconCssClass"
+                                        Enabled="@(!_showResetConfirmSection)"
+                                        OnClick="OnResetButtonClick" />
+            </SettingsField>
+
+            @if (_showResetConfirmSection)
+            {
+                <SettingsFieldSeparator />
+
+                <SettingsInformation>
+                    <div class="information-wrapper">
+                        <label>@Localization.UpdateControlPanel.ResetConfirmationTitle</label>
+
+                        <SettingsFieldCheckBoxRed Text="@Localization.UpdateControlPanel.ResetConfirmationText"
+                                                  @bind-Value="_confirmation" />
+
+                        <div class="wrapper">
+                            <SettingsFieldButton Text="@CommonVocabulary.No"
+                                                 IconCssClass="@_closeIconCssClass"
+                                                 CssClass="no-button"
+                                                 OnClick="OnNoButtonClick" />
+
+                            <SettingsFieldButtonRed Text="@Localization.UpdateControlPanel.EraseAllData"
+                                                    IconCssClass="@_refreshButtonIconCssClass"
+                                                    Enabled="@(_confirmation && _resetCorrelationId == null)"
+                                                    OnClick="OnResetConfirmedButtonClick" />
+                        </div>
+                    </div>
+                </SettingsInformation>
+            }
+            
+            @if (_isResetInProgress)
+            {
+                <SettingsInformation>
+                    @Localization.UpdateControlPanel.ResetInProgressMessage
+                </SettingsInformation>
+            }
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <SettingsField Label="@CommonVocabulary.Error">
+                    @_errorMessage
+                </SettingsField>
+            }
+        </SettingsGroup>
+    </SettingsLayout>
+</ControlPanelPage>
+
+<OkDialog HeaderText="@Localization.UpdateControlPanel.BackupErrorTitle"
+          Show="@_showErrorDialog"
+          OnConfirm="@(() => _showErrorDialog = false)">
+    <Body>
+        <div>@Localization.UpdateControlPanel.BackupErrorText</div>
+    </Body>
+</OkDialog>

@@ -1,0 +1,17 @@
+﻿@use 'typography';
+
+/* base styles */
+@use 'base';
+
+/* overrides of devexpress styles */
+@use 'dx';
+
+/* login styles used by server and wasm */
+@use 'login';
+
+@use "icons/monochrome-icons" with (
+    $svg-base-url: "../icons/monochrome-icons"
+);
+
+@use 'popup';
+@use 'reconnect-modal';

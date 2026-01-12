@@ -1,0 +1,271 @@
+﻿using System.Globalization;
+using System.Text;
+using System.Text.Json;
+using Blazor.Shared.Mqtt.Contracts;
+using Blazor.Shared.Mqtt.Helpers;
+using DevExpress.Blazor;
+using MQTTnet.Protocol;
+using Sdk.Connections.Contracts;
+using Sdk.Connections.Extensions;
+using Sdk.Extensions;
+
+namespace Blazor.Shared.Mqtt.Services;
+
+public sealed class MqttViewerComponentService
+{
+    private readonly IMqttService _mqttService;
+    private bool _expandButtonPressed;
+    private MessageModel? _selectedMessage;
+
+    public bool IsConnected => _mqttService.IsConnected;
+    public string ErrorMessage { get; set; } = string.Empty;
+    public List<TopicGroup> TopicGroups { get; } = [];
+    public string NodeTopic { get; set; } = string.Empty;
+    public string? TopicFilterText { get; private set; }
+    public bool DisplayMessageDetails { get; set; }
+    internal MqttFilterTypes CurrentFilter { get; private set; } = MqttFilterTypes.None;
+    internal int? LastReloadInterval { get; set; }
+
+    public event Func<Task>? PageRefreshRequested;
+    public event Func<Task>? MqttConnected;
+    public event Func<Task>? MqttDisconnected;
+
+    public MqttViewerComponentService(IMqttService mqttService)
+    {
+        _mqttService = mqttService;
+
+        EnsureAllTopicExists();
+    }
+
+    public Task OnFilterChanged(string filter)
+    {
+        if (filter == TopicFilterText)
+            return Task.CompletedTask;
+
+        // all components will get filtered messages
+        TopicFilterText = filter;
+        return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+
+    public void BeforeExpandAndCollapseTopicGroup(TreeViewNodeCancelEventArgs args)
+    {
+        if (_expandButtonPressed)
+        {
+            args.Cancel = true;
+            _expandButtonPressed = false;
+        }
+    }
+
+    public Task SetNodeTopicFilter(ITreeViewNodeInfo group)
+    {
+        _expandButtonPressed = true;
+        NodeTopic = GetTopicSubscription(group);
+
+        return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+
+    public Task ClearTopicTextFilter()
+    {
+        _mqttService.ClearMessages();
+        TopicFilterText = string.Empty;
+
+        return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+
+    public Task ClearTopicNodeFilter()
+    {
+        _mqttService.ClearMessages();
+        TopicGroups.First().SubTopics.Clear();
+        NodeTopic = string.Empty;
+
+        return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+
+    public async Task ConnectClient(Connection connection)
+    {
+        ErrorMessage = string.Empty;
+
+        var mqttConnection = connection.GetMqttConnection() ??
+            throw new InvalidOperationException("Failed to extract mqtt connection");
+
+        ConnectMqttEvents();
+
+        await _mqttService.Connect(mqttConnection);
+    }
+
+    private void ConnectMqttEvents()
+    {
+        _mqttService.Connected += OnClientConnected;
+        _mqttService.Disconnected += OnClientDisconnected;
+        _mqttService.ErrorOccured += OnErrorOccured;
+        _mqttService.MessageReceived += OnMessageReceived;
+    }
+
+    public async Task DisconnectClient()
+    {
+        await _mqttService.Disconnect();
+
+        DisconnectMqttEvents();
+
+        _selectedMessage = null;
+        TopicFilterText = string.Empty;
+        TopicGroups.Clear();
+        NodeTopic = string.Empty;
+    }
+
+    private void DisconnectMqttEvents()
+    {
+        _mqttService.Connected -= OnClientConnected;
+        _mqttService.Disconnected -= OnClientDisconnected;
+        _mqttService.ErrorOccured -= OnErrorOccured;
+        _mqttService.MessageReceived -= OnMessageReceived;
+    }
+
+    private void EnsureAllTopicExists()
+    {
+        if (TopicGroups.Any(k => k.Topic == MqttViewerConstants.AllTopicText))
+            return;
+
+        TopicGroups.Add(new()
+        {
+            Topic = MqttViewerConstants.AllTopicText,
+        });
+    }
+
+    public IEnumerable<MessageModel?> GetMessagesByTextFilter()
+        => (!string.IsNullOrEmpty(TopicFilterText)
+            ? _mqttService.Messages.Where(m => m is not null && m.Topic.Contains(TopicFilterText, StringComparison.Ordinal))
+            : _mqttService.Messages.Where(m => m is not null)).OrderByDescending(m => m?.MessageId);
+
+    public IEnumerable<MessageModel> GetMessagesByNodeFilter()
+    {
+        if (string.IsNullOrEmpty(NodeTopic))
+            return [];
+
+        return NodeTopic == MqttViewerConstants.AllTopicSubscription
+            ? [.. _mqttService.MessagesDict.Values]
+            : _mqttService.MessagesDict.Values.Where(v => v.Topic.StartsWith(NodeTopic + MqttViewerConstants.TopicSeparator, StringComparison.Ordinal));
+    }
+
+    public string GetMessageDetails()
+    {
+        if (_selectedMessage is null)
+            return string.Empty;
+
+        var message = _selectedMessage.Message + Environment.NewLine;
+
+        if (_selectedMessage.Message.StartsWith('{') && _selectedMessage.Message.EndsWith('}'))
+        {
+            message = TryPrettifyJson(_selectedMessage.Message);
+        }
+
+        return new StringBuilder()
+            .AppendFormattedLine(CultureInfo.InvariantCulture, "Topic: {0}", _selectedMessage.Topic)
+            .AppendFormattedLine(CultureInfo.InvariantCulture, "Timestamp: {0:dd.MM.yyyy hh:mm:ss}", _selectedMessage.Timestamp)
+            .AppendFormattedLine(CultureInfo.InvariantCulture, "QoS: {0}", _selectedMessage.Qos)
+            .AppendLine()
+            .Append(message)
+            .ToString();
+
+        static string TryPrettifyJson(string jsonString)
+        {
+            try
+            {
+                // prettify json
+                using var doc = JsonDocument.Parse(
+                    jsonString,
+                    new JsonDocumentOptions
+                    {
+                        AllowTrailingCommas = true
+                    }
+                );
+                var memoryStream = new MemoryStream();
+                using (
+                    var utf8JsonWriter = new Utf8JsonWriter(
+                        memoryStream,
+                        new JsonWriterOptions
+                        {
+                            Indented = true
+                        }
+                    )
+                )
+                {
+                    doc.WriteTo(utf8JsonWriter);
+                }
+                return new UTF8Encoding().GetString(memoryStream.ToArray());
+            }
+            catch (Exception)
+            {
+            }
+            return jsonString;
+        }
+    }
+
+    private static string GetTopicSubscription(ITreeViewNodeInfo nodeInfo)
+    {
+        if (nodeInfo.Text == MqttViewerConstants.AllTopicText)
+            return MqttViewerConstants.AllTopicSubscription;
+
+        var topicElements = new List<string>
+        {
+            nodeInfo.Text,
+        };
+
+        MqttTopicTreeBuilder.AddParentTopic(nodeInfo.Parent, topicElements);
+
+        return string.Join(MqttViewerConstants.TopicSeparator, [.. topicElements]);
+    }
+
+    private Task OnErrorOccured(string message)
+    {
+        DisconnectMqttEvents();
+        ErrorMessage = message;
+
+        return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+
+    private async Task OnClientConnected()
+    {
+        EnsureAllTopicExists();
+
+        if (_mqttService.IsConnected)
+            await _mqttService.Subscribe(MqttViewerConstants.AllTopicSubscription, MqttQualityOfServiceLevel.AtMostOnce);
+
+        if (MqttConnected is not null)
+            await MqttConnected.Invoke();
+    }
+
+    private Task OnClientDisconnected()
+        => MqttDisconnected?.Invoke() ?? Task.CompletedTask;
+
+    private Task OnMessageReceived(string topic)
+    {
+        if (MqttTopicTreeBuilder.UpdateTopicGroups(topic, TopicGroups.First().SubTopics))
+            return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+
+        return Task.CompletedTask;
+    }
+
+    public Task ShowMessageDetails(GridRowClickEventArgs args)
+    {
+        _selectedMessage = (MessageModel)args.Grid.GetDataItem(args.VisibleIndex);
+        DisplayMessageDetails = true;
+
+        return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+
+    public Task RequestRefresh()
+        => PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+
+    public Task CloseMessageDetails()
+    {
+        DisplayMessageDetails = false;
+        return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+
+    internal Task ToggleCurrentFilter(MqttFilterTypes filter)
+    {
+        CurrentFilter = CurrentFilter != filter ? filter : MqttFilterTypes.None;
+        return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+}

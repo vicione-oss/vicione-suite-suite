@@ -1,0 +1,78 @@
+﻿@using Blazor.Shared.Popup.Components
+@using Blazor.Shared.Popup.Enums
+@using Blazor.Shared.Wizard.ContentOverlays.Components
+@using Blazor.Shared.Wizard.ContentOverlays.Models
+@using Blazor.Shared.Wizard.Extensions
+@using Blazor.Shared.Wizard.Services
+@using Microsoft.AspNetCore.Components.Sections
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Models
+
+@{
+    var hasCustomOverlay = _wizardPageState.HasLoadingOverlay();
+
+    var cssClasses = new List<string>
+    {
+        "wizard-page-container"
+    };
+
+    if (HasGenericLoadingOverlay || hasCustomOverlay)
+        cssClasses.Add("blur");
+
+    var contentOverlaySectionId = new ContentOverlaySectionId();
+    var descriptionBannerSectionId = new DescriptionBannerSectionId();
+
+    var pageParameters = new Dictionary<string, object?>
+    {
+        { nameof(WizardPage<IWizardPageState>.State), _wizardPageState },
+        { nameof(WizardPage<IWizardPageState>.RegistryItem), WizardPageRegistryItem }
+    };
+}
+
+<div class="@string.Join(" ", cssClasses)">
+    <PopupContentLayout>
+        <div class="content-preliminary-spacing"></div>
+
+        <PopupStaticContent>
+            <SectionOutlet SectionId="descriptionBannerSectionId" />
+        </PopupStaticContent>
+
+        <PopupScrollableContent>
+
+            <CascadingValue Value="contentOverlaySectionId">
+                <CascadingValue Value="descriptionBannerSectionId">
+                    <DynamicComponent Type="@WizardPageRegistryItem.ComponentType" Parameters="@pageParameters" />
+                </CascadingValue>
+            </CascadingValue>
+
+        </PopupScrollableContent>
+    </PopupContentLayout>
+</div>
+
+@if (hasCustomOverlay)
+{
+    <SectionOutlet SectionId="contentOverlaySectionId" />
+
+    @if (_wizardPageState.CurrentOperation is not null)
+    {
+        var estimatedDurationMs = _wizardPageState.CurrentOperation.EstimatedDurationMs + 10000 ?? -1;
+
+        var displayDuration = estimatedDurationMs != -1 ?
+            ((int)(Math.Ceiling(estimatedDurationMs / 1000.0)))
+                : estimatedDurationMs;
+
+        var timedMessage = new TimedMessage
+        {
+            Message = _wizardPageState.CurrentOperation.Description ?? string.Empty,
+            DisplayDuration = displayDuration
+        };
+
+        <LoadingContentOverlay TimedMessage="@timedMessage" />
+    }
+}
+else
+{
+    if (HasGenericLoadingOverlay)
+    {
+        <LoadingContentOverlay />
+    }
+}

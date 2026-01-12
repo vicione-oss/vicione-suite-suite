@@ -1,0 +1,37 @@
+﻿@use "../../Styles/popup-master-detail-layout/variables";
+@use "./../../../../shared/styles/colors";
+@use "./../../../../shared/styles/loading-spinner/three-dots" with ( $dot-color: colors.$color-accent );
+
+.popup-content-action-button-container {
+    display: flex;
+    justify-content: flex-end;
+
+    .error-message {
+        flex-grow: 1;
+
+        font-size: medium;
+
+        padding-right: variables.$detail-action-button-spacing;
+
+        color: colors.$color-error;
+    }
+
+    .dot-flashing-container {
+        width: 40px;
+
+        display: grid;
+        align-items: center;
+        justify-items: center;
+
+        margin-right: variables.$detail-action-button-spacing;
+    }
+
+    ::deep button {
+        flex-shrink: 0;
+
+        &:not(:last-of-type) {
+            margin-right: variables.$detail-action-button-spacing;
+        }
+    }
+}
+

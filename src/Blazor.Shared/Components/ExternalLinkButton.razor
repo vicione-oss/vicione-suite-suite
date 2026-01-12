@@ -1,0 +1,15 @@
+﻿@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@{
+    var cssClasses = new List<string> { "external-link-button" };
+
+    if (!string.IsNullOrWhiteSpace(CssClass))
+        cssClasses.AddRange(CssClass.Split(" "));
+}
+
+<button class="@string.Join(" ", cssClasses)" @onclick="ButtonClick">
+    <MonochromeIcon Name="MonochromeIconName.ExternalLink" Size="MonochromeIconSize.Small" CssClass="icon" />
+
+    @Text
+</button>

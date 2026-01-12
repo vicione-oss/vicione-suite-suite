@@ -1,0 +1,70 @@
+﻿@using Blazor.Shared.Connections.Contracts
+@using Blazor.Shared.Connections.Extensions
+@using Blazor.Shared.Connections.Services
+@using Sdk.Client.ControlPanels.Services
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footer
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+
+@inherits ControlPanelBase<ConnectionsControlPanelState>
+
+<ControlPanelPage Title="@TechnicalTerms.ConnectionPlural">
+
+    <DescriptionBanner Title="@Localization.ConnectionsControlPanel.DescriptionBannerTitle"
+                       IconCssClass="@_descriptionBannerIconCssClass">
+        @Localization.ConnectionsControlPanel.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <Grid Items="_connectionsQueryable">
+
+        <ActionButtons>
+            <AddGridActionButton OnClick="@AddNewItem"/>
+
+            <EditGridActionButton Enabled="@_isSingleItemSelected" OnClick="@EditSelectedItem"/>
+
+            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
+                                    OnClick="@DeleteSelectedItems"/>
+        </ActionButtons>
+
+        <Filter>
+            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter"/>
+        </Filter>
+
+        <ChildContent>
+            <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@GridItemSelection"/>
+
+            <TemplateColumn Title="@CommonVocabulary.Name">
+                <span class="connection-name-container"
+                      title="@context.Name">
+
+                    @context.Name
+                </span>
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Description">
+                @context.Description
+            </TemplateColumn>
+
+            <TemplateColumn Title="@TechnicalTerms.Type">
+                @(ConnectionTypeUiRegistry.TryGetDisplayName(context.Type, out var displayName) ? displayName : context.Type.Name)
+            </TemplateColumn>
+
+            <TemplateColumn Title="@TechnicalTerms.TagPlural">
+                @string.Join(", ", GetTags(context))
+            </TemplateColumn>
+
+            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                              Navigate="@(async (EditConnectionModel item) => await EditItem(item))" />
+        </ChildContent>
+
+        <Footer>
+            <SelectionFooter ItemCount="_connectionsQueryable?.Count()" GridSelection="GridItemSelection" />
+        </Footer>
+    </Grid>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@TechnicalTerms.TagPlural">
+    <TagsControlPanelPageContent State="State" BeginEdit="@(async () => await BeginEdit())" />
+</ControlPanelPage>

@@ -1,0 +1,34 @@
+﻿@using ViciOne.Ui.Localization.Resources
+
+<OkDialog HeaderText="@Localization.ErrorDialog.HeaderText"
+          OnConfirm="@OnConfirm"
+          Show="@Show"
+          ZIndex="110">
+
+    <Body>
+        @if (IsDebugEnabled && Exception != null)
+        {
+            <div>
+                <label>@TechnicalTerms.Type</label>
+                <div>
+                    <p style="width: 100%">@Exception.GetType().ToString()</p>
+                </div>
+            </div>
+
+            <div>
+                <label>@CommonVocabulary.Message</label>
+                <div>
+                    <p style="width: 100%">@Exception.Message</p>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div>
+                <p style="width: 100%">
+                    @Localization.ErrorDialog.ErrorText
+                </p>
+            </div>
+        }
+    </Body>
+</OkDialog>

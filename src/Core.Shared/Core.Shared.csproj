@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Core.Shared</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HostManagement.Shared" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="MQTTnet" />
+    <PackageReference Include="Riok.Mapperly" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="StronglyTypedId" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="System.IO.Abstractions" />
+    <PackageReference Include="ViciOne.Suite.Sdk" PrivateAssets="False" />
+  </ItemGroup>
+  
+</Project>

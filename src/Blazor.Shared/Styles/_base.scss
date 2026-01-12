@@ -1,0 +1,224 @@
+﻿// import loading spinner styles as Blazor.Wasm.Client/wwwroot/index.html contains loading spinner markup
+// which is displayed in browser before any component styles are loaded
+// wasm is actually not supported and the sdk moved to another repo
+// @use "../../Sdk.Client.Components/Overlay/LoadingSpinnerComponent.razor.scss";
+
+@use "../../../shared/styles/colors.scss";
+
+:root {
+    --vo-standard-color-red: #{colors.$color-red};
+    --vo-standard-color-green: #{colors.$color-green};
+    --vo-standard-color-light-green: #{colors.$color-light-green};
+    --vo-standard-color-blue: #{colors.$color-blue};
+    --vo-standard-color-orange: #{colors.$color-orange};
+}
+
+html,
+body {
+    background-color: colors.$color-background;
+    color: colors.$color-font;
+    height: 100%;
+    --webkit-font-smoothing: antialiased;
+    --moz-osx-font-smoothing: grayscale;
+    font-smooth: always;
+}
+
+app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+button {
+    background-color: transparent;
+    border: none;
+    color: colors.$color-font;
+}
+
+a {
+    color: colors.$color-accent
+}
+
+a:hover {
+    color: colors.$color-accent-hover
+}
+
+::selection {
+    background-color: colors.$color-accent;
+    color: colors.$color-background;
+}
+
+.text-font {
+    color: colors.$color-font
+}
+
+.text-accent {
+    color: colors.$color-accent
+}
+
+.validation-message {
+    color: colors.$color-error;
+    font-size: smaller;
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 9.6px 20px 11.2px 20px;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 12px;
+    top: 8px;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1
+    }
+
+    25% {
+        opacity: .5
+    }
+
+    50% {
+        opacity: .1
+    }
+
+    75% {
+        opacity: .5
+    }
+
+    100% {
+        opacity: 1
+    }
+}
+
+@keyframes progressbar-slide {
+    0% {
+        transform: translateX(-200px)
+    }
+
+    70% {
+        transform: translateX(500px)
+    }
+
+    100% {
+        transform: translateX(500px)
+    }
+}
+
+::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 2px colors.$color-content-dark-hover
+}
+
+::-webkit-scrollbar-thumb {
+    background: colors.$color-content
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: colors.$color-content-hover
+}
+
+::-webkit-scrollbar-corner {
+    display: none
+}
+
+.btn {
+    color: colors.$color-font
+}
+
+.btn:disabled:hover {
+    color: inherit
+}
+
+.btn-success {
+    background-color: colors.$color-accent;
+    border-color: colors.$color-accent-dark;
+    color: colors.$color-font;
+}
+
+.btn-success:hover {
+    background-color: colors.$color-accent-hover;
+    border-color: colors.$color-accent-dark;
+    color: colors.$color-font;
+}
+
+.btn-success:not(:disabled):not(.disabled).active,
+.btn-success:not(:disabled):not(.disabled):active,
+.show > .btn-success.dropdown-toggle {
+    background-color: colors.$color-accent-dark;
+    border-color: colors.$color-accent;
+}
+
+.modal-content {
+    background-color: colors.$color-background-modal
+}
+
+dxbl-popup-cell {
+    z-index: 105 !important;
+}
+
+.card {
+    background-color: colors.$color-background;
+    border: none;
+    border-radius: 0;
+}
+
+.page-link {
+    background-color: colors.$color-background-modal;
+    border: unset;
+    color: colors.$color-accent;
+}
+
+.page-link:hover {
+    background-color: colors.$color-content-dark-hover;
+    color: colors.$color-accent;
+}
+
+.page-item.active .page-link {
+    background-color: colors.$color-accent;
+    color: colors.$color-font;
+}
+
+.page-item.active .page-link:hover {
+    background-color: colors.$color-accent-hover
+}
+
+.page-item.disabled .page-link {
+    background-color: colors.$color-content-dark-disabled;
+    color: colors.$color-font-disabled;
+}
+
+a.bg-primary:focus {
+    background-color: rgba(255, 255, 255, .12) !important
+}
+
+.not-authorized-container {
+    padding-top: 20%;
+    text-align: center;
+    width: 100%
+}
+
+.not-authorized-container > h1 {
+    color: colors.$color-accent
+}
+
+/** should be moved to Blazor.Dx library **/
+.suite-footer-btn {
+    margin: 5px;
+    width: 100px;
+}

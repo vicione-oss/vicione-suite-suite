@@ -1,0 +1,61 @@
+@page "/login"
+@using Blazor.Wasm.Client.Infrastructure.Security
+@using Blazor.Wasm.Client.Infrastructure.Security.Contracts
+@using Blazor.Wasm.Client.Components.Layout
+@using ViciOne.Ui.Localization.Resources;
+
+@layout LoginLayout
+@inject NavigationManager navigationManager
+@inject CustomAuthStateProvider authStateProvider
+
+<h1 class="h2 font-weight-normal login-title">
+    Log in
+</h1>
+<div class="row">
+    <div class="col-md-4">
+        <EditForm class="form-signin" OnValidSubmit="OnSubmit" Model="loginRequest">
+            <DataAnnotationsValidator />
+            <h4>Use a local account to log in.</h4>
+            <hr />
+            <div class="mb-3">
+                <label for="inputUsername" class="form-label">User Name</label>
+                <InputText id="inputUsername" class="form-control form-control-lg" @bind-Value="loginRequest.UserName" autofocus placeholder="@TechnicalTerms.Username" />
+                <ValidationMessage For="@(() => loginRequest.UserName)" />
+            </div>
+            <div class="mb-3">
+                <label for="inputPassword" class="form-label">Password</label>
+                <InputText type="password" id="inputPassword" class="form-control form-control-lg" placeholder="Password" @bind-Value="loginRequest.Password" />
+                <ValidationMessage For="@(() => loginRequest.Password)" />
+            </div>
+
+            <div class="mb-2 form-check">
+                <InputCheckbox id="inputRememberMe" class="form-check-input" @bind-Value="@loginRequest.RememberMe" />
+                <label class="form-check-label" for="inputRememberMe">Remember Me</label>
+            </div>
+            <button class="btn btn-primary mb-3" type="submit">Sign in</button>
+            <label class="text-danger">@error</label>
+        </EditForm>
+    </div>
+</div>
+
+@code{
+    LoginRequest loginRequest { get; set; } = new LoginRequest();
+    string? error { get; set; }
+
+    async Task OnSubmit()
+    {
+        error = null;
+        try
+        {
+            await authStateProvider.Login(loginRequest);
+
+    // force reload to load the modules
+            navigationManager.NavigateTo("", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+}

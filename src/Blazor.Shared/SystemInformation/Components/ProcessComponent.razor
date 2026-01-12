@@ -1,0 +1,184 @@
+﻿@using System.Globalization
+@using ViciOne.SystemMonitoring.Collectors
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
+@using ViciOne.Ui.Blazor.Components.SearchBox
+@using ViciOne.Ui.Localization.Resources
+
+@if (OperatingSystem.IsLinux())
+{
+    <div class="layout">
+        <div class="information-wrapper">
+            <div class="hardware-overview">
+                <div>CPU:</div>
+                <div class="outer-bar">
+                    <div class="inner-bar cpu" style="--cpuWidth: @FormatHardwareValue(_cpuValue, CultureInfo.InvariantCulture)%" />
+                </div>
+                <div class="value">@FormatHardwareValue(_cpuValue)%</div>
+                <div>RAM:</div>
+                <div class="outer-bar">
+                    <div class="inner-bar ram" style="--ramWidth: @FormatHardwareValue(_ramValue, CultureInfo.InvariantCulture)%" />
+                </div>
+                <div class="value">@FormatHardwareValue(_ramValue)%</div>
+                <div>HDD:</div>
+                <div class="outer-bar">
+                    <div class="inner-bar hdd" style="--hddWidth: @FormatHardwareValue(_hddValue, CultureInfo.InvariantCulture)%" />
+                </div>
+                <div class="value">@FormatHardwareValue(_hddValue)%</div>
+                <div>NET:</div>
+                <div class="outer-bar">
+                    <div class="inner-bar net" style="--netWidth: @FormatHardwareValue(_netValue, CultureInfo.InvariantCulture)%" />
+                </div>
+                <div class="value">@FormatHardwareValue(_netValue)%</div>
+            </div>
+
+            <div class="search-container">
+                <SearchBox TextChanged="@ApplyFilter"
+                           Placeholder="@($"{CommonVocabulary.SearchVerb}...")"
+                           CssClass="search-box" />
+            </div>
+        </div>
+
+        <div class="processes-grid">
+            <table cellpadding="0"
+                   cellspacing="0">
+                <thead>
+                    <tr>
+                        <th class="pid">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@nameof(LinuxProcessInfo.Pid)</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="ppid">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@nameof(LinuxProcessInfo.PPid)</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="name">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@CommonVocabulary.Name</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="state">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@CommonVocabulary.State</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="threads">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@nameof(LinuxProcessInfo.Threads)</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="res">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@Localization.ProcessComponent.Res</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="virt">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@Localization.ProcessComponent.Virt</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="cpu">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@Localization.ProcessComponent.CpuUsage</span>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="command">
+                            <div class="header-template">
+                                <span></span>
+                                <div>
+                                    <span>@TechnicalTerms.Command</span>
+                                </div>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var process in _processes)
+                    {
+                        <tr>
+                            <td class="pid">
+                                <div>
+                                    <span>@process.Pid</span>
+                                </div>
+                            </td>
+                            <td class="ppid">
+                                <div>
+                                    <span>@process.PPid</span>
+                                </div>
+                            </td>
+                            <td class="name">
+                                <div>
+                                    <span>@process.Name</span>
+                                </div>
+                            </td>
+                            <td class="state">
+                                <div title="@SplitStateInformation(process.State)[1]">
+                                    <span>@SplitStateInformation(process.State)[0]</span>
+                                </div>
+                            </td>
+                            <td class="threads">
+                                <div>
+                                    <span>@process.Threads</span>
+                                </div>
+                            </td>
+                            <td class="res">
+                                <div>
+                                    <span>@Math.Round((process.MemoryDetails.VmRSSKb / 1024d), 1)</span>
+                                </div>
+                            </td>
+                            <td class="virt">
+                                <div>
+                                    <span>@Math.Round((process.MemoryDetails.VmPeakKb / 1024d), 1)</span>
+                                </div>
+                            </td>
+                            <td class="cpu">
+                                <div>
+                                    <span>@FormatHardwareValue(Math.Round(process.CpuUsage, 1))%</span>
+                                </div>
+                            </td>
+                            <td class="command">
+                                <div>
+                                    <span>@process.CmdLine</span>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <LoadingSpinner Visible="_loadingSpinnerVisible" />
+}
+else
+{
+    <p>Process overview is only available on Linux</p>
+}

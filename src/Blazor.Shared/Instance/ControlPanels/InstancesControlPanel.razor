@@ -1,0 +1,83 @@
+@using Blazor.Shared.Instance.Contracts
+@using Blazor.Shared.Instance.Services
+@using Sdk.Client.ControlPanels.Services
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footer
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+
+@inherits ControlPanelBase<InstancesControlPanelState>
+
+<DescriptionBanner Title="@Localization.InstancesControlPanel.DescriptionBannerTitle">
+    @Localization.InstancesControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<Grid Items="_instancesQueryable">
+
+    <ActionButtons>
+        <GridActionButton Enabled="true"
+                          OnClick="State.ReloadInstances"
+                          Text="@CommonVocabulary.RefreshVerb"
+                          IconCssClass="@_refreshIconCssClass"></GridActionButton>
+
+        <GridActionButton Enabled="(InstanceGridItemSelection.Count > 0)"
+                          OnClick="SynchronizeSelectedInstances"
+                          Text="@CommonVocabulary.Synchronize"
+                          IconCssClass="@_reloadIconCssClass"></GridActionButton>
+
+        <EditGridActionButton Enabled="@_isSingleInstanceSelected" OnClick="@EditSelectedInstance" />
+
+        <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
+                                OnClick="@DeleteSelectedInstances" />
+    </ActionButtons>
+
+    <Filter>
+        <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+    </Filter>
+
+    <ChildContent>
+        <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@InstanceGridItemSelection" />
+        
+        <TemplateColumn Title="@CommonVocabulary.Name">
+            @context.Name
+        </TemplateColumn>
+
+        <TemplateColumn Title="@TechnicalTerms.Type">
+            @context.Type
+        </TemplateColumn>
+
+        <TemplateColumn Title="@TechnicalTerms.Version">
+            @context.Version
+        </TemplateColumn>
+
+        <TemplateColumn Title="@TechnicalAcronyms.Sdk">
+            @context.SdkVersion
+        </TemplateColumn>
+
+        <TemplateColumn Title="@CommonVocabulary.Status">
+            @if (context.IsSynchronizing)
+            {
+                <div>@Localization.InstancesControlPanel.Executing</div>
+            }
+            else
+            {
+                @if (context.HealthStatus is null)
+                {
+                    <div>Unknown</div>
+                }
+                else
+                {
+                    <div>@context.HealthStatus</div>
+                }
+            }
+        </TemplateColumn>
+
+        <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                          Navigate="@(async (InstanceInformationModel item) => await EditInstance(item))" />
+    </ChildContent>
+
+    <Footer>
+        <SelectionFooter ItemCount="_instancesQueryable?.Count()" GridSelection="InstanceGridItemSelection" />
+    </Footer>
+</Grid>

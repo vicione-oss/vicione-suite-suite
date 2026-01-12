@@ -1,0 +1,17 @@
+﻿{
+    "Name": "ViciOne.Suite.DeviceManagement",
+    "Title": "Data Collection Wizard",
+    "Description": "Use this module to onboard VSE, IoTCore and other devices to the Cluster",
+    "Version": "0.5.0",
+    "MinSuiteSdkVersion": "0.18.0",
+    "Company": "ifm software",
+    "ProjectUrl": "https://gitlab.i40.ifm-datalink.net/acx/vo-suite/modules/device-mgmt",
+    "ReadmeUrl": "https://gitlab.i40.ifm-datalink.net/acx/vo-suite/modules/device-mgmt/-/blob/master/README.md?ref_type=heads",
+    "Published": "2024-10-02T12:23:15.997857+00:00",
+    "Dependencies": [
+        {
+            "Name": "ViciOne.Suite.ClusterManagement",
+            "Version": "0.22.0"
+        }
+    ]
+}

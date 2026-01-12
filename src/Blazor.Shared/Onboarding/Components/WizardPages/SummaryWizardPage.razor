@@ -1,0 +1,97 @@
+﻿@using Blazor.Shared.Onboarding.Extensions
+@using Blazor.Shared.Onboarding.Services
+@using Blazor.Shared.Wizard.Components
+@using Blazor.Shared.Wizard.Services
+@using ViciOne.Ui.Localization.Resources
+
+@inherits WizardPage<SummaryWizardPageState>
+
+<DescriptionBanner Title="@Localization.SummaryWizardPage.DescriptionBannerTitle" IconCssClass="@_descriptionBannerIconCssClass">
+    @Localization.SummaryWizardPage.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@CommonVocabulary.Device" @bind-Expanded="State.DeviceExpanded">
+        <SettingsInformation>
+            <div class="settings-information-layout">
+                <div class="left">
+                    <img src="@_deviceImageSrc" alt="@CommonVocabulary.Device" />
+                </div>
+
+                <div class="right">
+                    <div>@TechnicalTerms.Hostname</div>
+                    <div>@State.Hostname</div>
+
+                    <div>@TechnicalTerms.SerialNumber</div>
+                    <div>@State.SerialNumber</div>
+                </div>
+            </div>
+        </SettingsInformation>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@CommonVocabulary.TimeZone" @bind-Expanded="State.TimeZoneExpanded">
+        <SettingsInformation>
+            <div class="settings-information-layout">
+                <div class="left">
+                    <img src="@_timeZoneImageSrc" alt="@CommonVocabulary.TimeZone" />
+                </div>
+
+                <div class="right">
+                    <div>@CommonVocabulary.TimeZone</div>
+                    <div>@State.TimeZone</div>
+
+                    <div>@CommonVocabulary.Date</div>
+                    <div>@State.Date</div>
+
+                    <div>@CommonVocabulary.Time</div>
+                    <div>@State.Time</div>
+                </div>
+            </div>
+        </SettingsInformation>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@State.InternetConnection.GetFriendlyNameVerbose()" @bind-Expanded="State.InternetConnectionExpanded">
+        <SettingsInformation>
+            <div class="settings-information-layout">
+                <div class="left">
+                    <img src="@_internetConnectionImageSrc" alt="@TechnicalTerms.InternetConnection" />
+                </div>
+
+                <div class="right">
+                    <SummaryNetworkInterfaceDetails NetworkInterfaceConfiguration="@State.InternetConnection" />
+                </div>
+            </div>
+        </SettingsInformation>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@State.LocalNetwork.GetFriendlyNameVerbose()" @bind-Expanded="State.LocalNetworkExpanded">
+        <SettingsInformation>
+            <div class="settings-information-layout">
+                <div class="left">
+                    <img src="@_localNetworkImageSrc" alt="@TechnicalTerms.LocalNetwork" />
+                </div>
+
+                <div class="right">
+                    <SummaryNetworkInterfaceDetails NetworkInterfaceConfiguration="@State.LocalNetwork" />
+                </div>
+            </div>
+        </SettingsInformation>
+    </SettingsGroup>
+
+    @if (State.AutomaticRestartAnticipated)
+    {
+        <SettingsGroup Title="@Localization.SummaryWizardPage.AutomaticRestartTitle" @bind-Expanded="State.AutomaticRestartExpanded">
+            <SettingsInformation>
+                <div class="settings-information-layout">
+                    <div class="left">
+                        <img src="@_deviceRestartImageSrc" alt="@CommonVocabulary.Restart" />
+                    </div>
+
+                    <div class="right">
+                        @Localization.SummaryWizardPage.AutomaticRestartDescription
+                    </div>
+                </div>
+            </SettingsInformation>
+        </SettingsGroup>
+    }
+</SettingsLayout>

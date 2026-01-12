@@ -1,0 +1,22 @@
+﻿@using Blazor.Shared.UserInterface.ControlPanels.Theme.Services
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<ThemeControlPanelState>
+
+<ControlPanelPage Title="@TechnicalTerms.SystemDefault">
+    <DescriptionBanner IconCssClass="@_showIconCssClasses" Title="@TechnicalTerms.Theme">
+        @Localization.SystemDefaultControlPanelPage.DescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        <SettingsGroup Title="Login">
+            <SettingsField Label="@CommonVocabulary.Design">
+                <SettingsFieldComboBox Items="@_loginDesigns"
+                                       ValueSelector="@(p => p.Key)"
+                                       TextSelector="@(p => p.Value)"
+                                       @bind-Value="@State.SelectedLoginDesign"
+                                       @bind-Value:after="BeginEdit"/>
+            </SettingsField>
+        </SettingsGroup>
+    </SettingsLayout>
+</ControlPanelPage>

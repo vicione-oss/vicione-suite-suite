@@ -1,0 +1,24 @@
+﻿{
+    "Arguments": "--no-source-map --style=compressed",
+    "ScopedCssFolders": [
+        "Components",
+        "Connections",
+        "Dialogs",
+        "Help",
+        "Instance",
+        "Logging",
+        "MessageBanner",
+        "Module",
+        "Mqtt",
+        "Network",
+        "NotificationArea",
+        "Onboarding",
+        "Popup",
+        "Profile",
+        "Settings",
+        "SystemInformation",
+        "UserInterface",
+        "UserManagement",
+        "Wizard"
+    ]
+}

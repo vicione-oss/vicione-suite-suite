@@ -1,0 +1,52 @@
+﻿@page "/template/register"
+@using Blazor.Server.Backend.Components
+@using Blazor.Server.Backend.Enums
+@using Blazor.Shared.Components
+@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using ViciOne.Ui.Localization.Resources
+
+<PageTitle>@Localization.Register.Title</PageTitle>
+
+<AccountLayout>
+    <Heading><div style="margin-top: -2px;">@Localization.Register.Title</div></Heading>
+    <LeftSideContent>
+        <EditForm method="post" OnValidSubmit="RegisterUser" FormName="register" Model="Input">
+            <DataAnnotationsValidator />
+
+            <TextInputField @bind-Value="@Input.Email"
+                            Valid="@(context.FieldCssClass(() => Input.Email) == "valid" ? true : false)"
+                            Placeholder="@CommonVocabulary.Email"
+                            Attributes="@(new() { { "autocomplete", "email" }, { "aria-required", true } })" />
+            <div class="password">
+                <TextInputField @bind-Value="@Input.Password"
+                                Valid="@(context.FieldCssClass(() => Input.Password) == "valid" ? true : false)"
+                                Placeholder="@CommonVocabulary.Password"
+                                Password="true"
+                                Attributes="@(new() { { "aria-required", true } })" />
+            </div>
+            <div class="password">
+                <TextInputField @bind-Value="@Input.ConfirmPassword"
+                                Valid="@(context.FieldCssClass(() => Input.ConfirmPassword) == "valid" ? true : false)"
+                                Placeholder="@Localization.Common.ConfirmPassword"
+                                Password="true"
+                                Attributes="@(new() { { "aria-required", true }, { "type", "password" } })" />
+            </div>
+            <div class="button-section">
+                <div class="cancel">
+                    <AccountButton Text="@CommonVocabulary.Cancel" ButtonType="AccountButtonType.Default" OnClick="@(() => NavigationManager.NavigateTo("/template/login"))" />
+                </div>
+
+                <AccountButton Text="@CommonVocabulary.RegisterVerb" ButtonType="AccountButtonType.Active" Submit="true" Disabled="false" />
+            </div>
+
+            <NavigationField Route="/template/resend-email-confirmation">
+                <Content>
+                    <img src="@(SvgIcon.Email.GetPath())" />
+
+                    <label>@Localization.Register.ResendConfirmationEmail</label>
+                </Content>
+            </NavigationField>
+        </EditForm>
+    </LeftSideContent>
+</AccountLayout>

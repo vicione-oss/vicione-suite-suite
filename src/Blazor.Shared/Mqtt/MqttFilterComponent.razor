@@ -1,0 +1,82 @@
+﻿@using Blazor.Shared.Mqtt.Contracts
+@using Blazor.Shared.Mqtt.Enums
+@using ViciOne.Ui.Blazor.Components.Button
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Blazor.Components.SearchBox
+@using ViciOne.Ui.Blazor.Components.SectionRail.Components
+@using ViciOne.Ui.Blazor.Components.TextBox
+@using ViciOne.Ui.Localization.Resources
+
+<SectionRail @bind-ActiveSectionId="@_activeSectionId" @bind-ActiveSectionId:after="@ActiveSectionIdChanged">
+    <Section Id="@SectionId.Filter" Title="@CommonVocabulary.Filter" IconCssClass="@_filterIconCssClass">
+        <div class="mqtt-text-filter">
+            <div class="headline-container">
+                <h4>@Localization.MqttViewer.FilterByMessage</h4>
+            </div>
+            <div class="text-and-button">
+                <SearchBox TextChanged="@(async (arg) => await ViewerService.OnFilterChanged(arg))"
+                            Text="@ViewerService.TopicFilterText" CssClass="text-box" />
+
+                <Button OnClick="@ViewerService.ClearTopicTextFilter" Size="ButtonSize.Small" IconCssClass="@_iconCssClass"
+                        Enabled="@(!string.IsNullOrEmpty(ViewerService.TopicFilterText))" />
+            </div>
+        </div>
+    </Section>
+
+    <Section Id="@SectionId.FileTree" Title="@Localization.MqttViewer.FileTree" IconCssClass="@_fileTreeIconCssClass">
+        <div class="mqtt-node-filter">
+            <div class="headline-container">
+                <h4>@Localization.MqttViewer.FilterByTopic</h4>
+            </div>
+            <div class="text-and-button">
+                <TextBox Value="@ViewerService.NodeTopic" ReadOnly="true" CssClass="text-box"></TextBox>
+                <Button OnClick="@ViewerService.ClearTopicNodeFilter" Size="ButtonSize.Small" IconCssClass="@_iconCssClass"
+                        Enabled="@(!string.IsNullOrEmpty(ViewerService.NodeTopic))" />
+            </div>
+            <div class="tree-container">
+                <DxTreeView Data="@ViewerService.TopicGroups"
+                            BeforeCollapse="@ViewerService.BeforeExpandAndCollapseTopicGroup"
+                            BeforeExpand="@ViewerService.BeforeExpandAndCollapseTopicGroup">
+                    <DataMappings>
+                        <DxTreeViewDataMapping Children="@nameof(TopicGroup.SubTopics)" Text="@nameof(TopicGroup.Topic)" />
+                    </DataMappings>
+                    <NodeTemplate>
+                        <div class="node-container">
+                            @if (context.DataItem is TopicGroup topicGroup)
+                            {
+                                @if (context.IsLeaf)
+                                {
+                                    <div class="tree-element">
+                                        @topicGroup.Topic
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="tree-element">
+                                        @if (context.Expanded)
+                                        {
+                                            <span class="mdi mdi-chevron-up"></span>
+                                        }
+                                        else
+                                        {
+                                            <span class="mdi mdi-chevron-down"></span>
+                                        }
+                                        @topicGroup.Topic
+                                    </div>
+                                }
+                            }
+
+                            <div @onclick="@(() => ViewerService.SetNodeTopicFilter(context))">
+                                <span class="mdi mdi-magnify"></span>
+                            </div>
+                        </div>
+                    </NodeTemplate>
+                </DxTreeView>
+            </div>
+        </div>
+    </Section>
+
+    <Section Id="SectionId.TestTube" Title="@CommonVocabulary.TestTube" IconCssClass="@_testTubeSolidIconCssClass"> 
+        <div></div>
+    </Section>
+</SectionRail>

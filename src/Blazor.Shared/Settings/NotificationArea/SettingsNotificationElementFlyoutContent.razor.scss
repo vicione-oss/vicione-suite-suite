@@ -1,0 +1,12 @@
+﻿.search-area {
+    display: flex;
+    align-items: center;
+
+    ::deep .search-box {
+        width: 100%;
+    }
+}
+
+.settings-button {
+    margin-bottom: 16px;
+}

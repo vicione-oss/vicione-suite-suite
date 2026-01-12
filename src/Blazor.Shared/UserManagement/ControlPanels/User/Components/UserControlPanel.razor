@@ -1,0 +1,247 @@
+﻿@using Blazor.Shared.Localization
+@using Blazor.Shared.UserManagement.ControlPanels.User.Models
+@using Blazor.Shared.UserManagement.ControlPanels.User.Services
+@using Microsoft.AspNetCore.Components.Forms
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Blazor.Components.ComboBox
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footer
+@using ViciOne.Ui.Blazor.Components.Switch
+@using ViciOne.Ui.Localization.Resources
+@using Labels = Blazor.Shared.UserManagement.Localization.Labels;
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.Shared.Dx.Components
+
+@inherits ControlPanelBase<UserControlPanelState>
+
+<ControlPanelPage Title="@Localization.UserControlPanel.Info">
+    <DescriptionBanner Title="@GetDescriptionBannerTitle()">
+        @GetDescriptionBannerContent()
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        @if (State.UserProfile is not null)
+        {
+            <SettingsGroup Title="@CommonVocabulary.User" @bind-Expanded="@State.UserSettingsGroupExpanded">
+                <SettingsField Label="@TechnicalTerms.Username">
+                    <SettingsFieldTextBox Placeholder="@TechnicalTerms.Username" Enabled="@(!State.IsEditMode())" Value="@State.UserProfile.UserName.Value" ValueChanged="UserNameTextBoxValueChanged" />
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.FirstName">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Name" @bind-Value="@State.UserProfile.Firstname" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.Surname">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Surname" @bind-Value="@State.UserProfile.Lastname" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.Title">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Title" @bind-Value="@State.UserProfile.Title" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@Localization.UserControlPanel.PasswordExpirationDate">
+                    <SettingsFieldTextBox Placeholder="@User.Localization.Constants.UniversalDateFormat" @bind-Value="@State.PasswordExpirationDateString" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </SettingsGroup>
+
+            <SettingsGroup Title="@CommonVocabulary.Contact" @bind-Expanded="@State.ContactSettingsGroupExpanded">
+                <SettingsField Label="@CommonVocabulary.Email">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Email" @bind-Value="@State.UserProfile.Email" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.Cellphone">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Cellphone" @bind-Value="@State.UserProfile.Mobile" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.Phone">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Phone" @bind-Value="@State.UserProfile.PhoneNumber" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </SettingsGroup>
+
+            <SettingsGroup Title="@CommonVocabulary.Password" @bind-Expanded="@State.PasswordSettingsGroupExpanded">
+                @if (State.IsEditMode())
+                {
+                    <SettingsField Label="@Labels.CurrentPassword">
+                        <SettingsFieldTextBox Placeholder="@Labels.CurrentPassword" Password="true" @bind-Value="@State.CurrentPassword" @bind-Value:after="BeginEdit" />
+                    </SettingsField>
+                }
+
+                <SettingsField Label="@Labels.NewPassword">
+                    <SettingsFieldTextBox Placeholder="@Labels.NewPassword" Password="true" @bind-Value="@State.NewPassword" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@Labels.RepeatNewPassword">
+                    <SettingsFieldTextBox Placeholder="@Labels.RepeatNewPassword" Password="true" @bind-Value="@State.RepeatNewPassword" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </SettingsGroup>
+
+            <SettingsGroup Title="@Localization.UserControlPanel.ActiveTwoFactorAuthentification" Expanded="@_twoFactorAuthenticationEnabled">
+                <Expander>
+                    <SwitchExpander Enabled="false" @bind-Value="@_twoFactorAuthenticationEnabled" @bind-Value:after="BeginEdit" />
+                </Expander>
+
+                <ChildContent>
+                </ChildContent>
+            </SettingsGroup>
+
+            <SettingsGroup Title="@CommonVocabulary.Company" @bind-Expanded="@State.CompanySettingsGroupExpanded">
+                @*
+                <SettingsField Label="@CommonVocabulary.Company">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Company" Enabled="false" />
+                </SettingsField>
+                <SettingsField Label="@CommonVocabulary.Site">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Site" Enabled="false" />
+                </SettingsField>
+                *@
+                <SettingsField Label="@CommonVocabulary.Department">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Department" @bind-Value="@State.UserProfile.Department" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+                <SettingsField Label="@CommonVocabulary.Occupation">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Occupation" @bind-Value="@State.UserProfile.Occupation" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+                @*
+                <SettingsField Label="@Localization.UserControlPanel.ReportsTo">
+                    <SettingsFieldTextBox Placeholder="@Localization.UserControlPanel.ReportsTo" Enabled="false" />
+                </SettingsField>
+                <SettingsField Label="@CommonVocabulary.Representative">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Representative" Enabled="false" />
+                </SettingsField>
+                *@
+            </SettingsGroup>
+
+            <SettingsGroup Title="@CommonVocabulary.Localization" @bind-Expanded="@State.LocalizationSettingsGroupExpanded">
+                <SettingsField Label="@CommonVocabulary.Language">
+                    <SettingsFieldTextBox ReadOnly="true" Value="@(State.SelectedCulture?.DisplayName ?? CommonVocabulary.Default)" />
+                    @* <SettingsFieldCultureComboBox Items="@Constants.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="BeginEdit"/> *@
+                </SettingsField>
+                <SettingsField Label="@CommonVocabulary.TimeZone">
+                    <SettingsFieldTextBox ReadOnly="true" Value="@(State.SelectedTimeZone?.DisplayName ?? CommonVocabulary.Default)" />
+                </SettingsField>
+            </SettingsGroup>
+        }
+    </SettingsLayout>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@CommonVocabulary.RolePlural">
+    <DescriptionBanner Title="@Localization.UserControlPanel.RolesDescriptionBannerTitle">
+        @Localization.UserControlPanel.RolesDescriptionBannerContent
+    </DescriptionBanner>
+    <Grid Items="@_assignedUserRoles">
+        <ActionButtons>
+            @if (State.AvailableUserRoles?.Any() == true)
+            {
+                <ComboBox Items="@State.AvailableUserRoles" @bind-Value="State.RoleToAdd" />
+                <AddGridActionButton OnClick="@AddToRole" Enabled="@(State.RoleToAdd != null)"/>
+            }
+            <DeleteGridActionButton Enabled="@_deleteRoleActionButtonEnabled" OnClick="@RemoveSelectedRoles" />
+        </ActionButtons>
+
+        <ChildContent>
+            <ItemSelectColumn KeySelector="@(item => item)" Selection="@RolesGridItemSelection" />
+
+            <TemplateColumn Title="@CommonVocabulary.RolePlural">
+                @context
+            </TemplateColumn>
+        </ChildContent>
+
+        <Footer>
+            <SelectionFooter ItemCount="_assignedUserRoles?.Count()" GridSelection="RolesGridItemSelection" />
+        </Footer>
+    </Grid>
+</ControlPanelPage>
+
+@* Commented-out sections are part of the UI design, but have no functionality until implemented *@
+
+@* <ControlPanelPage Title="@TechnicalTerms.AppPlural"> *@
+@*     <DescriptionBanner Title="@Localization.UserControlPanel.AppsDescriptionBannerTitle"> *@
+@*         @Localization.UserControlPanel.AppsDescriptionBannerContent *@
+@*     </DescriptionBanner> *@
+@* </ControlPanelPage> *@
+
+<ControlPanelPage Title="@TechnicalTerms.PermissionPlural">
+    <DescriptionBanner Title="@(string.Format(Localization.UserControlPanel.PermissionsDescriptionBannerTitle, State.UserName))">
+        @Localization.UserControlPanel.PermissionsDescriptionBannerContent
+    </DescriptionBanner>
+
+    <Grid Items="@State.FilteredGridItems">
+        <Filter>
+            <GridFilterControl @bind-Text="@State.FilterText"
+                               @bind-Text:after="@State.UpdateGridItems" />
+        </Filter>
+
+        <ChildContent>
+            <TemplateColumn Title="@CommonVocabulary.Name">
+                <div class="name-container">
+                    @if (context.IsGroupingRow)
+                    {
+                        <div class="group-name">
+                            <MonochromeIcon Name="MonochromeIconName.KeychainLight" Size="MonochromeIconSize.SmallMedium"/>
+                            <span>@context.ModuleId</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <MonochromeIcon Name="MonochromeIconName.KeyLight" Size="MonochromeIconSize.SmallMedium"/>
+                            <span>@context.Feature</span>
+                        </div>
+                    }
+                </div>
+            </TemplateColumn>
+
+            <TemplateColumn Title="@CommonVocabulary.Description">
+                @context.Description
+            </TemplateColumn>
+
+            <TemplateColumn Title="@Localization.UserControlPanel.AccessLevel">
+                <HeaderTemplate>
+                    <div class="access-level-container header">
+                        <span>@Localization.UserControlPanel.AccessLevel</span>
+                        <div>
+                            <MonochromeIcon Name="MonochromeIconName.PermissionNone" Size="MonochromeIconSize.Small"/>
+                            <MonochromeIcon Name="MonochromeIconName.PermissionViewOnly" Size="MonochromeIconSize.Small"/>
+                            <MonochromeIcon Name="MonochromeIconName.PermissionViewAndEdit" Size="MonochromeIconSize.Small"/>
+                        </div>
+                    </div>
+                </HeaderTemplate>
+
+                <ChildContent>
+                    <div class="access-level-container">
+                        <span></span>
+                        <div>
+                            @if (!context.IsGroupingRow)
+                            {
+                                <InputRadioGroup @bind-Value="@context.AccessLevel"
+                                                 @bind-Value:after="@(async () => await AccessLevelChangedAsync(context))"
+                                                 DisplayName="@(context.AccessLevel.ToString())"
+                                                 Name="@(context.ModuleId + context.Feature)">
+
+                                    <InputRadio Value="@(PermissionGridAccessLevel.None)" />
+
+                                    <InputRadio Value="@(PermissionGridAccessLevel.Partial)" />
+
+                                    <InputRadio Value="@(PermissionGridAccessLevel.Full)" />
+                                </InputRadioGroup>
+                            }
+                        </div>
+                    </div>
+                </ChildContent>
+            </TemplateColumn>
+        </ChildContent>
+    </Grid>
+</ControlPanelPage>
+
+@* <ControlPanelPage Title="@CommonVocabulary.DevicePlural"> *@
+@*     <DescriptionBanner Title="@Localization.UserControlPanel.DevicesDescriptionBannerTitle"> *@
+@*         @Localization.UserControlPanel.DevicesDescriptionBannerContent *@
+@*     </DescriptionBanner> *@
+@* </ControlPanelPage> *@
+
+@* <ControlPanelPage Title="@CommonVocabulary.Time"> *@
+@*     <DescriptionBanner Title="@Localization.UserControlPanel.TimeDescriptionBannerTitle"> *@
+@*         @Localization.UserControlPanel.TimeDescriptionBannerContent *@
+@*     </DescriptionBanner> *@
+@* </ControlPanelPage> *@

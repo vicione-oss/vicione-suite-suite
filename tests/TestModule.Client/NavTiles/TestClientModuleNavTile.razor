@@ -1,0 +1,11 @@
+﻿@using Sdk.Client.Modules
+@using Sdk.Client.NavTiles.Components
+
+@inherits NavTileBase
+
+<NavTileStandardContent Headline="@Localization.Common.ModuleTitle"
+                        Subline="@Localization.Common.ModuleDescription"
+                        IconSrc="@(ModuleAssetHelper.GetModuleIconPath<TestClientModule>("test-client-module.svg"))"
+                        IconAlt="@Localization.Common.ModuleTitle"
+                        OnContentLoading="@ContentLoading"
+                        OnContentReady="@ContentReady" />

@@ -1,0 +1,4 @@
+{
+    "Arguments": "--no-source-map --style=compressed",
+    "ScopedCssFolders": ["."]
+}

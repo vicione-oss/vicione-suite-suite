@@ -1,0 +1,32 @@
+﻿@using Blazor.Shared.Settings.NetworkInterface.Enums
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Localization.Resources
+
+<SettingsGroup Title="@Title" Expanded="@(ConfigurationMode == IpConfigurationMode.Manual)">
+    <Expander>
+        <ComboBoxExpander Items="@_configurationModeComboBoxItems"
+                          ValueSelector="@(i => i.Value)"
+                          TextSelector="@(i => i.Text)"
+                          @bind-Value="ConfigurationMode"
+                          @bind-Value:after="NotifyConfigurationModeChanged" />
+    </Expander>
+
+    <ChildContent>
+        <SettingsField Label="@TechnicalTerms.IpAddress">
+            <SettingsFieldTextBox Placeholder="@TechnicalTerms.IpAddress" @bind-Value="IpAddress" @bind-Value:after="NotifyIpAddressChanged" />
+        </SettingsField>
+
+        <SettingsField Label="@TechnicalTerms.SubnetMask">
+            <SettingsFieldTextBox Placeholder="@TechnicalTerms.SubnetMask" @bind-Value="SubnetMask" @bind-Value:after="NotifySubnetMaskChanged" />
+        </SettingsField>
+
+        <SettingsField Label="@TechnicalTerms.DefaultGateway">
+            <SettingsFieldTextBox Placeholder="@TechnicalTerms.DefaultGateway" @bind-Value="DefaultGateway" @bind-Value:after="NotifyDefaultGatewayChanged" />
+        </SettingsField>
+
+        @if (AdditionalSettingsFields is not null)
+        {
+            @AdditionalSettingsFields
+        }
+    </ChildContent>
+</SettingsGroup>

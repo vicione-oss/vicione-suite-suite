@@ -1,0 +1,49 @@
+﻿@using Public.Contracts
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inherits ComponentBase
+
+<hidden>@OnDraw()</hidden>
+<div class="jit-chat-content">
+    <AuthorizeView Policy="@Policy">
+        <Authorized>
+            <div class="jit-chat-messages" id="jit-chat-message-box">
+                @{ ChatMessage? lastMessage = null; }
+                @foreach (var message in JiTChatService.ChatMessages)
+                {
+                    @if (Math.Floor(new TimeSpan(message.Time.Ticks).TotalMinutes) - Math.Floor(new TimeSpan((lastMessage?.Time ?? DateTime.MinValue).Ticks).TotalMinutes) != 0)
+                    {
+                        <div class="jit-chat-timestamp">
+                            <p>@(message.Time.ToLongDateString()) @(message.Time.ToShortTimeString())</p>
+                        </div>
+
+                        lastMessage = message;
+                    }
+
+                    <div class="@($"{(message.User == Username ? "jit-chat-my-message" : string.Empty)} jit-chat-message")">
+                        <div class="jit-chat-message-info">
+                            <p>@(message.User)</p>
+                        </div>
+                        <p>@(message.Message)</p>
+                    </div>
+                }
+            </div>
+
+            <EditForm Context="editFormContext"
+                      EditContext="_editContext"
+                      OnValidSubmit="@(async () => await SubmitMessage())" >
+
+                <div class="jit-chat-input">
+                    <DxTextBox @bind-Text="MessageText" class="jit-chat-text-input"/>
+
+                    <button class="btn btn-success mdi mdi-send"
+                            type="submit">
+                    </button>
+                </div>
+            </EditForm>
+        </Authorized>
+        <NotAuthorized>
+            You are not supposed to be here!
+        </NotAuthorized>
+    </AuthorizeView>
+</div>

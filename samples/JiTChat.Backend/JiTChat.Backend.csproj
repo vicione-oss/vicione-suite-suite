@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.JiTChat.Backend</AssemblyName>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\JiTChat.Public\JiTChat.Public.csproj" />
+  </ItemGroup>
+
+</Project>

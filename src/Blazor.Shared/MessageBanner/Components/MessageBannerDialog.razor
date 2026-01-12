@@ -1,0 +1,25 @@
+﻿@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using Sdk.Client.Extensions
+
+@if (State.Visible)
+{
+    <div class="message-banner-dialog @State.Message.Type.ToString().ToHyphenSeparated()">
+        <button class="minimize-button" @onclick="MinimizeButtonClick">
+            <img src="@SvgIcon.CloseCircle.GetPath()" />
+        </button>
+
+        <div class="sign">
+            <img src="@State.Message.Icon.GetPath()" />
+        </div>
+
+        <div class="wrapper">
+            <div class="title">
+                @State.Message.Title
+            </div>
+            <div class="description">
+                @State.Message.Description
+            </div>
+        </div>
+    </div>
+}

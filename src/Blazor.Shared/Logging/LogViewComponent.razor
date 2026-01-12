@@ -1,0 +1,66 @@
+﻿@using Blazor.Shared.Logging.Contracts
+@using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
+@using ViciOne.Ui.Localization.Resources
+
+<div class="logging-content">
+
+    <div class="logging-toolbar">
+        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain" ItemClick="@OnItemClick">
+            <Items>
+                <!-- LOG LEVEL -->
+                <DxToolbarItem Text="@(Localization.LogView.LogLevel)"
+                               Enabled="false"/>
+                <DxToolbarItem>
+                    <Template>
+                        <DxComboBox NullText="Current log level..."
+                                    Data="@LogViewModel.LogLevels"
+                                    AllowUserInput="false"
+                                    @bind-Value="@SelectedLogLevel"
+                                    InputCssClass="loglevel-cbo"/>
+                    </Template>
+                </DxToolbarItem>
+
+                <!-- LOG FILE -->
+                <DxToolbarItem Text="@(Localization.LogView.LogFile)" 
+                               Enabled="false" 
+                               BeginGroup="true"/>
+                <DxToolbarItem>
+                    <Template>
+                        <DxComboBox Data="@Model.LogFiles"
+                                    NullText="@CommonVocabulary.SelectVerb"
+                                    AllowUserInput="true"
+                                    SearchMode="@ListSearchMode.AutoSearch"
+                                    SearchFilterCondition="ListSearchFilterCondition.Contains"
+                                    @bind-Value="@Model.SelectedLogName"
+                                    InputCssClass="logpath-cbo"/>
+                    </Template>
+                </DxToolbarItem>
+
+                <DxToolbarItem Tooltip="@CommonVocabulary.DisplayVerb"
+                               IconCssClass="mdi mdi-magnify"
+                               Enabled="@(CanDisplayLogName())"
+                               Name="@nameof(DisplayLog)">
+                </DxToolbarItem>
+
+                <DxToolbarItem Tooltip="@CommonVocabulary.DownloadVerb"
+                               IconCssClass="mdi mdi-download"
+                               Enabled="@(Model.SelectedLogName != null)"
+                               Name="@nameof(DownloadLogfile)">
+                </DxToolbarItem>
+            </Items>
+        </DxToolbar>
+    </div>
+
+    <div class="logging-log">
+        @if (Model.IsLoading)
+        {
+            <LoadingSpinner Visible="true"/>
+        }
+        else
+        {
+            <pre class="logging-text">
+                @(Model.LogText ?? Localization.LogView.ClickMagnifyToDisplayLogFile)
+            </pre>
+        }
+    </div>
+</div>

@@ -1,0 +1,59 @@
+﻿@use "../../../../shared/styles/colors";
+@use "../../../../shared/styles/loading-spinner/three-dots" with ( $dot-color: colors.$color-ifm-orange, $dot-width: 16px, $dot-height: 16px, $dot-radius: 8px );
+@use 'sass:color';
+
+#components-reconnect-modal {
+    display: none;
+    width: 100%;
+    height: 100%;
+
+    .interaction-center {
+        .left-side {
+            .interruption {
+                flex-direction: column;
+                row-gap: 16px;
+
+                .static-restart__loading-spinner {
+                    display: grid;
+                    align-items: center;
+                    justify-items: center;
+                }
+            }
+
+            .failed {
+                flex-direction: column;
+                row-gap: 16px;
+            }
+        }
+    }
+}
+
+#components-reconnect-modal.components-reconnect-show, #components-reconnect-modal.components-reconnect-hide, #components-reconnect-modal.components-reconnect-rejected {
+    .interruption {
+        display: flex;
+    }
+
+    .failed {
+        display: none;
+    }
+}
+
+#components-reconnect-modal.components-reconnect-failed {
+    .interruption {
+        display: none !important;
+    }
+
+    .failed {
+        display: flex !important;
+    }
+}
+
+#components-reconnect-modal.components-reconnect-show,
+#components-reconnect-modal.components-reconnect-hide,
+#components-reconnect-modal.components-reconnect-rejected,
+#components-reconnect-modal.components-reconnect-failed {
+    display: flex;
+    position: fixed;
+    top: 0;
+    z-index: 1100000;
+}

@@ -1,0 +1,5 @@
+﻿@use "../typography/fonts/noto-sans/variables" as noto-sans;
+
+$font-family: #{noto-sans.$font-family};
+$font-weight: #{noto-sans.$font-weight-light};
+$letter-spacing: 0.2px;

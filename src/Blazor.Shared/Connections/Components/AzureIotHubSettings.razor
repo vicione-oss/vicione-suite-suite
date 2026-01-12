@@ -1,0 +1,22 @@
+﻿@using Sdk.Client.Connections
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ConnectionSettingsComponentBase<AzureIotHubConnection>
+
+<SettingsField Label="@TechnicalTerms.Hostname">
+    <SettingsFieldTextBox Placeholder="@TechnicalTerms.Hostname"
+                          @bind-Value="@Connection.Hostname"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@($"{TechnicalTerms.SharedAccessSignatureKey} {CommonVocabulary.Name}")">
+    <SettingsFieldTextBox Placeholder="@($"{TechnicalTerms.SharedAccessSignatureKey} {CommonVocabulary.Name}")"
+                          @bind-Value="@Connection.SharedAccessSignatureKeyName"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@TechnicalTerms.SharedAccessSignatureKey">
+    <SettingsFieldTextBox Placeholder="@TechnicalTerms.SharedAccessSignatureKey"
+                          @bind-Value="@Connection.SharedAccessSignatureKey"
+                          @bind-Value:after="NotifyChanged" />
+</SettingsField>

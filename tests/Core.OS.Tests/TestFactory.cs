@@ -1,0 +1,198 @@
+﻿using System.Diagnostics;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Core.Module;
+using Core.Module.Contracts;
+using Core.Module.Nexus.Contracts;
+using Core.Module.Utils;
+using Core.OS.Extensions;
+using Core.OS.Modules;
+using Core.Tests.Tools;
+using Microsoft.Extensions.DependencyModel;
+using NSubstitute;
+using Sdk.Backend.ArtifactApi;
+using Sdk.Messaging;
+using Sdk.Modules;
+using Sdk.Testing.Backend;
+using TestModule.Backend;
+using TestModule.Client;
+using TestSystem.Backend;
+using Xunit;
+
+namespace Core.OS.Tests;
+
+internal static class TestFactory
+{
+    public const string ModuleResourceNamespace = "Core.OS.Tests.Modules.Resources";
+    public const string ClusterManagementMetadataResource = "0.22.0-win-x64_0.18.0.json";
+    public const string ClusterManagementCiMetadataResource = "ci-1399909-win-x64_0.18.0.json";
+    public const string DataCollectionWizardMetadataResource = "0.5.0-win-x64_0.18.0.json";
+
+    /// <summary>
+    /// Create a suite context with Core, optional TestUiHostBackend, optional TestBackendModule, optional TestClientModule
+    /// </summary>
+    /// <param name="enableUiHost"></param>
+    /// <param name="enableBackendModules"></param>
+    /// <param name="enableUiModules"></param>
+    /// <returns></returns>
+    internal static SuiteDependencyContext CreateSuiteContext(bool enableUiHost = true, bool enableBackendModules = true, bool enableUiModules = true)
+    {
+        var manifestProvider = Substitute.For<IModuleManifestProvider>();
+        manifestProvider.GetManifest().Returns(new ModulePackageManifest());
+
+        var setup = new TestConfig()
+            .ConfigureModuleLoader()
+            .AddTestUiHost(enableUiHost)
+            .AddTestBackendClientModule(enableBackendModules || enableUiModules);
+
+        var config = setup.BuildConfiguration();
+        var loaderOptions = config.GetModuleLoaderOptions();
+        var moduleOptions = config.CreateModuleOptions(manifestProvider, loaderOptions, ModuleIdResolver.ResolveId<TestBackendModule>(), ModuleIdResolver.ResolveId<TestClientModule>());
+
+        var builder = new SuiteDependencyContextBuilder()
+            .WithCore(typeof(TestSystemModule).Assembly)
+            .WithUiHost(loaderOptions, moduleOptions)
+            .WithBackendModules(loaderOptions, moduleOptions);
+
+        if (enableUiModules)
+            builder.WithClientModules(loaderOptions, moduleOptions);
+
+        return builder.Build();
+    }
+
+    public static SuiteDependencyContext CreateEmptySuiteContext()
+    {
+        var core = new ModuleDependencyContext(ModuleType.Backend, "emtpy", true);
+        return new SuiteDependencyContext(core, [], []);
+    }
+
+    public static ModuleDependencyContext CreateBackendModuleContext(Type mainAssemblyType, bool isDebugSource = false)
+        => CreateModuleContext(mainAssemblyType, ModuleType.Backend, isDebugSource);
+
+    public static ModuleDependencyContext CreateModuleContext(Type mainAssemblyType, ModuleType moduleType, bool isDebugSource = false)
+    {
+        var assembly = Assembly.GetAssembly(mainAssemblyType);
+        Assert.NotNull(assembly);
+
+        var assemblyName = assembly.GetName();
+        Assert.NotNull(assemblyName);
+        Assert.NotNull(assemblyName.Name);
+        Assert.NotNull(assemblyName.Version);
+
+        var path = ModuleHelpers.DllToDepsJson(assembly.Location);
+        var module = new ModuleDependencyContext(moduleType, path, isDebugSource);
+
+        // fake main library
+        module.RuntimeLibraries.Add(new RuntimeLibrary(mainAssemblyType.ToString(), assemblyName.Name, assemblyName.Version.ToString(), null, [], [], [], [], false));
+
+        // fake sdk library
+        var sdkAssembly = Assembly.GetAssembly(typeof(ModuleMetadata));
+        var sdkAssemblyName = sdkAssembly!.GetName();
+
+        Assert.NotNull(sdkAssemblyName);
+        Assert.NotNull(sdkAssemblyName.Name);
+        Assert.NotNull(sdkAssemblyName.Version);
+
+        module.RuntimeLibraries.Add(new RuntimeLibrary(sdkAssembly.GetType().ToString(), sdkAssemblyName.Name, sdkAssemblyName.Version.ToString(), null, [], [], [], [], false));
+
+        return module;
+    }
+
+    public static async Task<List<IArtifactItem>> GetEmbeddedQueryModuleMetadataArtifacts()
+    {
+        var responses = await GetEmbeddedSearchAssetsResponses();
+        var items = responses.SelectMany(k => k.Items).Select(k =>
+        {
+            var name = Path.GetFileName(k.Path);
+            var path = Path.GetDirectoryName(k.Path) ?? string.Empty;
+
+            return new ArtifactItem
+            {
+                Name = name,
+                Path = path.Replace("\\", "/"),
+                Repo = "vicione-suite",
+            };
+        });
+
+        return [.. items];
+    }
+
+    public static Task<List<SearchAssetsResponse>> GetEmbeddedSearchAssetsResponses()
+    {
+        var resources = Enumerable.Range(0, 5).Select(k => $"nexus-module-assets-response-{k}.json");
+
+        return DeserializeFromEmbeddedResources<SearchAssetsResponse>(resources);
+    }
+
+    public static Task<List<SearchAssetsResponse>> GetEmbeddedSearchMetadataAssets()
+    {
+        var resources = new List<string> {
+            "nexus-module-metadata-response.json"   // response of meta query
+        };
+
+        return DeserializeFromEmbeddedResources<SearchAssetsResponse>(resources);
+    }
+
+    public static Task<List<ModuleMetadata>> GetEmbeddedModuleMetadata(bool includePreReleases = true)
+    {
+        var resources = new List<string> {
+            ClusterManagementMetadataResource,  // ClusterManagement            
+            DataCollectionWizardMetadataResource    // DataCollectionWizard
+        };
+
+        if (includePreReleases)
+            resources.Add(ClusterManagementCiMetadataResource); // ClusterManagement CI
+
+        return DeserializeFromEmbeddedResources<ModuleMetadata>(resources, ModuleSerializerOptions.GetOptions());
+    }
+
+    private static async Task<List<T>> DeserializeFromEmbeddedResources<T>(IEnumerable<string> resourceNames, JsonSerializerOptions? options = null)
+    {
+        var result = new List<T>();
+        var assembly = Assembly.GetAssembly(typeof(TestFactory));
+
+        foreach (var resourceName in resourceNames)
+        {
+            using var stream = assembly!.GetManifestResourceStream($"{ModuleResourceNamespace}.{resourceName}");
+            var response = await JsonSerializer.DeserializeAsync<T>(stream!, options: options);
+            Assert.NotNull(response);
+            result.Add(response);
+        }
+
+        return result;
+    }
+
+    internal class ArtifactQueryResult : IArtifactQueryResult
+    {
+        [JsonIgnore]
+        public IReadOnlyCollection<IArtifactItem> Artifacts => ResultsTemp.ToArray();
+
+        [JsonPropertyName("results")]
+        public List<ArtifactItem> ResultsTemp { get; set; } = [];
+
+        public ErrorInfo? ErrorInfo { get; set; }
+    }
+
+    [DebuggerDisplay("Repo = {Repo,nq}, Path = {Path,nq}, Name = {Name,nq}")]
+    internal class ArtifactItem : IArtifactItem
+    {
+        public IArtifactChecksum? Checksum { get; set; }
+        public DateTimeOffset? Modified { get; set; }
+        public required string Name { get; set; }
+        public required string Path { get; set; }
+        public string Repo { get; set; } = string.Empty;
+        public long? Size { get; set; }
+    }
+
+    public static ModuleArtifactInfo CreateModuleArtifactInfo(IArtifactItem item)
+            => new()
+            {
+                Name = item.Name,
+                Path = item.Path,
+                Repo = item.Repo,
+                Size = item.Size,
+                Modified = item.Modified,
+                Checksum = item.Checksum,
+            };
+}

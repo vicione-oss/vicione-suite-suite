@@ -1,0 +1,14 @@
+﻿@use "./../../../../shared/styles/colors.scss";
+@use 'sass:color';
+
+.wrapper {
+    ::deep .red-button:not([disabled]) {
+        color: colors.$color-font-light;
+        background-color: colors.$color-red;
+        border-color: color.change(colors.$color-red, $alpha: 0.8);
+
+        &:hover {
+            border-color: color.adjust(colors.$color-red, $lightness: -15%);
+        }
+    }
+}

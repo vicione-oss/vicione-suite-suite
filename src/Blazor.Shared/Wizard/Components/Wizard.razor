@@ -1,0 +1,33 @@
+﻿@using Blazor.Shared.Settings.Components
+@using PopupConstants = Blazor.Shared.Popup.Constants
+
+@typeparam TContext
+
+<DxPopup @bind-Visible="@Visible"
+         @bind-Visible:after="DxPopupVisibleChanged"
+         CloseOnEscape="false"
+         CloseOnOutsideClick="false"
+         Closing="@OnClosing"
+         Height="@PopupConstants.PopupHeightPx"
+         Width="@PopupConstants.PopupWidthPx"
+         ZIndex="@PopupConstants.PopupZIndex"
+         CssClass="popup--suite"
+         ShowHeader="false"
+         @ref="_dxPopup">
+
+    <BodyContentTemplate>
+        <CascadingValue Value="this" IsFixed="true">
+            <WizardBody TContext="TContext"
+                        Title="@Title"
+                        AllowExit="@AllowExit"
+                        OnExit="@WizardBodyOnExit"
+                        OnHasUnsavedChanges="(() => _showUnsavedChangesPopup = true)"
+                        @ref="_wizardBody" />
+        </CascadingValue>
+    </BodyContentTemplate>
+</DxPopup>
+
+<UnsavedChangesPopup OnCancel="@OnCancelUnsavedChanges"
+                     OnRevert="@OnRevertUnsavedChanges"
+                     OnSave="@OnSaveUnsavedChanges"
+                     Visible="@_showUnsavedChangesPopup" />

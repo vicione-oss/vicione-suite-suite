@@ -1,0 +1,33 @@
+﻿@use "../../../shared/styles/colors";
+
+.navigation-field {
+    display: flex;
+    height: 17px;
+    padding: 0px;
+    align-items: stretch;
+    width: max-content;
+    cursor: pointer;
+
+    input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    ::deep img {
+        width: 16px;
+        height: 16px;
+    }
+
+    ::deep label {
+        margin-left: 8px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    &:focus-within {
+        border-bottom: 1px solid colors.$color-ifm-orange;
+    }
+}

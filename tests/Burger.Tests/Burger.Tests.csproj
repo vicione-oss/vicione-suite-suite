@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Burger.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\samples\Burger.Backend\Burger.Backend.csproj" />
+    <ProjectReference Include="..\..\samples\Burger.Client\Burger.Client.csproj" />    
+    <ProjectReference Include="..\Blazor.Tests.Tools\Blazor.Tests.Tools.csproj" />
+  </ItemGroup>
+
+</Project>

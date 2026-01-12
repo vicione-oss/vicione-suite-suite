@@ -1,0 +1,47 @@
+﻿@using ViciOne.Ui.Localization.Resources;
+
+<div class="systeminfo-sw-section">
+    <div class="systeminfo-hw-sw-header-frame">
+        <div class="systeminfo-hw-sw-header">
+            @TechnicalTerms.Software
+        </div>
+    </div>
+    <div class="systeminfo-hw-sw-row">
+        <div>@TechnicalTerms.Version</div>
+        <div title="@SuiteVersion">@SuiteVersion</div>
+    </div>
+    @if (BranchName is not null)
+    {
+        <div class="systeminfo-hw-sw-row">
+            <div>@TechnicalTerms.Branch</div>
+            <div title="@BranchName">@BranchName</div>
+        </div>
+    }
+</div>
+<div class="systeminfo-hw-section">
+    <div class="systeminfo-hw-sw-header-frame">
+        <div class="systeminfo-hw-sw-header">
+            @TechnicalTerms.Hardware
+        </div>
+    </div>
+    <div class="systeminfo-hw-sw-row">
+        <div>@TechnicalTerms.Hostname</div>
+        <div title="@MachineName">@MachineName</div>
+    </div>
+    <div class="systeminfo-hw-sw-row">
+        <div>@TechnicalTerms.Processor</div>
+        <div title="@Processor">@Processor</div>
+    </div>
+    <div class="systeminfo-hw-sw-row">
+        <div>@TechnicalTerms.Memory</div>
+        <div title="@Memory">@Memory</div>
+    </div>
+    <div class="systeminfo-hw-sw-row">
+        <div>@TechnicalAcronyms.Hdd</div>
+        <div title="@Disk">@Disk</div>
+    </div>
+    <div class="systeminfo-hw-sw-row">
+        <div>@TechnicalTerms.SerialNumber</div>
+        <div title="@SerialNumber">@SerialNumber</div>
+    </div>
+</div>

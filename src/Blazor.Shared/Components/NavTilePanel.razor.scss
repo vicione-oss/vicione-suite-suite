@@ -1,0 +1,26 @@
+﻿@use "./../../../shared/styles/variables";
+@use "./../../../shared/styles/colors";
+@use "./../../../shared/styles/typography";
+@use "./../../../shared/styles/loading-spinner/three-dots" with ( $dot-color: colors.$color-accent );
+
+.nav-tile-panel {
+    margin: 25px variables.$main-content-margin-left-right 0px variables.$main-content-margin-left-right;
+}
+
+h4 {
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    font-weight: typography.$font-weight-light;
+    color: colors.$color-font;
+    margin-bottom: 16px;
+    line-height: revert;
+}
+
+.nav-tile-panel-content {
+    display: flex;
+    flex-wrap: wrap
+}
+
+.dot-flashing {
+    left: three-dots.$dot-spacing;
+}

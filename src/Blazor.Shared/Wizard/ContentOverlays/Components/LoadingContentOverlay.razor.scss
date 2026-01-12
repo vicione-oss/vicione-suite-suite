@@ -1,0 +1,67 @@
+﻿@use "../../../../../shared/styles/colors";
+@use "../../../../../shared/styles/typography";
+@use "../../../Styles/typography/fonts/noto-sans/variables" as noto-sans;
+
+@use "sass:color";
+@use "sass:math";
+
+// https://cssloaders.github.io/
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    // no backdrop filter as text below the overlay is somehow now affected correctly, filter is applied in WizardPageContainer instead, DX issue?
+
+    $loader-size: 95px;
+
+    .loader-container {
+        position: absolute;
+
+        top: 50%;
+        left: 50%;
+        width: $loader-size;
+        height: $loader-size;
+        transform: translate(-50%, -50%);
+
+        .loader {
+            height: 100%;
+
+            border: 4px solid colors.$color-accent;
+            border-bottom-color: color.change(colors.$color-accent, $alpha: 0.1);
+            border-radius: 50%;
+            box-sizing: border-box;
+
+            animation: rotation 1s linear infinite;
+        }
+    }
+
+    ::deep .message {
+        position: absolute;
+
+        top: 50%;
+        left: 50%;
+        width: 80%;
+
+        transform: translate(-50%, math.div($loader-size, 2) + 64px);
+
+        font-family: noto-sans.$font-family;
+        font-size: 16px;
+        color: colors.$color-font-light;
+        letter-spacing: 0.2px;
+        font-weight: typography.$font-weight-regular;
+
+        text-align: center;
+    }
+}

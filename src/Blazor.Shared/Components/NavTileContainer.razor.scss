@@ -1,0 +1,78 @@
+﻿@use "./../../../shared/styles/colors";
+@use "./../../../shared/styles/nav-tiles/variables";
+@use "./../../../shared/styles/loading-spinner/three-dots" with ( $dot-color: colors.$color-accent );
+@use 'sass:color';
+
+.nav-tile-container {
+    position: relative;
+
+    margin: variables.$container-margin variables.$container-margin * 2 variables.$container-margin 0px;
+
+    overflow: hidden;
+
+    height: variables.$container-width-no-span;
+
+    &.horizontal-span-one {
+        width: variables.$container-width-no-span;
+    }
+
+    &.horizontal-span-two {
+        width: variables.$container-width-no-span * 2 + variables.$container-margin * 2; // increase by 2 times margin to get same width as two small tiles displayed next to each other
+    }
+
+    @mixin span-tile()
+    {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    $background-color: color.adjust(colors.$color-content, $alpha: -0.3);
+
+    .nav-tile-container__loading-spinner {
+        @include span-tile();
+
+        display: grid;
+        align-items: center;
+        justify-items: center;
+
+        background: $background-color;
+    }
+
+    .nav-tile-container__link {
+        @include span-tile();
+
+        padding: variables.$link-padding;
+        text-decoration: none;
+        cursor: pointer;
+
+        background: $background-color;
+        color: colors.$color-font;
+    }
+
+    &:not(.disabled) {
+        .nav-tile-container__link {
+            &:hover,
+            &:focus,
+            &:focus-visible {
+                background-color: color.adjust($background-color, $alpha: -0.1);
+                color: colors.$color-font-light;
+            }
+        }
+    }
+
+    &.disabled {
+        filter: brightness(0.6) grayscale(1);
+
+        .nav-tile-container__link {
+            cursor: default;
+            pointer-events: none;
+        }
+    }
+
+    &.loading {
+        .nav-tile-container__link {
+            visibility: hidden; // using visibility instead of opacity to disallow clicks in loading state
+        }
+    }
+}

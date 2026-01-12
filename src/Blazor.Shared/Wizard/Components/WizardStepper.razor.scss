@@ -1,0 +1,102 @@
+﻿@use "../../../../shared/styles/animations/variables" as animations;
+@use "../../../../shared/styles/colors";
+@use "../../../../shared/styles/typography";
+
+.wizard-stepper {
+    align-content: center;
+    display: grid;
+    grid-row-gap: 11px;
+    grid-template-rows: max-content;
+    justify-items: center;
+
+    font-size: 14px;
+
+    .separator {
+        width: 1px;
+        height: 40px;
+
+        background-color: gray;
+        color: transparent;
+        
+        transition: all animations.$duration animations.$effect;
+
+        &.done {
+            background-color: colors.$color-accent;
+        }
+
+        &.dotted {
+            background-color: transparent;
+            color: gray;
+
+            &.done {
+                color: colors.$color-accent;
+            }
+
+            &::before {
+                content: "••••";
+
+                // make each dots break to a new line
+                display: inline-block;
+                line-break: anywhere;
+                line-height: 13px;
+
+                // correct shifted position
+                position: relative;
+                left: -2px;
+                top: -8px;
+            }
+        }
+    }
+
+    .step {
+        display: grid;
+        grid-row-gap: 4px;
+        grid-template-columns: max-content;
+        grid-template-rows: max-content min-content;
+        justify-content: center;
+        justify-items: center;
+
+        &.active {
+            font-weight: typography.$font-weight-regular;
+
+            > span:first-of-type {
+                background-color: colors.$color-accent;
+                border-color: colors.$color-accent;
+            }
+        
+            > span:last-of-type {
+                color: colors.$color-font-light;
+            }
+        }
+
+        &.done {
+            font-weight: typography.$font-weight-regular;
+
+            > span:first-of-type {
+                border-color: colors.$color-accent;
+                color: colors.$color-accent;
+            }
+
+            > span:last-of-type {
+                color: colors.$color-font-light;
+            }
+        }
+
+        > span:first-of-type {
+            align-content: center;
+            border: 1px solid;
+            border-color: colors.$color-font-light;
+            border-radius: 16px;
+            color: colors.$color-font-light;
+            height: 32px;
+            text-align: center;
+            transition: background-color animations.$duration animations.$effect;
+            width: 32px;
+        }
+
+        > span:last-of-type {
+            color: colors.$color-font;
+            transition: background-color animations.$duration animations.$effect;
+        }
+    }
+}

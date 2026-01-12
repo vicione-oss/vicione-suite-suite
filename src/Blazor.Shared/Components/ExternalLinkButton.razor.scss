@@ -1,0 +1,27 @@
+﻿@use "../../../shared/styles/colors.scss";
+@use "../../../shared/styles/typography.scss";
+
+button {
+    display: flex;
+    align-items: center;
+    height: 17px;
+    font-weight: typography.$font-weight-light;
+    color: colors.$color-font;
+    font-size: 12px;
+    letter-spacing: .4px;
+    padding: 0px;
+    border: 0;
+
+    ::deep .icon {
+        color: colors.$color-accent;
+        margin-right: 8px;
+    }
+
+    &:hover {
+        color: colors.$color-font-light;
+    }
+
+    &:focus-visible {
+        outline: 0;
+    }
+}

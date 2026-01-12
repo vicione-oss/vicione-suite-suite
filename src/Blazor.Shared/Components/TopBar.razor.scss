@@ -1,0 +1,109 @@
+﻿@use "./../../../shared/styles/badges/deprecated";
+@use "../Styles/typography/fonts/noto-sans/variables" as noto-sans;
+
+@use "./../../../shared/styles/colors";
+@use "./../../../shared/styles/variables";
+
+.top-bar {
+    font-family: #{noto-sans.$font-family};
+    align-items: center;
+    background-color: colors.$color-background;
+    display: grid;
+    grid-template-rows: variables.$top-bar-height;
+    grid-template-columns: (variables.$top-bar-height + 8px) 1fr variables.$top-bar-height auto auto;
+    grid-template-areas: "app-menu app-name spacer notification-box notification-area";
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 102;
+    border-bottom-width: variables.$top-bar-border-bottom-width;
+    border-bottom-style: solid;
+    border-bottom-color: colors.$color-accent;
+}
+
+.read-only {
+    height: variables.$top-bar-height;
+    border-left: 10px solid colors.$color-error;
+    border-right: 10px solid colors.$color-error;
+
+    h4 {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        background: colors.$color-error;
+        color: white;
+        height: inherit;
+        margin-bottom: 0px;
+    }
+}
+
+.top-bar-app-menu {
+    grid-area: app-menu;
+    align-items: center;
+    color: colors.$color-font;
+    display: flex;
+    height: variables.$top-bar-height;
+    justify-content: center;
+    width: 52px;
+    text-decoration: none;
+
+    &:hover {
+        background-color: colors.$color-background-hover;
+        color: colors.$color-font;
+        text-decoration: none;
+    }
+}
+
+.top-bar-app-name {
+    grid-area: app-name;
+    cursor: default;
+    font-size: 24px;
+    letter-spacing: 0.5px;
+    font-weight: noto-sans.$font-weight-regular;
+    margin-bottom: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+
+    > a {
+        color: colors.$color-font-light;
+        cursor: pointer;
+    }
+
+    > a:hover {
+        color: colors.$color-font-light;
+        text-decoration: none;
+    }
+
+    > span {
+        color: colors.$color-font-light;
+    }
+}
+
+.top-bar-notification-area {
+    grid-area: notification-area;
+}
+
+#content-desktop {
+    display: block;
+}
+
+#content-mobile {
+    display: none;
+}
+
+@media screen and (max-width: 750px) {
+    #content-desktop-app-name {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    #content-desktop {
+        display: none;
+    }
+
+    #content-mobile {
+        display: block;
+    }
+}

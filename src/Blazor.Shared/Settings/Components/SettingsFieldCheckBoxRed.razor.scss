@@ -1,0 +1,13 @@
+﻿@use "./../../../../shared/styles/colors.scss";
+@use 'sass:color';
+
+.wrapper {
+    --vo-ui-bc-color-accent: #{colors.$color-red};
+    --vo-ui-bc-color-accent-hover: #{colors.$color-red};
+    --vo-ui-bc-check-box-color-accent-focus: #{color.adjust(colors.$color-red, $lightness: -10%)};
+    --vo-ui-bc-check-box-color-accent-hover: #{color.adjust(colors.$color-red, $lightness: -10%)};
+
+    display: grid;
+    grid-template-columns: auto min-content;
+    padding: 16px 0px;
+}

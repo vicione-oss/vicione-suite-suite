@@ -1,0 +1,21 @@
+﻿@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using ViciOne.Ui.Blazor.Components.TextBox
+
+<div class="input-field">
+    <TextBox @bind-Value:set="@ValueChanged"
+             @bind-Value:get="@Value"
+             Password="@Password"
+             Placeholder="@Placeholder"
+             Valid="@Valid" />
+
+    <div class="validation-image">
+        <img src="@(SvgIcon.ErrorFull.GetPath())" />
+
+        <div class="tooltip-info">
+            <div class="tooltip-info-tab">
+                <ValidationMessage For="@ValueExpression" class="message" />
+            </div>
+        </div>
+    </div>
+</div>

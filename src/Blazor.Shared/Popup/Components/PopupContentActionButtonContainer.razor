@@ -1,0 +1,19 @@
+﻿<div class="popup-content-action-button-container">
+    @if (ErrorMessageVisible && ErrorMessage is not null)
+    {
+        <div class="error-message">
+            @ErrorMessage
+        </div>
+    }
+
+    @if (ShowLoadingIndication)
+    {
+        <div class="dot-flashing-container">
+            <div class="dot-flashing"></div>
+        </div>
+    }
+
+    <CascadingValue Value="@Enabled" Name="@CascadingEnabledParameterName">
+        @Buttons
+    </CascadingValue>
+</div>

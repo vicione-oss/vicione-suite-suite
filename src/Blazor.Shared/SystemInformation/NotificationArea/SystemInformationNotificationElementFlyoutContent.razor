@@ -1,0 +1,62 @@
+﻿@using Blazor.Shared.Components.Layout
+@using Blazor.Shared.SystemInformation.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Components
+@using Microsoft.AspNetCore.Components.Authorization
+@using Sdk.Client.NotificationArea.Components.Layout
+@using Sdk.Client.Components.LinkButton
+
+@if (_authState != null)
+{
+    <NotificationElementFlyoutContentLayout>
+        <Main>
+            <div class="systeminfo-monitor">
+                <div class="systeminfo-tabs">
+                    <DxTabs>
+                        <DxTabPage Text="@TwentyFourHoursLabel">
+                            <SystemMonitoringComponent TimeSpanHours="24" />
+                        </DxTabPage>
+                        <DxTabPage Text="@OneHourLabel">
+                            <SystemMonitoringComponent TimeSpanHours="1" />
+                        </DxTabPage>
+                    </DxTabs>
+                </div>
+                <div class="systeminfo-open-monitor">
+                    <LinkButton IconName="@MonochromeIconName.OpenInNewWindow"
+                                Text="@Localization.SystemInformationNotificationElementFlyoutContent.OpenMonitor"
+                                OnClick="@OpenMonitor" />
+                </div>
+            </div>
+
+            <div class="systeminfo-log-center">
+                <LogCenterComponent />
+            </div>
+
+            <div class="systeminfo-hw-sw">
+                <SoftAndHardwareComponent />
+            </div>
+        </Main>
+
+        <Footer>
+            <AuthorizeView Policy="@SysAdminPolicy">
+                <Authorized>
+                    @*restart and shutdown section*@
+                    <div class="restart-and-shutdown">
+                        @* Hide this button, because we're currently unable to trigger a complete shutdown. *@
+                        @* <div>
+                            <button @onclick="BeginShutdown" disabled>
+                                <MonochromeIcon Name="@MonochromeIconName.SwitchOff" Size="@MonochromeIconSize.Small" CssClass="icon" />
+                                @CommonVocabulary.ShutdownVerb
+                            </button>
+                        </div> *@
+                        <div>
+                            <LinkButton IconName="@MonochromeIconName.Refresh"
+                                        Text="@Localization.SystemInformationNotificationElementFlyoutContent.Restart"
+                                        OnClick="@(async () => await SuiteControlService.ShutdownSuite())" />
+                        </div>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+        </Footer>
+    </NotificationElementFlyoutContentLayout>
+}

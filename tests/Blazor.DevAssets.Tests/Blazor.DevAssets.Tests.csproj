@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Blazor.DevAssets.Tests</AssemblyName>
+    <RootNamespace>Blazor.DevAssets.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Blazor.DevAssets\Blazor.DevAssets.csproj" />
+    <!-- needed to get the static.webassets.json from client -->
+    <ProjectReference Include="..\..\src\Blazor.Wasm.Client\Blazor.Wasm.Client.csproj" />    
+    <ProjectReference Include="..\TestModule.Client\TestModule.Client.csproj" />
+  </ItemGroup>
+
+</Project>

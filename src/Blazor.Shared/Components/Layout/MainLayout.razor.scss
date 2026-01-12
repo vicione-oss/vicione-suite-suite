@@ -1,0 +1,27 @@
+﻿@use "./../../../../shared/styles/colors.scss";
+@use "./../../../../shared/styles/variables.scss";
+@use "../../Styles/typography/fonts/noto-sans/variables" as noto-sans;
+
+.layout-main-content {
+    display: grid;
+    grid-template-rows: variables.$top-bar-height calc(100% - #{variables.$top-bar-height});
+    height: 100%;
+    overflow: hidden;
+    font-family: #{noto-sans.$font-family};
+
+    .layout-main-body {
+        position: relative;
+        overflow: auto;
+        height: 100%;
+
+        > h5 {
+            color: colors.$color-accent;
+            padding-top: 16px;
+            text-align: center;
+        }
+    }
+}
+
+.template-login {
+    display: block;
+}

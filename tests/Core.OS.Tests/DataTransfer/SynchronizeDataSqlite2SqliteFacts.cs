@@ -1,0 +1,228 @@
+﻿using Core.OS.DbContext;
+using Core.OS.Instance.Initialization;
+using Core.OS.Tests.DataTransfer.Helpers;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Sdk.Modules;
+using TestModule.Backend;
+using TestModule.Backend.Contracts;
+using Xunit;
+using static Core.OS.Tests.DataTransfer.Helpers.SeedData;
+using static Core.OS.Tests.DataTransfer.Helpers.UnitTestHelper;
+
+namespace Core.OS.Tests.DataTransfer;
+
+public class SynchronizeDataSqlite2SqliteFacts
+{
+    private readonly string _pathDbSqlite = "..\\..\\..\\DataTransfer\\";
+
+    [Fact]
+    [Trait(Traits.Category, Traits.ManualDbTest)]
+    public async Task FirstStep_CheckSimpleData()
+    {
+        // Arrange
+        // Konfiguration für Quell-DB
+        var localSqliteConnection = $"{_pathDbSqlite}TestModuleSource.db";
+        using var dbSourceContext =
+            InitializeTestModuleDbContextSqlite(localSqliteConnection, DefaultSeedDataSimpleDataTypes());
+        var serviceProvider = CreateServiceProvider(null, dbSourceContext);
+
+        // Konfiguration für Ziel-DB
+        localSqliteConnection = $"{_pathDbSqlite}TestModuleDest.db";
+        using var dbDestContext = InitializeTestModuleDbContextSqlite(localSqliteConnection);
+        var serviceProviderSlave = CreateServiceProvider(null, dbDestContext);
+        var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
+        SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
+
+        var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
+        var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
+
+        // Act
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, CancellationToken.None);
+        foreach (var arguments in argumentsCollection)
+        {
+            executeContextMock.Arguments
+                .Returns(arguments);
+
+            await sdActivity.Execute(executeContextMock);
+        }
+
+        // Assert
+        Assert.NotNull(argumentsCollection);
+        var machineIdSource = dbSourceContext.SimpleDataTypes.First(r => r.Id == 4).MachineId;
+        var machineIdDest = dbDestContext.SimpleDataTypes.First(r => r.Id == 4).MachineId;
+        Assert.Equal(machineIdSource, machineIdDest);
+    }
+
+    [Fact]
+    [Trait(Traits.Category, Traits.ManualDbTest)]
+    public async Task SynchronizeSuccessful_EmployeeSmallDB()
+    {
+        // Arrange
+        // Konfiguration für Quell-DB
+        var localSqliteConnection = $"{_pathDbSqlite}MasterEmployeeSmall.db";
+        using var dbSourceContext =
+            InitializeAndSeedingReferenceDbContextSqlite(localSqliteConnection);
+        var serviceProviderMaster = CreateServiceProviderReferenceDb(null, dbSourceContext);
+
+        // Konfiguration für Ziel-DB
+        localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
+        using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
+        var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);
+        var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
+        SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
+
+        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await using var command = dbDestConnection.CreateCommand();
+
+        var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
+        var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
+        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+
+        // Act
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProviderMaster, installedModules, CancellationToken.None);
+        foreach (var arguments in argumentsCollection)
+        {
+            var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));
+            if (foundTable)
+            {
+                executeContextMock.Arguments
+                    .Returns(arguments);
+
+                await sdActivity.Execute(executeContextMock);
+            }
+        }
+
+        // Assert
+        Assert.NotNull(argumentsCollection);
+        Assert.Equal(dbSourceContext.Employees.Count(), dbDestContext.Employees.Count());
+        Assert.Equal(dbSourceContext.Titles.Count(), dbDestContext.Titles.Count());
+        Assert.Equal(dbSourceContext.Salaries.Count(), dbDestContext.Salaries.Count());
+
+        var gender = dbDestContext.Employees.First(e => e.emp_no == 10001).gender;
+        Assert.Equal(Employees.Gender.M, gender);
+    }
+
+    [Fact]
+    [Trait(Traits.Category, Traits.ManualDbTest)]
+    public async Task SQLInjection_Insert_ExecuteSqlCommand()
+    {
+        // Ein gefundenes Single-Quote in einer TEXT-Spalte wird mit weiterem Single-Quote maskiert.
+        // Dieses Single-Quote interpretiert die sqlite-DB als Escape-Zeichen.
+        // Arrange
+        // Konfiguration für Quell-DB
+        var localSqliteConnection = $"{_pathDbSqlite}EmployeeInjectionExecute.db";
+        using var dbSourceContext =
+            InitializeAndSeedingReferenceDbContextSqlite(localSqliteConnection, TitleCase.Execute);
+        var serviceProvider = CreateServiceProviderReferenceDb(null, dbSourceContext);
+
+        // Konfiguration für Ziel-DB
+        localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
+        using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
+        var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);
+        var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
+        SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
+
+        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await using var command = dbDestConnection.CreateCommand();
+
+        var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
+        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+        var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
+
+        // Act
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, CancellationToken.None);
+        foreach (var arguments in argumentsCollection)
+        {
+            var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));
+            if (foundTable)
+            {
+                executeContextMock.Arguments
+                    .Returns(arguments);
+
+                await sdActivity.Execute(executeContextMock);
+            }
+        }
+
+        // Assert
+        Assert.NotNull(argumentsCollection);
+
+        // Tabelle "DepartmentManager" ist mit Werten befüllt, SQL-Injection wurde nicht ausgeführt.
+        Assert.Equal(dbSourceContext.DepartmentManagers.Count(), dbDestContext.DepartmentManagers.Count());
+
+        // Anzahl Datensätze von Tabelle "Title" vergleichen
+        Assert.Equal(dbSourceContext.Titles.Count(), dbDestContext.Titles.Count());
+    }
+
+    [Fact]
+    [Trait(Traits.Category, Traits.ManualDbTest)]
+    public async Task SQLInjection_Insert_CancelInsert()
+    {
+        // Bei einigen Datensätzen der Tabelle "Titles" wurden in der Spalte "Title" SQL-Injection-Werte eingetragen.
+        // Arrange
+        // Konfiguration für Quell-DB
+        var localSqliteConnection = $"{_pathDbSqlite}EmployeeInjectionCancelInsert.db";
+        using var dbSourceContext =
+            InitializeAndSeedingReferenceDbContextSqlite(localSqliteConnection, TitleCase.CancelInsert);
+        var serviceProvider = CreateServiceProviderReferenceDb(null, dbSourceContext);
+
+        // Konfiguration für Ziel-DB
+        localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
+        using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
+        var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);
+        var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
+        SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
+
+        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await using var command = dbDestConnection.CreateCommand();
+
+        var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
+        var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
+        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+
+        // Act
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, CancellationToken.None);
+        foreach (var arguments in argumentsCollection)
+        {
+            var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));
+            if (foundTable)
+            {
+                executeContextMock.Arguments
+                    .Returns(arguments);
+
+                await sdActivity.Execute(executeContextMock);
+            }
+        }
+
+        // Assert
+        Assert.NotNull(argumentsCollection);
+
+        // Anzahl Datensätze von der Tabelle "Titles".
+        var countTitlesSource = dbSourceContext.Titles.Count();
+
+        // Es wurden nicht alle Datensätze in die Zieltabelle "Titles" eingetragen,
+        // weil es zu einer Exception beim INSERT der Datensätze kam.
+        Assert.Equal(countTitlesSource, dbDestContext.Titles.Count());
+
+        /*
+     *   emp_no, title                  , weitere Spalten
+        (10008, "Assistant Engineer''"  ,'1998-03-11','2000-07-31'),
+        (10009, 'Assistant Engineer""'  ,'1985-02-18','1990-02-18'),
+        (10009, "Staff')"               ,'1990-02-18','1995-02-18'),
+        (10009, "Senior Engineer');"    ,'1995-02-18','9999-01-01'),
+        (10010, "Engineer\'"            ,'1996-11-24','9999-01-01'),
+        (10011, 'Staff`)'               ,'1998-02-11','9999-01-01'),
+     */
+        Assert.True(dbDestContext.Titles.Any(t => t.emp_no == 10008 && t.title == TitleWithSingleQuote));
+        Assert.True(dbDestContext.Titles.Any(t => t.emp_no == 10009 && t.title == TitleWithDoubleQuote));
+        Assert.True(dbDestContext.Titles.Any(t => t.emp_no == 10009 && t.title == TitleWithSingleQuoteAndRoundBracket));
+        Assert.True(dbDestContext.Titles.Any(t => t.emp_no == 10009 && t.title == TitleWithSingleQuoteRoundBrackeAndSemicolon));
+        Assert.True(dbDestContext.Titles.Any(t => t.emp_no == 10010 && t.title == TitleWithBackslashSingleQuote));
+        Assert.True(dbDestContext.Titles.Any(t => t.emp_no == 10011 && t.title == TitleWithBackStickAndRoundBracket));
+    }
+}

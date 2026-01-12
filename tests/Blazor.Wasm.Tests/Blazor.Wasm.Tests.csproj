@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Blazor.Wasm.Tests</AssemblyName>
+    <RootNamespace>Blazor.Wasm.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoFixture" />
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Blazor.Wasm.Backend\Blazor.Wasm.Backend.csproj" />
+    <ProjectReference Include="..\..\src\Blazor.Wasm.Client\Blazor.Wasm.Client.csproj" />
+    <ProjectReference Include="..\TestModule.Client\TestModule.Client.csproj" />
+    <ProjectReference Include="..\TestModule.Backend\TestModule.Backend.csproj" />
+  </ItemGroup>
+
+</Project>

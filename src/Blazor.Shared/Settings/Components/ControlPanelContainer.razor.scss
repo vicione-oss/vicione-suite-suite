@@ -1,0 +1,34 @@
+﻿@use "./../../../../shared/styles/colors";
+@use "./../../../../shared/styles/loading-spinner/three-dots" with ( $dot-color: colors.$color-accent );
+@use 'sass:color';
+
+.control-panel-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    overflow: auto;
+
+    color: colors.$color-font-light;
+
+    @mixin span-control-panel-container()
+    {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+    }
+
+    $background-color: color.adjust(colors.$color-content, $alpha: -0.3);
+
+    .control-panel-container__loading-spinner {
+        @include span-control-panel-container();
+
+        display: grid;
+        align-items: center;
+        justify-items: center;
+
+        background: $background-color;
+    }
+}

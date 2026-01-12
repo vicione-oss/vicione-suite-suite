@@ -1,0 +1,82 @@
+﻿using Blazor.Shared.MessageBanner.Components;
+using Blazor.Shared.MessageBanner.Services;
+using Bunit;
+using AwesomeAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Xunit;
+
+namespace Blazor.Shared.Tests.MessageBanner;
+
+public sealed class MessageBannerDialogTests
+{
+    [Fact]
+    public void Should_render_component()
+    {
+        // Arrange
+        var state = new MessageBannerDialogState();
+
+        using var ctx = new TestContext();
+
+        ctx.Services
+            .AddScoped(_ => Substitute.For<IMessageBannerMediator>())
+            .AddScoped(_ => state);
+
+        // Act
+        var component = ctx.RenderComponent<MessageBannerDialog>();
+
+        // Assert
+        Assert.NotNull(component);
+    }
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public void Assert_visibility(bool stateVisible, bool shouldBeVisible)
+    {
+        // Arrange
+        var state = new MessageBannerDialogState { Visible = stateVisible };
+
+        using var ctx = new TestContext();
+
+        ctx.Services
+            .AddScoped(_ => Substitute.For<IMessageBannerMediator>())
+            .AddScoped(_ => state);
+
+        // Act
+        var component = ctx.RenderComponent<MessageBannerDialog>();
+
+        // Assert
+        var assertion = component.Markup.Should();
+
+        if (shouldBeVisible)
+            assertion.NotBeEmpty();
+        else
+            assertion.BeEmpty();
+    }
+
+    [Fact]
+    public void Should_minimize_message_banner()
+    {
+        // Arrange
+        var state = new MessageBannerDialogState { Visible = true };
+        var messageBannerMediator = Substitute.For<IMessageBannerMediator>();
+
+        using var ctx = new TestContext();
+
+        ctx.Services
+            .AddScoped(_ => messageBannerMediator)
+            .AddScoped(_ => state);
+
+        // Act
+        var component = ctx.RenderComponent<MessageBannerDialog>();
+
+        // Assert
+        var minimizeButton = component.Find("button");
+
+        minimizeButton.Click();
+
+        // Assert
+        messageBannerMediator.Received(1).MinimizeMessageBanner();
+    }
+}

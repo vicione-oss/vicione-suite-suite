@@ -1,0 +1,19 @@
+﻿ @use "../../Styles/popup-master-detail-layout" as popup-master-detail-layout;
+
+.popup-scrollable-content {
+    flex-grow: 1;
+
+    ::deep .popup-scrollable-content__scroll-container {
+        height: 100%;
+
+        @include popup-master-detail-layout.adjust-scrolling($scroll-container-offset-x: 4px);
+
+        .popup-scrollable-content__padding-container {
+            min-height: 100%;
+
+            padding-left: popup-master-detail-layout.$detail-padding-left-right;
+            padding-right: popup-master-detail-layout.$detail-padding-left-right;
+            padding-bottom: 32px;
+        }
+    }
+}

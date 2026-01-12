@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Blazor.Shared.Tests</AssemblyName>
+    <RootNamespace>Blazor.Shared.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoFixture" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Blazor.Shared\Blazor.Shared.csproj" />
+    <ProjectReference Include="..\Blazor.Tests.Tools\Blazor.Tests.Tools.csproj" />
+    <ProjectReference Include="..\TestModule.Client\TestModule.Client.csproj" />
+  </ItemGroup>
+
+</Project>

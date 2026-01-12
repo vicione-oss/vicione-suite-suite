@@ -1,0 +1,22 @@
+﻿@using Sdk.Client.NotificationArea.Components
+@using Sdk.Client.NotificationArea.Services
+
+@{
+    var cssClasses = new List<string> { "notification-element-grid" };
+
+    if (!string.IsNullOrWhiteSpace(CssClass))
+        cssClasses.AddRange(CssClass.Split(" "));
+}
+<div class="@string.Join(" ", cssClasses)">
+    @foreach (var notificationElementRegistryItem in _notificationElementRegistryItems)
+    {
+        var notificationElementParameters = new Dictionary<string, object?>
+        {
+            { nameof(NotificationElementBase<INotificationElementState>.State), notificationElementRegistryItem.State }
+        };
+
+        <DynamicComponent Type="@notificationElementRegistryItem.ComponentType"
+                            Parameters="@notificationElementParameters"
+                            @key="@notificationElementRegistryItem.Id" />
+    }
+</div>

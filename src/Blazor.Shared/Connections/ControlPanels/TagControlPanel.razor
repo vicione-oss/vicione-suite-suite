@@ -1,0 +1,36 @@
+﻿@using Blazor.Shared.Connections.Services
+@using ViciOne.Ui.Blazor.Components.CheckBox
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
+@inherits ControlPanelBase<TagControlPanelState>
+
+<DescriptionBanner Title="@TechnicalTerms.Tag" IconCssClass="@MonochromeIconName.Tagging.GetCssClasses().ToSpaceSeparated()">
+    @Localization.TagControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@TechnicalTerms.PropertyPlural">
+        @if (State.Tag is not null)
+        {
+            <SettingsField Label="@TechnicalTerms.Id">
+                <SettingsFieldTextBox Enabled="false" Value="@State.Tag.Id.ToString()" />
+            </SettingsField>
+
+            <SettingsField Label="@CommonVocabulary.Text">
+                <SettingsFieldTextBox Placeholder="Text" @bind-Value="@State.Tag.Text" @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@CommonVocabulary.Protected">
+                <CheckBox Enabled="false" @bind-Value="@State.Tag.Protected" @bind-Value:after="BeginEdit" />
+            </SettingsField>
+        }
+        else
+        {
+            <SettingsInformation>
+                @Localization.TagControlPanel.FailedToFetchTag
+            </SettingsInformation>
+        }
+    </SettingsGroup>
+</SettingsLayout>

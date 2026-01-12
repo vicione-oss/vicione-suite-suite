@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.JiTChat.Public</AssemblyName>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="ViciOne.Suite.Sdk" />
+  </ItemGroup>
+
+</Project>

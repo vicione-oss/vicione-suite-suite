@@ -1,0 +1,26 @@
+﻿@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Shared.Dx.Components
+
+<DxDialog @ref="_refDialog"
+    Closing="@OnCancel"
+    CloseOnOutsideClick="false"
+    Header="@Localization.UnsavedChangesPopup.title"
+    Height="35%"
+    IsTextOnly="true"
+    Width="35%">
+
+    <Body>
+        @Localization.UnsavedChangesPopup.message
+    </Body>
+
+    <Footer>
+        <DxDialogFooterButton OnClick="@OnSave"
+                              Text="@CommonVocabulary.Save" />
+
+        <DxDialogFooterButton OnClick="@OnRevert"
+                              Text="@CommonVocabulary.RevertVerb" />
+
+        <DxDialogFooterButton OnClick="@OnCancel"
+                              Text="@CommonVocabulary.Cancel" />
+    </Footer>
+</DxDialog>

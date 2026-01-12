@@ -1,0 +1,22 @@
+﻿@using ViciOne.Ui.Localization.Resources
+
+<SettingsGroup Title="@Localization.TimeZoneSettingsGroup.Title">
+    <SettingsInformation>
+        <div class="time-zone-map">
+            <img src="@_timeZoneMapBackgroundImageSrc" class="time-zone-map-bg" alt="@CommonVocabulary.TimeZonePlural" />
+
+            @if (_selectedTimeZoneDescriptor.HasValue)
+            {
+                <img src="@_selectedTimeZoneDescriptor.Value.ImageSrc" class="time-zone" alt="@_selectedTimeZoneDescriptor.Value.DisplayName" />
+            }
+        </div>
+    </SettingsInformation>
+
+    <SettingsField Label="@CommonVocabulary.TimeZone" IsLoading="@_timeZoneSelectionLoading" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+        <SettingsFieldComboBox Items="@_allTimeZoneDescriptors"
+                               ValueSelector="@(timeZoneDescriptor => timeZoneDescriptor.TimeZoneId)"
+                               TextSelector="@(timeZoneDescriptor => timeZoneDescriptor.DisplayName)"
+                               @bind-Value="@SelectedTimeZoneId"
+                               @bind-Value:after="NotifySelectedTimeZoneIdChanged" />
+    </SettingsField>
+</SettingsGroup>

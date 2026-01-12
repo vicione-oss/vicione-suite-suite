@@ -1,0 +1,5 @@
+﻿@use "./../../Styles/buttons/mixins" as buttons;
+
+.popup-content-action-button {
+    @include buttons.lucent-styling();
+}

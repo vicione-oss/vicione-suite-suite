@@ -1,0 +1,29 @@
+﻿@using Sdk.Client.ControlPanels.Services
+
+@{
+    var containerCssClasses = new List<string>
+    {
+        "control-panel-container"
+    };
+
+    if (_controlPanelState.IsLoading)
+        containerCssClasses.Add("loading");
+
+    var controlPanelParameters = new Dictionary<string, object?>
+    {
+        { nameof(ControlPanelBase<ControlPanelState>.State), _controlPanelState }
+    };
+}
+
+<div class="@string.Join(" ", containerCssClasses)">
+    <CascadingValue Value="ControlPanelRegistryItem">
+        <DynamicComponent Type="@ControlPanelRegistryItem.ComponentType" Parameters="@controlPanelParameters" @key="ControlPanelRegistryItem" />
+    </CascadingValue>
+
+    @if (_controlPanelState.IsLoading)
+    {
+        <div class="control-panel-container__loading-spinner">
+            <div class="dot-flashing"></div>
+        </div>
+    }
+</div>

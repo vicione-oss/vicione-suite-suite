@@ -1,0 +1,20 @@
+﻿@use "../../Styles/popup-master-detail-layout/variables";
+
+@use "sass:math";
+
+.detail__separator {
+    height: 1px;
+
+    display: flex;
+
+    $padding-left-right: math.div(variables.$detail-padding-left-right, 2);
+
+    padding-left: $padding-left-right;
+    padding-right: $padding-left-right;
+
+    &::before {
+        content: " ";
+        flex-grow: 1;
+        background-color: #616161; // todo: where to pull this from colors.scss?
+    }
+}

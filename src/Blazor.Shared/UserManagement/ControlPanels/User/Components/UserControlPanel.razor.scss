@@ -1,0 +1,77 @@
+﻿@use "../../../../../../shared/styles/colors.scss";
+@use "../../../../../../shared/styles/animations/variables" as animations;
+
+::deep input[type="radio"] {
+    appearance: none;
+    background-color: colors.$color-background;
+    border: 0.15em solid colors.$color-border;
+    border-radius: 50%;
+    display: grid;
+    height: 16px;
+    place-content: center;
+    width: 16px;
+
+    &::before {
+        background-color: colors.$color-accent;
+        border-radius: 50%;
+        content: "";
+        height: 8px;
+        transform: scale(0);
+        transition: 120ms transform animations.$effect;
+        width: 8px;
+    }
+
+    &:checked {
+        border: 0.15em solid colors.$color-accent;
+
+        &::before {
+            transform: scale(1);
+        }
+    }
+
+    &:disabled {
+        border: 0.15em solid colors.$color-disabled;
+
+        &::before {
+            background-color: colors.$color-disabled;
+        }
+    }
+}
+
+.access-level-container {
+    display: grid;
+    grid-column-gap: 4px;
+    grid-template-columns: 1fr min-content;
+    justify-items: center;
+    width: 100%;
+
+    &.header {
+        padding: 0px 16px;
+    }
+
+    > div {
+        display: grid;
+        grid-template-columns: repeat(3, 18px);
+        grid-column-gap: 4px;
+        place-items: center;
+    }
+}
+
+.enabled-switch-container {
+    display: grid;
+    place-content: center;
+}
+
+.name-container {
+    > div {
+        align-items: center;
+        display: grid;
+        grid-template-columns: 24px max-content;
+        grid-column-gap: 4px;
+        padding-left: 24px;
+
+        &.group-name {
+            padding-left: 8px;
+        }
+    }
+}

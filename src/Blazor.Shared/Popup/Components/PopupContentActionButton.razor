@@ -1,0 +1,25 @@
+﻿@using ViciOne.Ui.Blazor.Components.Button
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
+@{
+    var cssClasses = new List<string> { "popup-content-action-button" };
+
+    if (!string.IsNullOrWhiteSpace(CssClass))
+        cssClasses.AddRange(CssClass.Split(" "));
+
+    var iconCssClass = IconName.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+
+    var enabled = CascadingEnabled;
+
+    if (Enabled.HasValue)
+        enabled = enabled && Enabled.Value;
+}
+
+<Button CssClass="@string.Join(" ", cssClasses)"
+        IconCssClass="@iconCssClass"
+        Text="@Text"
+        Size="ButtonSize.Small"
+        Enabled="@enabled"
+        OnClick="@ButtonClick" />

@@ -1,0 +1,30 @@
+﻿@using Blazor.Shared.Wizard.Extensions
+@using Blazor.Shared.Wizard.Models
+
+<div class="wizard-stepper">
+    @if (_steps.Count > 0)
+    {
+        var activeStepNumber = _activeStep is not null ? _activeStep.Value.Number : default;
+
+        var visibleStepNumbers = _steps.Select(step => step.Number).Reduce(activeStepNumber, maximumItems: 6);
+
+        var visibleSteps = _steps.Where(step => visibleStepNumbers.Contains(step.Number));
+
+        WizardStep? previousVisibleStep = null;
+
+        foreach (var visibleStep in visibleSteps)
+        {
+            if (previousVisibleStep.HasValue)
+            {
+                <span class="@GetStepSeparatorCssClass(visibleStep.Number, previousVisibleStep.Value.Number, activeStepNumber)"></span>
+            }
+
+            <div class="@GetStepCssClass(visibleStep.Number, activeStepNumber)">
+                <span>@visibleStep.Number</span>
+                <span>@visibleStep.Title</span>
+            </div>
+
+            previousVisibleStep = visibleStep;
+        }
+    }
+</div>

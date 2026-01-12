@@ -1,0 +1,10 @@
+﻿@using Sdk.Client.Extensions
+
+@if (Submit)
+{
+    <button class="account-button @(ButtonType.ToString().ToHyphenSeparated())" type="submit" disabled="@Disabled">@Text</button>
+}
+else
+{
+    <button class="account-button @(ButtonType.ToString().ToHyphenSeparated())" disabled="@Disabled" @onclick="OnClick">@Text</button>
+}
