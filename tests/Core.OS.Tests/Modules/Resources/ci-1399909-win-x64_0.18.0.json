@@ -5,8 +5,8 @@
     "Version": "ci-1399909",
     "MinSuiteSdkVersion": "0.17.0",
     "Company": "ifm software",
-    "ProjectUrl": "https://gitlab.i40.ifm-datalink.net/acx/vo-suite/modules/cluster-mgmt",
-    "ReadmeUrl": "https://gitlab.i40.ifm-datalink.net/acx/vo-suite/modules/cluster-mgmt/-/blob/master/README.md?ref_type=heads",
+    "ProjectUrl": "https://gitlab.com/vicione-oss/vicione/suite-apps/cluster-management/cluster-mgmt",
+    "ReadmeUrl": "https://gitlab.com/vicione-oss/vicione/suite-apps/cluster-management/cluster-mgmt/-/blob/master/README.md?ref_type=heads",
     "Published": "2024-10-02T12:23:15.997857+00:00",
     "Options": [
         {

@@ -79,7 +79,7 @@ public class GetUserConsumerTests
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
         await scope.ServiceProvider.SeedUsersAndRoles();
-        var userName = new UserName("I hate users");
+        var userName = new UserName("Boring invalid user name");
         var request = new GetUsers(userName);
 
         // Act/Assert
