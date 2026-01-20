@@ -9,7 +9,7 @@
 * [UiHost](#uihost-modules)
 * [Publish/Cleanup Modules](#publishcleanup-modules)
 
-Modules are used to add features to _Core.OS_. To create a new module you can use this [Dotnet Template](https://gitlab.i40.ifm-datalink.net/acx/vo-suite/dotnet-templates). A module consists of different parts represented by different project types with following naming convention:
+Modules are used to add features to _Core.OS_. To create a new module you can use this [Dotnet Template](https://gitlab.com/vicione-oss/addons/templates/addon-project-templates). A module consists of different parts represented by different project types with following naming convention:
 
 - `ModuleName.Backend`: Provide services, controllers, databases etc. and use suite infrastructure like the message bus directly.
 - `ModuleName.Client`: Provide user interfaces like components and pages based on Blazor. 
@@ -97,7 +97,7 @@ While developing the Suite, set `UiHost:UseDebugRoot=true` to resolve local asse
 When loading an UiHost module in _Core.OS_, a FileProvider for their static.webassets is provided for all activated client modules. During `Debug` mode, all resource requests are resolved using the `static.webassets.json` in the respective output directory of the client module.
 
 ## Publish/Cleanup Modules
-[Here](https://gitlab.i40.ifm-datalink.net/acx/vo-suite/vo-suite/-/tree/master/src/Sdk.Deployment/Scripts?ref_type=heads) are bash scripts to publish and cleanup a Suite-Module. For local development purposes you can also use [these](https://gitlab.i40.ifm-datalink.net/-/snippets/122) powershell scripts.
+[Here](https://gitlab.com/vicione-oss/vicione/suite/suite-sdk/-/tree/master/src/Sdk.Deployment/Scripts?ref_type=heads) are bash scripts to publish and cleanup a Suite-Module.
 
 To execute the `publish-module.sh` script you can use: `./publish-module.sh ModuleName PathToSrcFolder linux-x64 PathToOutputFolder`
 

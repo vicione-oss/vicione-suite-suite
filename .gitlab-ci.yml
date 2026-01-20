@@ -13,7 +13,7 @@ stages:
   - release-public
 
 include:
-  - project: 'acx/tooling/templates'
+  - project: 'vicione-oss/tooling/templates'
     file: '/CI-Templates/v2/dotnet.yml'
 
 #################### Rules
@@ -178,17 +178,13 @@ Validation:
     - <<: *rules_default_branch
     - <<: *rules_merge_request
     - <<: *rules_web
-  tags:
-    - linux
-    - docker
-    - x64
 
 ####################  Test stage
 
 xUnit x64:
   variables:
     ARCH: 'x64'
-    FILTER: 'Category!=System & Category!=ManualDbTest'
+    FILTER: 'Category!=System & Category!=ManualDbTest & Category!=Integration'
   extends: .dotnet-test-xunit
   artifacts:
     reports:
@@ -197,15 +193,13 @@ xUnit x64:
 xUnit arm64:
   variables:
     ARCH: 'arm64'
-    FILTER: 'Category!=System & Category!=ManualDbTest'
+    FILTER: 'Category!=System & Category!=ManualDbTest & Category!=Integration'
   extends: .dotnet-test-xunit
   artifacts:
     reports:
       junit: artifacts/tests/*-test-report.xml
   tags:
-    - linux
-    - docker
-    - arm64
+    - saas-linux-small-arm64
 
 #################### Artifacts stage
 
@@ -232,10 +226,6 @@ Create artifacts x64:
     paths:
       - artifacts.tar.gz
     expire_in: 30 days
-  tags:
-    - linux
-    - docker
-    - x64
   when: manual
   rules:
     - <<: *rules_tag_manual
@@ -267,9 +257,7 @@ Create artifacts arm64:
       - artifacts.tar.gz
     expire_in: 30 days
   tags:
-    - linux
-    - docker
-    - arm64
+    - saas-linux-small-arm64
   when: manual
   rules:
     - <<: *rules_tag_manual
@@ -289,9 +277,6 @@ Versioning:
     reports:
       dotenv: version.env
     expire_in: 30 days
-  tags:
-    - linux
-    - docker
   when: manual
   rules:
     - <<: *rules_tag_manual
@@ -308,7 +293,7 @@ trigger deb packaging:
     APP_VERSION: ${APP_VERSION}
     APP_TAG: ${APP_TAG}
   trigger:
-    project: 'acx/vicione/suite/deb-packaging'
+    project: 'vicione-oss/vicione/suite/deb-packaging'
     strategy: depend
   needs:
     - "Create artifacts arm64"
@@ -340,10 +325,6 @@ Publish only:
     - <<: *rules_merge_request_manual
     - <<: *rules_web_manual
   dependencies: []
-  tags:
-    - linux
-    - docker
-    - x64
 
 Start DigitalOcean:
   stage: review
@@ -371,10 +352,6 @@ Start DigitalOcean:
     url: https://$DROPLET_IP
     on_stop: Stop DigitalOcean
     auto_stop_in: 1 day
-  tags:
-    - linux
-    - docker
-    - x64
 
 Stop DigitalOcean:
   stage: review
@@ -393,10 +370,6 @@ Stop DigitalOcean:
   environment:
     name: review/$CI_COMMIT_REF_SLUG
     action: stop
-  tags:
-    - linux
-    - docker
-    - x64
 
 Cleanup orphanded deployments:
   stage: build
@@ -408,10 +381,6 @@ Cleanup orphanded deployments:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   dependencies: []
-  tags:
-    - linux
-    - docker
-    - x64
 
 Prepare Host for new Snapshot:
   stage: build
@@ -423,10 +392,6 @@ Prepare Host for new Snapshot:
   rules:
     - if: $PREPARE_SNAPSHOT
   dependencies: []
-  tags:
-    - linux
-    - docker
-    - x64
 
 ####################  Deploy stage
 

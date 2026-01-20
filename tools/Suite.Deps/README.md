@@ -2,7 +2,7 @@
 
 The tool analyzes the assembly dependencies of the Suite using the `SuiteDependencyContexts`. The tool provides different options:
 
-1. `core` - Create a [list of all assemblies](https://gitlab.i40.ifm-datalink.net/acx/vo-suite/vo-suite-sdk/-/blob/master/src/Sdk.Deployment/Scripts/suite-libraries.txt?ref_type=heads) provided by the Suite and optional by the referenced UiHost. These assemblies can be removed from module deployments safely to reduce their size significantly. Used by [assembly-cleanup.sh](https://gitlab.i40.ifm-datalink.net/acx/vo-suite/vo-suite-sdk/-/blob/master/src/Sdk.Deployment/Scripts/cleanup-module.sh?ref_type=heads).
+1. `core` - Create a [list of all assemblies](https://gitlab.com/vicione-oss/vicione/suite/suite-sdk/-/blob/master/src/Sdk.Deployment/Scripts/suite-libraries.txt?ref_type=heads) provided by the Suite and optional by the referenced UiHost. These assemblies can be removed from module deployments safely to reduce their size significantly. Used by [assembly-cleanup.sh](https://gitlab.com/vicione-oss/vicione/suite/suite-sdk/-/blob/master/src/Sdk.Deployment/Scripts/cleanup-module.sh?ref_type=heads).
 2. `modules` - Create a list of all module assemblies that are redundant when loaded by the suite. These assemblies can be removed from module deployments safely. 
 3. `mapping` - Output the json structure of assembly version mappings used by the Suite with the provided modules. 
 
