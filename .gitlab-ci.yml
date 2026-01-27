@@ -32,7 +32,7 @@ include:
         - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
         - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
         - if: '$CI_PIPELINE_SOURCE == "web"'
-      tags: ["saas-linux-large-arm64"]
+      tags: ["saas-linux-small-arm64"]
 
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.1.2
     inputs:
@@ -223,6 +223,8 @@ xUnit x64:
   artifacts:
     reports:
       junit: artifacts/tests/*-test-report.xml
+  tags:
+    - saas-linux-large-amd64
 
 xUnit arm64:
   variables:
@@ -257,6 +259,8 @@ Build artifacts x64:
     paths:
       - artifacts.tar.gz
     expire_in: 30 days
+  tags:
+    - saas-linux-large-amd64
   when: manual
   rules:
     - <<: *rules_tag_manual
