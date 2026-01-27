@@ -30,7 +30,7 @@
                         @if (Model.SenderStatus.IsConfigured())
                         {
                             <div class="forgot-password">
-                                <a asp-page="/Account/ForgotPassword" asp-area="Identity">Forgot your password?</a>
+                                <a asp-page="/Account/ForgotPassword" asp-area="Identity">@ViewData["ForgotPassword"]</a>
                             </div>
                         }
                     </div>

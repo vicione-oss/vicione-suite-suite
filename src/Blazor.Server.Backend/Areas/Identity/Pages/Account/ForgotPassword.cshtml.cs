@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Blazor.Server.Backend.Security;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
@@ -39,7 +39,7 @@ public class ForgotPasswordModel(UserManager<SuiteUser> userManager, ISuiteMedia
         if (ModelState.IsValid)
         {
             var user = await userManager.FindByEmailAsync(Input.Email);
-            if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
+            if (user == null || !await userManager.IsEmailConfirmedAsync(user))
             {
                 // Don't reveal that the user does not exist or is not confirmed
                 return RedirectToPage("./ForgotPasswordConfirmation");

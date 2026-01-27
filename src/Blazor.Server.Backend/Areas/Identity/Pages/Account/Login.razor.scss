@@ -1,4 +1,5 @@
 ﻿@use "../../../../../../shared/styles/colors-staged";
+@use 'sass:color';
 
 .password {
     margin-top: 16px;
@@ -31,6 +32,11 @@
             cursor: pointer;
             user-select: none;
             width: max-content;
+
+            --vo-ui-bc-color-accent: #{colors-staged.$color-ifm-orange};
+            --vo-ui-bc-color-accent-hover: #{colors-staged.$color-ifm-orange};
+            --vo-ui-bc-check-box-color-accent-focus: #{color.adjust(colors-staged.$color-ifm-orange, $lightness: -10%)};
+            --vo-ui-bc-check-box-color-accent-hover: #{color.adjust(colors-staged.$color-ifm-orange, $lightness: -10%)};
 
             .text {
                 margin-left: 8px;
