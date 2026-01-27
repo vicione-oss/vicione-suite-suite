@@ -143,6 +143,7 @@ public sealed class LoginModel(
         ViewData["Title"] = Localization.Login.Title;
         ViewData["User"] = CommonVocabulary.User;
         ViewData["Password"] = CommonVocabulary.Password;
+        ViewData["ForgotPassword"] = Localization.Login.ForgotPassword;
         ViewData["Disconnected"] = Localization.Login.WaitingForConnection;
     }
 

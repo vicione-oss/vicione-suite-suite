@@ -44,7 +44,7 @@
             font-size: 12px;
             color: colors.$color-font-light;
             letter-spacing: 0.4px;
-            font-weight: typography.$font-weight-light;
+            font-weight: typography.$font-weight-extralight;
 
             .heading {
                 font-size: 24px;
@@ -79,9 +79,9 @@
                 border-radius: 3px;
                 position: relative;
                 font-size: 11px;
-                color: colors.$color-font;
+                color: color.adjust(colors.$color-font-light, $alpha: -0.2);
                 letter-spacing: 0.2px;
-                font-weight: typography.$font-weight-light;
+                font-weight: typography.$font-weight-extralight;
                 padding: 7px 8px 9px;
                 border-radius: 3px;
 
@@ -91,7 +91,7 @@
                 }
 
                 &::placeholder {
-                    color: colors.$color-font;
+                    color: color.adjust(colors.$color-font-light, $alpha: -0.2);
                 }
 
                 &:focus {
@@ -140,6 +140,50 @@
             .forgot-password {
                 flex: 1;
                 text-align: end;
+
+                a {
+                    color: colors.$color-font-light;
+                    letter-spacing: 0.4px;
+                    text-decoration: none;
+
+                    &:focus {
+                        color: colors.$color-font-light;
+                        border-bottom: 1px solid colors-staged.$color-ifm-orange;
+                    }
+
+                    &:focus-visible {
+                        outline: none;
+                    }
+                }
+            }
+
+            .forgot-password-button-section {
+                .action-button {
+                    margin-top: 24px;
+                    margin-bottom: 48px;
+                }
+
+                .navigation-field {
+                    a {
+                        color: colors.$color-font-light;
+                        letter-spacing: 0.4px;
+                        text-decoration: none;
+
+                        label {
+                            margin-left: 8px;
+                            cursor: pointer;
+                        }
+
+                        &:focus {
+                            color: colors.$color-font-light;
+                            border-bottom: 1px solid colors-staged.$color-ifm-orange;
+                        }
+
+                        &:focus-visible {
+                            outline: none;
+                        }
+                    }
+                }
             }
 
             .remember-me {
@@ -191,7 +235,7 @@
                 font-size: 14px;
                 color: colors.$color-font-light;
                 letter-spacing: 0.2px;
-                font-weight: typography.$font-weight-light;
+                font-weight: typography.$font-weight-regular;
                 border-radius: 4px;
                 text-align: center;
                 width: 320px;
@@ -245,7 +289,7 @@
                 font-size: 36px;
                 display: flex;
                 align-items: center;
-                font-weight: typography.$font-weight-medium;
+                font-weight: typography.$font-weight-light;
                 color: colors.$color-font-light;
                 letter-spacing: 0.3px;
                 text-align: center;
@@ -272,6 +316,7 @@
                 align-items: center;
                 font-size: 14px;
                 color: colors.$color-font-light;
+                font-weight: typography.$font-weight-extralight;
                 letter-spacing: 0.2px;
                 line-height: 23px;
 
