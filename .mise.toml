@@ -1,0 +1,12 @@
+# Tool versions managed by mise (https://mise.jdx.dev)
+# Used to replace hardcoded version installations in CI/CD pipeline.
+#
+# Usage in CI:
+#   mise install
+#   eval "$(mise activate bash)"
+#
+# Then tools are available directly: node, npm, dotnet
+
+[tools]
+node = "20"
+dotnet = "9.0"
