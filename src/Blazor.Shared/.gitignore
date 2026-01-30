@@ -23,3 +23,4 @@ wwwroot/js/system-monitoring-component.js
 wwwroot/js/file-drop-zone.js
 wwwroot/js/settings-field-file-upload.js
 wwwroot/js/event-target-mixins.js
+wwwroot/js/copy-to-clipboard-button.js

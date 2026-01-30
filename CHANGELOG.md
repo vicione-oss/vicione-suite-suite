@@ -2,6 +2,10 @@
 
 ## 1.2.0 - Unreleased
 
+### Added
+
+- A button to copy system information for easy bug reporting was added to the `System & Notification` sidebar
+
 ### Changed
 
 - Replaced `DxPopup` with `ViciOne.Ui.Blazor.Components.Popup`

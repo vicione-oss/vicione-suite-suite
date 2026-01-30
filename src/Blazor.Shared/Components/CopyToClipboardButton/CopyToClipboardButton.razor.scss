@@ -1,0 +1,5 @@
+﻿@use "../../Styles/buttons/mixins" as buttons;
+
+.copy-to-clipboard-button {
+    @include buttons.lucent-styling();
+}
