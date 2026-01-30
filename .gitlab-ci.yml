@@ -1,5 +1,9 @@
 default:
-  image: mcr.microsoft.com/dotnet/sdk:9.0
+  image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-latest
+  tags:
+    - saas-linux-large-amd64
+  # Cache configuration provided by cache-config component
+  # Jobs should extend .mise-cache or .mise-cache-seed
 
 stages:
   - build
@@ -17,6 +21,9 @@ include:
   - project: 'vicione-oss/tooling/templates'
     file: '/CI-Templates/v2/dotnet.yml'
 
+  # Cache configuration component
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/cache/cache-config@v0.1.1
+
   # Registry components for artifact storage
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.1.2
     inputs:
@@ -32,7 +39,7 @@ include:
         - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
         - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
         - if: '$CI_PIPELINE_SOURCE == "web"'
-      tags: ["saas-linux-small-arm64"]
+      tags: ["saas-linux-large-arm64"]
 
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.1.2
     inputs:
@@ -63,6 +70,13 @@ variables:
   ARTIFACT_PREFIX: "suite"
   DEB_PACKAGING_PROJECT: 'vicione-oss/vicione/suite/deb-packaging'
   DEB_PACKAGING_BRANCH: 'master'
+  # mise HTTP settings - retry transient network failures with exponential backoff
+  MISE_HTTP_TIMEOUT: "60"
+  MISE_HTTP_RETRIES: "3"
+
+#################### Cache templates
+# Cache configuration provided by component: cache-config@v0.1.1
+# Provides .mise-cache (pull) and .mise-cache-seed (pull-push) anchors
 
 #################### Rules
 
@@ -95,9 +109,11 @@ variables:
   when: manual
   allow_failure: true
 
-.install_nodejs: &install_nodejs
-  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  - apt update && apt install -y nodejs
+# mise activation - installs tools from mise.toml (node, dotnet)
+# Use 'mise env' (not activate) in CI for reliable PATH setup
+.activate_mise: &activate_mise
+  - mise install
+  - eval "$(mise env)"
 
 .install_npm_packages: &install_npm_packages
   - npm install
@@ -111,7 +127,7 @@ variables:
 #################### Global
 
 before_script:
-  - *install_nodejs
+  - *activate_mise
   - *install_npm_packages
   - *run_npm_scripts
   - *run_eslint
@@ -197,7 +213,9 @@ before_script:
 #################### Build stage
 
 Validation:
+  extends: .mise-cache-seed
   stage: build
+  # Seeds amd64 cache - first amd64 job to run
   script:
     # must be case-sensitive, but gets generated case-insensitive by Visual Studio
     - |
@@ -216,21 +234,25 @@ Validation:
 ####################  Test stage
 
 xUnit x64:
+  extends:
+    - .dotnet-test-xunit
+    - .mise-cache
   variables:
     ARCH: 'x64'
     FILTER: 'Category!=System & Category!=ManualDbTest & Category!=Integration'
-  extends: .dotnet-test-xunit
   artifacts:
     reports:
       junit: artifacts/tests/*-test-report.xml
-  tags:
-    - saas-linux-large-amd64
 
 xUnit arm64:
+  extends:
+    - .dotnet-test-xunit
+    - .mise-cache-seed
+  # Seeds arm64 cache - first arm64 job to run
   variables:
     ARCH: 'arm64'
     FILTER: 'Category!=System & Category!=ManualDbTest & Category!=Integration'
-  extends: .dotnet-test-xunit
+    CACHE_ARCH: arm64
   artifacts:
     reports:
       junit: artifacts/tests/*-test-report.xml
@@ -240,13 +262,14 @@ xUnit arm64:
 #################### Artifacts stage
 
 Build artifacts x64:
+  extends: .mise-cache
   stage: artifacts
   variables:
     DOTNET_ARCH: 'linux-x64'
   before_script:
+    - *activate_mise
     - !reference [.nuget_credentials]
     - *patch_version
-    - *install_nodejs
     - *install_npm_packages
     - *run_npm_scripts
     - *run_eslint
@@ -259,8 +282,6 @@ Build artifacts x64:
     paths:
       - artifacts.tar.gz
     expire_in: 30 days
-  tags:
-    - saas-linux-large-amd64
   when: manual
   rules:
     - <<: *rules_tag_manual
@@ -269,13 +290,15 @@ Build artifacts x64:
     - <<: *rules_web
 
 Build artifacts arm64:
+  extends: .mise-cache
   stage: artifacts
   variables:
     DOTNET_ARCH: 'linux-arm64'
+    CACHE_ARCH: arm64
   before_script:
+    - *activate_mise
     - !reference [.nuget_credentials]
     - *patch_version
-    - *install_nodejs
     - *install_npm_packages
     - *run_npm_scripts
     - *run_eslint
@@ -298,15 +321,17 @@ Build artifacts arm64:
     - <<: *rules_web
 
 # Upload jobs created by registry component includes above
-# Override before_script to avoid global nodejs installation on curlimages/curl
+# Override before_script and cache - these jobs don't need mise tools
 Upload artifacts arm64:
   before_script: []
+  cache: []
   needs:
     - job: "Build artifacts arm64"
       artifacts: true
 
 Upload artifacts x64:
   before_script: []
+  cache: []
   needs:
     - job: "Build artifacts x64"
       artifacts: true
@@ -464,10 +489,6 @@ Cloud master:
   environment:
     name: deployments/cloud-master
     url: https://159.89.13.71
-  tags:
-    - linux
-    - docker
-    - x64
 
 Cloud presentation:
   stage: deploy
@@ -491,10 +512,6 @@ Cloud presentation:
   environment:
     name: deployments/cloud-presentation
     url: https://167.71.50.41
-  tags:
-    - linux
-    - docker
-    - x64
 
 Internal slave01:
   stage: deploy
@@ -516,10 +533,6 @@ Internal slave01:
   environment:
     name: deployments/internal-slave01
     url: https://10.45.24.192
-  tags:
-    - linux
-    - docker
-    - x64
 
 Internal minimal:
   stage: deploy
@@ -541,10 +554,6 @@ Internal minimal:
   environment:
     name: deployments/minimal
     url: https://10.45.24.155
-  tags:
-    - linux
-    - docker
-    - x64
 
 Internal ec20-4 server 1:
   stage: deploy
@@ -566,10 +575,6 @@ Internal ec20-4 server 1:
   environment:
     name: deployments/internal-ec20-4-server-1
     url: https://10.45.24.156
-  tags:
-    - linux
-    - docker
-    - x64
 
 Internal ec20-4 server 2:
   stage: deploy
@@ -591,10 +596,6 @@ Internal ec20-4 server 2:
   environment:
     name: deployments/internal-ec20-4-server-2
     url: https://10.45.24.157
-  tags:
-    - linux
-    - docker
-    - x64
 
 Internal ec20-4 server 3:
   stage: deploy
@@ -616,10 +617,6 @@ Internal ec20-4 server 3:
   environment:
     name: deployments/internal-ec20-4-server-3
     url: https://10.45.24.158
-  tags:
-    - linux
-    - docker
-    - x64
 
 Internal rpi5 server 1:
   stage: deploy
@@ -641,10 +638,6 @@ Internal rpi5 server 1:
   environment:
     name: deployments/internal-rpi5-server-1
     url: https://10.45.24.201
-  tags:
-    - linux
-    - docker
-    - x64
 
 # TODO: Remove after migration - internal JFrog no longer accessible
 # Docker jFrog dev release:
@@ -687,6 +680,8 @@ Docker jFrog:
   before_script:
     - apk add --no-cache bash curl sed
   variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
     DOCKER_HUB: 'jfrog.i40.ifm-datalink.net'
     REPO: 'jfrog.i40.ifm-datalink.net/vicione-docker-local'
     IMAGE_NAME: 'vicionesuite'
