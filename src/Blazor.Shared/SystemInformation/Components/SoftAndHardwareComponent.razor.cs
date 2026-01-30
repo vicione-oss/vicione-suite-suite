@@ -1,11 +1,12 @@
 ﻿using System.Globalization;
+using Blazor.Shared.SystemInformation.Models;
 using Blazor.Shared.SystemInformation.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Instance;
 
 namespace Blazor.Shared.SystemInformation.Components;
 
-public partial class SoftAndHardwareComponent
+public sealed partial class SoftAndHardwareComponent
 {
     private const string NotAvailable = "n/a";
 
@@ -39,5 +40,21 @@ public partial class SoftAndHardwareComponent
         MachineName = Environment.MachineName;
 
         base.OnInitialized();
+    }
+
+    private async Task<string> CopyToClipboardButtonSetText()
+    {
+        var modules = await InformationProvider.GetInstalledModules();
+        var softwareInfo = new SoftwareInfo
+        {
+            SuiteVersion = InformationProvider.Local.Version,
+            SdkVersion = InformationProvider.Local.SdkVersion,
+            InstanceType = InformationProvider.Local.Type,
+            SerialNumber = InformationProvider.Local.SerialNumber,
+            ModuleVersions = modules.ToDictionary(
+                module => module.Name,
+                module => module.Version)
+        };
+        return softwareInfo.ToString();
     }
 }

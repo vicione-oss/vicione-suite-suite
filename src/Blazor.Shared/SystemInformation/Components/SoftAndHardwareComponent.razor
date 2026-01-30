@@ -1,9 +1,11 @@
-﻿@using ViciOne.Ui.Localization.Resources;
+﻿@using Blazor.Shared.Components.CopyToClipboardButton
+@using ViciOne.Ui.Localization.Resources;
 
 <div class="systeminfo-sw-section">
     <div class="systeminfo-hw-sw-header-frame">
         <div class="systeminfo-hw-sw-header">
             @TechnicalTerms.Software
+            <CopyToClipboardButton SetText="CopyToClipboardButtonSetText"/>
         </div>
     </div>
     <div class="systeminfo-hw-sw-row">
