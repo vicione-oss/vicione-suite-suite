@@ -63,6 +63,6 @@ internal static class ModuleMetadataBundleFactory
                 Description = "Module can't be loaded - check logs for errors",
                 MinSuiteSdkVersion = minSdkVersion,
             },
-            Errors = [result.Error]
+            Errors = result.Error is not null ? [result.Error] : []
         };
 }

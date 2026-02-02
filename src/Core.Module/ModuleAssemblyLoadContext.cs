@@ -37,11 +37,10 @@ internal sealed class ModuleAssemblyLoadContext : AssemblyLoadContext
         if (_suiteContext.Core.RuntimeFiles.Any(k => assemblyName.Name == Path.GetFileNameWithoutExtension(k.Path)))
             return null;
 
-#if DEBUG
-        //these 2 still needs special treatment -they are contained in the Core.Os.deps.json as runtime library
-        //and gets published but!!! they are not listed in the context.RuntimeLibraries!!!
-        if (assemblyName.Name.StartsWith("Microsoft.Extensions.Localization", StringComparison.Ordinal) ||
-            assemblyName.Name == "Microsoft.AspNetCore.Components.Forms")
+#if DEBUG        
+        // Since .net10 the behavior of loading transitive assemblies has changed.
+        // If an assembly is already loaded in the default context it will not be resolved here.
+        if (Default.Assemblies.Any(a => a.GetName().Name == assemblyName.Name))
         {
             return null;
         }

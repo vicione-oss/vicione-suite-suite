@@ -5,7 +5,7 @@
     position: relative;
 
     > h5 {
-        color: colors.$color-accent;
+        color: colors.$accent;
         padding-top: 16px;
         text-align: center;
     }
@@ -27,14 +27,14 @@
         white-space: nowrap;
 
         > a {
-            color: colors.$color-font;
+            color: colors.$font;
             cursor: pointer;
             font-weight: 500;
             text-decoration: none;
         }
 
         > a:hover {
-            color: colors.$color-font;
+            color: colors.$font;
             text-decoration: none;
         }
     }

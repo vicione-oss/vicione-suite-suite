@@ -170,7 +170,7 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
         var queryTasks = _sources.Select(source => TryQuerySourceRaw(source, aqlQuery, cancellationToken));
         var queryResults = await Task.WhenAll(queryTasks);
 
-        return [.. queryResults.Where(k => !string.IsNullOrEmpty(k))];
+        return [.. queryResults.Where(k => !string.IsNullOrEmpty(k)).Select(k => k!)];
     }
 
     private async Task<string?> TryQuerySourceRaw(ApiSourceConfig source, string aqlQuery, CancellationToken cancellationToken)

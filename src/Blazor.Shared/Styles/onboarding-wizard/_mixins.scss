@@ -24,11 +24,11 @@
 
 @mixin summary-settings-information-label-value-divs() {
     & > div:nth-of-type(odd) {
-        color: colors.$color-font-light;
+        color: colors.$font-light;
     }
 
     & > div:nth-of-type(even) {
-        color: color.change(colors.$color-font-light, $alpha: 0.6);
+        color: color.change(colors.$font-light, $alpha: 0.6);
 
         text-align: right;
     }

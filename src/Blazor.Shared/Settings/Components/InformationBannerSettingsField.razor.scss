@@ -15,7 +15,7 @@
     .icon {
         grid-area: icon;
 
-        color: colors.$color-font-light;
+        color: colors.$font-light;
     }
 
     .text {
@@ -23,7 +23,7 @@
 
         align-self: center; // required to make *1 work
 
-        color: colors.$color-font-light;
+        color: colors.$font-light;
     }
 
     .button {

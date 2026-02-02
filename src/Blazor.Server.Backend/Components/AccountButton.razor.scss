@@ -7,7 +7,7 @@
     background: #222222;
     border-radius: 4px;
     font-size: 14px;
-    color: colors.$color-font-light;
+    color: colors.$font-light;
     letter-spacing: 0.2px;
     text-align: center;
     font-weight: typography.$font-weight-regular;
@@ -16,9 +16,9 @@
     padding: 6px 16px 7px 16px;
 
     &:disabled {
-        color: color.adjust(colors.$color-font-light, $alpha: -0.7) !important;
-        background: color.adjust(colors.$color-theme, $alpha: -0.8) !important;
-        outline: 1px solid color.adjust(colors.$color-font-light, $alpha: -0.9) !important;
+        color: color.adjust(colors.$font-light, $alpha: -0.7) !important;
+        background: color.adjust(colors.$theme, $alpha: -0.8) !important;
+        outline: 1px solid color.adjust(colors.$font-light, $alpha: -0.9) !important;
     }
 
     &.active {
@@ -37,7 +37,7 @@
     }
 
     &:focus {
-        background: color.adjust(colors.$color-theme, $alpha: -0.8);
+        background: color.adjust(colors.$theme, $alpha: -0.8);
         outline: 1px solid colors-staged.$color-ifm-orange;
     }
 }

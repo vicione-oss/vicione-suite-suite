@@ -52,7 +52,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         builder.Services.AddScoped<CircuitHandler, CultureCircuitHandler>();
         var options = config.BindSection<UiHostCircuitOptions>(ModuleId);
         services.AddLocalization();
-        services.AddAntiforgery();
         services.AddRazorPages();
 
         services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<SuiteUser>>();
@@ -63,7 +62,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             .AddInteractiveServerComponents()
             .AddHubOptions(opt => opt.MaximumReceiveMessageSize = options.MaximumReceiveMessageSize);
 
-        services.AddAuthentication(Core.Shared.Constants.AuthenticationSchema).AddCookie();
         services.AddCascadingAuthenticationState();
 
         services.AddAuthorization();
@@ -80,7 +78,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddSingleton(typeof(IUiEventSubscriptionRegistry<>), typeof(UiEventSubscriptionRegistry<>));
         services.AddServerHttpClient();
 
-        services.AddHttpContextAccessor();
         services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();
     }
 
@@ -96,9 +93,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             try
             {
                 var moduleServices = new ServiceCollection();
-
-                // keep for compatibility with sdk 1.0.0
-                module.ConfigureServices?.Invoke(moduleServices, HostingModel.BlazorServer);
 
                 module.Configure?.Invoke(moduleServices);
 
@@ -148,7 +142,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         return new UiModuleBundle(modules.First(), assemblyPath, assembly);
     }
 
-
     public void ConfigureIdentity(IdentityBuilder builder) { }
 
     public void UseSecurity(IApplicationBuilder app, bool useHeaderForwarding)
@@ -156,7 +149,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         if (useHeaderForwarding)
         {
             var forwardedHeaderOptions = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto };
-            forwardedHeaderOptions.KnownNetworks.Clear();
+            forwardedHeaderOptions.KnownIPNetworks.Clear();
             forwardedHeaderOptions.KnownProxies.Clear();
 
             app.UseForwardedHeaders(forwardedHeaderOptions);

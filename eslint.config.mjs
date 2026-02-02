@@ -17,6 +17,7 @@ tsxConfigurationObject.files.push('**/*.ts');
 export default [
     {
         ignores: [
+            '**/wwwroot/_framework/*.js',
             '**/wwwroot/js/*.js',
             '**/bin',
             'src/Blazor.Shared/Scripts/*.js',

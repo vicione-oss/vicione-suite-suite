@@ -13,9 +13,16 @@
 
 ### Updated
 
-- `ViciOne.Suite.Sdk` packages, update to version `1.2.0-ci1968091`
-- `ViciOne.Ui.Blazor.Components` package, update version to `4.3.0`
-- `ViciOne.Ui.Design` package, update version to `1.2.0`
+- `AspNetCore.SassCompiler` packages, update to version `1.97.1`
+- `Npgsql.EntityFrameworkCore.PostgreSQL` package, update to version `10.0.0`
+- `Microsoft` packages, update to version `10.0.2`
+- `Riok.Mapperly` packages, update to version `4.3.1`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2276846096`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.0.1`
+- `ViciOne.Ui.Design` package, update version to `2.0.3`
+- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.1.0`
+- `ViciOne.Ui.Localization` package, update version to `3.1.0`
+- `ViciOne.Ui.Shared.Dx` packages, update to version `0.19.1`
 
 ### Removed
 

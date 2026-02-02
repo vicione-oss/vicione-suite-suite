@@ -24,7 +24,7 @@
                 --dxbl-group-border-radius: 0px;
 
                 --dxbl-group-font-size: 12px;
-                --dxbl-group-color: #{colors.$color-font-light};
+                --dxbl-group-color: #{colors.$font-light};
 
                 .dxbl-group-header {
                     --dxbl-group-header-font-size: 14px;
@@ -54,20 +54,20 @@
                     margin-top: 8px;
                 }
 
-                $hover-bg: color.adjust(colors.$color-theme-inverted, $alpha: -0.95);
+                $hover-bg: color.adjust(colors.$theme-inverted, $alpha: -0.95);
 
                 .dxbl-accordion-group-header {
                     @include background-color-transition();
 
                     --dxbl-group-header-bg: transparent;
-                    --dxbl-group-header-color: #{colors.$color-font-light};
+                    --dxbl-group-header-color: #{colors.$font-light};
                     --dxbl-group-header-padding-x: 24px;
                     --dxbl-group-header-padding-y: 0px;
 
                     --dxbl-accordion-group-header-text-padding-y: 0px;
 
                     --dxbl-accordion-group-header-hover-bg: #{$hover-bg};
-                    --dxbl-accordion-group-header-hover-color: #{colors.$color-font-light};
+                    --dxbl-accordion-group-header-hover-color: #{colors.$font-light};
 
                     --dxbl-accordion-group-item-spacing: 0px;
 
@@ -170,7 +170,7 @@
                         font-weight: 400;
 
                         .menu-entry-guideline {
-                            --menu-entry-guideline-before-bg: #{colors.$color-accent};
+                            --menu-entry-guideline-before-bg: #{colors.$accent};
                         }
                     }
                 }

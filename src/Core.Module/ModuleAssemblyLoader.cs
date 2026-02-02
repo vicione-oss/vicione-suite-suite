@@ -9,14 +9,10 @@ namespace Core.Module;
 /// </summary>
 internal static class ModuleAssemblyLoader
 {
-    public static ModuleBundleLoadResult<ModuleBundle<TModule>> LoadBackendModuleBundles<TModule>(SuiteDependencyContext suiteContext, Type? coreBackendModule = null) where TModule : IModule
+    public static ModuleBundleLoadResult<ModuleBundle<TModule>> LoadBackendModuleBundles<TModule>(SuiteDependencyContext suiteContext) where TModule : IModule
     {
         // system bundle is always needed
         var result = new ModuleBundleLoadResult<ModuleBundle<TModule>>();
-
-        // first we need to take core.os module (already loaded)!! 
-        if (coreBackendModule is not null)
-            result.Bundles.Add(ModuleBundleFactory.CreateInternalModuleFromType<TModule>(coreBackendModule));
 
         // second ui host to ensure right load order
         if (suiteContext.UiHost is not null)

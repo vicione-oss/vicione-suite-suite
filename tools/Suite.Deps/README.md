@@ -6,6 +6,10 @@ The tool analyzes the assembly dependencies of the Suite using the `SuiteDepende
 2. `modules` - Create a list of all module assemblies that are redundant when loaded by the suite. These assemblies can be removed from module deployments safely. 
 3. `mapping` - Output the json structure of assembly version mappings used by the Suite with the provided modules. 
 
+## Prerequisites
+
+You need to have a published suite installation available to run the tool. To use the `core` option you can use the [publish-suite.sh](https://gitlab.i40.ifm-datalink.net/acx/vo-suite/vo-suite-sdk/-/blob/master/src/build/publish-suite.sh?ref_type=heads) script publish the suite and ui host locally (linux|wsl|..).
+
 ## Usage
 
 `ViciOne.Suite.Deps.exe -h` shows the help for the provided operation modes.

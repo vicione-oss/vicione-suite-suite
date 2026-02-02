@@ -11,8 +11,8 @@
 
 html,
 body {
-    background-color: colors.$color-background-darker;
-    color: colors.$color-font;
+    background-color: colors.$background-darker;
+    color: colors.$font;
     height: 100%;
     --webkit-font-smoothing: antialiased;
     --moz-osx-font-smoothing: grayscale;
@@ -28,32 +28,32 @@ app {
 button {
     background-color: transparent;
     border: none;
-    color: colors.$color-font;
+    color: colors.$font;
 }
 
 a {
-    color: colors.$color-accent
+    color: colors.$accent
 }
 
 a:hover {
-    color: colors.$color-accent-hover
+    color: colors.$accent-hover
 }
 
 ::selection {
-    background-color: colors.$color-accent;
-    color: colors.$color-background-darker;
+    background-color: colors.$accent;
+    color: colors.$background-darker;
 }
 
 .text-font {
-    color: colors.$color-font
+    color: colors.$font
 }
 
 .text-accent {
-    color: colors.$color-accent
+    color: colors.$accent
 }
 
 .validation-message {
-    color: colors.$color-error;
+    color: colors.$error;
     font-size: smaller;
 }
 
@@ -134,7 +134,7 @@ a:hover {
 }
 
 .btn {
-    color: colors.$color-font
+    color: colors.$font
 }
 
 .btn:disabled:hover {
@@ -142,22 +142,22 @@ a:hover {
 }
 
 .btn-success {
-    background-color: colors.$color-accent;
+    background-color: colors.$accent;
     border-color: colors-staged.$color-accent-dark;
-    color: colors.$color-font;
+    color: colors.$font;
 }
 
 .btn-success:hover {
-    background-color: colors.$color-accent-hover;
+    background-color: colors.$accent-hover;
     border-color: colors-staged.$color-accent-dark;
-    color: colors.$color-font;
+    color: colors.$font;
 }
 
 .btn-success:not(:disabled):not(.disabled).active,
 .btn-success:not(:disabled):not(.disabled):active,
 .show > .btn-success.dropdown-toggle {
     background-color: colors-staged.$color-accent-dark;
-    border-color: colors.$color-accent;
+    border-color: colors.$accent;
 }
 
 dxbl-popup-cell {
@@ -165,7 +165,7 @@ dxbl-popup-cell {
 }
 
 .card {
-    background-color: colors.$color-background-darker;
+    background-color: colors.$background-darker;
     border: none;
     border-radius: 0;
 }
@@ -173,21 +173,21 @@ dxbl-popup-cell {
 .page-link {
     background-color: colors-staged.$color-background-modal;
     border: unset;
-    color: colors.$color-accent;
+    color: colors.$accent;
 }
 
 .page-link:hover {
     background-color: colors-staged.$color-content-dark-hover;
-    color: colors.$color-accent;
+    color: colors.$accent;
 }
 
 .page-item.active .page-link {
-    background-color: colors.$color-accent;
-    color: colors.$color-font;
+    background-color: colors.$accent;
+    color: colors.$font;
 }
 
 .page-item.active .page-link:hover {
-    background-color: colors.$color-accent-hover
+    background-color: colors.$accent-hover
 }
 
 .page-item.disabled .page-link {
@@ -206,7 +206,7 @@ a.bg-primary:focus {
 }
 
 .not-authorized-container > h1 {
-    color: colors.$color-accent
+    color: colors.$accent
 }
 
 /** should be moved to Blazor.Dx library **/

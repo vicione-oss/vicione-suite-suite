@@ -5,24 +5,24 @@
 
 .input-field {
     --vo-ui-bc-color-accent: #{colors-staged.$color-ifm-orange};
-    --vo-ui-bc-color-accent-hover: #{color.adjust(colors.$color-font-light, $alpha: -0.2)};
-    --vo-ui-bc-text-box-background-color: #{color.adjust(colors.$color-font-light, $alpha: -0.95)};
-    --vo-ui-bc-text-box-color: #{color.adjust(colors.$color-font-light, $alpha: -0.2)};
+    --vo-ui-bc-color-accent-hover: #{color.adjust(colors.$font-light, $alpha: -0.2)};
+    --vo-ui-bc-text-box-background-color: #{color.adjust(colors.$font-light, $alpha: -0.95)};
+    --vo-ui-bc-text-box-color: #{color.adjust(colors.$font-light, $alpha: -0.2)};
 
     width: 320px;
     height: 32px;
-    border: 1px solid color.adjust(colors.$color-font-light, $alpha: -0.8);
+    border: 1px solid color.adjust(colors.$font-light, $alpha: -0.8);
     border-radius: 3px;
     position: relative;
 
     &:has(input.invalid):not(:focus-within) {
         ::deep input {
-            color: colors.$color-font-light;
+            color: colors.$font-light;
             background: var(--vo-ui-bc-text-box-background-color);
-            outline: 1px solid colors.$color-error;
+            outline: 1px solid colors.$error;
 
             &::placeholder {
-                color: colors.$color-font-light;
+                color: colors.$font-light;
             }
         }
 
@@ -53,7 +53,7 @@
 
         &:focus {
             outline: 1px solid var(--vo-ui-bc-color-accent);
-            color: colors.$color-font-light;
+            color: colors.$font-light;
         }
 
         &:hover:not(:focus) {

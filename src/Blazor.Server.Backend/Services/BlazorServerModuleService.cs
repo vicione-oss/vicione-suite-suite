@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using System.Security.Claims;
 using Blazor.Shared.Extensions;
+using Blazor.Shared.Module.Services;
 using Core.UiHosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.Modules;
-using Sdk.Client.Services;
 using Sdk.Modules;
 
 namespace Blazor.Server.Backend.Services;

@@ -4,7 +4,7 @@
 
 .wrapper {
     ::deep .red-button:not([disabled]) {
-        color: colors.$color-font-light;
+        color: colors.$font-light;
         background-color: colors-staged.$color-red;
         border-color: color.change(colors-staged.$color-red, $alpha: 0.8);
 

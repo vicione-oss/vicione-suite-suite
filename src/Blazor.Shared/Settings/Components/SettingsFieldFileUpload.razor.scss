@@ -9,7 +9,7 @@
       background-color: transparent;
   }
   to {
-      background-color: color.change(colors.$color-font-light, $alpha: 0.03);
+      background-color: color.change(colors.$font-light, $alpha: 0.03);
   }
 }
 
@@ -25,7 +25,7 @@
         right: -8px;
         bottom: -8px;
 
-        background-color: color.change(colors.$color-font-light, $alpha: 0.03);
+        background-color: color.change(colors.$font-light, $alpha: 0.03);
         border-radius: 3px;
 
         animation-name: drop-incoming-bg-fade-in;
@@ -66,7 +66,7 @@
             }
 
             &.error {
-                color: colors.$color-error;
+                color: colors.$error;
             }
         }
 

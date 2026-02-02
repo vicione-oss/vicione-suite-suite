@@ -1,5 +1,6 @@
 ﻿using AwesomeAssertions;
 using Blazor.Shared.Extensions;
+using Blazor.Shared.Module.Services;
 using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;

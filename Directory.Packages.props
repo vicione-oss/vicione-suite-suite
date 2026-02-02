@@ -1,16 +1,17 @@
 ﻿<Project>
   <PropertyGroup>
+    <!--Update of DotNetVersion requires deletion of .\src\Blazor.Server.Backend\wwwroot\_framework\blazor.web.js to update it-->
+    <DotNetVersion>10.0.2</DotNetVersion>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <HostManagementVersion>1.2.0</HostManagementVersion>
     <MassTransitVersion>8.5.7</MassTransitVersion>
-    <ViciOneUiMonochromeIconsVersion>3.10.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>1.2.0-ci1968091</ViciOneSuiteSdkVersion>
-    <DotNetVersion>9.0.11</DotNetVersion>
+    <ViciOneUiMonochromeIconsVersion>4.1.0</ViciOneUiMonochromeIconsVersion>
+    <ViciOneSuiteSdkVersion>2.0.0-ci2276846096</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.4.0" />
+    <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-    <PackageVersion Include="AspNetCore.SassCompiler" Version="1.94.2" />
+    <PackageVersion Include="AspNetCore.SassCompiler" Version="1.97.1" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="DevExpress.Blazor" Version="24.2.12" />
     <PackageVersion Include="Fluid.Core" Version="2.31.0" />
@@ -34,14 +35,14 @@
     <PackageVersion Include="Microsoft.TypeScript.MSBuild" Version="5.9.3" />
     <PackageVersion Include="minisign-net" Version="1.0.0" />
     <PackageVersion Include="MQTTnet" Version="5.0.1.1416" />
-    <PackageVersion Include="Npgsql" Version="9.0.4" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageVersion Include="Npgsql" Version="10.0.1" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.14.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.14.0" />
-    <PackageVersion Include="Riok.Mapperly" Version="4.3.0" />
+    <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
     <PackageVersion Include="Semver" Version="3.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
@@ -57,13 +58,13 @@
     <PackageVersion Include="ViciOne.Suite.Sdk.Client" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Deployment" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.SystemMonitoring" Version="0.10.0" />
-    <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="4.3.0" />
-    <PackageVersion Include="ViciOne.Ui.Design" Version="1.2.0" />
-    <PackageVersion Include="ViciOne.Ui.Localization" Version="2.35.0" />
+    <PackageVersion Include="ViciOne.Ui.Design" Version="2.0.3" />
+    <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="5.0.1" />
+    <PackageVersion Include="ViciOne.Ui.Localization" Version="3.1.0" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Assets" Version="$(ViciOneUiMonochromeIconsVersion)" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Components" Version="$(ViciOneUiMonochromeIconsVersion)" />
-    <PackageVersion Include="ViciOne.Ui.Shared.Dx" Version="0.19.0" />
-    <PackageVersion Include="ViciOne.Ui.Shared.Extreme" Version="0.19.0" />
+    <PackageVersion Include="ViciOne.Ui.Shared.Dx" Version="0.19.1" />
+    <PackageVersion Include="ViciOne.Ui.Shared.Extreme" Version="0.19.1" />
     <!--Used for tests only:-->
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="AwesomeAssertions" Version="9.3.0" />
@@ -81,7 +82,7 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Testing" Version="$(ViciOneSuiteSdkVersion)" />
     <!--Used for test report generation-->
-    <PackageVersion Include="JunitXml.TestLogger" Version="7.0.2" />
+    <PackageVersion Include="JunitXml.TestLogger" Version="8.0.0" />
     <!--Used for tools only:-->
     <PackageVersion Include="CommandLineParser" Version="2.9.1" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(DotNetVersion)" />

@@ -97,9 +97,9 @@ public partial class DevelopmentFileProviderTests
     {
         var inputs = new[]
         {
-            "C:\\Users\\xxxx\\.nuget\\packages\\microsoft.aspnetcore.components.webassembly.authentication\\9.0.0\\staticwebassets\\",
-            "D:\\repos\\vo-suite\\src\\ModuleA.Client\\obj\\Debug\\net9.0\\scopedcss\\projectbundle\\",
-            "D:\\repos\\vo-suite\\src\\ModuleB.Client\\obj\\Debug\\net9.0\\scopedcss\\projectbundle\\"
+            "C:\\Users\\xxxx\\.nuget\\packages\\microsoft.aspnetcore.components.webassembly.authentication\\9.0.5\\staticwebassets\\",
+            "D:\\repos\\vo-suite\\src\\ModuleA.Client\\obj\\Debug\\net10.0\\scopedcss\\projectbundle\\",
+            "D:\\repos\\vo-suite\\src\\ModuleB.Client\\obj\\Debug\\net10.0\\scopedcss\\projectbundle\\"
         };
 
         var result = StaticWebAssetContent.FixDockerDebugContentRootPaths(inputs);
