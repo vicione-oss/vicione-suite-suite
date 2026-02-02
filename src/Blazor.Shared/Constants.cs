@@ -6,14 +6,11 @@ namespace Blazor.Shared;
 
 public static class Constants
 {
-    public const string SignalRHubEndpoint = "/messagehub";
     public const long BackupFileSizeLimitMB = 50 * 1024 * 1024;
 
     public const string IndexRoute = "/";
 
-    public const string LogViewRoute = "logging";
     public const string LogViewFeature = "Log viewer";
-
     public const string JournalViewRoute = "journal";
 
     public const string ProcessRoute = "processes";
