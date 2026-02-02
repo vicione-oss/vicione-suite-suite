@@ -9,7 +9,7 @@
         align-items: center;
 
         .ticket-center-head {
-            color: colors.$color-font-light;
+            color: colors.$font-light;
             text-align: left;
             font-size: 14px;
             font-weight: noto-sans.$font-weight-regular;
@@ -27,18 +27,18 @@
             gap: 0px;
             align-items: center;
 
-            color: colors.$color-font;
+            color: colors.$font;
             font-size: 12px;
             font-weight: noto-sans.$font-weight-light;
             letter-spacing: 0.4px;
 
             .icon {
-                color: colors.$color-accent;
+                color: colors.$accent;
                 margin-right: 8px;
             }
 
             &:hover {
-                color: colors.$color-font-light;
+                color: colors.$font-light;
             }
         }
     }

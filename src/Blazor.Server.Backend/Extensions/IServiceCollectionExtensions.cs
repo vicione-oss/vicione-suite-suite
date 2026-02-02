@@ -3,6 +3,7 @@ using Blazor.Shared;
 using Blazor.Shared.Connections.Components;
 using Blazor.Shared.Connections.Validators;
 using Blazor.Shared.Extensions;
+using Blazor.Shared.Module.Services;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;

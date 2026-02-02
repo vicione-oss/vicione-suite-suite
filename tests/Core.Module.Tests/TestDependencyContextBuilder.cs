@@ -75,7 +75,7 @@ internal sealed class TestDependencyContextBuilder
             .Union(CreateSqliteRuntimeLibraries(options));
 
         var dependencyContext = CreateDependencyContext(libraries);
-        _options.CoreContext = new ModuleDependencyContext(ModuleType.Backend, $"/src/Core.OS/bin/Debug/net9.0/{CoreOs}.deps.json", false);
+        _options.CoreContext = new ModuleDependencyContext(ModuleType.Backend, $"/src/Core.OS/bin/Debug/net10.0/{CoreOs}.deps.json", false);
         _options.CoreContext.AddRuntimeLibraries(dependencyContext);
 
         return this;
@@ -94,7 +94,7 @@ internal sealed class TestDependencyContextBuilder
             .Union(CreateBlazorServerRuntimeLibraries(options));
 
         var dependencyContext = CreateDependencyContext(libraries);
-        var context = new ModuleDependencyContext(ModuleType.Backend, $"/src/Blazor.Server.Backend/bin/Debug/net9.0/{BlazorServer}.deps.json", false);
+        var context = new ModuleDependencyContext(ModuleType.Backend, $"/src/Blazor.Server.Backend/bin/Debug/net10.0/{BlazorServer}.deps.json", false);
         context.AddRuntimeLibraries(dependencyContext);
 
         _options.UiHostContext = context;
@@ -178,7 +178,7 @@ internal sealed class TestDependencyContextBuilder
 
     private static ModuleDependencyContext CreateModuleDependencyContext(DependencyContext dependencyContext, ModuleType moduleType, string moduleId, string assemblyName)
     {
-        var context = new ModuleDependencyContext(moduleType, $"/src/{moduleId}/bin/Debug/net9.0/{assemblyName}.deps.json", false);
+        var context = new ModuleDependencyContext(moduleType, $"/src/{moduleId}/bin/Debug/net10.0/{assemblyName}.deps.json", false);
         context.AddRuntimeLibraries(dependencyContext);
         return context;
     }
@@ -318,7 +318,7 @@ internal sealed class TestDependencyContextBuilder
             "ViciOne.Ui.Shared.Dx",
             versions.UiSharedDx,
             null,
-            [new RuntimeAssetGroup(null, "lib/net9.0/ViciOne.Ui.Shared.Dx.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/ViciOne.Ui.Shared.Dx.dll")],
             [],
             [],
             [
@@ -344,7 +344,7 @@ internal sealed class TestDependencyContextBuilder
             "Microsoft.AspNetCore.Components.WebAssembly",
             versions.DotNetVersion,
             null,
-            [new RuntimeAssetGroup(null, "lib/net9.0/Microsoft.AspNetCore.Components.WebAssembly.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/Microsoft.AspNetCore.Components.WebAssembly.dll")],
             [],
             [],
             [],
@@ -354,7 +354,7 @@ internal sealed class TestDependencyContextBuilder
             "Microsoft.AspNetCore.Components.Web",
             versions.DotNetVersion,
             "sha512-8wvWv4uX4tu9PmPd9f84MY0ZqiQnkvUbpLzaUo6xxbg0oq7g73jzPt9aKypkiMr7g2PwOihfyftfSoj6LOJ6WQ==",
-            [new RuntimeAssetGroup(null, "lib/net9.0/Microsoft.AspNetCore.Components.Web.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/Microsoft.AspNetCore.Components.Web.dll")],
             [],
             [],
             [],
@@ -367,7 +367,7 @@ internal sealed class TestDependencyContextBuilder
             SQLiteMicrosoft,
             versions.SQLiteMicrosoft,
             null,
-            [new RuntimeAssetGroup(null, "lib/net9.0/Microsoft.Data.Sqlite.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/Microsoft.Data.Sqlite.dll")],
             [],
             [],
             [
@@ -404,7 +404,7 @@ internal sealed class TestDependencyContextBuilder
             "MassTransit.Abstractions",
             versions.MassTransit,
             null,
-            [new RuntimeAssetGroup(null, "lib/net9.0/MassTransit.Abstractions.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/MassTransit.Abstractions.dll")],
             [],
             [],
             [],
@@ -416,7 +416,7 @@ internal sealed class TestDependencyContextBuilder
                 MassTransit,
                 versions.MassTransit,
                 null,
-                [new RuntimeAssetGroup(null, $"lib/net9.0/{MassTransit}.dll")],
+                [new RuntimeAssetGroup(null, $"lib/net10.0/{MassTransit}.dll")],
                 [],
                 [],
                 [
@@ -431,7 +431,7 @@ internal sealed class TestDependencyContextBuilder
                 "MassTransit.RabbitMQ",
                 versions.MassTransit,
                 null,
-                [new RuntimeAssetGroup(null, "lib/net9.0/MassTransit.RabbitMqTransport.dll")],
+                [new RuntimeAssetGroup(null, "lib/net10.0/MassTransit.RabbitMqTransport.dll")],
                 [],
                 [],
                 [
@@ -478,7 +478,7 @@ internal sealed class TestDependencyContextBuilder
             "Microsoft.Extensions.DependencyInjection.Abstractions",
             versions.MsDependencyInjectionAbstractions,
             null,
-            [new RuntimeAssetGroup(null, "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll")],
             [],
             [],
             [],
@@ -581,7 +581,7 @@ internal sealed class TestDependencyContextBuilder
             "ViciOne.ManagedEngine.Contracts",
             "0.50.0",
             null,
-            [new RuntimeAssetGroup(null, "lib/net9.0/ViciOne.ManagedEngine.Contracts.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/ViciOne.ManagedEngine.Contracts.dll")],
             [],
             [],
             [
@@ -623,7 +623,7 @@ internal sealed class TestDependencyContextBuilder
             "ViciOne.Ui.ClusterEditor",
             "0.1.0.62682",
             null,
-            [new RuntimeAssetGroup(null, "lib/net9.0/ViciOne.Ui.ClusterEditor.dll", "lib/net9.0/ViciOne.Ui.ColorableIcons.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/ViciOne.Ui.ClusterEditor.dll", "lib/net9.0/ViciOne.Ui.ColorableIcons.dll")],
             [],
             [],
             [
@@ -677,7 +677,7 @@ internal sealed class TestDependencyContextBuilder
             "YamlDotNet",
             "15.1.2",
             null,
-            [new RuntimeAssetGroup(null, "lib/net9.0/YamlDotNet.dll")],
+            [new RuntimeAssetGroup(null, "lib/net10.0/YamlDotNet.dll")],
             [],
             [],
             [],

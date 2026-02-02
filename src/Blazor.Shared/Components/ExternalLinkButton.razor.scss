@@ -6,19 +6,19 @@ button {
     align-items: center;
     height: 17px;
     font-weight: typography.$font-weight-light;
-    color: colors.$color-font;
+    color: colors.$font;
     font-size: 12px;
     letter-spacing: .4px;
     padding: 0px;
     border: 0;
 
     ::deep .icon {
-        color: colors.$color-accent;
+        color: colors.$accent;
         margin-right: 8px;
     }
 
     &:hover {
-        color: colors.$color-font-light;
+        color: colors.$font-light;
     }
 
     &:focus-visible {

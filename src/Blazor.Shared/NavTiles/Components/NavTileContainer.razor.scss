@@ -37,7 +37,7 @@
         cursor: pointer;
 
         background: $background-color;
-        color: colors.$color-font;
+        color: colors.$font;
 
         ::deep .content-loading-indication {
             width: 100%;
@@ -55,7 +55,7 @@
             &:focus,
             &:focus-visible {
                 background-color: color.adjust($background-color, $alpha: -0.1);
-                color: colors.$color-font-light;
+                color: colors.$font-light;
             }
         }
     }

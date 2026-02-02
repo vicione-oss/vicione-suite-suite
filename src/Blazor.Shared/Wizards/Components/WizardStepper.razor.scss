@@ -21,7 +21,7 @@
         transition: all animations.$duration animations.$effect;
 
         &.done {
-            background-color: colors.$color-accent;
+            background-color: colors.$accent;
         }
 
         &.dotted {
@@ -29,7 +29,7 @@
             color: gray;
 
             &.done {
-                color: colors.$color-accent;
+                color: colors.$accent;
             }
 
             &::before {
@@ -60,12 +60,12 @@
             font-weight: typography.$font-weight-regular;
 
             > span:first-of-type {
-                background-color: colors.$color-accent;
-                border-color: colors.$color-accent;
+                background-color: colors.$accent;
+                border-color: colors.$accent;
             }
         
             > span:last-of-type {
-                color: colors.$color-font-light;
+                color: colors.$font-light;
             }
         }
 
@@ -73,21 +73,21 @@
             font-weight: typography.$font-weight-regular;
 
             > span:first-of-type {
-                border-color: colors.$color-accent;
-                color: colors.$color-accent;
+                border-color: colors.$accent;
+                color: colors.$accent;
             }
 
             > span:last-of-type {
-                color: colors.$color-font-light;
+                color: colors.$font-light;
             }
         }
 
         > span:first-of-type {
             align-content: center;
             border: 1px solid;
-            border-color: colors.$color-font-light;
+            border-color: colors.$font-light;
             border-radius: 16px;
-            color: colors.$color-font-light;
+            color: colors.$font-light;
             height: 32px;
             text-align: center;
             transition: background-color animations.$duration animations.$effect;
@@ -95,7 +95,7 @@
         }
 
         > span:last-of-type {
-            color: colors.$color-font;
+            color: colors.$font;
             transition: background-color animations.$duration animations.$effect;
         }
     }

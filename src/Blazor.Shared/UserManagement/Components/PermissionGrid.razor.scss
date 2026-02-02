@@ -44,8 +44,8 @@
 
     ::deep input[type="radio"] {
         appearance: none;
-        background-color: colors.$color-background-darker;
-        border: 0.15em solid colors.$color-border;
+        background-color: colors.$background-darker;
+        border: 0.15em solid colors.$border;
         border-radius: 50%;
         display: grid;
         height: 16px;
@@ -53,7 +53,7 @@
         width: 16px;
 
         &::before {
-            background-color: colors.$color-accent;
+            background-color: colors.$accent;
             border-radius: 50%;
             content: "";
             height: 8px;
@@ -63,7 +63,7 @@
         }
 
         &:checked {
-            border: 0.15em solid colors.$color-accent;
+            border: 0.15em solid colors.$accent;
 
             &::before {
                 transform: scale(1);

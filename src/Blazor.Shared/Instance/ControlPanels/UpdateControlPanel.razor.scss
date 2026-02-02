@@ -18,7 +18,7 @@
     border-color: #b1b1b1;
     border-radius: 4px;
     background-color: inherit;
-    color: color.change(colors.$color-font-light, $alpha: 0.8);
+    color: color.change(colors.$font-light, $alpha: 0.8);
     font-family: inherit;
     font-weight: typography.$font-weight-light;
     letter-spacing: 0.4px;
@@ -31,12 +31,12 @@
     }
 
     &:hover {
-        border-color: colors.$color-font-light;
+        border-color: colors.$font-light;
     }
 
     &:focus {
         outline: none;
-        border-color: colors.$color-font-light;
+        border-color: colors.$font-light;
     }
 }
 

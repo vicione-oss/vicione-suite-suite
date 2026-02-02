@@ -68,12 +68,12 @@
 
             span {
                 font-size: 10px;
-                color: colors.$color-font;
+                color: colors.$font;
                 letter-spacing: 0.4px;
                 font-weight: typography.$font-weight-light;
 
                 &:not(.seperator):hover {
-                    color: colors.$color-font-light;
+                    color: colors.$font-light;
                 }
             }
 

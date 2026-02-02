@@ -15,11 +15,11 @@
     @include animations.color();
 
     &:hover {
-        color: colors.$color-accent-hover;
+        color: colors.$accent-hover;
     }
 
     &:focus {
         outline: none;
-        color: colors.$color-accent;
+        color: colors.$accent;
     }
 }

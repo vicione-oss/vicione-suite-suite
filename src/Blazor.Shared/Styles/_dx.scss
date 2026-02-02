@@ -6,19 +6,19 @@
         padding: 0 8px;
 
         .nav-link {
-            color: colors.$color-accent;
+            color: colors.$accent;
 
             &.active {
-                background-color: colors.$color-accent;
+                background-color: colors.$accent;
                 border: none;
-                color: colors.$color-font;
+                color: colors.$font;
             }
         }
     }
 }
 
 .dxbl-btn.dxbl-toolbar-btn:not(.dxbl-disabled) {
-    border: 1px solid colors.$color-border;
+    border: 1px solid colors.$border;
 }
 
 .dxbl-modal[height] { // *1

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Blazor.Shared.Module.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Sdk.Client.Services;
@@ -10,9 +11,7 @@ public sealed partial class MainLayout : IDisposable
     private bool _isTemplateLogin;
 
     [Inject] private ILayoutService LayoutService { get; set; } = default!;
-#pragma warning disable CS0618 // Type or member is obsolete
     [Inject] private IClientModuleService ModuleService { get; set; } = default!;
-#pragma warning restore CS0618
     [Inject] private IServiceProvider ServiceProvider { get; set; } = default!;
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [CascadingParameter] private Task<AuthenticationState>? ExistingCascadedAuthenticationState { get; set; }

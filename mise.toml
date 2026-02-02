@@ -9,4 +9,4 @@
 
 [tools]
 node = "20"
-dotnet = "9.0"
+dotnet = "10"

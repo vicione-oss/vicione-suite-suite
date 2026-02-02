@@ -10,12 +10,12 @@
     $tab-font-weight-active: typography.$font-weight-regular;
 
     $tab-line-trickness: 2px;
-    $tab-line-color-hover: colors.$color-font-light;
-    $tab-line-color-active: colors.$color-accent;
+    $tab-line-color-hover: colors.$font-light;
+    $tab-line-color-active: colors.$accent;
 
-    $tab-font-color-default: colors.$color-font;
-    $tab-font-color-active: colors.$color-font-light;
-    $tab-font-color-hover: colors.$color-font-light;
+    $tab-font-color-default: colors.$font;
+    $tab-font-color-active: colors.$font-light;
+    $tab-font-color-hover: colors.$font-light;
 
     $tab-text-padding-bottom: 1px;
 

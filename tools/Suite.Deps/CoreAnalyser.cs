@@ -14,12 +14,13 @@ internal static class CoreAnalyser
 
     public static Task Execute(CoreAnalyserOptions options)
     {
-        var context = CreateSuiteDependencyContext(options, new FileSystem());
+        var fileSystem = new FileSystem();
+        var context = CreateSuiteDependencyContext(options, fileSystem);
 
         WriteHeader(context, options);
 
         // all the runtime libraries provided by core or uihost
-        foreach (var library in GetRuntimeLibraryModels(context))
+        foreach (var library in GetSuiteModels(context, fileSystem, options))
         {
             Console.WriteLine(options.Version ? $"{library.FileName}:{library.Version}" : library.FileName);
         }
@@ -89,6 +90,24 @@ internal static class CoreAnalyser
         return context;
     }
 
+    /// <summary>
+    /// Join core and uihost runtime libraries with framework assemblies shipped with the suite
+    /// </summary>    
+    private static IEnumerable<FileVersionModel> GetSuiteModels(SuiteDependencyContext context, IFileSystem fileSystem, CoreAnalyserOptions options)
+    {
+        var coreAndHostLibraries = GetRuntimeLibraryModels(context);
+
+        var frameworkAssemblies = GetFrameworkAssemblies(fileSystem, options)
+            .Select(k => new FileVersionModel(k, null));
+
+        return coreAndHostLibraries.Union(frameworkAssemblies)
+            .DistinctBy(k => k.FileName)
+            .OrderBy(k => k.FileName);
+    }
+
+    /// <summary>
+    /// Join core and uihost runtime libraries
+    /// </summary>   
     private static IEnumerable<FileVersionModel> GetRuntimeLibraryModels(SuiteDependencyContext context)
     {
         var uiHostLibraries = context.UiHost?.RuntimeLibraries ?? [];
@@ -98,7 +117,8 @@ internal static class CoreAnalyser
             .Where(k => k.Type != "reference")
             .DistinctBy(k => k.Name);
 
-        // the runtime libraries defined in deps.json do not match the published assemblies - don't ask me why :(
+        // the runtime libraries defined in deps.json do not match the published assemblies
+        // ms libs are added because --self-contained flag is used on dotnet publish
         return coreAndHostLibraries
             .Select(k => new FileVersionModel(GetExistingAssemblyPath(k), k.Version))
             .Where(k => !string.IsNullOrEmpty(k.FileName))
@@ -119,6 +139,25 @@ internal static class CoreAnalyser
 
             return null;
         }
+    }
+
+    /// <summary>
+    /// Get framework assemblies shipped with the suite because it gets published self-contained
+    /// </summary>
+    /// <param name="fileSystem"></param>
+    /// <param name="options"></param>
+    /// <returns></returns>
+    private static IEnumerable<string?> GetFrameworkAssemblies(IFileSystem fileSystem, CoreAnalyserOptions options)
+    {
+        var rootedSuitePath = fileSystem.GetRootedPath(options.SuitePath);
+        return Directory.EnumerateFiles(rootedSuitePath, "*.dll", SearchOption.TopDirectoryOnly)
+            .Select(Path.GetFileName)
+            .Where(IsFrameworkAssembly);
+
+        bool IsFrameworkAssembly(string? fileName) => !string.IsNullOrWhiteSpace(fileName) &&
+                (fileName.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase)
+                || fileName.StartsWith("System.", StringComparison.OrdinalIgnoreCase)
+                || fileName.StartsWith("netstandard.dll", StringComparison.OrdinalIgnoreCase));
     }
 
     private record FileVersionModel(string? FileName, string? Version);

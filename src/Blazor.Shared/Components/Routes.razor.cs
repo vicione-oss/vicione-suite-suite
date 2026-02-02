@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
+using Blazor.Shared.Module.Services;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
-using Sdk.Client.Services;
 
 namespace Blazor.Shared.Components;
 
@@ -11,9 +11,7 @@ public sealed partial class Routes
     private readonly List<Assembly> _additionalAssemblies = [];
 
     private bool _initialized;
-#pragma warning disable CS0618 // Type or member is obsolete
     [Inject] private IClientModuleService ModuleService { get; set; } = default!;
-#pragma warning restore CS0618
     [Inject] private IServiceProvider ServiceProvider { get; set; } = default!;
     [Inject] private INavigationService NavigationService { get; set; } = default!;
 

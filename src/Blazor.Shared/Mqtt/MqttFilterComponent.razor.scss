@@ -23,9 +23,9 @@
     .tree-container {
         display: flex;
         overflow: auto;
-        background-color: colors.$color-background-darker;
+        background-color: colors.$background-darker;
         border-radius: 2px;
-        border: 1px solid colors.$color-border;
+        border: 1px solid colors.$border;
 
         .node-container {
             display: flex;
@@ -45,7 +45,7 @@
         }
 
         :hover {
-            background-color: colors.$color-accent;
+            background-color: colors.$accent;
             color: colors-staged.$color-font-inverted;
         }
     }

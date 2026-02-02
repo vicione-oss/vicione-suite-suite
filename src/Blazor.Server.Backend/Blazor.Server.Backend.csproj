@@ -141,4 +141,23 @@
     </PropertyGroup>
   </Target>
 
+  <!-- This target was introduced with .NET10 update where UseStaticFiles does not include the blazor.web.js anymore.
+    See https://github.com/Lapiniot/Net.MQTT/issues/116 and https://github.com/dotnet/aspnetcore/issues/64381#issuecomment-3546832403
+    If we update the .NET version, we have to update the version number in the path below
+  -->
+  <Target Name="CopyBlazorWebJsToWwwrootFramework" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' and !Exists('$(MSBuildProjectDirectory)\wwwroot\_framework\blazor.web.js')">
+    <PropertyGroup>
+      <_BlazorFrameworkPackDir>$(NuGetPackageRoot)microsoft.aspnetcore.app.internal.assets\10.0.1\_framework\</_BlazorFrameworkPackDir>
+      <_BlazorWebJsSource>$(_BlazorFrameworkPackDir)blazor.web.js</_BlazorWebJsSource>
+      <_BlazorWebJsDestDir>$(MSBuildProjectDirectory)\wwwroot\_framework\</_BlazorWebJsDestDir>
+      <_BlazorWebJsDest>$(_BlazorWebJsDestDir)blazor.web.js</_BlazorWebJsDest>
+    </PropertyGroup>
+
+    <Message Text="Copying blazor.web.js from '$(_BlazorWebJsSource)' to '$(_BlazorWebJsDest)'" Importance="high" />
+
+    <Error Condition="!Exists('$(_BlazorWebJsSource)')" Text="blazor.web.js not found at '$(_BlazorWebJsSource)'. Ensure Microsoft.AspNetCore.App.Internal.Assets is restored and version is set correctly." />
+
+    <MakeDir Directories="$(_BlazorWebJsDestDir)" />
+    <Copy SourceFiles="$(_BlazorWebJsSource)" DestinationFiles="$(_BlazorWebJsDest)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>
