@@ -11,7 +11,6 @@ public sealed class LoggingOptions : ILogOptions
 
     public string? LogPath { get; set; }
     public string[]? LogTargets { get; set; }
-    public string? LogFileNameTemplate { get; set; }
     [ValidateObjectMembers]
     public LoggingResourceOptions? Resources { get; set; }
     [ValidateObjectMembers]
@@ -29,8 +28,6 @@ public sealed class LoggingResourceOptions
 public sealed class LoggingMemoryOptions
 {
     public const string ConfigSection = "Memory";
-
-    public bool AutoStart { get; set; }
 
     [Range(1, int.MaxValue)]
     public int LimitInMb { get; set; } = 500;

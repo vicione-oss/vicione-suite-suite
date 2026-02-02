@@ -6,6 +6,4 @@ public interface ILogOptions
     string? LogPath { get; }
 
     string[]? LogTargets { get; }
-
-    string? LogFileNameTemplate { get; }
 }
