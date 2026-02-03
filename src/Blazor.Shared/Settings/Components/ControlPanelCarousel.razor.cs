@@ -73,13 +73,6 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
         _settingsModuleStateSemaphore.Dispose();
     }
 
-    protected override void OnParametersSet()
-    {
-        UpdateItems(SettingsModuleState.RequestedControlPanelRegistryItems);
-
-        _shouldRender = true;
-    }
-
     protected override bool ShouldRender()
     {
         if (_shouldRender)
@@ -221,10 +214,31 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
 
     private void UpdateItems(IReadOnlyList<IControlPanelRegistryItem> requestedControlPanelRegistryItems)
     {
-        _items.Clear();
+        for (var i = 0; i < requestedControlPanelRegistryItems.Count; i++)
+        {
+            var controlPanelRegistryItem = requestedControlPanelRegistryItems[i];
+            var isActive = controlPanelRegistryItem == SettingsModuleState.ActiveControlPanelRegistryItem;
 
-        foreach (var i in requestedControlPanelRegistryItems)
-            _items.Add(new Item { ControlPanelRegistryItem = i, Active = i == SettingsModuleState.ActiveControlPanelRegistryItem });
+            if (i < _items.Count)
+            {
+                var item = _items[i];
+                if (item.ControlPanelRegistryItem != controlPanelRegistryItem)
+                {
+                    _items[i] = new() { ControlPanelRegistryItem = controlPanelRegistryItem, Active = isActive };
+                }
+                else
+                {
+                    item.Active = isActive;
+                }
+            }
+            else
+            {
+                _items.Add(new() { ControlPanelRegistryItem = controlPanelRegistryItem, Active = isActive });
+            }
+        }
+
+        if (requestedControlPanelRegistryItems.Count < _items.Count)
+            _items.RemoveRange(requestedControlPanelRegistryItems.Count, _items.Count - requestedControlPanelRegistryItems.Count);
     }
 
     private async void SettingsModuleStateChanged(PropertiesChangedEventArgs args)

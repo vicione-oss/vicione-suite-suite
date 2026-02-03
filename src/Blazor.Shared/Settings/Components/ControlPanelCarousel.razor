@@ -45,10 +45,10 @@
                 var descriptionBannerSectionId = new DescriptionBannerSectionId();
                 var controlPanelLoadingIndicationSectionId = new ControlPanelLoadingIndicationSectionId();
 
-                <div @attributes="itemAttributes" @key="itemIndex">
+                <div @attributes="itemAttributes" @key="item">
                     @if (renderControlPanel)
                     {
-                        <AdvancedErrorBoundary @key="item">
+                        <AdvancedErrorBoundary>
                             <PopupContentLayout>
                                 <PopupStaticContent>
                                     <SectionOutlet SectionId="descriptionBannerSectionId" />
