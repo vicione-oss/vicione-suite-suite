@@ -15,6 +15,7 @@ public sealed class InstanceInformation : IInstanceInformation
     public string FormattedName { get; set; } = "{ViciOne} Suite";
     public string? Description { get; set; }
     public string SerialNumber { get; set; } = string.Empty;
+    public string SystemType { get; set; } = string.Empty;
     public List<string> InstalledModules { get; set; } = [];
     IReadOnlyCollection<string> IInstanceInformation.InstalledModules => InstalledModules;
     public DateTimeOffset? FirstTimeRegistered { get; set; }

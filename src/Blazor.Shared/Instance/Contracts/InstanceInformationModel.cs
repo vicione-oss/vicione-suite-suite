@@ -31,9 +31,12 @@ public sealed class InstanceInformationModel(IInstanceInformation info) : IInsta
 
     public string SerialNumber { get; } = info.SerialNumber;
 
+    public string SystemType { get; set; } = info.SystemType;
+
     public string Version { get; } = info.Version;
 
     public string SdkVersion { get; } = info.SdkVersion;
+
     public string? BranchName { get; } = info.BranchName;
 
     public bool InRecoveryMode { get; set; }

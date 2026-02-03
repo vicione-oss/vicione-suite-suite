@@ -17,7 +17,7 @@ namespace Core.OS.Migrations.ApplicationDbContext.Sqlite
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("app")
-                .HasAnnotation("ProductVersion", "9.0.6");
+                .HasAnnotation("ProductVersion", "10.0.2");
 
             modelBuilder.Entity("Core.Shared.Instance.Contracts.CrossInstanceConfiguration", b =>
                 {
@@ -50,7 +50,7 @@ namespace Core.OS.Migrations.ApplicationDbContext.Sqlite
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("FirstTimeRegistered")
+                    b.Property<string>("FirstTimeRegistered")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("FormattedName")
@@ -64,7 +64,7 @@ namespace Core.OS.Migrations.ApplicationDbContext.Sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("LastRegistered")
+                    b.Property<string>("LastRegistered")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -75,6 +75,10 @@ namespace Core.OS.Migrations.ApplicationDbContext.Sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SystemType")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

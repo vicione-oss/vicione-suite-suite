@@ -294,6 +294,7 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
             Description = infoProvider.Local.Description,
             FormattedName = infoProvider.Local.FormattedName,
             SerialNumber = infoProvider.Local.SerialNumber,
+            SystemType = infoProvider.Local.SystemType,
             SdkVersion = infoProvider.Local.SdkVersion,
             Configuration = config.AsEnumerable().Where(IsAllowed).ToList(),
             Version = infoProvider.Local.Version,

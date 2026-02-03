@@ -11,6 +11,7 @@ public sealed record RegisterInstance : ICommand
     public string? FormattedName { get; set; }
     public string? Description { get; init; }
     public string SerialNumber { get; init; } = string.Empty;
+    public string SystemType { get; init; } = string.Empty;
     public string SdkVersion { get; init; } = string.Empty;
     public string? BranchName { get; init; }
     public List<string> InstalledModules { get; init; } = [];

@@ -37,6 +37,7 @@ internal class TestInstanceInformationProvider : IInstanceInformationProvider
         public string FormattedName { get; set; } = "{ViciOne} Suite";
         public string? Description { get; set; }
         public string SerialNumber => Id.ToString("N");
+        public string SystemType => "TestSystemType";
         public required IReadOnlyCollection<string> InstalledModules { get; init; }
         public DateTimeOffset? FirstTimeRegistered { get; set; }
         public DateTimeOffset? LastRegistered { get; set; }

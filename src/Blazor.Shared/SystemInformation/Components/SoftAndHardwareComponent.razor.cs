@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using Blazor.Shared.SystemInformation.Models;
+using Blazor.Shared.SystemInformation.Extensions;
 using Blazor.Shared.SystemInformation.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Instance;
@@ -42,19 +42,5 @@ public sealed partial class SoftAndHardwareComponent
         base.OnInitialized();
     }
 
-    private async Task<string> CopyToClipboardButtonSetText()
-    {
-        var modules = await InformationProvider.GetInstalledModules();
-        var softwareInfo = new SoftwareInfo
-        {
-            SuiteVersion = InformationProvider.Local.Version,
-            SdkVersion = InformationProvider.Local.SdkVersion,
-            InstanceType = InformationProvider.Local.Type,
-            SerialNumber = InformationProvider.Local.SerialNumber,
-            ModuleVersions = modules.ToDictionary(
-                module => module.Name,
-                module => module.Version)
-        };
-        return softwareInfo.ToString();
-    }
+    private Task<string> CopyToClipboardButtonSetText() => InformationProvider.GetSystemInformationMarkdown();
 }

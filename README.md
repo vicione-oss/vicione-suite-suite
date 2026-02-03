@@ -69,7 +69,7 @@ Currently, you must manually provide the credentials in one of the following way
 Please contact the infrastructure team to obtain the required password.
 
 Once you received the password, you can continue to add the credentials by e.g. UserSecrets:
-1. Open a powershell and move into the `.../vo-suite/src/Core.OS` directory
+1. Open a powershell and move into the `.../suite/src/Core.OS` directory
 1. Execute the following commands<br>
 ```ps
 dotnet user-secrets set "ArtifactRepository:Sources:0:UserName" "vicione-suite-readonly"
@@ -87,7 +87,7 @@ dotnet user-secrets set "ArtifactRepository:Sources:1:Password" "<password>"
 All npm packages need to be installed before starting the application.
 
 To install the npm packages you have to:
-1. Open a powershell and move into the `.../vo-suite` directory (or run it from there)
+1. Open a powershell and move into the `.../suite` directory (or run it from there)
 1. Run the command `npm install`
 1. Run the command `npm run build`
 
@@ -293,6 +293,13 @@ The following example creates migrations for a newly introduced entity `FooBar` 
 Add-Migration Application_FooBar -OutputDir Migrations\ApplicationDbContext\Sqlite -Context ApplicationDbContextSqlite -StartupProject Core.OS
 
 Add-Migration Application_FooBar -OutputDir Migrations\ApplicationDbContext\Postgres -Context ApplicationDbContextPostgres -StartupProject Core.OS
+```
+
+Alternatively using PowerShell from the `.../suite/src/Core.OS`-directory:
+``` powershell
+dotnet ef migrations add Application_FooBar -o Migrations\ApplicationDbContext\Sqlite -c ApplicationDbContextSqlite -s Core.OS.csproj
+
+dotnet ef migrations add Application_FooBar -o Migrations\ApplicationDbContext\Postgres -c ApplicationDbContextPostgres -s Core.OS.csproj
 ```
 
 Upon start, the application automatically creates required databases and executes pending migrations.
