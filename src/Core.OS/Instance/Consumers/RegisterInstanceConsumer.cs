@@ -104,6 +104,7 @@ public sealed class RegisterInstanceConsumer(IServiceProvider services, ILogger<
                 existing.FormattedName = command.FormattedName;
             existing.Description = command.Description;
             existing.SerialNumber = command.SerialNumber;
+            existing.SystemType = command.SystemType;
             existing.SdkVersion = command.SdkVersion;
             existing.LastRegistered = registrationTime;
             existing.Version = command.Version;
@@ -127,6 +128,7 @@ public sealed class RegisterInstanceConsumer(IServiceProvider services, ILogger<
             Name = command.Name,
             Description = command.Description,
             SerialNumber = command.SerialNumber,
+            SystemType = command.SystemType,
             SdkVersion = command.SdkVersion,
             FirstTimeRegistered = registrationTime,
             LastRegistered = registrationTime,

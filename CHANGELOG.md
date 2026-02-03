@@ -16,7 +16,11 @@
 - `AspNetCore.SassCompiler` packages, update to version `1.97.1`
 - `Npgsql.EntityFrameworkCore.PostgreSQL` package, update to version `10.0.0`
 - `Microsoft` packages, update to version `10.0.2`
+- `OpenTelemetry` packages, update to version `1.15.0`
 - `Riok.Mapperly` packages, update to version `4.3.1`
+- `Serilog.AspNetCore` packages, update to version `10.0.0`
+- `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
+- `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
 - `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2276846096`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.0.1`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
