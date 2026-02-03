@@ -1,0 +1,96 @@
+<Solution>
+  <Folder Name="/samples/" />
+  <Folder Name="/samples/Burger/">
+    <Project Path="samples/Burger.Backend/Burger.Backend.csproj" />
+    <Project Path="samples/Burger.Client/Burger.Client.csproj">
+      <BuildDependency Project="src/Core.Deployment/Core.Deployment.csproj" />
+    </Project>
+    <Project Path="samples/Burger.Internal/Burger.Internal.csproj" />
+    <Project Path="samples/Burger.Public/Burger.Public.csproj" />
+  </Folder>
+  <Folder Name="/samples/JiTChat/">
+    <Project Path="samples/JiTChat.Backend/JiTChat.Backend.csproj" />
+    <Project Path="samples/JiTChat.Client/JiTChat.Client.csproj" />
+    <Project Path="samples/JiTChat.Public/JiTChat.Public.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path=".gitlab-ci.yml" />
+    <File Path=".globalconfig" />
+    <File Path="CHANGELOG.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="eslint.config.mjs" />
+    <File Path="global.json" />
+    <File Path="NuGet.Config" />
+    <File Path="package.json" />
+    <File Path="README.md" />
+    <File Path="tests.runsettings" />
+    <File Path="tsconfig.json" />
+    <File Path="VERSION" />
+    <File Path="VERSION_HOSTMANAGEMENT" />
+    <File Path="xunit.runner.json" />
+  </Folder>
+  <Folder Name="/Solution Items/build/">
+    <File Path="build/deploy.sh" />
+    <File Path="build/package_basic.sh" />
+    <File Path="build/package_digitalocean.sh" />
+    <File Path="build/package_publish.sh" />
+    <File Path="build/package_settings.sh" />
+    <File Path="build/publish-for-docker.sh" />
+    <File Path="build/publish-modules.sh" />
+    <File Path="build/publish-suite.ps1" />
+    <File Path="build/publish-suite.sh" />
+    <File Path="build/review.sh" />
+  </Folder>
+  <Folder Name="/Solution Items/deployments/">
+    <File Path="deployments/initial-modules.basic.json" />
+    <File Path="deployments/initial-modules.empty.json" />
+  </Folder>
+  <Folder Name="/Solution Items/docs/">
+    <File Path="docs/code-style-guide.md" />
+    <File Path="docs/edge-s.md" />
+    <File Path="docs/integration-testing.md" />
+    <File Path="docs/localization-guide.md" />
+    <File Path="docs/mail.md" />
+    <File Path="docs/modules.md" />
+    <File Path="docs/security-and-identity.md" />
+    <File Path="docs/target-platforms.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Blazor.DevAssets/Blazor.DevAssets.csproj" />
+    <Project Path="src/Blazor.Server.Backend/Blazor.Server.Backend.csproj" />
+    <Project Path="src/Blazor.Shared/Blazor.Shared.csproj">
+      <BuildDependency Project="src/Core.Deployment/Core.Deployment.csproj" />
+    </Project>
+    <Project Path="src/Core.Deployment/Core.Deployment.csproj" />
+    <Project Path="src/Core.Module/Core.Module.csproj" />
+    <Project Path="src/Core.OS/Core.OS.csproj" />
+    <Project Path="src/Core.Shared/Core.Shared.csproj" />
+    <Project Path="src/Core.UiHosting/Core.UiHosting.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Blazor.DevAssets.Tests/Blazor.DevAssets.Tests.csproj" />
+    <Project Path="tests/Blazor.Server.Tests/Blazor.Server.Tests.csproj" />
+    <Project Path="tests/Blazor.Shared.Tests/Blazor.Shared.Tests.csproj" />
+    <Project Path="tests/Blazor.Tests.Tools/Blazor.Tests.Tools.csproj" />
+    <Project Path="tests/Core.Module.Tests/Core.Module.Tests.csproj" />
+    <Project Path="tests/Core.OS.Tests/Core.OS.Tests.csproj" />
+    <Project Path="tests/Core.Shared.Tests/Core.Shared.Tests.csproj" />
+    <Project Path="tests/Core.Tests.Tools/Core.Tests.Tools.csproj" />
+  </Folder>
+  <Folder Name="/tests/Modules/">
+    <Project Path="tests/Burger.Tests/Burger.Tests.csproj" />
+    <Project Path="tests/JiTChat.Tests/JiTChat.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/Sdk/">
+    <Project Path="tests/TestModule.Backend/TestModule.Backend.csproj" />
+    <Project Path="tests/TestModule.Client/TestModule.Client.csproj" />
+    <Project Path="tests/TestSystem.Backend/TestSystem.Backend.csproj" />
+    <Project Path="tests/TestUiHost.Backend/TestUiHost.Backend.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Suite.Deps/Suite.Deps.csproj" />
+  </Folder>
+</Solution>
