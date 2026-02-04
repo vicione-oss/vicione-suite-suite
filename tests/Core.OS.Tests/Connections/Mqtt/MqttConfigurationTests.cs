@@ -1,4 +1,5 @@
 ﻿using Core.OS.Connections.Mqtt;
+using Core.OS.Tests.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sdk.Testing.Backend;

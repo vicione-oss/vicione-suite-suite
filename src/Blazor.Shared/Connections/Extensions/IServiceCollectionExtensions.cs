@@ -11,63 +11,66 @@ namespace Blazor.Shared.Connections.Extensions;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddConnectionManagement(this IServiceCollection services)
-        => services
-            .AddConnectionControlPanel()
-            .AddConnectionsControlPanel()
-            .AddTagControlPanel();
-
-    internal static IServiceCollection AddConnectionServices(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.TryAddScoped<ISuiteConnectionService, SuiteConnectionService>();
+        public IServiceCollection AddConnectionManagement()
+            => services
+                .AddConnectionControlPanel()
+                .AddConnectionsControlPanel()
+                .AddTagControlPanel();
 
-        // Suite has to provide <see cref="Sdk.Client.Services.IConnectionService"/> used by modules
-        services.TryAddScoped<IConnectionService>(s => s.GetRequiredService<ISuiteConnectionService>());
+        internal IServiceCollection AddConnectionServices()
+        {
+            services.TryAddScoped<ISuiteConnectionService, SuiteConnectionService>();
 
-        return services;
-    }
+            // Suite has to provide <see cref="Sdk.Client.Services.IConnectionService"/> used by modules
+            services.TryAddScoped<IConnectionService>(s => s.GetRequiredService<ISuiteConnectionService>());
 
-    internal static IServiceCollection AddConnectionControlPanel(this IServiceCollection services)
-    {
-        services.AddControlPanel<SharedClientModule, ConnectionControlPanel, ConnectionControlPanelState>()
-            .WithAutoDiscovery<ConnectionControlPanelDescriptor>()
-            .WithSaveHandler<ConnectionControlPanelSaveHandler>()
-            .WithResetHandler<ConnectionControlPanelResetHandler>();
+            return services;
+        }
 
-        services.AddConnectionServices();
+        internal IServiceCollection AddConnectionControlPanel()
+        {
+            services.AddControlPanel<SharedClientModule, ConnectionControlPanel, ConnectionControlPanelState>()
+                .WithAutoDiscovery<ConnectionControlPanelDescriptor>()
+                .WithSaveHandler<ConnectionControlPanelSaveHandler>()
+                .WithResetHandler<ConnectionControlPanelResetHandler>();
 
-        services.AddScoped<TestConnectionService>();
+            services.AddConnectionServices();
 
-        return services;
-    }
+            services.AddScoped<TestConnectionService>();
 
-    internal static IServiceCollection AddConnectionsControlPanel(this IServiceCollection services)
-    {
-        services.AddControlPanel<SharedClientModule, ConnectionsControlPanel, ConnectionsControlPanelState>()
-            .WithAutoDiscovery<ConnectionsControlPanelDescriptor>()
-            .WithSaveHandler<ConnectionsControlPanelSaveHandler>()
-            .WithResetHandler<ConnectionsControlPanelResetHandler>();
+            return services;
+        }
 
-        services.AddConnectionServices();
+        internal IServiceCollection AddConnectionsControlPanel()
+        {
+            services.AddControlPanel<SharedClientModule, ConnectionsControlPanel, ConnectionsControlPanelState>()
+                .WithAutoDiscovery<ConnectionsControlPanelDescriptor>()
+                .WithSaveHandler<ConnectionsControlPanelSaveHandler>()
+                .WithResetHandler<ConnectionsControlPanelResetHandler>();
 
-        services.AddGridItemSelectColumn()
-            .AddGridItemSelection<Guid>(typeof(ConnectionsControlPanelServiceKey))
-            .AddGridItemSelection<Guid>(typeof(TagsControlPanelPageContentServiceKey));
+            services.AddConnectionServices();
 
-        return services;
-    }
+            services.AddGridItemSelectColumn()
+                .AddGridItemSelection<Guid>(typeof(ConnectionsControlPanelServiceKey))
+                .AddGridItemSelection<Guid>(typeof(TagsControlPanelPageContentServiceKey));
 
-    internal static IServiceCollection AddTagControlPanel(this IServiceCollection services)
-    {
-        services.AddControlPanel<SharedClientModule, TagControlPanel, TagControlPanelState>()
-            .WithAutoDiscovery<TagControlPanelDescriptor>()
-            .WithSaveHandler<TagControlPanelSaveHandler>()
-            .WithResetHandler<TagControlPanelResetHandler>();
+            return services;
+        }
 
-        services.AddConnectionServices();
+        internal IServiceCollection AddTagControlPanel()
+        {
+            services.AddControlPanel<SharedClientModule, TagControlPanel, TagControlPanelState>()
+                .WithAutoDiscovery<TagControlPanelDescriptor>()
+                .WithSaveHandler<TagControlPanelSaveHandler>()
+                .WithResetHandler<TagControlPanelResetHandler>();
 
-        services.AddCheckBox();
+            services.AddConnectionServices();
 
-        return services;
+            services.AddCheckBox();
+
+            return services;
+        }
     }
 }

@@ -14,51 +14,54 @@ namespace Blazor.Shared.Settings.Extensions;
 
 internal static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddSettings(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddSettingsPopup();
+        public IServiceCollection AddSettings()
+        {
+            services.AddSettingsPopup();
 
-        services.TryAddSingleton<IEqualityComparer<Claim>, ClaimEqualityComparer>();
-        services.AddTransient<SettingsModuleService>();
-        services.AddScoped<INavigateBackRequest, NavigateBackRequest>();
+            services.TryAddSingleton<IEqualityComparer<Claim>, ClaimEqualityComparer>();
+            services.AddTransient<SettingsModuleService>();
+            services.AddScoped<INavigateBackRequest, NavigateBackRequest>();
 
-        services.AddControlPanelInfrastructure();
+            services.AddControlPanelInfrastructure();
 
-        services.AddCheckBox();
-        services.AddIntSpinEdit();
-        services.AddFloatSpinEdit();
+            services.AddCheckBox();
+            services.AddIntSpinEdit();
+            services.AddFloatSpinEdit();
 
-        services.AddLoadingIndicationPlacementBehavior();
+            services.AddLoadingIndicationPlacementBehavior();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddControlPanelInfrastructure(this IServiceCollection services)
-    {
-        services.AddScoped<SettingsModuleState>();
-        services.AddScoped<IActiveControlPanelDescriptorProvider, ActiveControlPanelDescriptorProvider>();
-        services.AddScoped<IActiveControlPanelPageProvider, ActiveControlPanelPageProvider>();
-        services.AddScoped<IControlPanelRequest, ControlPanelRequest>();
-        services.AddScoped<IControlPanelRegistryItemCache, ControlPanelRegistryItemCache>();
-        services.AddScoped<IDefaultControlPanelGroupDescriptor, DefaultControlPanelGroupDescriptor>();
-        services.AddScoped<IControlPanelRegistryFactory, ControlPanelRegistryFactory>();
-        services.AddScoped<IControlPanelPageRegistry, ControlPanelPageRegistry>();
-        services.AddControlPanelEditRegistry();
-        services.AddScoped<ControlPanelEditFactory>();
+        public IServiceCollection AddControlPanelInfrastructure()
+        {
+            services.AddScoped<SettingsModuleState>();
+            services.AddScoped<IActiveControlPanelDescriptorProvider, ActiveControlPanelDescriptorProvider>();
+            services.AddScoped<IActiveControlPanelPageProvider, ActiveControlPanelPageProvider>();
+            services.AddScoped<IControlPanelRequest, ControlPanelRequest>();
+            services.AddScoped<IControlPanelRegistryItemCache, ControlPanelRegistryItemCache>();
+            services.AddScoped<IDefaultControlPanelGroupDescriptor, DefaultControlPanelGroupDescriptor>();
+            services.AddScoped<IControlPanelRegistryFactory, ControlPanelRegistryFactory>();
+            services.AddScoped<IControlPanelPageRegistry, ControlPanelPageRegistry>();
+            services.AddControlPanelEditRegistry();
+            services.AddScoped<ControlPanelEditFactory>();
 
-        return services;
-    }
+            return services;
+        }
 
-    internal static IServiceCollection AddControlPanelEditRegistry(this IServiceCollection services)
-        => services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
+        internal IServiceCollection AddControlPanelEditRegistry()
+            => services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
 
-    internal static IServiceCollection AddSettingsPopup(this IServiceCollection services)
-    {
-        services.AddPopup();
+        internal IServiceCollection AddSettingsPopup()
+        {
+            services.AddPopup();
 
-        services.AddScoped<ISettingsPopupRequest, SettingsPopupRequest>();
-        services.AddScoped<ISettingsPopupState, SettingsPopupState>();
+            services.AddScoped<ISettingsPopupRequest, SettingsPopupRequest>();
+            services.AddScoped<ISettingsPopupState, SettingsPopupState>();
 
-        return services;
+            return services;
+        }
     }
 }

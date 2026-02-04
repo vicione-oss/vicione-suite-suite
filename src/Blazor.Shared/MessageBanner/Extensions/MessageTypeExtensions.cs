@@ -7,17 +7,20 @@ namespace Blazor.Shared.MessageBanner.Extensions;
 
 internal static class MessageTypeExtensions
 {
-    public static SvgIcon ToIcon(this MessageType messageType) => messageType switch
+    extension(MessageType messageType)
     {
-        MessageType.Warning => SvgIcon.RtmWarning,
-        MessageType.Error => SvgIcon.RtmError,
-        _ => SvgIcon.InfoOutlined
-    };
+        public SvgIcon ToIcon() => messageType switch
+        {
+            MessageType.Warning => SvgIcon.RtmWarning,
+            MessageType.Error => SvgIcon.RtmError,
+            _ => SvgIcon.InfoOutlined
+        };
 
-    public static string ToTitle(this MessageType messageType) => messageType switch
-    {
-        MessageType.Warning => CommonVocabulary.Warning,
-        MessageType.Error => CommonVocabulary.Error,
-        _ => CommonVocabulary.Information
-    };
+        public string ToTitle() => messageType switch
+        {
+            MessageType.Warning => CommonVocabulary.Warning,
+            MessageType.Error => CommonVocabulary.Error,
+            _ => CommonVocabulary.Information
+        };
+    }
 }

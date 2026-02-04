@@ -8,44 +8,47 @@ namespace Blazor.Shared.Instance.Extensions;
 
 internal static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddInstanceManagement(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddInstancesControlPanel()
-            .AddInstanceControlPanel()
-            .AddUpdateControlPanel();
+        public IServiceCollection AddInstanceManagement()
+        {
+            services.AddInstancesControlPanel()
+                .AddInstanceControlPanel()
+                .AddUpdateControlPanel();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddInstancesControlPanel(this IServiceCollection services)
-    {
-        services.AddControlPanel<SharedClientModule, InstancesControlPanel, InstancesControlPanelState>()
-            .WithSaveHandler<InstancesControlPanelSaveHandler>()
-            .WithResetHandler<InstancesControlPanelResetHandler>();
+        public IServiceCollection AddInstancesControlPanel()
+        {
+            services.AddControlPanel<SharedClientModule, InstancesControlPanel, InstancesControlPanelState>()
+                .WithSaveHandler<InstancesControlPanelSaveHandler>()
+                .WithResetHandler<InstancesControlPanelResetHandler>();
 
-        services.AddGridItemSelectColumn()
-            .AddGridItemSelection<Guid>(typeof(InstancesControlPanelServiceKey));
+            services.AddGridItemSelectColumn()
+                .AddGridItemSelection<Guid>(typeof(InstancesControlPanelServiceKey));
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddInstanceControlPanel(this IServiceCollection services)
-    {
-        services.AddControlPanel<SharedClientModule, InstanceControlPanel, InstanceControlPanelState>()
-            .WithSaveHandler<InstanceControlPanelSaveHandler>()
-            .WithResetHandler<InstanceControlPanelResetHandler>();
+        public IServiceCollection AddInstanceControlPanel()
+        {
+            services.AddControlPanel<SharedClientModule, InstanceControlPanel, InstanceControlPanelState>()
+                .WithSaveHandler<InstanceControlPanelSaveHandler>()
+                .WithResetHandler<InstanceControlPanelResetHandler>();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddUpdateControlPanel(this IServiceCollection services)
-    {
-        services.AddControlPanel<SharedClientModule, UpdateControlPanel, UpdateControlPanelState>()
-            .WithAutoDiscovery<UpdateControlPanelDescriptor>()
-            .WithSaveHandler<UpdateControlPanelSaveHandler>()
-            .WithCancelHandler<UpdateControlPanelCancelHandler>()
-            .WithResetHandler<UpdateControlPanelResetHandler>();
+        public IServiceCollection AddUpdateControlPanel()
+        {
+            services.AddControlPanel<SharedClientModule, UpdateControlPanel, UpdateControlPanelState>()
+                .WithAutoDiscovery<UpdateControlPanelDescriptor>()
+                .WithSaveHandler<UpdateControlPanelSaveHandler>()
+                .WithCancelHandler<UpdateControlPanelCancelHandler>()
+                .WithResetHandler<UpdateControlPanelResetHandler>();
 
-        return services;
+            return services;
+        }
     }
 }

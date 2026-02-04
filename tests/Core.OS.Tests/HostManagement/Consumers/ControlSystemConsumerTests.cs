@@ -6,6 +6,7 @@ using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
+using Core.OS.Tests.Extensions;
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;

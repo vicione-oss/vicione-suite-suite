@@ -12,53 +12,56 @@ namespace Core.OS.Monitoring.Extensions;
 
 internal static class IServiceCollectionExtensions
 {
-    internal static IServiceCollection AddJournalService(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        if (OperatingSystem.IsLinux())
+        internal IServiceCollection AddJournalService()
         {
-            services.AddOptions<JournalOptions>();
-            services.AddSingleton<JournalService>();
-        }
-        return services;
-    }
-
-    [SuppressMessage("CodeQuality", "IDE0079:Unnötige Unterdrückung entfernen")]
-    [SuppressMessage("Interoperability", "CA1416:Plattformkompatibilität überprüfen")]
-    internal static IServiceCollection AddSystemMonitoring(this IServiceCollection services, IConfiguration configuration)
-    {
-        var options = configuration.GetSection(SystemMonitoringOptions.ConfigSection).Get<SystemMonitoringOptions>();
-
-        services.AddSingleton<IJournalMonitoring, JournalMonitoring>(_ =>
-        {
-            var journalMonitoring = new JournalMonitoring();
-            if (OperatingSystem.IsLinux() && options is not null && options.Enabled)
-                journalMonitoring.AddFilterEntry(JournalFieldsMetric.Suite, ViciOne.Ui.Localization.Resources.TechnicalTerms.Suite, options.SuiteJournalFilter, 0);
-            return journalMonitoring;
-        });
-
-        services.AddOptions<SystemMonitoringOptions>()
-            .BindConfiguration(SystemMonitoringOptions.ConfigSection)
-            .ValidateDataAnnotations();
-
-        if (OperatingSystem.IsLinux() && (options?.Enabled ?? true))
-        {
-            services.AddOptions<MonitoringConfig>()
-                .Configure<ILocalInstanceInformationProvider, IOptions<MqttClientOptions>, ILogger<MonitoringConfig>, IOptions<SystemMonitoringOptions>>(CreateConfiguration);
-            services.AddSystemMonitoring(static b => b
-                .UseMqttOutput()
-                .UseDefaultCollectors()
-                .AddCollector<JournalFieldsCollector>());
-
-            if (options?.Collectors.JournalFields ?? false)
+            if (OperatingSystem.IsLinux())
             {
-                services.Configure<JournalFieldsCollectorOptions>(o =>
-                {
-                    o.StringComparer = StringComparer.OrdinalIgnoreCase;
-                    o.Fields = [JournalPriorityConstants.FieldName];
-                });
+                services.AddOptions<JournalOptions>();
+                services.AddSingleton<JournalService>();
             }
+            return services;
         }
-        return services;
+
+        [SuppressMessage("CodeQuality", "IDE0079:Unnötige Unterdrückung entfernen")]
+        [SuppressMessage("Interoperability", "CA1416:Plattformkompatibilität überprüfen")]
+        internal IServiceCollection AddSystemMonitoring(IConfiguration configuration)
+        {
+            var options = configuration.GetSection(SystemMonitoringOptions.ConfigSection).Get<SystemMonitoringOptions>();
+
+            services.AddSingleton<IJournalMonitoring, JournalMonitoring>(_ =>
+            {
+                var journalMonitoring = new JournalMonitoring();
+                if (OperatingSystem.IsLinux() && options is not null && options.Enabled)
+                    journalMonitoring.AddFilterEntry(JournalFieldsMetric.Suite, ViciOne.Ui.Localization.Resources.TechnicalTerms.Suite, options.SuiteJournalFilter, 0);
+                return journalMonitoring;
+            });
+
+            services.AddOptions<SystemMonitoringOptions>()
+                .BindConfiguration(SystemMonitoringOptions.ConfigSection)
+                .ValidateDataAnnotations();
+
+            if (OperatingSystem.IsLinux() && (options?.Enabled ?? true))
+            {
+                services.AddOptions<MonitoringConfig>()
+                    .Configure<ILocalInstanceInformationProvider, IOptions<MqttClientOptions>, ILogger<MonitoringConfig>, IOptions<SystemMonitoringOptions>>(CreateConfiguration);
+                services.AddSystemMonitoring(static b => b
+                    .UseMqttOutput()
+                    .UseDefaultCollectors()
+                    .AddCollector<JournalFieldsCollector>());
+
+                if (options?.Collectors.JournalFields ?? false)
+                {
+                    services.Configure<JournalFieldsCollectorOptions>(o =>
+                    {
+                        o.StringComparer = StringComparer.OrdinalIgnoreCase;
+                        o.Fields = [JournalPriorityConstants.FieldName];
+                    });
+                }
+            }
+            return services;
+        }
     }
 
     private static void CreateConfiguration(MonitoringConfig config, ILocalInstanceInformationProvider localInstanceInformationProvider, IOptions<MqttClientOptions> mqttClientOptions, ILogger<MonitoringConfig> logger, IOptions<SystemMonitoringOptions> options)

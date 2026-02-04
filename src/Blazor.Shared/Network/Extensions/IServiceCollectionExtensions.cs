@@ -13,23 +13,26 @@ namespace Blazor.Shared.Network.Extensions;
 
 internal static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddNetwork(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddScoped<IUpdateControlPanelRegistryHandler, UpdateControlPanelRegistryHandler>();
+        public IServiceCollection AddNetwork()
+        {
+            services.AddScoped<IUpdateControlPanelRegistryHandler, UpdateControlPanelRegistryHandler>();
 
-        services.AddDnsControlPanel()
-            .AddNetworkInterfaceControlPanel()
-            .AddNtpControlPanel()
-            .AddProxiesControlPanel()
-            .AddRemoteAccessControlPanel();
+            services.AddDnsControlPanel()
+                .AddNetworkInterfaceControlPanel()
+                .AddNtpControlPanel()
+                .AddProxiesControlPanel()
+                .AddRemoteAccessControlPanel();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddIpAddressValidator(this IServiceCollection services)
-    {
-        services.TryAddScoped<IIpAddressValidator, IpAddressValidator>();
+        public IServiceCollection AddIpAddressValidator()
+        {
+            services.TryAddScoped<IIpAddressValidator, IpAddressValidator>();
 
-        return services;
+            return services;
+        }
     }
 }

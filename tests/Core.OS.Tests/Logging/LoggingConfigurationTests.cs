@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Core.OS.Logging;
+using Core.OS.Tests.Extensions;
 using Core.Shared;
 using Core.Shared.Logging;
 using Microsoft.Extensions.Configuration;

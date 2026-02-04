@@ -8,6 +8,7 @@ using Core.OS.Instance.Extensions;
 using Core.OS.Logging;
 using Core.OS.Modules;
 using Core.OS.Persistence;
+using Core.OS.Tests.Extensions;
 using Core.Shared.HostManagement;
 using Core.Shared.Logging;
 using Core.Tests.Tools;

@@ -5,22 +5,25 @@ namespace Blazor.Shared.Onboarding.Extensions;
 
 internal static class IHasNetworkInterfaceNumberExtensions
 {
-    public static string GetName(this IHasNetworkInterfaceNumber networkInterface)
-        => $"lan{networkInterface.Number}";
-
-    public static string GetFriendlyName(this IHasNetworkInterfaceNumber networkInterface)
-        => $"{TechnicalAcronyms.LAN} {networkInterface.Number}";
-
-    public static string GetFriendlyNameVerbose(this IHasNetworkInterfaceNumber networkInterface)
-        => $"{networkInterface.GetFriendlyName()} ({networkInterface.GetNetworkDescription()})";
-
-    private static string GetNetworkDescription(this IHasNetworkInterfaceNumber networkInterface)
+    extension(IHasNetworkInterfaceNumber networkInterface)
     {
-        if (networkInterface.Number == Constants.LocalNetworkInterfaceNameNumber)
-            return TechnicalTerms.LocalNetwork;
-        else if (networkInterface.Number == Constants.InternetNetworkInterfaceNameNumber)
-            return TechnicalTerms.InternetConnection;
-        else
-            return CommonVocabulary.Unknown;
+        public string GetName()
+            => $"lan{networkInterface.Number}";
+
+        public string GetFriendlyName()
+            => $"{TechnicalAcronyms.LAN} {networkInterface.Number}";
+
+        public string GetFriendlyNameVerbose()
+            => $"{networkInterface.GetFriendlyName()} ({networkInterface.GetNetworkDescription()})";
+
+        private string GetNetworkDescription()
+        {
+            return networkInterface.Number switch
+            {
+                Constants.LocalNetworkInterfaceNameNumber => TechnicalTerms.LocalNetwork,
+                Constants.InternetNetworkInterfaceNameNumber => TechnicalTerms.InternetConnection,
+                _ => CommonVocabulary.Unknown
+            };
+        }
     }
 }

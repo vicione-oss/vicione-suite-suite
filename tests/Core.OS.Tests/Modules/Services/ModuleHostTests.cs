@@ -9,7 +9,6 @@ using Core.OS.Modules;
 using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
-using Core.Tests.Tools;
 using Core.UiHosting;
 using DevExpress.Utils;
 using AwesomeAssertions;
@@ -33,7 +32,9 @@ using TestUiHost;
 using TestUiHost.Controllers;
 using Xunit;
 using Core.OS.Instance.Extensions;
+using Core.OS.Tests.Extensions;
 using Core.Shared.Modules.Contracts;
+using Core.Tests.Tools;
 
 namespace Core.OS.Tests.Modules.Services;
 

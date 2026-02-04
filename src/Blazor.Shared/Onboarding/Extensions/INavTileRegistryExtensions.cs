@@ -7,17 +7,20 @@ namespace Blazor.Shared.Onboarding.Extensions;
 
 public static class INavTileRegistryExtensions
 {
-    public static void AddOnboardingNavTile(this INavTileRegistry<SharedClientModule> registry)
+    extension(INavTileRegistry<SharedClientModule> registry)
     {
-        if (registry.Any(i => i.ComponentType == typeof(OnboardingNavTile)))
-            return;
+        public void AddOnboardingNavTile()
+        {
+            if (registry.Any(i => i.ComponentType == typeof(OnboardingNavTile)))
+                return;
 
-        var accessLevelAuthorizationRequirement = new AccessLevelAuthorizationRequirement(SharedClientModule.ModuleId, AccessLevel.Full);
+            var accessLevelAuthorizationRequirement = new AccessLevelAuthorizationRequirement(SharedClientModule.ModuleId, AccessLevel.Full);
 
-        registry.Add<OnboardingNavTile>(OnboardingNavTile.Id, linkTarget: Constants.Route, group: NavTileGroup.Administration,
-            authorizationRequirement: accessLevelAuthorizationRequirement);
+            registry.Add<OnboardingNavTile>(OnboardingNavTile.Id, linkTarget: Constants.Route, group: NavTileGroup.Administration,
+                authorizationRequirement: accessLevelAuthorizationRequirement);
+        }
+
+        public void RemoveOnboardingNavTile()
+            => registry.Remove(OnboardingNavTile.Id);
     }
-
-    public static void RemoveOnboardingNavTile(this INavTileRegistry<SharedClientModule> registry)
-        => registry.Remove(OnboardingNavTile.Id);
 }

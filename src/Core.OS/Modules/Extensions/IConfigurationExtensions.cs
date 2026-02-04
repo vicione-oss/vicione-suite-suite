@@ -2,6 +2,7 @@
 using Core.Module.Options;
 using Core.Shared;
 using Sdk.Backend.Extensions;
+using Sdk.Modules;
 
 namespace Core.OS.Modules.Extensions;
 
@@ -48,53 +49,56 @@ internal static class IConfigurationExtensions
         return options ?? throw new ConfigurationException(ArtifactRepositoryOptions.ConfigSection);
     }
 
-    internal static UiHostOptions? CreateUiHostOptions(this IConfiguration config, ModuleLoaderOptions options)
+    extension(IConfiguration config)
     {
-        if (string.IsNullOrEmpty(options.UiHost))
-            return null;
-
-        return config.BindSection<UiHostOptions>(options.UiHost);
-    }
-
-    /// <summary>
-    /// All modules provided by the <see cref="ModulePackageManifest"/> are enabled per default except their <see cref="ModuleOptions.Enable"/> flag is overriden
-    /// in the settings. The same way modules from the debug manifest are treated
-    /// </summary>    
-    /// <returns>{{ModuleId, ModuleOptions}, ..}</returns>
-    internal static Dictionary<string, ModuleOptions> CreateModuleOptions(this IConfiguration config, IModuleManifestProvider manifestProvider, params string[] additionalModuleIds)
-    {
-        var results = new Dictionary<string, ModuleOptions>();
-        var manifest = manifestProvider.GetManifest();
-        var packageNames = manifest.Packages
-            .Where(p => !string.IsNullOrWhiteSpace(p.Name))
-            .Select(p => p.Name)
-            .Union(additionalModuleIds); // for the samples modules
-
-        // by default modules in manifest are enabled
-        foreach (var packageName in packageNames)
+        internal UiHostOptions? CreateUiHostOptions(ModuleLoaderOptions options)
         {
-            var moduleOptions = new ModuleOptions();
+            if (string.IsNullOrEmpty(options.UiHost))
+                return null;
 
-            // it can be disabled by config so check the section
-            var section = config.GetSection(packageName);
-            if (section.Value != null)
-            {
-                section.Bind(moduleOptions);
-                continue;
-            }
-
-            // try to bind the section
-            var val = section.Get<ModuleOptions>();
-            if (val != null)
-            {
-                results[packageName] = val;
-                continue;
-            }
-
-            // no overrides so module is enabled
-            results[packageName] = moduleOptions;
+            return config.BindSection<UiHostOptions>(options.UiHost);
         }
 
-        return results;
+        /// <summary>
+        /// All modules provided by the <see cref="ModulePackageManifest"/> are enabled per default except their <see cref="ModuleOptions.Enable"/> flag is overriden
+        /// in the settings. The same way modules from the debug manifest are treated
+        /// </summary>    
+        /// <returns>{{ModuleId, ModuleOptions}, ..}</returns>
+        internal Dictionary<string, ModuleOptions> CreateModuleOptions(IModuleManifestProvider manifestProvider, params string[] additionalModuleIds)
+        {
+            var results = new Dictionary<string, ModuleOptions>();
+            var manifest = manifestProvider.GetManifest();
+            var packageNames = manifest.Packages
+                .Where(p => !string.IsNullOrWhiteSpace(p.Name))
+                .Select(p => p.Name)
+                .Union(additionalModuleIds); // for the samples modules
+
+            // by default modules in manifest are enabled
+            foreach (var packageName in packageNames)
+            {
+                var moduleOptions = new ModuleOptions();
+
+                // it can be disabled by config so check the section
+                var section = config.GetSection(packageName);
+                if (section.Value != null)
+                {
+                    section.Bind(moduleOptions);
+                    continue;
+                }
+
+                // try to bind the section
+                var val = section.Get<ModuleOptions>();
+                if (val != null)
+                {
+                    results[packageName] = val;
+                    continue;
+                }
+
+                // no overrides so module is enabled
+                results[packageName] = moduleOptions;
+            }
+
+            return results;
+        }
     }
 }

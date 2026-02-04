@@ -12,58 +12,61 @@ namespace Core.Tests.Tools;
 
 public static class TestConfigExtensions
 {
-    public static TestConfig ConfigureModuleLoader(this TestConfig config, string? modulesPath = null, List<string>? debugPaths = null)
+    extension(TestConfig config)
     {
-        if (string.IsNullOrEmpty(modulesPath))
+        public TestConfig ConfigureModuleLoader(string? modulesPath = null, List<string>? debugPaths = null)
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            modulesPath = Path.GetDirectoryName(assembly.Location) ?? string.Empty;
+            if (string.IsNullOrEmpty(modulesPath))
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                modulesPath = Path.GetDirectoryName(assembly.Location) ?? string.Empty;
+            }
+
+            if (debugPaths is not null)
+            {
+                var idx = 0;
+                foreach (var item in debugPaths)
+                    config.SetSetting($"{ModuleLoader.ModulesDebugPath(idx++)}", item);
+            }
+
+            return config
+                .SetSetting(ModuleLoader.ModulesPath, modulesPath);
         }
 
-        if (debugPaths is not null)
+        public TestConfig AddTestBackendClientModule(bool enable = true)
         {
-            var idx = 0;
-            foreach (var item in debugPaths)
-                config.SetSetting($"{ModuleLoader.ModulesDebugPath(idx++)}", item);
+            config.AddTestModule(TestBackendModule.Id, enable);
+            return config;
         }
 
-        return config
-            .SetSetting(ModuleLoader.ModulesPath, modulesPath);
+        public TestConfig AddTestModule(string moduleId, bool enable = true)
+            => config.AddTestModuleInternal(moduleId, enable);
+
+        private TestConfig AddTestModuleInternal(string moduleId, bool enable = true)
+        {
+            config.SetSetting($"{moduleId.Replace(".", "", StringComparison.Ordinal)}:{nameof(ModuleOptions.Enable)}", enable.ToString());
+            return config;
+        }
+
+        public TestConfig AddTestUiHost(bool enable = true, bool useDebugPaths = true)
+            => config.AddUiHost(TestUiHostBackend.Id, enable, useDebugPaths);
+
+        private TestConfig AddUiHost(string moduleId, bool enable, bool useDebugPaths = true)
+        {
+            if (useDebugPaths)
+                config.SetSetting($"{ModuleLoader.UiHostsPath}", GetUiHostTestDebugPath(enable));
+
+            if (!enable)
+                return config.SetSetting($"{ModuleLoader.UiHost}", string.Empty);
+
+            return config
+                .SetSetting($"{ModuleLoader.UiHost}", moduleId)
+                .SetSetting(UiHost.Enable(moduleId), enable.ToString());
+        }
     }
-
-    public static TestConfig AddTestBackendClientModule(this TestConfig conf, bool enable = true)
-    {
-        conf.AddTestModule(TestBackendModule.Id, enable);
-        return conf;
-    }
-
-    public static TestConfig AddTestModule(this TestConfig conf, string moduleId, bool enable = true)
-        => conf.AddTestModuleInternal(moduleId, enable);
-
-    private static TestConfig AddTestModuleInternal(this TestConfig conf, string moduleId, bool enable = true)
-    {
-        conf.SetSetting($"{moduleId.Replace(".", "", StringComparison.Ordinal)}:{nameof(ModuleOptions.Enable)}", enable.ToString());
-        return conf;
-    }
-
-    public static TestConfig AddTestUiHost(this TestConfig conf, bool enable = true, bool useDebugPaths = true)
-        => conf.AddUiHost(TestUiHostBackend.Id, enable, useDebugPaths);
 
     public static string? GetUiHostTestDebugPath(bool enableUiHost)
         => enableUiHost ? Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location!)!) : null;
-
-    public static TestConfig AddUiHost(this TestConfig conf, string moduleId, bool enable, bool useDebugPaths = true)
-    {
-        if (useDebugPaths)
-            conf.SetSetting($"{ModuleLoader.UiHostsPath}", GetUiHostTestDebugPath(enable));
-
-        if (!enable)
-            return conf.SetSetting($"{ModuleLoader.UiHost}", string.Empty);
-
-        return conf
-            .SetSetting($"{ModuleLoader.UiHost}", moduleId)
-            .SetSetting(UiHost.Enable(moduleId), enable.ToString());
-    }
 
     public static Dictionary<string, ModuleOptions> CreateModuleTestOptions(this IConfiguration configuration, ModuleLoaderOptions loaderOptions)
     {

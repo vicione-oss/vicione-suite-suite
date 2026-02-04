@@ -5,6 +5,7 @@ using Core.Module.Contracts;
 using Core.OS.Modules;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
+using Core.OS.Tests.Extensions;
 using Core.Tests.Tools;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -19,7 +19,6 @@ using Blazor.Shared.Wizards.Extensions;
 using Core.Shared.HostManagement.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Sdk.Client.NavTiles.Extensions;
 using Sdk.Client.NotificationArea.Extensions;
 using Sdk.Client.Services;
 using ViciOne.Ui.Blazor.Components.SectionRail.Extensions;
@@ -30,65 +29,68 @@ namespace Blazor.Shared.Extensions;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddBlazorShared(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddSharedUiServices();
+        public IServiceCollection AddBlazorShared()
+        {
+            services.AddSharedUiServices();
 
-        services.AddMqttViewer();
+            services.AddMqttViewer();
 
-        services.AddNotificationElements<SharedClientModule>();
+            services.AddNotificationElements<SharedClientModule>();
 
-        services.AddBlazorSharedAuthorization()
-            .AddSettings()
-            .AddNetwork()
-            .AddConnectionManagement()
-            .AddInstanceManagement()
-            .AddModuleManagement()
-            .AddUserManagement()
-            .AddUserInterfaceControlPanels();
+            services.AddBlazorSharedAuthorization()
+                .AddSettings()
+                .AddNetwork()
+                .AddConnectionManagement()
+                .AddInstanceManagement()
+                .AddModuleManagement()
+                .AddUserManagement()
+                .AddUserInterfaceControlPanels();
 
-        services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
+            services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
 
-        services
-            .AddNavTiles()
-            .AddWizards()
-            .AddOnboarding();
+            services
+                .AddNavTiles()
+                .AddWizards()
+                .AddOnboarding();
 
-        return services;
-    }
+            return services;
+        }
 
-    internal static IServiceCollection AddLoginDesignService(this IServiceCollection services)
-    {
-        services.TryAddSingleton<LoginDesignService>();
+        internal IServiceCollection AddLoginDesignService()
+        {
+            services.TryAddSingleton<LoginDesignService>();
 
-        return services;
-    }
+            return services;
+        }
 
-    private static IServiceCollection AddSharedUiServices(this IServiceCollection services)
-    {
-        // Common
-        services.AddScoped<ILayoutService, LayoutService>()
-            .AddTransient<IJsInterop, JsInterop>()
-            .AddLoginDesignService()
-            .AddProfile()
-            .AddSystemInformation()
-            .AddMessageBanner()
-            .AddTooltip()
-            .AddNotificationArea()
-            .AddScoped<ISuiteControlService, SuiteControlService>()
-            .AddScrolling()
-            .AddSingleton<CopyrightYearProvider>();
+        private IServiceCollection AddSharedUiServices()
+        {
+            // Common
+            services.AddScoped<ILayoutService, LayoutService>()
+                .AddTransient<IJsInterop, JsInterop>()
+                .AddLoginDesignService()
+                .AddProfile()
+                .AddSystemInformation()
+                .AddMessageBanner()
+                .AddTooltip()
+                .AddNotificationArea()
+                .AddScoped<ISuiteControlService, SuiteControlService>()
+                .AddScrolling()
+                .AddSingleton<CopyrightYearProvider>();
 
-        return services;
-    }
+            return services;
+        }
 
-    private static IServiceCollection AddMqttViewer(this IServiceCollection services)
-    {
-        services.AddSectionRail<SectionId>();
+        private IServiceCollection AddMqttViewer()
+        {
+            services.AddSectionRail<SectionId>();
 
-        services.AddScoped<IMqttService, MqttService>();
-        services.AddScoped<MqttViewerComponentService>();
+            services.AddScoped<IMqttService, MqttService>();
+            services.AddScoped<MqttViewerComponentService>();
 
-        return services;
+            return services;
+        }
     }
 }

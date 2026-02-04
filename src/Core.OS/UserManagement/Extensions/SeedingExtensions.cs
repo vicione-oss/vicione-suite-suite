@@ -57,137 +57,140 @@ public static partial class SeedingExtensions
         Admin
     ];
 
-    internal static async Task SeedUsersAndRoles(this IServiceProvider scopedServices)
+    extension(IServiceProvider scopedServices)
     {
-        var userManagementOptions = scopedServices.GetRequiredService<IOptions<UserManagementOptions>>().Value;
-        var logger = scopedServices.GetRequiredService<ILogger<ApplicationWorker>>();
-
-        await scopedServices.SeedRoles(logger).ConfigureAwait(false);
-
-        await scopedServices.SeedTestUsers(userManagementOptions, logger).ConfigureAwait(false);
-
-        await scopedServices.SeedAdministrator(userManagementOptions, logger).ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Will create a role per module per access level and assign all respective claims to that role
-    /// </summary>
-    private static async Task SeedRoles(this IServiceProvider services, ILogger logger)
-    {
-        var roleManager = services.GetRequiredService<RoleManager<SuiteRole>>();
-        var moduleAuthorizationClaimParser = services.GetRequiredService<IModuleAuthorizationClaimParser>();
-        var features = services.GetServices<IModuleFeature>();
-        var adminRole = await roleManager.FindByNameAsync(AdminRoleName).ConfigureAwait(false);
-
-        if (adminRole is null)
+        internal async Task SeedUsersAndRoles()
         {
-            // Delete roles created before there was a sysadmin - can be removed after a while
-            foreach (var existingRole in roleManager.Roles)
-                await roleManager.DeleteAsync(existingRole).ConfigureAwait(false);
+            var userManagementOptions = scopedServices.GetRequiredService<IOptions<UserManagementOptions>>().Value;
+            var logger = scopedServices.GetRequiredService<ILogger<ApplicationWorker>>();
 
-            adminRole = new SuiteRole(AdminRoleName)
-            {
-                Description = "The system administrator role with full access to all features.",
-                Managed = true
-            };
-            var resultRole = await roleManager.CreateAsync(adminRole).ConfigureAwait(false);
-            if(!resultRole.Succeeded)
-                throw new InvalidOperationException($"Failed to create role '{AdminRoleName}': " + resultRole.Errors.First().Description);
+            await scopedServices.SeedRoles(logger).ConfigureAwait(false);
+
+            await scopedServices.SeedTestUsers(userManagementOptions, logger).ConfigureAwait(false);
+
+            await scopedServices.SeedAdministrator(userManagementOptions, logger).ConfigureAwait(false);
         }
 
-        foreach (var feature in features)
+        /// <summary>
+        /// Will create a role per module per access level and assign all respective claims to that role
+        /// </summary>
+        private async Task SeedRoles(ILogger logger)
         {
-            var assignedClaims = await roleManager.GetClaimsAsync(adminRole);
-            if (!assignedClaims.Any(claim
-                    => moduleAuthorizationClaimParser.TryParse(claim, out var claimValue)
-                       && claimValue.ModuleId == feature.ModuleId
-                       && claimValue.AccessLevel == AccessLevel.Full
-                       && claimValue.FeatureName == feature.Name))
+            var roleManager = scopedServices.GetRequiredService<RoleManager<SuiteRole>>();
+            var moduleAuthorizationClaimParser = scopedServices.GetRequiredService<IModuleAuthorizationClaimParser>();
+            var features = scopedServices.GetServices<IModuleFeature>();
+            var adminRole = await roleManager.FindByNameAsync(AdminRoleName).ConfigureAwait(false);
+
+            if (adminRole is null)
             {
-                LogSeedRolesCreateClaimModuleIdNamePath(logger, feature.ModuleId, feature.Name, feature.Path);
-                var newClaim = ModuleAuthorizationClaimFactory.CreateClaim(feature.ModuleId, AccessLevel.Full, feature.Name);
-                var resultAddClaim = await roleManager.AddClaimAsync(adminRole, newClaim);
-                if(!resultAddClaim.Succeeded)
-                    throw new InvalidOperationException($"Failed to add claim {newClaim} to role '{AdminRoleName}': " + resultAddClaim.Errors.First().Description);
-            }
-        }
-    }
+                // Delete roles created before there was a sysadmin - can be removed after a while
+                foreach (var existingRole in roleManager.Roles)
+                    await roleManager.DeleteAsync(existingRole).ConfigureAwait(false);
 
-    private static async Task SeedTestUsers(this IServiceProvider services, UserManagementOptions options, ILogger logger)
-    {
-        if (!options.SeedTestUsers)
-            return;
-
-        var userManager = services.GetRequiredService<UserManager<SuiteUser>>();
-
-        foreach (var user in Users)
-        {
-            var suiteUser = await userManager.FindByNameAsync(user.UserName);
-            if (suiteUser is null)
-            {
-                suiteUser = CreateSuiteUserWithDefaults(user);
-
-                LogCreatingTestSuiteUser(logger, suiteUser.UserName);
-
-                var resultUser = await userManager.CreateAsync(suiteUser, user.Password);
-                if(!resultUser.Succeeded)
-                    throw new InvalidOperationException($"Failed to create user {suiteUser.UserName}: {resultUser.Errors.First().Description}");
+                adminRole = new SuiteRole(AdminRoleName)
+                {
+                    Description = "The system administrator role with full access to all features.",
+                    Managed = true
+                };
+                var resultRole = await roleManager.CreateAsync(adminRole).ConfigureAwait(false);
+                if(!resultRole.Succeeded)
+                    throw new InvalidOperationException($"Failed to create role '{AdminRoleName}': " + resultRole.Errors.First().Description);
             }
 
-            // Ensure test admin users always have "System Administrator"-role
-            if (user.AccessLevel != AccessLevel.Full)
-                continue;
-
-            LogAddingFullAccessForUserToModule(logger, suiteUser.UserName, Shared.Constants.SystemModuleId);
-
-            if (await userManager.IsInRoleAsync(suiteUser, AdminRoleName))
-                continue;
-
-            var resultAddToRole = await userManager.AddToRoleAsync(suiteUser, AdminRoleName);
-            if (!resultAddToRole.Succeeded)
-                throw new InvalidOperationException($"Failed to add {suiteUser.UserName} to {AdminRoleName}: {resultAddToRole.Errors.First().Description}");
+            foreach (var feature in features)
+            {
+                var assignedClaims = await roleManager.GetClaimsAsync(adminRole);
+                if (!assignedClaims.Any(claim
+                        => moduleAuthorizationClaimParser.TryParse(claim, out var claimValue)
+                           && claimValue.ModuleId == feature.ModuleId
+                           && claimValue.AccessLevel == AccessLevel.Full
+                           && claimValue.FeatureName == feature.Name))
+                {
+                    LogSeedRolesCreateClaimModuleIdNamePath(logger, feature.ModuleId, feature.Name, feature.Path);
+                    var newClaim = ModuleAuthorizationClaimFactory.CreateClaim(feature.ModuleId, AccessLevel.Full, feature.Name);
+                    var resultAddClaim = await roleManager.AddClaimAsync(adminRole, newClaim);
+                    if(!resultAddClaim.Succeeded)
+                        throw new InvalidOperationException($"Failed to add claim {newClaim} to role '{AdminRoleName}': " + resultAddClaim.Errors.First().Description);
+                }
+            }
         }
-    }
 
-    private static async Task SeedAdministrator(this IServiceProvider services, UserManagementOptions options, ILogger logger)
-    {
-        if (string.IsNullOrWhiteSpace(options.AdministratorName)
-            || string.IsNullOrWhiteSpace(options.AdministratorEmail))
-            return;
-
-        var userManager = services.GetRequiredService<UserManager<SuiteUser>>();
-
-        var suiteUser = await userManager.FindByNameAsync(options.AdministratorName);
-        if (suiteUser is null)
+        private async Task SeedTestUsers(UserManagementOptions options, ILogger logger)
         {
-            if (userManager.Users.Any()) // Only seed, if the database is untouched
+            if (!options.SeedTestUsers)
                 return;
 
-            LogCreatingInitialSuiteSystemUser(logger);
+            var userManager = scopedServices.GetRequiredService<UserManager<SuiteUser>>();
 
-            suiteUser = new SuiteUser
+            foreach (var user in Users)
             {
-                UserName = options.AdministratorName,
-                EmailConfirmed = true,
-                Email = options.AdministratorEmail,
-                PhoneNumberConfirmed = true,
-                PasswordExpirationDate = DateTimeOffset.MinValue // Create with an expired PW to force the user to set one
-            };
+                var suiteUser = await userManager.FindByNameAsync(user.UserName);
+                if (suiteUser is null)
+                {
+                    suiteUser = CreateSuiteUserWithDefaults(user);
 
-            var resultUser = await userManager.CreateAsync(suiteUser, options.InitialAdministratorPassword);
-            if(!resultUser.Succeeded)
-                throw new InvalidOperationException("Failed to create initial system user: " + resultUser.Errors.First().Description);
+                    LogCreatingTestSuiteUser(logger, suiteUser.UserName);
+
+                    var resultUser = await userManager.CreateAsync(suiteUser, user.Password);
+                    if(!resultUser.Succeeded)
+                        throw new InvalidOperationException($"Failed to create user {suiteUser.UserName}: {resultUser.Errors.First().Description}");
+                }
+
+                // Ensure test admin users always have "System Administrator"-role
+                if (user.AccessLevel != AccessLevel.Full)
+                    continue;
+
+                LogAddingFullAccessForUserToModule(logger, suiteUser.UserName, Shared.Constants.SystemModuleId);
+
+                if (await userManager.IsInRoleAsync(suiteUser, AdminRoleName))
+                    continue;
+
+                var resultAddToRole = await userManager.AddToRoleAsync(suiteUser, AdminRoleName);
+                if (!resultAddToRole.Succeeded)
+                    throw new InvalidOperationException($"Failed to add {suiteUser.UserName} to {AdminRoleName}: {resultAddToRole.Errors.First().Description}");
+            }
         }
 
-        // Administrator User shall always have full access to all Modules
-        if (await userManager.IsInRoleAsync(suiteUser, AdminRoleName))
-            return;
+        private async Task SeedAdministrator(UserManagementOptions options, ILogger logger)
+        {
+            if (string.IsNullOrWhiteSpace(options.AdministratorName)
+                || string.IsNullOrWhiteSpace(options.AdministratorEmail))
+                return;
 
-        LogAddingFullAccessForUserToRole(logger, suiteUser.UserName, AdminRoleName);
-        var resultAddToRole = await userManager.AddToRoleAsync(suiteUser, AdminRoleName);
-        if (!resultAddToRole.Succeeded)
-            throw new InvalidOperationException(
-                $"Failed to add {suiteUser.UserName} to {AdminRoleName}: {resultAddToRole.Errors.First().Description}");
+            var userManager = scopedServices.GetRequiredService<UserManager<SuiteUser>>();
+
+            var suiteUser = await userManager.FindByNameAsync(options.AdministratorName);
+            if (suiteUser is null)
+            {
+                if (userManager.Users.Any()) // Only seed, if the database is untouched
+                    return;
+
+                LogCreatingInitialSuiteSystemUser(logger);
+
+                suiteUser = new SuiteUser
+                {
+                    UserName = options.AdministratorName,
+                    EmailConfirmed = true,
+                    Email = options.AdministratorEmail,
+                    PhoneNumberConfirmed = true,
+                    PasswordExpirationDate = DateTimeOffset.MinValue // Create with an expired PW to force the user to set one
+                };
+
+                var resultUser = await userManager.CreateAsync(suiteUser, options.InitialAdministratorPassword);
+                if(!resultUser.Succeeded)
+                    throw new InvalidOperationException("Failed to create initial system user: " + resultUser.Errors.First().Description);
+            }
+
+            // Administrator User shall always have full access to all Modules
+            if (await userManager.IsInRoleAsync(suiteUser, AdminRoleName))
+                return;
+
+            LogAddingFullAccessForUserToRole(logger, suiteUser.UserName, AdminRoleName);
+            var resultAddToRole = await userManager.AddToRoleAsync(suiteUser, AdminRoleName);
+            if (!resultAddToRole.Succeeded)
+                throw new InvalidOperationException(
+                    $"Failed to add {suiteUser.UserName} to {AdminRoleName}: {resultAddToRole.Errors.First().Description}");
+        }
     }
 
     internal static SuiteUser CreateSuiteUserWithDefaults(SeedUser seedUser)

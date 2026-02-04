@@ -9,25 +9,28 @@ namespace Blazor.Shared.Wizards.Extensions;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddWizards(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddPopup();
+        public IServiceCollection AddWizards()
+        {
+            services.AddPopup();
 
-        services.AddTransient<IWizardBodyContentRenderCycle, WizardBodyContentRenderCycle>();
-        services.AddScoped<IWizardPageRegistryFactory, WizardPageRegistryFactory>();
-        services.AddScoped<IWizardContentComponentTypeProvider, WizardContentComponentTypeProvider>();
-        services.AddScoped<IWizardStepFactory, WizardStepFactory>();
+            services.AddTransient<IWizardBodyContentRenderCycle, WizardBodyContentRenderCycle>();
+            services.AddScoped<IWizardPageRegistryFactory, WizardPageRegistryFactory>();
+            services.AddScoped<IWizardContentComponentTypeProvider, WizardContentComponentTypeProvider>();
+            services.AddScoped<IWizardStepFactory, WizardStepFactory>();
 
-        services.AddScoped<WizardPageEditFactory>();
-        services.AddWizardPageEditRegistry();
+            services.AddScoped<WizardPageEditFactory>();
+            services.AddWizardPageEditRegistry();
 
-        services.AddTransient<IWizardState, WizardState>();
+            services.AddTransient<IWizardState, WizardState>();
 
-        services.AddLoadingIndicationPlacementBehavior();
+            services.AddLoadingIndicationPlacementBehavior();
 
-        return services;
+            return services;
+        }
+
+        internal IServiceCollection AddWizardPageEditRegistry()
+            => services.AddScoped<IWizardPageEditRegistry, WizardPageEditRegistry>();
     }
-
-    internal static IServiceCollection AddWizardPageEditRegistry(this IServiceCollection services)
-        => services.AddScoped<IWizardPageEditRegistry, WizardPageEditRegistry>();
 }

@@ -17,63 +17,65 @@ namespace Core.OS.Instance.Extensions;
 
 internal static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddInstanceServices(this IServiceCollection services, InstanceOptions instanceOptions, bool useInMemoryBus)
+    extension(IServiceCollection services)
     {
-        if (instanceOptions.Type == InstanceType.Master)
+        public IServiceCollection AddInstanceServices(InstanceOptions instanceOptions, bool useInMemoryBus)
         {
-            services
-                .AddTransient<IMasterDbConnectionStringProvider, MasterDbConnectionStringProvider>()
-                .AddTransient<IInstanceConfigurationRepository, InstanceConfigurationRepository>()
-                .AddScoped<ISaveChangesInterceptor, ChangeTrackingInterceptor>();
+            if (instanceOptions.Type == InstanceType.Master)
+            {
+                services
+                    .AddTransient<IMasterDbConnectionStringProvider, MasterDbConnectionStringProvider>()
+                    .AddTransient<IInstanceConfigurationRepository, InstanceConfigurationRepository>()
+                    .AddScoped<ISaveChangesInterceptor, ChangeTrackingInterceptor>();
+            }
+
+            services.AddSingleton<MasterHealthInfo>();
+
+            if (!useInMemoryBus && instanceOptions.Type is InstanceType.Master or InstanceType.Slave)
+            {
+                services
+                    .AddSingleton<IHealthCheckPublisher, InstanceHealthCheckPublisher>()
+                    .AddSingleton<IMasterHealthService, MasterHealthService>()
+                    .AddSingleton<IMasterHealthInfo>(s => s.GetRequiredService<MasterHealthInfo>());
+            }
+            else if (instanceOptions.Type is InstanceType.Standalone)
+            {
+                services.AddSingleton<IMasterHealthService, MockMasterHealthService>()
+                    .AddSingleton<IMasterHealthInfo>(s =>
+                    {
+                        var info = s.GetRequiredService<MasterHealthInfo>();
+                        info.IsMasterReachable = true;
+
+                        return info;
+                    });
+            }
+
+            services.AddHostedService<InstanceRecoveryService>();
+            services.AddHostedService<UserTicketCleanupService>();
+
+            // general instance services
+            return services.AddSingleton<ILocalInstanceInformationProvider, LocalInstanceInformationProvider>()
+                .AddScoped<IInstanceInformationProvider, InstanceInformationProvider>()
+                .AddSingleton<InMemoryClusterInformationProvider>()
+                .AddSingleton<IClusterInformationProvider, InMemoryClusterInformationProvider>(p => p.GetRequiredService<InMemoryClusterInformationProvider>())
+                .AddSingleton<SynchronizationState>()
+                .AddSingleton<ITicketStore, UserTicketStore>()
+                .AddSingleton<IBackupStore, BackupStore>()
+                .AddTransient<IBackupFactory, BackupFactory>()
+                .AddScoped<INonceStore, NonceStore>()
+                .AddScoped<IOnboardingStateStore, OnboardingStateStore>()
+                .AddStreamUploadHandler<SystemBackendModule, DeviceImageContext>(options => options.FilenameTransform = filename => Shared.Constants.DeviceImageFileName);
         }
 
-        services.AddSingleton<MasterHealthInfo>();
-
-        if (!useInMemoryBus && instanceOptions.Type is InstanceType.Master or InstanceType.Slave)
-        {
-            services
-                .AddSingleton<IHealthCheckPublisher, InstanceHealthCheckPublisher>()
-                .AddSingleton<IMasterHealthService, MasterHealthService>()
-                .AddSingleton<IMasterHealthInfo>(s => s.GetRequiredService<MasterHealthInfo>());
-        }
-        else if (instanceOptions.Type is InstanceType.Standalone)
-        {
-            services.AddSingleton<IMasterHealthService, MockMasterHealthService>()
-                .AddSingleton<IMasterHealthInfo>(s =>
-                {
-                    var info = s.GetRequiredService<MasterHealthInfo>();
-                    info.IsMasterReachable = true;
-
-                    return info;
-                });
-        }
-
-        services.AddHostedService<InstanceRecoveryService>();
-        services.AddHostedService<UserTicketCleanupService>();
-
-        // general instance services
-        return services.AddSingleton<ILocalInstanceInformationProvider, LocalInstanceInformationProvider>()
-            .AddScoped<IInstanceInformationProvider, InstanceInformationProvider>()
-            .AddSingleton<InMemoryClusterInformationProvider>()
-            .AddSingleton<IClusterInformationProvider, InMemoryClusterInformationProvider>(p => p.GetRequiredService<InMemoryClusterInformationProvider>())
-            .AddSingleton<SynchronizationState>()
-            .AddSingleton<ITicketStore, UserTicketStore>()
-            .AddSingleton<IBackupStore, BackupStore>()
-            .AddTransient<IBackupFactory, BackupFactory>()
-            .AddScoped<INonceStore, NonceStore>()
-            .AddScoped<IOnboardingStateStore, OnboardingStateStore>()
-            .AddStreamUploadHandler<SystemBackendModule, DeviceImageContext>(options => options.FilenameTransform = filename => Shared.Constants.DeviceImageFileName);
-    }
-
-    private static IServiceCollection AddStreamUploadHandler<TModule, TContext>(this IServiceCollection services,
-        Action<StreamUploadHandlerOptions<TContext>>? configureOptions = null)
+        private IServiceCollection AddStreamUploadHandler<TModule, TContext>(Action<StreamUploadHandlerOptions<TContext>>? configureOptions = null)
             where TModule : BackendModule
-    {
-        if (configureOptions is not null)
-            services.Configure(configureOptions);
+        {
+            if (configureOptions is not null)
+                services.Configure(configureOptions);
 
-        services.AddTransient<IStreamUploadHandler, StreamUploadHandler<TModule, TContext>>();
+            services.AddTransient<IStreamUploadHandler, StreamUploadHandler<TModule, TContext>>();
 
-        return services;
+            return services;
+        }
     }
 }

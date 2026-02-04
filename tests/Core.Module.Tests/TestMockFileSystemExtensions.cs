@@ -12,47 +12,50 @@ namespace Core.Module.Tests;
 
 internal static class TestMockFileSystemExtensions
 {
-    public static MockFileSystem SetupTestCore(this MockFileSystem fileSystem, bool realDepsJson = true, bool realDll = false)
+    extension(MockFileSystem fileSystem)
     {
-        var assembly = typeof(TestSystemModule).Assembly;
-        Assert.NotNull(assembly);
+        public MockFileSystem SetupTestCore(bool realDepsJson = true, bool realDll = false)
+        {
+            var assembly = typeof(TestSystemModule).Assembly;
+            Assert.NotNull(assembly);
 
-        var moduleDirectory = fileSystem.Path.GetDirectoryName(assembly.Location);
-        Assert.NotNull(moduleDirectory);
+            var moduleDirectory = fileSystem.Path.GetDirectoryName(assembly.Location);
+            Assert.NotNull(moduleDirectory);
 
-        var depsPath = fileSystem.Path.Combine(moduleDirectory, assembly.GetName().Name + ".deps.json");
-        fileSystem.AddFile(depsPath, CreateMockDepsJsonCopy(realDepsJson ? assembly : null));
+            var depsPath = fileSystem.Path.Combine(moduleDirectory, assembly.GetName().Name + ".deps.json");
+            fileSystem.AddFile(depsPath, CreateMockDepsJsonCopy(realDepsJson ? assembly : null));
 
-        var dllPath = fileSystem.Path.Combine(moduleDirectory, assembly.GetName().Name + ".dll");
-        fileSystem.AddFile(dllPath, CreateMockDllCopy(realDll ? assembly : null));
+            var dllPath = fileSystem.Path.Combine(moduleDirectory, assembly.GetName().Name + ".dll");
+            fileSystem.AddFile(dllPath, CreateMockDllCopy(realDll ? assembly : null));
 
-        return fileSystem;
-    }
+            return fileSystem;
+        }
 
-    public static MockFileSystem SetupTestUiHost(this MockFileSystem fileSystem, string modulePath, bool realDepsJson = true, bool realDll = false)
-        => fileSystem.SetupModule<TestUiHostBackend>(modulePath, ModuleIdResolver.ResolveId<TestUiHostBackend>(), realDepsJson, realDll);
+        public MockFileSystem SetupTestUiHost(string modulePath, bool realDepsJson = true, bool realDll = false)
+            => fileSystem.SetupModule<TestUiHostBackend>(modulePath, ModuleIdResolver.ResolveId<TestUiHostBackend>(), realDepsJson, realDll);
 
-    public static MockFileSystem SetupTestBackendModule(this MockFileSystem fileSystem, string modulePath, bool realDepsJson = true, bool realDll = false)
-        => fileSystem.SetupModule<TestBackendModule>(modulePath, ModuleIdResolver.ResolveId<TestBackendModule>(), realDepsJson, realDll);
+        public MockFileSystem SetupTestBackendModule(string modulePath, bool realDepsJson = true, bool realDll = false)
+            => fileSystem.SetupModule<TestBackendModule>(modulePath, ModuleIdResolver.ResolveId<TestBackendModule>(), realDepsJson, realDll);
 
-    public static MockFileSystem SetupTestClientModule(this MockFileSystem fileSystem, string modulePath, bool realDepsJson = true, bool realDll = false)
-        => fileSystem.SetupModule<TestClientModule>(modulePath, ModuleIdResolver.ResolveId<TestClientModule>(), realDepsJson, realDll);
+        public MockFileSystem SetupTestClientModule(string modulePath, bool realDepsJson = true, bool realDll = false)
+            => fileSystem.SetupModule<TestClientModule>(modulePath, ModuleIdResolver.ResolveId<TestClientModule>(), realDepsJson, realDll);
 
-    private static MockFileSystem SetupModule<T>(this MockFileSystem fileSystem, string modulePath, string moduleId, bool realDepsJson = true, bool realDll = false)
-    {
-        var assembly = typeof(T).Assembly;
-        Assert.NotNull(assembly);
+        private MockFileSystem SetupModule<T>(string modulePath, string moduleId, bool realDepsJson = true, bool realDll = false)
+        {
+            var assembly = typeof(T).Assembly;
+            Assert.NotNull(assembly);
 
-        var moduleDirectory = fileSystem.Path.Combine(modulePath, moduleId);
-        fileSystem.AddDirectory(moduleDirectory);
+            var moduleDirectory = fileSystem.Path.Combine(modulePath, moduleId);
+            fileSystem.AddDirectory(moduleDirectory);
 
-        var dllPath = fileSystem.Path.Combine(moduleDirectory, assembly.GetName().Name + ".dll");
-        fileSystem.AddFile(dllPath, CreateMockDllCopy(realDll ? assembly : null));
+            var dllPath = fileSystem.Path.Combine(moduleDirectory, assembly.GetName().Name + ".dll");
+            fileSystem.AddFile(dllPath, CreateMockDllCopy(realDll ? assembly : null));
 
-        var depsPath = fileSystem.Path.Combine(moduleDirectory, assembly.GetName().Name + ".deps.json");
-        fileSystem.AddFile(depsPath, CreateMockDepsJsonCopy(realDepsJson ? assembly : null));
+            var depsPath = fileSystem.Path.Combine(moduleDirectory, assembly.GetName().Name + ".deps.json");
+            fileSystem.AddFile(depsPath, CreateMockDepsJsonCopy(realDepsJson ? assembly : null));
 
-        return fileSystem;
+            return fileSystem;
+        }
     }
 
     private static MockFileData CreateMockDllCopy(Assembly? assembly = null)
