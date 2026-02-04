@@ -7,15 +7,18 @@ namespace Blazor.Shared.NavTiles.Extensions;
 
 internal static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddNavTiles(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddNavTilesInfrastructure();
+        public IServiceCollection AddNavTiles()
+        {
+            services.AddNavTilesInfrastructure();
 
-        services.AddNavTiles<SharedClientModule>();
+            services.AddNavTiles<SharedClientModule>();
 
-        return services;
+            return services;
+        }
+
+        internal IServiceCollection AddNavTilesInfrastructure()
+            => services.AddScoped<INavTileRegistryFactory, NavTileRegistryFactory>();
     }
-
-    internal static IServiceCollection AddNavTilesInfrastructure(this IServiceCollection services)
-        => services.AddScoped<INavTileRegistryFactory, NavTileRegistryFactory>();
 }

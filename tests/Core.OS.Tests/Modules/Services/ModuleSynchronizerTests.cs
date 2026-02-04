@@ -8,6 +8,7 @@ using Core.OS.Hosting;
 using Core.OS.Modules;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
+using Core.OS.Tests.Extensions;
 using Core.Shared.Modules;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Core.OS.Tests.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;

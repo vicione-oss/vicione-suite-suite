@@ -2,6 +2,7 @@
 using Core.OS.MessageBus.MassTransit;
 using Core.OS.MessageBus.MassTransit.Configuration;
 using Core.OS.Modules;
+using Core.OS.Tests.Extensions;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

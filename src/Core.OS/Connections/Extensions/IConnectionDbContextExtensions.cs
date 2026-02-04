@@ -10,127 +10,121 @@ namespace Core.OS.Connections.Extensions;
 
 internal static class IConnectionDbContextExtensions
 {
-    /// <summary>
-    /// if connection has tags that already exist in database there entity state will be Added. That leads to
-    /// Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "PK_Tags" or
-    /// SQLite Error 19: 'UNIQUE constraint failed: Tags.Id' on SaveChangesAsync.
-    /// To avoid that we have to replace the message tags with existing tag entities  
-    /// </summary>
-    /// <param name="dbContext"></param>
-    /// <param name="connection"></param>
-    /// <param name="addedTags"></param>
-    /// <param name="changedTags"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public static async Task<HashSet<Tag>> ProcessTags(this IConnectionDbContext dbContext, Connection connection, List<Tag> addedTags, List<Tag> changedTags, CancellationToken cancellationToken)
+    extension(IConnectionDbContext dbContext)
     {
-        var existingTags = new HashSet<Tag>();
-        var allTags = await dbContext.Tags.ToListAsync(cancellationToken);
-        foreach (var tag in connection.Tags)
+        /// <summary>
+        /// if connection has tags that already exist in database there entity state will be Added. That leads to
+        /// Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "PK_Tags" or
+        /// SQLite Error 19: 'UNIQUE constraint failed: Tags.Id' on SaveChangesAsync.
+        /// To avoid that we have to replace the message tags with existing tag entities  
+        /// </summary>
+        public async Task<HashSet<Tag>> ProcessTags(Connection connection, List<Tag> addedTags, List<Tag> changedTags, CancellationToken cancellationToken)
         {
-            var existingTag = allTags.FirstOrDefault(t => t == tag);
-            if (existingTag is null)
+            var existingTags = new HashSet<Tag>();
+            var allTags = await dbContext.Tags.ToListAsync(cancellationToken);
+            foreach (var tag in connection.Tags)
             {
-                addedTags.Add(tag);
-                continue;
+                var existingTag = allTags.FirstOrDefault(t => t == tag);
+                if (existingTag is null)
+                {
+                    addedTags.Add(tag);
+                    continue;
+                }
+
+                if (existingTag.Text != tag.Text)
+                {
+                    existingTag.Text = tag.Text;
+                    changedTags.Add(existingTag);
+                    continue;
+                }
+
+                existingTags.Add(existingTag);
             }
 
-            if (existingTag.Text != tag.Text)
+            return existingTags.Union(addedTags).ToHashSet();
+        }
+
+        public async Task SeedMqttBrokerConnections(MqttClientOptions mqttClientOptions,
+            Guid instanceId,
+            CancellationToken stoppingToken)
+        {
+            // ensure we return the entity reference instead of the static one
+            // to prevent change tracker issues
+            var systemDefault = dbContext.Tags.FirstOrDefault(k => k.Id == ConnectionConstants.Tags.SystemDefault.Id);
+            if (systemDefault is null)
             {
-                existingTag.Text = tag.Text;
-                changedTags.Add(existingTag);
-                continue;
+                Log.Logger.Error("System connection tag '{Tag}' is missing", nameof(ConnectionConstants.Tags.SystemDefault));
             }
 
-            existingTags.Add(existingTag);
+            if (mqttClientOptions.ServiceClient is not null)
+                await dbContext.SeedMqttServiceConnection(
+                    mqttClientOptions.ServiceClient,
+                    instanceId,
+                    systemDefault,
+                    stoppingToken);
+            else
+                await dbContext.RemoveMqttConnection(instanceId, MqttConnectionType.TCP, stoppingToken);
+
+            if (mqttClientOptions.WebSocketClient is not null)
+                await dbContext.SeedMqttWebsocketConnection(
+                    mqttClientOptions.WebSocketClient,
+                    instanceId,
+                    systemDefault,
+                    stoppingToken);
+            else
+                await dbContext.RemoveMqttConnection(
+                    instanceId,
+                    MqttConnectionType.WebSocket,
+                    stoppingToken);
+
+            await dbContext.Instance.SaveChangesAsync(stoppingToken);
         }
 
-        return existingTags.Union(addedTags).ToHashSet();
-    }
-
-    public static async Task SeedMqttBrokerConnections(this IConnectionDbContext dbContext,
-        MqttClientOptions mqttClientOptions,
-        Guid instanceId,
-        CancellationToken stoppingToken)
-    {
-        // ensure we return the entity reference instead of the static one
-        // to prevent change tracker issues
-        var systemDefault = dbContext.Tags.FirstOrDefault(k => k.Id == ConnectionConstants.Tags.SystemDefault.Id);
-        if (systemDefault is null)
+        private Task SeedMqttServiceConnection(MqttConnectionOptions options,
+            Guid instanceId,
+            Tag? systemDefault,
+            CancellationToken stoppingToken)
         {
-            Log.Logger.Error("System connection tag '{Tag}' is missing", nameof(ConnectionConstants.Tags.SystemDefault));
-        }
+            var mqtt = SuiteConnectionFactory.CreateMqttServiceConnection(options);
+            if (mqtt is null)
+                return Task.CompletedTask;
 
-        if (mqttClientOptions.ServiceClient is not null)
-            await dbContext.SeedMqttServiceConnection(
-                mqttClientOptions.ServiceClient,
+            return SeedMqttConnection(dbContext,
+                mqtt,
+                SuiteConnectionFactory.MqttServiceName,
+                SuiteConnectionFactory.MqttServiceDescription,
                 instanceId,
                 systemDefault,
                 stoppingToken);
-        else
-            await dbContext.RemoveMqttConnection(instanceId, MqttConnectionType.TCP, stoppingToken);
+        }
 
-        if (mqttClientOptions.WebSocketClient is not null)
-            await dbContext.SeedMqttWebsocketConnection(
-                mqttClientOptions.WebSocketClient,
+        private Task SeedMqttWebsocketConnection(MqttConnectionOptions options,
+            Guid instanceId,
+            Tag? systemDefault,
+            CancellationToken stoppingToken)
+        {
+            var mqtt = SuiteConnectionFactory.CreateMqttWebsocketConnection(options);
+            if (mqtt is null)
+                return Task.CompletedTask;
+
+            return SeedMqttConnection(dbContext,
+                mqtt,
+                SuiteConnectionFactory.MqttWebsocketName,
+                SuiteConnectionFactory.MqttWebsocketDescription,
                 instanceId,
                 systemDefault,
                 stoppingToken);
-        else
-            await dbContext.RemoveMqttConnection(
-                instanceId,
-                MqttConnectionType.WebSocket,
-                stoppingToken);
+        }
 
-        await dbContext.Instance.SaveChangesAsync(stoppingToken);
-    }
+        public async Task SeedSystemDefaultTag(CancellationToken stoppingToken)
+        {
+            if (dbContext.Tags.Any(k => k.Id == ConnectionConstants.Tags.SystemDefault.Id))
+                return;
 
-    private static Task SeedMqttServiceConnection(this IConnectionDbContext dbContext,
-        MqttConnectionOptions options,
-        Guid instanceId,
-        Tag? systemDefault,
-        CancellationToken stoppingToken)
-    {
-        var mqtt = SuiteConnectionFactory.CreateMqttServiceConnection(options);
-        if (mqtt is null)
-            return Task.CompletedTask;
+            dbContext.Tags.Add(ConnectionConstants.Tags.SystemDefault);
 
-        return SeedMqttConnection(dbContext,
-            mqtt,
-            SuiteConnectionFactory.MqttServiceName,
-            SuiteConnectionFactory.MqttServiceDescription,
-            instanceId,
-            systemDefault,
-            stoppingToken);
-    }
-
-    private static Task SeedMqttWebsocketConnection(this IConnectionDbContext dbContext,
-        MqttConnectionOptions options,
-        Guid instanceId,
-        Tag? systemDefault,
-        CancellationToken stoppingToken)
-    {
-        var mqtt = SuiteConnectionFactory.CreateMqttWebsocketConnection(options);
-        if (mqtt is null)
-            return Task.CompletedTask;
-
-        return SeedMqttConnection(dbContext,
-            mqtt,
-            SuiteConnectionFactory.MqttWebsocketName,
-            SuiteConnectionFactory.MqttWebsocketDescription,
-            instanceId,
-            systemDefault,
-            stoppingToken);
-    }
-
-    public static async Task SeedSystemDefaultTag(this IConnectionDbContext dbContext, CancellationToken stoppingToken)
-    {
-        if (dbContext.Tags.Any(k => k.Id == ConnectionConstants.Tags.SystemDefault.Id))
-            return;
-
-        dbContext.Tags.Add(ConnectionConstants.Tags.SystemDefault);
-
-        await dbContext.Instance.SaveChangesAsync(stoppingToken);
+            await dbContext.Instance.SaveChangesAsync(stoppingToken);
+        }
     }
 
     private static async Task SeedMqttConnection(IConnectionDbContext dbContext,

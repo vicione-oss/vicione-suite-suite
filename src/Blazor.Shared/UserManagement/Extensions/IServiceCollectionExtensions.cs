@@ -12,39 +12,42 @@ namespace Blazor.Shared.UserManagement.Extensions;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddUserManagement(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddScoped<IUserService, UserService>();
-        services.AddTransient<IRoleService, RoleService>();
-        services.AddUsersControlPanel();
-        services.AddUserControlPanel();
-        services.AddRolesControlPanel();
-        services.AddRoleControlPanel();
+        public IServiceCollection AddUserManagement()
+        {
+            services.AddScoped<IUserService, UserService>();
+            services.AddTransient<IRoleService, RoleService>();
+            services.AddUsersControlPanel();
+            services.AddUserControlPanel();
+            services.AddRolesControlPanel();
+            services.AddRoleControlPanel();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddUsernameValidator(this IServiceCollection services)
-    {
-        services.AddRequiredValidator();
-        services.TryAddScoped<IUsernameValidator, UsernameValidator>();
+        public IServiceCollection AddUsernameValidator()
+        {
+            services.AddRequiredValidator();
+            services.TryAddScoped<IUsernameValidator, UsernameValidator>();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddPasswordValidator(this IServiceCollection services)
-    {
-        services.AddRequiredValidator();
-        services.TryAddScoped<IPasswordValidator, PasswordValidator>();
+        public IServiceCollection AddPasswordValidator()
+        {
+            services.AddRequiredValidator();
+            services.TryAddScoped<IPasswordValidator, PasswordValidator>();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddRepeatPasswordValidator(this IServiceCollection services)
-    {
-        services.AddRequiredValidator();
-        services.TryAddScoped<IRepeatPasswordValidator, RepeatPasswordValidator>();
+        public IServiceCollection AddRepeatPasswordValidator()
+        {
+            services.AddRequiredValidator();
+            services.TryAddScoped<IRepeatPasswordValidator, RepeatPasswordValidator>();
 
-        return services;
+            return services;
+        }
     }
 }

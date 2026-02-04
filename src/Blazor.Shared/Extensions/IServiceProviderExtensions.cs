@@ -14,40 +14,43 @@ namespace Blazor.Shared.Extensions;
 
 public static class IServiceProviderExtensions
 {
-    public static IServiceProvider UseSharedServices(this IServiceProvider services)
+    extension(IServiceProvider services)
     {
-        services.UseHelp();
-        services.UseInstanceManagement();
-        services.UseOnboarding();
-        services.UseMqttViewer();
+        public IServiceProvider UseSharedServices()
+        {
+            services.UseHelp();
+            services.UseInstanceManagement();
+            services.UseOnboarding();
+            services.UseMqttViewer();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static async Task InitializeSharedServices(this IServiceProvider services, CancellationToken cancellationToken = default)
-    {
-        await services.GetRequiredService<ITimeZoneDescriptorProvider>().GetAll(cancellationToken); // initializes the timezones for the scope 
-        await services.GetRequiredService<IClientTimeProvider>().Initialize(cancellationToken);
-        await services.GetRequiredService<ISuiteConnectionService>().Initialize(cancellationToken);
-    }
+        public async Task InitializeSharedServices(CancellationToken cancellationToken = default)
+        {
+            await services.GetRequiredService<ITimeZoneDescriptorProvider>().GetAll(cancellationToken); // initializes the timezones for the scope 
+            await services.GetRequiredService<IClientTimeProvider>().Initialize(cancellationToken);
+            await services.GetRequiredService<ISuiteConnectionService>().Initialize(cancellationToken);
+        }
 
-    private static void UseMqttViewer(this IServiceProvider services)
-    {
+        private void UseMqttViewer()
+        {
 #if DEBUG
-        try
-        {
-            var registry = services.GetRequiredService<INavTileRegistry<SharedClientModule>>();
-            if (registry.Any(i => i.ComponentType == typeof(MqttViewerNavTile)))
-                return;
+            try
+            {
+                var registry = services.GetRequiredService<INavTileRegistry<SharedClientModule>>();
+                if (registry.Any(i => i.ComponentType == typeof(MqttViewerNavTile)))
+                    return;
 
-            var accessLevelAuthorizationRequirement = new AccessLevelAuthorizationRequirement(SharedClientModule.ModuleId, AccessLevel.Full);
-            registry.Add<MqttViewerNavTile>(Constants.MqttViewerNavTileId, linkTarget: Constants.MqttViewerRoute, group: NavTileGroup.Administration,
-                authorizationRequirement: accessLevelAuthorizationRequirement);
-        }
-        catch (ObjectDisposedException)
-        {
-            // this happens...
-        }
+                var accessLevelAuthorizationRequirement = new AccessLevelAuthorizationRequirement(SharedClientModule.ModuleId, AccessLevel.Full);
+                registry.Add<MqttViewerNavTile>(Constants.MqttViewerNavTileId, linkTarget: Constants.MqttViewerRoute, group: NavTileGroup.Administration,
+                    authorizationRequirement: accessLevelAuthorizationRequirement);
+            }
+            catch (ObjectDisposedException)
+            {
+                // this happens...
+            }
 #endif
+        }
     }
 }

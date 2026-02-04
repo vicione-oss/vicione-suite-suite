@@ -6,18 +6,21 @@ namespace Blazor.Shared.NotificationArea.Extensions;
 
 internal static class IServiceCollectionExtensions
 {
-    internal static IServiceCollection AddNotificationArea(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.AddNotificationElementInfrastructure();
-        services.AddScoped<IActiveNotificationElementPolicy, SingleActiveNotificationElementPolicy>();
+        internal IServiceCollection AddNotificationArea()
+        {
+            services.AddNotificationElementInfrastructure();
+            services.AddScoped<IActiveNotificationElementPolicy, SingleActiveNotificationElementPolicy>();
 
-        return services;
-    }
+            return services;
+        }
 
-    internal static IServiceCollection AddNotificationElementInfrastructure(this IServiceCollection services)
-    {
-        services.AddScoped<INotificationElementRegistryFactory, NotificationElementRegistryFactory>();
+        internal IServiceCollection AddNotificationElementInfrastructure()
+        {
+            services.AddScoped<INotificationElementRegistryFactory, NotificationElementRegistryFactory>();
 
-        return services;
+            return services;
+        }
     }
 }

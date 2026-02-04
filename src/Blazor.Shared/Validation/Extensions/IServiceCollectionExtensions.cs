@@ -6,24 +6,27 @@ namespace Blazor.Shared.Validation.Extensions;
 
 public static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddRequiredValidator(this IServiceCollection services)
+    extension(IServiceCollection services)
     {
-        services.TryAddScoped<IRequiredValidator, RequiredValidator>();
+        public IServiceCollection AddRequiredValidator()
+        {
+            services.TryAddScoped<IRequiredValidator, RequiredValidator>();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddEmailValidator(this IServiceCollection services)
-    {
-        services.TryAddScoped<IEmailValidator, EmailValidator>();
+        public IServiceCollection AddEmailValidator()
+        {
+            services.TryAddScoped<IEmailValidator, EmailValidator>();
 
-        return services;
-    }
+            return services;
+        }
 
-    public static IServiceCollection AddPhoneNumberValidator(this IServiceCollection services)
-    {
-        services.TryAddScoped<IPhoneNumberValidator, PhoneNumberValidator>(); //Should be own method
+        public IServiceCollection AddPhoneNumberValidator()
+        {
+            services.TryAddScoped<IPhoneNumberValidator, PhoneNumberValidator>(); //Should be own method
 
-        return services;
+            return services;
+        }
     }
 }

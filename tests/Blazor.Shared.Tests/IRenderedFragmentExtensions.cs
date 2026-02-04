@@ -6,9 +6,12 @@ namespace Blazor.Shared.Tests;
 
 internal static class IRenderedFragmentExtensions
 {
-    public static IElement FindDialogConfirmButton(this IRenderedFragment fragment)
-        => fragment.FindAll("button").First(b => b.InnerHtml.Contains(CommonVocabulary.Confirm, StringComparison.Ordinal));
+    extension(IRenderedFragment fragment)
+    {
+        public IElement FindDialogConfirmButton()
+            => fragment.FindAll("button").First(b => b.InnerHtml.Contains(CommonVocabulary.Confirm, StringComparison.Ordinal));
 
-    public static IElement FindDialogCancelButton(this IRenderedFragment fragment)
-        => fragment.FindAll("button").First(b => b.InnerHtml.Contains(CommonVocabulary.Cancel, StringComparison.Ordinal));
+        public IElement FindDialogCancelButton()
+            => fragment.FindAll("button").First(b => b.InnerHtml.Contains(CommonVocabulary.Cancel, StringComparison.Ordinal));
+    }
 }

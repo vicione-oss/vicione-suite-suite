@@ -6,7 +6,9 @@ namespace Core.OS.UserManagement.Extensions;
 
 public static class UserProfileExtensions
 {
-    public static async Task<UserProfile> CreateUserProfile(this SuiteUser user, UserManager<SuiteUser> userManager)
+    extension(SuiteUser user)
+    {
+        public async Task<UserProfile> CreateUserProfile(UserManager<SuiteUser> userManager)
             => new()
             {
                 // required:
@@ -33,22 +35,23 @@ public static class UserProfileExtensions
                 PasswordExpirationDate = user.PasswordExpirationDate
             };
 
-    public static void AssignOptionalData(this SuiteUser user, UserProfile userProfile)
-    {
-        user.FirstName = userProfile.Firstname;
-        user.LastName = userProfile.Lastname;
-        user.Title = userProfile.Title;
-        user.Occupation = userProfile.Occupation;
-        user.Department = userProfile.Department;
-        user.Language = userProfile.Language;
-        user.TimeZone = userProfile.TimeZone;
-        user.Street = userProfile.Street;
-        user.StreetNumber = userProfile.StreetNumber;
-        user.ZipCode = userProfile.ZipCode;
-        user.City = userProfile.City;
-        user.Country = userProfile.Country;
-        user.PhoneNumber = userProfile.PhoneNumber;
-        user.Mobile = userProfile.Mobile;
-        user.PasswordExpirationDate = userProfile.PasswordExpirationDate;
+        public void AssignOptionalData(UserProfile userProfile)
+        {
+            user.FirstName = userProfile.Firstname;
+            user.LastName = userProfile.Lastname;
+            user.Title = userProfile.Title;
+            user.Occupation = userProfile.Occupation;
+            user.Department = userProfile.Department;
+            user.Language = userProfile.Language;
+            user.TimeZone = userProfile.TimeZone;
+            user.Street = userProfile.Street;
+            user.StreetNumber = userProfile.StreetNumber;
+            user.ZipCode = userProfile.ZipCode;
+            user.City = userProfile.City;
+            user.Country = userProfile.Country;
+            user.PhoneNumber = userProfile.PhoneNumber;
+            user.Mobile = userProfile.Mobile;
+            user.PasswordExpirationDate = userProfile.PasswordExpirationDate;
+        }
     }
 }
