@@ -251,7 +251,13 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
             SourceGenerationContext.Default.GetNetworkStatusInformationResult);
     }
 
-    public static GetSystemConfigurationResult GetEmbeddedSystemConfigurationResult()
+    public static SystemConfiguration GetEmbeddedSystemConfiguration()
+    {
+        var result = GetEmbeddedSystemConfigurationResult();
+        return result.Configuration ?? throw new InvalidOperationException("Embedded 'GetSystemConfigurationResult.json' does not contain configuration");
+    }
+
+    private static GetSystemConfigurationResult GetEmbeddedSystemConfigurationResult()
     {
         var assembly = Assembly.GetExecutingAssembly();
 
@@ -261,11 +267,5 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
         var result = JsonSerializer.Deserialize(stream, SourceGenerationContext.Default.GetSystemConfigurationResult);
         return result
             ?? throw new InvalidOperationException("Failed to deserialize embedded resource 'GetSystemConfigurationResult.json'");
-    }
-
-    public static SystemConfiguration GetEmbeddedSystemConfiguration()
-    {
-        var result = GetEmbeddedSystemConfigurationResult();
-        return result.Configuration ?? throw new InvalidOperationException("Embedded 'GetSystemConfigurationResult.json' does not contain configuration");
     }
 }

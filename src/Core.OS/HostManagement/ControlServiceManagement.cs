@@ -1,13 +1,11 @@
 ﻿using System.Diagnostics;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.HostManagement.Extensions;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Service;
 using HostManagement.Shared.Enums;
-using MassTransit.SqlTransport.Topology;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration;
 using SdkServiceState = Sdk.SystemConfiguration.Contracts.Service.ServiceState;
@@ -16,20 +14,27 @@ namespace Core.OS.HostManagement;
 
 public class ControlServiceManagement(IPipeClient pipeClient, SystemConfigurationCache responseCache, ILogger<ControlServiceManagement> logger) : IControlServiceManagement
 {
-    public async Task<ControlServiceManagementResult> ControlService(ServiceCommand command, string serviceName, CancellationToken cancellationToken = default)
+    public bool IsAvailable => pipeClient is not MockPipeClient;
+
+    public async Task<ControlServiceManagementResult> TryControlService(ServiceCommand command, string serviceName, CancellationToken cancellationToken = default)
     {
+        if (!IsAvailable)
+        {
+            var errorInfo = new ErrorInfo(ControlServiceError.ControlServiceUnavailable, "Operation not supported. HMS not installed or connected.");
+            return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
+        }
+
         try
         {
             if (command is ServiceCommand.Enable or ServiceCommand.Disable)
                 return await ChangeServiceConfiguration(command, serviceName, cancellationToken);
-            else
-                return await ChangeServiceState(command, serviceName, cancellationToken);
+            return await ChangeServiceState(command, serviceName, cancellationToken);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Failed to {Command} service '{ServiceName}'.", command, serviceName);
             var errorInfo = new ErrorInfo(ControlServiceError.UnknownError, e.Message);
-            return new(serviceName, SdkServiceState.Unknown, errorInfo);
+            return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
         }
     }
 
@@ -47,15 +52,13 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
         ApplyServiceCommand(serviceToControl, command);
 
         var setResult = await pipeClient.SetSystemConfiguration(response.Configuration, cancellationToken);
-        if (setResult?.Status != OperationStatus.Success)
-        {
-            var errorCode = (int?)setResult?.Status ?? ControlServiceError.UnknownError;
-            var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
-            logger.LogError("{Command} service '{ServiceName}' failed with {ErrorCode}. {Message}", command, serviceName, errorCode, setResult?.Message);
-            return new(serviceName, ToSuiteState(command), errorInfo);
-        }
+        if (setResult?.Status == OperationStatus.Success)
+            return new ControlServiceManagementResult(serviceName, ToSuiteState(command));
 
-        return new(serviceName, ToSuiteState(command));
+        var errorCode = (int?)setResult?.Status ?? ControlServiceError.UnknownError;
+        var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
+        logger.LogError("{Command} service '{ServiceName}' failed with {ErrorCode}. {Message}", command, serviceName, errorCode, setResult?.Message);
+        return new ControlServiceManagementResult(serviceName, ToSuiteState(command), errorInfo);
     }
 
     private static ServiceDetail GetOrAddServiceToControl(SystemConfiguration? configuration, string serviceName)
@@ -65,9 +68,9 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
             throw new InvalidOperationException("SystemConfiguration does not exist");
 
         var serviceToControl = configuration.Services.Find(s => s.Name == serviceName);
-        if (serviceToControl == null)
+        if (serviceToControl is null)
         {
-            serviceToControl = new()
+            serviceToControl = new ServiceDetail
             {
                 Name = serviceName,
                 State = ServiceState.Unknown,
@@ -126,9 +129,9 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
             var errorCode = (int?)setResult?.Status ?? ControlServiceError.UnknownError;
             var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
             logger.LogError("{Command} service '{ServiceName}' failed with {ErrorCode}. {Message}", command, serviceName, errorCode, setResult?.Message);
-            return new(serviceName, ToSuiteState(command), errorInfo);
+            return new ControlServiceManagementResult(serviceName, ToSuiteState(command), errorInfo);
         }
 
-        return new(serviceName, ToSuiteState(command));
+        return new ControlServiceManagementResult(serviceName, ToSuiteState(command));
     }
 }
