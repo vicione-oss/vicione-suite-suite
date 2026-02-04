@@ -33,6 +33,17 @@ public sealed class ControlServiceManagementTests
     }
 
     [Fact]
+    public async Task Should_be_available()
+    {
+        // Arrange + Act
+        await using var services = CreateServices();
+        var service = services.GetRequiredService<ControlServiceManagement>();
+
+        // Assert
+        service.IsAvailable.Should().BeTrue();
+    }
+    
+    [Fact]
     public async Task Should_enable_unknown_service()
     {
         // Arrange
@@ -40,7 +51,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.ControlService(ServiceCommand.Enable, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Enable, ServiceName);
 
         // Assert
         result.Success.Should().BeTrue();
@@ -56,7 +67,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.ControlService(ServiceCommand.Disable, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Disable, ServiceName);
 
         // Assert
         result.Success.Should().BeTrue();
@@ -72,7 +83,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.ControlService(ServiceCommand.Restart, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Restart, ServiceName);
 
         // Assert
         result.Success.Should().BeTrue();
@@ -88,7 +99,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.ControlService(ServiceCommand.Start, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Start, ServiceName);
 
         // Assert
         result.Success.Should().BeTrue();
@@ -104,7 +115,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.ControlService(ServiceCommand.Stop, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Stop, ServiceName);
 
         // Assert
         result.Success.Should().BeTrue();

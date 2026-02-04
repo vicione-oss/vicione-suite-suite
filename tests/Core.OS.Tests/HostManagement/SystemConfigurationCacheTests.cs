@@ -31,7 +31,7 @@ public class SystemConfigurationCacheTests
         public void Should_set_cache_system_config()
         {
             // Arrange
-            var config = MockPipeClient.GetEmbeddedSystemConfiguration();
+            var config = TestPipeClient.GetEmbeddedSystemConfiguration();
             using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<SystemConfigurationCache>();
 
@@ -49,7 +49,7 @@ public class SystemConfigurationCacheTests
         public void Should_get_cached_system_config()
         {
             // Arrange
-            var config = MockPipeClient.GetEmbeddedSystemConfiguration();
+            var config = TestPipeClient.GetEmbeddedSystemConfiguration();
             using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<SystemConfigurationCache>();
             cache.Set(config);

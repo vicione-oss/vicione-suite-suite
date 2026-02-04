@@ -41,7 +41,7 @@ public class ControlServiceConsumerTests
         await tester.TestInstanceDependentCommand<ControlService, ControlServiceConsumer>(command);
 
         // Assert
-        await _serviceManagement.Received().ControlService(command.Command, command.ServiceName, Arg.Any<CancellationToken>());
+        await _serviceManagement.Received().TryControlService(command.Command, command.ServiceName, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class ControlServiceConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         var command = new ControlService(ServiceName, ServiceCommand.Start);
-        _serviceManagement.ControlService(command.Command, command.ServiceName, Arg.Any<CancellationToken>())
+        _serviceManagement.TryControlService(command.Command, command.ServiceName, Arg.Any<CancellationToken>())
             .Returns(new ControlServiceManagementResult(command.ServiceName, ServiceState.Enabled));
 
         // Act
@@ -67,7 +67,7 @@ public class ControlServiceConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         var command = new ControlService(ServiceName, ServiceCommand.Start);
-        _serviceManagement.ControlService(command.Command, command.ServiceName, Arg.Any<CancellationToken>())
+        _serviceManagement.TryControlService(command.Command, command.ServiceName, Arg.Any<CancellationToken>())
             .Returns(new ControlServiceManagementResult(command.ServiceName, ServiceState.Enabled, new ErrorInfo(3, "Error occured")));
 
         // Act

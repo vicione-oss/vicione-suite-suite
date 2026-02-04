@@ -34,7 +34,7 @@ internal static class ServiceCollectionExtensions
         };
 
         services
-            .AddSingleton<IPipeClient>(_ => new MockPipeClient(fileSystem, appLifetime, Options.Create(mockOptions), Options.Create(instanceOptions)))
+            .AddSingleton<IPipeClient>(_ => new TestPipeClient(new MockPipeClient(fileSystem, appLifetime, Options.Create(mockOptions), Options.Create(instanceOptions))))
             .AddSingleton(Options.Create(options))
             .AddSingleton(Options.Create(instanceOptions));
 

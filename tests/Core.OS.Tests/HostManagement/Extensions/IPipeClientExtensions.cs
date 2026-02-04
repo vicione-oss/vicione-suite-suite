@@ -17,7 +17,7 @@ internal static class IPipeClientExtensions
             Status = status,
             ResultType = nameof(CommunicationContracts.GetSystemConfigurationResult),
             Message = message,
-            Configuration = MockPipeClient.GetEmbeddedSystemConfiguration()
+            Configuration = TestPipeClient.GetEmbeddedSystemConfiguration()
         };
 
         pipeClient.SendRequest(Topics.GetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())

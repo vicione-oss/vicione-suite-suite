@@ -19,7 +19,7 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
 
             LogControlService(logger, context.Message.ServiceName, context.Message.Command);
 
-            var result = await serviceManagement.ControlService(context.Message.Command, context.Message.ServiceName, context.CancellationToken);
+            var result = await serviceManagement.TryControlService(context.Message.Command, context.Message.ServiceName, context.CancellationToken);
 
             if (!result.Success)
             {
