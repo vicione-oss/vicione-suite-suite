@@ -45,24 +45,24 @@
                                         var settingsEntries = entriesEnumerable.ToList();
                                         isActive = _activeSettingsEntry is not null && settingsEntries.Contains(_activeSettingsEntry);
                                         string? iconCssClass = settingsCategory.IconCssClass;
-                                        string? iconUrl = settingsCategory.IconUrl?.ToString();
+                                        Uri? iconUrl = settingsCategory.IconUrl;
 
                                         if (iconCssClass is null && iconUrl is null)
                                         {
                                             var firstSettingsEntry = settingsEntries.FirstOrDefault();
                                             if (firstSettingsEntry is not null)
-                                                iconUrl = firstSettingsEntry.IconPath;
+                                                iconUrl = firstSettingsEntry.IconUrl;
 
                                             if (iconUrl is null)
                                                 iconCssClass = "empty-icon";
                                         }
 
-                                        <DxAccordionItem Attributes="@(new Dictionary<string, object>() { { "title", settingsCategory.Title } })"
+                                        <DxAccordionItem Attributes="@(new Dictionary<string, object> { { "title", settingsCategory.Title } })"
                                                          Text="@settingsCategory.Title"
                                                          Expanded="@isExpanded"
                                                          CssClass="@(isActive ? "active" : null)"
                                                          IconCssClass="@iconCssClass"
-                                                         IconUrl="@iconUrl"
+                                                         IconUrl="@(iconUrl?.OriginalString ?? string.Empty)"
                                                          @key="@settingsCategory.Title">
                                             <ContentTemplate>
                                                 @foreach (var settingsEntry in settingsEntries)

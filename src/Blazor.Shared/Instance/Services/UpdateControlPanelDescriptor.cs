@@ -7,5 +7,5 @@ namespace Blazor.Shared.Instance.Services;
 internal sealed class UpdateControlPanelDescriptor : IControlPanelDescriptor<UpdateControlPanel>
 {
     public string Title => CommonVocabulary.General;
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
 }

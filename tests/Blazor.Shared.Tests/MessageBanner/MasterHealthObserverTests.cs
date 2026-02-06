@@ -20,12 +20,12 @@ public sealed class MasterHealthObserverTests
     public void Should_render_component()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddScoped(_ => Substitute.For<IUiMediator>());
         ctx.Services.AddScoped(_ => Substitute.For<IMessageBannerMediator>());
 
         // Act
-        var renderedComponent = ctx.RenderComponent<MasterHealthObserver>();
+        var renderedComponent = ctx.Render<MasterHealthObserver>();
 
         // Assert
         renderedComponent.Should().NotBeNull();
@@ -37,11 +37,11 @@ public sealed class MasterHealthObserverTests
         // Arrange
         var messageBannerMediator = Substitute.For<IMessageBannerMediator>();
 
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.Services.AddScoped(_ => Substitute.For<IUiMediator>());
         ctx.Services.AddScoped(_ => messageBannerMediator);
 
-        var renderedComponent = ctx.RenderComponent<MasterHealthObserver>();
+        var renderedComponent = ctx.Render<MasterHealthObserver>();
 
         // Act
         await renderedComponent.Instance.Consume(
@@ -64,11 +64,11 @@ public sealed class MasterHealthObserverTests
         // Arrange
         var messageBannerMediator = Substitute.For<IMessageBannerMediator>();
 
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.Services.AddScoped(_ => Substitute.For<IUiMediator>());
         ctx.Services.AddScoped(_ => messageBannerMediator);
 
-        var renderedComponent = ctx.RenderComponent<MasterHealthObserver>();
+        var renderedComponent = ctx.Render<MasterHealthObserver>();
 
         await renderedComponent.Instance.Consume(
             new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(false), Guid.NewGuid()),
@@ -89,11 +89,11 @@ public sealed class MasterHealthObserverTests
         // Arrange
         var messageBannerMediator = Substitute.For<IMessageBannerMediator>();
 
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.Services.AddScoped(_ => Substitute.For<IUiMediator>());
         ctx.Services.AddScoped(_ => messageBannerMediator);
 
-        var renderedComponent = ctx.RenderComponent<MasterHealthObserver>();
+        var renderedComponent = ctx.Render<MasterHealthObserver>();
 
         // Act
         await renderedComponent.Instance.Consume(
@@ -108,11 +108,11 @@ public sealed class MasterHealthObserverTests
     public async Task Should_not_call_close_message_banner_because_show_message_banner_was_called_externally()
     {
         // Arrange
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.Services.AddScoped(_ => Substitute.For<IUiMediator>());
         ctx.Services.AddScoped<IMessageBannerMediator, TestMessageBannerMediator>();
 
-        var renderedComponent = ctx.RenderComponent<MasterHealthObserver>();
+        var renderedComponent = ctx.Render<MasterHealthObserver>();
 
         var closeMessageBannerCalled = false;
 

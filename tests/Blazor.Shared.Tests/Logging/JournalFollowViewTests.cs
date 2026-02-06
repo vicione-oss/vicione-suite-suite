@@ -16,12 +16,12 @@ public sealed class JournalFollowViewTests
     public void Should_render_component()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
         ctx.Services.AddSingleton<JournalService>();
 
         // Act
-        var page = ctx.RenderComponent<JournalFollowView>();
+        var page = ctx.Render<JournalFollowView>();
 
         // Assert
         page.Should().NotBeNull();

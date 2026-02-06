@@ -36,7 +36,7 @@ public class SettingsContainerTests
         public sealed class FirstControlPanelDescriptor : IControlPanelDescriptor<FirstControlPanel>
         {
             public string Title => "Dummy";
-            public string IconPath => "icon.svg";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
         }
 
         internal sealed class FirstControlPanelCategoryDescriptor : IControlPanelCategoryDescriptor
@@ -63,13 +63,13 @@ public class SettingsContainerTests
         public sealed class CloudControlPanelDescriptor : IControlPanelDescriptor<CloudControlPanel>
         {
             public string Title => "Cloud";
-            public string IconPath => "icon.svg";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
         }
     }
 
-    private static TestContext SetupTestContext()
+    private static BunitContext SetupTestContext()
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
         ctx.SetupBlazorSharedSettings(setup =>
         {
             setup.Services.AddControlPanelInfrastructure();
@@ -97,7 +97,7 @@ public class SettingsContainerTests
         using var ctx = SetupTestContext();
 
         // Act
-        var component = ctx.RenderComponent<SettingsContainer>();
+        var component = ctx.Render<SettingsContainer>();
 
         // Assert
         Assert.NotNull(component);
@@ -110,7 +110,7 @@ public class SettingsContainerTests
         using var ctx = SetupTestContext();
 
         // Act + Assert
-        var component = ctx.RenderComponent<SettingsContainer>();
+        var component = ctx.Render<SettingsContainer>();
 
         var categoryTitle = "Network";
 
@@ -139,7 +139,7 @@ public class SettingsContainerTests
         using var ctx = SetupTestContext();
 
         // Act + Assert
-        var component = ctx.RenderComponent<SettingsContainer>();
+        var component = ctx.Render<SettingsContainer>();
 
         var categoryTitle = "Network";
 
@@ -172,7 +172,7 @@ public class SettingsContainerTests
         using var ctx = SetupTestContext();
 
         // Act + Assert
-        var component = ctx.RenderComponent<SettingsContainer>();
+        var component = ctx.Render<SettingsContainer>();
 
         Assert.Empty(component.FindAll(".dirty-state"));
     }
@@ -181,7 +181,7 @@ public class SettingsContainerTests
     public async Task SaveErrorGetsDisplayed()
     {
         // Arrange
-        using var ctx = SetupTestContext();
+        await using var ctx = SetupTestContext();
 
         ctx.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
 
@@ -193,7 +193,7 @@ public class SettingsContainerTests
         controlPanelEditRegistry.Add(controlPanelEdit);
 
         // Act
-        var component = ctx.RenderComponent<SettingsContainer>();
+        var component = ctx.Render<SettingsContainer>();
 
         controlPanelEdit.Begin();
 

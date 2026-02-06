@@ -20,7 +20,7 @@ public sealed record SuiteBurger
     {
         StringBuilder sb = new();
 
-        sb.AppendFormat(CultureInfo.InvariantCulture, "Burger: {0:F2} lb", Weight);
+        sb.Append(CultureInfo.InvariantCulture, $"Burger: {Weight:F2} lb");
 
         if (Cheese)
             sb.Append(" Cheese");

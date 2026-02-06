@@ -84,11 +84,11 @@ internal sealed class TimeZoneDescriptorProvider : ITimeZoneDescriptorProvider
             TimeZoneId = timeZoneInfo.Id,
             DisplayName = displayName,
             BaseUtcOffset = timeZoneInfo.BaseUtcOffset,
-            ImageSrc = GetTimeZoneImageSrc(timeZoneInfo)
+            ImageUrl = GetTimeZoneImageSrc(timeZoneInfo)
         };
     }
 
-    private static string GetTimeZoneImageSrc(TimeZoneInfo timeZoneInfo)
+    private static Uri GetTimeZoneImageSrc(TimeZoneInfo timeZoneInfo)
     {
         string timeZoneHourOffsetFormat;
 
@@ -99,6 +99,6 @@ internal sealed class TimeZoneDescriptorProvider : ITimeZoneDescriptorProvider
 
         var filename = $"timezone_{timeZoneInfo.BaseUtcOffset.TotalHours.ToString(timeZoneHourOffsetFormat, CultureInfo.InvariantCulture)}.png";
 
-        return TimeZoneImageHelper.GetTimeZoneImageSrc(filename);
+        return TimeZoneImageHelper.GetTimeZoneImageUri(filename);
     }
 }

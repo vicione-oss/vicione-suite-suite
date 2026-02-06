@@ -7,8 +7,8 @@ public partial class OnboardingNavTile : NavTileBase
 {
     public const string Id = "54a7f368-6e52-4560-8221-91ea72f056ef";
 
-    private readonly string _iconSrc = GetIconSrc();
+    private readonly Uri _iconUrl = GetIconUrl();
 
-    private static string GetIconSrc()
-        => ModuleAssetHelper.GetModuleImagePath<SharedClientModule>($"onboarding-navtile/icon.svg");
+    private static Uri GetIconUrl()
+        => ModuleAssetHelper.GetModuleImageUrl<SharedClientModule>($"onboarding-navtile/icon.svg");
 }

@@ -16,7 +16,7 @@ public class IndexPageTests
     public void NavItemsGetRendered()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
 
         ctx.SetupSuiteServices(setup =>
         {
@@ -28,7 +28,7 @@ public class IndexPageTests
         });
 
         // Act
-        var component = ctx.RenderComponent<IndexPage>();
+        var component = ctx.Render<IndexPage>();
 
         // Assert
         var tileGroups = component.FindAll(".nav-tile-panel");
@@ -49,7 +49,7 @@ public class IndexPageTests
             new TestOtherEditorClientModule(),
         };
 
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServices(setup =>
         {
             setup.Services.AddNavTilesInfrastructure();
@@ -69,7 +69,7 @@ public class IndexPageTests
         ctx.JSInterop.Mode = JSRuntimeMode.Loose;
 
         // Act
-        var component = ctx.RenderComponent<IndexPage>();
+        var component = ctx.Render<IndexPage>();
 
         // Assert
         var navTileContainers = component.FindAll(".nav-tile-container");

@@ -8,7 +8,7 @@ namespace Blazor.Shared.Settings.DateAndTime.Components;
 public sealed partial class TimeZoneSettingsGroup : ComponentBase, IDisposable
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly string _timeZoneMapBackgroundImageSrc = TimeZoneImageHelper.GetTimeZoneImageSrc("bg.png");
+    private readonly Uri _timeZoneMapBackgroundImageSrc = TimeZoneImageHelper.GetTimeZoneImageUri("bg.png");
 
     private bool _disposed;
 

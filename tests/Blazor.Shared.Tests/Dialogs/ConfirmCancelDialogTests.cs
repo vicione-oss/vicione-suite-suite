@@ -12,11 +12,11 @@ public sealed class ConfirmCancelDialogTests
     public void ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ConfirmCancelDialog>();
+        var cut = ctx.Render<ConfirmCancelDialog>();
 
         // Assert
         Assert.NotNull(cut);
@@ -26,11 +26,11 @@ public sealed class ConfirmCancelDialogTests
     public void Should_Be_Rendered_Hidden()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ConfirmCancelDialog>();
+        var cut = ctx.Render<ConfirmCancelDialog>();
 
         // Assert
         Assert.NotNull(cut);
@@ -41,12 +41,12 @@ public sealed class ConfirmCancelDialogTests
     public void Should_Be_Rendered_Visible()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ConfirmCancelDialog>();
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        var cut = ctx.Render<ConfirmCancelDialog>();
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
 
         // Assert
         Assert.NotNull(cut);
@@ -59,15 +59,15 @@ public sealed class ConfirmCancelDialogTests
         // Arrange
         var onConfirmFired = false;
         var onCancelFired = false;
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ConfirmCancelDialog>(parameters => parameters
+        var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
             .Add(p => p.OnCancel, () => { onCancelFired = true; })
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         cut.FindDialogConfirmButton().Click();
 
         // Assert
@@ -82,15 +82,15 @@ public sealed class ConfirmCancelDialogTests
         // Arrange
         var onConfirmFired = false;
         var onCancelFired = false;
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ConfirmCancelDialog>(parameters => parameters
+        var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
             .Add(p => p.OnCancel, () => { onCancelFired = true; })
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         cut.FindDialogCancelButton().Click();
 
         // Assert
@@ -105,15 +105,15 @@ public sealed class ConfirmCancelDialogTests
         // Arrange
         var onConfirmFired = false;
         var onCancelFired = false;
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ConfirmCancelDialog>(parameters => parameters
+        var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
             .Add(p => p.OnCancel, () => { onCancelFired = true; })
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         cut.FindDialogCancelButton().Click();
 
         // Assert
@@ -127,14 +127,14 @@ public sealed class ConfirmCancelDialogTests
     {
         // Arrange
         var headerText = "Test header";
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ConfirmCancelDialog>(parameters => parameters
+        var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.HeaderText, headerText));
 
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         var headerElement = cut.Find(".dxbl-popup-header");
 
         // Assert
@@ -147,14 +147,14 @@ public sealed class ConfirmCancelDialogTests
     {
         // Arrange
         var body = "<p>Test body</p>";
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ConfirmCancelDialog>(parameters => parameters
+        var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.Body, body)
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         var bodyContainer = cut.Find(".content-container");
 
         // Assert

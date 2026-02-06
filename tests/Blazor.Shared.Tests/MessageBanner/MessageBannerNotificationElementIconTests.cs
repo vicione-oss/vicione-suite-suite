@@ -18,11 +18,11 @@ public sealed class MessageBannerNotificationElementIconTests
         // Arrange
         var state = new MessageBannerNotificationElementIconState();
 
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddScoped(_ => state);
 
         // Act
-        var renderedComponent = ctx.RenderComponent<MessageBannerNotificationElementIcon>();
+        var renderedComponent = ctx.Render<MessageBannerNotificationElementIcon>();
 
         // Assert
         renderedComponent.Should().NotBeNull();
@@ -34,15 +34,15 @@ public sealed class MessageBannerNotificationElementIconTests
         // Arrange
         var state = new MessageBannerNotificationElementIconState { Icon = SvgIcon.CSharp };
 
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.Services.AddScoped(_ => state);
 
         // Act
-        var renderedComponent = ctx.RenderComponent<MessageBannerNotificationElementIcon>();
+        var renderedComponent = ctx.Render<MessageBannerNotificationElementIcon>();
 
         // Assert
         var icon = renderedComponent.Find("img");
-        icon.GetAttribute("src").Should().Be(SvgIcon.CSharp.GetPath());
+        icon.GetAttribute("src").Should().Be(SvgIcon.CSharp.GetPath().OriginalString);
     }
 
     [Fact]

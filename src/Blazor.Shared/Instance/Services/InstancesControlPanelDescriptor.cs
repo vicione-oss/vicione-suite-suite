@@ -8,6 +8,6 @@ namespace Blazor.Shared.Instance.Services;
 
 internal sealed class InstancesControlPanelDescriptor : IControlPanelDescriptor<InstancesControlPanel>
 {
-    public string IconPath => SvgIcon.ClusterOverview.GetPath();
+    public Uri IconUrl => SvgIcon.ClusterOverview.GetPath();
     public string Title => TechnicalTerms.InstancePlural;
 }

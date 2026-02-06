@@ -10,5 +10,5 @@ internal sealed class ProxiesControlPanelDescriptor : IControlPanelDescriptor<Pr
 {
     public string Category => CommonVocabulary.Network;
     public string Title => TechnicalTerms.ProxyPlural;
-    public string IconPath => SvgIcon.HostConfig.GetPath();
+    public Uri IconUrl => SvgIcon.HostConfig.GetPath();
 }

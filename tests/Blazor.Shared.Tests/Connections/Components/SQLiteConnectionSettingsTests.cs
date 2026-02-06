@@ -16,11 +16,11 @@ public class SQLiteConnectionSettingsTests
     {
         // Arrange
         var connection = ConnectionFactory.SQLiteConnection.GetSQLiteConnection();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var component = ctx.RenderComponent<SQLiteConnectionSettings>(parameters =>
+        var component = ctx.Render<SQLiteConnectionSettings>(parameters =>
         {
             parameters.Add(c => c.Connection, connection);
         });
@@ -35,11 +35,11 @@ public class SQLiteConnectionSettingsTests
     {
         // Arrange
         var connection = ConnectionFactory.SQLiteConnection.GetSQLiteConnection();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var component = ctx.RenderComponent<SQLiteConnectionSettings>(parameters =>
+        var component = ctx.Render<SQLiteConnectionSettings>(parameters =>
         {
             parameters.Add(c => c.Connection, connection);
         });

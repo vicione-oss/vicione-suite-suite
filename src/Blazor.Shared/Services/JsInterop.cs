@@ -10,20 +10,17 @@ namespace Blazor.Shared.Services;
 
 public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) : IJsInterop
 {
-    private readonly IJSRuntime _jsRuntime = jsRuntime;
-    private readonly ILogger<JsInterop> _logger = logger;
-
     public async Task SetCookie(string name, string value, int days)
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.setCookie",
                 name, value, days);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(SetCookie));
+            logger.LogError(ex, nameof(SetCookie));
         }
     }
 
@@ -31,7 +28,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            return await _jsRuntime.InvokeAsync<string>(
+            return await jsRuntime.InvokeAsync<string>(
                 "ViciOne.Interop.getCookie",
                 name);
         }
@@ -45,13 +42,13 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.updateTitle",
                 title);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(UpdateTitle));
+            logger.LogError(ex, nameof(UpdateTitle));
         }
     }
 
@@ -59,27 +56,27 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.includeMeta",
                 id, attribute, name, content, key);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(IncludeMeta));
+            logger.LogError(ex, nameof(IncludeMeta));
         }
     }
 
-    public async Task IncludeLink(string id, string rel, string href, string type, string integrity, string crossorigin, string key)
+    public async Task IncludeLink(string id, string rel, Uri href, string type, string integrity, string crossorigin, string key)
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.includeLink",
-                id, rel, href, type, integrity, crossorigin, key);
+                id, rel, href.OriginalString, type, integrity, crossorigin, key);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(IncludeLink));
+            logger.LogError(ex, nameof(IncludeLink));
         }
     }
 
@@ -87,43 +84,41 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.includeLinks",
                 (object)links);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(IncludeLinks));
+            logger.LogError(ex, nameof(IncludeLinks));
         }
     }
 
-    public async Task IncludeScript(string id, string src, string integrity, string crossorigin, string content, string location, string key)
+    public async Task IncludeScript(string id, Uri src, string integrity, string crossorigin, string content, string location, string key)
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.includeScript",
-                id, src, integrity, crossorigin, content, location, key);
+                id, src.OriginalString, integrity, crossorigin, content, location, key);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(IncludeScript));
+            logger.LogError(ex, nameof(IncludeScript));
         }
     }
 
-    public async Task<IJSObjectReference?> IncludeModuleScript(string location)
+    public async Task<IJSObjectReference?> IncludeModuleScript(Uri location)
     {
-        IJSObjectReference? reference;
-
         try
         {
-            reference = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", location);
+            var reference = await jsRuntime.InvokeAsync<IJSObjectReference>("import", location.OriginalString);
 
             return reference;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(IncludeModuleScript));
+            logger.LogError(ex, nameof(IncludeModuleScript));
 
             return null;
         }
@@ -131,19 +126,19 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
 
     public Task<IJSObjectReference?> IncludeModuleScript<T>(string filename)
         where T : IModule
-        => IncludeModuleScript(ModuleAssetHelper.GetModuleJsPath<T>(filename));
+        => IncludeModuleScript(ModuleAssetHelper.GetModuleJsUrl<T>(filename));
 
     public async Task IncludeScripts(object[] scripts)
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.includeScripts",
                 (object)scripts);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(IncludeScripts));
+            logger.LogError(ex, nameof(IncludeScripts));
         }
     }
 
@@ -151,29 +146,29 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.removeElementsById",
                 prefix, first, last);
         }
         catch (Exception ex)
         {
             // happens if ModuleComponentBase wants to cleanup
-            _logger.LogDebug(ex, nameof(RemoveElementsById));
+            logger.LogDebug(ex, nameof(RemoveElementsById));
         }
     }
 
-    public async Task RemoveScriptsBySource(string source)
+    public async Task RemoveScriptsBySource(Uri source)
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.removeScriptsBySource",
-                source);
+                source.OriginalString);
         }
         catch (Exception ex)
         {
             // happens if ModuleComponentBase wants to cleanup
-            _logger.LogDebug(ex, nameof(RemoveScriptsBySource));
+            logger.LogDebug(ex, nameof(RemoveScriptsBySource));
         }
     }
 
@@ -181,7 +176,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            return await _jsRuntime.InvokeAsync<string>(
+            return await jsRuntime.InvokeAsync<string>(
                 "ViciOne.Interop.getElementByName",
                 name);
         }
@@ -195,13 +190,13 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.submitForm",
                 path, fields);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(SubmitForm));
+            logger.LogError(ex, nameof(SubmitForm));
         }
     }
 
@@ -209,7 +204,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            return await _jsRuntime.InvokeAsync<string[]>(
+            return await jsRuntime.InvokeAsync<string[]>(
                 "ViciOne.Interop.getFiles",
                 id);
         }
@@ -223,13 +218,13 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.uploadFiles",
                 posturl, folder, id);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(UploadFiles));
+            logger.LogError(ex, nameof(UploadFiles));
         }
     }
 
@@ -237,13 +232,13 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.refreshBrowser",
                 force, wait);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(RefreshBrowser));
+            logger.LogError(ex, nameof(RefreshBrowser));
         }
     }
 
@@ -251,13 +246,13 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.redirectBrowser",
                 url.AbsoluteUri, wait);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(RedirectBrowser));
+            logger.LogError(ex, nameof(RedirectBrowser));
         }
     }
 
@@ -265,7 +260,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            return await _jsRuntime.InvokeAsync<bool>(
+            return await jsRuntime.InvokeAsync<bool>(
                 "ViciOne.Interop.formValid",
                 form);
         }
@@ -279,13 +274,13 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.setElementAttribute",
                 id, attribute, value);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(SetElementAttribute));
+            logger.LogError(ex, nameof(SetElementAttribute));
         }
     }
 
@@ -302,11 +297,11 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         {
             using var streamRef = new DotNetStreamReference(content);
 
-            await _jsRuntime.InvokeVoidAsync("ViciOne.Download.fileFromStream", name, streamRef);
+            await jsRuntime.InvokeVoidAsync("ViciOne.Download.fileFromStream", name, streamRef);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, nameof(SetElementAttribute));
+            logger.LogError(ex, nameof(SetElementAttribute));
         }
     }
 }

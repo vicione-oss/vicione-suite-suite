@@ -33,9 +33,9 @@ public sealed class ProfileNotificationElementFlyoutContentTests
     public void Component_should_render()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx()
-            .AddTestAuthorization();
+            .AddAuthorization();
 
         ctx.Services
             .AddSingleton(_hostEnvironmentMock)
@@ -57,7 +57,7 @@ public sealed class ProfileNotificationElementFlyoutContentTests
             .Returns([new UserProfile { UserName = new UserName("MyDummy") }]);
 
         // Act
-        var component = ctx.RenderComponent<ProfileNotificationElementFlyoutContent>();
+        var component = ctx.Render<ProfileNotificationElementFlyoutContent>();
 
         // Assert
         Assert.NotNull(component);

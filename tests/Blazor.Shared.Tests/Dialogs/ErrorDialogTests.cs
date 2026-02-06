@@ -11,11 +11,11 @@ public sealed class ErrorDialogTests
     public void ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ErrorDialog>();
+        var cut = ctx.Render<ErrorDialog>();
 
         // Assert
         Assert.NotNull(cut);
@@ -25,11 +25,11 @@ public sealed class ErrorDialogTests
     public void Shoul_Be_Rendered_Hidden()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ErrorDialog>();
+        var cut = ctx.Render<ErrorDialog>();
 
         // Assert
         Assert.NotNull(cut);
@@ -40,12 +40,12 @@ public sealed class ErrorDialogTests
     public void Should_Be_Rendered_Visible()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ErrorDialog>();
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        var cut = ctx.Render<ErrorDialog>();
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
 
         // Assert
         Assert.NotNull(cut);
@@ -57,14 +57,14 @@ public sealed class ErrorDialogTests
     {
         // Arrange
         var onConfirmFired = false;
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ErrorDialog>(parameters => parameters
+        var cut = ctx.Render<ErrorDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         cut.WaitForElement("button", TimeSpan.FromSeconds(1));
         cut.Find(".btn-footer").Click();
 
@@ -78,14 +78,14 @@ public sealed class ErrorDialogTests
     {
         // Arrange
         var onConfirmFired = false;
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ErrorDialog>(parameters => parameters
+        var cut = ctx.Render<ErrorDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         cut.FindAll("button")[1].Click();
 
         // Assert
@@ -99,15 +99,15 @@ public sealed class ErrorDialogTests
         // Arrange
         var exceptionMessage = "Exception test message";
         var exception = new InvalidOperationException(exceptionMessage);
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<ErrorDialog>(parameters => parameters
+        var cut = ctx.Render<ErrorDialog>(parameters => parameters
             .Add(p => p.Exception, exception)
             .Add(p => p.IsDebugEnabled, true)
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         var bodyContainer = cut.Find(".content-container");
 
         // Assert

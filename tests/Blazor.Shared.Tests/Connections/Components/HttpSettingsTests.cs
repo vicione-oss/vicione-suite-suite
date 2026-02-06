@@ -16,11 +16,11 @@ public class HttpSettingsTests
     {
         // Arrange
         var connection = ConnectionFactory.HttpConnection.GetHttpConnection();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var component = ctx.RenderComponent<HttpSettings>(parameters =>
+        var component = ctx.Render<HttpSettings>(parameters =>
         {
             parameters.Add(c => c.Connection, connection);
         });
@@ -34,11 +34,11 @@ public class HttpSettingsTests
     {
         // Arrange
         var connection = ConnectionFactory.HttpConnection.GetHttpConnection();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var component = ctx.RenderComponent<HttpSettings>(parameters =>
+        var component = ctx.Render<HttpSettings>(parameters =>
         {
             parameters.Add(c => c.Connection, connection);
         });

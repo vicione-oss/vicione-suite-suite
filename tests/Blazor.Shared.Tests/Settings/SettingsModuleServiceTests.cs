@@ -27,7 +27,7 @@ public sealed class SettingsModuleServiceTests
     private sealed class FooControlPanelDescriptor : IControlPanelDescriptor<FooControlPanel>
     {
         public string Title => "SubCategory9";
-        public string IconPath => "icon.svg";
+        public Uri IconUrl => new("icon.svg", UriKind.Relative);
     }
 
     [ControlPanelCategory<TestControlPanelCategoryDescriptor>]
@@ -38,7 +38,7 @@ public sealed class SettingsModuleServiceTests
     private sealed class BarControlPanelDescriptor : IControlPanelDescriptor<BarControlPanel>
     {
         public string Title => "SubCategory14";
-        public string IconPath => "icon.svg";
+        public Uri IconUrl => new("icon.svg", UriKind.Relative);
     }
 
     [ControlPanelCategory<TestControlPanelCategoryDescriptor>]

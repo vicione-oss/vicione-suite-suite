@@ -6,6 +6,6 @@ namespace Blazor.Shared.Connections.Services;
 
 internal sealed class ConnectionsControlPanelDescriptor : IControlPanelDescriptor<ConnectionsControlPanel>
 {
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
     public string Title => TechnicalTerms.ConnectionPlural;
 }

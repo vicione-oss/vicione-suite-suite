@@ -30,7 +30,7 @@ public class PublishMessageConsumerTests
         await using var tester = new MassTransitTester(_configureServices);
         var command = new PublishMessage()
         {
-            Message = new JiTChat.Public.Contracts.ChatMessage()
+            Message = new Public.Contracts.ChatMessage()
             {
                 Message = "Eyy",
             }

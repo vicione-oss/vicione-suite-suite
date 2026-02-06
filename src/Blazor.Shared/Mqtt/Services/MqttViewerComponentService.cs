@@ -160,9 +160,9 @@ public sealed class MqttViewerComponentService
         }
 
         return new StringBuilder()
-            .AppendFormattedLine(CultureInfo.InvariantCulture, "Topic: {0}", _selectedMessage.Topic)
-            .AppendFormattedLine(CultureInfo.InvariantCulture, "Timestamp: {0:dd.MM.yyyy hh:mm:ss}", _selectedMessage.Timestamp)
-            .AppendFormattedLine(CultureInfo.InvariantCulture, "QoS: {0}", _selectedMessage.Qos)
+            .Append(CultureInfo.InvariantCulture, $"Topic: {_selectedMessage.Topic}").AppendLine()
+            .Append(CultureInfo.InvariantCulture, $"Timestamp: {_selectedMessage.Timestamp:dd.MM.yyyy hh:mm:ss}").AppendLine()
+            .Append(CultureInfo.InvariantCulture, $"QoS: {_selectedMessage.Qos}").AppendLine()
             .AppendLine()
             .Append(message)
             .ToString();

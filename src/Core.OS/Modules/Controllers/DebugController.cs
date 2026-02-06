@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Globalization;
+using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Text.Json;
@@ -15,8 +16,6 @@ namespace Core.OS.Modules.Controllers;
 public sealed class DebugController(
     IModuleHost contextProvider) : ControllerBase
 {
-    private readonly IModuleHost _contextProvider = contextProvider;
-
     [HttpGet("dump")]
     public ActionResult<string> GetInfos()
     {
@@ -31,7 +30,7 @@ public sealed class DebugController(
                 continue;
 
             sb.AppendLine();
-            sb.AppendFormattedLine("AssemblyLoadContext.{0}:", context.Name);
+            sb.Append(CultureInfo.CurrentCulture, $"AssemblyLoadContext.{context.Name}:").AppendLine();
             AddAssemblies(sb, context.Assemblies.OrderBy(a => a.GetName().Name));
         }
 
@@ -43,9 +42,9 @@ public sealed class DebugController(
         foreach (var assembly in assemblies)
         {
             if (!string.IsNullOrEmpty(assembly.Location))
-                sb.AppendFormattedLine("{0} version: {1} location:{2}", assembly.FullName, assembly.GetName()?.Version, assembly.Location);
+                sb.Append(CultureInfo.CurrentCulture, $"{assembly.FullName} version: {assembly.GetName().Version} location:{assembly.Location}").AppendLine();
             else
-                sb.AppendFormattedLine("{0} version: {1}", assembly.FullName, assembly.GetName()?.Version);
+                sb.Append(CultureInfo.CurrentCulture, $"{assembly.FullName} version: {assembly.GetName().Version}").AppendLine();
         }
     }
 
@@ -53,7 +52,7 @@ public sealed class DebugController(
     [Produces("application/json")]
     public ActionResult<string> GetSuiteContext()
     {
-        var context = JsonSerializer.Serialize(_contextProvider.GetContext(), DefaultJsonSerializerSettings.Default);
+        var context = JsonSerializer.Serialize(contextProvider.GetContext(), DefaultJsonSerializerSettings.Default);
 
         return Ok(context);
     }

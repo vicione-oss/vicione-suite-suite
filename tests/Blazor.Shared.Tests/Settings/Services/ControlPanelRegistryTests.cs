@@ -492,7 +492,7 @@ public sealed class ControlPanelRegistryTests
 
         public sealed class GeneralControlPanelDescriptor : IControlPanelDescriptor<GeneralControlPanel>
         {
-            public string IconPath => "icon.svg";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
             public string Title => "General";
         }
 
@@ -500,7 +500,7 @@ public sealed class ControlPanelRegistryTests
 
         public sealed class AppearanceControlPanelDescriptor : IControlPanelDescriptor<AppearanceControlPanel>
         {
-            public string IconPath => "icon.svg";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
             public string Title => "Appearance";
         }
 
@@ -514,7 +514,7 @@ public sealed class ControlPanelRegistryTests
 
         internal sealed class ThemeControlPanelDescriptor : IControlPanelDescriptor<ThemeControlPanel>
         {
-            public string IconPath => "icon.svg";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
             public string Title => "Theme";
         }
 
@@ -540,7 +540,7 @@ public sealed class ControlPanelRegistryTests
 
         public sealed class ControlPanelDescriptor : IControlPanelDescriptor<ControlPanel>
         {
-            public string IconPath => "icon.svg";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
             public string Title => "My sub-category";
         }
 

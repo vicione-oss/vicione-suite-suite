@@ -11,7 +11,7 @@ namespace Blazor.Shared.Onboarding.Components.WizardPages;
 public sealed partial class WelcomeWizardPage : WizardPage<WizardPageState>
 {
     private readonly string _descriptionBannerIconCssClass = MonochromeIconName.Wizard.GetCssClasses().ToSpaceSeparated();
-    private readonly string _deviceImageSrc = GetImageSrc("device.svg");
+    private readonly Uri _deviceImageUrl = GetImageUrl("device.svg");
 
     private bool _isWizardWithPasswordPage;
 
@@ -20,6 +20,6 @@ public sealed partial class WelcomeWizardPage : WizardPage<WizardPageState>
     protected override void OnInitialized()
         => _isWizardWithPasswordPage = WizardPageRegistry.Any(i => i.ComponentType == typeof(PasswordWizardPage));
 
-    private static string GetImageSrc(string filename)
-        => ModuleAssetHelper.GetModuleImagePath<SharedClientModule>($"onboarding-wizard/welcome-page/{filename}");
+    private static Uri GetImageUrl(string filename)
+        => ModuleAssetHelper.GetModuleImageUrl<SharedClientModule>($"onboarding-wizard/welcome-page/{filename}");
 }

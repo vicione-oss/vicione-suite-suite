@@ -18,9 +18,9 @@ public sealed class TagControlPanelTests
 {
     private readonly ISuiteConnectionService _connectionService = Substitute.For<ISuiteConnectionService>();
 
-    private static TestContext SetupTestContext(ISuiteConnectionService connectionService)
+    private static BunitContext SetupTestContext(ISuiteConnectionService connectionService)
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
 
         ctx.SetupSuiteServices(setup =>
         {
@@ -42,7 +42,7 @@ public sealed class TagControlPanelTests
         var state = new TagControlPanelState();
 
         // Act
-        var component = ctx.RenderComponent<TagControlPanel>(p => p.Add(c => c.State, state));
+        var component = ctx.Render<TagControlPanel>(p => p.Add(c => c.State, state));
 
         // Assert
         Assert.NotNull(component);
@@ -56,7 +56,7 @@ public sealed class TagControlPanelTests
 
         _connectionService.GetTag(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(tag);
 
-        using var ctx = SetupTestContext(_connectionService);
+        await using var ctx = SetupTestContext(_connectionService);
 
         var state = new TagControlPanelState { TagId = tag.Id };
 
@@ -64,12 +64,12 @@ public sealed class TagControlPanelTests
         await resetHandler.Reset(state, CancellationToken.None);
 
         // Act
-        var component = ctx.RenderComponent<TagControlPanel>(parameters =>
+        var component = ctx.Render<TagControlPanel>(parameters =>
         {
             parameters.Add(c => c.State, state);
         });
 
-        component.GetSettingsFieldChild<TagControlPanel, CheckBox<bool>>(CommonVocabulary.Protected);
+        component.GetSettingsFieldChild<CheckBox<bool>>(CommonVocabulary.Protected);
 
         // Assert
         component.AssertSettingsFieldTextBox(TechnicalTerms.Id, tag.Id.ToString());

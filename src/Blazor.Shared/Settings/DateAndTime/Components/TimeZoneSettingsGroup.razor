@@ -3,11 +3,11 @@
 <SettingsGroup Title="@Localization.TimeZoneSettingsGroup.Title">
     <SettingsInformation>
         <div class="time-zone-map">
-            <img src="@_timeZoneMapBackgroundImageSrc" class="time-zone-map-bg" alt="@CommonVocabulary.TimeZonePlural" />
+            <img src="@_timeZoneMapBackgroundImageSrc.OriginalString" class="time-zone-map-bg" alt="@CommonVocabulary.TimeZonePlural" />
 
             @if (_selectedTimeZoneDescriptor.HasValue)
             {
-                <img src="@_selectedTimeZoneDescriptor.Value.ImageSrc" class="time-zone" alt="@_selectedTimeZoneDescriptor.Value.DisplayName" />
+                <img src="@_selectedTimeZoneDescriptor.Value.ImageUrl.OriginalString" class="time-zone" alt="@_selectedTimeZoneDescriptor.Value.DisplayName" />
             }
         </div>
     </SettingsInformation>

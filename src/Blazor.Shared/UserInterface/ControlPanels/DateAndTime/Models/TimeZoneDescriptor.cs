@@ -4,4 +4,4 @@ public readonly record struct TimeZoneDescriptor(
     string TimeZoneId,
     string DisplayName,
     TimeSpan BaseUtcOffset,
-    string ImageSrc);
+    Uri ImageUrl);

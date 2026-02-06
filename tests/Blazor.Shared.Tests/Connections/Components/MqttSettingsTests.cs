@@ -16,12 +16,12 @@ public class MqttSettingsTests
     {
         // Arrange
         var connection = ConnectionFactory.MqttConnection.GetMqttConnection();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
         ctx.SetupBlazorUiComponents();
 
         // Act + Assert
-        _ = ctx.RenderComponent<MqttSettings>(parameters =>
+        _ = ctx.Render<MqttSettings>(parameters =>
         {
             parameters.Add(c => c.Connection, connection);
         });
@@ -32,12 +32,12 @@ public class MqttSettingsTests
     {
         // Arrange
         var connection = ConnectionFactory.MqttConnection.GetMqttConnection();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
         ctx.SetupBlazorUiComponents();
 
         // Act
-        var component = ctx.RenderComponent<MqttSettings>(parameters =>
+        var component = ctx.Render<MqttSettings>(parameters =>
         {
             parameters.Add(c => c.Connection, connection);
         });

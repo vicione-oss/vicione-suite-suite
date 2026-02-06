@@ -84,7 +84,7 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
                     result.Add(new SettingsEntry
                     {
                         Title = controlPanelRegistryItem.Descriptor.Title,
-                        IconPath = controlPanelRegistryItem.Descriptor.IconPath,
+                        IconUrl = controlPanelRegistryItem.Descriptor.IconUrl,
                         ControlPanelRegistryItem = controlPanelRegistryItem,
                         Position = controlPanelRegistryItem.Descriptor.Position
                     });

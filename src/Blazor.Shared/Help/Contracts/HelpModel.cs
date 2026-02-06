@@ -8,5 +8,5 @@ public sealed class HelpModel : ICardModel
     public required string Title { get; set; }
     public required string TeaserText { get; set; }
     public required string Text { get; set; }
-    public required string TeaserImagePath { get; set; }
+    public Uri? TeaserImageUrl { get; set; }
 }

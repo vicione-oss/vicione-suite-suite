@@ -15,7 +15,7 @@ public sealed partial class HelpNotificationElementFlyoutContent : ComponentBase
 
     protected override void OnInitialized()
     {
-        var teaserImagePath = ModuleAssetHelper.GetModuleImagePath<SharedClientModule>("teaser-image.png");
+        var teaserImagePath = ModuleAssetHelper.GetModuleImageUrl<SharedClientModule>("teaser-image.png");
 
         _helpItems.Add(new Contracts.HelpModel
         {
@@ -25,7 +25,7 @@ public sealed partial class HelpNotificationElementFlyoutContent : ComponentBase
                 "ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et",
             Text = "Lorem ipsum dolor sit amet, consetetur <link text:sadipscing helpId:dc7341ae-1b0d-483c-8512-790fde054a80> elitr, sed diam nonumy eirmod tempor invidunt " +
                 "ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et",
-            TeaserImagePath = teaserImagePath
+            TeaserImageUrl = teaserImagePath
         });
         _helpItems.Add(new Contracts.HelpModel
         {
@@ -35,7 +35,6 @@ public sealed partial class HelpNotificationElementFlyoutContent : ComponentBase
                 "ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et",
             Text = "Lorem ipsum dolor sit amet, consetetur <link text:sadipscing helpId:14c68d5a-68fa-47b2-bafd-f0ecb62223ea> elitr, sed diam nonumy eirmod tempor invidunt " +
                 "ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et",
-            TeaserImagePath = string.Empty
         });
         _helpItems.Add(new Contracts.HelpModel
         {
@@ -61,7 +60,7 @@ public sealed partial class HelpNotificationElementFlyoutContent : ComponentBase
                 "aliquip ex ea commodo consequat.   \r\n\r\nDuis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla " +
                 "facilisis.   \r\n\r\nAt vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. " +
                 "Lorem ipsum dolor sit amet, consetetur",
-            TeaserImagePath = teaserImagePath
+            TeaserImageUrl = teaserImagePath
         });
         _helpItems.Add(new Contracts.HelpModel
         {
@@ -70,7 +69,6 @@ public sealed partial class HelpNotificationElementFlyoutContent : ComponentBase
             TeaserText = "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt " +
                 "ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et",
             Text = string.Empty,
-            TeaserImagePath = string.Empty
         });
     }
 

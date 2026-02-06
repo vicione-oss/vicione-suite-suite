@@ -8,6 +8,6 @@ namespace Blazor.Shared.UserInterface.ControlPanels.DateAndTime.Services;
 internal sealed class DateAndTimeControlPanelDescriptor : IControlPanelDescriptor<DateAndTimeControlPanel>
 {
     public string Title => string.Format(CultureInfo.CurrentCulture, CommonPatterns.ThisAndThat, CommonVocabulary.Date, CommonVocabulary.Time);
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
     public int? Position => null;
 }

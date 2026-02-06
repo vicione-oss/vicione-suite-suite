@@ -210,7 +210,7 @@ public sealed class ControlPanelEditRegistryTests
         var services = new ServiceCollection()
             .AddControlPanelEditRegistry();
 
-        using var serviceProvider = services.BuildServiceProvider();
+        await using var serviceProvider = services.BuildServiceProvider();
 
         var controlPanelRegistryEditChangedCounter = 0;
 

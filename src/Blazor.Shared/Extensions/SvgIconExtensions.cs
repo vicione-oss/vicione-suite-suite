@@ -6,9 +6,9 @@ namespace Blazor.Shared.Extensions;
 
 public static class SvgIconExtensions
 {
-    public static string GetPath(this SvgIcon icon)
+    public static Uri GetPath(this SvgIcon icon)
     {
-        var iconPath = ModuleAssetHelper.GetModuleIconPath<SharedClientModule>($"{icon.ToString().ToHyphenSeparated()}.svg");
+        var iconPath = ModuleAssetHelper.GetModuleIconUrl<SharedClientModule>($"{icon.ToString().ToHyphenSeparated()}.svg");
 
         return iconPath;
     }

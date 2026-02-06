@@ -3,12 +3,13 @@ using Bunit;
 using DevExpress.Blazor;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Components;
+using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Tests;
 
 internal static class IRenderedComponentExtensions
 {
-    extension<TComponent>(IRenderedComponent<TComponent> component) where TComponent : IComponent
+    extension(IRenderedComponent<IComponent> component)
     {
         public void AssertDxTextBoxValue(string id, string? expectedValue)
         {
@@ -30,13 +31,23 @@ internal static class IRenderedComponentExtensions
             var tagBox = tagBoxes.First(k => k.Instance.Id == id);
             tagBox.Instance.Tags.Should().BeEquivalentTo(tags);
         }
+    }
+    
 
+    extension<TComponent>(IRenderedComponent<TComponent> component) where TComponent : IComponent
+        {
         public IElement GetButtonByInnerHtml(string text) => component.FindAll("button").First(b => b.InnerHtml.Contains(text, StringComparison.Ordinal));
 
         public IElement GetFooterButton(string text)
             => component
                 .FindAll(".btn-footer")
                 .First(b => b.InnerHtml.Contains(text, StringComparison.Ordinal));
+        
+        public IElement FindDialogConfirmButton()
+            => component.FindAll("button").First(b => b.InnerHtml.Contains(CommonVocabulary.Confirm, StringComparison.Ordinal));
+
+        public IElement FindDialogCancelButton()
+            => component.FindAll("button").First(b => b.InnerHtml.Contains(CommonVocabulary.Cancel, StringComparison.Ordinal));
     }
 
     public static void DxSpinEditChange<TValue>(this IRenderedComponent<DxSpinEdit<TValue>> spinEdit, TValue text)

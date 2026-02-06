@@ -107,7 +107,7 @@ public class ModuleManagementServiceTests
         public async Task Should_preset_available_modules_option_values_with_defaults()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             SetupModuleMetadata(_moduleBundles);
 
@@ -131,7 +131,7 @@ public class ModuleManagementServiceTests
         public async Task Should_return_empty_result_if_no_modules_are_installed_or_available()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             SetupModuleMetadata();
 
@@ -146,7 +146,7 @@ public class ModuleManagementServiceTests
         public async Task Should_return_installed_modules()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             SetupModuleMetadata(_moduleBundles);
 
@@ -164,7 +164,7 @@ public class ModuleManagementServiceTests
         public async Task Should_send_command()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
 
@@ -179,7 +179,7 @@ public class ModuleManagementServiceTests
         public async Task Should_keep_installed_modules()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
 
@@ -197,7 +197,7 @@ public class ModuleManagementServiceTests
         public async Task Should_update_installed_modules()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
 
@@ -217,7 +217,7 @@ public class ModuleManagementServiceTests
         public async Task Should_send_available_modules_to_be_installed()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
 

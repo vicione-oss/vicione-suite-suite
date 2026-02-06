@@ -23,7 +23,7 @@ public sealed class ConnectionControlPanelResetHandlerTests
             .AddScoped(_ => Substitute.For<IConnectionTypeRegistry>().Setup())
             .AddScoped<IControlPanelResetHandler<ConnectionControlPanelState>, ConnectionControlPanelResetHandler>();
 
-        using var serviceProvider = services.BuildServiceProvider();
+        await using var serviceProvider = services.BuildServiceProvider();
 
         var state = new ConnectionControlPanelState { ConnectionId = connection.Id };
 
