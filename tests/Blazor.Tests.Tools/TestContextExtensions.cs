@@ -11,9 +11,9 @@ namespace Blazor.Tests.Tools;
 
 public static class TestContextExtensions
 {
-    extension(TestContext ctx)
+    extension(BunitContext ctx)
     {
-        public TestContext SetupSuiteServicesWithBlazorDx(Action<ClientServiceConfigurator>? setup = null)
+        public BunitContext SetupSuiteServicesWithBlazorDx(Action<ClientServiceConfigurator>? setup = null)
         {
             ctx.SetupSuiteServices(setup);
 
@@ -31,7 +31,7 @@ public static class TestContextExtensions
             return ctx;
         }
 
-        public TestContext SetupBlazorUiComponents(Action<ClientServiceConfigurator>? setup = null)
+        public BunitContext SetupBlazorUiComponents(Action<ClientServiceConfigurator>? setup = null)
         {
             ctx.Services.AddCheckBox()
                 .AddShortSpinEdit()

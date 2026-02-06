@@ -28,7 +28,7 @@ public static class Constants
     /// </summary>
     public const int CommandTimeoutMs = 10_000;
 
-    public static readonly Uri WallpaperBaseUri = new(ModuleAssetHelper.GetModuleImagePath<SharedClientModule>("wallpapers"), UriKind.Relative);
+    public static readonly Uri WallpaperBaseUri = ModuleAssetHelper.GetModuleImageUrl<SharedClientModule>("wallpapers");
     public static readonly WallpaperImage WallpaperImage = WallpaperImage.BlackAbstractTriangles;
 
     public static readonly CultureInfo[] SupportedCultures =

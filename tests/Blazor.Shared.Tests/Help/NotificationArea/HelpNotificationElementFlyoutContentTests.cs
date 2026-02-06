@@ -14,11 +14,11 @@ public sealed class HelpNotificationElementFlyoutContentTests
     public void Component_should_render()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
 
         // Act
-        var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+        var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
         // Assert
         Assert.NotNull(component);
@@ -29,10 +29,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public void Shows_all_help_items()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             component.Markup.Should().Contain("Help 1");
             component.Markup.Should().Contain("Help 2");
@@ -43,10 +43,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public async Task Shows_filtered_help_itemsAsync()
         {
-            using var ctx = new TestContext();
+            await using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
             var textbox = component.Find(".text-box");
             var args = new ChangeEventArgs()
             {
@@ -67,10 +67,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public void Shows_previous_help()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
             component.Find(".link").Click();
@@ -85,10 +85,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public void Shows_card_view()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more")).Click();
             component.Find(".arrow-back").Click();
@@ -105,10 +105,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public void Should_redirect_to_listed_help_items()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
             component.Find(".link").Click();
@@ -123,10 +123,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public async Task Should_reset_filter()
         {
-            using var ctx = new TestContext();
+            await using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
             var textbox = component.Find(".text-box");
             var args = new ChangeEventArgs()
             {
@@ -149,10 +149,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public void Should_open_linked_help_detail()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
             component.Find(".link").Click();
@@ -169,10 +169,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public void Should_open_help_detail()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more")).Click();
 
@@ -185,10 +185,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public void Removes_help_card()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
-            var component = ctx.RenderComponent<HelpNotificationElementFlyoutContent>();
+            var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             component.Find(".close").Click();
 

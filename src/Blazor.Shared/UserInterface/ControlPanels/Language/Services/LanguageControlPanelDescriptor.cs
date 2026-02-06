@@ -7,6 +7,6 @@ namespace Blazor.Shared.UserInterface.ControlPanels.Language.Services;
 internal sealed class LanguageControlPanelDescriptor : IControlPanelDescriptor<LanguageControlPanel>
 {
     public string Title => CommonVocabulary.Language;
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
     public int? Position => null;
 }

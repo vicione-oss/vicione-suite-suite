@@ -33,7 +33,7 @@ public class NetworkInterfaceControlPanelTests
         mediator.Request<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>(Arg.Any<GetDHCPLeaseInformation>(), Arg.Any<CancellationToken>())
             .Returns(new GetDHCPLeaseInformationResponse());
 
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupBlazorSharedSettings(setup =>
         {
             setup.Services.AddSingleton(systemConfigurationService);
@@ -52,7 +52,7 @@ public class NetworkInterfaceControlPanelTests
             new ControlPanelNetworkCategoryDescriptor());
 
         // Act
-        var component = ctx.RenderComponent<NetworkInterfaceControlPanel>(builder => builder
+        var component = ctx.Render<NetworkInterfaceControlPanel>(builder => builder
             .Add(p => p.State, controlPanelState)
             .AddCascadingValue(registryItem));
 

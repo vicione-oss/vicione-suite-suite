@@ -56,7 +56,7 @@ public class MqttViewerComponentTests
     private static IElement FindConnectButton(IRenderedComponent<MqttViewerComponent> component)
         => component.Find(ConnectSpanSelector).ParentElement ?? throw new ElementNotFoundException(ConnectSpanSelector);
 
-    private static void ConfigureTestServices(TestContext ctx, List<Connection>? connections = null, List<MessageModel>? messages = null)
+    private static void ConfigureTestServices(BunitContext ctx, List<Connection>? connections = null, List<MessageModel>? messages = null)
     {
         ctx.SetupSuiteServicesWithBlazorDx(s =>
         {
@@ -81,7 +81,7 @@ public class MqttViewerComponentTests
         [Fact(Skip = SkipFailing)]
         public void Sets_variables()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     new Connection()
@@ -110,7 +110,7 @@ public class MqttViewerComponentTests
                     },
                 ]);
 
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
 
             var input = component.Find(DxSelectors.TextEditCss);
             input.OuterHtml.Should().Contain("field-text=\"test Connection1\"");
@@ -120,11 +120,11 @@ public class MqttViewerComponentTests
         public void Sets_message_when_no_connections_are_configured()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
 
             // Assert
             component.WaitForElement(".dxbl-modal-content", _extraWaitTime).InnerHtml.Should().Contain("no_connections");
@@ -137,11 +137,11 @@ public class MqttViewerComponentTests
         public async Task Returns_when_selected_connection_is_null()
         {
             // Arrange
-            using var ctx = new TestContext();
+            await using var ctx = new BunitContext();
             ConfigureTestServices(ctx);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
 
             // Assert
@@ -153,14 +153,14 @@ public class MqttViewerComponentTests
         public async Task Calls_connect_on_client()
         {
             // Arrange
-            using var ctx = new TestContext();
+            await using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
                 ]);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
 
             // Assert
@@ -179,7 +179,7 @@ public class MqttViewerComponentTests
         public void Shows_error_message_on_failure()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
@@ -190,7 +190,7 @@ public class MqttViewerComponentTests
                 .Do(_ => service.ErrorOccured += Raise.Event<Func<string, Task>>("Test Message"));
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             service.Connect(new());
             FindConnectButton(component).Click();
             FindConnectButton(component).Click();
@@ -209,7 +209,7 @@ public class MqttViewerComponentTests
         public async Task Calls_disconnect_on_client()
         {
             // Arrange
-            using var ctx = new TestContext();
+            await using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
@@ -231,7 +231,7 @@ public class MqttViewerComponentTests
                 ]));
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
             service.Connected += Raise.Event<Func<Task>>();
             service.IsConnected.Returns(true);
@@ -250,7 +250,7 @@ public class MqttViewerComponentTests
         public void Clears_message_list()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
@@ -260,7 +260,7 @@ public class MqttViewerComponentTests
                 ]);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
             component.Find(ToggleTextFilterButtonSelector).Click();
             component.Find(DxSelectors.TextBox).DxTextEditChange("temp");
@@ -277,7 +277,7 @@ public class MqttViewerComponentTests
         public void Shows_message_in_message_detail_box_on_all_messages_grid_click()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
@@ -287,7 +287,7 @@ public class MqttViewerComponentTests
                 ]);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
 
             // Assert
@@ -303,7 +303,7 @@ public class MqttViewerComponentTests
         public void Shows_message_details_on_filtered_messages_grid_click()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             var message = new MessageModel
             {
                 Topic = "house/room/temperature",
@@ -319,7 +319,7 @@ public class MqttViewerComponentTests
                 ]);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
 
             var service = ctx.Services.GetRequiredService<IMqttService>();
@@ -328,7 +328,7 @@ public class MqttViewerComponentTests
             component.Find(ToggleNodeFilterButtonSelector).Click();
             component.Find(ExpandNodeButtonSelector).Click();
             component.FindAll(FilterButtonSelector).Last().Click();
-            component.FindAll("td", true).First(e => e.InnerHtml.Contains("test", StringComparison.Ordinal)).Click();
+            component.FindAll("td").First(e => e.InnerHtml.Contains("test", StringComparison.Ordinal)).Click();
 
             // Assert
             component.WaitForAssertion(() =>
@@ -344,7 +344,7 @@ public class MqttViewerComponentTests
         public void Set_correct_reload_interval()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 messages:
                 [
@@ -352,7 +352,7 @@ public class MqttViewerComponentTests
                 ]);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
 
             // open combobox
             component.FindAll(DxSelectors.ComboBox)
@@ -374,7 +374,7 @@ public class MqttViewerComponentTests
         public void Expands_note_on_chevron_click()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
@@ -384,7 +384,7 @@ public class MqttViewerComponentTests
                 ]);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
 
             var service = ctx.Services.GetRequiredService<IMqttService>();
@@ -406,14 +406,14 @@ public class MqttViewerComponentTests
         public void Does_not_expand_on_magnify_click()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
                 ]);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
 
             var service = ctx.Services.GetRequiredService<IMqttService>();
@@ -460,7 +460,7 @@ public class MqttViewerComponentTests
                 },
             };
 
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
@@ -468,7 +468,7 @@ public class MqttViewerComponentTests
                 messageModels);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
             component.Find(ToggleTextFilterButtonSelector).Click();
             component.Find(DxSelectors.TextBox).DxTextEditChange("temp");
@@ -488,14 +488,14 @@ public class MqttViewerComponentTests
         public void Sets_correct_tree_on_incoming_message()
         {
             // Arrange
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
                 [
                     _localMqttConnection,
                 ]);
 
             // Act
-            var component = ctx.RenderComponent<MqttViewerComponent>();
+            var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
 
             var service = ctx.Services.GetRequiredService<IMqttService>();

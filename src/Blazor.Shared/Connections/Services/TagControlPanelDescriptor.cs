@@ -7,6 +7,6 @@ namespace Blazor.Shared.Connections.Services;
 internal sealed class TagControlPanelDescriptor : IControlPanelDescriptor<TagControlPanel>
 {
     public string Title => TechnicalTerms.Tag;
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
     public bool ShowInNavigation => false;
 }

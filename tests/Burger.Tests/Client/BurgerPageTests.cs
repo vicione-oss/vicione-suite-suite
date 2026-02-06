@@ -15,7 +15,7 @@ public sealed class BurgerPageTests
     public void PageGetsRendered()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx(setup =>
         {
             setup.Services.AddLocalization<BurgerClientModule>();
@@ -23,7 +23,7 @@ public sealed class BurgerPageTests
         ctx.Services.AddSingleton<OrderBurgerService>();
 
         // Act
-        var sut = ctx.RenderComponent<BurgerPage>();
+        var sut = ctx.Render<BurgerPage>();
 
         // Assert
         Assert.NotNull(sut);

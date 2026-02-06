@@ -19,10 +19,10 @@ namespace Blazor.Shared.Tests.Connections.ControlPanels;
 
 public class TagsControlPanelPageContentTests
 {
-    private static TestContext SetupTestContext(Action<ClientServiceConfigurator>? configure = null,
+    private static BunitContext SetupTestContext(Action<ClientServiceConfigurator>? configure = null,
         Action<IControlPanelRequest>? controlPanelRequestSetup = null)
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
         ctx.Services.AddControlPanelInfrastructure();
         ctx.Services.AddConnectionsControlPanel();
 
@@ -94,7 +94,7 @@ public class TagsControlPanelPageContentTests
             using var ctx = SetupTestContext();
 
             // Act + Assert
-            Assert.NotNull(ctx.RenderComponent<TagsControlPanelPageContent>(b =>
+            Assert.NotNull(ctx.Render<TagsControlPanelPageContent>(b =>
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask)));
         }
@@ -111,7 +111,7 @@ public class TagsControlPanelPageContentTests
             ConnectionsControlPanelState? state = null;
             var tags = CreateTags();
 
-            using var ctx = SetupTestContext(setup =>
+            await using var ctx = SetupTestContext(setup =>
             {
                 state = new(setup.ClientMediator)
                 {
@@ -124,7 +124,7 @@ public class TagsControlPanelPageContentTests
             });
 
             // Act + Assert
-            var component = ctx.RenderComponent<TagsControlPanelPageContent>(b =>
+            var component = ctx.Render<TagsControlPanelPageContent>(b =>
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
@@ -151,7 +151,7 @@ public class TagsControlPanelPageContentTests
             ConnectionsControlPanelState? state = null;
             var tags = CreateTags();
 
-            using var ctx = SetupTestContext(setup =>
+            await using var ctx = SetupTestContext(setup =>
             {
                 state = new(setup.ClientMediator)
                 {
@@ -164,7 +164,7 @@ public class TagsControlPanelPageContentTests
             });
 
             // Act + Assert
-            var component = ctx.RenderComponent<TagsControlPanelPageContent>(b =>
+            var component = ctx.Render<TagsControlPanelPageContent>(b =>
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
@@ -204,7 +204,7 @@ public class TagsControlPanelPageContentTests
             });
 
             // Act
-            var component = ctx.RenderComponent<TagsControlPanelPageContent>(b =>
+            var component = ctx.Render<TagsControlPanelPageContent>(b =>
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
@@ -228,7 +228,7 @@ public class TagsControlPanelPageContentTests
             ConnectionsControlPanelState? state = null;
             var tags = CreateTags();
 
-            using var ctx = SetupTestContext(setup =>
+            await using var ctx = SetupTestContext(setup =>
             {
                 state = new(setup.ClientMediator)
                 {
@@ -241,7 +241,7 @@ public class TagsControlPanelPageContentTests
             });
 
             // Act + Assert
-            var component = ctx.RenderComponent<TagsControlPanelPageContent>(b =>
+            var component = ctx.Render<TagsControlPanelPageContent>(b =>
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
@@ -283,7 +283,7 @@ public class TagsControlPanelPageContentTests
                 controlPanelRequest = controlPanelRequestSetup;
             });
 
-            var component = ctx.RenderComponent<TagsControlPanelPageContent>(b =>
+            var component = ctx.Render<TagsControlPanelPageContent>(b =>
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
@@ -325,7 +325,7 @@ public class TagsControlPanelPageContentTests
                 controlPanelRequest = controlPanelRequestSetup;
             });
 
-            var component = ctx.RenderComponent<TagsControlPanelPageContent>(b =>
+            var component = ctx.Render<TagsControlPanelPageContent>(b =>
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 

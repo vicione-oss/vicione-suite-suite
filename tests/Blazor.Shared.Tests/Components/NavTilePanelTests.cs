@@ -20,7 +20,7 @@ using Sdk.Client.NavTiles.Extensions;
 using Sdk.Client.NavTiles.Services;
 using Sdk.Client.Services;
 using Xunit;
-using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Blazor.Shared.Tests.Components;
 
@@ -69,7 +69,7 @@ public sealed class NavTilePanelTests
     public void Should_render_navigation_tiles_based_on_authorization_configuration(AuthorizationScenario authorizationScenario)
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
 
         ctx.Services.AddSdkAuthorization();
         ctx.Services.AddSingleton(Substitute.For<ILayoutService>());
@@ -79,7 +79,7 @@ public sealed class NavTilePanelTests
         ctx.Services.AddNavTiles<TestClientModuleA>();
 
         // Act
-        var renderedComponent = ctx.RenderComponent<NavTilePanel>();
+        var renderedComponent = ctx.Render<NavTilePanel>();
 
         // Assert
         AssertRenderedHtml(renderedComponent, authorizationScenario);
@@ -89,7 +89,7 @@ public sealed class NavTilePanelTests
     public async Task Should_update_itself_on_authentication_state_change()
     {
         // Arrange
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
 
         ctx.Services.AddSdkAuthorization();
         ctx.Services.AddSingleton(Substitute.For<ILayoutService>());
@@ -101,7 +101,7 @@ public sealed class NavTilePanelTests
 
         var navTileRegistry = ctx.Services.GetRequiredService<INavTileRegistry<TestClientModuleA>>();
 
-        var renderedComponent = ctx.RenderComponent<NavTilePanel>();
+        var renderedComponent = ctx.Render<NavTilePanel>();
 
         var authenticationStateProvider = ctx.Services.GetRequiredService<AuthenticationStateProviderMock>();
 
@@ -173,9 +173,9 @@ public sealed class NavTilePanelTests
 
         public void Deserialize(IXunitSerializationInfo info)
         {
-            UserName = info.GetValue<string>(nameof(UserName));
-            ModuleAuthorizationClaims = info.GetValue<string[]>(nameof(ModuleAuthorizationClaims)).Select(claimJson => JsonSerializer.Deserialize<ModuleAuthorizationClaim>(claimJson));
-            ExpectedNavTileContents = info.GetValue<string[]>(nameof(ExpectedNavTileContents));
+            UserName = info.GetValue<string>(nameof(UserName)) ?? string.Empty;
+            ModuleAuthorizationClaims = (info.GetValue<string[]>(nameof(ModuleAuthorizationClaims)) ?? []).Select(claimJson => JsonSerializer.Deserialize<ModuleAuthorizationClaim>(claimJson));
+            ExpectedNavTileContents = info.GetValue<string[]>(nameof(ExpectedNavTileContents)) ?? [];
         }
     }
 }

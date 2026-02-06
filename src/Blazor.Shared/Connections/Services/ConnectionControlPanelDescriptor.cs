@@ -8,7 +8,7 @@ internal sealed class ConnectionControlPanelDescriptor : IControlPanelDescriptor
 {
     public string Title => TechnicalTerms.Connection;
 
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
 
     public bool ShowInNavigation => false;
 }

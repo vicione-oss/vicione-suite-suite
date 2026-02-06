@@ -16,10 +16,10 @@ public class SystemMonitoringComponentTests
     private readonly IJsInterop _jsInterop = Substitute.For<IJsInterop>();
 
     [Fact]
-    public void Should_render_component()
+    public async Task Should_render_component()
     {
         // Arrange
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         var timeProvider = Substitute.For<TimeProvider>();
         timeProvider.LocalTimeZone.Returns(TimeZoneInfo.Utc);
 
@@ -30,7 +30,7 @@ public class SystemMonitoringComponentTests
             .AddKeyedScoped(Sdk.Constants.ClientTimeProviderServiceKey, (_, __) => timeProvider);
 
         // Act
-        var component = ctx.RenderComponent<SystemMonitoringComponent>();
+        var component = ctx.Render<SystemMonitoringComponent>();
 
         // Assert
         Assert.NotNull(component);
@@ -44,7 +44,7 @@ public class SystemMonitoringComponentTests
         var timeProvider = Substitute.For<TimeProvider>();
         timeProvider.LocalTimeZone.Returns(TimeZoneInfo.Utc);
 
-        using (var ctx = new TestContext())
+        await using (var ctx = new BunitContext())
         {
             ctx.Services
             .AddSingleton(_jsInterop)
@@ -55,7 +55,7 @@ public class SystemMonitoringComponentTests
             _jsInterop.IncludeModuleScript<SharedClientModule>("system-monitoring-component.js").Returns(_jsModuleReference);
 
             // Act
-            var component = ctx.RenderComponent<SystemMonitoringComponent>();
+            var component = ctx.Render<SystemMonitoringComponent>();
             Assert.NotNull(component);
         }
 

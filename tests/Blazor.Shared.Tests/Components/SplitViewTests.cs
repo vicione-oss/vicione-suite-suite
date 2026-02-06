@@ -11,10 +11,10 @@ public class SplitViewTests
     public void ComponentGetsRendered()
     {
         // Arrange        
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
 
         // Act + Assert
-        Assert.NotNull(ctx.RenderComponent<SplitViewComponent>());
+        Assert.NotNull(ctx.Render<SplitViewComponent>());
     }
 }

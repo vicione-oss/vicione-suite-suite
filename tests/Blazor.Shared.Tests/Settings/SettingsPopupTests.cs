@@ -8,14 +8,14 @@ namespace Blazor.Shared.Tests.Settings;
 public class SettingsPopupTests
 {
     [Fact]
-    public void ComponentGetsRendered()
+    public async Task ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.SetupBlazorSharedSettings(setup => setup.Services.AddSettingsPopup());
 
         // Act
-        var component = ctx.RenderComponent<SettingsPopup>();
+        var component = ctx.Render<SettingsPopup>();
 
         // Assert
         Assert.NotNull(component);

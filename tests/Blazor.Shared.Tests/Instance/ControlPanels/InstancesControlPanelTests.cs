@@ -37,9 +37,9 @@ public class InstancesControlPanelTests
         };
     }
 
-    private TestContext SetupTestContext(List<InstanceInformation>? instanceInformations = null, Action<ClientServiceConfigurator>? configure = null, Action<IControlPanelRequest>? controlPanelRequestSetup = null)
+    private BunitContext SetupTestContext(List<InstanceInformation>? instanceInformations = null, Action<ClientServiceConfigurator>? configure = null, Action<IControlPanelRequest>? controlPanelRequestSetup = null)
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
         ctx.SetupSuiteServices(setup =>
         {
             setup.ClientMediator.Request<GetInstances, GetInstancesResponse>(
@@ -75,7 +75,7 @@ public class InstancesControlPanelTests
             var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
 
             // Act + Assert
-            Assert.NotNull(ctx.RenderComponent<InstancesControlPanel>(b => b.Add(p => p.State, state)));
+            Assert.NotNull(ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state)));
         }
 
         [Fact]
@@ -83,7 +83,7 @@ public class InstancesControlPanelTests
         {
             // Arrange
             IUiMediator? mediator = null;
-            using var ctx = SetupTestContext(null, setup =>
+            await using var ctx = SetupTestContext(null, setup =>
             {
                 mediator = setup.ClientMediator;
             });
@@ -93,7 +93,7 @@ public class InstancesControlPanelTests
             await resetHandler.Reset(state, CancellationToken.None);
 
             // Act
-            var component = ctx.RenderComponent<InstancesControlPanel>(b => b.Add(p => p.State, state));
+            var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
 
             // Assert
             Assert.NotNull(component);
@@ -113,7 +113,7 @@ public class InstancesControlPanelTests
             IUiMediator? mediator = null;
             var info = CreateSlaveInstanceInfo();
 
-            using var ctx = SetupTestContext([info], setup =>
+            await using var ctx = SetupTestContext([info], setup =>
             {
                 mediator = setup.ClientMediator;
             });
@@ -123,7 +123,7 @@ public class InstancesControlPanelTests
             await resetHandler.Reset(state, CancellationToken.None);
 
             // Act
-            var component = ctx.RenderComponent<InstancesControlPanel>(b => b.Add(p => p.State, state));
+            var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             component.TriggerGridFirstRowSelectionChange(true);
 
             component.FindGridActionButton(MonochromeIconName.Delete).Click();
@@ -144,7 +144,7 @@ public class InstancesControlPanelTests
             IUiMediator? mediator = null;
             var info = CreateSlaveInstanceInfo();
 
-            using var ctx = SetupTestContext([info], setup =>
+            await using var ctx = SetupTestContext([info], setup =>
             {
                 mediator = setup.ClientMediator;
             });
@@ -154,7 +154,7 @@ public class InstancesControlPanelTests
             await resetHandler.Reset(state, CancellationToken.None);
 
             // Act
-            var component = ctx.RenderComponent<InstancesControlPanel>(b => b.Add(p => p.State, state));
+            var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             component.TriggerGridFirstRowSelectionChange(true);
 
             component.FindGridActionButton(MonochromeIconName.Reload).Click();
@@ -176,7 +176,7 @@ public class InstancesControlPanelTests
             IControlPanelRequest? controlPanelRequest = null;
             var info = CreateSlaveInstanceInfo();
 
-            using var ctx = SetupTestContext([info], null, controlPanelRequestSetup =>
+            await using var ctx = SetupTestContext([info], null, controlPanelRequestSetup =>
             {
                 controlPanelRequest = controlPanelRequestSetup;
             });
@@ -186,7 +186,7 @@ public class InstancesControlPanelTests
             await resetHandler.Reset(state, CancellationToken.None);
 
             // Act
-            var component = ctx.RenderComponent<InstancesControlPanel>(b => b.Add(p => p.State, state));
+            var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             component.Find(".navigate-button").Click();
 
             // Assert
@@ -204,13 +204,13 @@ public class InstancesControlPanelTests
             // Arrange
             var info = CreateSlaveInstanceInfo();
             var instanceEvent = new ControlInstanceCompleted(info.Id, InstanceCommand.Delete);
-            using var ctx = SetupTestContext([info]);
+            await using var ctx = SetupTestContext([info]);
             var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
             await resetHandler.Reset(state, CancellationToken.None);
 
-            var component = ctx.RenderComponent<InstancesControlPanel>(b => b.Add(p => p.State, state));
+            var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             var clientContext = ClientContextFactory.Create(instanceEvent);
             component.Markup.Should().Contain(info.Name);
 
@@ -229,13 +229,13 @@ public class InstancesControlPanelTests
             // Arrange
             var info = CreateSlaveInstanceInfo();
             var instanceEvent = new ControlInstanceCompleted(info.Id, InstanceCommand.Synchronize);
-            using var ctx = SetupTestContext([info]);
+            await using var ctx = SetupTestContext([info]);
             var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
             await resetHandler.Reset(state, CancellationToken.None);
 
-            var component = ctx.RenderComponent<InstancesControlPanel>(b => b.Add(p => p.State, state));
+            var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             var clientContext = ClientContextFactory.Create(instanceEvent);
 
             component.Markup.Should().Contain(info.Name);
@@ -259,7 +259,7 @@ public class InstancesControlPanelTests
     //        using var ctx = SetupTestContext([info]);
 
     //        // Act
-    //        var component = ctx.RenderComponent<InstancesControlPanel>();
+    //        var component = ctx.Render<InstancesControlPanel>();
 
     //        _informationProvider.HealthStatusChanged += Raise.Event<Func<Guid, HealthStatus, DateTimeOffset, Task>>(info.Id, HealthStatus.Healthy, DateTimeOffset.Now);
 

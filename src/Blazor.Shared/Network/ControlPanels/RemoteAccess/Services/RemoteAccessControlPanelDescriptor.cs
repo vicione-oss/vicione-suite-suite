@@ -8,5 +8,5 @@ internal sealed class RemoteAccessControlPanelDescriptor : IControlPanelDescript
 {
     public string Category => CommonVocabulary.Network;
     public string Title => TechnicalTerms.RemoteAccess;
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
 }

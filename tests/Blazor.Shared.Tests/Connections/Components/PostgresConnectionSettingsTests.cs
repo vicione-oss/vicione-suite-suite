@@ -16,11 +16,11 @@ public class PostgresConnectionSettingsTests
     {
         // Arrange
         var connection = ConnectionFactory.PostgresConnection.GetPostgresConnection();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var component = ctx.RenderComponent<PostgresConnectionSettings>(parameters =>
+        var component = ctx.Render<PostgresConnectionSettings>(parameters =>
         {
             parameters.Add(c => c.Connection, connection);
         });
@@ -35,11 +35,11 @@ public class PostgresConnectionSettingsTests
     {
         // Arrange
         var connection = ConnectionFactory.PostgresConnection.GetPostgresConnection();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var component = ctx.RenderComponent<PostgresConnectionSettings>(parameters =>
+        var component = ctx.Render<PostgresConnectionSettings>(parameters =>
         {
             parameters.Add(c => c.Connection, connection);
         });

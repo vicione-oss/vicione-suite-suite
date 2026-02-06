@@ -18,7 +18,7 @@ using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
 using Xunit;
-using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Blazor.Shared.Tests.Settings;
 
@@ -209,7 +209,7 @@ public sealed class ControlPanelRegistryItemCacheTests
 
         AddControlPanels(services);
 
-        using var serviceProvider = services.BuildServiceProvider();
+        await using var serviceProvider = services.BuildServiceProvider();
 
         var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
         var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
@@ -242,7 +242,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     private sealed class AdminControlPanelDescriptor : IControlPanelDescriptor<AdminControlPanel>
     {
         public string Title => "Foo";
-        public string IconPath => "icon.svg";
+        public Uri IconUrl => new("icon.svg", UriKind.Relative);
     }
 
     [ControlPanelCategory<TestControlPanelCategoryDescriptor>]
@@ -254,7 +254,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     private sealed class UserControlPanelDescriptor : IControlPanelDescriptor<UserControlPanel>
     {
         public string Title => "Bar";
-        public string IconPath => "icon.svg";
+        public Uri IconUrl => new("icon.svg", UriKind.Relative);
     }
 
     [ControlPanelCategory<TestControlPanelCategoryDescriptor>]
@@ -265,7 +265,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     private sealed class AllowAnonymousControlPanelDescriptor : IControlPanelDescriptor<AllowAnonymousControlPanel>
     {
         public string Title => "Anonymous";
-        public string IconPath => "icon.svg";
+        public Uri IconUrl => new("icon.svg", UriKind.Relative);
     }
 
     public sealed class AuthorizationScenario : IXunitSerializable
@@ -283,9 +283,9 @@ public sealed class ControlPanelRegistryItemCacheTests
 
         public void Deserialize(IXunitSerializationInfo info)
         {
-            UserName = info.GetValue<string>(nameof(UserName));
-            ModuleAuthorizationClaims = info.GetValue<string[]>(nameof(ModuleAuthorizationClaims)).Select(claimJson => JsonSerializer.Deserialize<ModuleAuthorizationClaim>(claimJson));
-            ExpectedControlPanelTypes = info.GetValue<string[]>(nameof(ExpectedControlPanelTypes)).Select(typeNames => Type.GetType(typeNames)!);
+            UserName = info.GetValue<string>(nameof(UserName)) ?? string.Empty;
+            ModuleAuthorizationClaims = (info.GetValue<string[]>(nameof(ModuleAuthorizationClaims)) ?? []).Select(claimJson => JsonSerializer.Deserialize<ModuleAuthorizationClaim>(claimJson));
+            ExpectedControlPanelTypes = (info.GetValue<string[]>(nameof(ExpectedControlPanelTypes)) ?? []).Select(typeNames => Type.GetType(typeNames)!);
         }
     }
 }

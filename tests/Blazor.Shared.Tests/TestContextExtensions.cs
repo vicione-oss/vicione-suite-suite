@@ -12,9 +12,9 @@ namespace Blazor.Shared.Tests;
 
 internal static class TestContextExtensions
 {
-    extension(TestContext ctx)
+    extension(BunitContext ctx)
     {
-        public TestContext SetLocalServices()
+        public BunitContext SetLocalServices()
         {
             ctx.Services.AddSingleton(Substitute.For<INavigationService>());
 
@@ -37,7 +37,7 @@ internal static class TestContextExtensions
             moduleState?.Invoke(settingsState);
         }
 
-        public TestContext SetupBlazorSharedSettings(Action<ClientServiceConfigurator>? setup = null, Action<SettingsModuleState>? moduleState = null)
+        public BunitContext SetupBlazorSharedSettings(Action<ClientServiceConfigurator>? setup = null, Action<SettingsModuleState>? moduleState = null)
         {
             ctx.SetupInternal();
 
@@ -48,7 +48,7 @@ internal static class TestContextExtensions
             return ctx;
         }
 
-        public TestContext SetupControlPanelServices(Action<IControlPanelRequest>? controlPanelRequestSetup = null,
+        public BunitContext SetupControlPanelServices(Action<IControlPanelRequest>? controlPanelRequestSetup = null,
             Action<IActiveControlPanelPageProvider>? activeControlPanelPageProviderSetup = null)
         {
             var controlPanelRequest = Substitute.For<IControlPanelRequest>();
@@ -70,7 +70,7 @@ internal static class TestContextExtensions
             var pageRegistry = ctx.Services.GetRequiredService<IControlPanelPageRegistry>();
             var activePageProvider = ctx.Services.GetRequiredService<IActiveControlPanelPageProvider>();
 
-            var component = ctx.RenderComponent<TComponent>(b => b.Add(c => c.State, state));
+            var component = ctx.Render<TComponent>(b => b.Add(c => c.State, state));
             var pages = pageRegistry.Select(k => k.ControlPanelPage).ToArray();
             if (index >= pages.Length)
                 throw new InvalidOperationException($"No page with index {index} provided.");

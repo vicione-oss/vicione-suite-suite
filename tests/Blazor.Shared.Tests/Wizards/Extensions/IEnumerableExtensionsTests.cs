@@ -1,7 +1,7 @@
 ﻿using AwesomeAssertions;
 using Blazor.Shared.Wizards.Extensions;
 using Xunit;
-using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Blazor.Shared.Tests.Wizards.Extensions;
 
@@ -24,7 +24,7 @@ public sealed class IEnumerableExtensionsTests
         {
             ItemCount = info.GetValue<int>(nameof(ItemCount));
             Start = info.GetValue<int>(nameof(Start));
-            Expected = info.GetValue<int[]>(nameof(Expected));
+            Expected = info.GetValue<int[]>(nameof(Expected)) ?? [];
         }
     }
 

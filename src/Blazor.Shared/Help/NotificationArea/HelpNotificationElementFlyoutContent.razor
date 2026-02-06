@@ -10,11 +10,11 @@
 <div class="wrapper">
     <div class="search-area">
         <button class="arrow-back" @onclick="async () => await OnArrowBackClick()">
-            <img src="@SvgIcon.ArrowBack.GetPath()" />
+            <img src="@SvgIcon.ArrowBack.GetPath().OriginalString" />
         </button>
 
         <button class="home" @onclick="async () => await ShowCardView()">
-            <img src="@SvgIcon.Home.GetPath()" />
+            <img src="@SvgIcon.Home.GetPath().OriginalString" />
         </button>
 
         <SearchBox Text="@_filter" TextChanging="@((value) => _filter = value)" Placeholder="@($"{CommonVocabulary.SearchVerb} ...")" />

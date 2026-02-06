@@ -13,7 +13,7 @@ public sealed class HelpDetailTests
         [Fact]
         public void Invokes_event()
         {
-            using var ctx = new TestContext();
+            using var ctx = new BunitContext();
             var invoked = false;
             var help = new HelpModel
             {
@@ -21,10 +21,9 @@ public sealed class HelpDetailTests
                 Title = "Title",
                 TeaserText = "Teaser",
                 Text = "Text <link text:link helpId:00000000-0000-0000-0000-000000000001",
-                TeaserImagePath = string.Empty,
             };
 
-            var component = ctx.RenderComponent<HelpDetail>(parameters =>
+            var component = ctx.Render<HelpDetail>(parameters =>
             {
                 parameters.Add(p => p.Help, help);
                 parameters.Add(p => p.OnLinkClick, () => invoked = true);

@@ -19,7 +19,7 @@ using Sdk.Client.NotificationArea.Extensions;
 using Sdk.Client.NotificationArea.Services;
 using Sdk.Client.Services;
 using Xunit;
-using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Blazor.Shared.Tests.NotificationArea.Components;
 
@@ -72,9 +72,9 @@ public sealed class NotificationElementGridTests
             }
         ];
 
-    private static TestContext SetupTestContext(AuthenticationStateProvider provider)
+    private static BunitContext SetupTestContext(AuthenticationStateProvider provider)
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
 
         ctx.Services.AddSdkAuthorization();
         ctx.Services.AddSingleton(Substitute.For<ILayoutService>());
@@ -92,7 +92,7 @@ public sealed class NotificationElementGridTests
         using var ctx = SetupTestContext(new AuthenticationStateProviderMock("Garply"));
 
         // Act
-        var renderedComponent = ctx.RenderComponent<NotificationElementGrid>();
+        var renderedComponent = ctx.Render<NotificationElementGrid>();
 
         // Assert
         renderedComponent.Should().NotBeNull();
@@ -108,7 +108,7 @@ public sealed class NotificationElementGridTests
         ctx.Services.AddNotificationElements<TestClientModuleB>();
 
         // Act
-        var renderedComponent = ctx.RenderComponent<NotificationElementGrid>();
+        var renderedComponent = ctx.Render<NotificationElementGrid>();
 
         // Assert
         var notificationElements = renderedComponent.FindAll(".notification-element");
@@ -125,7 +125,7 @@ public sealed class NotificationElementGridTests
         ctx.Services.AddNotificationElements<TestClientModuleB>();
 
         // Act
-        var renderedComponent = ctx.RenderComponent<NotificationElementGrid>();
+        var renderedComponent = ctx.Render<NotificationElementGrid>();
 
         var registry = ctx.Services.GetRequiredService<INotificationElementRegistry<TestClientModuleA>>();
         var firstNotificationElement = registry.First();
@@ -150,7 +150,7 @@ public sealed class NotificationElementGridTests
         ctx.Services.AddNotificationElements<TestClientModuleA>();
         ctx.Services.AddNotificationElements<TestClientModuleB>();
 
-        var renderedComponent = ctx.RenderComponent<NotificationElementGrid>();
+        var renderedComponent = ctx.Render<NotificationElementGrid>();
 
         // Act + Assert
         var registries = ctx.Services.GetRequiredService<IEnumerable<INotificationElementRegistry>>();
@@ -187,7 +187,7 @@ public sealed class NotificationElementGridTests
 
         ctx.Services.AddNotificationElements<TestClientModuleB>();
 
-        var renderedComponent = ctx.RenderComponent<NotificationElementGrid>();
+        var renderedComponent = ctx.Render<NotificationElementGrid>();
 
         // Act
         var registry = ctx.Services.GetRequiredService<INotificationElementRegistry<TestClientModuleB>>();
@@ -209,7 +209,7 @@ public sealed class NotificationElementGridTests
 
         ctx.Services.AddNotificationElements<TestClientModuleA>();
 
-        var renderedComponent = ctx.RenderComponent<NotificationElementGrid>();
+        var renderedComponent = ctx.Render<NotificationElementGrid>();
 
         // Act
         var registry = ctx.Services.GetRequiredService<INotificationElementRegistry<TestClientModuleA>>();
@@ -236,7 +236,7 @@ public sealed class NotificationElementGridTests
         ctx.Services.AddNotificationElements<TestClientModuleB>();
 
         // Act
-        var renderedComponent = ctx.RenderComponent<NotificationElementGrid>();
+        var renderedComponent = ctx.Render<NotificationElementGrid>();
 
         // Assert
         AssertRenderedHtml(renderedComponent, authorizationScenario);
@@ -246,7 +246,7 @@ public sealed class NotificationElementGridTests
     public async Task Should_update_itself_on_authentication_state_change()
     {
         // Arrange
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
 
         ctx.Services.AddSdkAuthorization();
         ctx.Services.AddSingleton(Substitute.For<ILayoutService>());
@@ -257,7 +257,7 @@ public sealed class NotificationElementGridTests
         ctx.Services.AddNotificationElements<TestClientModuleA>();
         ctx.Services.AddNotificationElements<TestClientModuleB>();
 
-        var renderedComponent = ctx.RenderComponent<NotificationElementGrid>();
+        var renderedComponent = ctx.Render<NotificationElementGrid>();
 
         var authenticationStateProvider = ctx.Services.GetRequiredService<AuthenticationStateProviderMock>();
 
@@ -340,9 +340,9 @@ public sealed class NotificationElementGridTests
 
         public void Deserialize(IXunitSerializationInfo info)
         {
-            UserName = info.GetValue<string>(nameof(UserName));
-            ModuleAuthorizationClaims = info.GetValue<string[]>(nameof(ModuleAuthorizationClaims)).Select(claimJson => JsonSerializer.Deserialize<ModuleAuthorizationClaim>(claimJson));
-            ExpectedNotificationElementTitles = info.GetValue<string[]>(nameof(ExpectedNotificationElementTitles));
+            UserName = info.GetValue<string>(nameof(UserName)) ?? string.Empty;
+            ModuleAuthorizationClaims = (info.GetValue<string[]>(nameof(ModuleAuthorizationClaims)) ?? []).Select(claimJson => JsonSerializer.Deserialize<ModuleAuthorizationClaim>(claimJson));
+            ExpectedNotificationElementTitles = info.GetValue<string[]>(nameof(ExpectedNotificationElementTitles)) ?? [];
         }
     }
 }

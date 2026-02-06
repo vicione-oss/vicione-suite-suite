@@ -14,6 +14,7 @@
 ### Updated
 
 - `AspNetCore.SassCompiler` packages, update to version `1.97.1`
+- `Bunit` packages, update to version `2.5.3`
 - `Npgsql.EntityFrameworkCore.PostgreSQL` package, update to version `10.0.0`
 - `Microsoft` packages, update to version `10.0.2`
 - `OpenTelemetry` packages, update to version `1.15.0`
@@ -21,12 +22,14 @@
 - `Serilog.AspNetCore` packages, update to version `10.0.0`
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2304777803`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2310395265`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.1.1`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.1.0`
 - `ViciOne.Ui.Localization` package, update version to `3.1.0`
 - `ViciOne.Ui.Shared.Dx` packages, update to version `0.19.1`
+- `xunit` packages, update to version `xunit.v3 - 3.2.2`
+- `xunit.extensibility.core` packages, update to version `xunit.v3.extensibility.core - 3.2.2`
 
 ### Removed
 

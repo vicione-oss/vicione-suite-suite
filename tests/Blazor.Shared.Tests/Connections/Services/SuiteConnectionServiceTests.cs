@@ -391,9 +391,9 @@ public class SuiteConnectionServiceTests
 
     public class ConnectionServiceUpsertConnection
     {
-        private static TestContext SetupTestContext(Connection? connection = null, Action<ClientServiceConfigurator>? additionalSetup = null)
+        private static BunitContext SetupTestContext(Connection? connection = null, Action<ClientServiceConfigurator>? additionalSetup = null)
         {
-            var ctx = new TestContext();
+            var ctx = new BunitContext();
 
             ctx.SetupSuiteServicesWithBlazorDx(setup =>
             {
@@ -438,7 +438,7 @@ public class SuiteConnectionServiceTests
                             await eventConsumer.Consume(context, CancellationToken.None);
                     });
 
-            using var ctx = SetupTestContext(databaseConnection, setupSuiteService);
+            await using var ctx = SetupTestContext(databaseConnection, setupSuiteService);
 
             connectionService = ctx.Services.GetRequiredService<ISuiteConnectionService>();
 
@@ -477,7 +477,7 @@ public class SuiteConnectionServiceTests
                             await eventConsumer.Consume(context, CancellationToken.None);
                     });
 
-            using var ctx = SetupTestContext(databaseConnection, setupSuiteService);
+            await using var ctx = SetupTestContext(databaseConnection, setupSuiteService);
 
             connectionService = ctx.Services.GetRequiredService<ISuiteConnectionService>();
 

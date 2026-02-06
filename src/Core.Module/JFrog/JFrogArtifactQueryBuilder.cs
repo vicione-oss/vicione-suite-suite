@@ -162,11 +162,11 @@ internal class JFrogArtifactQueryBuilder() : IArtifactQueryBuilder
         }
 
         // https://jfrog.com/help/r/jfrog-rest-apis/display-limits-and-pagination
-        if (_offset is not null and > 0)
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".offset({0})", _offset);
+        if (_offset is > 0)
+            sb.Append(CultureInfo.InvariantCulture, $".offset({_offset})");
 
-        if (_limit is not null and > 0)
-            sb.AppendFormat(CultureInfo.InvariantCulture, ".limit({0})", _limit);
+        if (_limit is > 0)
+            sb.Append(CultureInfo.InvariantCulture, $".limit({_limit})");
 
         return sb.ToString();
     }

@@ -16,12 +16,12 @@ public sealed class JournalViewTests
     public void Should_render_component()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
         ctx.Services.AddSingleton<JournalService>();
 
         // Act
-        var page = ctx.RenderComponent<JournalView>();
+        var page = ctx.Render<JournalView>();
 
         // Assert
         page.Should().NotBeNull();

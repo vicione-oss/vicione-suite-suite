@@ -12,11 +12,11 @@ public sealed class OkDialogTests
     public void ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<OkDialog>();
+        var cut = ctx.Render<OkDialog>();
 
         // Assert
         Assert.NotNull(cut);
@@ -26,11 +26,11 @@ public sealed class OkDialogTests
     public void Should_Be_Rendered_Hidden()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<OkDialog>();
+        var cut = ctx.Render<OkDialog>();
 
         // Assert
         Assert.NotNull(cut);
@@ -41,12 +41,12 @@ public sealed class OkDialogTests
     public void Should_Be_Rendered_Visible()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<OkDialog>();
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        var cut = ctx.Render<OkDialog>();
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
 
         // Assert
         Assert.NotNull(cut);
@@ -58,14 +58,14 @@ public sealed class OkDialogTests
     {
         // Arrange
         var onConfirmFired = false;
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<OkDialog>(parameters => parameters
+        var cut = ctx.Render<OkDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         cut.Instance.Refresh();
         cut.Find(".btn-footer").Click();
 
@@ -79,14 +79,14 @@ public sealed class OkDialogTests
     {
         // Arrange
         var onConfirmFired = false;
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<OkDialog>(parameters => parameters
+        var cut = ctx.Render<OkDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         cut.FindAll("button")[1].Click();
 
         // Assert
@@ -99,14 +99,14 @@ public sealed class OkDialogTests
     {
         // Arrange
         var headerText = "Test header";
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<OkDialog>(parameters => parameters
+        var cut = ctx.Render<OkDialog>(parameters => parameters
             .Add(p => p.HeaderText, headerText)
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         var headerElement = cut.Find(".header-bar");
 
         // Assert
@@ -119,14 +119,14 @@ public sealed class OkDialogTests
     {
         // Arrange
         var body = "<p>Test body</p>";
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
-        var cut = ctx.RenderComponent<OkDialog>(parameters => parameters
+        var cut = ctx.Render<OkDialog>(parameters => parameters
             .Add(p => p.Body, body)
         );
-        cut.SetParametersAndRender(parameters => parameters.Add(p => p.Show, true));
+        cut.Render(parameters => parameters.Add(p => p.Show, true));
         var bodyContainer = cut.Find(".content-container");
 
         // Assert

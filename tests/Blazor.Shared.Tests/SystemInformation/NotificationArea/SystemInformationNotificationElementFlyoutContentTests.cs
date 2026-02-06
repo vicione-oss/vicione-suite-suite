@@ -16,7 +16,7 @@ public sealed class SystemInformationNotificationElementFlyoutContentTests
     public void Should_render_component()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
 
         ctx.Services
             .AddSystemInformation()
@@ -25,7 +25,7 @@ public sealed class SystemInformationNotificationElementFlyoutContentTests
             .AddSingleton(Substitute.For<ISuiteControlService>());
 
         // Act
-        var component = ctx.RenderComponent<SystemInformationNotificationElementFlyoutContent>();
+        var component = ctx.Render<SystemInformationNotificationElementFlyoutContent>();
 
         // Assert
         Assert.NotNull(component);

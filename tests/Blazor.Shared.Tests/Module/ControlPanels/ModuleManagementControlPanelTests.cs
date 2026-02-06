@@ -16,9 +16,9 @@ public class ModuleManagementControlPanelTests
 {
     private readonly IModuleManagementService _moduleManagementService = Substitute.For<IModuleManagementService>();
 
-    private static TestContext SetupTestContext(IModuleManagementService moduleManagementService)
+    private static BunitContext SetupTestContext(IModuleManagementService moduleManagementService)
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
 
         ctx.SetupSuiteServicesWithBlazorDx(setup =>
         {
@@ -46,7 +46,7 @@ public class ModuleManagementControlPanelTests
         var registryItem = registry.First();
 
         // Act
-        var component = ctx.RenderComponent<ModuleManagementControlPanel>(builder => builder
+        var component = ctx.Render<ModuleManagementControlPanel>(builder => builder
             .Add(c => c.State, state)
             .AddCascadingValue(registryItem));
 

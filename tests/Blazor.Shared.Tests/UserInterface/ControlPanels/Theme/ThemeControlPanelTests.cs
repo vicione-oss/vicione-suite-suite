@@ -17,7 +17,7 @@ public sealed class ThemeControlPanelTests
     public void Component_should_render()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
 
         ctx.SetupSuiteServices(setup =>
         {
@@ -31,7 +31,7 @@ public sealed class ThemeControlPanelTests
         var registryItem = registry.First();
 
         // Act
-        var component = ctx.RenderComponent<ThemeControlPanel>(builder => builder
+        var component = ctx.Render<ThemeControlPanel>(builder => builder
             .Add(c => c.State, state)
             .AddCascadingValue(registryItem));
 

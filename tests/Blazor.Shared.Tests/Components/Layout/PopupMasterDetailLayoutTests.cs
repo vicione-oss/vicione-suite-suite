@@ -19,7 +19,7 @@ public sealed class PopupMasterDetailLayoutTests
     public async Task Assert_element_exists_when_control_panel_edit_is_running(string expectedCssClass)
     {
         // Arrange
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.SetupBlazorSharedSettings(setup =>
         {
             setup.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
@@ -40,7 +40,7 @@ public sealed class PopupMasterDetailLayoutTests
         var controlPanelEditRegistry = ctx.Services.GetRequiredService<IControlPanelEditRegistry>();
         controlPanelEditRegistry.Add(controlPanelEdit);
 
-        var component = ctx.RenderComponent<SettingsContainer>();
+        var component = ctx.Render<SettingsContainer>();
 
         // Act
         controlPanelEdit.Begin();

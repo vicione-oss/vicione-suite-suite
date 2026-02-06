@@ -8,5 +8,5 @@ internal sealed class NtpControlPanelDescriptor : IControlPanelDescriptor<NtpCon
 {
     public string Category => CommonVocabulary.Network;
     public string Title => TechnicalAcronyms.Ntp;
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
 }

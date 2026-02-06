@@ -23,9 +23,9 @@ public sealed class ControlPanelCarouselTests
         // Arrange
         FirstLevelControlPanel.ResetInitializationCount();
 
-        using var testContext = SetupTestContext();
+        await using var testContext = SetupTestContext();
 
-        var component = testContext.RenderComponent<ControlPanelCarousel>();
+        var component = testContext.Render<ControlPanelCarousel>();
 
         var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
         await controlPanelRequest.Send<FirstLevelControlPanel>();
@@ -47,9 +47,9 @@ public sealed class ControlPanelCarouselTests
         // Arrange
         SecondLevelControlPanel.ResetInitializationCount();
 
-        using var testContext = SetupTestContext();
+        await using var testContext = SetupTestContext();
 
-        var component = testContext.RenderComponent<ControlPanelCarousel>();
+        var component = testContext.Render<ControlPanelCarousel>();
 
         var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
         await controlPanelRequest.Send<FirstLevelControlPanel>();
@@ -68,7 +68,7 @@ public sealed class ControlPanelCarouselTests
         component.FindComponent<FirstLevelControlPanel>();
     }
 
-    private static void SetActiveControlPanel<TControlPanel>(TestContext ctx)
+    private static void SetActiveControlPanel<TControlPanel>(BunitContext ctx)
         where TControlPanel : ControlPanelBase<ControlPanelState>
     {
         var settingsModuleState = ctx.Services.GetRequiredService<SettingsModuleState>();
@@ -77,9 +77,9 @@ public sealed class ControlPanelCarouselTests
             controlPanelRegistry.FirstOrDefault(i => i.ComponentType == typeof(TControlPanel));
     }
 
-    private static TestContext SetupTestContext()
+    private static BunitContext SetupTestContext()
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
         ctx.SetupBlazorSharedSettings(setup =>
         {
             setup.Services.AddSettings();
@@ -126,7 +126,7 @@ public sealed class ControlPanelCarouselTests
         public sealed class FirstLevelControlPanelDescriptor : IControlPanelDescriptor<FirstLevelControlPanel>
         {
             public string Title => "First level";
-            public string IconPath => "icon.svg";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
         }
 
         public sealed class SecondLevelControlPanel : TestControlPanel
@@ -149,7 +149,7 @@ public sealed class ControlPanelCarouselTests
         public sealed class SecondLevelControlPanelDescriptor : IControlPanelDescriptor<SecondLevelControlPanel>
         {
             public string Title => "Second level";
-            public string IconPath => "icon.svg";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
             public bool ShowInNavigation => false;
         }
     }

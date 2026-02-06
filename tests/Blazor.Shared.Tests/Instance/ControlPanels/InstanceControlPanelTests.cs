@@ -21,7 +21,7 @@ public class InstanceControlPanelTests
     {
         // Arrange
         var state = new InstanceControlPanelState();
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServices(setup =>
         {
             setup.ClientMediator.Request<GetInstances, GetInstancesResponse>(
@@ -35,7 +35,7 @@ public class InstanceControlPanelTests
         ctx.Services.AddInstanceControlPanel();
 
         // Act
-        var component = ctx.RenderComponent<InstanceControlPanel>(p => p.Add(c => c.State, state));
+        var component = ctx.Render<InstanceControlPanel>(p => p.Add(c => c.State, state));
 
         // Assert
         Assert.NotNull(component);
@@ -46,7 +46,7 @@ public class InstanceControlPanelTests
     {
         // Arrange
         var mediator = Substitute.For<IUiMediator>();
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServices(setup =>
         {
             setup.ClientMediator.Request<GetInstances, GetInstancesResponse>(
@@ -68,7 +68,7 @@ public class InstanceControlPanelTests
         // Act
         await resetHandler.Reset(state, CancellationToken.None);
 
-        var component = ctx.RenderComponent<InstanceControlPanel>(p => p.Add(c => c.State, state));
+        var component = ctx.Render<InstanceControlPanel>(p => p.Add(c => c.State, state));
 
         // Assert
         Assert.NotNull(component);

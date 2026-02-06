@@ -11,24 +11,24 @@ public sealed class TopBarTests
     public void ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
         ctx.SetLocalServices();
 
         // Act + Assert
-        Assert.NotNull(ctx.RenderComponent<TopBar>());
+        Assert.NotNull(ctx.Render<TopBar>());
     }
 
     [Fact]
     public void RootNavigationInvoked()
     {
         // Arrange
-        using var ctx = new TestContext();
+        using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
         ctx.SetLocalServices();
 
         // Act + Assert
-        var component = ctx.RenderComponent<TopBar>();
+        var component = ctx.Render<TopBar>();
 
         var link1 = component.Find(".top-bar-app-menu");
         Assert.NotNull(link1);

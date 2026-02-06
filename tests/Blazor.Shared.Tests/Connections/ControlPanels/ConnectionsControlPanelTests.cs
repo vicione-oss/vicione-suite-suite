@@ -22,9 +22,9 @@ public class ConnectionsControlPanelTests
     internal readonly ISuiteConnectionService _connectionService = Substitute.For<ISuiteConnectionService>();
     private IControlPanelRequest? _controlPanelRequest;
 
-    private TestContext SetupTestContext()
+    private BunitContext SetupTestContext()
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
         ctx.SetupSuiteServices()
             .SetupSuiteServicesWithBlazorDx()
             .SetupControlPanelServices(setup =>

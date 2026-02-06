@@ -1,45 +1,45 @@
-﻿using Blazor.Shared.MessageBanner.Extensions;
+﻿using AwesomeAssertions;
+using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.NotificationArea;
 using Blazor.Shared.MessageBanner.Services;
+using Blazor.Shared.NotificationArea.Extensions;
 using Bunit;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Sdk.Client.NotificationArea.Extensions;
 using Sdk.Client.NotificationArea.Services;
 using Xunit;
-using Blazor.Shared.NotificationArea.Extensions;
 
 namespace Blazor.Shared.Tests.MessageBanner;
 
 public sealed class MessageBannerNotificationElementTests
 {
     [Fact]
-    public void Should_render_component()
+    public async Task Should_render_component()
     {
         // Arrange
         var state = new MessageBannerNotificationElementState();
         var iconState = new MessageBannerNotificationElementIconState();
 
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
 
         ctx.Services
             .AddScoped(_ => Substitute.For<IMessageBannerMediator>())
             .AddScoped(_ => iconState);
 
         // Act
-        var component = ctx.RenderComponent<MessageBannerNotificationElement>(
-            ComponentParameter.CreateParameter(nameof(MessageBannerNotificationElement.State), state));
+        var component = ctx.Render<MessageBannerNotificationElement>(
+            c => c.Add(p => p.State, state));
 
         // Assert
         Assert.NotNull(component);
     }
 
     [Fact]
-    public void Should_not_be_visible_by_default()
+    public async Task Should_not_be_visible_by_default()
     {
         // Arrange
-        using var ctx = new TestContext();
+       await using var ctx = new BunitContext();
 
         ctx.Services
             .AddMessageBanner()
@@ -50,20 +50,20 @@ public sealed class MessageBannerNotificationElementTests
         var registryItem = registry.First(i => i.ComponentType == typeof(MessageBannerNotificationElement));
 
         // Act
-        var component = ctx.RenderComponent<MessageBannerNotificationElement>(
-            ComponentParameter.CreateParameter(nameof(MessageBannerNotificationElement.State), registryItem.State));
+        var component = ctx.Render<MessageBannerNotificationElement>(
+            c => c.Add(p => p.State, registryItem.State));
 
         // Assert
         component.Markup.Should().BeEmpty();
     }
 
     [Fact]
-    public void Should_restore_message_banner_on_click()
+    public async Task Should_restore_message_banner_on_click()
     {
         // Arrange
         var messageBannerMediator = Substitute.For<IMessageBannerMediator>();
 
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
 
         ctx.Services
             .AddScoped(_ => messageBannerMediator)
@@ -72,8 +72,9 @@ public sealed class MessageBannerNotificationElementTests
         var state = new MessageBannerNotificationElementState { Visible = true };
 
         // Act
-        var notificationElement = ctx.RenderComponent<MessageBannerNotificationElement>(
-            ComponentParameter.CreateParameter(nameof(MessageBannerNotificationElement.State), state));
+        var notificationElement = ctx.Render<MessageBannerNotificationElement>(
+            c => c.Add(p => p.State, state));
+
 
         var button = notificationElement.Find("button");
         button.Click();

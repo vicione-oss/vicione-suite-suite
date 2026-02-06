@@ -22,12 +22,12 @@ public class JsInteropTests
             { "ViciOne.Interop.setElementAttribute", interop => interop.SetElementAttribute("elementId", "style", "height:100%;") },
             { "ViciOne.Interop.updateTitle", interop => interop.UpdateTitle("NewTitle") },
             { "ViciOne.Interop.includeMeta", interop => interop.IncludeMeta("elementId", "attribute", "name", "content", "key") },
-            { "ViciOne.Interop.includeLink", interop => interop.IncludeLink("elementId", "rel", "href", "type", "integrity", "crossOrigin", "key") },
+            { "ViciOne.Interop.includeLink", interop => interop.IncludeLink("elementId", "rel", new Uri("http://url"), "type", "integrity", "crossOrigin", "key") },
             { "ViciOne.Interop.includeLinks", interop => interop.IncludeLinks([]) },
-            { "ViciOne.Interop.includeScript", interop => interop.IncludeScript("elementId", "src", "integrity", "crossOrigin", "content", "location", "key") },
+            { "ViciOne.Interop.includeScript", interop => interop.IncludeScript("elementId", new Uri("http://url"), "integrity", "crossOrigin", "content", "location", "key") },
             { "ViciOne.Interop.includeScripts", interop => interop.IncludeScripts([]) },
             { "ViciOne.Interop.removeElementsById", interop => interop.RemoveElementsById("prefix", "first", "last") },
-            { "ViciOne.Interop.removeScriptsBySource", interop => interop.RemoveScriptsBySource("src") },
+            { "ViciOne.Interop.removeScriptsBySource", interop => interop.RemoveScriptsBySource(new Uri("http://url")) },
             { "ViciOne.Interop.submitForm", interop => interop.SubmitForm("path", "fields") },
             { "ViciOne.Interop.getFiles", interop => interop.GetFiles("id") },
             { "ViciOne.Interop.uploadFiles", interop => interop.UploadFiles("postUrl", "folder", "id") },
@@ -37,7 +37,7 @@ public class JsInteropTests
         };
 
         // Arrange        
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
 
         var interop = new JsInterop(ctx.JSInterop.JSRuntime, _loggerMock);
@@ -56,7 +56,7 @@ public class JsInteropTests
     public async Task GetCookie()
     {
         // Arrange        
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
 
         var interop = new JsInterop(ctx.JSInterop.JSRuntime, _loggerMock);
@@ -72,7 +72,7 @@ public class JsInteropTests
     public async Task FormValid()
     {
         // Arrange        
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
 
         var interop = new JsInterop(ctx.JSInterop.JSRuntime, _loggerMock);
@@ -89,7 +89,7 @@ public class JsInteropTests
     public async Task GetElementByName()
     {
         // Arrange        
-        using var ctx = new TestContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
 
         var interop = new JsInterop(ctx.JSInterop.JSRuntime, _loggerMock);

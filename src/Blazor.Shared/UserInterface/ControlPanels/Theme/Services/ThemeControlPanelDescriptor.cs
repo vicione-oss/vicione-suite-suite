@@ -7,5 +7,5 @@ namespace Blazor.Shared.UserInterface.ControlPanels.Theme.Services;
 internal sealed class ThemeControlPanelDescriptor : IControlPanelDescriptor<ThemeControlPanel>
 {
     public string Title => TechnicalTerms.Theme;
-    public string IconPath => string.Empty;
+    public Uri? IconUrl => null;
 }

@@ -22,9 +22,9 @@ namespace Blazor.Shared.Tests.Connections.ControlPanels;
 
 public class ConnectionControlPanelTests
 {
-    private static TestContext SetupTestContext(Connection? connection = null)
+    private static BunitContext SetupTestContext(Connection? connection = null)
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
 
         var suiteConnectionService = Substitute.For<ISuiteConnectionService>();
 
@@ -61,7 +61,7 @@ public class ConnectionControlPanelTests
         public async Task Should_init_empty_connection_if_state_connection_id_is_not_set()
         {
             // Arrange
-            using var ctx = SetupTestContext();
+            await using var ctx = SetupTestContext();
 
             var registry = ctx.Services.GetRequiredService<IConnectionTypeRegistry>();
             var connection = EditConnectionModelFactory.CreateNew(registry);
@@ -72,7 +72,7 @@ public class ConnectionControlPanelTests
             await resetHandler.Reset(state, CancellationToken.None);
 
             // Act
-            var component = ctx.RenderComponent<ConnectionControlPanel>(parameters =>
+            var component = ctx.Render<ConnectionControlPanel>(parameters =>
             {
                 parameters.Add(c => c.State, state);
             });
@@ -88,7 +88,7 @@ public class ConnectionControlPanelTests
             // Arrange
             var connection = ConnectionFactory.SQLiteConnection;
 
-            using var ctx = SetupTestContext(connection);
+            await using var ctx = SetupTestContext(connection);
 
             var state = new ConnectionControlPanelState { ConnectionId = connection.Id };
 
@@ -96,7 +96,7 @@ public class ConnectionControlPanelTests
             await resetHandler.Reset(state, CancellationToken.None);
 
             // Act
-            var component = ctx.RenderComponent<ConnectionControlPanel>(parameters =>
+            var component = ctx.Render<ConnectionControlPanel>(parameters =>
             {
                 parameters.Add(c => c.State, state);
             });

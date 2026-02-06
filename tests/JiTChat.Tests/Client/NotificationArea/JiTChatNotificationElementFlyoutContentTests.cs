@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using Blazor.Tests.Tools;
 using Bunit;
-using Bunit.TestDoubles;
 using JiTChat.Client;
 using JiTChat.Client.Contracts;
 using JiTChat.Client.NotificationArea;
@@ -15,9 +14,9 @@ namespace JiTChat.Tests.Client.NotificationArea;
 
 public sealed class JiTChatNotificationElementFlyoutContentTests
 {
-    private static TestContext SetupTestContext(IJiTChatService? jitChatService = null)
+    private static BunitContext SetupTestContext(IJiTChatService? jitChatService = null)
     {
-        var ctx = new TestContext();
+        var ctx = new BunitContext();
 
         var timeProvider = Substitute.For<TimeProvider>();
         timeProvider.LocalTimeZone.Returns(TimeZoneInfo.Utc);
@@ -43,11 +42,11 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
     {
         using var ctx = SetupTestContext();
 
-        var authContext = ctx.AddTestAuthorization();
+        var authContext = ctx.AddAuthorization();
         authContext.SetAuthorized("Eddy");
 
         // Act
-        var sut = ctx.RenderComponent<JiTChatNotificationElementFlyoutContent>();
+        var sut = ctx.Render<JiTChatNotificationElementFlyoutContent>();
 
         // Assert
         Assert.NotNull(sut);
@@ -64,14 +63,14 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
 
         using var ctx = SetupTestContext(jitChatServiceMock);
 
-        var authContext = ctx.AddTestAuthorization();
+        var authContext = ctx.AddAuthorization();
         authContext
             .SetAuthorized("Eddy")
             .SetPolicies(ModulePolicyProvider.GetPolicy<JiTChatClientModule>())
             .SetClaims(new Claim(ModuleIdResolver.ResolveId<JiTChatClientModule>(), nameof(AccessLevel.Partial)));
 
         // Act
-        var cut = ctx.RenderComponent<JiTChatNotificationElementFlyoutContent>();
+        var cut = ctx.Render<JiTChatNotificationElementFlyoutContent>();
         var button = cut.Find(".jit-chat-input > .btn");
         button.Click();
 
@@ -89,14 +88,14 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
 
         using var ctx = SetupTestContext(jitChatServiceMock);
 
-        var authContext = ctx.AddTestAuthorization();
+        var authContext = ctx.AddAuthorization();
         authContext
             .SetAuthorized("Eddy")
             .SetPolicies(ModulePolicyProvider.GetPolicy<JiTChatClientModule>())
             .SetClaims(new Claim(ModuleIdResolver.ResolveId<JiTChatClientModule>(), nameof(AccessLevel.Partial)));
 
         // Act
-        var cut = ctx.RenderComponent<JiTChatNotificationElementFlyoutContent>();
+        var cut = ctx.Render<JiTChatNotificationElementFlyoutContent>();
 
         var message = new ChatMessage { User = "Bob", Message = "Huhu" };
         messages.Add(message);
