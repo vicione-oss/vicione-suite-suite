@@ -18,7 +18,7 @@ namespace Core.OS.Migrations.UserDbContext.Postgres
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("user")
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
