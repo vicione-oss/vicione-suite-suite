@@ -35,7 +35,7 @@ public class GetUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var request = new GetUsers();
 
         // Act/Assert
@@ -48,7 +48,7 @@ public class GetUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
         var request = new GetUsers();
 
@@ -63,7 +63,7 @@ public class GetUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
         var request = new GetUsers(new UserName(SeedingExtensions.Bob.UserName));
 
@@ -78,7 +78,7 @@ public class GetUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var userName = new UserName("Boring invalid user name");
         var request = new GetUsers(userName);
 

@@ -1,21 +1,93 @@
 ﻿{
     "profiles": {
-        "Blazor.Server": {
+        "Standalone-Ui": {
             "commandName": "Project",
             "launchBrowser": false,
             "environmentVariables": {
-                "ASPNETCORE_ENVIRONMENT": "Development"
+                "ASPNETCORE_ENVIRONMENT": "Development",
+
+                "Instance__Type": "Standalone",
+                "Instance__HomeDirectory": "AppData_Standalone",
+                "Instance__CacheDirectory": "Cache_Standalone",
+                "Instance__BackupDirectory": "Backup_Standalone"
             },
             "applicationUrl": "https://localhost:5001;http://localhost:5000"
         },
-        "Backend-Slave1": {
+        "Master-Ui": {
+            "commandName": "Project",
+            "launchBrowser": false,
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+
+                "Instance__Type": "Master",
+                "Instance__HomeDirectory": "AppData_Master",
+                "Instance__CacheDirectory": "Cache_Master",
+                "Instance__BackupDirectory": "Backup_Master",
+
+                "UserManagement__SeedTestUsers": "true",
+
+                "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+
+                "MessageBus__UseInMemoryBus": "false",
+                "MessageBus__CleanVirtualHost": "true",
+                "MessageBus__Connection__Host": "localhost",
+                "MessageBus__Connection__Port": "5672",
+                "MessageBus__Connection__Username": "guest",
+                "MessageBus__Connection__Password": "guest",
+
+                "ConnectionStrings__Postgres": "Server=127.0.0.1;Port=5432;Database=vo-suite;User Id=postgres;Password=postgres"
+            },
+            "applicationUrl": "https://localhost:5001;http://localhost:5000"
+        },
+        "Slave-Ui-1": {
             "commandName": "Project",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "Kestrel__Endpoints__Http__Url": "http://localhost:6000",
-                "Kestrel__Endpoints__Https__Url": "https://localhost:6001"
+                "Kestrel__Endpoints__Https__Url": "https://localhost:6001",
+
+                "Instance__Type": "Slave",
+                "Instance__HomeDirectory": "AppData_Slave1",
+                "Instance__CacheDirectory": "Cache_Slave1",
+                "Instance__BackupDirectory": "Backup_Slave1",
+
+                "UserManagement__SeedTestUsers": "false",
+
+                "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+
+                "MessageBus__UseInMemoryBus": "false",
+                "MessageBus__CleanVirtualHost": "true",
+                "MessageBus__Connection__Host": "localhost",
+                "MessageBus__Connection__Port": "5672",
+                "MessageBus__Connection__Username": "guest",
+                "MessageBus__Connection__Password": "guest"
             },
             "applicationUrl": "https://localhost:6001;http://localhost:6000"
+        },
+        "Slave-Ui-2": {
+            "commandName": "Project",
+            "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "Kestrel__Endpoints__Http__Url": "http://localhost:7000",
+                "Kestrel__Endpoints__Https__Url": "https://localhost:7001",
+
+                "Instance__Type": "Slave",
+                "Instance__HomeDirectory": "AppData_Slave2",
+                "Instance__CacheDirectory": "Cache_Slave2",
+                "Instance__BackupDirectory": "Backup_Slave2",
+
+                "UserManagement__SeedTestUsers": "false",
+
+                "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+
+                "MessageBus__UseInMemoryBus": "false",
+                "MessageBus__CleanVirtualHost": "true",
+                "MessageBus__Connection__Host": "localhost",
+                "MessageBus__Connection__Port": "5672",
+                "MessageBus__Connection__Username": "guest",
+                "MessageBus__Connection__Password": "guest"
+            },
+            "applicationUrl": "https://localhost:7001;http://localhost:7000"
         },
         "Docker": {
             "commandName": "Docker",

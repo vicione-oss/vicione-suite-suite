@@ -1,10 +1,12 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.IO.Abstractions;
 using Core.Module.Options;
 using Core.OS.Connections.Extensions;
 using Core.OS.Connections.Mqtt;
 using Core.OS.DbContext;
 using Core.OS.DbContext.Extensions;
+using Core.OS.Diagnostics;
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Contracts;
@@ -20,12 +22,29 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Trace;
 using Sdk.Backend.Messaging;
+using Sdk.Instance;
 
 namespace Core.OS.Modules.Services;
 
-internal sealed class ApplicationWorker(IServiceProvider services, ILogger<ApplicationWorker> logger) : IHostedLifecycleService
+internal sealed class ApplicationWorker(
+    IServiceProvider services,
+    TracerProvider tracerProvider,
+    ILogger<ApplicationWorker> logger) : IHostedLifecycleService
 {
+    /*
+     * This is only needed to ensure that the tracer provider is constructed before we are trying to use activities.
+     * OpenTelemetry itself registers a service and is only fully functional when its service is started.
+     * As we do the heavy lifting, in `StartingAsync`, before the services are started, even with this reference, tracing
+     * might not show up in jaeger. Starting in debug mode will most likely be enabling traces.
+     *
+     * Will be addressed in https://gitlab.com/vicione-oss/vicione/suite/suite/-/issues/2654
+     */
+#pragma warning disable CA1823
+    private readonly TracerProvider _ = tracerProvider;
+#pragma warning restore CA1823
+
     public string? InitializationErrorMessage { get; private set; }
 
     public async Task StartingAsync(CancellationToken cancellationToken)
@@ -34,42 +53,50 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         {
             logger.LogInformation("Starting application initialization");
 
-            using var scope = services.CreateScope();//Init Scope
+            using var scope = services.CreateScope();
             var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+            using var activity = CoreActivitySource.Source.StartActivity();
+
+            // migrate our core contexts (application, user etc.)
+            await MigrateCoreData(scope, cancellationToken);
+            activity?.AddEvent(new ActivityEvent("app.lifecycle.core_data.migrated"));
+
+            var localInstanceInformationProvider
+                = scope.ServiceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
+            InitializeLocalInstanceInformation(scope, localInstanceInformationProvider);
+            activity?.AddEvent(new ActivityEvent("app.lifecycle.local_instance.initialized"));
+            activity?.AddTag("service.instance.id", localInstanceInformationProvider.Local.Id);
+            activity?.AddTag("service.instance.type", localInstanceInformationProvider.Local.Type);
 
             MoveResources(scope);
 
-            // migrate our core contexts (application, user etc.)
-            await MigrateAndSeedCoreData(scope, cancellationToken);
+            if (localInstanceInformationProvider.Local.Type != InstanceType.Slave)
+            {
+                await SeedInitialData(scope, cancellationToken);
+                activity?.AddEvent(new ActivityEvent("app.lifecycle.initial_data.seeded"));
+            }
 
-            await DeleteOrphanedNonces(scope, cancellationToken);
-
-            await SetCulture(scope, cancellationToken);
-
-            InitializeLocalInstanceInformation(scope);
+            await DeleteOrphanedNonces(scope.ServiceProvider.GetRequiredService<INonceStore>(), cancellationToken);
+            activity?.AddEvent(new ActivityEvent("app.lifecycle.nonces.deleted"));
 
             // in slave scenario, synchronized with master on second+ start migration SystemModule leads to:
             // Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'table "AspNetRoles" already exists'.
             await MigrateAndSeedModuleData(scope, configuration, cancellationToken);
-            logger.LogInformation("Migration completed and module data is seeded");
+            activity?.AddEvent(new ActivityEvent("app.lifecycle.module_data.seeded"));
 
-            // clean the rabbit mq before the bus gets started
-            await RabbitMqCleaner.CleanVirtualHost(scope.ServiceProvider, logger, cancellationToken);
+            await StartMassTransitBusDependingOnInstanceType(scope,
+                localInstanceInformationProvider,
+                cancellationToken);
 
-            // start the message bus in parallel
-            var busDepot = scope.ServiceProvider.GetRequiredService<IBusDepot>();
-            var task = Task.Run(() => busDepot.Start(cancellationToken), cancellationToken);
+            await WaitForInitialSyncToBeDone(scope);
 
-            while (task.Status < TaskStatus.Running)
-                await Task.Delay(5, cancellationToken);
+            await SetCulture(scope.ServiceProvider.GetRequiredService<IApplicationDbContext>(), cancellationToken);
 
-            // here we have the application db up and running and can register our instance
-            await RegisterInstance(scope, cancellationToken);
-
-            var infoProvider = scope.ServiceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
+            activity?.AddEvent(new ActivityEvent("app.lifecycle.started"));
             logger.LogInformation("Init completed as {InstanceType} ({InstanceId})",
-                infoProvider.Local.Type,
-                infoProvider.Local.Id);
+                localInstanceInformationProvider.Local.Type,
+                localInstanceInformationProvider.Local.Id);
         }
         catch (Exception ex)
         {
@@ -77,10 +104,52 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         }
     }
 
+    private static async Task WaitForInitialSyncToBeDone(IServiceScope scope)
+        => await scope.ServiceProvider.GetRequiredService<SynchronizationState>().Ready;
+
+    private async Task StartMassTransitBusDependingOnInstanceType(IServiceScope scope,
+        ILocalInstanceInformationProvider localInstanceInformationProvider,
+        CancellationToken cancellationToken)
+    {
+        using var activity
+            = CoreActivitySource.Source.StartActivity(
+                $"{nameof(ApplicationWorker)}.{nameof(StartMassTransitBusDependingOnInstanceType)}");
+        var instanceInformation = localInstanceInformationProvider.Local;
+        var loadedModules = localInstanceInformationProvider.LoadedModules;
+        var configuration = services.GetRequiredService<IConfiguration>();
+
+        if (instanceInformation.Type == InstanceType.Slave)
+        {
+            // we send the registration before waiting for the bus to start.
+            // this will work because the message is sent directly to the endpoint, not using the bus.
+            await RegisterInstance(scope,
+                instanceInformation,
+                loadedModules,
+                configuration,
+                cancellationToken);
+            activity?.AddEvent(new ActivityEvent("app.lifecycle.register_instance.send"));
+
+            await StartMessageBusDepot(scope, cancellationToken);
+        }
+        else
+        {
+            await StartMessageBusDepot(scope, cancellationToken);
+            await RegisterInstance(scope,
+                instanceInformation,
+                loadedModules,
+                configuration,
+                cancellationToken);
+            activity?.AddEvent(new ActivityEvent("app.lifecycle.register_instance.send"));
+        }
+    }
+
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
             return;
+        using var activity
+            = CoreActivitySource.Source.StartActivity($"{nameof(ApplicationWorker)}.{nameof(StartAsync)}");
+
         try
         {
             logger.LogTrace("Initializing module host");
@@ -89,17 +158,18 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
 
             using var scope = services.CreateScope();
             await moduleHost.CallOnInitialized(scope, cancellationToken);
+            activity?.AddEvent(new ActivityEvent("app.lifecycle.module_host.initialized"));
 
             logger.LogInformation("Modules are initialized");
         }
         catch (Exception ex)
         {
+            activity?.AddException(ex);
             LogInitFailed(ex);
         }
     }
 
-    public Task StartedAsync(CancellationToken cancellationToken)
-        => Task.CompletedTask;
+    public Task StartedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     public Task StoppingAsync(CancellationToken cancellationToken)
     {
@@ -107,11 +177,28 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         return busDepot.Stop(cancellationToken);
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
-        => Task.CompletedTask;
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
-    public Task StoppedAsync(CancellationToken cancellationToken)
-        => Task.CompletedTask;
+    public Task StoppedAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    private async Task StartMessageBusDepot(IServiceScope scope,
+        CancellationToken cancellationToken)
+    {
+        // clean the rabbit mq before the bus gets started
+        await RabbitMqCleaner.CleanVirtualHost(scope.ServiceProvider, logger, cancellationToken);
+
+        // start the message bus in a background task
+        var busDepot = scope.ServiceProvider.GetRequiredService<IBusDepot>();
+        var task = Task.Run(() => busDepot.Start(cancellationToken), cancellationToken);
+
+        // Wait for it to at least be running/attempting
+        while (task is { Status: < TaskStatus.Running, IsFaulted: false })
+        {
+            await Task.Delay(10, cancellationToken);
+        }
+
+        logger.LogInformation("Message bus depot started");
+    }
 
     private void MoveResources(IServiceScope scope)
     {
@@ -123,10 +210,8 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         logger.LogInformation("Module resources sychronized");
     }
 
-    private async Task DeleteOrphanedNonces(IServiceScope scope, CancellationToken cancellationToken)
+    private async Task DeleteOrphanedNonces(INonceStore nonceStore, CancellationToken cancellationToken)
     {
-        var nonceStore = scope.ServiceProvider.GetRequiredService<INonceStore>();
-
         try
         {
             logger.LogTrace("Deleting orphaned nonces");
@@ -143,18 +228,20 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         }
     }
 
-    private async Task SetCulture(IServiceScope scope, CancellationToken cancellationToken)
+    private async Task SetCulture(IApplicationDbContext context, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
             return;
 
-        var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
-
+        using var activity = CoreActivitySource.Source.StartActivity();
         try
         {
-            var crossInstanceConfiguration = await context.CrossInstanceConfiguration.FirstOrDefaultAsync(cancellationToken);
+            var crossInstanceConfiguration
+                = await context.CrossInstanceConfiguration.FirstOrDefaultAsync(cancellationToken);
 
-            SetCulture(crossInstanceConfiguration?.CultureName ?? CrossInstanceConfiguration.CultureNameDefault);
+            var cultureName = crossInstanceConfiguration?.CultureName ?? CrossInstanceConfiguration.CultureNameDefault;
+            activity?.AddTag("process.runtime.culture", cultureName);
+            SetCulture(cultureName);
         }
         catch (OperationCanceledException)
         {
@@ -162,8 +249,10 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         }
         catch (Exception e)
         {
+            activity?.AddException(e);
             logger.LogError(e, "Unexpected error occured while trying to set culture");
 
+            activity?.AddTag("process.runtime.culture", CrossInstanceConfiguration.CultureNameDefault);
             SetCulture(CrossInstanceConfiguration.CultureNameDefault);
         }
     }
@@ -178,7 +267,8 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         logger.LogInformation("Culture set to {CultureName}", cultureName);
     }
 
-    private async Task MigrateAndSeedCoreData(IServiceScope scope, CancellationToken cancellationToken)
+    private async Task MigrateCoreData(IServiceScope scope,
+        CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
             return;
@@ -188,12 +278,6 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         await scope.ServiceProvider.MigrateContext<IApplicationDbContext>(cancellationToken);
         await scope.ServiceProvider.MigrateContext<UserDbContext>(cancellationToken);
         await scope.ServiceProvider.MigrateContext<IConnectionDbContext>(cancellationToken);
-
-        // seed data
-        logger.LogTrace("Seeding initial data");
-
-        await scope.ServiceProvider.SeedUsersAndRoles();
-        await scope.ServiceProvider.SeedConnections(cancellationToken);
 
         // force regeneration of users security stamps to invalidate current logins
         if (InstanceStartupState.InvalidateLoginsAfterMigration)
@@ -205,7 +289,18 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         }
     }
 
-    private static async Task MigrateAndSeedModuleData(IServiceScope scope, IConfiguration config, CancellationToken cancellationToken)
+    private async Task SeedInitialData(IServiceScope scope,
+        CancellationToken cancellationToken)
+    {
+        logger.LogTrace("Seeding initial data");
+
+        await scope.ServiceProvider.SeedUsersAndRoles(cancellationToken);
+        await scope.ServiceProvider.SeedConnections(cancellationToken);
+    }
+
+    private static async Task MigrateAndSeedModuleData(IServiceScope scope,
+        IConfiguration config,
+        CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
             return;
@@ -215,14 +310,13 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
         await moduleHost.MigrateAndSeedModuleData(scope, config, cancellationToken);
     }
 
-    private static void InitializeLocalInstanceInformation(IServiceScope scope)
+    private void InitializeLocalInstanceInformation(IServiceScope scope,
+        ILocalInstanceInformationProvider localInfoProvider)
     {
         var fileSystem = scope.ServiceProvider.GetRequiredService<IFileSystem>();
         var instanceOptions = scope.ServiceProvider.GetRequiredService<IOptions<InstanceOptions>>().Value;
         var moduleHost = scope.ServiceProvider.GetRequiredService<IModuleHost>();
-        var localInfoProvider = scope.ServiceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
         var instanceId = localInfoProvider.ReadLocalInstanceId();
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<ApplicationWorker>>();
 
         logger.LogTrace("Initializing local instance information");
 
@@ -266,6 +360,7 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
 
         // update local instance info to what we have already because modules might access it
         // on their init process e.g. ClusterManagement on PostMigrate
+        // Extra State for module process to start?
         localInfoProvider.UpdateLocal(instanceInfo);
     }
 
@@ -274,41 +369,45 @@ internal sealed class ApplicationWorker(IServiceProvider services, ILogger<Appli
     /// <see cref="ILocalInstanceInformationProvider.Local"/> that will update the local
     /// instance on db context
     /// </summary>
-    private async Task RegisterInstance(IServiceScope scope, CancellationToken cancellationToken)
+    private async Task RegisterInstance(IServiceScope scope,
+        IInstanceInformation instanceInfo,
+        IReadOnlyCollection<string> loadedModules,
+        IConfiguration config,
+        CancellationToken cancellationToken)
     {
-        var infoProvider = scope.ServiceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
-
-        logger.LogInformation("Starting registration for instance {InstanceId}", infoProvider.Local.Id);
+        logger.LogInformation("Starting registration for instance {InstanceId}", instanceInfo.Id);
 
         var sendEndpointProvider = scope.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
-        var config = services.GetRequiredService<IConfiguration>();
 
-        // needs to be sent that way, because the Mediator blocks commands until the Master is reachable
-        var endPoint = await sendEndpointProvider.GetSendEndpoint(MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
+        // needs to be sent that way, because the bus is blocked to prevent messages being processed before sync is done
+        var endPoint = await sendEndpointProvider.GetSendEndpoint(
+            MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
         await endPoint.Send(new RegisterInstance
-        {
-            InstanceId = infoProvider.Local.Id,
-            InstalledModules = [.. infoProvider.LoadedModules],
-            Type = infoProvider.Local.Type,
-            Name = infoProvider.Local.Name,
-            Description = infoProvider.Local.Description,
-            FormattedName = infoProvider.Local.FormattedName,
-            SerialNumber = infoProvider.Local.SerialNumber,
-            SystemType = infoProvider.Local.SystemType,
-            SdkVersion = infoProvider.Local.SdkVersion,
-            Configuration = config.AsEnumerable().Where(IsAllowed).ToList(),
-            Version = infoProvider.Local.Version,
-            BranchName = infoProvider.Local.BranchName
-        },
+            {
+                InstanceId = instanceInfo.Id,
+                InstalledModules = [.. loadedModules],
+                Type = instanceInfo.Type,
+                Name = instanceInfo.Name,
+                Description = instanceInfo.Description,
+                FormattedName = instanceInfo.FormattedName,
+                SerialNumber = instanceInfo.SerialNumber,
+                SystemType =  instanceInfo.SystemType,
+                SdkVersion = instanceInfo.SdkVersion,
+                Configuration = config.AsEnumerable().Where(IsAllowed).ToList(),
+                Version = instanceInfo.Version,
+                BranchName = instanceInfo.BranchName
+            },
             cancellationToken);
 
-        logger.LogInformation("Published {Command} on {Type} instance", nameof(Instance.Commands.RegisterInstance), infoProvider.Local.Type);
+        logger.LogInformation("Published {Command} on {Type} instance",
+            nameof(Instance.Commands.RegisterInstance),
+            instanceInfo.Type);
     }
 
     private static bool IsAllowed(KeyValuePair<string, string?> keyValuePair)
     {
         // in development there are more than 700 lines of configuration
-        // therefore we filter to get reduced subset. 
+        // therefore we filter to get reduced subset.
         string[] knownKeys =
         [
             "AllowedHosts",

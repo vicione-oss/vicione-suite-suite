@@ -44,7 +44,7 @@ public class SendVerifyEmailAddressLinkConsumerTest
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
         var suiteUser = scope.ServiceProvider.GetRequiredService<UserManager<SuiteUser>>().Users.First();
         const string callbackLink = "http://localhost:5000";
@@ -64,7 +64,7 @@ public class SendVerifyEmailAddressLinkConsumerTest
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
 
         // Act

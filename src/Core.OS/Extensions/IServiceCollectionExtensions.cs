@@ -5,11 +5,11 @@ using Core.OS.Connections.Extensions;
 using Core.OS.DataProtection.Extensions;
 using Core.OS.DbContext;
 using Core.OS.DbContext.Extensions;
+using Core.OS.Diagnostics;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Logging;
-using Core.OS.Mail;
 using Core.OS.Mail.Extensions;
 using Core.OS.MessageBus.Extensions;
 using Core.OS.MessageBus.MassTransit.Configuration;
@@ -64,7 +64,7 @@ internal static class IServiceCollectionExtensions
             => services.AddOptions<T>()
                 .BindConfiguration(sectionName)
                 .ValidateDataAnnotations();
-        
+
         public IServiceCollection AddServices(IFileSystem fileSystem,
             ConfigurationManager config,
             IModuleHost moduleHost)
@@ -166,8 +166,9 @@ internal static class IServiceCollectionExtensions
             services
                 .AddOpenTelemetry()
                 .ConfigureResource(b =>
+                {
                     b.AddService(
-                            Assembly.GetExecutingAssembly().GetName().Name ?? "vicione-suite",
+                            CoreActivitySource.SourceName,
                             serviceNamespace: "vicione",
                             serviceVersion: Assembly.GetExecutingAssembly()
                                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
@@ -177,8 +178,10 @@ internal static class IServiceCollectionExtensions
                         .AddAttributes(
                         [
                             new("process.pid", Environment.ProcessId),
-                        ]))
-                .WithTracing(b => ConfigureTracing(b, configuration))
+                            new("service.instance.type", instanceOptions.Type.ToString())
+                        ]);
+                })
+                .WithTracing(b => ConfigureTracing(b, CoreActivitySource.SourceName, configuration))
                 .WithMetrics(b => ConfigureMetrics(b, configuration))
                 .UseOtlpExporter();
 
@@ -186,15 +189,15 @@ internal static class IServiceCollectionExtensions
 
             bool IsDisabled() => string.IsNullOrEmpty(configuration.GetValue<string?>(OtelEndpoint));
 
-            static void ConfigureTracing(TracerProviderBuilder builder, IConfiguration configuration)
+            static void ConfigureTracing(TracerProviderBuilder builder, string serviceName, IConfiguration configuration)
             {
                 builder
                     .AddAspNetCoreInstrumentation()
+                    .AddSource(serviceName)
                     .AddSource(DiagnosticHeaders.DefaultListenerName);
 
                 var additionalSources = configuration.GetSection(OtelAdditionalSources).Get<string[]>() ?? [];
-                foreach (var source in additionalSources)
-                    builder.AddSource(source);
+                builder.AddSource(additionalSources);
             }
 
             static void ConfigureMetrics(MeterProviderBuilder builder, IConfiguration configuration)

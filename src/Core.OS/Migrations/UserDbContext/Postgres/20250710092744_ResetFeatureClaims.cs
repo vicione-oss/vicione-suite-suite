@@ -10,8 +10,8 @@ namespace Core.OS.Migrations.UserDbContext.Postgres
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("DELETE FROM \"AspNetRoleClaims\"");
-            migrationBuilder.Sql("DELETE FROM \"AspNetUserClaims\"");
+            migrationBuilder.Sql("DELETE FROM \"user\".\"AspNetRoleClaims\"");
+            migrationBuilder.Sql("DELETE FROM \"user\".\"AspNetUserClaims\"");
         }
 
         /// <inheritdoc />

@@ -15,12 +15,16 @@ public class ApplicationDbContext(DbContextOptions options) : ModuleDbContext(op
     public DbSet<Nonce> Nonces => Set<Nonce>();
     public DbSet<OnboardingState> OnboardingStates => Set<OnboardingState>();
 
+    public override IEnumerable<Type> NotSynchronizedEntityTypes => [typeof(Nonce)];
+
     public override string DefaultSchemaName => DbSchemaName;
 
     protected override void OnModuleModelCreating(ModelBuilder modelBuilder)
-        => modelBuilder.Entity<InstanceInformation>()
+    {
+        modelBuilder.Entity<InstanceInformation>()
             .Property(i => i.InstalledModules)
             .PersistAsJson();
+    }
 }
 
 public sealed class ApplicationDbContextSqlite(DbContextOptions<ApplicationDbContextSqlite> options) :

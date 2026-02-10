@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Core.Module;
+using Core.OS.Diagnostics.MassTransit;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
@@ -72,6 +73,8 @@ internal static class MassTransitConfiguration
                             StringComparison.Ordinal))
                         configurator.AddDependency(provider.GetRequiredService<SynchronizationState>());
                 });
+
+                busConfig.AddBusObserver<BusObserver>();
 
                 var busSettings = config.GetMessageBusOptions();
                 if (busSettings.UseInMemoryBus)
@@ -237,4 +240,5 @@ internal static class MassTransitConfiguration
         }
     }
 }
+
 #pragma warning restore CA1506

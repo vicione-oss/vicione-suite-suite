@@ -184,7 +184,12 @@ public class SuiteDependencyContextBuilder
 #endif
         ResolveBackendModulePathInfos(fileSystem, _options.BackendLoaderOptions, _options.BackendModuleOptions);
         ResolveUiHostPathInfo(fileSystem, _options.UiHostOptions);
-        ResolveUiModules(fileSystem, _options.ClientLoaderOptions, _options.ClientModuleOptions);
+        // TODO: The following check is a workaround supposed to be addressed in:
+        // https://gitlab.com/vicione-oss/vicione/suite/suite/-/issues/2645
+        if (_options.UiHostOptions is { Enable: true })
+        {
+            ResolveUiModules(fileSystem, _options.ClientLoaderOptions, _options.ClientModuleOptions);
+        }
 
         // cleanup the lists
         CleanupOptions();

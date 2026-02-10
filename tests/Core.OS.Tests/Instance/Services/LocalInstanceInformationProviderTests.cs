@@ -93,7 +93,7 @@ public class LocalInstanceInformationProviderTests
             using var serviceProvider = SetupServiceProvider();
             var provider = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
 
-            // Act            
+            // Act
             _ = provider.ReadLocalInstanceId();
             _ = provider.ReadLocalInstanceId();
             _ = provider.ReadLocalInstanceId();
