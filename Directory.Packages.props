@@ -5,7 +5,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <HostManagementVersion>1.2.0</HostManagementVersion>
     <MassTransitVersion>8.5.7</MassTransitVersion>
-    <ViciOneUiMonochromeIconsVersion>4.1.0</ViciOneUiMonochromeIconsVersion>
+    <ViciOneUiMonochromeIconsVersion>4.2.0</ViciOneUiMonochromeIconsVersion>
     <ViciOneSuiteSdkVersion>2.0.0-ci2313993755</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -59,7 +59,7 @@
     <PackageVersion Include="ViciOne.Suite.Sdk.Deployment" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.SystemMonitoring" Version="0.10.0" />
     <PackageVersion Include="ViciOne.Ui.Design" Version="2.0.3" />
-    <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="5.1.1" />
+    <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="5.2.0" />
     <PackageVersion Include="ViciOne.Ui.Localization" Version="3.1.0" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Assets" Version="$(ViciOneUiMonochromeIconsVersion)" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Components" Version="$(ViciOneUiMonochromeIconsVersion)" />

@@ -223,4 +223,7 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
             GridItemSelection.Remove(connectionId);
         }
     }
+
+    private string GetDisplayNameOfType(EditConnectionModel model)
+        => ConnectionTypeUiRegistry.TryGetDisplayName(model.Type, out var displayName) ? displayName : model.Type.Name;
 }

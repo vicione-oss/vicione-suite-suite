@@ -28,13 +28,13 @@
         <ChildContent>
             <ItemSelectColumn KeySelector="@(item => item.UserName)" Selection="@UserGridItemSelection" />
 
-            <TemplateColumn Title="@TechnicalTerms.Username">
-                @context.UserName
-            </TemplateColumn>
+            <PropertyColumn Title="@TechnicalTerms.Username"
+                            Property="@(i => i.UserName)"
+                            Sortable="true" />
 
-            <TemplateColumn Title="@CommonVocabulary.Email">
-                @context.Email
-            </TemplateColumn>
+            <PropertyColumn Title="@CommonVocabulary.Email"
+                            Property="@(i => i.Email)"
+                            Sortable="true" />
 
             <TemplateColumn Title="@CommonVocabulary.Description">
             </TemplateColumn>
