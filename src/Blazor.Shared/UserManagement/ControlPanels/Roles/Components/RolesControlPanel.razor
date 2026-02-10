@@ -28,13 +28,13 @@
         <ChildContent>
             <ItemSelectColumn KeySelector="@(item => item.Name)" Selection="RoleGridItemSelection" />
 
-            <TemplateColumn Title="@CommonVocabulary.Name">
-                @context.Name
-            </TemplateColumn>
+            <PropertyColumn Title="@CommonVocabulary.Name"
+                            Property="@(i => i.Name)"
+                            Sortable="true" />
 
-            <TemplateColumn Title="@CommonVocabulary.Description">
-                @context.Description
-            </TemplateColumn>
+            <PropertyColumn Title="@CommonVocabulary.Description"
+                            Property="@(i => i.Description)"
+                            Sortable="true" />
 
             <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
                               Navigate="@(async (Role item) => await EditRole(item))" />

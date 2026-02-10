@@ -26,13 +26,13 @@
         <ChildContent>
             <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@TagGridItemSelection" />
 
-            <TemplateColumn Title="@TechnicalTerms.Id">
-                @context.Id
-            </TemplateColumn>
+            <PropertyColumn Title="@TechnicalTerms.Id"
+                            Property="@(i => i.Id)"
+                            Sortable="true" />
 
-            <TemplateColumn Title="@CommonVocabulary.Text">
-                @context.Text
-            </TemplateColumn>
+            <PropertyColumn Title="@CommonVocabulary.Text"
+                            Property="@(i => i.Text)"
+                            Sortable="true" />
 
             <TemplateColumn Title="@CommonVocabulary.Protected">
                 <CheckBox Enabled="false" Value="@context.Protected" />

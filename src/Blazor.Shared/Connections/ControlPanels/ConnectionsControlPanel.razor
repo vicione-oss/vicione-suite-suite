@@ -1,6 +1,7 @@
 ﻿@using Blazor.Shared.Connections.Contracts
 @using Blazor.Shared.Connections.Services
 @using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Blazor.Components.Grid.Models
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.Blazor.Components.Grid.Components
 @using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
@@ -34,7 +35,8 @@
             <ChildContent>
                 <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@GridItemSelection" />
 
-                <TemplateColumn Title="@CommonVocabulary.Name">
+                <TemplateColumn Title="@CommonVocabulary.Name"
+                                Sort="@(GridSort<EditConnectionModel>.ByAscending(m => m.Name))">
                     <span class="connection-name-container"
                           title="@context.Name">
 
@@ -42,12 +44,13 @@
                     </span>
                 </TemplateColumn>
 
-                <TemplateColumn Title="@CommonVocabulary.Description">
-                    @context.Description
-                </TemplateColumn>
+                <PropertyColumn Title="@CommonVocabulary.Description"
+                                Property="@(i => i.Description)"
+                                Sortable="true"/>
 
-                <TemplateColumn Title="@TechnicalTerms.Type">
-                    @(ConnectionTypeUiRegistry.TryGetDisplayName(context.Type, out var displayName) ? displayName : context.Type.Name)
+                <TemplateColumn Title="@TechnicalTerms.Type"
+                                Sort="@(GridSort<EditConnectionModel>.ByAscending(m => GetDisplayNameOfType(m)))">
+                    @GetDisplayNameOfType(context)
                 </TemplateColumn>
 
                 <TemplateColumn Title="@TechnicalTerms.TagPlural">
