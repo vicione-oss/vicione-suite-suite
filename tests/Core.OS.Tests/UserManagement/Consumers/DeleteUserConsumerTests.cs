@@ -36,7 +36,7 @@ public class DeleteUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var command = new DeleteUser(new UserProfile
         {
             UserName = new UserName("test"),
@@ -53,7 +53,7 @@ public class DeleteUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var userProfile = SeedingExtensions.Bob.ToUserProfile();
         var command = new DeleteUser(userProfile);
 
@@ -68,7 +68,7 @@ public class DeleteUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var user = new UserProfile
         {
             UserName = new UserName("Unknown"),
@@ -90,7 +90,7 @@ public class DeleteUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
 
         var userProfile = SeedingExtensions.Admin.ToUserProfile();
         var command = new DeleteUser(userProfile);
@@ -106,7 +106,7 @@ public class DeleteUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SuiteUser>>();
         var eddy = await userManager.FindByNameAsync(SeedingExtensions.Eddy.UserName);

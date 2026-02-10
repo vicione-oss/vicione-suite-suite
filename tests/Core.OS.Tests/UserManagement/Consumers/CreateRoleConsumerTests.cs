@@ -35,7 +35,7 @@ public class CreateRoleConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var command = new CreateRole(new Role { Name = "Test" });
 
         // Act/Assert
@@ -48,7 +48,7 @@ public class CreateRoleConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var role = new Role { Name = "Test", Claims = [new() { Type = "Test", Value = "Full" }] };
         var command = new CreateRole(role);
 
@@ -66,7 +66,7 @@ public class CreateRoleConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
         var role = new Role { Name = TestExtensions.TestRoleName };
         var command = new CreateRole(role);

@@ -33,7 +33,7 @@ public class SeedingExtensionsTests : TestWithDbContextSqlite<UserDbContextSqlit
         using var serviceProvider = CreateServiceProvider();
 
         // Act
-        await serviceProvider.SeedUsersAndRoles();
+        await serviceProvider.SeedUsersAndRoles(CancellationToken.None);
 
         // Assert
         var context = serviceProvider.GetRequiredService<UserDbContext>();

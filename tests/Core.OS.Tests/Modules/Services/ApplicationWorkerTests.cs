@@ -5,6 +5,7 @@ using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
+using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Services;
 using Core.OS.Modules.Services;
 using Core.OS.Tests.Extensions;
@@ -21,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using OpenTelemetry.Trace;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Xunit;
@@ -56,7 +58,13 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
                     .AddUserDbContextsInMemory(false)
                     .AddConnectionDbContextsInMemory(false)
                     .AddUserManagement()
-                    .AddSingleton(_ => Substitute.For<INonceStore>());
+                    .AddSingleton(_ => Substitute.For<INonceStore>())
+                    .AddSingleton<SynchronizationState>(_ =>
+                    {
+                        var syncDone = new SynchronizationState();
+                        syncDone.CompleteSynchronization();
+                        return syncDone;
+                    });
 
                 var options = Substitute.For<IOptions<MassTransitHostOptions>>();
                 options.Value.Returns(new MassTransitHostOptions()
@@ -77,7 +85,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         var endPoint = Substitute.For<ISendEndpoint>();
         _sendEndpointProvider.GetSendEndpoint(commandUri).Returns(endPoint);
 
-        var applicationWorker = new ApplicationWorker(_appFactory.Services, _loggerMock);
+        var applicationWorker = CreateApplicationWorker();
 
         // Act
         await applicationWorker.StartingAsync(default);
@@ -92,7 +100,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         // Arrange
         _localInstanceInformationMock.SetupLocalInstanceInformation(InstanceType.Slave);
 
-        var applicationWorker = new ApplicationWorker(_appFactory.Services, _loggerMock);
+        var applicationWorker = CreateApplicationWorker();
 
         // Act
         await applicationWorker.StartingAsync(default);
@@ -107,7 +115,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         // Arrange
         _localInstanceInformationMock.SetupLocalInstanceInformation(InstanceType.Slave);
 
-        var applicationWorker = new ApplicationWorker(_appFactory.Services, _loggerMock);
+        var applicationWorker = CreateApplicationWorker();
 
         // Act
         await applicationWorker.StoppingAsync(default);
@@ -127,7 +135,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
 
         var cancellationToken = new CancellationToken();
 
-        var worker = new ApplicationWorker(_appFactory.Services, _loggerMock);
+        var worker = CreateApplicationWorker();
 
         // Act
         await worker.StartingAsync(cancellationToken);
@@ -156,7 +164,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
 
         var cancellationToken = new CancellationToken();
 
-        var worker = new ApplicationWorker(_appFactory.Services, _loggerMock);
+        var worker = CreateApplicationWorker();
 
         // Act
         await worker.StartingAsync(cancellationToken);
@@ -183,7 +191,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
 
         var cancellationToken = new CancellationToken();
 
-        var worker = new ApplicationWorker(_appFactory.Services, _loggerMock);
+        var worker = CreateApplicationWorker();
 
         // Act
         await worker.StartingAsync(cancellationToken);
@@ -206,7 +214,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton(lifetime);
         await using var services = serviceCollection.BuildServiceProvider();
-        var applicationWorker = new ApplicationWorker(services, _loggerMock);
+        var applicationWorker = CreateApplicationWorker();
 
         await _appFactory.Services.EnsureApplicationContextIsCreated(cancellationToken);
 
@@ -216,4 +224,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         // Assert
         Assert.NotNull(applicationWorker.InitializationErrorMessage);
     }
+
+    private ApplicationWorker CreateApplicationWorker()
+        => new(_appFactory.Services, Substitute.For<TracerProvider>(), _loggerMock);
 }

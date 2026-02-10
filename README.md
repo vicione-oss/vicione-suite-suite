@@ -96,18 +96,25 @@ The installation should now run automatically.
 > Note: After executing commands such as git clean, this step likely needs to be repeated.
 
 ## Getting started
-After cloning the ViciOne Suite repo and fulfilling the above mentioned prerequisites, you are now ready to launch the application. 
+After cloning the ViciOne Suite repo and fulfilling the above mentioned prerequisites, you are now ready to launch the application.
 
 To do so:
-1. Open the [solution](/vicione-suite.sln) with Visual Studio
-1. Set the `startup-project` to **Core.OS** 
-1. Choose your preferred `Emulator` (**Recommended** Backend-Server)
+1. Open the [solution](/vicione-suite.sln) with Visual Studio/Rider/VS Code
+1. Make sure the `startup-project` is set to **Core.OS**
+1. Choose your preferred `instance mode`:
+   1. **Standalone-Ui:** will start a standalone instance (**Recommended**)
+   1. **Master-Ui:** will start a master instance
+   1. **Slave-Ui-1:** will start a slave instance
+   1. **Slave-Ui-2:** will start a slave instance
 1. Start debugging (The first start might take a minute)
 1. Open a browser and go to the URL https://localhost:XXXX*
 1. Login using one of the below mentioned [ViciOne Suite Accounts](#vicione-suite-accounts)
 
->\*Note: The port depends on chosen Emulator. For example, Blazor Server listens on Port 5001. If you are unsure, check the console for an information like *"Now listening on: https://localhost:XXXX"*
+>\*Note: The port depends on chosen instance mode. For example, standalone listens on Port 5001. If you are unsure, check the console for an information like *"Now listening on: https://localhost:XXXX"*
 
+>\*\*Note: To successfully start a master/slave setup, make sure to have the prerequisites installed and running (best to use `compose.yaml` to start Postgres, RabbitMQ and jaeger)
+
+It is possible to start multiple instances using the launch profiles Master-Ui & Slave-Ui-(1|2).
 
 ## ViciOne Suite Accounts
 
@@ -180,13 +187,16 @@ Sample configuration in `appsettings.json`:
 }
 ```
 
+When using the runtime profiles from `launchSettings.json`, no additional configuration for OpenTelemetry is required.
+Also, when starting, OpenTelemetry is set up to trace `MassTransit`, so adding it to the `OTEL_ADDITIONAL_SOURCES` list is not required.
+
 #### Connection details for Backend-Services
 >:warning: Only use in development environment
 
 Backend services can be provided with connection details using the `MqttClient.ServiceClient`-Key. This should only be used for development purposes. In production environments it is required to use `ConnectionManagement` to configure connections.
 
 ```json
-"MqttClient": {        
+"MqttClient": {
     "ServiceClient": {
         "Endpoint": "localhost",
         "Port": 1883,

@@ -36,7 +36,7 @@ public class UpdateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var command = new UpdateUser(
             new UserProfile
             {
@@ -54,7 +54,7 @@ public class UpdateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var userProfile = new UserProfile
         {
             UserName = new UserName(SeedingExtensions.Eddy.UserName),
@@ -74,7 +74,7 @@ public class UpdateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var userProfile = new UserProfile
         {
             UserName = new UserName(SeedingExtensions.Eddy.UserName),
@@ -94,7 +94,7 @@ public class UpdateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SuiteUser>>();
         var eddy = await userManager.FindByNameAsync(SeedingExtensions.Eddy.UserName);
@@ -119,7 +119,7 @@ public class UpdateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var user = new UserProfile
         {
             UserName = new UserName("Error"),
@@ -140,7 +140,7 @@ public class UpdateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var user = SeedingExtensions.Eddy.ToUserProfile();
         user.CurrentPassword = SeedingExtensions.Eddy.Password;
         user.NewPassword = "Too short";
@@ -159,7 +159,7 @@ public class UpdateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var user = SeedingExtensions.Eddy.ToUserProfile();
         user.CurrentPassword = "Up2Good!!";
         user.NewPassword = "%Up2noG00d$$!";

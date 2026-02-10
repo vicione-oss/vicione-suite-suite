@@ -59,8 +59,11 @@ public static partial class SeedingExtensions
 
     extension(IServiceProvider scopedServices)
     {
-        internal async Task SeedUsersAndRoles()
+        internal async Task SeedUsersAndRoles(CancellationToken cancellationToken)
         {
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
             var userManagementOptions = scopedServices.GetRequiredService<IOptions<UserManagementOptions>>().Value;
             var logger = scopedServices.GetRequiredService<ILogger<ApplicationWorker>>();
 

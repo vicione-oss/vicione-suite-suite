@@ -1,8 +1,10 @@
-﻿using System.IO.Abstractions;
+﻿using System.Diagnostics;
+using System.IO.Abstractions;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using Core.OS.Diagnostics;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.MessageBus.MassTransit.Configuration;
@@ -42,6 +44,11 @@ internal static class RabbitMqCleaner
             UserName = transportOptions.User,
             Password = transportOptions.Pass
         };
+        using var activity = CoreActivitySource.Source.StartActivity();
+        activity?
+            .AddTag("server.address", transportOptions.Host)
+            .AddTag("messaging.rabbitmq.vhost", virtualHost)
+            .AddTag("server.port", $"{transportOptions.Port}");
 
         var connection = await factory.CreateConnectionAsync(cancellationToken);
         try
@@ -59,6 +66,7 @@ internal static class RabbitMqCleaner
             foreach (var exchange in exchanges)
             {
                 await channel.ExchangeDeleteAsync(exchange, cancellationToken: cancellationToken);
+                logger.LogEvent($"Deleted exchange {exchange}");
                 exchangeCount++;
             }
 
@@ -67,6 +75,7 @@ internal static class RabbitMqCleaner
             {
                 await channel.QueuePurgeAsync(queue, cancellationToken);
                 await channel.QueueDeleteAsync(queue, cancellationToken: cancellationToken);
+                logger.LogEvent($"Deleted queue {queue}");
                 queueCount++;
             }
 
@@ -76,13 +85,17 @@ internal static class RabbitMqCleaner
                 logger.LogInformation("Removed {QueueCount} queue(s), {ExchangeCount} exchange(s)",
                     queueCount,
                     exchangeCount);
-
+            activity?
+                .AddTag("messaging.rabbitmq.cleaned.queues", $"{queueCount}")
+                .AddTag("messaging.rabbitmq.cleaned.exchanges", $"{exchangeCount}");
 
             await connection.CloseAsync(200, "Completed (Ok)", cancellationToken);
             WriteCleanedVersionFile(fileSystem, instanceOptions);
         }
         catch (Exception ex)
         {
+            activity?.AddException(ex);
+            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
             if (connection.IsOpen)
                 await connection.CloseAsync(500, $"Completed (not OK): {ex.Message}", cancellationToken);
         }
@@ -138,4 +151,10 @@ internal static class RabbitMqCleaner
 
     private static string GetCleanedNodesVersionFilePath(IFileSystem fileSystem, InstanceOptions options)
         => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(options), "CleanedBrokerVersion.info");
+}
+
+internal static partial class LoggingExtensions
+{
+    [LoggerMessage(LogLevel.Information, "Event: `{message}`")]
+    internal static partial void LogEvent(this ILogger logger, string message);
 }

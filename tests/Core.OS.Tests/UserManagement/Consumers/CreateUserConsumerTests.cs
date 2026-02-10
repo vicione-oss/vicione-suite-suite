@@ -35,7 +35,7 @@ public class CreateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var command = new CreateUser(new UserProfile
         {
             UserName = new UserName("test"),
@@ -52,7 +52,7 @@ public class CreateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
         var userProfile = new UserProfile
         {
@@ -74,7 +74,7 @@ public class CreateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var user = SeedingExtensions.Eddy.ToUserProfile(true);
         var command = new CreateUser(user);
 
@@ -91,7 +91,7 @@ public class CreateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
         var user = new UserProfile
         {
@@ -114,7 +114,7 @@ public class CreateUserConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
 
         var user = new UserProfile

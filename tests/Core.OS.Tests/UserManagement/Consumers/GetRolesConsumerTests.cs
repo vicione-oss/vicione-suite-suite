@@ -29,7 +29,7 @@ public class GetRolesConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var request = new GetRoles();
 
         // Act/Assert
@@ -42,7 +42,7 @@ public class GetRolesConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var request = new GetRoles();
 
         // Act

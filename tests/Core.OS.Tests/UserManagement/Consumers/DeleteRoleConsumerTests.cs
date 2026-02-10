@@ -38,7 +38,7 @@ public class DeleteRoleConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var command = new DeleteRole(new() { Name = "Test" });
 
         // Act/Assert
@@ -51,7 +51,7 @@ public class DeleteRoleConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<SuiteRole>>();
         var roleName = "Test";
 
@@ -73,7 +73,7 @@ public class DeleteRoleConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var role = new Role { Name = "Test" };
         var command = new DeleteRole(role);
 
@@ -92,7 +92,7 @@ public class DeleteRoleConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles();
+        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         var role = new Role { Name = SeedingExtensions.AdminRoleName };
         var command = new DeleteRole(role);
 
