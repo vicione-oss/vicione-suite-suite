@@ -17,6 +17,7 @@ using Sdk.Instance;
 using Sdk.Testing.Client;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using Xunit;
+using TestContext = Xunit.TestContext;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels;
 
@@ -90,7 +91,7 @@ public class InstancesControlPanelTests
             var state = new InstancesControlPanelState(mediator!);
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
-            await resetHandler.Reset(state, CancellationToken.None);
+            await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             // Act
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
@@ -100,7 +101,7 @@ public class InstancesControlPanelTests
             Assert.NotNull(mediator);
 
             await mediator.Received()
-                .Request<GetInstances, GetInstancesResponse>(Arg.Is<GetInstances>(k => k.InstanceId == null));
+                .Request<GetInstances, GetInstancesResponse>(Arg.Is<GetInstances>(k => k.InstanceId == null), Arg.Any<CancellationToken>());
         }
     }
 
@@ -120,7 +121,7 @@ public class InstancesControlPanelTests
             var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
-            await resetHandler.Reset(state, CancellationToken.None);
+            await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             // Act
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
@@ -151,7 +152,7 @@ public class InstancesControlPanelTests
             var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
-            await resetHandler.Reset(state, CancellationToken.None);
+            await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             // Act
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
@@ -183,7 +184,7 @@ public class InstancesControlPanelTests
             var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
-            await resetHandler.Reset(state, CancellationToken.None);
+            await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             // Act
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
@@ -208,7 +209,7 @@ public class InstancesControlPanelTests
             var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
-            await resetHandler.Reset(state, CancellationToken.None);
+            await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             var clientContext = ClientContextFactory.Create(instanceEvent);
@@ -217,7 +218,7 @@ public class InstancesControlPanelTests
             // Act
             component.TriggerGridFirstRowSelectionChange(true);
             component.FindGridActionButton(MonochromeIconName.Delete).Click();
-            await component.Instance.Consume(clientContext, CancellationToken.None);
+            await component.Instance.Consume(clientContext, TestContext.Current.CancellationToken);
 
             // Assert
             component.Markup.Should().NotContain(info.Name);
@@ -233,7 +234,7 @@ public class InstancesControlPanelTests
             var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
-            await resetHandler.Reset(state, CancellationToken.None);
+            await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             var clientContext = ClientContextFactory.Create(instanceEvent);
@@ -241,7 +242,7 @@ public class InstancesControlPanelTests
             component.Markup.Should().Contain(info.Name);
 
             // Act            
-            await component.Instance.Consume(clientContext, CancellationToken.None);
+            await component.Instance.Consume(clientContext, TestContext.Current.CancellationToken);
 
             // Assert            
             // todo - we can't assert because we can't access the models yet.

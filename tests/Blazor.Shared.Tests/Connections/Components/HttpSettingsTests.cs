@@ -12,11 +12,11 @@ namespace Blazor.Shared.Tests.Connections.Components;
 public class HttpSettingsTests
 {
     [Fact]
-    public void ComponentGetsRendered()
+    public async Task ComponentGetsRendered()
     {
         // Arrange
         var connection = ConnectionFactory.HttpConnection.GetHttpConnection();
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act

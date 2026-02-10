@@ -16,7 +16,8 @@ public class FluidTemplateRendererTest
 
         // Act + Assert
         await Assert.ThrowsAsync<FileNotFoundException>(() =>
-            renderer.RenderFromTemplateFile(new FileSystem().FileInfo.New("non-existent-template"), _ => { }));
+            renderer.RenderFromTemplateFile(new FileSystem().FileInfo.New("non-existent-template"),
+                _ => { }, TestContext.Current.CancellationToken));
     }
 
     [Theory]
@@ -28,8 +29,7 @@ public class FluidTemplateRendererTest
 
         // Act
         var result = await renderer.RenderFromTemplateFile(
-            new FileSystem().FileInfo.New(templateFile),
-            _ => { });
+            new FileSystem().FileInfo.New(templateFile), _ => { }, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotEmpty(result);

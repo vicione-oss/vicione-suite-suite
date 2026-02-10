@@ -38,9 +38,9 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
     }
 
     [Fact]
-    public void Should_render_component()
+    public async Task Should_render_component()
     {
-        using var ctx = SetupTestContext();
+        await using var ctx = SetupTestContext();
 
         var authContext = ctx.AddAuthorization();
         authContext.SetAuthorized("Eddy");
@@ -53,15 +53,15 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
     }
 
     [Fact]
-    public void Should_send_message()
+    public async Task Should_send_message()
     {
         var jitChatServiceMock = Substitute.For<IJiTChatService>();
         jitChatServiceMock.ChatMessages
             .Returns([]);
 
-        jitChatServiceMock.SendMessage(Arg.Is("Eddy"), Arg.Is(string.Empty));
+        await jitChatServiceMock.SendMessage(Arg.Is("Eddy"), Arg.Is(string.Empty));
 
-        using var ctx = SetupTestContext(jitChatServiceMock);
+        await using var ctx = SetupTestContext(jitChatServiceMock);
 
         var authContext = ctx.AddAuthorization();
         authContext
@@ -75,18 +75,18 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
         button.Click();
 
         // Assert
-        jitChatServiceMock.Received(1).SendMessage("Eddy", string.Empty);
+        await jitChatServiceMock.Received(1).SendMessage("Eddy", string.Empty);
     }
 
     [Fact]
-    public void Should_display_message()
+    public async Task Should_display_message()
     {
         var jitChatServiceMock = Substitute.For<IJiTChatService>();
         var messages = new List<ChatMessage>();
         jitChatServiceMock.ChatMessages
             .Returns(messages);
 
-        using var ctx = SetupTestContext(jitChatServiceMock);
+        await using var ctx = SetupTestContext(jitChatServiceMock);
 
         var authContext = ctx.AddAuthorization();
         authContext

@@ -32,7 +32,7 @@ public class IConnectionDbContextExtensionsTests : TestWithDbContextSqlite<Conne
     {
         // Arrange
         await using var serviceProvider = CreateServiceProvider();
-        var token = CancellationToken.None;
+        var token = TestContext.Current.CancellationToken;
 
         // Act
         await serviceProvider.SeedConnections(token);
@@ -47,7 +47,7 @@ public class IConnectionDbContextExtensionsTests : TestWithDbContextSqlite<Conne
     {
         // Arrange
         await using var serviceProvider = CreateServiceProvider(CreateMqttClientConfig());
-        var token = CancellationToken.None;
+        var token = TestContext.Current.CancellationToken;
 
         // Act
         await serviceProvider.SeedConnections(token);
@@ -62,7 +62,7 @@ public class IConnectionDbContextExtensionsTests : TestWithDbContextSqlite<Conne
     {
         // Arrange
         await using var serviceProvider = CreateServiceProvider();
-        var token = CancellationToken.None;
+        var token = TestContext.Current.CancellationToken;
 
         // Act
         await serviceProvider.SeedConnections(token);
@@ -77,8 +77,8 @@ public class IConnectionDbContextExtensionsTests : TestWithDbContextSqlite<Conne
     {
         // Arrange
         await using var enabledProvider = CreateServiceProvider(CreateMqttClientConfig());
-        using var disabledProvider = CreateServiceProvider();
-        var token = CancellationToken.None;
+        await using var disabledProvider = CreateServiceProvider();
+        var token = TestContext.Current.CancellationToken;
 
         // Act
         await enabledProvider.SeedConnections(token);

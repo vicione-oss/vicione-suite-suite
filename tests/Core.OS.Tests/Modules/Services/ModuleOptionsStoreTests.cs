@@ -65,7 +65,7 @@ public class ModuleOptionsStoreTests
             var optionStore = serviceProvider.GetRequiredService<ModuleOptionsStore>();
 
             // Act
-            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [_boolOption, _numberOption, _textOption], CancellationToken.None);
+            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [_boolOption, _numberOption, _textOption], TestContext.Current.CancellationToken);
 
             // Assert            
             _fileSystem.AllFiles.Should().ContainSingle(k => k.EndsWith(ModuleOptionsStore.ModuleSettingsFileName, StringComparison.Ordinal));
@@ -79,7 +79,7 @@ public class ModuleOptionsStoreTests
             var optionStore = serviceProvider.GetRequiredService<ModuleOptionsStore>();
 
             // Act
-            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [_boolOption, _numberOption, _textOption], CancellationToken.None);
+            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [_boolOption, _numberOption, _textOption], TestContext.Current.CancellationToken);
 
             // Assert            
             _fileSystem.AllDirectories.Should().ContainSingle(k => k.EndsWith(ModuleIdResolver.ResolveId<TestBackendModule>(), StringComparison.Ordinal));
@@ -93,7 +93,7 @@ public class ModuleOptionsStoreTests
             var optionStore = serviceProvider.GetRequiredService<ModuleOptionsStore>();
 
             // Act
-            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [], CancellationToken.None);
+            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [], TestContext.Current.CancellationToken);
 
             // Assert            
             _fileSystem.AllFiles.Should().BeEmpty();
@@ -108,10 +108,10 @@ public class ModuleOptionsStoreTests
             // Arrange        
             await using var serviceProvider = SetupServiceProvider();
             var optionStore = serviceProvider.GetRequiredService<ModuleOptionsStore>();
-            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [_boolOption, _numberOption, _textOption], CancellationToken.None);
+            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [_boolOption, _numberOption, _textOption], TestContext.Current.CancellationToken);
 
             // Act
-            var configuration = await optionStore.LoadJsonConfiguration(ModuleIdResolver.ResolveId<TestBackendModule>());
+            var configuration = await optionStore.LoadJsonConfiguration(ModuleIdResolver.ResolveId<TestBackendModule>(), TestContext.Current.CancellationToken);
 
             // Assert
             Assert.NotNull(configuration);
@@ -123,10 +123,10 @@ public class ModuleOptionsStoreTests
             // Arrange        
             await using var serviceProvider = SetupServiceProvider();
             var optionStore = serviceProvider.GetRequiredService<ModuleOptionsStore>();
-            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [_boolOption, _numberOption, _textOption], CancellationToken.None);
+            await optionStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), [_boolOption, _numberOption, _textOption], TestContext.Current.CancellationToken);
 
             // Act
-            var configuration = await optionStore.LoadJsonConfiguration(ModuleIdResolver.ResolveId<TestBackendModule>());
+            var configuration = await optionStore.LoadJsonConfiguration(ModuleIdResolver.ResolveId<TestBackendModule>(), TestContext.Current.CancellationToken);
 
             // Assert
             Assert.NotNull(configuration);
@@ -147,7 +147,7 @@ public class ModuleOptionsStoreTests
             var suiteContext = TestFactory.CreateSuiteContext();
 
             // Act
-            await optionStore.ValidateModuleOptions(suiteContext, CancellationToken.None);
+            await optionStore.ValidateModuleOptions(suiteContext, TestContext.Current.CancellationToken);
 
             // Assert            
             suiteContext.Modules.SelectMany(k => k.StartupErrors).Should().HaveCount(2, "TestClient|Backend metadata is missing");

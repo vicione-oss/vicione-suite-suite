@@ -65,7 +65,7 @@ public sealed class DowngradeWebApplicationBuilderTests
         var downgradeOptions = CreateDowngradeOptions();
 
         // Act
-        using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, downgradeOptions);
+        await using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, downgradeOptions);
         host.Urls.Add(TestUrl);
 
         // Assert
@@ -100,7 +100,7 @@ public sealed class DowngradeWebApplicationBuilderTests
 
         var downgradeOptions = CreateDowngradeOptions();
 
-        using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, downgradeOptions);
+        await using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, downgradeOptions);
         host.Urls.Add(TestUrl);
 
         var thread = new Thread(async () =>
@@ -136,7 +136,7 @@ public sealed class DowngradeWebApplicationBuilderTests
 
         var downgradeOptions = CreateDowngradeOptions();
 
-        using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, downgradeOptions);
+        await using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, downgradeOptions);
         host.Urls.Add(TestUrl);
 
         var thread = new Thread(async () =>
@@ -146,7 +146,7 @@ public sealed class DowngradeWebApplicationBuilderTests
 
         thread.Start();
 
-        await Task.Delay(2000);
+        await Task.Delay(2000, TestContext.Current.CancellationToken);
 
         var factory = host.Services.GetRequiredService<IHttpClientFactory>();
         using var client = factory.CreateClient();

@@ -56,7 +56,7 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
         // Arrange
         _localInstanceInformationMock.SetupLocalInstanceInformation(InstanceType.Master);
 
-        var provider = await CreateInstanceInformationProvider(_config, CancellationToken.None);
+        var provider = await CreateInstanceInformationProvider(_config, TestContext.Current.CancellationToken);
 
         // Act
         var id = provider.Local.Id;
@@ -71,8 +71,8 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
         // Arrange
         _localInstanceInformationMock.SetupLocalInstanceInformation(InstanceType.Master);
 
-        var provider1 = await CreateInstanceInformationProvider(_config, CancellationToken.None);
-        var provider2 = await CreateInstanceInformationProvider(_config, CancellationToken.None);
+        var provider1 = await CreateInstanceInformationProvider(_config, TestContext.Current.CancellationToken);
+        var provider2 = await CreateInstanceInformationProvider(_config, TestContext.Current.CancellationToken);
 
         // Act
         var id1 = provider1.Local.Id;
@@ -88,7 +88,7 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
         // Arrange
         _localInstanceInformationMock.SetupLocalInstanceInformation();
 
-        var provider = await CreateInstanceInformationProvider(_config, CancellationToken.None);
+        var provider = await CreateInstanceInformationProvider(_config, TestContext.Current.CancellationToken);
 
         // Act
         var id = provider.Local.Id;
@@ -104,7 +104,7 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
         var preloadId = Guid.NewGuid();
         _localInstanceInformationMock.SetupLocalInstanceInformation(InstanceType.Standalone, preloadId);
 
-        var provider = await CreateInstanceInformationProvider(_config, CancellationToken.None);
+        var provider = await CreateInstanceInformationProvider(_config, TestContext.Current.CancellationToken);
 
         // Act
         var id = provider.Local.Id;

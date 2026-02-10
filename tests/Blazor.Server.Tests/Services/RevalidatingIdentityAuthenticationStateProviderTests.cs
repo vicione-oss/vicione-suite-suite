@@ -48,7 +48,7 @@ public class RevalidatingIdentityAuthenticationStateProviderTests
         using var stateProvider = new MockRevalidatingIdentityAuthenticationStateProvider<IdentityUser>(
             _loggerFactory, _scopeFactory, _identityOptions);
         // Act
-        var validatedState = await stateProvider.ValidateAuthenticationStateAsync(authenticationState, CancellationToken.None);
+        var validatedState = await stateProvider.ValidateAuthenticationStateAsync(authenticationState, TestContext.Current.CancellationToken);
 
         // Assert
         _ = userManager.Received(1).GetUserAsync(Arg.Is<ClaimsPrincipal>(cp => cp == claimPrincipalUserAdmin));
@@ -83,7 +83,7 @@ public class RevalidatingIdentityAuthenticationStateProviderTests
         using var stateProvider = new MockRevalidatingIdentityAuthenticationStateProvider<IdentityUser>(
             _loggerFactory, _scopeFactory, _identityOptions);
         // Act
-        var validatedState = await stateProvider.ValidateAuthenticationStateAsync(authenticationState, CancellationToken.None);
+        var validatedState = await stateProvider.ValidateAuthenticationStateAsync(authenticationState, TestContext.Current.CancellationToken);
 
         // Assert
         _ = userManager.Received(1).GetUserAsync(Arg.Is<ClaimsPrincipal>(cp => cp == claimPrincipalUserAdmin));
@@ -125,7 +125,7 @@ public class RevalidatingIdentityAuthenticationStateProviderTests
         using var stateProvider = new MockRevalidatingIdentityAuthenticationStateProvider<IdentityUser>(
             _loggerFactory, _scopeFactory, _identityOptions);
         // Act
-        var validatedState = await stateProvider.ValidateAuthenticationStateAsync(authenticationState, CancellationToken.None);
+        var validatedState = await stateProvider.ValidateAuthenticationStateAsync(authenticationState, TestContext.Current.CancellationToken);
 
         // Assert
         _ = userManager.Received(1).GetUserAsync(Arg.Is<ClaimsPrincipal>(cp => cp == claimPrincipalUserAdmin));

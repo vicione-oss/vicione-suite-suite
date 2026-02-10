@@ -82,8 +82,8 @@ public sealed class RestoreBackupConsumerTests
 
         // Assert
         _store.Received(0).CreateBackupFile(out Arg.Any<string>());
-        (await _fileSystem.ReadRestoreTask(_instanceOptions)).Should().BeNull();
-        (await tester.Harness.Sent.Any<ControlService>(k => k.Context.Message.ServiceName == _instanceOptions.ServiceName)).Should().BeFalse();
+        (await _fileSystem.ReadRestoreTask(_instanceOptions, TestContext.Current.CancellationToken)).Should().BeNull();
+        (await tester.Harness.Sent.Any<ControlService>(k => k.Context.Message.ServiceName == _instanceOptions.ServiceName, TestContext.Current.CancellationToken)).Should().BeFalse();
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public sealed class RestoreBackupConsumerTests
 
         // Assert
         _store.Received(1).CreateBackupFile(out Arg.Any<string>());
-        (await _fileSystem.ReadRestoreTask(_instanceOptions)).Should().NotBeNull();
+        (await _fileSystem.ReadRestoreTask(_instanceOptions, TestContext.Current.CancellationToken)).Should().NotBeNull();
         response.ErrorInfo.Should().BeNull();
     }
 
@@ -133,7 +133,7 @@ public sealed class RestoreBackupConsumerTests
 
         // Assert
         _store.Received(0).CreateBackupFile(out Arg.Any<string>());
-        (await _fileSystem.ReadRestoreTask(_instanceOptions)).Should().BeNull();
+        (await _fileSystem.ReadRestoreTask(_instanceOptions, TestContext.Current.CancellationToken)).Should().BeNull();
         response.ErrorInfo.Should().BeNull();
     }
 
@@ -158,7 +158,7 @@ public sealed class RestoreBackupConsumerTests
 
         // Assert
         (await tester.Harness.Sent.Any<ControlInstance>(k => k.Context.Message.InstanceId == instanceId
-            && k.Context.Message.Action == InstanceCommand.Restart)).Should().BeTrue();
+            && k.Context.Message.Action == InstanceCommand.Restart, TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
@@ -256,7 +256,7 @@ public sealed class RestoreBackupConsumerTests
         var response = await tester.TestCommand<RestoreBackup, RestoreBackupConsumer, RestoreBackupPrepared>(command);
 
         // Assert
-        (await _fileSystem.ReadRestoreTask(_instanceOptions)).Should().BeNull();
+        (await _fileSystem.ReadRestoreTask(_instanceOptions, TestContext.Current.CancellationToken)).Should().BeNull();
         response.ErrorInfo.Should().NotBeNull();
     }
 

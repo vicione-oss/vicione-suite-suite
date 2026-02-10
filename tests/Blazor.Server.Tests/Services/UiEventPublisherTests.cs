@@ -31,10 +31,10 @@ public abstract class UiEventPublisherTests
     public sealed class Connect : UiEventPublisherTests
     {
         [Fact]
-        public void Should_use_subscription_identity_if_available()
+        public async Task Should_use_subscription_identity_if_available()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var publisher = serviceProvider.GetRequiredService<UiEventPublisher<FooEvent>>();
 
             var handler = Substitute.For<IEventConsumer<FooEvent>>();
@@ -56,7 +56,7 @@ public abstract class UiEventPublisherTests
         public async Task Should_use_subscription_identity_if_available()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var publisher = serviceProvider.GetRequiredService<UiEventPublisher<FooEvent>>();
 
             var handler = Substitute.For<IEventConsumer<FooEvent>>();
@@ -67,7 +67,7 @@ public abstract class UiEventPublisherTests
             _registry.Add(handler, identity);
 
             // Act
-            await publisher.PublishUiEvent(new FooEvent(), Guid.NewGuid());
+            await publisher.PublishUiEvent(new FooEvent(), Guid.NewGuid(), TestContext.Current.CancellationToken);
 
             // Assert
             _memoryCache.Received(1).TryGetValue(cacheKey, out _);
@@ -104,7 +104,7 @@ public abstract class UiEventPublisherTests
             var correlation = Guid.NewGuid();
 
             // Act
-            await publisher.PublishUiEvent(evt, correlation, CancellationToken.None);
+            await publisher.PublishUiEvent(evt, correlation, TestContext.Current.CancellationToken);
 
             // Assert
             await consumerWithUser.Received(1).Consume(
@@ -137,7 +137,7 @@ public abstract class UiEventPublisherTests
             _registry.Add(handler, null);
 
             // Act
-            await publisher.PublishUiEvent(fooEvent, correlationId);
+            await publisher.PublishUiEvent(fooEvent, correlationId, TestContext.Current.CancellationToken);
 
             // Assert
             _ = handler.Received().Consume(clientContext, Arg.Any<CancellationToken>());

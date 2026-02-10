@@ -5,24 +5,23 @@ using Microsoft.Extensions.Options;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Sdk.Instance.HealthCheck.Events;
+using Timer = System.Timers.Timer;
 
 namespace Core.OS.Instance.HealthCheck;
 
-public sealed class MasterHealthService(MasterHealthInfo masterHealthInfo, IServiceProvider services, IOptions<InstanceOptions> options) :
+public sealed class MasterHealthService(MasterHealthInfo masterHealthInfo, IServiceProvider services, IOptions<InstanceOptions> options, ILogger<MasterHealthService> logger) :
     IMasterHealthService, IDisposable
 {
-    private readonly MasterHealthInfo _masterHealthInfo = masterHealthInfo;
-    private readonly IServiceProvider _services = services;
     private readonly InstanceHealthCheckOptions _options = options.Value.HealthChecks ?? new();
     private Guid? _masterId;
     private bool _receivedHealthStatus;
-    private System.Timers.Timer? _timer;
+    private Timer? _timer;
     private bool _isInitialized;
     private readonly Lock _lockObject = new();
 
-    public async Task CheckHealthStatus(Guid id, HealthStatus healthStatus)
+    public async Task CheckHealthStatus(Guid id, HealthStatus healthStatus, CancellationToken token = default)
     {
-        await InitMasterId();
+        await InitMasterId(token);
 
         lock (_lockObject)
         {
@@ -33,44 +32,50 @@ public sealed class MasterHealthService(MasterHealthInfo masterHealthInfo, IServ
         if (id == _masterId)
         {
             _receivedHealthStatus = true;
-            await UpdateHealthStatus(true);
+            await UpdateHealthStatus(true, token);
         }
     }
 
     private void Initialize()
     {
-        _timer = new((_options.MasterPublishIntervalInSeconds + 5) * 1000);
+        _timer = new Timer((_options.MasterPublishIntervalInSeconds + 5) * 1000);
         _timer.Elapsed += OnTimerElapsed;
         _timer.Start();
 
         _isInitialized = true;
     }
 
-    private async Task InitMasterId()
+    private async Task InitMasterId(CancellationToken token)
     {
         if (_masterId is not null)
             return;
 
-        var scope = _services.CreateAsyncScope();
+        var scope = services.CreateAsyncScope();
 
         var instanceProvider = scope.ServiceProvider.GetRequiredService<IInstanceInformationProvider>();
         if (instanceProvider.Local.Type == InstanceType.Master)
         {
             _masterId = instanceProvider.Local.Id;
-            await UpdateHealthStatus(true);
+            await UpdateHealthStatus(true, token);
             return;
         }
 
         // can be null if the instance is not yet in the table
-        _masterId = (await instanceProvider.GetInstancesInCluster(CancellationToken.None))
+        _masterId = (await instanceProvider.GetInstancesInCluster(token))
             .FirstOrDefault(i => i.Type == InstanceType.Master)?.Id;
     }
 
     private async void OnTimerElapsed(object? sender, ElapsedEventArgs e)
     {
-        await UpdateHealthStatus(_receivedHealthStatus);
-
-        _receivedHealthStatus = false;
+        try
+        {
+            await UpdateHealthStatus(_receivedHealthStatus, CancellationToken.None);
+            _receivedHealthStatus = false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "An error occurred while checking health status.");
+        }
     }
 
     public void Dispose()
@@ -83,16 +88,16 @@ public sealed class MasterHealthService(MasterHealthInfo masterHealthInfo, IServ
         }
     }
 
-    private async Task UpdateHealthStatus(bool healthy)
+    private async Task UpdateHealthStatus(bool healthy, CancellationToken token)
     {
-        if (_masterHealthInfo.IsMasterReachable != healthy)
+        if (masterHealthInfo.IsMasterReachable != healthy)
         {
-            _masterHealthInfo.IsMasterReachable = healthy;
+            masterHealthInfo.IsMasterReachable = healthy;
 
-            await using var scope = _services.CreateAsyncScope();
+            await using var scope = services.CreateAsyncScope();
             var mediator = scope.ServiceProvider.GetRequiredService<ISuiteMediator>();
 
-            await mediator.Publish(new MasterHealthInfoChanged(_masterHealthInfo.IsMasterReachable));
+            await mediator.Publish(new MasterHealthInfoChanged(masterHealthInfo.IsMasterReachable), token);
         }
     }
 }

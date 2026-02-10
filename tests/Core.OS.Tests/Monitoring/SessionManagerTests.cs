@@ -30,7 +30,7 @@ public class SessionManagerTests
                 StringComparer.OrdinalIgnoreCase);
 
             // Act
-            await sut.Process(DateTimeOffset.UtcNow, CancellationToken.None);
+            await sut.Process(DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
             // Assert
             var currentCounts = sut.GetCurrentCounts();
@@ -64,10 +64,10 @@ public class SessionManagerTests
                 StringComparer.Ordinal);
 
             // call once to _lastCursor set
-            await sut.Process(DateTimeOffset.UtcNow, CancellationToken.None);
+            await sut.Process(DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
             // Act
-            await sut.Process(DateTimeOffset.UtcNow, CancellationToken.None);
+            await sut.Process(DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
             // Assert
             session.Received().SeekCursor("C1");
@@ -96,11 +96,11 @@ public class SessionManagerTests
                 StringComparer.Ordinal);
 
             // call once to _lastCursor set
-            await sut.Process(DateTimeOffset.UtcNow, CancellationToken.None);
+            await sut.Process(DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
             sut.GetCurrentCounts();
 
             // Act
-            await sut.Process(DateTimeOffset.UtcNow, CancellationToken.None);
+            await sut.Process(DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
             // Assert
             sut.GetCurrentCounts().Should().ContainSingle().Which.Value.Should().Be(1);

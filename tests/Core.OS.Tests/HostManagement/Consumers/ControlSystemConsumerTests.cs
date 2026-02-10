@@ -73,7 +73,7 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemCompleted>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemCompleted>(TestContext.Current.CancellationToken)).Should().BeTrue();
         await _pipeClient.Received().SendRequest(Topics.ResetSystem, string.Empty, Arg.Any<CancellationToken>());
     }
 
@@ -107,7 +107,7 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemError>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemError>(TestContext.Current.CancellationToken)).Should().BeTrue();
         await _pipeClient.Received().SendRequest(Topics.ResetSystem, string.Empty, Arg.Any<CancellationToken>());
     }
 
@@ -124,7 +124,7 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemCompleted>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemCompleted>(TestContext.Current.CancellationToken)).Should().BeTrue();
         await _pipeClient.Received().SendRequest(Topics.RestartSystem, string.Empty, Arg.Any<CancellationToken>());
     }
 
@@ -140,7 +140,7 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemError>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemError>(TestContext.Current.CancellationToken)).Should().BeTrue();
         await _pipeClient.Received().SendRequest(Topics.RestartSystem, string.Empty, Arg.Any<CancellationToken>());
     }
 
@@ -173,7 +173,7 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemCompleted>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemCompleted>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
@@ -187,7 +187,7 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemError>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemError>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     private void SetupShutdownSystemRequestSuccess()

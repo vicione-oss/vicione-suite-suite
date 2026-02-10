@@ -77,7 +77,7 @@ public class SuiteArtifactRepositoryTests
             var repository = services.GetRequiredService<SuiteArtifactRepository>();
 
             // Act
-            var result = await repository.DownloadAndValidate(DownloadPath, _bundle, CancellationToken.None);
+            var result = await repository.DownloadAndValidate(DownloadPath, _bundle, TestContext.Current.CancellationToken);
 
             // Assert
             result.FilePath.Should().Be(fileSystem.Path.Combine(DownloadPath, _bundle.Package.Name));
@@ -100,7 +100,7 @@ public class SuiteArtifactRepositoryTests
             };
 
             // Act
-            var action = () => repository.DownloadAndValidate(DownloadPath, suiteBundle, CancellationToken.None);
+            var action = () => repository.DownloadAndValidate(DownloadPath, suiteBundle, TestContext.Current.CancellationToken);
 
             // Assert
             await action.Should().ThrowAsync<InvalidOperationException>()
@@ -115,7 +115,7 @@ public class SuiteArtifactRepositoryTests
             var repository = services.GetRequiredService<SuiteArtifactRepository>();
 
             // Act
-            var action = () => repository.DownloadAndValidate(DownloadPath, _bundle, CancellationToken.None);
+            var action = () => repository.DownloadAndValidate(DownloadPath, _bundle, TestContext.Current.CancellationToken);
 
             // Assert
             await action.Should().ThrowAsync<InvalidOperationException>()
@@ -127,13 +127,13 @@ public class SuiteArtifactRepositoryTests
         {
             // Arrange
             var options = SystemTestSettings.ArtifactApiOptions;
-            options.PublicKeys = [Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("INVALID_PUBLIC_KEY"))];
+            options.PublicKeys = [Convert.ToBase64String("INVALID_PUBLIC_KEY"u8.ToArray())];
 
             await using var services = CreateServiceProvider(options);
             var repository = services.GetRequiredService<SuiteArtifactRepository>();
 
             // Act
-            var action = () => repository.DownloadAndValidate(DownloadPath, _bundle, CancellationToken.None);
+            var action = () => repository.DownloadAndValidate(DownloadPath, _bundle, TestContext.Current.CancellationToken);
 
             // Assert
             await action.Should().ThrowAsync<InvalidOperationException>()
@@ -161,7 +161,7 @@ public class SuiteArtifactRepositoryTests
             };
 
             // Act
-            var action = () => repository.DownloadAndValidate(DownloadPath, suiteBundle, CancellationToken.None);
+            var action = () => repository.DownloadAndValidate(DownloadPath, suiteBundle, TestContext.Current.CancellationToken);
 
             // Assert
             await action.Should().ThrowAsync<InvalidOperationException>();
@@ -187,7 +187,7 @@ public class SuiteArtifactRepositoryTests
             };
 
             // Act
-            var action = () => repository.DownloadAndValidate(DownloadPath, suiteBundle, CancellationToken.None);
+            var action = () => repository.DownloadAndValidate(DownloadPath, suiteBundle, TestContext.Current.CancellationToken);
 
             // Assert
             await action.Should().ThrowAsync<HttpRequestException>();
@@ -205,7 +205,7 @@ public class SuiteArtifactRepositoryTests
             var repository = services.GetRequiredService<SuiteArtifactRepository>();
 
             // Act
-            var result = await repository.QueryAllSuiteArtifacts(CancellationToken.None);
+            var result = await repository.QueryAllSuiteArtifacts(TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().NotBeEmpty();
@@ -225,7 +225,7 @@ public class SuiteArtifactRepositoryTests
             var repository = services.GetRequiredService<SuiteArtifactRepository>();
 
             // Act
-            var result = await repository.QuerySuiteArtifactBundles(_hmVersion, false, CancellationToken.None);
+            var result = await repository.QuerySuiteArtifactBundles(_hmVersion, false, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().NotBeEmpty();
@@ -239,7 +239,7 @@ public class SuiteArtifactRepositoryTests
             var repository = services.GetRequiredService<SuiteArtifactRepository>();
 
             // Act
-            var result = await repository.QuerySuiteArtifactBundles(_hmVersion, true, CancellationToken.None);
+            var result = await repository.QuerySuiteArtifactBundles(_hmVersion, true, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().NotBeEmpty();

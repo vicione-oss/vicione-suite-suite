@@ -18,7 +18,7 @@ public class HttpConnectionTestTests
             var sut = new HttpConnectionTest();
 
             // Act
-            var result = await sut.Test(connection, CancellationToken.None);
+            var result = await sut.Test(connection, TestContext.Current.CancellationToken);
 
             // Assert            
             result.Success.Should().BeFalse();
@@ -35,7 +35,7 @@ public class HttpConnectionTestTests
             var sut = new HttpConnectionTest();
 
             // Act
-            var result = await sut.Test(connection, CancellationToken.None);
+            var result = await sut.Test(connection, TestContext.Current.CancellationToken);
 
             // Assert
             result.Success.Should().BeFalse();
@@ -51,7 +51,7 @@ public class HttpConnectionTestTests
             var sut = new HttpConnectionTest();
 
             // Act
-            var result = await sut.Test(connection, CancellationToken.None);
+            var result = await sut.Test(connection, TestContext.Current.CancellationToken);
 
             // Assert
             result.Success.Should().BeTrue();
@@ -66,7 +66,7 @@ public class HttpConnectionTestTests
             var sut = new HttpConnectionTest();
 
             // Act
-            var result = await sut.Test(connection, CancellationToken.None);
+            var result = await sut.Test(connection, TestContext.Current.CancellationToken);
 
             // Assert
             result.Success.Should().BeFalse();

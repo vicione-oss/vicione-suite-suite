@@ -88,7 +88,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         var applicationWorker = CreateApplicationWorker();
 
         // Act
-        await applicationWorker.StartingAsync(default);
+        await applicationWorker.StartingAsync(TestContext.Current.CancellationToken);
 
         // Assert
         await endPoint.Received().Send(Arg.Any<RegisterInstance>(), Arg.Any<CancellationToken>());
@@ -103,7 +103,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         var applicationWorker = CreateApplicationWorker();
 
         // Act
-        await applicationWorker.StartingAsync(default);
+        await applicationWorker.StartingAsync(TestContext.Current.CancellationToken);
 
         // Assert
         await _busDepot.Received().Start(Arg.Any<CancellationToken>());
@@ -118,7 +118,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         var applicationWorker = CreateApplicationWorker();
 
         // Act
-        await applicationWorker.StoppingAsync(default);
+        await applicationWorker.StoppingAsync(TestContext.Current.CancellationToken);
 
         // Assert
         await _busDepot.Received().Stop(Arg.Any<CancellationToken>());
@@ -133,12 +133,10 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         _mediatorMock.Request<GetInstances, GetInstancesResponse>(Arg.Any<GetInstances>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new GetInstancesResponse([])));
 
-        var cancellationToken = new CancellationToken();
-
-        var worker = CreateApplicationWorker();
+		var worker = CreateApplicationWorker();
 
         // Act
-        await worker.StartingAsync(cancellationToken);
+        await worker.StartingAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Null(worker.InitializationErrorMessage);
@@ -149,11 +147,11 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
     {
         // Arrange
         var applicationContext = _appFactory.Services.GetRequiredService<IApplicationDbContext>();
-        await applicationContext.Instance.Database.MigrateAsync();
+        await applicationContext.Instance.Database.MigrateAsync(TestContext.Current.CancellationToken);
 
         var orphanedNonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow.AddDays(-1) };
         applicationContext.Nonces.Add(orphanedNonce);
-        await applicationContext.Instance.SaveChangesAsync();
+        await applicationContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var nonceStore = _appFactory.Services.GetRequiredService<INonceStore>();
 
@@ -162,12 +160,10 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         _mediatorMock.Request<GetInstances, GetInstancesResponse>(Arg.Any<GetInstances>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new GetInstancesResponse([])));
 
-        var cancellationToken = new CancellationToken();
-
         var worker = CreateApplicationWorker();
 
         // Act
-        await worker.StartingAsync(cancellationToken);
+        await worker.StartingAsync(TestContext.Current.CancellationToken);
 
         // Assert
         await nonceStore.Received().DeletedOrphaned(Arg.Any<CancellationToken>());
@@ -178,30 +174,27 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
     {
         // Arrange
         var applicationContext = _appFactory.Services.GetRequiredService<IApplicationDbContext>();
-        await applicationContext.Instance.Database.MigrateAsync();
+        await applicationContext.Instance.Database.MigrateAsync(TestContext.Current.CancellationToken);
 
         var applicationConfiguration = new CrossInstanceConfiguration { CultureName = "ja-JP" };
         applicationContext.CrossInstanceConfiguration.Add(applicationConfiguration);
-        await applicationContext.Instance.SaveChangesAsync();
+        await applicationContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         _localInstanceInformationMock.SetupLocalInstanceInformation();
 
         _mediatorMock.Request<GetInstances, GetInstancesResponse>(Arg.Any<GetInstances>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new GetInstancesResponse([])));
-
-        var cancellationToken = new CancellationToken();
-
         var worker = CreateApplicationWorker();
 
         // Act
-        await worker.StartingAsync(cancellationToken);
+        await worker.StartingAsync(TestContext.Current.CancellationToken);
 
         // Assert
         CultureInfo.DefaultThreadCurrentCulture.Should().NotBeNull();
-        CultureInfo.DefaultThreadCurrentCulture!.Name.Should().Be(applicationConfiguration.CultureName);
+        CultureInfo.DefaultThreadCurrentCulture.Name.Should().Be(applicationConfiguration.CultureName);
 
         CultureInfo.DefaultThreadCurrentUICulture.Should().NotBeNull();
-        CultureInfo.DefaultThreadCurrentUICulture!.Name.Should().Be(applicationConfiguration.CultureName);
+        CultureInfo.DefaultThreadCurrentUICulture.Name.Should().Be(applicationConfiguration.CultureName);
     }
 
     [Fact]
@@ -209,17 +202,16 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
     {
         // Arrange
         var lifetime = Substitute.For<IHostApplicationLifetime>();
-        var cancellationToken = new CancellationToken();
 
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton(lifetime);
         await using var services = serviceCollection.BuildServiceProvider();
         var applicationWorker = CreateApplicationWorker();
 
-        await _appFactory.Services.EnsureApplicationContextIsCreated(cancellationToken);
+        await _appFactory.Services.EnsureApplicationContextIsCreated(TestContext.Current.CancellationToken);
 
         // Act
-        await applicationWorker.StartingAsync(cancellationToken);
+        await applicationWorker.StartingAsync(TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(applicationWorker.InitializationErrorMessage);

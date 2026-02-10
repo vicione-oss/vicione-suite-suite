@@ -55,6 +55,6 @@ public class PublishMessageConsumerTests
         await tester.TestCommand<PublishMessage, PublishMessageConsumer>(command);
 
         // Assert
-        Assert.True(await tester.Harness.Published.Any<MessagePublished>());
+        Assert.True(await tester.Harness.Published.Any<MessagePublished>(TestContext.Current.CancellationToken));
     }
 }

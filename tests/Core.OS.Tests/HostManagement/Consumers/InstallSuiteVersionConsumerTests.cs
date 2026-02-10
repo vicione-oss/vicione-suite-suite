@@ -45,7 +45,7 @@ public sealed class InstallSuiteVersionConsumerTests
         await tester.TestCommand<InstallSuiteVersion, InstallSuiteVersionConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<InstallSuiteVersionStarted>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<InstallSuiteVersionStarted>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
@@ -69,6 +69,6 @@ public sealed class InstallSuiteVersionConsumerTests
         await tester.TestCommand<InstallSuiteVersion, InstallSuiteVersionConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<InstallSuiteVersionError>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<InstallSuiteVersionError>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 }

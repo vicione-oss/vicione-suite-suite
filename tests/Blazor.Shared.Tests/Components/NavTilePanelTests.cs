@@ -66,10 +66,10 @@ public sealed class NavTilePanelTests
 
     [Theory]
     [MemberData(nameof(AuthorizationScenarios))]
-    public void Should_render_navigation_tiles_based_on_authorization_configuration(AuthorizationScenario authorizationScenario)
+    public async Task Should_render_navigation_tiles_based_on_authorization_configuration(AuthorizationScenario authorizationScenario)
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
 
         ctx.Services.AddSdkAuthorization();
         ctx.Services.AddSingleton(Substitute.For<ILayoutService>());

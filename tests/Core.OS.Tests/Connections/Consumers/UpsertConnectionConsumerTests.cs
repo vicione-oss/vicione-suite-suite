@@ -91,7 +91,7 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
         ]));
 
         // Act - delay needed to avoid context concurrency issues
-        await tester.TestCommand<UpsertConnection, UpsertConnectionConsumer>(command, null);
+        await tester.TestCommand<UpsertConnection, UpsertConnectionConsumer>(command);
 
         // Assert
         await AssertUpsertConnectionConsumed(tester.Harness, dbContext, command, CrudAction.Created);
@@ -112,13 +112,13 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
         var command = new UpsertConnection(existingConnection);
 
         // Act - delay needed to avoid context concurrency issues
-        await tester.TestCommand<UpsertConnection, UpsertConnectionConsumer>(command, null);
+        await tester.TestCommand<UpsertConnection, UpsertConnectionConsumer>(command);
 
         // Assert
         await AssertUpsertConnectionConsumed(tester.Harness, dbContext, command, CrudAction.Updated);
         Assert.True(await tester.Harness.Published.Any<TagsChanged>(r =>
             r.Context.Message.Action == CrudAction.Created &&
-            Equals(r.Context.Message.Tags[0], TestTag)));
+            Equals(r.Context.Message.Tags[0], TestTag), TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -139,22 +139,22 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
         var command = new UpsertConnection(existingConnection);
 
         // Act - delay needed to avoid context concurrency issues
-        await tester.TestCommand<UpsertConnection, UpsertConnectionConsumer>(command, null);
+        await tester.TestCommand<UpsertConnection, UpsertConnectionConsumer>(command);
 
         // Assert
         await AssertUpsertConnectionConsumed(tester.Harness, dbContext, command, CrudAction.Updated);
         Assert.True(await tester.Harness.Published.Any<TagsChanged>(r =>
             r.Context.Message.Action == CrudAction.Updated &&
-            Equals(r.Context.Message.Tags[0], modifiedTag)));
+            Equals(r.Context.Message.Tags[0], modifiedTag), TestContext.Current.CancellationToken));
     }
 
     private static async Task AssertUpsertConnectionConsumed(ITestHarness harness, IConnectionDbContext dbContext, UpsertConnection command, CrudAction action)
     {
-        Assert.False(await harness.Published.Any<ConnectionErrorOccured>());
+        Assert.False(await harness.Published.Any<ConnectionErrorOccured>(TestContext.Current.CancellationToken));
         Assert.True(await harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == action &&
-            Equals(r.Context.Message.Connection.Id, command.Connection.Id)));
+            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken));
 
-        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id));
+        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, TestContext.Current.CancellationToken));
     }
 }

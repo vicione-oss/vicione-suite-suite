@@ -36,11 +36,11 @@ public class WorkspaceManagementTests
     public sealed class GetHomeDirectory : WorkspaceManagementTests
     {
         [Fact]
-        public void Should_create_directory_from_settings()
+        public async Task Should_create_directory_from_settings()
         {
             // Arrange
             var instanceOptions = _config.GetInstanceOptions();
-            using var serviceProvider = CreateServiceProvider();
+            await using var serviceProvider = CreateServiceProvider();
             var workspaceMgmt = serviceProvider.GetRequiredService<WorkspaceManagement>();
 
             // Act
@@ -75,11 +75,11 @@ public class WorkspaceManagementTests
     public sealed class GetCacheDirectory : WorkspaceManagementTests
     {
         [Fact]
-        public void Should_create_directory_from_settings()
+        public async Task Should_create_directory_from_settings()
         {
             // Arrange
             var instanceOptions = _config.GetInstanceOptions();
-            using var serviceProvider = CreateServiceProvider();
+            await using var serviceProvider = CreateServiceProvider();
             var workspaceMgmt = serviceProvider.GetRequiredService<WorkspaceManagement>();
 
             // Act
@@ -114,11 +114,11 @@ public class WorkspaceManagementTests
     public sealed class WriteResetHomeDirectoryFlag : WorkspaceManagementTests
     {
         [Fact]
-        public void Should_create_reset_trigger_file()
+        public async Task Should_create_reset_trigger_file()
         {
             // Arrange
             var instanceOptions = _config.GetInstanceOptions();
-            using var serviceProvider = CreateServiceProvider();
+            await using var serviceProvider = CreateServiceProvider();
             var workspaceMgmt = serviceProvider.GetRequiredService<WorkspaceManagement>();
 
             // Act
@@ -137,11 +137,11 @@ public class WorkspaceManagementTests
     public sealed class WriteResetCacheDirectoryFlag : WorkspaceManagementTests
     {
         [Fact]
-        public void Should_create_reset_trigger_file()
+        public async Task Should_create_reset_trigger_file()
         {
             // Arrange
             var instanceOptions = _config.GetInstanceOptions();
-            using var serviceProvider = CreateServiceProvider();
+            await using var serviceProvider = CreateServiceProvider();
             var workspaceMgmt = serviceProvider.GetRequiredService<WorkspaceManagement>();
 
             // Act

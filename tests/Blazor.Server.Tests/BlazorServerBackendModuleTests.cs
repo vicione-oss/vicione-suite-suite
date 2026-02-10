@@ -33,7 +33,7 @@ public class BlazorServerBackendModuleTests
     public class LoadUiDependencies : BlazorServerBackendModuleTests
     {
         [Fact]
-        public void Load_ui_dependencies_is_successful()
+        public async Task Load_ui_dependencies_is_successful()
         {
             // Arrange
             var (serviceCollection, backend) = SetupTest();
@@ -45,7 +45,7 @@ public class BlazorServerBackendModuleTests
 
             // Act
             backend.LoadUiDependencies(serviceCollection, _uiHostEnv);
-            using var serviceProvider = serviceCollection.BuildServiceProvider();
+            await using var serviceProvider = serviceCollection.BuildServiceProvider();
 
             // Assert
             var moduleManagerFromInterface = serviceProvider.GetRequiredService<IUiModuleManager>();
@@ -60,7 +60,7 @@ public class BlazorServerBackendModuleTests
     public class RegisterUiDependencies : BlazorServerBackendModuleTests
     {
         [Fact]
-        public void Register_ui_blazor_server_client_module_and_client_service_is_successful()
+        public async Task Register_ui_blazor_server_client_module_and_client_service_is_successful()
         {
             // Arrange
             var (serviceCollection, backend) = SetupTest();
@@ -81,7 +81,7 @@ public class BlazorServerBackendModuleTests
             serviceCollection.AddSingleton(Substitute.For<IFileSystem>());
             serviceCollection.AddTransient(sp => Substitute.For<ILogOptions>()); // ...ConfigureAndValidateOptions()
 
-            using var serviceProvider = serviceCollection.BuildServiceProvider();
+            await using var serviceProvider = serviceCollection.BuildServiceProvider();
 
             // Assert
             var moduleManagerFromInterface = serviceProvider.GetRequiredService<IUiModuleManager>();

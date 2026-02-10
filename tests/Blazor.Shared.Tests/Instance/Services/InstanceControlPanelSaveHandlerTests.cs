@@ -39,11 +39,11 @@ public class InstanceControlPanelSaveHandlerTests
                     var message = new InstanceInformationUpdated(correlationId, information, true);
                     var context = new ClientContext<InstanceInformationUpdated>(message, Guid.NewGuid());
 
-                    await saveHandler.Consume(context, CancellationToken.None);
+                    await saveHandler.Consume(context, TestContext.Current.CancellationToken);
                 });
 
             // Act
-            var handlerResult = await saveHandler.Save(state, CancellationToken.None);
+            var handlerResult = await saveHandler.Save(state, TestContext.Current.CancellationToken);
 
             // Assert
             await clientMediator.Received().Send(Arg.Is<UpdateInstanceInformation>(a => a.CorrelationId == correlationId), Arg.Any<CancellationToken>());
@@ -74,11 +74,11 @@ public class InstanceControlPanelSaveHandlerTests
                     var message = new InstanceInformationUpdated(correlationId, information, false);
                     var context = new ClientContext<InstanceInformationUpdated>(message, Guid.NewGuid());
 
-                    await saveHandler.Consume(context, CancellationToken.None);
+                    await saveHandler.Consume(context, TestContext.Current.CancellationToken);
                 });
 
             // Act
-            var handlerResult = await saveHandler.Save(state, CancellationToken.None);
+            var handlerResult = await saveHandler.Save(state, TestContext.Current.CancellationToken);
 
             // Assert
             await clientMediator.Received().Send(Arg.Is<UpdateInstanceInformation>(a => a.CorrelationId == correlationId), Arg.Any<CancellationToken>());

@@ -55,12 +55,12 @@ public sealed class CreateConnectionConsumerTests : TestWithDbContextSqlite<Conn
         await tester.TestCommand<CreateConnection, CreateConnectionConsumer>(command);
 
         // Assert
-        Assert.False(await tester.Harness.Published.Any<ConnectionErrorOccured>());
+        Assert.False(await tester.Harness.Published.Any<ConnectionErrorOccured>(TestContext.Current.CancellationToken));
         Assert.True(await tester.Harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == CrudAction.Created &&
-            Equals(r.Context.Message.Connection.Id, command.Connection.Id)));
+            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken));
 
-        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id));
+        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -73,17 +73,17 @@ public sealed class CreateConnectionConsumerTests : TestWithDbContextSqlite<Conn
         var dbContext = tester.Services.GetRequiredService<IConnectionDbContext>();
 
         dbContext.Connections.Add(connection);
-        await ((ConnectionDbContext)dbContext).SaveChangesAsync();
+        await ((ConnectionDbContext)dbContext).SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await tester.TestCommand<CreateConnection, CreateConnectionConsumer>(command);
 
         // Assert
-        Assert.False(await tester.Harness.Published.Any<ConnectionErrorOccured>());
+        Assert.False(await tester.Harness.Published.Any<ConnectionErrorOccured>(TestContext.Current.CancellationToken));
         Assert.False(await tester.Harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == CrudAction.Created &&
-            Equals(r.Context.Message.Connection.Id, command.Connection.Id)));
+            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken));
 
-        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id));
+        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, cancellationToken: TestContext.Current.CancellationToken));
     }
 }

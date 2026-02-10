@@ -69,10 +69,10 @@ public class BlazorServerModuleServiceTests
     public sealed class GetModules : BlazorServerModuleServiceTests
     {
         [Fact]
-        public void Should_returns_modules()
+        public async Task Should_returns_modules()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var blazorServerModuleService = serviceProvider.GetRequiredService<BlazorServerModuleService>();
 
             // Act
@@ -86,10 +86,10 @@ public class BlazorServerModuleServiceTests
     public sealed class GetModuleByType : BlazorServerModuleServiceTests
     {
         [Fact]
-        public void Should_return_client_module_if_type_is_known()
+        public async Task Should_return_client_module_if_type_is_known()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var blazorServerModuleService = serviceProvider.GetRequiredService<BlazorServerModuleService>();
 
             // Act
@@ -101,10 +101,10 @@ public class BlazorServerModuleServiceTests
         }
 
         [Fact]
-        public void Should_return_null_if_type_is_unknown()
+        public async Task Should_return_null_if_type_is_unknown()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var blazorServerModuleService = serviceProvider.GetRequiredService<BlazorServerModuleService>();
 
             // Act
@@ -118,10 +118,10 @@ public class BlazorServerModuleServiceTests
     public sealed class GetModuleAssemblies : BlazorServerModuleServiceTests
     {
         [Fact]
-        public void Should_returns_module_assemblies()
+        public async Task Should_returns_module_assemblies()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var blazorServerModuleService = serviceProvider.GetRequiredService<BlazorServerModuleService>();
 
             // Act
@@ -132,10 +132,10 @@ public class BlazorServerModuleServiceTests
         }
 
         [Fact]
-        public void Should_returns_module_assemblies_provided_by_ui_manager()
+        public async Task Should_returns_module_assemblies_provided_by_ui_manager()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var blazorServerModuleService = serviceProvider.GetRequiredService<BlazorServerModuleService>();
             _uiModuleManager.GetAdditionalAssemblies().Returns([
                 typeof(TestClientModule).Assembly,
@@ -153,10 +153,10 @@ public class BlazorServerModuleServiceTests
     public sealed class GetAllModuleStylesheets : BlazorServerModuleServiceTests
     {
         [Fact]
-        public void Should_returns_all_module_stylesheets()
+        public async Task Should_returns_all_module_stylesheets()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var blazorServerModuleService = serviceProvider.GetRequiredService<BlazorServerModuleService>();
 
             // Act
@@ -173,7 +173,7 @@ public class BlazorServerModuleServiceTests
         public async Task Should_call_initialize_service_for_client_module()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var blazorServerModuleService = serviceProvider.GetRequiredService<BlazorServerModuleService>();
             var admin = new ClaimsPrincipal(new ClaimsIdentity([
                 new Claim(ClaimsIdentity.DefaultRoleClaimType, AccessLevel.Full.ToString())

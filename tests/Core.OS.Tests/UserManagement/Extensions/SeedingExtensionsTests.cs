@@ -30,7 +30,7 @@ public class SeedingExtensionsTests : TestWithDbContextSqlite<UserDbContextSqlit
     public async Task SeedUsersAndRoles_should_seed_data()
     {
         // Arrange
-        using var serviceProvider = CreateServiceProvider();
+        await using var serviceProvider = CreateServiceProvider();
 
         // Act
         await serviceProvider.SeedUsersAndRoles(CancellationToken.None);

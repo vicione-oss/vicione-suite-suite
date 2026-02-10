@@ -29,7 +29,7 @@ public class MailingTests
                       """);
 
         // Act + Assert
-        await sender.SendMail(email);
+        await sender.SendMail(email, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class MailingTests
             message: "This message should never be sent, as authentication is supposed to fail.");
 
         // Act + Assert
-        await Assert.ThrowsAnyAsync<AuthenticationException>(() => sender.SendMail(email));
+        await Assert.ThrowsAnyAsync<AuthenticationException>(() => sender.SendMail(email, TestContext.Current.CancellationToken));
     }
 
     private static MailkitMailSender CreateMailkitMailSender(string password)

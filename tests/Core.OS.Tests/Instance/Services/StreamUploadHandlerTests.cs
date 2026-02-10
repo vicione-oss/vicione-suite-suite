@@ -53,7 +53,7 @@ public class StreamUploadHandlerTests
             var stream = new MemoryStream(Encoding.UTF8.GetBytes("hello"));
 
             // Act
-            var result = await sut.Execute(stream, "file.txt", CancellationToken.None);
+            var result = await sut.Execute(stream, "file.txt", TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeOfType<StreamUploadErrorResult>();
@@ -72,7 +72,7 @@ public class StreamUploadHandlerTests
             var inputStream = new MemoryStream(content);
 
             // Act
-            var result = await sut.Execute(inputStream, "file.txt", CancellationToken.None);
+            var result = await sut.Execute(inputStream, "file.txt", TestContext.Current.CancellationToken);
 
             // Assert
             ResultDestinationFileShouldExist(result, fileSystem.Path.Combine(systemWorkspace, "file.txt"));
@@ -85,24 +85,21 @@ public class StreamUploadHandlerTests
             var fileSystem = new MockFileSystem();
             var systemWorkspace = SetupSystemWorkspace(fileSystem);
             var parent = fileSystem.Directory.GetParent(systemWorkspace);
-            var transform = parent!.CreateSubdirectory("tranform");
+            var transform = parent!.CreateSubdirectory("transform");
 
-            _options.PathTransform = (oldPath) =>
-            {
-                return transform.FullName;
-            };
+            _options.PathTransform = _ => transform.FullName;
 
             var sut = new StreamUploadHandler<SystemBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
 
-            var content = Encoding.UTF8.GetBytes("HelloWorld");
+            var content = "HelloWorld"u8.ToArray();
             var inputStream = new MemoryStream(content);
 
             // Act
-            var result = await sut.Execute(inputStream, "file.txt", CancellationToken.None);
+            var result = await sut.Execute(inputStream, "file.txt", TestContext.Current.CancellationToken);
 
             // Assert
             var expectedFilePath = fileSystem.Path.Combine(transform.FullName, "file.txt");
-            var expectedFileContents = await fileSystem.File.ReadAllBytesAsync(expectedFilePath);
+            var expectedFileContents = await fileSystem.File.ReadAllBytesAsync(expectedFilePath, TestContext.Current.CancellationToken);
             ResultDestinationFileShouldExist(result, expectedFilePath);
             content.Should().BeEquivalentTo(expectedFileContents);
         }
@@ -112,17 +109,17 @@ public class StreamUploadHandlerTests
         {
             // Arrange
             var fileSystem = new MockFileSystem();
-            var systemWorkspace = SetupSystemWorkspace(fileSystem);
+            _ = SetupSystemWorkspace(fileSystem);
 
             var sut = new StreamUploadHandler<SystemBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
 
             IStreamUploadProgress? captured = null;
             sut.OnProgress = p => { captured = p; return Task.CompletedTask; };
 
-            var input = new MemoryStream(Encoding.UTF8.GetBytes("data"));
+            var input = new MemoryStream("data"u8.ToArray());
 
             // Act
-            await sut.Execute(input, "file.txt", CancellationToken.None);
+            await sut.Execute(input, "file.txt", TestContext.Current.CancellationToken);
 
             // Assert
             captured.Should().NotBeNull();
@@ -138,14 +135,14 @@ public class StreamUploadHandlerTests
 
             var fileSystem = Substitute.For<IFileSystem>();
             fileSystem.DriveInfo.New("cache").AvailableFreeSpace.Returns(1024 * 1024);
-            fileSystem.File.Create(Arg.Any<string>()).Returns(ci => throw new IOException("disk error"));
+            fileSystem.File.Create(Arg.Any<string>()).Returns(_ => throw new IOException("disk error"));
             fileSystem.Path.Combine("cache", "bad.txt").Returns("cache/bad.txt");
 
             var sut = new StreamUploadHandler<SystemBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
-            var input = new MemoryStream(Encoding.UTF8.GetBytes("foo"));
+            var input = new MemoryStream("foo"u8.ToArray());
 
             // Act
-            var result = await sut.Execute(input, "bad.txt", CancellationToken.None);
+            var result = await sut.Execute(input, "bad.txt", TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeOfType<StreamUploadErrorResult>();

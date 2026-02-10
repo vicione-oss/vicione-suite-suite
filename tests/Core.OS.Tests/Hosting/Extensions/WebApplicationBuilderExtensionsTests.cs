@@ -40,14 +40,14 @@ public class WebApplicationBuilderExtensionsTests
             var builder = WebApplication.CreateBuilder();
 
             // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger);
+            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             detected.Should().BeFalse();
 
             var dataVersionFilePath = _fileSystem.GetLocalDataVersionFilePath(_instanceOptions);
             _fileSystem.File.Exists(dataVersionFilePath).Should().BeTrue();
-            _fileSystem.File.ReadAllText(dataVersionFilePath).Should().Be(SuiteVersionUtils.GetSuiteVersion());
+            (await _fileSystem.File.ReadAllTextAsync(dataVersionFilePath, TestContext.Current.CancellationToken)).Should().Be(SuiteVersionUtils.GetSuiteVersion());
         }
 
         [Fact]
@@ -56,10 +56,10 @@ public class WebApplicationBuilderExtensionsTests
             // Arrange
             var builder = WebApplication.CreateBuilder();
             var version = GetSuiteVersionIncrement();
-            await _fileSystem.WriteDataVersionFile(_instanceOptions, version);
+            await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
 
             // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger);
+            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             detected.Should().BeFalse();
@@ -72,10 +72,10 @@ public class WebApplicationBuilderExtensionsTests
             // Arrange
             var builder = WebApplication.CreateBuilder();
             var version = GetSuiteVersionIncrement(incrementMinor: -1);
-            await _fileSystem.WriteDataVersionFile(_instanceOptions, version);
+            await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
 
             // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger);
+            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             detected.Should().BeFalse();
@@ -88,16 +88,16 @@ public class WebApplicationBuilderExtensionsTests
             // Arrange
             var builder = WebApplication.CreateBuilder();
             var version = GetSuiteVersionIncrement(incrementMinor: -1);
-            await _fileSystem.WriteDataVersionFile(_instanceOptions, version);
+            await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
 
             // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger);
+            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             detected.Should().BeFalse();
             var dataVersionFilePath = _fileSystem.GetLocalDataVersionFilePath(_instanceOptions);
             _fileSystem.File.Exists(dataVersionFilePath).Should().BeTrue();
-            _fileSystem.File.ReadAllText(dataVersionFilePath).Should().Be(SuiteVersionUtils.GetSuiteVersion());
+            (await _fileSystem.File.ReadAllTextAsync(dataVersionFilePath, TestContext.Current.CancellationToken)).Should().Be(SuiteVersionUtils.GetSuiteVersion());
         }
 
         [Fact]
@@ -105,15 +105,15 @@ public class WebApplicationBuilderExtensionsTests
         {
             // Arrange
             var builder = WebApplication.CreateBuilder();
-            await _fileSystem.WriteDataVersionFile(_instanceOptions, string.Empty);
+            await _fileSystem.WriteDataVersionFile(_instanceOptions, string.Empty, TestContext.Current.CancellationToken);
 
             // Act
-            await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger);
+            await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             var dataVersionFilePath = _fileSystem.GetLocalDataVersionFilePath(_instanceOptions);
             _fileSystem.File.Exists(dataVersionFilePath).Should().BeTrue();
-            _fileSystem.File.ReadAllText(dataVersionFilePath).Should().Be(SuiteVersionUtils.GetSuiteVersion());
+            (await _fileSystem.File.ReadAllTextAsync(dataVersionFilePath, TestContext.Current.CancellationToken)).Should().Be(SuiteVersionUtils.GetSuiteVersion());
 
             _logger.Received().Error(Arg.Any<InvalidOperationException>(), "Error on detecting downgrade");
         }
@@ -125,7 +125,7 @@ public class WebApplicationBuilderExtensionsTests
             // Arrange
             var builder = WebApplication.CreateBuilder();
             var version = GetSuiteVersionIncrement(incrementMinor: 1);
-            await _fileSystem.WriteDataVersionFile(_instanceOptions, version);
+            await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
             using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
             // Act

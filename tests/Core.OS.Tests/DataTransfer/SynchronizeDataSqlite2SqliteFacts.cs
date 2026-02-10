@@ -40,7 +40,7 @@ public class SynchronizeDataSqlite2SqliteFacts
         var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
 
         // Act
-        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, CancellationToken.None);
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, TestContext.Current.CancellationToken);
         foreach (var arguments in argumentsCollection)
         {
             executeContextMock.Arguments
@@ -75,15 +75,15 @@ public class SynchronizeDataSqlite2SqliteFacts
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
         await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
-        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 
         var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
         var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
-        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+        var tableList = await command.GetTablesSqlite(TestContext.Current.CancellationToken);
 
         // Act
-        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProviderMaster, installedModules, CancellationToken.None);
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProviderMaster, installedModules, TestContext.Current.CancellationToken);
         foreach (var arguments in argumentsCollection)
         {
             var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));
@@ -127,15 +127,15 @@ public class SynchronizeDataSqlite2SqliteFacts
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
         await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
-        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 
         var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
-        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+        var tableList = await command.GetTablesSqlite(TestContext.Current.CancellationToken);
         var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
 
         // Act
-        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, CancellationToken.None);
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, TestContext.Current.CancellationToken);
         foreach (var arguments in argumentsCollection)
         {
             var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));
@@ -178,15 +178,15 @@ public class SynchronizeDataSqlite2SqliteFacts
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
         await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
-        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 
         var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
         var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
-        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+        var tableList = await command.GetTablesSqlite(TestContext.Current.CancellationToken);
 
         // Act
-        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, CancellationToken.None);
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsSqlite(serviceProvider, installedModules, TestContext.Current.CancellationToken);
         foreach (var arguments in argumentsCollection)
         {
             var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));

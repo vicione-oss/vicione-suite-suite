@@ -61,7 +61,7 @@ public sealed class TagControlPanelTests
         var state = new TagControlPanelState { TagId = tag.Id };
 
         var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<TagControlPanelState>>();
-        await resetHandler.Reset(state, CancellationToken.None);
+        await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);
 
         // Act
         var component = ctx.Render<TagControlPanel>(parameters =>

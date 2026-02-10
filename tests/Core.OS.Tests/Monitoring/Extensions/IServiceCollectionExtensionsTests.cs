@@ -19,7 +19,7 @@ public sealed class IServiceCollectionExtensionsTests
     public sealed class AddJournalService
     {
         [Fact]
-        public void Should_register_journal_services_when_on_linux()
+        public async Task Should_register_journal_services_when_on_linux()
         {
             // Arrange
             var services = new ServiceCollection();
@@ -33,7 +33,7 @@ public sealed class IServiceCollectionExtensionsTests
 
             services.Should().Contain(s => s.ServiceType == typeof(JournalService));
 
-            using var sp = services.BuildServiceProvider();
+            await using var sp = services.BuildServiceProvider();
             sp.GetService<IOptions<JournalOptions>>().Should().NotBeNull();
         }
 
@@ -58,7 +58,7 @@ public sealed class IServiceCollectionExtensionsTests
     public sealed class AddSystemMonitoring
     {
         [Fact]
-        public void Should_register_journal_monitoring_and_configure_options()
+        public async Task Should_register_journal_monitoring_and_configure_options()
         {
             // Arrange
             var config = new ConfigurationBuilder()
@@ -84,13 +84,13 @@ public sealed class IServiceCollectionExtensionsTests
 
             services.Should().Contain(s => s.ServiceType == typeof(IJournalMonitoring));
 
-            using var sp = services.BuildServiceProvider();
+            await using var sp = services.BuildServiceProvider();
             sp.GetService<IOptions<SystemMonitoringOptions>>().Should().NotBeNull();
             sp.GetService<IOptions<MonitoringConfig>>().Should().NotBeNull();
         }
 
         [Fact]
-        public void Should_not_register_monitoringconfig_when_not_linux()
+        public async Task Should_not_register_monitoringconfig_when_not_linux()
         {
             // Arrange
             var config = new ConfigurationBuilder()
@@ -111,7 +111,7 @@ public sealed class IServiceCollectionExtensionsTests
             if (OperatingSystem.IsLinux())
                 return;
 
-            using var sp = services.BuildServiceProvider();
+            await using var sp = services.BuildServiceProvider();
             sp.GetService<IOptions<MonitoringConfig>>().Should().NotBeNull();
         }
     }

@@ -61,7 +61,8 @@ public class SuiteControlServiceTests
                     cmd.Action == InstanceCommand.Restart &&
                     cmd.Delay > TimeSpan.Zero &&
                     cmd.CorrelationId != Guid.Empty),
-                instanceId);
+                instanceId,
+                Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -71,7 +72,7 @@ public class SuiteControlServiceTests
             var service = CreateService();
             var capturedCorrelationIds = new List<Guid>();
 
-            await _mediator.Send(Arg.Do<ControlInstance>(cmd => capturedCorrelationIds.Add(cmd.CorrelationId)), Arg.Any<Guid>());
+            await _mediator.Send(Arg.Do<ControlInstance>(cmd => capturedCorrelationIds.Add(cmd.CorrelationId)), Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
             // Act
             await service.RestartSuite();
@@ -100,7 +101,8 @@ public class SuiteControlServiceTests
             // Assert
             await _mediator.Received(1).Send(
                 Arg.Is<ControlSystem>(cmd => cmd.Command == SystemCommand.Restart),
-                instanceId);
+                instanceId,
+                Arg.Any<CancellationToken>());
         }
     }
 
@@ -119,7 +121,8 @@ public class SuiteControlServiceTests
             // Assert
             await _mediator.Received(1).Send(
                 Arg.Is<ControlSystem>(cmd => cmd.Command == SystemCommand.Shutdown),
-                instanceId);
+                instanceId,
+                Arg.Any<CancellationToken>());
         }
     }
 }

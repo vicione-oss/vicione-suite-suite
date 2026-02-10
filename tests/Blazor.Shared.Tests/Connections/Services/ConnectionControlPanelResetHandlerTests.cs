@@ -30,7 +30,7 @@ public sealed class ConnectionControlPanelResetHandlerTests
         var resetHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<ConnectionControlPanelState>>();
 
         // Act
-        var action = async () => await resetHandler.Reset(state, CancellationToken.None);
+        var action = async () => await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);
 
         // Assert
         await action.Should().ThrowAsync<InvalidOperationException>();

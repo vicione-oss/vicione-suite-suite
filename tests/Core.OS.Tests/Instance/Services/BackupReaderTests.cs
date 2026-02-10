@@ -32,7 +32,7 @@ public class BackupReaderTests
             var fileSystem = services.GetRequiredService<IFileSystem>();
 
             // Act
-            var metadata = await BackupReader.GetBackupMetadata(fileSystem, TestResources.BackupZip, CancellationToken.None);
+            var metadata = await BackupReader.GetBackupMetadata(fileSystem, TestResources.BackupZip, TestContext.Current.CancellationToken);
 
             // Assert
             metadata.Should().NotBeNull();
@@ -48,7 +48,7 @@ public class BackupReaderTests
             await using var archiveStream = CreateZipStream(fileSystem);
 
             // Act
-            var metadata = await BackupReader.GetBackupMetadata(archiveStream, CancellationToken.None);
+            var metadata = await BackupReader.GetBackupMetadata(archiveStream, TestContext.Current.CancellationToken);
 
             // Assert
             metadata.Should().NotBeNull();
@@ -61,10 +61,10 @@ public class BackupReaderTests
             // Arrange
             await using var services = CreateServices();
             var fileSystem = services.GetRequiredService<IFileSystem>();
-            using var zipArchive = CreateZipArchive(fileSystem);
+            await using var zipArchive = CreateZipArchive(fileSystem);
 
             // Act
-            var metadata = await BackupReader.GetBackupMetadata(zipArchive, CancellationToken.None);
+            var metadata = await BackupReader.GetBackupMetadata(zipArchive, TestContext.Current.CancellationToken);
 
             // Assert
             metadata.Should().NotBeNull();
@@ -82,7 +82,7 @@ public class BackupReaderTests
             var fileSystem = services.GetRequiredService<IFileSystem>();
 
             // Act
-            var systemConfiguration = await BackupReader.GetSystemConfiguration(fileSystem, TestResources.BackupZip, CancellationToken.None);
+            var systemConfiguration = await BackupReader.GetSystemConfiguration(fileSystem, TestResources.BackupZip, TestContext.Current.CancellationToken);
 
             // Assert
             systemConfiguration.Should().NotBeNull();
@@ -97,7 +97,7 @@ public class BackupReaderTests
             await using var archiveStream = CreateZipStream(fileSystem);
 
             // Act
-            var systemConfiguration = await BackupReader.GetSystemConfiguration(archiveStream, CancellationToken.None);
+            var systemConfiguration = await BackupReader.GetSystemConfiguration(archiveStream, TestContext.Current.CancellationToken);
 
             // Assert
             systemConfiguration.Should().NotBeNull();
@@ -109,10 +109,10 @@ public class BackupReaderTests
             // Arrange
             await using var services = CreateServices();
             var fileSystem = services.GetRequiredService<IFileSystem>();
-            using var zipArchive = CreateZipArchive(fileSystem);
+            await using var zipArchive = CreateZipArchive(fileSystem);
 
             // Act
-            var systemConfiguration = await BackupReader.GetSystemConfiguration(zipArchive, CancellationToken.None);
+            var systemConfiguration = await BackupReader.GetSystemConfiguration(zipArchive, TestContext.Current.CancellationToken);
 
             // Assert
             systemConfiguration.Should().NotBeNull();
@@ -156,7 +156,7 @@ public class BackupReaderTests
             // Arrange
             await using var services = CreateServices();
             var fileSystem = services.GetRequiredService<IFileSystem>();
-            using var zipArchive = CreateZipArchive(fileSystem);
+            await using var zipArchive = CreateZipArchive(fileSystem);
 
             // Act
             var moduleEntries = BackupReader.GetModuleEntries(zipArchive);

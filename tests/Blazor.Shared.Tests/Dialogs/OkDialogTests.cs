@@ -9,10 +9,10 @@ namespace Blazor.Shared.Tests.Dialogs;
 public sealed class OkDialogTests
 {
     [Fact]
-    public void ComponentGetsRendered()
+    public async Task ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -23,10 +23,10 @@ public sealed class OkDialogTests
     }
 
     [Fact]
-    public void Should_Be_Rendered_Hidden()
+    public async Task Should_Be_Rendered_Hidden()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -38,10 +38,10 @@ public sealed class OkDialogTests
     }
 
     [Fact]
-    public void Should_Be_Rendered_Visible()
+    public async Task Should_Be_Rendered_Visible()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -54,11 +54,11 @@ public sealed class OkDialogTests
     }
 
     [Fact]
-    public void OnConfirm_Event_Is_Fired_On_Ok_Button_Click()
+    public async Task OnConfirm_Event_Is_Fired_On_Ok_Button_Click()
     {
         // Arrange
         var onConfirmFired = false;
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -75,11 +75,11 @@ public sealed class OkDialogTests
     }
 
     [Fact]
-    public void OnConfirm_Event_Is_Fired_On_Cross_Button_Click()
+    public async Task OnConfirm_Event_Is_Fired_On_Cross_Button_Click()
     {
         // Arrange
         var onConfirmFired = false;
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -95,11 +95,11 @@ public sealed class OkDialogTests
     }
 
     [Fact]
-    public void Header_Is_Rendered()
+    public async Task Header_Is_Rendered()
     {
         // Arrange
         var headerText = "Test header";
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -115,11 +115,11 @@ public sealed class OkDialogTests
     }
 
     [Fact]
-    public void Body_Is_Rendered()
+    public async Task Body_Is_Rendered()
     {
         // Arrange
         var body = "<p>Test body</p>";
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act

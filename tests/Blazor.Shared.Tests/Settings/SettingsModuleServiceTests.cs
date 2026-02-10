@@ -61,10 +61,10 @@ public sealed class SettingsModuleServiceTests
     }
 
     [Fact]
-    public void GetCategoriesGroupedByPanelElements()
+    public async Task GetCategoriesGroupedByPanelElements()
     {
         // Arrange
-        using var serviceProvider = SetupServiceProvider();
+        await using var serviceProvider = SetupServiceProvider();
         var controlPanelRegistries = serviceProvider.GetRequiredService<IEnumerable<IControlPanelRegistry>>();
         var controlPanelRegistryItems = controlPanelRegistries.SelectMany(i => i);
         var defaultControlPanelGroupDescriptor = serviceProvider.GetRequiredService<IDefaultControlPanelGroupDescriptor>();
@@ -79,10 +79,10 @@ public sealed class SettingsModuleServiceTests
     }
 
     [Fact]
-    public void GetSubCategoriesGroupedByPanelElements()
+    public async Task GetSubCategoriesGroupedByPanelElements()
     {
         // Arrange
-        using var serviceProvider = SetupServiceProvider();
+        await using var serviceProvider = SetupServiceProvider();
         var controlPanelRegistries = serviceProvider.GetRequiredService<IEnumerable<IControlPanelRegistry>>();
         var controlPanelRegistryItems = controlPanelRegistries.SelectMany(i => i);
         var defaultControlPanelGroupDescriptor = serviceProvider.GetRequiredService<IDefaultControlPanelGroupDescriptor>();
@@ -98,10 +98,10 @@ public sealed class SettingsModuleServiceTests
     }
 
     [Fact]
-    public void GetControlPanelsByCategoryAndSubCategory()
+    public async Task GetControlPanelsByCategoryAndSubCategory()
     {
         // Arrange
-        using var serviceProvider = SetupServiceProvider();
+        await using var serviceProvider = SetupServiceProvider();
         var controlPanelRegistries = serviceProvider.GetRequiredService<IEnumerable<IControlPanelRegistry>>();
         var controlPanelRegistryItems = controlPanelRegistries.SelectMany(i => i);
         var defaultControlPanelGroupDescriptor = serviceProvider.GetRequiredService<IDefaultControlPanelGroupDescriptor>();

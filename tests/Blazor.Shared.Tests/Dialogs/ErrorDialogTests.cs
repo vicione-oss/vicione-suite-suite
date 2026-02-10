@@ -8,10 +8,10 @@ namespace Blazor.Shared.Tests.Dialogs;
 public sealed class ErrorDialogTests
 {
     [Fact]
-    public void ComponentGetsRendered()
+    public async Task ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -22,10 +22,10 @@ public sealed class ErrorDialogTests
     }
 
     [Fact]
-    public void Shoul_Be_Rendered_Hidden()
+    public async Task Shoul_Be_Rendered_Hidden()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -37,10 +37,10 @@ public sealed class ErrorDialogTests
     }
 
     [Fact]
-    public void Should_Be_Rendered_Visible()
+    public async Task Should_Be_Rendered_Visible()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -53,11 +53,11 @@ public sealed class ErrorDialogTests
     }
 
     [Fact]
-    public void OnConfirm_Event_Is_Fired_On_Ok_Button_Click()
+    public async Task OnConfirm_Event_Is_Fired_On_Ok_Button_Click()
     {
         // Arrange
         var onConfirmFired = false;
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -74,11 +74,11 @@ public sealed class ErrorDialogTests
     }
 
     [Fact]
-    public void OnConfirm_Event_Is_Fired_On_Cross_Button_Click()
+    public async Task OnConfirm_Event_Is_Fired_On_Cross_Button_Click()
     {
         // Arrange
         var onConfirmFired = false;
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act
@@ -94,12 +94,12 @@ public sealed class ErrorDialogTests
     }
 
     [Fact]
-    public void Exception_Is_Rendered()
+    public async Task Exception_Is_Rendered()
     {
         // Arrange
         var exceptionMessage = "Exception test message";
         var exception = new InvalidOperationException(exceptionMessage);
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
 
         // Act

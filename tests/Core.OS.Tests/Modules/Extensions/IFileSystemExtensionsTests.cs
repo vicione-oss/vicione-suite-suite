@@ -39,7 +39,7 @@ public class IFileSystemExtensionsTests
             fileSystem.AddDirectory(parent);
 
             // Act
-            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, null, _logger);
+            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, null, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists(expected).Should().BeTrue();
@@ -60,7 +60,7 @@ public class IFileSystemExtensionsTests
             fileSystem.AddDirectory(parent);
 
             // Act
-            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, manifestSeed, _logger);
+            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, manifestSeed, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists(expected).Should().BeTrue();
@@ -78,7 +78,7 @@ public class IFileSystemExtensionsTests
             fileSystem.File.Exists(ModuleConstants.ModulesFileName).Returns(true);
 
             // Act
-            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, null, _logger);
+            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, null, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.FileStream.DidNotReceive().New(Arg.Any<string>(), Arg.Any<FileStreamOptions>());

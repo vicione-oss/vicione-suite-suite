@@ -13,10 +13,10 @@ namespace Blazor.Shared.Tests.Logging;
 public sealed class JournalFollowViewTests
 {
     [Fact(Skip = "JournalService can't be abstracted and therefore it's hard to test now")]
-    public void Should_render_component()
+    public async Task Should_render_component()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx();
         ctx.Services.AddSingleton<JournalService>();
 

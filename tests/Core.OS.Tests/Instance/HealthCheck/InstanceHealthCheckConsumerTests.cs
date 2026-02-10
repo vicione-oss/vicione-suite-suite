@@ -26,12 +26,12 @@ public class InstanceHealthCheckConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         var service = tester.Services.GetRequiredService<IMasterHealthService>();
-        var command = new InstanceHealthInfo(new(), DateTimeOffset.Now, HealthStatus.Healthy);
+        var command = new InstanceHealthInfo(Guid.Empty, DateTimeOffset.Now, HealthStatus.Healthy);
 
         // Act
         await tester.TestEvent<InstanceHealthInfo, InstanceHealthCheckConsumer>(command);
 
         // Assert
-        await service.Received(1).CheckHealthStatus(Arg.Any<Guid>(), Arg.Any<HealthStatus>());
+        await service.Received(1).CheckHealthStatus(Arg.Any<Guid>(), Arg.Any<HealthStatus>(), Arg.Any<CancellationToken>());
     }
 }

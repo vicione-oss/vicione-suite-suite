@@ -23,7 +23,7 @@ public class SetCrossInstanceConfigurationConsumerTests : TestWithDbContextSqlit
         {
             services.AddConsumer<SetCrossInstanceConfigurationConsumer>();
             services.AddSingleton<IApplicationDbContext>(_ => TestDbContext);
-            services.AddSingleton<ILogger<SetCrossInstanceConfigurationConsumer>>(Substitute.For<ILogger<SetCrossInstanceConfigurationConsumer>>());
+            services.AddSingleton(Substitute.For<ILogger<SetCrossInstanceConfigurationConsumer>>());
         };
 
     [Fact]
@@ -47,7 +47,7 @@ public class SetCrossInstanceConfigurationConsumerTests : TestWithDbContextSqlit
         // Act + Assert
         await tester.TestCommand<SetCrossInstanceConfiguration, SetCrossInstanceConfigurationConsumer>(command);
 
-        var added = await TestDbContext.CrossInstanceConfiguration.AsNoTracking().SingleAsync();
+        var added = await TestDbContext.CrossInstanceConfiguration.AsNoTracking().SingleAsync(TestContext.Current.CancellationToken);
         added.CultureName.Should().Be("de-DE");
         added.TimeZoneId.Should().Be(TimeZoneInfo.Local.Id);
     }
@@ -61,12 +61,12 @@ public class SetCrossInstanceConfigurationConsumerTests : TestWithDbContextSqlit
         var config = new CrossInstanceConfiguration() { Id = Guid.NewGuid(), CultureName = "en-GB" };
 
         TestDbContext.CrossInstanceConfiguration.Add(config);
-        await TestDbContext.SaveChangesAsync();
+        await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act + Assert
         await tester.TestCommand<SetCrossInstanceConfiguration, SetCrossInstanceConfigurationConsumer>(command);
 
-        var updated = await TestDbContext.CrossInstanceConfiguration.AsNoTracking().SingleAsync();
+        var updated = await TestDbContext.CrossInstanceConfiguration.AsNoTracking().SingleAsync(TestContext.Current.CancellationToken);
         updated.Id.Should().Be(config.Id);
         updated.CultureName.Should().Be("de-DE");
     }
@@ -83,14 +83,16 @@ public class SetCrossInstanceConfigurationConsumerTests : TestWithDbContextSqlit
         var config = new CrossInstanceConfiguration() { Id = Guid.NewGuid(), CultureName = "en-GB" };
 
         TestDbContext.CrossInstanceConfiguration.Add(config);
-        await TestDbContext.SaveChangesAsync();
+        await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act + Assert
         var changeEvent = await tester.TestCommand<SetCrossInstanceConfiguration, SetCrossInstanceConfigurationConsumer, CrossInstanceConfigurationChanged>(command);
 
-        var updated = await TestDbContext.CrossInstanceConfiguration.AsNoTracking().SingleAsync();
+        var updated = await TestDbContext.CrossInstanceConfiguration.AsNoTracking().SingleAsync(TestContext.Current.CancellationToken);
         changeEvent.CrossInstanceConfiguration.Id.Should().Be(config.Id);
         changeEvent.CrossInstanceConfiguration.CultureName.Should().Be("de-DE");
         changeEvent.CorrelationId.Should().Be(command.CorrelationId);
+        
+        changeEvent.CrossInstanceConfiguration.Should().BeEquivalentTo(updated);
     }
 }

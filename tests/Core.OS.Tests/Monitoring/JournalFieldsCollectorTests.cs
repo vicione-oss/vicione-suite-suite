@@ -53,7 +53,7 @@ public class JournalFieldsCollector_CollectMetrics
             });
         JournalFieldsCollector collector = new(options, journalMonitoring, _ => Task.FromResult(session));
 
-        var metrics = await collector.CollectMetrics(1, DateTimeOffset.UtcNow, default);
+        var metrics = await collector.CollectMetrics(1, DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
         metrics.Should().HaveCount(2).And.SatisfyRespectively(
             m =>
@@ -126,8 +126,8 @@ public class JournalFieldsCollector_CollectMetrics
         });
         JournalFieldsCollector collector = new(options, journalMonitoring, _ => Task.FromResult(session));
 
-        await collector.CollectMetrics(1, DateTimeOffset.UtcNow, default);
-        var metrics = await collector.CollectMetrics(15, DateTimeOffset.UtcNow, default);
+        await collector.CollectMetrics(1, DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
+        var metrics = await collector.CollectMetrics(15, DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
         metrics.Should().HaveCount(4).And.SatisfyRespectively(
             m => m.IntervalInMinutes.Should().Be(1),
@@ -191,7 +191,7 @@ public class JournalFieldsCollector_CollectMetrics
         ]);
         JournalFieldsCollector collector = new(options, journalMonitoring, _ => Task.FromResult(session));
 
-        var metrics = await collector.CollectMetrics(1, DateTimeOffset.UtcNow, default);
+        var metrics = await collector.CollectMetrics(1, DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
         metrics.Should().ContainSingle().Which.Value.Should().BeOfType<Dictionary<string, int>>().Which.Count.Should().Be(2);
     }

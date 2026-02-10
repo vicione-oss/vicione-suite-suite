@@ -44,7 +44,7 @@ public class WebApplicationBuilderExtensionsTests
             var builder = WebApplication.CreateBuilder();
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.File.Exists(_fileSystem.GetLocalInstanceIdFilePath(_instanceOptions)).Should().BeTrue();
@@ -62,7 +62,7 @@ public class WebApplicationBuilderExtensionsTests
             _fileSystem.AddEmptyFile(deviceImageFile);
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.File.Exists(deviceImageFile).Should().BeFalse();
@@ -84,7 +84,7 @@ public class WebApplicationBuilderExtensionsTests
             _fileSystem.WriteResetFile(_instanceOptions);
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();
@@ -108,7 +108,7 @@ public class WebApplicationBuilderExtensionsTests
             _fileSystem.WriteResetFile(_instanceOptions);
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();
@@ -131,7 +131,7 @@ public class WebApplicationBuilderExtensionsTests
             SetupTestFiles(_fileSystem, backupDirectory);
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().NotBeEmpty();
@@ -150,7 +150,7 @@ public class WebApplicationBuilderExtensionsTests
             var cacheDirectory = _fileSystem.GetRootedCacheDirectory(_instanceOptions);
             var backupDirectory = _fileSystem.GetRootedBackupDirectory(_instanceOptions);
             var backupFilePath = _fileSystem.Path.Combine(backupDirectory, _backupFileName);
-            var backupMetadata = await BackupReader.GetBackupMetadata(_fileSystem, backupFilePath);
+            var backupMetadata = await BackupReader.GetBackupMetadata(_fileSystem, backupFilePath, TestContext.Current.CancellationToken);
 
             SetupTestFiles(_fileSystem, homeDirectory);
             SetupTestFiles(_fileSystem, cacheDirectory);

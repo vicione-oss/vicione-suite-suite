@@ -27,10 +27,10 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
 
             var nonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow };
             TestDbContext.Nonces.Add(nonce);
-            await TestDbContext.SaveChangesAsync();
+            await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
-            var result = await store.GetNonce(nonce.Value);
+            var result = await store.GetNonce(nonce.Value, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().Be(nonce);
@@ -46,7 +46,7 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
             var nonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow };
 
             // Act
-            var result = await store.GetNonce(nonce.Value);
+            var result = await store.GetNonce(nonce.Value, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeNull();
@@ -63,7 +63,7 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
             var store = serviceProvider.GetRequiredService<NonceStore>();
 
             // Act
-            var result = await store.Create();
+            var result = await store.Create(TestContext.Current.CancellationToken);
 
             // Assert
             result.Value.Should().NotBe(Guid.Empty);
@@ -83,10 +83,10 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
 
             var nonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow };
             TestDbContext.Nonces.Add(nonce);
-            await TestDbContext.SaveChangesAsync();
+            await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
-            var result = await store.Delete(nonce);
+            var result = await store.Delete(nonce, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeTrue();
@@ -102,7 +102,7 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
             var nonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow };
 
             // Act
-            var result = await store.Delete(nonce);
+            var result = await store.Delete(nonce, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeFalse();
@@ -122,10 +122,10 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
             var newNonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow };
             TestDbContext.Nonces.Add(oldNonce);
             TestDbContext.Nonces.Add(newNonce);
-            await TestDbContext.SaveChangesAsync();
+            await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
-            await store.DeletedOrphaned();
+            await store.DeletedOrphaned(TestContext.Current.CancellationToken);
 
             // Assert
             TestDbContext.Nonces.Should().Contain(newNonce);
@@ -141,10 +141,10 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
 
             var newNonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow };
             TestDbContext.Nonces.Add(newNonce);
-            await TestDbContext.SaveChangesAsync();
+            await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
-            await store.DeletedOrphaned();
+            await store.DeletedOrphaned(TestContext.Current.CancellationToken);
 
             // Assert
             TestDbContext.Nonces.Should().Contain(newNonce);

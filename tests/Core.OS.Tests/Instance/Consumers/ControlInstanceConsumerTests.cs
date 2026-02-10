@@ -98,7 +98,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
             await using var tester = new MassTransitTester(_configureServices);
             var appDb = tester.Services.GetRequiredService<IApplicationDbContext>();
             appDb.InstanceInfo.Add(_standaloneInstance);
-            await appDb.Instance.SaveChangesAsync();
+            await appDb.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             _pipeClient.SetupRestartServiceResult(OperationStatus.Success, "TEST");
             _localInstanceProvider.SetupLocalInstanceInformation(guid: _instanceId);
@@ -142,7 +142,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
             await using var tester = new MassTransitTester(_configureServices);
             var appDb = tester.Services.GetRequiredService<IApplicationDbContext>();
             appDb.InstanceInfo.Add(_standaloneInstance);
-            await appDb.Instance.SaveChangesAsync();
+            await appDb.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
             _localInstanceProvider.SetupLocalInstanceInformation(guid: _instanceId);
 
             var command = new ControlInstance()
@@ -181,7 +181,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
     {
         if (disposing)
         {
-            _pipeClient?.Dispose();
+            _pipeClient.Dispose();
         }
         base.Dispose(disposing);
     }

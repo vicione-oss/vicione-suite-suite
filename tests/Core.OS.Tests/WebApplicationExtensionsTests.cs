@@ -26,7 +26,7 @@ public class WebApplicationExtensionsTests
             var host = builder.Build();
 
             // Act
-            var failures = host.GetInvalidOptions();
+            var failures = (host.GetInvalidOptions() ?? []).ToArray();
 
             // Assert
             Assert.NotNull(failures);

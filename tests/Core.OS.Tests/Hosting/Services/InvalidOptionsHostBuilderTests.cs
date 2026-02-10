@@ -37,7 +37,7 @@ public sealed class InvalidOptionsHostBuilderTests
 
         thread.Start();
 
-        await Task.Delay(5000);
+        await Task.Delay(5000, TestContext.Current.CancellationToken);
 
         // Assert
         using var client = new HttpClient();

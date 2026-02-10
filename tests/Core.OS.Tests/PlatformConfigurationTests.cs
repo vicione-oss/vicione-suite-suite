@@ -128,7 +128,7 @@ public class PlatformConfigurationTests
     }
 
     [Fact]
-    public void Health_check_should_not_be_configured_for_memory_bus()
+    public async Task Health_check_should_not_be_configured_for_memory_bus()
     {
         // Arrange
         var fileSystem = new MockFileSystem();
@@ -152,7 +152,7 @@ public class PlatformConfigurationTests
             .AddCoreServices(fileSystem, config, moduleHost);
 
         // Act
-        using var serviceProvider = services.BuildServiceProvider();
+        await using var serviceProvider = services.BuildServiceProvider();
 
         // Assert
         Assert.Null(serviceProvider.GetService<IHealthCheckPublisher>());
