@@ -55,10 +55,7 @@ public abstract class BlazorServerUiMediatorTests
             // Arrange
             using var serviceProvider = SetupServiceProvider();
             var uiMediator = serviceProvider.GetRequiredService<BlazorServerUiMediator>();
-            var command = new FooTestCommand
-            {
-                InstanceId = Guid.NewGuid(),
-            };
+            var command = new FooTestCommand(Guid.NewGuid());
             // Act
             await uiMediator.Send(command, command.InstanceId);
 
@@ -172,17 +169,16 @@ public abstract class BlazorServerUiMediatorTests
         }
     }
 
-    public record FooTestCommand : IInstanceDependentCommand
+    public record FooTestCommand(Guid InstanceId) : IInstanceDependentCommand
     {
-        public Guid InstanceId { get; set; }
-        public Guid CorrelationId => InstanceId;
+        public Guid CorrelationId { get; init; } = InstanceId;
     }
 
     public record BarTestCommand(Guid BarId) : ICommand
     {
         public Guid InstanceId { get; set; }
 
-        public Guid CorrelationId => BarId;
+        public Guid CorrelationId { get; init; } = BarId;
     }
 
     public record FooTestRequest(Guid RequestId) : IRequest<FooTestResponse>;

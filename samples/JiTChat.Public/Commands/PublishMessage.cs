@@ -7,5 +7,5 @@ public sealed record PublishMessage : ICommand
 {
     public Guid SenderId { get; set; }
     public ChatMessage Message { get; set; } = new();
-    public Guid CorrelationId { get; set; } = Guid.NewGuid();
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }

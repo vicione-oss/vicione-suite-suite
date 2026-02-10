@@ -5,5 +5,5 @@ namespace Burger.Backend.Consumers;
 
 public sealed record DeliveryCommand(Guid OrderId, List<SuiteBurger> Burgers) : ICommand
 {
-    public Guid CorrelationId => OrderId;
+    public Guid CorrelationId { get; init; } = OrderId;
 }
