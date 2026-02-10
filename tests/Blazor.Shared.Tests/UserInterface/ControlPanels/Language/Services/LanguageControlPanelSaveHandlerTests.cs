@@ -42,11 +42,11 @@ public class LanguageControlPanelSaveHandlerTests
                     var message = new CrossInstanceConfigurationChanged(_correlationId, configuration);
                     var context = new ClientContext<CrossInstanceConfigurationChanged>(message, Guid.NewGuid());
 
-                    await saveHandler.Consume(context, CancellationToken.None);
+                    await saveHandler.Consume(context, TestContext.Current.CancellationToken);
                 });
 
             // Act
-            var handlerResult = await saveHandler.Save(state, CancellationToken.None);
+            var handlerResult = await saveHandler.Save(state, TestContext.Current.CancellationToken);
 
             // Assert
             await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
@@ -82,11 +82,11 @@ public class LanguageControlPanelSaveHandlerTests
                     var message = new CrossInstanceConfigurationError(_correlationId, errorInfo, Guid.NewGuid());
                     var context = new ClientContext<CrossInstanceConfigurationError>(message, Guid.NewGuid());
 
-                    await saveHandler.Consume(context, CancellationToken.None);
+                    await saveHandler.Consume(context, TestContext.Current.CancellationToken);
                 });
 
             // Act
-            var handlerResult = await saveHandler.Save(state, CancellationToken.None);
+            var handlerResult = await saveHandler.Save(state, TestContext.Current.CancellationToken);
 
             // Assert
             await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a.CorrelationId == _correlationId), Arg.Any<CancellationToken>());

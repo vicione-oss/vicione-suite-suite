@@ -57,8 +57,8 @@ public class ControlServiceConsumerTests
         await tester.TestInstanceDependentCommand<ControlService, ControlServiceConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<SystemConfigurationChanged>()).Should().BeTrue();
-        (await tester.Harness.Published.Any<ControlServiceCompleted>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<SystemConfigurationChanged>(TestContext.Current.CancellationToken)).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlServiceCompleted>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
@@ -74,6 +74,6 @@ public class ControlServiceConsumerTests
         await tester.TestInstanceDependentCommand<ControlService, ControlServiceConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlServiceError>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlServiceError>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 }

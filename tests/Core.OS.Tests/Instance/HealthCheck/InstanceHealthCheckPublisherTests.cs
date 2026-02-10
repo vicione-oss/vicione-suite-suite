@@ -39,7 +39,7 @@ public class InstanceHealthCheckPublisherTests
         // Act
         await publisher.PublishAsync(
             new HealthReport(Substitute.For<IReadOnlyDictionary<string, HealthReportEntry>>(), HealthStatus.Unhealthy, TimeSpan.Zero),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         _ = _mediatorMock.Received()
@@ -66,7 +66,7 @@ public class InstanceHealthCheckPublisherTests
         // Act
         await publisher.PublishAsync(
             new HealthReport(Substitute.For<IReadOnlyDictionary<string, HealthReportEntry>>(), HealthStatus.Healthy, TimeSpan.Zero),
-            CancellationToken.None);
+            TestContext.Current.CancellationToken);
 
         // Assert
         _ = _mediatorMock.Received()
@@ -74,7 +74,7 @@ public class InstanceHealthCheckPublisherTests
                 Arg.Is<InstanceHealthInfo>(message =>
                     message.SenderInstanceId == instanceId &&
                     message.Status == HealthStatus.Healthy),
-                CancellationToken.None);
+                TestContext.Current.CancellationToken);
 
         _mediatorMock.ReceivedCalls().Should().HaveCount(1);
     }

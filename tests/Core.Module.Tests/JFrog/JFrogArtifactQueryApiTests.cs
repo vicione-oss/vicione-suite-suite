@@ -6,7 +6,6 @@ using System.Text;
 using AwesomeAssertions;
 using Core.Module.JFrog;
 using Core.Module.Options;
-using Core.Module.Tests;
 using Core.Tests.Tools;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,6 +13,8 @@ using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Testing;
 using Xunit;
+
+namespace Core.Module.Tests.JFrog;
 
 /// <summary>
 /// https://jfrog.com/help/r/jfrog-rest-apis/artifactory-query-language
@@ -84,13 +85,13 @@ public class JFrogArtifactQueryApiTests
         public async Task Returns_result_when_http_response_is_successful()
         {
             // Arrange
-            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(HttpStatusCode.OK, """{ "results": [] }""", "application/json");
+            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(HttpStatusCode.OK, """{ "results": [] }""");
             _httpClientFactory.BaseAddress = new Uri(TestApiAddress);
 
             var repository = CreateRepository(_httpClientFactory);
 
             // Act
-            var result = await repository.Query("items.find({})", CancellationToken.None);
+            var result = await repository.Query("items.find({})", TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().NotBeNull();
@@ -106,7 +107,7 @@ public class JFrogArtifactQueryApiTests
             var repository = CreateRepository(_httpClientFactory);
 
             // Act
-            var result = await repository.Query("items.find({})", CancellationToken.None);
+            var result = await repository.Query("items.find({})", TestContext.Current.CancellationToken);
 
             // Assert
             result.Errors.Should().NotBeEmpty();
@@ -119,7 +120,7 @@ public class JFrogArtifactQueryApiTests
         public async Task Writes_stream_to_file_system()
         {
             // Arrange
-            using var stream = new MemoryStream(Encoding.UTF8.GetBytes("Hello world"));
+            using var stream = new MemoryStream("Hello world"u8.ToArray());
             _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(contentStream: stream);
 
             var artifact = Substitute.For<IArtifact>();
@@ -129,11 +130,11 @@ public class JFrogArtifactQueryApiTests
             var repository = CreateRepository(_httpClientFactory, fileSystem);
 
             // Act
-            await repository.DownloadToFile(artifact, "target/path.txt", CancellationToken.None);
+            await repository.DownloadToFile(artifact, "target/path.txt", TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists("target/path.txt").Should().BeTrue();
-            (await fileSystem.File.ReadAllTextAsync("target/path.txt")).Should().Be("Hello world");
+            (await fileSystem.File.ReadAllTextAsync("target/path.txt", TestContext.Current.CancellationToken)).Should().Be("Hello world");
         }
     }
 
@@ -144,10 +145,10 @@ public class JFrogArtifactQueryApiTests
         {
             // Arrange
             using var zipStream = new MemoryStream();
-            using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+            await using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
             {
                 var entry = archive.CreateEntry("test.txt");
-                using var writer = new StreamWriter(entry.Open());
+                await using var writer = new StreamWriter(await entry.OpenAsync(TestContext.Current.CancellationToken));
                 await writer.WriteAsync("content");
             }
             zipStream.Position = 0;
@@ -162,7 +163,7 @@ public class JFrogArtifactQueryApiTests
             var repository = CreateRepository(_httpClientFactory, fileSystem);
 
             // Act
-            await repository.DownloadAndExtract(artifact, tempDirectory.Path, CancellationToken.None);
+            await repository.DownloadAndExtract(artifact, tempDirectory.Path, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.Directory.Exists(tempDirectory.Path).Should().BeTrue();
@@ -183,7 +184,7 @@ public class JFrogArtifactQueryApiTests
             builder.AndPathMatches("modules/*");
 
             // Act
-            var result = await repository.QueryRaw(builder.Build());
+            var result = await repository.QueryRaw(builder.Build(), TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().NotBeNullOrEmpty();
@@ -199,7 +200,7 @@ public class JFrogArtifactQueryApiTests
             var repository = CreateRepository(_httpClientFactory);
 
             // Act
-            var result = await repository.QueryRaw("invalid query");
+            var result = await repository.QueryRaw("invalid query", TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeEmpty();
@@ -221,7 +222,7 @@ public class JFrogArtifactQueryApiTests
                 .Build();
 
             // Act
-            var result = await artifactRepository.Query(query);
+            var result = await artifactRepository.Query(query, TestContext.Current.CancellationToken);
 
             // Assert
             result.Artifacts.Should().HaveCount(2);
@@ -240,7 +241,7 @@ public class JFrogArtifactQueryApiTests
                 .Build();
 
             // Act
-            var result = await artifactRepository.Query(query);
+            var result = await artifactRepository.Query(query, TestContext.Current.CancellationToken);
 
             // Assert
             result.Artifacts.Should().HaveCount(2);
@@ -264,7 +265,7 @@ public class JFrogArtifactQueryApiTests
                 .Build();
 
             // Act
-            var result = await artifactRepository.Query(query);
+            var result = await artifactRepository.Query(query, TestContext.Current.CancellationToken);
 
             // Assert
             result.Artifacts.Should().AllSatisfy(k => k.Kind.Should().Be(ArtifactKind.Folder));
@@ -286,7 +287,7 @@ public class JFrogArtifactQueryApiTests
                 .Build();
 
             // Act
-            var result = await artifactRepository.Query(query);
+            var result = await artifactRepository.Query(query, TestContext.Current.CancellationToken);
 
             // Assert
             result.Artifacts.Should().AllSatisfy(k => k.Name.Should().StartWith("vicione-suite_"));
@@ -304,7 +305,7 @@ public class JFrogArtifactQueryApiTests
                 .Build();
 
             // Act
-            var result = await artifactRepository.QueryRaw(query);
+            var result = await artifactRepository.QueryRaw(query, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().NotBeEmpty();
@@ -323,7 +324,7 @@ public class JFrogArtifactQueryApiTests
                 .Build();
 
             // Act
-            var result = await artifactRepository.Query(query);
+            var result = await artifactRepository.Query(query, TestContext.Current.CancellationToken);
 
             // Assert
             result.Artifacts.Should().AllSatisfy(k => k.Name.Should().StartWith("vicione-suite_"));
@@ -345,9 +346,9 @@ public class JFrogArtifactQueryApiTests
                 .AndNameMatches(suiteVersion)
                 .Build();
 
-            var artifact = (await repository.Query(query)).Artifacts.First();
+            var artifact = (await repository.Query(query, TestContext.Current.CancellationToken)).Artifacts.First();
 
-            await repository.DownloadToFile(artifact, $"C:\\Users\\deneuhjo\\Downloads\\{suiteVersion}", CancellationToken.None);
+            await repository.DownloadToFile(artifact, $"C:\\Users\\deneuhjo\\Downloads\\{suiteVersion}", TestContext.Current.CancellationToken);
         }
     }
 

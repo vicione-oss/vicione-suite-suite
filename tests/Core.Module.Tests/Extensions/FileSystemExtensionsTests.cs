@@ -144,7 +144,7 @@ public class FileSystemExtensionsTests
             };
 
             // Act
-            var result = await _fileSystem.GetDebugModuleVersions(loaderOptions, CancellationToken.None);
+            var result = await _fileSystem.GetDebugModuleVersions(loaderOptions, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().ContainKey(ModuleId);
@@ -169,7 +169,7 @@ public class FileSystemExtensionsTests
             };
 
             // Act
-            var result = await _fileSystem.GetDebugModuleVersions(loaderOptions, CancellationToken.None);
+            var result = await _fileSystem.GetDebugModuleVersions(loaderOptions, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().NotContainKey(ModuleId);
@@ -192,7 +192,7 @@ public class FileSystemExtensionsTests
             };
 
             // Act
-            var result = await _fileSystem.GetDebugModuleVersions(loaderOptions, CancellationToken.None);
+            var result = await _fileSystem.GetDebugModuleVersions(loaderOptions, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeEmpty();
@@ -221,7 +221,7 @@ public class FileSystemExtensionsTests
             };
 
             // Act
-            var result = await _fileSystem.GetDebugModuleVersions(loaderOptions, CancellationToken.None);
+            var result = await _fileSystem.GetDebugModuleVersions(loaderOptions, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().ContainKey(ModuleId);

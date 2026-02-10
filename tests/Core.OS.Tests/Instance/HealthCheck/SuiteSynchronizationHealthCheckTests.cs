@@ -41,7 +41,7 @@ public class SuiteSynchronizationHealthCheckTests
             .Build();
 
         // Act
-        await host.StartAsync();
+        await host.StartAsync(TestContext.Current.CancellationToken);
 
         using var server = host.GetTestServer();
         using var client = server.CreateClient();
@@ -49,12 +49,12 @@ public class SuiteSynchronizationHealthCheckTests
         // executed in RegisterInstanceConsumer
         host.Services.GetRequiredService<SynchronizationState>().CompleteSynchronization();
 
-        var response = await client.GetAsync(HealthPath, HttpCompletionOption.ResponseContentRead);
+        var response = await client.GetAsync(HealthPath, HttpCompletionOption.ResponseContentRead, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal("text/plain", response.Content.Headers.ContentType?.ToString());
-        Assert.Equal("Healthy", await response.Content.ReadAsStringAsync());
+        Assert.Equal("Healthy", await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -84,20 +84,20 @@ public class SuiteSynchronizationHealthCheckTests
             .Build();
 
         // Act
-        await host.StartAsync();
+        await host.StartAsync(TestContext.Current.CancellationToken);
 
         var server = host.GetTestServer();
         var client = server.CreateClient();
 
-        var firstResponse = await client.GetAsync(HealthPath);
+        var firstResponse = await client.GetAsync(HealthPath, TestContext.Current.CancellationToken);
         // executed in RegisterInstanceConsumer
         host.Services.GetRequiredService<SynchronizationState>().CompleteSynchronization();
-        var secondResponse = await client.GetAsync(HealthPath);
+        var secondResponse = await client.GetAsync(HealthPath, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(HttpStatusCode.ServiceUnavailable, firstResponse.StatusCode);
         Assert.Equal(HttpStatusCode.OK, secondResponse.StatusCode);
         Assert.Equal("text/plain", secondResponse.Content.Headers.ContentType?.ToString());
-        Assert.Equal("Healthy", await secondResponse.Content.ReadAsStringAsync());
+        Assert.Equal("Healthy", await secondResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 }

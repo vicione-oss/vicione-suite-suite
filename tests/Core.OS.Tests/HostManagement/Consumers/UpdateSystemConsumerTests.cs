@@ -36,9 +36,8 @@ public sealed class UpdateSystemConsumerTests
         cfg.AddSingleton(Substitute.For<ILookupNormalizer>());
         cfg.AddSingleton(Substitute.For<ILogger<UserManager<SuiteUser>>>);
         cfg.AddSingleton(Substitute.For<ILogger<UpdateSystemConsumer>>());
-        cfg.AddSingleton<UserManager<SuiteUser>>(svc =>
-        {
-            return new UserManager<SuiteUser>(
+        cfg.AddSingleton<UserManager<SuiteUser>>(svc
+            => new UserManager<SuiteUser>(
                 _userStore,
                 svc.GetRequiredService<IOptions<IdentityOptions>>(),
                 svc.GetRequiredService<IPasswordHasher<SuiteUser>>(),
@@ -48,8 +47,7 @@ public sealed class UpdateSystemConsumerTests
                 new IdentityErrorDescriber(),
                 svc,
                 svc.GetRequiredService<ILogger<UserManager<SuiteUser>>>()
-                );
-        });
+            ));
     }
 
     [Fact]
@@ -83,7 +81,7 @@ public sealed class UpdateSystemConsumerTests
         await tester.TestInstanceDependentCommand<UpdateSystem, UpdateSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<UpdateSystemStarted>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<UpdateSystemStarted>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
@@ -98,7 +96,7 @@ public sealed class UpdateSystemConsumerTests
         await tester.TestInstanceDependentCommand<UpdateSystem, UpdateSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<UpdateSystemError>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<UpdateSystemError>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     private void SetupUpdateSystemRequestSuccess(UpdateSystem command)

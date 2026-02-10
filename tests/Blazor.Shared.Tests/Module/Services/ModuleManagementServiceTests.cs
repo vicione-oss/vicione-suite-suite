@@ -112,7 +112,7 @@ public class ModuleManagementServiceTests
             SetupModuleMetadata(_moduleBundles);
 
             // Act
-            var results = await service.GetModuleMetadata();
+            var results = await service.GetModuleMetadata(cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
             var available = ModuleMetadataModelFactory.CreateModel(results.Bundles.First(k => k.ModuleId == AvailableModulePackageName));
@@ -136,7 +136,7 @@ public class ModuleManagementServiceTests
             SetupModuleMetadata();
 
             // Act
-            var results = await service.GetModuleMetadata(true);
+            var results = await service.GetModuleMetadata(true, TestContext.Current.CancellationToken);
 
             // Assert
             results.Bundles.Should().BeEmpty();
@@ -151,7 +151,7 @@ public class ModuleManagementServiceTests
             SetupModuleMetadata(_moduleBundles);
 
             // Act
-            var results = await service.GetModuleMetadata();
+            var results = await service.GetModuleMetadata(cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
             results.Bundles.Select(k => k).Should().BeEquivalentTo(_moduleBundles);
@@ -169,10 +169,10 @@ public class ModuleManagementServiceTests
             var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
 
             // Act
-            await service.UpdateModulePackageVersions(models);
+            await service.UpdateModulePackageVersions(models, TestContext.Current.CancellationToken);
 
             // Assert
-            await _mediator.Received().Send(Arg.Any<UpdateModulePackageManifest>());
+            await _mediator.Received().Send(Arg.Any<UpdateModulePackageManifest>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -184,13 +184,13 @@ public class ModuleManagementServiceTests
             var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
 
             // Act
-            await service.UpdateModulePackageVersions(models);
+            await service.UpdateModulePackageVersions(models, TestContext.Current.CancellationToken);
 
             // Assert
             await _mediator.Received().Send(Arg.Is<UpdateModulePackageManifest>(k
                 => k.Manifest.Packages.Count == 2
                 && k.Manifest.Packages.First(m => m.Name == TestClientModuleName).Version.ToString() == TestClientModuleVersion
-                && k.Manifest.Packages.First(m => m.Name == AnotherModuleName).Version.ToString() == AnotherModuleVersion));
+                && k.Manifest.Packages.First(m => m.Name == AnotherModuleName).Version.ToString() == AnotherModuleVersion), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -204,13 +204,13 @@ public class ModuleManagementServiceTests
             models.First(k => k.Name == TestClientModuleName).UpdateVersion = TestClientModuleUpdateVersion;
 
             // Act
-            await service.UpdateModulePackageVersions(models);
+            await service.UpdateModulePackageVersions(models, TestContext.Current.CancellationToken);
 
             // Assert
             await _mediator.Received().Send(Arg.Is<UpdateModulePackageManifest>(k
                 => k.Manifest.Packages.Count == 2
                 && k.Manifest.Packages.First(m => m.Name == TestClientModuleName).Version.ToString() == TestClientModuleUpdateVersion
-                && k.Manifest.Packages.First(m => m.Name == AnotherModuleName).Version.ToString() == AnotherModuleVersion));
+                && k.Manifest.Packages.First(m => m.Name == AnotherModuleName).Version.ToString() == AnotherModuleVersion), Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -226,14 +226,14 @@ public class ModuleManagementServiceTests
             package.ToBeInstalled = true;
 
             // Act
-            await service.UpdateModulePackageVersions(models);
+            await service.UpdateModulePackageVersions(models, TestContext.Current.CancellationToken);
 
             // Assert
             await _mediator.Received().Send(Arg.Is<UpdateModulePackageManifest>(k
                 => k.Manifest.Packages.Count == 3
                 && k.Manifest.Packages.First(m => m.Name == TestClientModuleName).Version.ToString() == TestClientModuleVersion
                 && k.Manifest.Packages.First(m => m.Name == AnotherModuleName).Version.ToString() == AnotherModuleVersion
-                && k.Manifest.Packages.First(m => m.Name == AvailableModulePackageName).Version.ToString() == AvailableModuleVersion));
+                && k.Manifest.Packages.First(m => m.Name == AvailableModulePackageName).Version.ToString() == AvailableModuleVersion), Arg.Any<CancellationToken>());
         }
     }
 }

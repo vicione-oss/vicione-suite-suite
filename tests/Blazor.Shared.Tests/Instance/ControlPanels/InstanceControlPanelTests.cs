@@ -66,7 +66,7 @@ public class InstanceControlPanelTests
         var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstanceControlPanelState>>();
 
         // Act
-        await resetHandler.Reset(state, CancellationToken.None);
+        await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);
 
         var component = ctx.Render<InstanceControlPanel>(p => p.Add(c => c.State, state));
 

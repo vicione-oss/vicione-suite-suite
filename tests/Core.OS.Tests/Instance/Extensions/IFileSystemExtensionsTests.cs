@@ -39,7 +39,7 @@ public class IFileSystemExtensionsTests
             fileSystem.AddDirectory(parent);
 
             // Act
-            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, null, _logger);
+            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, null, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists(expected).Should().BeTrue();
@@ -63,7 +63,7 @@ public class IFileSystemExtensionsTests
             fileSystem.AddDirectory(parent);
 
             // Act
-            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, manifestSeed, _logger);
+            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, manifestSeed, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists(expected).Should().BeTrue();
@@ -81,7 +81,7 @@ public class IFileSystemExtensionsTests
             fileSystem.File.Exists(ModuleConstants.ModulesFileName).Returns(true);
 
             // Act
-            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, null, _logger);
+            await fileSystem.EnsureModuleVersionsFile(_instanceOptions, null, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.FileStream.DidNotReceive().New(Arg.Any<string>(), Arg.Any<FileStreamOptions>());
@@ -111,7 +111,7 @@ public class IFileSystemExtensionsTests
             _recoveryOptions.Recovery = null;
 
             // Act
-            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, CancellationToken.None);
+            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeFalse();
@@ -129,7 +129,7 @@ public class IFileSystemExtensionsTests
             fileSystem.AddDirectory(parent);
 
             // Act
-            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, CancellationToken.None);
+            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeFalse();
@@ -150,7 +150,7 @@ public class IFileSystemExtensionsTests
             SetupRecoveryStateFile(fileSystem, _recoveryOptions, recoveryState);
 
             // Act
-            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, CancellationToken.None);
+            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeFalse();
@@ -170,7 +170,7 @@ public class IFileSystemExtensionsTests
             SetupRecoveryStateFile(fileSystem, _recoveryOptions, recoveryState);
 
             // Act
-            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, CancellationToken.None);
+            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeFalse();
@@ -191,7 +191,7 @@ public class IFileSystemExtensionsTests
             SetupRecoveryStateFile(fileSystem, _recoveryOptions, recoveryState);
 
             // Act
-            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, CancellationToken.None);
+            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeTrue();
@@ -215,7 +215,7 @@ public class IFileSystemExtensionsTests
             SetupRecoveryStateFile(fileSystem, _instanceOptions, recoveryState);
 
             // Act
-            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger);
+            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             state.Should().BeEquivalentTo(recoveryState);
@@ -229,7 +229,7 @@ public class IFileSystemExtensionsTests
             var recoveryFilePath = fileSystem.GetLocalRecoveryFilePath(_instanceOptions);
 
             // Act
-            _ = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger);
+            _ = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             await fileSystem.File.Received(1).ReadAllTextAsync(recoveryFilePath, Arg.Any<CancellationToken>());
@@ -249,11 +249,11 @@ public class IFileSystemExtensionsTests
             SetupRecoveryStateFolder(fileSystem, recoveryFilePath);
 
             // Act
-            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, CancellationToken.None);
+            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists(recoveryFilePath).Should().BeTrue();
-            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger);
+            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
             Assert.NotNull(state);
             state.Startups.Should().Be(1);
         }
@@ -273,11 +273,11 @@ public class IFileSystemExtensionsTests
             SetupRecoveryStateFile(fileSystem, _instanceOptions, recoveryState);
 
             // Act
-            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, CancellationToken.None);
+            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists(recoveryFilePath).Should().BeTrue();
-            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger);
+            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
             Assert.NotNull(state);
             state.Startups.Should().Be(1);
         }

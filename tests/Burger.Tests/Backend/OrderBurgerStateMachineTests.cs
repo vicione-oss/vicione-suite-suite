@@ -47,12 +47,12 @@ public class OrderBurgerStateMachineTests : TestWithDbContextSqlite<BurgerDbCont
         var sagaHarness = tester.Harness.GetSagaStateMachineHarness<OrderBurgerStateMachine, OrderBurgerState>();
 
         // Act - Order
-        await tester.Harness.Bus.Publish(command);
+        await tester.Harness.Bus.Publish(command, TestContext.Current.CancellationToken);
 
-        Assert.True(await sagaHarness.Consumed.Any<OrderBurger>());
-        Assert.True(await sagaHarness.Created.Any(x => x.CorrelationId == orderId));
-        Assert.True(await tester.Harness.Published.Any<OrderBurgerReceived>());
-        Assert.True(await tester.Harness.Sent.Any<KitchenCommand>());
+        Assert.True(await sagaHarness.Consumed.Any<OrderBurger>(TestContext.Current.CancellationToken));
+        Assert.True(await sagaHarness.Created.Any(x => x.CorrelationId == orderId, TestContext.Current.CancellationToken));
+        Assert.True(await tester.Harness.Published.Any<OrderBurgerReceived>(TestContext.Current.CancellationToken));
+        Assert.True(await tester.Harness.Sent.Any<KitchenCommand>(TestContext.Current.CancellationToken));
 
         // Act - Cook
         var orderCompleted = new BurgerCompleted
@@ -60,16 +60,16 @@ public class OrderBurgerStateMachineTests : TestWithDbContextSqlite<BurgerDbCont
             OrderId = orderId,
             Burgers = burgers
         };
-        await tester.Harness.Bus.Publish(orderCompleted);
+        await tester.Harness.Bus.Publish(orderCompleted, TestContext.Current.CancellationToken);
 
-        Assert.True(await sagaHarness.Consumed.Any<BurgerCompleted>());
-        Assert.True(await tester.Harness.Sent.Any<DeliveryCommand>());
+        Assert.True(await sagaHarness.Consumed.Any<BurgerCompleted>(TestContext.Current.CancellationToken));
+        Assert.True(await tester.Harness.Sent.Any<DeliveryCommand>(TestContext.Current.CancellationToken));
 
         // Act - Deliver
         var burgerDelivered = new DeliveryCompleted(orderId);
-        await tester.Harness.Bus.Publish(burgerDelivered);
+        await tester.Harness.Bus.Publish(burgerDelivered, TestContext.Current.CancellationToken);
 
-        Assert.True(await sagaHarness.Consumed.Any<DeliveryCompleted>());
-        Assert.True(await tester.Harness.Published.Any<OrderBurgerSucceeded>());
+        Assert.True(await sagaHarness.Consumed.Any<DeliveryCompleted>(TestContext.Current.CancellationToken));
+        Assert.True(await tester.Harness.Published.Any<OrderBurgerSucceeded>(TestContext.Current.CancellationToken));
     }
 }

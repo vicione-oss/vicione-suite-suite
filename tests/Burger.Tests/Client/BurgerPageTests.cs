@@ -12,10 +12,10 @@ namespace Burger.Tests.Client;
 public sealed class BurgerPageTests
 {
     [Fact]
-    public void PageGetsRendered()
+    public async Task PageGetsRendered()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServicesWithBlazorDx(setup =>
         {
             setup.Services.AddLocalization<BurgerClientModule>();

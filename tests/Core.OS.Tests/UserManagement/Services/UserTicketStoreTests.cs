@@ -41,13 +41,13 @@ public class UserTicketStoreTests
 
             var ticket = new UserTicket { Id = Guid.NewGuid(), UserId = "Tester", Value = [1, 2, 3] }; // expired -> remove
             dbContext.Tickets.Add(ticket);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
             await store.RemoveAsync("not-a-guid");
 
             // Assert
-            (await dbContext.Tickets.FindAsync(ticket.Id)).Should().NotBeNull();
+            (await dbContext.Tickets.FindAsync([ticket.Id], TestContext.Current.CancellationToken)).Should().NotBeNull();
         }
 
         [Fact]
@@ -59,13 +59,13 @@ public class UserTicketStoreTests
 
             var ticket = new UserTicket { Id = Guid.NewGuid(), UserId = "Tester", Value = [1, 2, 3] }; // expired -> remove
             dbContext.Tickets.Add(ticket);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
             await store.RemoveAsync(ticket.Id.ToString());
 
             // Assert
-            (await dbContext.Tickets.FindAsync(ticket.Id)).Should().BeNull();
+            (await dbContext.Tickets.FindAsync([ticket.Id], TestContext.Current.CancellationToken)).Should().BeNull();
         }
 
         [Fact]
@@ -79,7 +79,7 @@ public class UserTicketStoreTests
             await store.RemoveAsync(Guid.NewGuid().ToString());
 
             // Assert
-            (await dbContext.Tickets.CountAsync()).Should().Be(0);
+            (await dbContext.Tickets.CountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
         }
     }
 
@@ -91,13 +91,13 @@ public class UserTicketStoreTests
             // Arrange
             await using var serviceProvider = SetupServiceProvider(out var dbContext);
             var store = new UserTicketStore(serviceProvider);
-            var authTicket = BuildAuthTicket("any");
+            var authTicket = BuildAuthTicket("any", "user", DateTimeOffset.UtcNow.AddMinutes(10));
 
             // Act
             await store.RenewAsync("xxx", authTicket);
 
             // Assert
-            (await dbContext.Tickets.CountAsync()).Should().Be(0);
+            (await dbContext.Tickets.CountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
         }
 
         [Fact]
@@ -118,7 +118,7 @@ public class UserTicketStoreTests
                 Expires = DateTimeOffset.UtcNow.AddMinutes(-30)
             };
             dbContext.Tickets.Add(existing);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var expires = DateTimeOffset.UtcNow.AddMinutes(20);
             var authTicket = BuildAuthTicket(Shared.Constants.AuthenticationSchema, userName: "Tester", expiresUtc: expires);
@@ -127,9 +127,9 @@ public class UserTicketStoreTests
             await store.RenewAsync(id.ToString(), authTicket);
 
             // Assert
-            var reloaded = await dbContext.Tickets.FindAsync(id);
+            var reloaded = await dbContext.Tickets.FindAsync([id], TestContext.Current.CancellationToken);
             reloaded.Should().NotBeNull();
-            reloaded!.Value.Should().NotBeNullOrEmpty();
+            reloaded.Value.Should().NotBeNullOrEmpty();
             reloaded.LastActivity.Should().BeAfter(lastActivity);
             reloaded.Expires.Should().BeCloseTo(expires, TimeSpan.FromSeconds(1));
         }
@@ -186,17 +186,17 @@ public class UserTicketStoreTests
                 Expires = DateTimeOffset.UtcNow.AddMinutes(10)
             };
             dbContext.Tickets.Add(existing);
-            await dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
             var result = await store.RetrieveAsync(id.ToString());
 
             // Assert
             result.Should().NotBeNull();
-            result!.AuthenticationScheme.Should().Be(original.AuthenticationScheme);
-            result.Principal!.Identity!.Name.Should().Be("userA");
+            result.AuthenticationScheme.Should().Be(original.AuthenticationScheme);
+            result.Principal.Identity!.Name.Should().Be("userA");
 
-            var reloaded = await dbContext.Tickets.FindAsync(id);
+            var reloaded = await dbContext.Tickets.FindAsync([id], TestContext.Current.CancellationToken);
             reloaded!.LastActivity!.Should().BeAfter(lastActivity);
         }
     }
@@ -217,7 +217,7 @@ public class UserTicketStoreTests
 
             // Assert
             result.Should().BeEmpty();
-            (await dbContext.Tickets.CountAsync()).Should().Be(0);
+            (await dbContext.Tickets.CountAsync(TestContext.Current.CancellationToken)).Should().Be(0);
         }
 
         [Fact]
@@ -237,7 +237,7 @@ public class UserTicketStoreTests
             key.Should().NotBeNullOrWhiteSpace();
             Guid.TryParse(key, out var id).Should().BeTrue();
 
-            var saved = await dbContext.Tickets.FindAsync(id);
+            var saved = await dbContext.Tickets.FindAsync([id], TestContext.Current.CancellationToken);
             saved.Should().NotBeNull();
             saved!.UserId.Should().Be("Tester");
             saved.Value.Should().NotBeNullOrEmpty();
@@ -260,7 +260,4 @@ public class UserTicketStoreTests
 
         return new AuthenticationTicket(principal, props, authenticationScheme);
     }
-
-    private static AuthenticationTicket BuildAuthTicket(string authenticationSchemeOrAny)
-        => BuildAuthTicket(authenticationSchemeOrAny, "user", DateTimeOffset.UtcNow.AddMinutes(10));
 }

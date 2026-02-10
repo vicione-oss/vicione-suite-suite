@@ -50,7 +50,7 @@ public sealed class GetCrossInstanceConfigurationConsumerTests : TestWithDbConte
         var config = new CrossInstanceConfiguration() {  Id = Guid.NewGuid() };
 
         TestDbContext.CrossInstanceConfiguration.Add(config);
-        await TestDbContext.SaveChangesAsync();
+        await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var response = await tester.TestRequest<GetCrossInstanceConfigurationResponse, GetCrossInstanceConfiguration>(request);

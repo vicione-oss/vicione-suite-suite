@@ -3,6 +3,7 @@ using Sdk.Connections.Contracts;
 using Sdk.Connections.Events;
 using Sdk.Messaging;
 using Sdk.Testing.Client;
+using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.Extensions;
 
@@ -14,6 +15,6 @@ internal static class IEventConsumerExtensions
         var connectionChangedEvent = new ConnectionChanged(correlationId, crudAction, connection, [], []);
         var context = ClientContextFactory.Create(connectionChangedEvent);
 
-        return eventConsumer.Consume(context, CancellationToken.None);
+        return eventConsumer.Consume(context, TestContext.Current.CancellationToken);
     }
 }

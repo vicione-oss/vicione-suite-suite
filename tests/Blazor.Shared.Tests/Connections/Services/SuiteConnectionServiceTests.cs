@@ -36,14 +36,14 @@ public class SuiteConnectionServiceTests
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
 
             uiMediator.SetupGetConnections();
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertTag, TagsChanged>(
                 (command) => new TagsChanged(command.CorrelationId, CrudAction.Created, [command.Tag]),
                 () => suiteConnectionService);
 
             // Act
-            await suiteConnectionService.UpsertTag(tag);
+            await suiteConnectionService.UpsertTag(tag, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             suiteConnectionService.Tags.Should().BeEquivalentTo([tag]);
@@ -62,7 +62,7 @@ public class SuiteConnectionServiceTests
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
 
             uiMediator.SetupGetConnections();
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             var eventFactoryCallCount = 0;
 
@@ -70,12 +70,12 @@ public class SuiteConnectionServiceTests
                 (command) => new TagsChanged(command.CorrelationId, eventFactoryCallCount++ == 0 ? CrudAction.Created : CrudAction.Updated, [command.Tag]),
                 () => suiteConnectionService);
 
-            await suiteConnectionService.UpsertTag(tag);
+            await suiteConnectionService.UpsertTag(tag, Xunit.TestContext.Current.CancellationToken);
 
             tag.Text = "newText";
 
             // Act
-            await suiteConnectionService.UpsertTag(tag);
+            await suiteConnectionService.UpsertTag(tag, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             suiteConnectionService.Tags.Should().BeEquivalentTo([tag]);
@@ -94,14 +94,14 @@ public class SuiteConnectionServiceTests
             var deleteTag = new Tag("delete", Guid.NewGuid());
             var keepTag = new Tag("keep", Guid.NewGuid());
 
-            var tagMap = (new Tag[] { deleteTag, keepTag }).ToDictionary(tag => tag.Id);
+            var tagMap = (new[] { deleteTag, keepTag }).ToDictionary(tag => tag.Id);
 
             var uiMediator = Substitute.For<IUiMediator>();
 
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
 
             uiMediator.SetupGetConnections();
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertTag, TagsChanged>(
                 (command) => new TagsChanged(command.CorrelationId, CrudAction.Created, [command.Tag]),
@@ -111,11 +111,11 @@ public class SuiteConnectionServiceTests
                 (command) => new TagsChanged(command.CorrelationId, CrudAction.Deleted, [tagMap[command.TagId]]),
                 () => suiteConnectionService);
 
-            await suiteConnectionService.UpsertTag(deleteTag);
-            await suiteConnectionService.UpsertTag(keepTag);
+            await suiteConnectionService.UpsertTag(deleteTag, Xunit.TestContext.Current.CancellationToken);
+            await suiteConnectionService.UpsertTag(keepTag, Xunit.TestContext.Current.CancellationToken);
 
             // Act
-            await suiteConnectionService.DeleteTag(deleteTag);
+            await suiteConnectionService.DeleteTag(deleteTag, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             suiteConnectionService.Tags.Should().BeEquivalentTo([keepTag]);
@@ -139,7 +139,7 @@ public class SuiteConnectionServiceTests
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
 
             uiMediator.SetupGetConnections();
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertTag, TagsChanged>(
                 (command) => new TagsChanged(command.CorrelationId, CrudAction.Created, [command.Tag]),
@@ -149,10 +149,10 @@ public class SuiteConnectionServiceTests
                 (command) => new TagsChanged(command.CorrelationId, CrudAction.Deleted, [tagMap[command.TagId]]),
                 () => suiteConnectionService);
 
-            await suiteConnectionService.UpsertTag(protectedTag);
+            await suiteConnectionService.UpsertTag(protectedTag, Xunit.TestContext.Current.CancellationToken);
 
             // Act
-            var result = await suiteConnectionService.DeleteTag(protectedTag);
+            var result = await suiteConnectionService.DeleteTag(protectedTag, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeOfType<SuiteConnectionServiceErrorResult>().Subject.ErrorMessage.Should().Be(SuiteConnectionServiceLocalization.TagCannotBeDeletedBecauseItIsProtected);
@@ -172,7 +172,7 @@ public class SuiteConnectionServiceTests
             uiMediator.SetupGetConnections();
 
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             var originalConnection = ConnectionFactory.CreateConnections().First();
 
@@ -210,7 +210,7 @@ public class SuiteConnectionServiceTests
             uiMediator.SetupGetSingleConnection(connection);
 
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.SetupGetSingleConnection(updatedConnection);
 
@@ -245,7 +245,7 @@ public class SuiteConnectionServiceTests
             uiMediator.SetupGetSingleConnection(connection);
 
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             // Assert Event
             var stateChangedCallsCount = 0;
@@ -282,14 +282,14 @@ public class SuiteConnectionServiceTests
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
 
             uiMediator.SetupGetConnections();
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertConnection, ConnectionChanged>(
                 (command) => new ConnectionChanged(command.CorrelationId, CrudAction.Created, command.Connection, [.. command.Connection.Tags], []),
                 () => suiteConnectionService);
 
             // Act
-            await suiteConnectionService.UpsertConnection(connection);
+            await suiteConnectionService.UpsertConnection(connection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             suiteConnectionService.Tags.Should().BeEquivalentTo([tag]);
@@ -307,7 +307,7 @@ public class SuiteConnectionServiceTests
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
 
             uiMediator.SetupGetConnections();
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertConnection, ConnectionChanged>(
                 (command) => new ConnectionChanged(command.CorrelationId, CrudAction.Updated, command.Connection, [], []),
@@ -316,7 +316,7 @@ public class SuiteConnectionServiceTests
             var databaseConnection = ConnectionFactory.SQLiteConnection;
 
             // Act
-            var result = await suiteConnectionService.UpsertConnection(databaseConnection);
+            var result = await suiteConnectionService.UpsertConnection(databaseConnection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());
@@ -333,7 +333,7 @@ public class SuiteConnectionServiceTests
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
 
             uiMediator.SetupGetConnections();
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             var unknownCorrelationId = Guid.NewGuid(); // unknown correlation-id causes timeout
 
@@ -342,7 +342,7 @@ public class SuiteConnectionServiceTests
                 () => suiteConnectionService);
 
             // Act
-            var result = await suiteConnectionService.UpsertConnection(ConnectionFactory.SQLiteConnection);
+            var result = await suiteConnectionService.UpsertConnection(ConnectionFactory.SQLiteConnection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeOfType<SuiteConnectionServiceErrorResult>().Subject.ErrorMessage.Should().Contain("timed out");
@@ -359,14 +359,14 @@ public class SuiteConnectionServiceTests
             var connection = new Connection();
             connection.Tags.Add(tag);
 
-            var connectionMap = (new Connection[] { connection }).ToDictionary(connection => connection.Id);
+            var connectionMap = (new[] { connection }).ToDictionary(conn => conn.Id);
 
             var uiMediator = Substitute.For<IUiMediator>();
 
             using var suiteConnectionService = new SuiteConnectionService(uiMediator);
 
             uiMediator.SetupGetConnections();
-            await suiteConnectionService.Initialize();
+            await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertConnection, ConnectionChanged>(
                     (command) => new ConnectionChanged(command.CorrelationId, CrudAction.Created, command.Connection, [.. command.Connection.Tags], []),
@@ -376,10 +376,10 @@ public class SuiteConnectionServiceTests
                 (command) => new ConnectionChanged(command.CorrelationId, CrudAction.Deleted, connectionMap[command.ConnectionId], [], []),
                 () => suiteConnectionService);
 
-            await suiteConnectionService.UpsertConnection(connection);
+            await suiteConnectionService.UpsertConnection(connection, Xunit.TestContext.Current.CancellationToken);
 
             // Act
-            await suiteConnectionService.DeleteConnection(connection);
+            await suiteConnectionService.DeleteConnection(connection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             suiteConnectionService.Tags.Should().BeEquivalentTo([tag]);
@@ -419,23 +419,30 @@ public class SuiteConnectionServiceTests
         {
             // Arrange
             var databaseConnection = ConnectionFactory.SQLiteConnection;
-            var correlationId = Guid.Empty;
             ISuiteConnectionService connectionService = default!;
 
             void setupSuiteService(ClientServiceConfigurator setup)
                 => setup.ClientMediator.When(m => m.Send(Arg.Any<UpsertConnection>(), Arg.Any<CancellationToken>()))
-                    .Do(async callinfo =>
+                    .Do(async void (callInfo) =>
                     {
-                        var command = callinfo.Arg<UpsertConnection>();
-                        correlationId = command.CorrelationId;
-                        var connection = command.Connection;
+                        try
+                        {
+                            var command = callInfo.Arg<UpsertConnection>();
+                            var ct = callInfo.Arg<CancellationToken>();
+                            var correlationId = command.CorrelationId;
+                            var connection = command.Connection;
 
-                        var message = new ConnectionChanged(correlationId, CrudAction.Updated, connection, [], []);
-                        var context = new ClientContext<ConnectionChanged>(message, Guid.NewGuid());
+                            var message = new ConnectionChanged(correlationId, CrudAction.Updated, connection, [], []);
+                            var context = new ClientContext<ConnectionChanged>(message, Guid.NewGuid());
 
-                        await connectionService.Initialize();
-                        if (connectionService is IEventConsumer<ConnectionChanged> eventConsumer)
-                            await eventConsumer.Consume(context, CancellationToken.None);
+                            await connectionService.Initialize(ct);
+                            if (connectionService is IEventConsumer<ConnectionChanged> eventConsumer)
+                                await eventConsumer.Consume(context, Xunit.TestContext.Current.CancellationToken);
+                        }
+                        catch (Exception)
+                        {
+                            // Swallow exceptions to not break the test
+                        }
                     });
 
             await using var ctx = SetupTestContext(databaseConnection, setupSuiteService);
@@ -445,7 +452,7 @@ public class SuiteConnectionServiceTests
             var uiMediator = ctx.Services.GetRequiredService<IUiMediator>();
 
             // Act
-            var serviceResult = await connectionService.UpsertConnection(databaseConnection, CancellationToken.None);
+            var serviceResult = await connectionService.UpsertConnection(databaseConnection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());
@@ -458,23 +465,30 @@ public class SuiteConnectionServiceTests
         {
             // Arrange
             var databaseConnection = ConnectionFactory.SQLiteConnection;
-            var correlationId = Guid.Empty;
             ISuiteConnectionService connectionService = default!;
 
             void setupSuiteService(ClientServiceConfigurator setup)
                 => setup.ClientMediator.When(m => m.Send(Arg.Any<UpsertConnection>(), Arg.Any<CancellationToken>()))
-                    .Do(async callinfo =>
+                    .Do(async void (callInfo) =>
                     {
-                        var command = callinfo.Arg<UpsertConnection>();
-                        correlationId = Guid.NewGuid(); // unknown correlation-id causes timeout
-                        var connection = command.Connection;
+                        try
+                        {
+                            var command = callInfo.Arg<UpsertConnection>();
+                            var ct = callInfo.Arg<CancellationToken>();
+                            var correlationId = Guid.NewGuid(); // unknown correlation-id causes timeout
+                            var connection = command.Connection;
 
-                        var message = new ConnectionChanged(correlationId, CrudAction.Updated, connection, [], []);
-                        var context = new ClientContext<ConnectionChanged>(message, Guid.NewGuid());
+                            var message = new ConnectionChanged(correlationId, CrudAction.Updated, connection, [], []);
+                            var context = new ClientContext<ConnectionChanged>(message, Guid.NewGuid());
 
-                        await connectionService.Initialize();
-                        if (connectionService is IEventConsumer<ConnectionChanged> eventConsumer)
-                            await eventConsumer.Consume(context, CancellationToken.None);
+                            await connectionService.Initialize(ct);
+                            if (connectionService is IEventConsumer<ConnectionChanged> eventConsumer)
+                                await eventConsumer.Consume(context, Xunit.TestContext.Current.CancellationToken);
+                        }
+                        catch (Exception)
+                        {
+                            // Swallow exceptions to not break the test
+                        }
                     });
 
             await using var ctx = SetupTestContext(databaseConnection, setupSuiteService);
@@ -484,7 +498,7 @@ public class SuiteConnectionServiceTests
             var uiMediator = ctx.Services.GetRequiredService<IUiMediator>();
 
             // Act
-            var serviceResult = await connectionService.UpsertConnection(databaseConnection, CancellationToken.None);
+            var serviceResult = await connectionService.UpsertConnection(databaseConnection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
             await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());

@@ -111,7 +111,7 @@ internal static class TestFactory
     {
         var resource = "jfrog-module-artifacts.json";
         var assembly = Assembly.GetAssembly(typeof(TestFactory));
-        using var stream = assembly!.GetManifestResourceStream($"{ModuleResourceNamespace}.{resource}");
+        await using var stream = assembly!.GetManifestResourceStream($"{ModuleResourceNamespace}.{resource}");
         var queryResult = await JsonSerializer.DeserializeAsync<JFrogQueryResult>(stream!, options: ModuleSerializerOptions.GetOptions());
 
         return queryResult ?? throw new InvalidOperationException($"Failed to load embedded resource {resource}");
@@ -137,7 +137,7 @@ internal static class TestFactory
 
         foreach (var resourceName in resourceNames)
         {
-            using var stream = assembly!.GetManifestResourceStream($"{ModuleResourceNamespace}.{resourceName}");
+            await using var stream = assembly!.GetManifestResourceStream($"{ModuleResourceNamespace}.{resourceName}");
             var response = await JsonSerializer.DeserializeAsync<T>(stream!, options: options);
             Assert.NotNull(response);
             result.Add(response);

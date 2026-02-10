@@ -36,9 +36,9 @@ public class InMemoryClusterInformationProviderTests
                     },
                 ]));
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
-            var result = await clusterInformationProvider.GetInstancesInCluster(CancellationToken.None);
+            var result = await clusterInformationProvider.GetInstancesInCluster(TestContext.Current.CancellationToken);
 
             var instance = result.Single();
             instance.Id.Should().Be(guid);
@@ -67,7 +67,7 @@ public class InMemoryClusterInformationProviderTests
                     },
                 ]));
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
             var result = await clusterInformationProvider.GetHealthStatus(guid);
 
@@ -99,9 +99,9 @@ public class InMemoryClusterInformationProviderTests
             mediator.Request<GetInstances, GetInstancesResponse>(Arg.Any<GetInstances>(), Arg.Any<CancellationToken>())
                 .Returns(new GetInstancesResponse([master, slave,]));
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
-            var result = await clusterInformationProvider.GetInstancesInCluster(CancellationToken.None);
+            var result = await clusterInformationProvider.GetInstancesInCluster(TestContext.Current.CancellationToken);
 
             result.Count.Should().Be(2);
             result.Should().Contain(master);
@@ -113,7 +113,7 @@ public class InMemoryClusterInformationProviderTests
         {
             var clusterInformationProvider = InitProvider();
 
-            var result = await clusterInformationProvider.GetInstancesInCluster(CancellationToken.None);
+            var result = await clusterInformationProvider.GetInstancesInCluster(TestContext.Current.CancellationToken);
 
             result.Should().BeEmpty();
         }
@@ -151,7 +151,7 @@ public class InMemoryClusterInformationProviderTests
                     },
                 ]));
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
             if (masterHealthStatus is not null)
                 await clusterInformationProvider.ChangeHealthInfo(guidMaster, (HealthStatus)masterHealthStatus, DateTimeOffset.Now);
@@ -195,11 +195,11 @@ public class InMemoryClusterInformationProviderTests
 
             clusterInformationProvider.NewInstanceAdded += (_) => { called = true; return Task.CompletedTask; };
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
             await clusterInformationProvider.AddNewInstance(slave);
 
-            var result = await clusterInformationProvider.GetInstancesInCluster(CancellationToken.None);
+            var result = await clusterInformationProvider.GetInstancesInCluster(TestContext.Current.CancellationToken);
 
             result.Count.Should().Be(2);
             result.Should().Contain(master);
@@ -225,11 +225,11 @@ public class InMemoryClusterInformationProviderTests
 
             clusterInformationProvider.NewInstanceAdded += (_) => { called = true; return Task.CompletedTask; };
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
             await clusterInformationProvider.AddNewInstance(master);
 
-            var result = await clusterInformationProvider.GetInstancesInCluster(CancellationToken.None);
+            var result = await clusterInformationProvider.GetInstancesInCluster(TestContext.Current.CancellationToken);
 
             var instance = result.Single();
             instance.Should().Be(master);
@@ -260,7 +260,7 @@ public class InMemoryClusterInformationProviderTests
 
             clusterInformationProvider.HealthStatusChanged += (_, _, _) => { called = true; return Task.CompletedTask; };
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
             await clusterInformationProvider.ChangeHealthInfo(guid, HealthStatus.Healthy, DateTimeOffset.Now);
 
@@ -290,7 +290,7 @@ public class InMemoryClusterInformationProviderTests
 
             clusterInformationProvider.HealthStatusChanged += (_, _, _) => { called = true; return Task.CompletedTask; };
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
             await clusterInformationProvider.ChangeHealthInfo(Guid.NewGuid(), HealthStatus.Healthy, DateTimeOffset.Now);
 
@@ -321,11 +321,11 @@ public class InMemoryClusterInformationProviderTests
 
             clusterInformationProvider.InstanceDeleted += (_) => { called = true; return Task.CompletedTask; };
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
             await clusterInformationProvider.RemoveInstance(guid, true);
 
-            var result = await clusterInformationProvider.GetInstancesInCluster(CancellationToken.None);
+            var result = await clusterInformationProvider.GetInstancesInCluster(TestContext.Current.CancellationToken);
 
             result.Should().BeEmpty();
             called.Should().BeTrue();
@@ -352,11 +352,11 @@ public class InMemoryClusterInformationProviderTests
 
             clusterInformationProvider.DeleteInstanceFailed += (_) => { called = true; return Task.CompletedTask; };
 
-            await clusterInformationProvider.Initialize(mediator, CancellationToken.None);
+            await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
             await clusterInformationProvider.RemoveInstance(guid, false);
 
-            var result = await clusterInformationProvider.GetInstancesInCluster(CancellationToken.None);
+            var result = await clusterInformationProvider.GetInstancesInCluster(TestContext.Current.CancellationToken);
 
             _ = result.Single();
             called.Should().BeTrue();

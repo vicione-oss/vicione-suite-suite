@@ -30,7 +30,7 @@ public sealed class JiTChatServiceTests
 
         var clientContext = ClientContextFactory.Create(message);
 
-        await service.Consume(clientContext, CancellationToken.None);
+        await service.Consume(clientContext, TestContext.Current.CancellationToken);
 
         // Act
         service.MarkAllMessagesAsRead();
@@ -88,7 +88,7 @@ public sealed class JiTChatServiceTests
         var clientContext = ClientContextFactory.Create(message);
 
         // Act
-        await service.Consume(clientContext, CancellationToken.None);
+        await service.Consume(clientContext, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Single(service.ChatMessages, m => Equals("Reeeeee", m.Message) && Equals("Me", m.User));
@@ -117,7 +117,7 @@ public sealed class JiTChatServiceTests
         var clientContext = ClientContextFactory.Create(message);
 
         // Act + Assert
-        await service.Consume(clientContext, CancellationToken.None);
+        await service.Consume(clientContext, TestContext.Current.CancellationToken);
 
         Assert.Equal(1, firedMessages);
 

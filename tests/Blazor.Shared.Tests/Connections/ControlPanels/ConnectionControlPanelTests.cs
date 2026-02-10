@@ -69,7 +69,7 @@ public class ConnectionControlPanelTests
             var state = new ConnectionControlPanelState();
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<ConnectionControlPanelState>>();
-            await resetHandler.Reset(state, CancellationToken.None);
+            await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);
 
             // Act
             var component = ctx.Render<ConnectionControlPanel>(parameters =>
@@ -93,7 +93,7 @@ public class ConnectionControlPanelTests
             var state = new ConnectionControlPanelState { ConnectionId = connection.Id };
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<ConnectionControlPanelState>>();
-            await resetHandler.Reset(state, CancellationToken.None);
+            await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);
 
             // Act
             var component = ctx.Render<ConnectionControlPanel>(parameters =>

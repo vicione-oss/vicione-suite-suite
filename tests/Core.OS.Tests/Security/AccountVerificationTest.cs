@@ -29,7 +29,7 @@ public class AccountVerificationTest
             = CreateAccountVerification(mailSystemIsConfigured, settingsRequireVerification, userIsConfirmed);
 
         // Act
-        var needsVerification = await accountVerification.NeedsVerification(UserId);
+        var needsVerification = await accountVerification.NeedsVerification(UserId, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equal(userNeedsVerification, needsVerification);
@@ -40,7 +40,7 @@ public class AccountVerificationTest
         bool userIsConfirmed)
     {
         MockDependencies(out var mailSenderStatus,
-            out var mailSender,
+            out _,
             out var securitySettings,
             out var userManager);
         mailSenderStatus.IsConfigured().Returns(mailSystemIsConfigured);

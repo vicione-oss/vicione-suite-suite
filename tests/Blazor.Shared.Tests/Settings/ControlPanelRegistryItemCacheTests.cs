@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Security.Claims;
 using System.Text.Json;
 using Blazor.Shared.Authorization;
 using Blazor.Shared.Authorization.Extensions;
@@ -63,7 +64,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     private static ServiceProvider SetupServiceProvider()
     {
         var services = new ServiceCollection()
-            .AddClientServices(configurator => { })
+            .AddClientServices(_ => { })
             .AddScoped(_ => new AuthenticationStateProviderMock("Frodo", new ModuleAuthorizationClaim(TestClientModuleA.ModuleId, AccessLevel.Full, TestClientModuleA.ModuleId)))
             .AddScoped<AuthenticationStateProvider>(services => services.GetRequiredService<AuthenticationStateProviderMock>())
             .AddSettings();
@@ -99,6 +100,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     }
 
     [Fact]
+    [SuppressMessage("ReSharper", "PossibleMultipleEnumeration", Justification = "Testing with multiple IEnumerable results")]
     public async Task Should_return_all_control_panel_registry_items_cached()
     {
         // Arrange
@@ -109,11 +111,11 @@ public sealed class ControlPanelRegistryItemCacheTests
         var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
         var user = await authenticationStateProvider.GetUser();
 
-        var firstResult = await controlPanelRegistryItemCache.GetAll(user);
+        var firstResult = await controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken);
         var firstResultCopy = firstResult.ToList();
 
         // Act
-        var secondResult = await controlPanelRegistryItemCache.GetAll(user);
+        var secondResult = await controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken);
 
         // Assert
         secondResult.Should().BeSameAs(firstResult);
@@ -130,12 +132,12 @@ public sealed class ControlPanelRegistryItemCacheTests
         var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
         var currentUser = await authenticationStateProvider.GetUser();
 
-        var firstResult = await controlPanelRegistryItemCache.GetAll(currentUser);
+        var firstResult = await controlPanelRegistryItemCache.GetAll(currentUser, TestContext.Current.CancellationToken);
 
         // Act
         var newUser = new ClaimsPrincipal();
 
-        var secondResult = await controlPanelRegistryItemCache.GetAll(newUser);
+        var secondResult = await controlPanelRegistryItemCache.GetAll(newUser, TestContext.Current.CancellationToken);
 
         // Assert
         secondResult.Should().NotBeSameAs(firstResult);
@@ -152,12 +154,12 @@ public sealed class ControlPanelRegistryItemCacheTests
         var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProviderMock>();
         var currentUser = await authenticationStateProvider.GetUser();
 
-        var firstResult = await controlPanelRegistryItemCache.GetAll(currentUser);
+        var firstResult = await controlPanelRegistryItemCache.GetAll(currentUser, TestContext.Current.CancellationToken);
 
         // Act
         var newUser = await authenticationStateProvider.ChangeUser("Waldo");
 
-        var secondResult = await controlPanelRegistryItemCache.GetAll(newUser);
+        var secondResult = await controlPanelRegistryItemCache.GetAll(newUser, TestContext.Current.CancellationToken);
 
         // Assert
         controlPanelRegistryItemCacheMonitor.Should().Raise(nameof(controlPanelRegistryItemCache.Changed));
@@ -176,7 +178,7 @@ public sealed class ControlPanelRegistryItemCacheTests
         var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
         var currentUser = await authenticationStateProvider.GetUser();
 
-        var firstResult = await controlPanelRegistryItemCache.GetAll(currentUser);
+        var firstResult = await controlPanelRegistryItemCache.GetAll(currentUser, TestContext.Current.CancellationToken);
 
         var controlPanelRegistry = serviceProvider.GetRequiredService<IControlPanelRegistry<TestClientModuleA>>();
 
@@ -184,7 +186,7 @@ public sealed class ControlPanelRegistryItemCacheTests
         var newControlPanelRegistryItem = controlPanelRegistry.Add<AdminControlPanel, ControlPanelState>(
             new AdminControlPanelDescriptor(), new ControlPanelState(), new TestControlPanelCategoryDescriptor());
 
-        var secondResult = await controlPanelRegistryItemCache.GetAll(currentUser);
+        var secondResult = (await controlPanelRegistryItemCache.GetAll(currentUser, TestContext.Current.CancellationToken)).ToArray();
 
         // Assert
         controlPanelRegistryItemCacheMonitor.Should().Raise(nameof(controlPanelRegistryItemCache.Changed));
@@ -199,7 +201,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     {
         // Arrange
         var services = new ServiceCollection()
-            .AddClientServices(configurator => { })
+            .AddClientServices(_ => { })
             .AddScoped(_ => new AuthenticationStateProviderMock(authorizationScenario.UserName, authorizationScenario.ModuleAuthorizationClaims))
             .AddScoped<AuthenticationStateProvider>(services => services.GetRequiredService<AuthenticationStateProviderMock>())
             .AddSettings()
@@ -217,7 +219,7 @@ public sealed class ControlPanelRegistryItemCacheTests
         var user = await authenticationStateProvider.GetUser();
 
         // Act
-        var controlPanelRegistryItems = await controlPanelRegistryItemCache.GetAll(user);
+        var controlPanelRegistryItems = await controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken);
 
         // Assert
         var controlPanelTypes = controlPanelRegistryItems.Select(i => i.ComponentType);
@@ -246,7 +248,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     }
 
     [ControlPanelCategory<TestControlPanelCategoryDescriptor>]
-    [ModuleAuthorize(TestClientModuleA.ModuleId, AccessLevel.Partial)]
+    [ModuleAuthorize(TestClientModuleA.ModuleId)]
     private sealed class UserControlPanel : ControlPanelBase<ControlPanelState>
     {
     }

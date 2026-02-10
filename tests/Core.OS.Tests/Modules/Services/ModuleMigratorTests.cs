@@ -84,7 +84,7 @@ public sealed class ModuleMigratorTests
             .Returns([]);
 
         // Act
-        await migrator.PrepareUpdateMigration(_packageManifest);
+        await migrator.PrepareUpdateMigration(_packageManifest, TestContext.Current.CancellationToken);
 
         // Assert
         _workspaceManagement.Received(0).WriteResetHomeDirectoryFlag(Arg.Any<string>());
@@ -102,7 +102,7 @@ public sealed class ModuleMigratorTests
             .Returns([_testBackendBundle]);
 
         // Act
-        await migrator.PrepareUpdateMigration(_packageManifest);
+        await migrator.PrepareUpdateMigration(_packageManifest, TestContext.Current.CancellationToken);
 
         // Assert
         _workspaceManagement.Received(1).WriteResetHomeDirectoryFlag(TestBackendModule.GetAssemblyName());
@@ -123,7 +123,7 @@ public sealed class ModuleMigratorTests
             .Version = TestBackendPatchVersion;
 
         // Act
-        await migrator.PrepareUpdateMigration(_packageManifest);
+        await migrator.PrepareUpdateMigration(_packageManifest, TestContext.Current.CancellationToken);
 
         // Assert
         _workspaceManagement.Received(0).WriteResetHomeDirectoryFlag(TestBackendModule.GetAssemblyName());
@@ -142,7 +142,7 @@ public sealed class ModuleMigratorTests
             .Returns([_testBackendBundle]);
 
         // Act
-        await migrator.PrepareUpdateMigration(_packageManifest);
+        await migrator.PrepareUpdateMigration(_packageManifest, TestContext.Current.CancellationToken);
 
         // Assert
         _workspaceManagement.Received(0).WriteResetHomeDirectoryFlag(TestBackendModule.GetAssemblyName());
@@ -160,7 +160,7 @@ public sealed class ModuleMigratorTests
             .Returns([_testBackendBundle]);
 
         // Act
-        var action = () => migrator.PrepareUpdateMigration(_packageManifest);
+        var action = () => migrator.PrepareUpdateMigration(_packageManifest, TestContext.Current.CancellationToken);
 
         // Assert
         await action.Should().ThrowAsync<InvalidOperationException>()

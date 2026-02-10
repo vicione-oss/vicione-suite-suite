@@ -26,7 +26,7 @@ public abstract class BlazorServerUiMediatorTests
             .AddSingleton(_publisher)
             .AddSingleton(_suiteMediator)
             .AddSingleton(Substitute.For<ILogger<BlazorServerUiMediator>>())
-            .AddScoped(s => _httpContextAccessor)
+            .AddScoped(_ => _httpContextAccessor)
             .AddSingleton<BlazorServerUiMediator>()
             .BuildServiceProvider();
 
@@ -36,14 +36,14 @@ public abstract class BlazorServerUiMediatorTests
         public async Task Should_send_command()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var uiMediator = serviceProvider.GetRequiredService<BlazorServerUiMediator>();
             var command = new BarTestCommand(Guid.NewGuid())
             {
                 InstanceId = Guid.NewGuid(),
             };
             // Act
-            await uiMediator.Send(command);
+            await uiMediator.Send(command, TestContext.Current.CancellationToken);
 
             // Assert
             await _suiteMediator.Received().Send(command, Arg.Any<CancellationToken>());
@@ -53,11 +53,11 @@ public abstract class BlazorServerUiMediatorTests
         public async Task Should_send_instance_dependent_command()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var uiMediator = serviceProvider.GetRequiredService<BlazorServerUiMediator>();
             var command = new FooTestCommand(Guid.NewGuid());
             // Act
-            await uiMediator.Send(command, command.InstanceId);
+            await uiMediator.Send(command, command.InstanceId, TestContext.Current.CancellationToken);
 
             // Assert
             await _suiteMediator.Received().Send(command, command.InstanceId, Arg.Any<CancellationToken>());
@@ -70,7 +70,7 @@ public abstract class BlazorServerUiMediatorTests
         public async Task Should_return_response()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var uiMediator = serviceProvider.GetRequiredService<BlazorServerUiMediator>();
             var fooTestRequest = new FooTestRequest(Guid.NewGuid());
             var fooTestResponse = new FooTestResponse()
@@ -82,7 +82,7 @@ public abstract class BlazorServerUiMediatorTests
             _suiteMediator.SetupRequest<FooTestRequest, FooTestResponse>(null, fooTestResponse);
 
             // Act
-            var responseMessage = await uiMediator.Request<FooTestRequest, FooTestResponse>(fooTestRequest);
+            var responseMessage = await uiMediator.Request<FooTestRequest, FooTestResponse>(fooTestRequest, TestContext.Current.CancellationToken);
 
             // Assert
             responseMessage.ClusterJson.Should().Be(fooTestResponse.ClusterJson);
@@ -92,10 +92,10 @@ public abstract class BlazorServerUiMediatorTests
     public sealed class Register : BlazorServerUiMediatorTests
     {
         [Fact]
-        public void Should_connect_event_consumer()
+        public async Task Should_connect_event_consumer()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var uiMediator = serviceProvider.GetRequiredService<BlazorServerUiMediator>();
 
             var fooHandler = new FooService();
@@ -108,10 +108,10 @@ public abstract class BlazorServerUiMediatorTests
         }
 
         [Fact]
-        public void Should_connect_event_consumer_with_identity()
+        public async Task Should_connect_event_consumer_with_identity()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var uiMediator = serviceProvider.GetRequiredService<BlazorServerUiMediator>();
 
             _httpContextAccessor.HttpContext = BuildHttpContext(true, "/some");
@@ -126,10 +126,10 @@ public abstract class BlazorServerUiMediatorTests
         }
 
         [Fact]
-        public void Should_init_scoped_identity_only_once()
+        public async Task Should_init_scoped_identity_only_once()
         {
             // Arrange
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var uiMediator = serviceProvider.GetRequiredService<BlazorServerUiMediator>();
 
             _httpContextAccessor.HttpContext = BuildHttpContext(true, "/some");

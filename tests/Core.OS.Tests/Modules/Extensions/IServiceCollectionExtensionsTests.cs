@@ -1,11 +1,11 @@
 ﻿using System.IO.Abstractions;
+using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Options;
 using Core.OS.Instance;
 using Core.OS.Modules;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -36,10 +36,10 @@ public class IServiceCollectionExtensionsTests
             };
 
             // Act
-            var result = await services.AddModuleManifestProvider(fileSystem, options, logger);
+            var result = await services.AddModuleManifestProvider(fileSystem, options, logger, TestContext.Current.CancellationToken);
 
             // Assert
-            using var provider = services.BuildServiceProvider();
+            await using var provider = services.BuildServiceProvider();
 
             result.Should().NotBeNull();
             provider.GetService<IModuleManifestProvider>().Should().Be(result);
@@ -49,7 +49,7 @@ public class IServiceCollectionExtensionsTests
     public sealed class AddModuleServices
     {
         [Fact]
-        public void Should_register_all_expected_services()
+        public async Task Should_register_all_expected_services()
         {
             // Arrange
             var instanceOptions = new InstanceOptions()
@@ -73,11 +73,11 @@ public class IServiceCollectionExtensionsTests
                 .AddSingleton(Substitute.For<IModuleOptionsStore>())
                 .AddSingleton(Options.Create(moduleOptions))
                 .AddSingleton(Substitute.For<ILogger<WorkspaceManagement>>())
-                .AddSingleton(Options.Create(instanceOptions)); ;
+                .AddSingleton(Options.Create(instanceOptions));
 
             // Act
             services.AddModuleServices();
-            using var provider = services.BuildServiceProvider();
+            await using var provider = services.BuildServiceProvider();
 
             // Assert
             provider.GetService<IArtifactRepository>().Should().NotBeNull();
@@ -97,7 +97,7 @@ public class IServiceCollectionExtensionsTests
     public sealed class AddWorkspaceProvider
     {
         [Fact]
-        public void Should_register_workspace_provider_for_valid_backend_module()
+        public async Task Should_register_workspace_provider_for_valid_backend_module()
         {
             // Arrange
             var services = new ServiceCollection()
@@ -105,7 +105,7 @@ public class IServiceCollectionExtensionsTests
 
             // Act
             services.AddWorkspaceProvider(typeof(SystemBackendModule));
-            using var provider = services.BuildServiceProvider();
+            await using var provider = services.BuildServiceProvider();
 
             // Assert
             provider.GetService<IWorkspaceProvider<SystemBackendModule>>().Should().NotBeNull();

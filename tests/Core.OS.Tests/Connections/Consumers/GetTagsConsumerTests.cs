@@ -65,7 +65,7 @@ public class GetTagsConsumerTests : TestWithDbContextSqlite<ConnectionDbContextS
         dbContext.Tags.Add(firstTag);
         dbContext.Tags.Add(secondTag);
 
-        await dbContext.Instance.SaveChangesAsync();
+        await dbContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var response = await tester.TestRequest<GetTagsResponse, GetTags>(new());

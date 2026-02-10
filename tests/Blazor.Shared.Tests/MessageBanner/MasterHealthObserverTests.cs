@@ -46,7 +46,7 @@ public sealed class MasterHealthObserverTests
         // Act
         await renderedComponent.Instance.Consume(
             new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(false), Guid.NewGuid()),
-            CancellationToken.None);
+            Xunit.TestContext.Current.CancellationToken);
 
         // Assert
         var expectedMessageType = MessageType.Warning;
@@ -72,12 +72,12 @@ public sealed class MasterHealthObserverTests
 
         await renderedComponent.Instance.Consume(
             new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(false), Guid.NewGuid()),
-            CancellationToken.None);
+            Xunit.TestContext.Current.CancellationToken);
 
         // Act
         await renderedComponent.Instance.Consume(
             new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(true), Guid.NewGuid()),
-            CancellationToken.None);
+            Xunit.TestContext.Current.CancellationToken);
 
         // Assert
         messageBannerMediator.Received(1).CloseMessageBanner();
@@ -98,7 +98,7 @@ public sealed class MasterHealthObserverTests
         // Act
         await renderedComponent.Instance.Consume(
             new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(true), Guid.NewGuid()),
-            CancellationToken.None);
+            Xunit.TestContext.Current.CancellationToken);
 
         // Assert
         messageBannerMediator.DidNotReceive().CloseMessageBanner();
@@ -124,7 +124,7 @@ public sealed class MasterHealthObserverTests
             // master goes offline
             await renderedComponent.Instance.Consume(
                 new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(false), Guid.NewGuid()),
-                CancellationToken.None);
+                Xunit.TestContext.Current.CancellationToken);
 
             // external call
             messageBannerMediator.ShowMessageBanner(new DummyMessage());
@@ -132,7 +132,7 @@ public sealed class MasterHealthObserverTests
             // master comes online again
             await renderedComponent.Instance.Consume(
                 new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(true), Guid.NewGuid()),
-                CancellationToken.None);
+                Xunit.TestContext.Current.CancellationToken);
         }
 
         // Assert

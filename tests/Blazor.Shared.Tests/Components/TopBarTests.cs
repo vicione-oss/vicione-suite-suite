@@ -8,10 +8,10 @@ namespace Blazor.Shared.Tests.Components;
 public sealed class TopBarTests
 {
     [Fact]
-    public void ComponentGetsRendered()
+    public async Task ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
         ctx.SetLocalServices();
 
@@ -20,10 +20,10 @@ public sealed class TopBarTests
     }
 
     [Fact]
-    public void RootNavigationInvoked()
+    public async Task RootNavigationInvoked()
     {
         // Arrange
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
         ctx.SetLocalServices();
 

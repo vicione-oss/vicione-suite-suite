@@ -32,7 +32,7 @@ public class ModuleManifestProviderTests
         Type = Sdk.Instance.InstanceType.Standalone,
     };
 
-    public ServiceProvider SetupServiceProvider()
+    private ServiceProvider SetupServiceProvider()
         => new ServiceCollection()
             .AddSingleton(_logger)
             .AddSingleton<IFileSystem>(_fileSystem)
@@ -69,7 +69,7 @@ public class ModuleManifestProviderTests
             SetupPackageManifestFile(out var manifestPath, out var existing);
 
             // Act
-            await provider.LoadPackageManifest(_logger);
+            await provider.LoadPackageManifest(_logger, TestContext.Current.CancellationToken);
 
             // Assert
             var manifest = provider.GetManifest();
@@ -87,7 +87,7 @@ public class ModuleManifestProviderTests
             var rooted = _fileSystem.GetModuleVersionsFilePath(_instanceOptions);
 
             // Act
-            await provider.LoadPackageManifest(_logger);
+            await provider.LoadPackageManifest(_logger, TestContext.Current.CancellationToken);
 
             // Assert
             var manifest = provider.GetManifest();
@@ -105,7 +105,7 @@ public class ModuleManifestProviderTests
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var provider = serviceProvider.GetRequiredService<ModuleManifestProvider>();
-            SetupPackageManifestFile(out var manifestPath, out var existing);
+            SetupPackageManifestFile(out var manifestPath, out _);
 
             var versionA = "0.5.1";
             var versionB = "2.3.0";
@@ -118,10 +118,10 @@ public class ModuleManifestProviderTests
                     new ModuleDependencyPackage { Name = ModuleC, Version = versionC },
                 ]
             };
-            await provider.LoadPackageManifest(_logger);
+            await provider.LoadPackageManifest(_logger, TestContext.Current.CancellationToken);
 
             // Act
-            await provider.UpdateManifestPackages(update.Packages);
+            await provider.UpdateManifestPackages(update.Packages, TestContext.Current.CancellationToken);
 
             // Assert
             var manifest = provider.GetManifest();
@@ -140,10 +140,10 @@ public class ModuleManifestProviderTests
     {
         var assembly = Assembly.GetAssembly(typeof(Program));
 
-        using var stream = assembly!.GetManifestResourceStream(ModuleConstants.InitialModulesJsonResourceKey);
+        await using var stream = assembly!.GetManifestResourceStream(ModuleConstants.InitialModulesJsonResourceKey);
         Assert.NotNull(stream);
 
-        var manifest = await JsonSerializer.DeserializeAsync<ModulePackageManifest>(stream);
+        var manifest = await JsonSerializer.DeserializeAsync<ModulePackageManifest>(stream, cancellationToken: TestContext.Current.CancellationToken);
         Assert.NotNull(manifest);
     }
 }

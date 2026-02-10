@@ -49,14 +49,14 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
         };
 
         dbContext.Tags.Add(tag);
-        await dbContext.Instance.SaveChangesAsync();
+        await dbContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await tester.TestCommand<DeleteTag, DeleteTagConsumer>(new DeleteTag(tagId));
 
         // Assert
         dbContext.Tags.Should().Contain(tag);
-        Assert.False(await tester.Harness.Published.Any<TagsChanged>());
+        Assert.False(await tester.Harness.Published.Any<TagsChanged>(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -73,14 +73,14 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
         };
 
         dbContext.Tags.Add(tag);
-        await dbContext.Instance.SaveChangesAsync();
+        await dbContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await tester.TestCommand<DeleteTag, DeleteTagConsumer>(new DeleteTag(tagId, true));
 
         // Assert
         dbContext.Tags.Should().HaveCount(0);
-        Assert.True(await tester.Harness.Published.Any<TagsChanged>());
+        Assert.True(await tester.Harness.Published.Any<TagsChanged>(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -94,13 +94,13 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
         var tag = new Tag("test", tagId);
 
         dbContext.Tags.Add(tag);
-        await dbContext.Instance.SaveChangesAsync();
+        await dbContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await tester.TestCommand<DeleteTag, DeleteTagConsumer>(new DeleteTag(tagId));
 
         // Assert
         dbContext.Tags.Should().HaveCount(0);
-        Assert.True(await tester.Harness.Published.Any<TagsChanged>());
+        Assert.True(await tester.Harness.Published.Any<TagsChanged>(TestContext.Current.CancellationToken));
     }
 }

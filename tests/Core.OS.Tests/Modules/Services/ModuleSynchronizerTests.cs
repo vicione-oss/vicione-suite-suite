@@ -67,7 +67,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act 
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.All.Should().BeEmpty();
@@ -80,11 +80,11 @@ public class ModuleSynchronizerTests
             using var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
-                .WithApiAdapter(new ArtifactRepositoryOptions() { Sources = [new ArtifactRepositorySource { Endpoint = "http://vicione-test.ifm.com" }] })
+                .WithApiAdapter(new ArtifactRepositoryOptions { Sources = [new ArtifactRepositorySource { Endpoint = "http://vicione-test.ifm.com" }] })
                 .WithModulesPath(ModulesFolder);
 
             // Act + Assert
-            await synchronizer.ProcessSynchronization();
+            await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
         }
 
         [Fact]
@@ -97,7 +97,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act
-            var action = () => synchronizer.ProcessSynchronization();
+            var action = () => synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             action.Should().ThrowAsync<InvalidOperationException>();
@@ -115,7 +115,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act
-            var action = () => synchronizer.ProcessSynchronization();
+            var action = () => synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             action.Should().ThrowAsync<InvalidOperationException>();
@@ -148,7 +148,7 @@ public class ModuleSynchronizerTests
                 .Returns(response);
 
             // Act
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.Resolved.Should().HaveCount(1, "Module.C -> 1.24.0");
@@ -175,7 +175,7 @@ public class ModuleSynchronizerTests
                 .Returns(response);
 
             // Act
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             await _moduleRepository.Received().DownloadAndExtract(
@@ -195,7 +195,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act
-            _ = await synchronizer.ProcessSynchronization();
+            _ = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             await _moduleRepository.DidNotReceive().DownloadAndExtract(
@@ -232,7 +232,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act 
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.Incompatible.Should().ContainSingle(k => k.Name == ModuleB
@@ -249,7 +249,7 @@ public class ModuleSynchronizerTests
             fileSystem.AddDirectory(ModulesFolder);
             AddModuleDirectory(fileSystem, _moduleB);
 
-            var moduleMetadata = new ModuleMetadata()
+            var moduleMetadata = new ModuleMetadata
             {
                 Name = _moduleB.Name,
                 Version = _moduleB.Version,
@@ -267,7 +267,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act 
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.Incompatible.Should().BeEmpty();
@@ -277,7 +277,7 @@ public class ModuleSynchronizerTests
         public async Task Should_use_remote_module_metadata_if_local_is_not_available()
         {
             // Arrange
-            var moduleMetadata = new ModuleMetadata()
+            var moduleMetadata = new ModuleMetadata
             {
                 Name = _moduleB.Name,
                 Version = _moduleB.Version,
@@ -295,7 +295,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act 
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.Incompatible.Should().BeEmpty();
@@ -327,7 +327,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act 
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.Incompatible.Should().ContainSingle(k => k.Name == ModuleB
@@ -358,7 +358,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act 
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.Resolved.Should().ContainSingle(k => k.Name == ModuleA
@@ -386,7 +386,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act 
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.Resolved.Should().ContainSingle(k => k.Name == ModuleA
@@ -409,7 +409,7 @@ public class ModuleSynchronizerTests
             _fileSystem.Path.Exists(ModulesFolder).Returns(true);
 
             // Act 
-            var result = await synchronizer.ProcessSynchronization();
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             result.All.Should().BeEmpty();
@@ -426,7 +426,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act
-            var action = () => synchronizer.ProcessSynchronization();
+            var action = () => synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             action.Should().ThrowAsync<DirectoryNotFoundException>();
@@ -443,7 +443,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(_loaderOptions);
 
             // Act
-            await synchronizer.ProcessSynchronization();
+            await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.Directory.Received().CreateDirectory(ModulesFolder);
@@ -461,7 +461,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act
-            var action = () => synchronizer.ProcessSynchronization();
+            var action = () => synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert
             action.Should().ThrowAsync<InvalidOperationException>();
@@ -501,7 +501,7 @@ public class ModuleSynchronizerTests
                 .WithOrphanedVersionCleanup();
 
             // Act
-            await synchronizer.ProcessSynchronization();
+            await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert            
             fileSystem.Directory.Exists(GetModuleDirectory(fileSystem, _moduleA)).Should().BeTrue();
@@ -533,7 +533,7 @@ public class ModuleSynchronizerTests
                 .WithOrphanedVersionCleanup();
 
             // Act
-            await synchronizer.ProcessSynchronization();
+            await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert            
             fileSystem.Directory.Exists(clusterMgmtPath).Should().BeTrue();
@@ -556,7 +556,7 @@ public class ModuleSynchronizerTests
                 .WithModulesPath(ModulesFolder);
 
             // Act
-            await synchronizer.ProcessSynchronization();
+            await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
 
             // Assert            
             fileSystem.Directory.Exists(GetModuleDirectory(fileSystem, _moduleA)).Should().BeTrue();

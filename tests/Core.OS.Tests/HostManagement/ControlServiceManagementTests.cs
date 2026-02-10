@@ -51,7 +51,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.TryControlService(ServiceCommand.Enable, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Enable, ServiceName, TestContext.Current.CancellationToken);
 
         // Assert
         result.Success.Should().BeTrue();
@@ -67,7 +67,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.TryControlService(ServiceCommand.Disable, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Disable, ServiceName, TestContext.Current.CancellationToken);
 
         // Assert
         result.Success.Should().BeTrue();
@@ -83,7 +83,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.TryControlService(ServiceCommand.Restart, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Restart, ServiceName, TestContext.Current.CancellationToken);
 
         // Assert
         result.Success.Should().BeTrue();
@@ -99,7 +99,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.TryControlService(ServiceCommand.Start, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Start, ServiceName, TestContext.Current.CancellationToken);
 
         // Assert
         result.Success.Should().BeTrue();
@@ -115,7 +115,7 @@ public sealed class ControlServiceManagementTests
         var service = services.GetRequiredService<ControlServiceManagement>();
 
         // Act
-        var result = await service.TryControlService(ServiceCommand.Stop, ServiceName);
+        var result = await service.TryControlService(ServiceCommand.Stop, ServiceName, TestContext.Current.CancellationToken);
 
         // Assert
         result.Success.Should().BeTrue();

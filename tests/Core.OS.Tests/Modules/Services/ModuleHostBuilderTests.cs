@@ -53,7 +53,7 @@ public class ModuleHostBuilderTests
             var hostBuilder = new ModuleHostBuilder(_fileSystem, config, moduleOptions);
 
             // Act
-            var moduleHost = await hostBuilder.Build(() => null, CancellationToken.None);
+            var moduleHost = await hostBuilder.Build(() => null, TestContext.Current.CancellationToken);
 
             // Assert
             moduleHost.GetModules().Should().BeEmpty();
@@ -76,7 +76,7 @@ public class ModuleHostBuilderTests
             // Act
             var moduleHost = await hostBuilder
                 .WithSuiteDependencyContext(context)
-                .Build(() => null, CancellationToken.None);
+                .Build(() => null, TestContext.Current.CancellationToken);
 
             // Assert
             var modules = moduleHost.GetModules().ToList();
@@ -104,7 +104,7 @@ public class ModuleHostBuilderTests
             // Act
             var moduleHost = await hostBuilder
                 .WithSuiteDependencyContext(context)
-                .Build(() => null, CancellationToken.None);
+                .Build(() => null, TestContext.Current.CancellationToken);
 
             // Assert
             var module = moduleHost.GetManifestModules().First(k => k.ModuleId == TestBackendModule.Id);
@@ -132,7 +132,7 @@ public class ModuleHostBuilderTests
             // Act
             var moduleHost = await hostBuilder
                 .WithSuiteDependencyContext()
-                .Build(() => null, CancellationToken.None);
+                .Build(() => null, TestContext.Current.CancellationToken);
 
             // Assert
             moduleHost.GetContext().Modules.Should().HaveCount(2, "Test.Backend|Client");
@@ -164,7 +164,7 @@ public class ModuleHostBuilderTests
             var moduleHost = await hostBuilder
                 .WithSuiteDependencyContext()
                 .WithOptionsSupport(configManager, serviceCollection)
-                .Build(() => null, CancellationToken.None);
+                .Build(() => null, TestContext.Current.CancellationToken);
 
             // Assert
             serviceCollection.Should().ContainSingle(s => s.ServiceType == typeof(IModuleOptionsStore) && s.Lifetime == ServiceLifetime.Singleton);
@@ -200,7 +200,7 @@ public class ModuleHostBuilderTests
             var moduleHost = await hostBuilder
                 .WithSuiteDependencyContext(context)
                 .WithOptionsSupport(configManager, services)
-                .Build(() => null, CancellationToken.None);
+                .Build(() => null, TestContext.Current.CancellationToken);
 
             // Assert
             var module = moduleHost.GetManifestModules().First();
@@ -222,7 +222,7 @@ public class ModuleHostBuilderTests
             var moduleOptions = new Dictionary<string, ModuleOptions>();
             var buildTask = new ModuleHostBuilder(_fileSystem, config, moduleOptions)
                 .WithOptionsSupport(configManager, services)
-                .Build(() => null, CancellationToken.None);
+                .Build(() => null, TestContext.Current.CancellationToken);
 
             var act = () => buildTask;
 

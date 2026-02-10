@@ -18,7 +18,7 @@ public class SystemConfigurationCacheTests
         ConfigurationCacheLifetimeMs = 200
     };
 
-    public ServiceProvider SetupServiceProvider()
+    private ServiceProvider SetupServiceProvider()
         => new ServiceCollection()
             .AddSingleton(_logger)
             .AddSingleton(Options.Create(_options))
@@ -28,11 +28,11 @@ public class SystemConfigurationCacheTests
     public class Set : SystemConfigurationCacheTests
     {
         [Fact]
-        public void Should_set_cache_system_config()
+        public async Task Should_set_cache_system_config()
         {
             // Arrange
             var config = TestPipeClient.GetEmbeddedSystemConfiguration();
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<SystemConfigurationCache>();
 
             // Act
@@ -46,11 +46,11 @@ public class SystemConfigurationCacheTests
     public class Get : SystemConfigurationCacheTests
     {
         [Fact]
-        public void Should_get_cached_system_config()
+        public async Task Should_get_cached_system_config()
         {
             // Arrange
             var config = TestPipeClient.GetEmbeddedSystemConfiguration();
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<SystemConfigurationCache>();
             cache.Set(config);
 
@@ -66,12 +66,12 @@ public class SystemConfigurationCacheTests
         {
             // Arrange
             var config = new SystemConfiguration();
-            using var serviceProvider = SetupServiceProvider();
+            await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<SystemConfigurationCache>();
             cache.Set(config);
 
             // Act
-            await Task.Delay((int)_options.ConfigurationCacheLifetimeMs + 500);
+            await Task.Delay((int)_options.ConfigurationCacheLifetimeMs + 500, TestContext.Current.CancellationToken);
             var cached = cache.Get();
 
             // Assert

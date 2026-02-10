@@ -40,7 +40,7 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
         var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
 
         // Act
-        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsPg(serviceProvider, installedModules, CancellationToken.None);
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsPg(serviceProvider, installedModules, TestContext.Current.CancellationToken);
         foreach (var arguments in argumentsCollection)
         {
             executeContextMock.Arguments
@@ -74,15 +74,15 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
         await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
-        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 
         var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
-        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+        var tableList = await command.GetTablesSqlite(TestContext.Current.CancellationToken);
         var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
 
         // Act
-        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsPg(serviceProvider, installedModules, CancellationToken.None);
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsPg(serviceProvider, installedModules, TestContext.Current.CancellationToken);
         foreach (var arguments in argumentsCollection)
         {
             var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));
@@ -126,13 +126,13 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
 
         var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
         await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
-        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
-        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+        var tableList = await command.GetTablesSqlite(TestContext.Current.CancellationToken);
         var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
 
         // Act
-        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsPg(serviceProvider, installedModules, CancellationToken.None);
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsPg(serviceProvider, installedModules, TestContext.Current.CancellationToken);
         foreach (var arguments in argumentsCollection)
         {
             var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));
@@ -180,14 +180,14 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
         await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
-        await dbDestConnection.OpenAsync(CancellationToken.None);
+        await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 
-        var tableList = await command.GetTablesSqlite(CancellationToken.None);
+        var tableList = await command.GetTablesSqlite(TestContext.Current.CancellationToken);
         var executeContextMock = Substitute.For<ExecuteContext<SyncDataArguments>>();
 
         // Act
-        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsPg(serviceProvider, installedModules, CancellationToken.None);
+        var argumentsCollection = await SyncDataHelpers.CreateSyncDataArgumentsPg(serviceProvider, installedModules, TestContext.Current.CancellationToken);
         foreach (var arguments in argumentsCollection)
         {
             var foundTable = tableList.Any(tablename => arguments.Table.Equals(tablename, StringComparison.OrdinalIgnoreCase));

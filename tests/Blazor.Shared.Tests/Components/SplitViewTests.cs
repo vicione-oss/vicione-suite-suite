@@ -8,10 +8,10 @@ namespace Blazor.Shared.Tests.Components;
 public class SplitViewTests
 {
     [Fact]
-    public void ComponentGetsRendered()
+    public async Task ComponentGetsRendered()
     {
         // Arrange        
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
 
         // Act + Assert

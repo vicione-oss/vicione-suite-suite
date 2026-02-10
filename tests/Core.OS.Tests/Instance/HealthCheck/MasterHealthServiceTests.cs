@@ -5,6 +5,7 @@ using Core.Shared.Instance.HealthCheck;
 using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sdk.Backend.Messaging;
@@ -19,6 +20,7 @@ public class MasterHealthServiceTests
     private readonly IInstanceInformationProvider _instanceProvider = Substitute.For<IInstanceInformationProvider>();
     private readonly ISuiteMediator _mediator = Substitute.For<ISuiteMediator>();
     private readonly IOptions<InstanceOptions> _options = Substitute.For<IOptions<InstanceOptions>>();
+    private readonly ILogger<MasterHealthService> _logger = Substitute.For<ILogger<MasterHealthService>>();
 
     public class CheckHealthStatus : MasterHealthServiceTests
     {
@@ -35,7 +37,7 @@ public class MasterHealthServiceTests
             });
 
             _instanceProvider
-                .GetInstancesInCluster(CancellationToken.None)
+                .GetInstancesInCluster(TestContext.Current.CancellationToken)
                 .Returns(
                 [
                     new TestInstanceInformation { Id = masterId, Type = InstanceType.Master },
@@ -59,10 +61,10 @@ public class MasterHealthServiceTests
                 .BuildServiceProvider();
 
             var info = new MasterHealthInfo();
-            using var service = new MasterHealthService(info, services, _options);
+            using var service = new MasterHealthService(info, services, _options, _logger);
 
             // Act
-            await service.CheckHealthStatus(masterId, HealthStatus.Healthy);
+            await service.CheckHealthStatus(masterId, HealthStatus.Healthy, TestContext.Current.CancellationToken);
 
             // Assert
             info.IsMasterReachable.Should().BeTrue();
@@ -93,7 +95,7 @@ public class MasterHealthServiceTests
             });
 
             _instanceProvider
-                .GetInstancesInCluster(CancellationToken.None)
+                .GetInstancesInCluster(Arg.Any<CancellationToken>())
                 .Returns(
                 [
                     new TestInstanceInformation { Id = Guid.NewGuid(), Type = InstanceType.Master },
@@ -104,10 +106,10 @@ public class MasterHealthServiceTests
                 .AddSingleton(_mediator)
                 .BuildServiceProvider();
 
-            using var service = new MasterHealthService(info, services, _options);
+            using var service = new MasterHealthService(info, services, _options, _logger);
 
             // Act
-            await service.CheckHealthStatus(new(), HealthStatus.Healthy);
+            await service.CheckHealthStatus(Guid.NewGuid(), HealthStatus.Healthy, TestContext.Current.CancellationToken);
 
             // Assert
             info.IsMasterReachable.Should().BeFalse();

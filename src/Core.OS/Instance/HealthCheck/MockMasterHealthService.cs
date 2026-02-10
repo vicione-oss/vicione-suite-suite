@@ -5,5 +5,5 @@ namespace Core.OS.Instance.HealthCheck;
 
 public class MockMasterHealthService : IMasterHealthService
 {
-    public Task CheckHealthStatus(Guid id, HealthStatus healthStatus) => Task.CompletedTask;
+    public Task CheckHealthStatus(Guid id, HealthStatus healthStatus, CancellationToken token = default) => Task.CompletedTask;
 }

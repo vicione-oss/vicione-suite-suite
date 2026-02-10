@@ -31,7 +31,7 @@ public class ModuleMetadataCacheTests
     private readonly IOptions<ArtifactRepositoryOptions> _options = Substitute.For<IOptions<ArtifactRepositoryOptions>>();
     private readonly ArtifactRepositoryOptions _apiOptions = new() { PackageCacheLifetimeMs = 800 };
 
-    public ServiceProvider SetupServiceProvider()
+    private ServiceProvider SetupServiceProvider()
     {
         _options.Value.Returns(_apiOptions);
 
@@ -67,10 +67,9 @@ public class ModuleMetadataCacheTests
 
         foreach (var artifact in metadataArtifacts)
         {
-            // setup queries to get module artifact by dependency packkge
+            // setup queries to get module artifact by dependency package
             if (ModuleNameVersionRegex.GetVersions(artifact.Name, out var parsed, out var ciVersion))
             {
-                var moduleId = artifact.Path.Replace("modules/", "", StringComparison.Ordinal);
                 var moduleDependency = new ModuleDependencyPackage
                 {
                     Name = artifact.Path.Replace("modules/", "", StringComparison.Ordinal),
@@ -115,7 +114,7 @@ public class ModuleMetadataCacheTests
             _moduleRepository.QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
-            var metadata = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
+            var metadata = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
 
             // Assert
             metadata.Should().BeEmpty();
@@ -130,7 +129,7 @@ public class ModuleMetadataCacheTests
             var assets = await SetupTestModuleMetadataAssets(_moduleRepository);
 
             // Act
-            var packages = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
+            var packages = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
 
             // Assert
             packages.Should().HaveCount(assets.Count, "One item per asset");
@@ -145,8 +144,8 @@ public class ModuleMetadataCacheTests
             _moduleRepository.QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
-            var metadata1 = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
-            var metadata2 = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
+            var metadata1 = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
+            var metadata2 = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
 
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
@@ -162,9 +161,9 @@ public class ModuleMetadataCacheTests
             await SetupTestModuleMetadataAssets(_moduleRepository);
 
             // Act
-            var metadata1 = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
-            await Task.Delay((int)_apiOptions.PackageCacheLifetimeMs + 200);
-            var metadata2 = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
+            var metadata1 = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
+            await Task.Delay((int)_apiOptions.PackageCacheLifetimeMs + 200, TestContext.Current.CancellationToken);
+            var metadata2 = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
 
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
@@ -180,8 +179,8 @@ public class ModuleMetadataCacheTests
             await SetupTestModuleMetadataAssets(_moduleRepository);
 
             // Act
-            var metadata1 = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
-            var metadata2 = await cache.GetAvailableModuleMetadata(null, true, CancellationToken.None);
+            var metadata1 = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
+            var metadata2 = await cache.GetAvailableModuleMetadata(null, true, TestContext.Current.CancellationToken);
 
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
@@ -198,8 +197,8 @@ public class ModuleMetadataCacheTests
             var version = new Version("1.0.0");
 
             // Act
-            var metadata1 = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
-            var metadata2 = await cache.GetAvailableModuleMetadata(version, false, CancellationToken.None);
+            var metadata1 = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
+            var metadata2 = await cache.GetAvailableModuleMetadata(version, false, TestContext.Current.CancellationToken);
 
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
@@ -233,7 +232,7 @@ public class ModuleMetadataCacheTests
                     .Returns(firstMetadata);
 
             // Act
-            var packages = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
+            var packages = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
 
             // Assert
             packages.Should().HaveCount(1, "metadata of first asset");
@@ -248,14 +247,14 @@ public class ModuleMetadataCacheTests
             await SetupTestModuleMetadataAssets(_moduleRepository, false);
 
             // Act
-            var packages = await cache.GetAvailableModuleMetadata(null, false, CancellationToken.None);
+            var packages = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
 
             // Assert
             packages.Should().HaveCount(10, "8xClusterManagement + 2xDataCollectionWizard");
         }
     }
 
-    public class GetInstalledModuleMetadata() : ModuleMetadataCacheTests
+    public class GetInstalledModuleMetadata : ModuleMetadataCacheTests
     {
         [Fact]
         public async Task Should_return_infos_for_debug_modules()
@@ -272,7 +271,7 @@ public class ModuleMetadataCacheTests
             _moduleManager.GetContext().Returns(suiteContext);
 
             // Act        
-            var result = await cache.GetInstalledModuleMetadata();
+            var result = await cache.GetInstalledModuleMetadata(TestContext.Current.CancellationToken);
 
             // Assert       
             result.Should().NotBeNull();
@@ -293,7 +292,7 @@ public class ModuleMetadataCacheTests
             _moduleManager.GetManifestModules().Returns([bundle]);
 
             // Act        
-            var result = await cache.GetInstalledModuleMetadata();
+            var result = await cache.GetInstalledModuleMetadata(TestContext.Current.CancellationToken);
 
             // Assert       
             result.Should().HaveCount(1, "ClusterManagement");
@@ -311,7 +310,7 @@ public class ModuleMetadataCacheTests
             _moduleManager.GetManifestModules().Returns([bundle]);
 
             // Act        
-            var result = await cache.GetInstalledModuleMetadata();
+            var result = await cache.GetInstalledModuleMetadata(TestContext.Current.CancellationToken);
 
             // Assert       
             result.Should().ContainSingle(k => k.Metadata.Description == "Generated metadata");

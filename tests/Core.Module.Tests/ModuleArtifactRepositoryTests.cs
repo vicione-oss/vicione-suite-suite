@@ -51,7 +51,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var result = await repository.DownloadAndExtract(tempDir.Path, modulePackage, CancellationToken.None);
+            var result = await repository.DownloadAndExtract(tempDir.Path, modulePackage, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Null(result.Error);
@@ -68,8 +68,8 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var first = await repository.DownloadAndExtract(tempDir.Path, modulePackage, CancellationToken.None);
-            var second = await repository.DownloadAndExtract(tempDir.Path, modulePackage, CancellationToken.None);
+            var first = await repository.DownloadAndExtract(tempDir.Path, modulePackage, TestContext.Current.CancellationToken);
+            var second = await repository.DownloadAndExtract(tempDir.Path, modulePackage, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Null(first.Error);
@@ -88,7 +88,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var results = await repository.DownloadAndExtract(tempDir.Path, modulePackages, CancellationToken.None);
+            var results = await repository.DownloadAndExtract(tempDir.Path, modulePackages, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.NotEmpty(results);
@@ -104,7 +104,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var results = await repository.DownloadAndExtract(tempDir.Path, [], CancellationToken.None);
+            var results = await repository.DownloadAndExtract(tempDir.Path, [], TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Empty(results);
@@ -124,8 +124,8 @@ public class ModuleArtifactRepositoryTests
             using var ms = new MemoryStream();
 
             // Act
-            using var moduleStream = await repository.GetMetadataDownloadStream(package);
-            await moduleStream.CopyToAsync(ms);
+            await using var moduleStream = await repository.GetMetadataDownloadStream(package, TestContext.Current.CancellationToken);
+            await moduleStream.CopyToAsync(ms, TestContext.Current.CancellationToken);
 
             // Assert
             ms.Length.Should().BeGreaterThan(0);
@@ -147,7 +147,7 @@ public class ModuleArtifactRepositoryTests
             artifact.Repository.Returns("vicione-suite");
 
             // Act
-            var metadata = await repository.GetModuleMetadata(artifact);
+            var metadata = await repository.GetModuleMetadata(artifact, TestContext.Current.CancellationToken);
 
             // Assert
             metadata.Should().NotBeNull();
@@ -167,8 +167,8 @@ public class ModuleArtifactRepositoryTests
             using var ms = new MemoryStream();
 
             // Act
-            await using var metadataStream = await repository.GetMetadataDownloadStream(package);
-            await metadataStream.CopyToAsync(ms);
+            await using var metadataStream = await repository.GetMetadataDownloadStream(package, TestContext.Current.CancellationToken);
+            await metadataStream.CopyToAsync(ms, TestContext.Current.CancellationToken);
 
             // Assert
             ms.Length.Should().BeGreaterThan(0);
@@ -186,7 +186,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var assets = await repository.QueryModuleArtifacts();
+            var assets = await repository.QueryModuleArtifacts(TestContext.Current.CancellationToken);
 
             // Assert
             assets.Should().NotBeEmpty();
@@ -204,7 +204,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var assets = await repository.QueryModuleMetadataArtifacts();
+            var assets = await repository.QueryModuleMetadataArtifacts(cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
             assets.Should().NotBeEmpty();
@@ -218,7 +218,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var assets = await repository.QueryModuleMetadataArtifacts(sdkVersion: _sdkVersion);
+            var assets = await repository.QueryModuleMetadataArtifacts(_sdkVersion, TestContext.Current.CancellationToken);
 
             // Assert
             assets.Should().NotBeEmpty();
@@ -237,7 +237,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var assets = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, _packageName);
+            var assets = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, _packageName, TestContext.Current.CancellationToken);
 
             // Assert
             assets.Should().NotBeNull();
@@ -251,7 +251,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var result = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, "Unknown.Package", CancellationToken.None);
+            var result = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, "Unknown.Package", TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeNull();

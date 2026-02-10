@@ -45,7 +45,7 @@ public class UserTicketCleanupServiceTests
         await using var services = SetupServiceProvider(out var dbContext);
         dbContext.Tickets.Add(t1);
         dbContext.Tickets.Add(t2);
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = services.GetRequiredService<UserTicketCleanupService>();
 
@@ -55,15 +55,15 @@ public class UserTicketCleanupServiceTests
         await sut.StartAsync(cts.Token);
         try
         {
-            await Task.Delay(100);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
         }
         finally
         {
-            await sut.StopAsync(CancellationToken.None);
+            await sut.StopAsync(TestContext.Current.CancellationToken);
         }
 
         // Assert
-        dbContext.Tickets.SingleOrDefault(k => k.Id == t1.Id).Should().BeNull();
+        dbContext.Tickets.SingleOrDefault(k => k.Id == t1.Id).Should().BeNull(); // flaky test when testing locally
         dbContext.Tickets.SingleOrDefault(k => k.Id == t2.Id).Should().NotBeNull();
     }
 }

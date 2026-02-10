@@ -56,7 +56,7 @@ public class ModuleHostTests
     public class AddModuleServices : ModuleHostTests
     {
         [Fact]
-        public void Should_register_module_controllers_as_service()
+        public async Task Should_register_module_controllers_as_service()
         {
             // Arrange
             var testHost = new TestUiHostBackend();
@@ -66,7 +66,7 @@ public class ModuleHostTests
                     testHost, testModule,
                 ],
                 out var services,
-                out var _);
+                out _);
 
             var mvcBuilder = CreateMvcBuilder(services);
 
@@ -75,7 +75,7 @@ public class ModuleHostTests
             manager.AddModuleServices(services, mvcBuilder);
 
             // Assert
-            using var serviceProvider = services.BuildServiceProvider();
+            await using var serviceProvider = services.BuildServiceProvider();
             serviceProvider.GetRequiredService<TestUiHostController>()
                 .Should().NotBeNull();
 
@@ -85,7 +85,7 @@ public class ModuleHostTests
         }
 
         [Fact]
-        public void Should_add_workspace_service_per_module()
+        public async Task Should_add_workspace_service_per_module()
         {
             // Arrange
             var testHost = new TestUiHostBackend();
@@ -104,7 +104,7 @@ public class ModuleHostTests
             manager.AddModuleServices(services, mvcBuilder);
 
             // Assert
-            using var serviceProvider = services.BuildServiceProvider();
+            await using var serviceProvider = services.BuildServiceProvider();
             var wsProvider = serviceProvider.GetRequiredService<IWorkspaceProvider<TestBackendModule>>();
             wsProvider.Home.Should().NotBeNull();
             wsProvider.Cache.Should().NotBeNull();
@@ -119,7 +119,7 @@ public class ModuleHostTests
         {
             // Arrange
             var module = new TestBackendModule();
-            var manager = CreateModuleHostWithUiSupport(module, out var services, out var _);
+            var manager = CreateModuleHostWithUiSupport(module, out var services, out _);
             var mvcBuilder = CreateMvcBuilder(services);
 
             // Act + Assert
@@ -131,11 +131,11 @@ public class ModuleHostTests
     public class AddUiHostServices : ModuleHostTests
     {
         [Fact]
-        public void Should_init_ui_host_services()
+        public async Task Should_init_ui_host_services()
         {
             // Arrange
             var testHost = new TestUiHostBackend();
-            var manager = CreateModuleHostWithUiSupport(testHost, out var services, out var _);
+            var manager = CreateModuleHostWithUiSupport(testHost, out var services, out _);
             var mvcBuilder = CreateMvcBuilder(services);
             services.AddModuleServices();
 
@@ -148,7 +148,7 @@ public class ModuleHostTests
             testHost.CallReceived += (_, s) => stack.Pop().Should().Be(s);
             manager.AddUiHostServices(services, mvcBuilder, (_) => null);
 
-            using var serviceProvider = services.BuildServiceProvider();
+            await using var serviceProvider = services.BuildServiceProvider();
             var wsProvider = serviceProvider.GetRequiredService<IWorkspaceProvider<TestUiHostBackend>>();
             wsProvider.Home.Should().NotBeNull();
             wsProvider.Cache.Should().NotBeNull();
@@ -164,7 +164,7 @@ public class ModuleHostTests
                     testHost,
                 ],
                 out var services,
-                out var _);
+                out _);
 
             var mvcBuilder = CreateMvcBuilder(services);
 
@@ -188,8 +188,8 @@ public class ModuleHostTests
             var testModule = Substitute.For<TestBackendModule>();
             var manager = CreateModuleHostWithUiSupport(
                 [testHost, testModule],
-                out var _,
-                out var _);
+                out _,
+                out _);
 
             // Act + Assert
             manager.GetModule<TestUiHostBackend>().Should().NotBeNull();
@@ -207,8 +207,8 @@ public class ModuleHostTests
             var testModule = Substitute.For<TestBackendModule>();
             var manager = CreateModuleHostWithUiSupport(
                 [testHost, testModule],
-                out var _,
-                out var _);
+                out _,
+                out _);
 
             // Act + Assert
             manager.GetModuleAssemblies().Should().ContainSingle(k => k.FullName == testHost.GetType().Assembly.FullName);
@@ -219,7 +219,7 @@ public class ModuleHostTests
     public class MapModuleEndpoints : ModuleHostTests
     {
         [Fact]
-        public void Should_call_map_endpoints_on_all_modules()
+        public async Task Should_call_map_endpoints_on_all_modules()
         {
             // Arrange
             var testHost = new TestUiHostBackend();
@@ -229,7 +229,7 @@ public class ModuleHostTests
                 out var services,
                 out _);
 
-            using var provider = services.BuildServiceProvider();
+            await using var provider = services.BuildServiceProvider();
             var endpointBuilder = Substitute.For<IEndpointRouteBuilder>();
             endpointBuilder.ServiceProvider.Returns(provider);
 
@@ -242,12 +242,12 @@ public class ModuleHostTests
         }
 
         [Fact]
-        public void Should_setup_message_on_disabled_ui_host()
+        public async Task Should_setup_message_on_disabled_ui_host()
         {
             // Arrange
             var module = new TestUiHostBackend();
-            var manager = CreateModuleHostWithUiSupport(module, out var services, out var _);
-            using var serviceProvider = services.BuildServiceProvider();
+            var manager = CreateModuleHostWithUiSupport(module, out var services, out _);
+            await using var serviceProvider = services.BuildServiceProvider();
 
             var endpointBuilder = Substitute.For<IEndpointRouteBuilder>();
             endpointBuilder.ServiceProvider.Returns(serviceProvider);
@@ -261,16 +261,16 @@ public class ModuleHostTests
     public class UseUiHost : ModuleHostTests
     {
         [Fact]
-        public void Should_initialize_with_options()
+        public async Task Should_initialize_with_options()
         {
             // Arrange
             var hostModule = new TestUiHostBackend();
             var webEnv = Substitute.For<IWebHostEnvironment>();
             var hostEnv = Substitute.For<IUiHostEnvironment>();
 
-            var manager = CreateModuleHostWithUiSupport(hostModule, out var services, out var _);
+            var manager = CreateModuleHostWithUiSupport(hostModule, out var services, out _);
             services.AddSingleton(hostEnv);
-            using var serviceProvider = services.BuildServiceProvider();
+            await using var serviceProvider = services.BuildServiceProvider();
 
             var appBuilder = Substitute.For<IApplicationBuilder>();
             appBuilder.ApplicationServices
@@ -285,12 +285,12 @@ public class ModuleHostTests
     public class UseSecurity : ModuleHostTests
     {
         [Fact]
-        public void Should_call_module_use_security()
+        public async Task Should_call_module_use_security()
         {
             // Arrange
             var module = new TestUiHostBackend();
-            var manager = CreateModuleHostWithUiSupport(module, out var services, out var _);
-            using var serviceProvider = services.BuildServiceProvider();
+            var manager = CreateModuleHostWithUiSupport(module, out var services, out _);
+            await using var serviceProvider = services.BuildServiceProvider();
 
             var appBuilder = Substitute.For<IApplicationBuilder>();
             appBuilder.ApplicationServices
@@ -305,12 +305,12 @@ public class ModuleHostTests
     public class UseModuleServices : ModuleHostTests
     {
         [Fact]
-        public void Should_call_use_services_on_modules()
+        public async Task Should_call_use_services_on_modules()
         {
             // Arrange
             var module = new TestBackendModule();
-            var manager = CreateModuleHostWithUiSupport(module, out var services, out var _);
-            using var serviceProvider = services.BuildServiceProvider();
+            var manager = CreateModuleHostWithUiSupport(module, out var services, out _);
+            await using var serviceProvider = services.BuildServiceProvider();
 
             var appBuilder = Substitute.For<IApplicationBuilder>();
             appBuilder.ApplicationServices
@@ -330,7 +330,7 @@ public class ModuleHostTests
             // Arrange
             var module = new TestBackendModule();
             var busConfigurator = Substitute.For<IBusRegistrationConfigurator>();
-            var manager = CreateModuleHostWithUiSupport(module, out var _, out var _);
+            var manager = CreateModuleHostWithUiSupport(module, out _, out _);
 
             // Act + Assert
             module.CallReceived += (_, s) => s.Should().Be(nameof(BackendModule.ConfigureMessageBus));
@@ -341,7 +341,7 @@ public class ModuleHostTests
     public class MoveModuleResources : ModuleHostTests
     {
         [Fact]
-        public void Module_resources_should_be_copied()
+        public async Task Module_resources_should_be_copied()
         {
             // Arrange
             var module = new TestBackendModule();
@@ -353,7 +353,7 @@ public class ModuleHostTests
             services.AddSingleton(config);
             services.AddSingleton<IFileSystem>(fileSystem);
             services.AddLogging();
-            using var serviceProvider = services.BuildServiceProvider();
+            await using var serviceProvider = services.BuildServiceProvider();
 
             var testFolder = fileSystem.Path.GetDirectoryName(testAssembly.Location);
             var resourceDirectory = fileSystem.Path.Combine(testFolder!, module.GetResourceDirectory(serviceProvider));
@@ -374,7 +374,7 @@ public class ModuleHostTests
         }
 
         [Fact]
-        public void Exception_on_module_resource_move_should_be_catched()
+        public async Task Exception_on_module_resource_move_should_be_catched()
         {
             // Arrange
             var module = new TestBackendModule();
@@ -387,7 +387,7 @@ public class ModuleHostTests
                 .GetDirectoryName(testAssembly.Location)
                 .Throws(new DirectoryNotFoundException());
 
-            using var services = new ServiceCollection()
+            await using var services = new ServiceCollection()
                 .AddSingleton(config)
                 .AddSingleton(fileSystem)
                 .AddLogging()
@@ -417,12 +417,12 @@ public class ModuleHostTests
             await using var scope = services.CreateAsyncScope();
 
             // Act
-            await manager.MigrateAndSeedModuleData(scope, config, CancellationToken.None);
+            await manager.MigrateAndSeedModuleData(scope, config, TestContext.Current.CancellationToken);
 
             // Assert
-            await initializer.Received().OnPreMigrate(Arg.Any<IServiceProvider>(), CancellationToken.None);
-            await initializer.Received().Migrate(Arg.Any<IServiceProvider>(), CancellationToken.None);
-            await initializer.Received().OnPostMigrate(Arg.Any<IServiceProvider>(), CancellationToken.None);
+            await initializer.Received().OnPreMigrate(Arg.Any<IServiceProvider>(), TestContext.Current.CancellationToken);
+            await initializer.Received().Migrate(Arg.Any<IServiceProvider>(), TestContext.Current.CancellationToken);
+            await initializer.Received().OnPostMigrate(Arg.Any<IServiceProvider>(), TestContext.Current.CancellationToken);
         }
 
         [Fact]
@@ -442,12 +442,12 @@ public class ModuleHostTests
             await using var scope = services.CreateAsyncScope();
 
             // Act
-            await manager.MigrateAndSeedModuleData(scope, config, CancellationToken.None);
+            await manager.MigrateAndSeedModuleData(scope, config, TestContext.Current.CancellationToken);
 
             // Assert
-            await initializer.Received().OnPreMigrate(Arg.Any<IServiceProvider>(), CancellationToken.None);
-            await initializer.Received().Migrate(Arg.Any<IServiceProvider>(), CancellationToken.None);
-            await initializer.DidNotReceive().OnPostMigrate(Arg.Any<IServiceProvider>(), CancellationToken.None);
+            await initializer.Received().OnPreMigrate(Arg.Any<IServiceProvider>(), TestContext.Current.CancellationToken);
+            await initializer.Received().Migrate(Arg.Any<IServiceProvider>(), TestContext.Current.CancellationToken);
+            await initializer.DidNotReceive().OnPostMigrate(Arg.Any<IServiceProvider>(), TestContext.Current.CancellationToken);
         }
 
         [Fact]
@@ -460,7 +460,7 @@ public class ModuleHostTests
             var manager = CreateModuleHost(module, config);
 
             initializer
-                .OnPreMigrate(Arg.Any<IServiceProvider>(), CancellationToken.None)
+                .OnPreMigrate(Arg.Any<IServiceProvider>(), TestContext.Current.CancellationToken)
                 .ThrowsAsync(new InvalidOperationException());
 
             await using var services = new ServiceCollection()
@@ -471,7 +471,7 @@ public class ModuleHostTests
             await using var scope = services.CreateAsyncScope();
 
             // Act + Assert
-            await manager.MigrateAndSeedModuleData(scope, config, CancellationToken.None);
+            await manager.MigrateAndSeedModuleData(scope, config, TestContext.Current.CancellationToken);
         }
     }
 

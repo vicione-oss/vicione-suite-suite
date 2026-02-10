@@ -6,7 +6,6 @@ using Blazor.Shared.UserManagement.Services;
 using Blazor.Shared.Validation.Services.Validators;
 using Blazor.Tests.Tools;
 using Bunit;
-using Bunit.TestDoubles;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Requests;
 using Core.Shared.UserManagement.Contracts;
@@ -48,12 +47,12 @@ public sealed class ProfileNotificationElementFlyoutContentTests
             .AddSingleton(_phoneNumberValidator);
 
         _uiMediator.Request<GetCrossInstanceConfiguration, GetCrossInstanceConfigurationResponse>(
-            Arg.Any<GetCrossInstanceConfiguration>())
+            Arg.Any<GetCrossInstanceConfiguration>(), Arg.Any<CancellationToken>())
             .Returns(new GetCrossInstanceConfigurationResponse(new CrossInstanceConfiguration()));
 
         ctx.Services.AddProfile();
 
-        _userProfileMock.GetUsers(Arg.Any<UserName?>())
+        _userProfileMock.GetUsers(Arg.Any<UserName?>(), Arg.Any<CancellationToken>())
             .Returns([new UserProfile { UserName = new UserName("MyDummy") }]);
 
         // Act

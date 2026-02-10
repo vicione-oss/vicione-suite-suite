@@ -61,7 +61,7 @@ public sealed class SetSystemConfigurationConsumerTests
         await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<SystemConfigurationChanged>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<SystemConfigurationChanged>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public sealed class SetSystemConfigurationConsumerTests
         await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<SetSystemConfigurationError>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<SetSystemConfigurationError>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public sealed class SetSystemConfigurationConsumerTests
         await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<SetSystemConfigurationError>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<SetSystemConfigurationError>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public sealed class SetSystemConfigurationConsumerTests
         await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<SystemRestartRequired>()).Should().BeFalse();
-        (await tester.Harness.Published.Any<SystemConfigurationChanged>()).Should().BeTrue();
+        (await tester.Harness.Published.Any<SystemRestartRequired>(TestContext.Current.CancellationToken)).Should().BeFalse();
+        (await tester.Harness.Published.Any<SystemConfigurationChanged>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 }
