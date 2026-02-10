@@ -17,5 +17,5 @@ public sealed record RegisterInstance : ICommand
     public List<string> InstalledModules { get; init; } = [];
     public List<KeyValuePair<string, string?>> Configuration { get; init; } = [];
     public string Version { get; init; } = string.Empty;
-    public Guid CorrelationId { get; set; } = Guid.NewGuid();
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }

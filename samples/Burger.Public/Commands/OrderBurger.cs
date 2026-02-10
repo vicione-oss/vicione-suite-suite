@@ -6,5 +6,5 @@ namespace Burger.Public.Commands;
 [MessageEndpoint("OrderBurgerState")]
 public sealed record OrderBurger(Guid OrderId, List<SuiteBurger> Burgers) : ICommand
 {
-    public Guid CorrelationId => OrderId;
+    public Guid CorrelationId { get; init; } = OrderId;
 }

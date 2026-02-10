@@ -6,7 +6,7 @@
     <HostManagementVersion>1.2.0</HostManagementVersion>
     <MassTransitVersion>8.5.7</MassTransitVersion>
     <ViciOneUiMonochromeIconsVersion>4.1.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>2.0.0-ci2310395265</ViciOneSuiteSdkVersion>
+    <ViciOneSuiteSdkVersion>2.0.0-ci2313993755</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />

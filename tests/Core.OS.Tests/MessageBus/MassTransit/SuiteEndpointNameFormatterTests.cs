@@ -475,14 +475,14 @@ public class SuiteEndpointNameFormatterTests
     private class GenericCommand<T> : ICommand
     {
         public List<T> MyList = [];
-        public Guid CorrelationId { get; set; } = Guid.NewGuid();
+        public Guid CorrelationId { get; init; } = Guid.NewGuid();
     }
 
     [MessageEndpoint($"{CommandEndpoint}_{nameof(OtherGenericCommand<T>)}")]
     private class OtherGenericCommand<T> : ICommand
     {
         public List<T> MyList = [];
-        public Guid CorrelationId { get; set; } = Guid.NewGuid();
+        public Guid CorrelationId { get; init; } = Guid.NewGuid();
     }
 
     /// <summary>

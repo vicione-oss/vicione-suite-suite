@@ -4,5 +4,5 @@ namespace Core.Shared.HostManagement.Commands;
 
 public record UpdateSystem(string FilePath) : IInstanceDependentCommand
 {
-    public Guid CorrelationId { get; set; } = Guid.NewGuid();
+    public Guid CorrelationId { get; init; } = Guid.NewGuid();
 }
