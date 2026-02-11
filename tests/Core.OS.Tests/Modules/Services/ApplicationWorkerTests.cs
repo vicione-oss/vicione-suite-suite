@@ -133,7 +133,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         _mediatorMock.Request<GetInstances, GetInstancesResponse>(Arg.Any<GetInstances>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new GetInstancesResponse([])));
 
-		var worker = CreateApplicationWorker();
+        var worker = CreateApplicationWorker();
 
         // Act
         await worker.StartingAsync(TestContext.Current.CancellationToken);
@@ -205,6 +205,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
 
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddSingleton(lifetime);
+        serviceCollection.AddSingleton(Substitute.For<TracerProvider>());
         await using var services = serviceCollection.BuildServiceProvider();
         var applicationWorker = CreateApplicationWorker();
 
@@ -218,5 +219,5 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
     }
 
     private ApplicationWorker CreateApplicationWorker()
-        => new(_appFactory.Services, Substitute.For<TracerProvider>(), _loggerMock);
+        => new(_appFactory.Services, _loggerMock);
 }

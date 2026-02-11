@@ -25,7 +25,7 @@
     }
 }
 
-#components-reconnect-modal.components-reconnect-show, #components-reconnect-modal.components-reconnect-hide, #components-reconnect-modal.components-reconnect-rejected {
+#components-reconnect-modal.components-reconnect-show, #components-reconnect-modal.components-reconnect-hide, #components-reconnect-modal.components-reconnect-rejected, #components-reconnect-modal.components-reconnect-resume-failed {
     .interruption {
         display: flex;
     }
@@ -48,6 +48,7 @@
 #components-reconnect-modal.components-reconnect-show,
 #components-reconnect-modal.components-reconnect-hide,
 #components-reconnect-modal.components-reconnect-rejected,
+#components-reconnect-modal.components-reconnect-resume-failed,
 #components-reconnect-modal.components-reconnect-failed {
     display: flex;
     position: fixed;

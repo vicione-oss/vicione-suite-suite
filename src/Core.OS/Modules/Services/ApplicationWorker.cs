@@ -30,27 +30,28 @@ namespace Core.OS.Modules.Services;
 
 internal sealed class ApplicationWorker(
     IServiceProvider services,
-    TracerProvider tracerProvider,
     ILogger<ApplicationWorker> logger) : IHostedLifecycleService
 {
-    /*
-     * This is only needed to ensure that the tracer provider is constructed before we are trying to use activities.
-     * OpenTelemetry itself registers a service and is only fully functional when its service is started.
-     * As we do the heavy lifting, in `StartingAsync`, before the services are started, even with this reference, tracing
-     * might not show up in jaeger. Starting in debug mode will most likely be enabling traces.
-     *
-     * Will be addressed in https://gitlab.com/vicione-oss/vicione/suite/suite/-/issues/2654
-     */
-#pragma warning disable CA1823
-    private readonly TracerProvider _ = tracerProvider;
-#pragma warning restore CA1823
-
     public string? InitializationErrorMessage { get; private set; }
 
     public async Task StartingAsync(CancellationToken cancellationToken)
     {
         try
         {
+            /*
+             * This is only needed to ensure that the tracer provider is constructed before we are trying to use activities.
+             * OpenTelemetry itself registers a service and is only fully functional when its service is started.
+             * As we do the heavy lifting, in `StartingAsync`, before the services are started, even with this reference, tracing
+             * might not show up in jaeger. Starting in debug mode will most likely be enabling traces.
+             *
+             * Will be addressed in https://gitlab.com/vicione-oss/vicione/suite/suite/-/issues/2654
+             */
+            var tracerProvider = services.GetService<TracerProvider>();
+            if (tracerProvider is null)
+            {
+                logger.LogWarning("TracerProvider is not available, tracing will not work");
+            }
+
             logger.LogInformation("Starting application initialization");
 
             using var scope = services.CreateScope();
@@ -383,20 +384,20 @@ internal sealed class ApplicationWorker(
         var endPoint = await sendEndpointProvider.GetSendEndpoint(
             MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
         await endPoint.Send(new RegisterInstance
-            {
-                InstanceId = instanceInfo.Id,
-                InstalledModules = [.. loadedModules],
-                Type = instanceInfo.Type,
-                Name = instanceInfo.Name,
-                Description = instanceInfo.Description,
-                FormattedName = instanceInfo.FormattedName,
-                SerialNumber = instanceInfo.SerialNumber,
-                SystemType =  instanceInfo.SystemType,
-                SdkVersion = instanceInfo.SdkVersion,
-                Configuration = config.AsEnumerable().Where(IsAllowed).ToList(),
-                Version = instanceInfo.Version,
-                BranchName = instanceInfo.BranchName
-            },
+        {
+            InstanceId = instanceInfo.Id,
+            InstalledModules = [.. loadedModules],
+            Type = instanceInfo.Type,
+            Name = instanceInfo.Name,
+            Description = instanceInfo.Description,
+            FormattedName = instanceInfo.FormattedName,
+            SerialNumber = instanceInfo.SerialNumber,
+            SystemType = instanceInfo.SystemType,
+            SdkVersion = instanceInfo.SdkVersion,
+            Configuration = config.AsEnumerable().Where(IsAllowed).ToList(),
+            Version = instanceInfo.Version,
+            BranchName = instanceInfo.BranchName
+        },
             cancellationToken);
 
         logger.LogInformation("Published {Command} on {Type} instance",

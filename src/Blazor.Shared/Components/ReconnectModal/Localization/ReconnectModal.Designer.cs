@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Blazor.Shared.Localization {
+namespace Blazor.Shared.Components.ReconnectModal.Localization {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Blazor.Shared.Localization {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class App {
+    internal class ReconnectModal {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal App() {
+        internal ReconnectModal() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Blazor.Shared.Localization {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Shared.Localization.App", typeof(App).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Shared.Components.ReconnectModal.Localization.ReconnectModal", typeof(ReconnectModal).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,56 +61,56 @@ namespace Blazor.Shared.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Authentication in progress.
+        ///   Looks up a localized string similar to Please contact your administrator or try to open your application in a new browser window..
         /// </summary>
-        internal static string AuthenticationInProgress {
+        internal static string AdministratorText {
             get {
-                return ResourceManager.GetString("AuthenticationInProgress", resourceCulture);
+                return ResourceManager.GetString("AdministratorText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List of installed modules.
+        ///   Looks up a localized string similar to The connection to the server has been interrupted. This can happen, for example, due to a system restart, a network issue or a hardware error..
         /// </summary>
-        internal static string ModulesViewDescription {
+        internal static string InterruptionText {
             get {
-                return ResourceManager.GetString("ModulesViewDescription", resourceCulture);
+                return ResourceManager.GetString("InterruptionText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Modules.
+        ///   Looks up a localized string similar to You will be automatically redirected as soon as the connection is re-established. This can take up to 5 minutes..
         /// </summary>
-        internal static string ModulesViewTitle {
+        internal static string RedirectText {
             get {
-                return ResourceManager.GetString("ModulesViewTitle", resourceCulture);
+                return ResourceManager.GetString("RedirectText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Display mqtt messages.
+        ///   Looks up a localized string similar to Connection interrupted.
         /// </summary>
-        internal static string MqttViewerDescription {
+        internal static string Title {
             get {
-                return ResourceManager.GetString("MqttViewerDescription", resourceCulture);
+                return ResourceManager.GetString("Title", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mqtt Viewer.
+        ///   Looks up a localized string similar to Please be patient for a moment and do not leave this page..
         /// </summary>
-        internal static string MqttViewerTitle {
+        internal static string WaitText {
             get {
-                return ResourceManager.GetString("MqttViewerTitle", resourceCulture);
+                return ResourceManager.GetString("WaitText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You&apos;re not allowed in here.
+        ///   Looks up a localized string similar to Something went wrong. A connection to the server could not be established repeatedly..
         /// </summary>
-        internal static string NotAllowed {
+        internal static string WentWrongText {
             get {
-                return ResourceManager.GetString("NotAllowed", resourceCulture);
+                return ResourceManager.GetString("WentWrongText", resourceCulture);
             }
         }
     }
