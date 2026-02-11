@@ -1,0 +1,22 @@
+﻿@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication
+@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication.Enums
+
+<div id="components-reconnect-modal">
+    <AccountLayout>
+        <Heading>@Localization.ReconnectModal.Title</Heading>
+        <LeftSideContent>
+            <div class="interruption">
+                <div>@Localization.ReconnectModal.InterruptionText</div>
+                <div>@Localization.ReconnectModal.RedirectText</div>
+                <div>@Localization.ReconnectModal.WaitText</div>
+                <ContentLoadingIndication Visible=true Kind="@LoadingIndicationKind.SpinnerCenter">
+                    &nbsp;
+                </ContentLoadingIndication> 
+            </div>
+            <div class="failed">
+                <div>@Localization.ReconnectModal.WentWrongText</div>
+                <div>@Localization.ReconnectModal.AdministratorText</div>
+            </div>
+        </LeftSideContent>
+    </AccountLayout>
+</div>

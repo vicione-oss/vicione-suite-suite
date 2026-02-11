@@ -117,22 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AuthenticationInProgress" xml:space="preserve">
-    <value>Authentication in progress</value>
+  <data name="AdministratorText" xml:space="preserve">
+    <value>Please contact your administrator or try to open your application in a new browser window.</value>
   </data>
-  <data name="NotAllowed" xml:space="preserve">
-    <value>You're not allowed in here</value>
+  <data name="InterruptionText" xml:space="preserve">
+    <value>The connection to the server has been interrupted. This can happen, for example, due to a system restart, a network issue or a hardware error.</value>
   </data>
-  <data name="MqttViewerTitle" xml:space="preserve">
-    <value>Mqtt Viewer</value>
+  <data name="RedirectText" xml:space="preserve">
+    <value>You will be automatically redirected as soon as the connection is re-established. This can take up to 5 minutes.</value>
   </data>
-  <data name="MqttViewerDescription" xml:space="preserve">
-    <value>Display mqtt messages</value>
+  <data name="Title" xml:space="preserve">
+    <value>Connection interrupted</value>
   </data>
-  <data name="ModulesViewTitle" xml:space="preserve">
-    <value>Modules</value>
+  <data name="WaitText" xml:space="preserve">
+    <value>Please be patient for a moment and do not leave this page.</value>
   </data>
-  <data name="ModulesViewDescription" xml:space="preserve">
-    <value>List of installed modules</value>
+  <data name="WentWrongText" xml:space="preserve">
+    <value>Something went wrong. A connection to the server could not be established repeatedly.</value>
   </data>
 </root>

@@ -1,4 +1,5 @@
-﻿@using Microsoft.Extensions.Hosting
+﻿@using Blazor.Shared.Components.ReconnectModal
+@using Microsoft.Extensions.Hosting
 @using ViciOne.Ui.Blazor.Components.ContentLoadingIndication
 @using ViciOne.Ui.Blazor.Components.ContentLoadingIndication.Enums
 
@@ -36,25 +37,7 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <div id="components-reconnect-modal">
-        <AccountLayout>
-            <Heading>@_title</Heading>
-            <LeftSideContent>
-                <div class="interruption">
-                    <div>@_interruptionText</div>
-                    <div>@_redirectText</div>
-                    <div>@_waitText</div>
-                    <ContentLoadingIndication Visible=true Kind="@LoadingIndicationKind.SpinnerCenter">
-                        &nbsp;
-                    </ContentLoadingIndication> 
-                </div>
-                <div class="failed">
-                    <div>@_wentWrongText</div>
-                    <div>@_administratorText</div>
-                </div>
-            </LeftSideContent>
-        </AccountLayout>
-    </div>
+    <ReconnectModal />
 
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script src="_content/ViciOne.Ui.Shared.Dx/scripts/vicione-ui-shared-dx.min.js"></script>

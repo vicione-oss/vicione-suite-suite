@@ -72,6 +72,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>LogView.resx</DependentUpon>
     </Compile>
+    <Compile Update="Components\ReconnectModal\Localization\ReconnectModal.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ReconnectModal.resx</DependentUpon>
+    </Compile>
     <Compile Update="Connections\ControlPanels\Localization\ConnectionControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -483,6 +488,10 @@
     <EmbeddedResource Update="Admin\Logging\Localization\LogView.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LogView.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Components\ReconnectModal\Localization\ReconnectModal.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ReconnectModal.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Connections\ControlPanels\Localization\ConnectionControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -117,22 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AuthenticationInProgress" xml:space="preserve">
-    <value>Authentication in progress</value>
+  <data name="AdministratorText" xml:space="preserve">
+    <value>Bitte kontaktieren Sie Ihren Administrator oder versuchen Sie Ihre Anwendung in einem neuen Browser Fenster aufzurufen.</value>
   </data>
-  <data name="NotAllowed" xml:space="preserve">
-    <value>You're not allowed in here</value>
+  <data name="InterruptionText" xml:space="preserve">
+    <value>Die Verbindung zum Server wurde unterbrochen. Dies kann zum Beispiel durch ein Systemneustart, ein Netzwerk-Problem oder durch ein Hardwarefehler passieren.</value>
   </data>
-  <data name="MqttViewerTitle" xml:space="preserve">
-    <value>Mqtt Viewer</value>
+  <data name="RedirectText" xml:space="preserve">
+    <value>Sie werden automatisch weitergeleitet, sobald die Verbindung wiederhergestellt wurde. Dies kann bis zu 5 Minuten dauern.</value>
   </data>
-  <data name="MqttViewerDescription" xml:space="preserve">
-    <value>Display mqtt messages</value>
+  <data name="Title" xml:space="preserve">
+    <value>Verbindung unterbrochen</value>
   </data>
-  <data name="ModulesViewTitle" xml:space="preserve">
-    <value>Modules</value>
+  <data name="WaitText" xml:space="preserve">
+    <value>Bitte haben Sie einen Moment Geduld und verlassen Sie diese Seite nicht.</value>
   </data>
-  <data name="ModulesViewDescription" xml:space="preserve">
-    <value>List of installed modules</value>
+  <data name="WentWrongText" xml:space="preserve">
+    <value>Etwas ist schief gelaufen. Es konnte wiederholt keine Verbindung zum Server hergestellt werden.</value>
   </data>
 </root>

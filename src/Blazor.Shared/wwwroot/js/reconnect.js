@@ -1,16 +1,42 @@
-﻿document.addEventListener("DOMContentLoaded", function () {
-    const observer = new MutationObserver(mutationsList => {
-        for (let mutation of mutationsList) {
-            if (mutation.attributeName === 'class') {
-                if (mutation.target.classList.contains("components-reconnect-failed")) {
-                    window.Blazor.reconnect()
-                }
-                else if (mutation.target.classList.contains("components-reconnect-rejected")) {
-                    location.reload()
-                }
+﻿// Set up event handler
+const reconnectModal = document.getElementById("components-reconnect-modal");
+reconnectModal.addEventListener("components-reconnect-state-changed", handleReconnectStateChanged);
+
+function handleReconnectStateChanged(event) {
+    if (event.detail.state === "failed") {
+        document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
+    } else if (event.detail.state === "rejected" || event.detail.state === "resume-failed") {
+        location.reload();
+    }
+}
+
+async function retry() {
+    document.removeEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
+
+    try {
+        // Reconnect will asynchronously return:
+        // - true to mean success
+        // - false to mean we reached the server, but it rejected the connection (e.g., unknown circuit ID)
+        // - exception to mean we didn't reach the server (this can be sync or async)
+        const successful = await Blazor.reconnect();
+        if (!successful) {
+            // We have been able to reach the server, but the circuit is no longer available.
+            // We'll reload the page so the user can continue using the app as quickly as possible.
+            const resumeSuccessful = await Blazor.resumeCircuit();
+            if (!resumeSuccessful) {
+                location.reload();
+            } else {
+                reconnectModal.close();
             }
         }
-    });
+    } catch (err) {
+        // We got an exception, server is currently unavailable
+        document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
+    }
+}
 
-    observer.observe(document.getElementById("components-reconnect-modal"), { attributes: true });
-});
+async function retryWhenDocumentBecomesVisible() {
+    if (document.visibilityState === "visible") {
+        await retry();
+    }
+}
