@@ -22,7 +22,7 @@ public sealed partial class Login
     //private ILogger<Login> Logger { get; set; }
 
     [SupplyParameterFromForm]
-    private LoginFormModel Input { get; set; } = new();
+    private LoginFormModel Input { get; set; }
 
     //[SupplyParameterFromQuery]
     //private string? ReturnUrl { get; set; }
@@ -34,6 +34,7 @@ public sealed partial class Login
 
     protected override void OnInitialized()
     {
+        Input ??= new();
         //if (HttpMethods.IsGet(HttpContext.Request.Method))
         //{
         //    // Clear the existing external cookie to ensure a clean login process
