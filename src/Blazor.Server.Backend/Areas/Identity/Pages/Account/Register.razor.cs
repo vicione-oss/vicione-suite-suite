@@ -11,10 +11,11 @@ public sealed partial class Register
     private NavigationManager NavigationManager { get; set; } = default!;
 
     [SupplyParameterFromForm]
-    private RegisterFormModel Input { get; set; } = new();
+    private RegisterFormModel Input { get; set; } = default!;
 
     public void RegisterUser()
     {
-
     }
+
+    protected override void OnInitialized() => Input ??= new();
 }

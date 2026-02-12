@@ -4,7 +4,6 @@
 @using Blazor.Shared.Components
 @using Blazor.Shared.Enums
 @using Blazor.Shared.Extensions
-@using Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization
 @using ViciOne.Ui.Localization.Resources
 
 <PageTitle>@Localization.ResendEmailConfirmation.Title</PageTitle>
@@ -16,7 +15,7 @@
             <DataAnnotationsValidator />
 
             <TextInputField @bind-Value="@Input.Email"
-                            Valid="@(context.FieldCssClass(() => Input.Email) == "valid" ? true : false)"
+                            Valid="@(context.FieldCssClass(() => Input.Email) == "valid")"
                             Placeholder="@CommonVocabulary.Email"
                             Attributes="@(new() { { "autocomplete", "email" }, { "aria-required", true } })" />
 

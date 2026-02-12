@@ -8,9 +8,11 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account;
 public sealed partial class ResendEmailConfirmation
 {
     [SupplyParameterFromForm]
-    private ResendEmailConfirmationFormModel Input { get; set; } = new();
+    private ResendEmailConfirmationFormModel Input { get; set; } = default!;
 
     public void ResendEmail()
     {
     }
+
+    protected override void OnInitialized() => Input ??= new();
 }

@@ -15,23 +15,24 @@
             <DataAnnotationsValidator />
 
             <TextInputField @bind-Value="@Input.Email"
-                            Valid="@(context.FieldCssClass(() => Input.Email) == "valid" ? true : false)"
+                            Valid="@(context.FieldCssClass(() => Input.Email) == "valid")"
                             Placeholder="@CommonVocabulary.Email"
-                            Attributes="@(new() { { "autocomplete", "email" }, { "aria-required", true } })" />
+                            Attributes="@(new() { { "autocomplete", "email" }, { "aria-required", true } })"/>
             <div class="password">
                 <TextInputField @bind-Value="@Input.Password"
-                                Valid="@(context.FieldCssClass(() => Input.Password) == "valid" ? true : false)"
+                                Valid="@(context.FieldCssClass(() => Input.Password) == "valid")"
                                 Placeholder="@CommonVocabulary.Password"
                                 Password="true"
-                                Attributes="@(new() { { "aria-required", true } })" />
+                                Attributes="@(new() { { "aria-required", true } })"/>
             </div>
             <div class="password">
                 <TextInputField @bind-Value="@Input.ConfirmPassword"
-                                Valid="@(context.FieldCssClass(() => Input.ConfirmPassword) == "valid" ? true : false)"
+                                Valid="@(context.FieldCssClass(() => Input.ConfirmPassword) == "valid")"
                                 Placeholder="@Localization.Common.ConfirmPassword"
                                 Password="true"
-                                Attributes="@(new() { { "aria-required", true }, { "type", "password" } })" />
+                                Attributes="@(new() { { "aria-required", true }, { "type", "password" } })"/>
             </div>
+
             <div class="button-section">
                 <div class="cancel">
                     <AccountButton Text="@CommonVocabulary.Cancel" ButtonType="AccountButtonType.Default" OnClick="@(() => NavigationManager.NavigateTo("/template/login"))" />
