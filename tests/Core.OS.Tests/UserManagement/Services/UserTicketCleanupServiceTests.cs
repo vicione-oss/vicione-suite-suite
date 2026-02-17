@@ -55,7 +55,7 @@ public class UserTicketCleanupServiceTests
         await sut.StartAsync(cts.Token);
         try
         {
-            await Task.Delay(100, TestContext.Current.CancellationToken);
+            await Task.Delay(200, TestContext.Current.CancellationToken);
         }
         finally
         {
