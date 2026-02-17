@@ -40,6 +40,11 @@ internal sealed class ModuleAssemblyLoadContext : AssemblyLoadContext
 #if DEBUG        
         // Since .net10 the behavior of loading transitive assemblies has changed.
         // If an assembly is already loaded in the default context it will not be resolved here.
+        if (assemblyName.Name == "Microsoft.AspNetCore.Components.Forms" || assemblyName.Name == "Microsoft.Extensions.Localization")
+        {
+            return null;
+        }
+
         if (Default.Assemblies.Any(a => a.GetName().Name == assemblyName.Name))
         {
             return null;
