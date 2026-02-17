@@ -57,6 +57,7 @@
     <File Path="docs/modules.md" />
     <File Path="docs/security-and-identity.md" />
     <File Path="docs/target-platforms.md" />
+    <File Path="docs/suite-architecture.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Blazor.DevAssets/Blazor.DevAssets.csproj" />
