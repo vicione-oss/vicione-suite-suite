@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Testing.Platform" />
     <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
 

@@ -46,7 +46,7 @@
     </PropertyGroup>
     
     <!-- Testprojekte nicht packen und nicht publishen -->
-    <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('Tests')) Or $(MSBuildProjectDirectory.Contains('tests'))">
+    <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
         <IsPackable>false</IsPackable>
         <IsPublishable>false</IsPublishable>
         <CompressionEnabled>false</CompressionEnabled>
