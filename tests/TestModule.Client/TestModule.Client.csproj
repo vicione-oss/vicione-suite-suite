@@ -4,6 +4,7 @@
     <AssemblyName>ViciOne.Suite.TestModule.Client</AssemblyName>
     <RootNamespace>TestModule.Client</RootNamespace>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <CompressionEnabled>false</CompressionEnabled>
   </PropertyGroup>
 
   <ItemGroup>
