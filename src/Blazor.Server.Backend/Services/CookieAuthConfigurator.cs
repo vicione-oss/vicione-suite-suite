@@ -17,7 +17,12 @@ internal sealed class CookieAuthConfigurator(ITicketStore store) : IPostConfigur
         // Security hardening
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Strict;
+        /*
+         * For OpenID connect workflows to fully function, we need this to be Lax.
+         * Using Strict here would lead to cookies not being sent from the browser during the login process.
+         * Using Lax is no problem because our application does not offer non-idempotent GET endpoints.
+         */
+        options.Cookie.SameSite = SameSiteMode.Lax;
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
 

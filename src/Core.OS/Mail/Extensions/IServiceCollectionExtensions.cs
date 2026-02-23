@@ -1,7 +1,7 @@
 ﻿using Core.OS.Extensions;
 using Core.OS.Mail.MailKit;
 using Core.OS.Modules.Services;
-using Core.OS.Security;
+using Core.OS.UserManagement.Security;
 using Core.OS.UserManagement.Templates;
 using Core.Shared.Mail;
 using Core.Shared.Security;

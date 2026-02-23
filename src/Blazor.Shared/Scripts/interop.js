@@ -384,6 +384,10 @@
             if (element !== null) {
                 element.setAttribute(attribute, value);
             }
+        },
+        submitExistingForm: function (form) {
+            if (form)
+                form.submit();
         }
     };
 

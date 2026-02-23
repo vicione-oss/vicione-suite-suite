@@ -20,6 +20,8 @@ Welcome to the readme of ViciOne Suite. Questions and suggestions for improvemen
         * [Connection details for Backend-Services](#connection-details-for-backend-services)
     * [Modules](./docs/modules.md)
     * [OpenTelemetry](#opentelemetry)
+    * [OpenID Connect](#openid-connect)
+        * [Using OIDC in development](#using-oidc-in-development)
 * [Deployments](#deployments)
     * [Test Systems](#test-systems)
     * [Tools](#tools)
@@ -205,6 +207,35 @@ Backend services can be provided with connection details using the `MqttClient.S
     }
 }
 ```
+
+### OpenID Connect
+
+Using OIDC requires a provider to be configured. 
+The provider can be configured with the following settings:
+
+```json
+"ExternalIdProviders": {
+  "Providers": [
+    {
+      "Name": "GitLab",
+      "Authority": "https://gitlab.com",
+      "ClientId": "client id",
+      "ClientSecret": "secret"
+    }
+  ]
+}
+```
+
+> Currently, only **one provider** is supported, even though it is possible to configure multiple providers.
+
+#### Using OIDC in development
+
+For development purposes go to https://gitlab.com/-/user_settings/applications and register an application there.
+Required are the grants:
+
+- `openid`
+- `email`
+- `profile`
 
 ## Modules
 

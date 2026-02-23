@@ -18,6 +18,7 @@ public static class IServiceCollectionExtensions
         {
             services.AddScoped<IUserService, UserService>();
             services.AddTransient<IRoleService, RoleService>();
+            services.AddTransient<IExternalAccountService, ExternalAccountService>();
             services.AddUsersControlPanel();
             services.AddUserControlPanel();
             services.AddRolesControlPanel();

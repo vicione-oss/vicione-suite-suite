@@ -135,4 +135,16 @@
   <data name="WaitingForConnection" xml:space="preserve">
     <value>Waiting for connection...</value>
   </data>
+  <data name="ExternalLoginFailed" xml:space="preserve">
+    <value>External login failed</value>
+  </data>
+  <data name="NoLocalUser" xml:space="preserve">
+    <value>No local user found</value>
+  </data>
+  <data name="UnknownExternalUser" xml:space="preserve">
+    <value>No user linked to this external account</value>
+  </data>
+  <data name="LoginUsingExternalProvider" xml:space="preserve">
+    <value>Login using</value>
+  </data>
 </root>

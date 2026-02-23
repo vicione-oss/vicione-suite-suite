@@ -1,6 +1,5 @@
 ﻿@page "/account/login"
 @* This route needs to be set this way, otherwise the "MapRazorPages" method would map it to "identity/account/login". *@
-
 @model Blazor.Server.Backend.Areas.Identity.Pages.Account.LoginModel
 
 <div class="background-test" style="--background-url: url(@(ViewData["BackgroundImagePath"]))">
@@ -37,6 +36,11 @@
                     <button type="submit" class="action-button">@ViewData["Title"]</button>
                     <div id="blazor-disconnect-info" class="blazor-disconnect-info">@ViewData["Disconnected"]</div>
                 </form>
+                @if (Model.IsExternalIdProviderConfigured)
+                {
+                    <hr />
+                    <partial name="_PerformExternalLogin" />
+                }
             </div>
             <div class="spacer"></div>
         </div>

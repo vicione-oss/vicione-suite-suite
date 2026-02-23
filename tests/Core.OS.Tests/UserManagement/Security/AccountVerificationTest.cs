@@ -1,4 +1,4 @@
-﻿using Core.OS.Security;
+﻿using Core.OS.UserManagement.Security;
 using Core.Shared.Mail;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using NSubstitute;
 using Xunit;
 
-namespace Core.OS.Tests.Security;
+namespace Core.OS.Tests.UserManagement.Security;
 
 public class AccountVerificationTest
 {

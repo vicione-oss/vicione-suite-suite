@@ -11,6 +11,7 @@ using Core.OS.Persistence;
 using Core.OS.Tests.Extensions;
 using Core.Shared.HostManagement;
 using Core.Shared.Logging;
+using Core.Shared.UserManagement.Configuration;
 using Core.Tests.Tools;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -70,6 +71,7 @@ public class PlatformConfigurationTests
         Assert.NotNull(serviceProvider.GetService<IOptions<LoggingOptions>>());
         Assert.NotNull(serviceProvider.GetService<IOptions<HealthCheckPublisherOptions>>());
         Assert.NotNull(serviceProvider.GetService<IOptions<HostManagementOptions>>());
+        Assert.NotNull(serviceProvider.GetService<IOptions<ExternalIdProviderOptions>>());
         Assert.NotNull(serviceProvider.GetService<ILogOptions>());
 
         Assert.NotNull(serviceProvider.GetService<ISuiteMediator>());

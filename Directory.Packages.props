@@ -21,6 +21,7 @@
     <PackageVersion Include="MassTransit" Version="$(MassTransitVersion)" />
     <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="$(MassTransitVersion)" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="$(MassTransitVersion)" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Authorization" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Authorization" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="$(DotNetVersion)" />

@@ -14,6 +14,7 @@
 @using ViciOne.Ui.Shared.Dx.Components.Scrolling
 @using ViciOne.Ui.Blazor.Components.ComboBox
 
+
 @if (_userProfile != null)
 {
     <div>
@@ -151,17 +152,23 @@
                 <div class="overflow-area"></div>
             </ScrollContainer>
             <div class="bottom">
+                <div class="add-external-login">
+                    @if (ShowAddExternalLogin)
+                    {
+                        <AddExternalLoginButton ExternalIdProvider="OpenIdConnect" />
+                    }
+                </div>
                 <div class="change-password">
                     <LinkButton IconName="@MonochromeIconName.LockActive"
                                 CssClass="change-password-button"
                                 Text="@Localization.ProfileNotificationElementFlyoutContent.ChangePassword"
-                                OnClick="@(() => NavigationManager.NavigateTo("/account/change-password", true))" />
+                                OnClick="@(() => NavigationManager.NavigateTo("/account/change-password", true))"/>
                 </div>
                 <div class="sign-out">
                     <LinkButton IconName="@MonochromeIconName.Exit"
                                 CssClass="sign-out-button"
                                 Text="@CommonVocabulary.SignOutVerb"
-                                OnClick="@BeginSignOut" />
+                                OnClick="@BeginSignOut"/>
                 </div>
             </div>
         </div>
