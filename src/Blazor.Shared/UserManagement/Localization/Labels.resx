@@ -126,4 +126,7 @@
   <data name="RepeatNewPassword" xml:space="preserve">
     <value>Repeat new password</value>
   </data>
+  <data name="AddExternalLogin" xml:space="preserve">
+    <value>Add external login</value>
+  </data>
 </root>

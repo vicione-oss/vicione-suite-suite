@@ -6,6 +6,7 @@ using Blazor.Shared.UserManagement.Services;
 using Blazor.Shared.Validation.Services.Validators;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Requests;
+using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Mappers;
 using Microsoft.AspNetCore.Components;
@@ -19,7 +20,8 @@ using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Profile.NotificationArea;
 
-public sealed partial class ProfileNotificationElementFlyoutContent : ComponentBase, INotificationElementFlyoutContent
+public sealed partial class ProfileNotificationElementFlyoutContent(
+    IExternalAuthenticationSettings externalAuthenticationSettings) : ComponentBase, INotificationElementFlyoutContent
 {
     private UserProfile? _userProfile;
     private UserProfile? _userProfileBaseline;
@@ -31,14 +33,13 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
     private List<UserProfile> _users = [];
     private bool _canEditUserData;
     private string? _errorMessage;
-
     private List<ComboBoxItem<CultureInfo?, string>> _availableCultures = [];
     private CultureInfo? _selectedCulture;
     private bool _cultureChanged;
-
     private List<ComboBoxItem<string?, string>> _availableTimeZones = [];
     private bool _availableTimeZonesLoading = true;
     private string? _selectedTimeZone;
+    private ExternalUserAccount? _externalAccount;
 
     [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
     [Inject] private INavigationService Navigation { get; set; } = default!;
@@ -54,6 +55,10 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
     [Inject] private IEmailValidator EmailValidator { get; set; } = default!;
     [Inject] private IPhoneNumberValidator PhoneNumberValidator { get; set; } = default!;
     [Inject] private ILogger<ProfileNotificationElementFlyoutContent> Logger { get; set; } = default!;
+    [Inject] public IExternalAccountService ExternalAccountService { get; set; } = default!;
+    private bool ShowAddExternalLogin
+        => IsExternalAccountProviderConfigured && _externalAccount is null;
+    private bool IsExternalAccountProviderConfigured { get; set; }
 
     private Task BeginSignOut() => Navigation.Logout();
 
@@ -83,7 +88,10 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
         {
             _users = await UserService.GetUsers(new UserName(identityName));
             if (_users.Count > 0)
+            {
                 _userProfile = _users[0];
+                _externalAccount = await ExternalAccountService.GetExternalUserAccount(identityName);
+            }
         }
         else
         {
@@ -91,6 +99,9 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
         }
 
         _canEditUserData = true;
+
+        IsExternalAccountProviderConfigured
+            = await externalAuthenticationSettings.IsExternalAuthenticationProviderConfigured();
     }
 
     private async Task EditUserData()

@@ -21,19 +21,25 @@ public sealed class LoginModel(
     SignInManager<SuiteUser> signInManager,
     UserManager<SuiteUser> userManager,
     IAccountVerification accountVerification,
+    IExternalAuthenticationSettings externalAuthenticationSettings,
     ISuiteMediator suiteMediator,
     IMailSenderStatus senderStatus,
     ILogger<LoginModel> logger) : PageModel
 {
     public IMailSenderStatus SenderStatus { get; } = senderStatus;
 
-    [BindProperty]
-    public LoginFormModel Input { get; set; } = default!;
+    [BindProperty] public LoginFormModel Input { get; set; } = default!;
 
     public string? ReturnRoute { get; set; }
 
-    [TempData]
-    private string? ErrorMessage { get; set; }
+    [TempData] private string? ErrorMessage { get; set; }
+
+    [TempData] public int? ExternalError { get; set; }
+
+    private ExternalLoginError ExternalErrorTyped
+        => ExternalError.HasValue ? (ExternalLoginError)ExternalError : ExternalLoginError.None;
+
+    public bool IsExternalIdProviderConfigured { get; set; }
 
     public override PageResult Page()
     {
@@ -47,6 +53,12 @@ public sealed class LoginModel(
     {
         SetLocalizations();
         SetBackgroundImagePath();
+        await InitializeExternalIdProvider();
+
+        if (ExternalErrorTyped > ExternalLoginError.None)
+        {
+            ModelState.AddModelError("ExternalLogin", MapToErrorMessage(ExternalErrorTyped));
+        }
 
         if (!string.IsNullOrEmpty(ErrorMessage))
         {
@@ -58,14 +70,25 @@ public sealed class LoginModel(
         // Clear the existing external cookie to ensure a clean login process
         await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-        //ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
         ReturnRoute = returnRoute;
+    }
+
+    private static string MapToErrorMessage(ExternalLoginError externalError)
+    {
+        return externalError switch
+        {
+            ExternalLoginError.LoginFailed => Localization.Login.ExternalLoginFailed,
+            ExternalLoginError.NoLocalUser => Localization.Login.NoLocalUser,
+            ExternalLoginError.UnknownExternalUser => Localization.Login.UnknownExternalUser,
+            ExternalLoginError.None => string.Empty,
+            _ => throw new ArgumentOutOfRangeException(nameof(externalError), externalError, null)
+        };
     }
 
     public async Task<IActionResult> OnPostAsync(string? returnRoute = null)
     {
         returnRoute ??= Url.Content("~/");
+        await InitializeExternalIdProvider();
 
         if (!ModelState.IsValid)
             return Page();
@@ -149,4 +172,16 @@ public sealed class LoginModel(
 
     private void SetBackgroundImagePath()
         => ViewData["BackgroundImagePath"] = Constants.WallpaperImage.GetPath(Constants.WallpaperBaseUri);
+
+    private async Task InitializeExternalIdProvider()
+    {
+        IsExternalIdProviderConfigured
+            = await externalAuthenticationSettings.IsExternalAuthenticationProviderConfigured();
+
+        if (!IsExternalIdProviderConfigured)
+            return;
+
+        ViewData["ExternalProviderDisplayName"] = "OpenID";
+        ViewData["ExternalProviderName"] = "OpenIdConnect";
+    }
 }

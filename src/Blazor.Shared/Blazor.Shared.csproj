@@ -832,7 +832,7 @@
 
   <Target Name="ConfigureMonochromeIcons" BeforeTargets="BeforeMonochromeIconTargets">
     <ItemGroup>
-      <MonochromeIcon Include="add-user" Size="32" />
+      <MonochromeIcon Include="add-user" Size="16;32" />
       <MonochromeIcon Include="arrow-navigation-light-left" Size="16" />
       <MonochromeIcon Include="arrow-navigation-light-right" Size="16" />
       <MonochromeIcon Include="check" Size="16;24" />

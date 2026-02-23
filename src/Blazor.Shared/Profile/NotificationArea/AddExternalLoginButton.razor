@@ -1,0 +1,24 @@
+@using Blazor.Shared.UserManagement.Localization
+@using Microsoft.AspNetCore.Components.Forms
+@using Sdk.Client.Components.LinkButton
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string ExternalIdProvider { get; set; }
+
+}
+@*
+`LinkButton` currently does not offer to set the type on the button.
+Hence it cannot be used as a submit button in a form.
+This is why we need to submit the form in `OnClick`.
+*@
+<LinkButton IconName="@MonochromeIconName.AddUser"
+            CssClass="add-external-login-button"
+            Text="@Labels.AddExternalLogin"
+            OnClick="@OnExternalLoginSubmitAsync"/>
+<form @ref="form" action="/Account/Manage/LinkExternalLogin" method="post">
+    <AntiforgeryToken />
+    <input type="hidden" name="provider" value="OpenIdConnect"/>
+</form>

@@ -18,15 +18,20 @@ using Core.OS.Modules.Services;
 using Core.OS.Monitoring.Extensions;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Extensions;
+using Core.OS.UserManagement.Security;
 using Core.Shared;
+using Core.Shared.Extensions;
 using Core.Shared.HostManagement;
 using Core.Shared.Logging;
+using Core.Shared.Security;
+using Core.Shared.UserManagement.Configuration;
 using Core.Shared.UserManagement.Contracts;
 using MassTransit.Logging;
 using MassTransit.Monitoring;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -47,6 +52,7 @@ internal static class IServiceCollectionExtensions
             services.AddSuiteOptions<LoggingOptions>(LoggingOptions.ConfigSection);
             services.AddSuiteOptions<HostManagementOptions>(HostManagementOptions.ConfigSection);
             services.AddSuiteOptions<ArtifactRepositoryOptions>(ArtifactRepositoryOptions.ConfigSection);
+            services.AddSuiteOptions<ExternalIdProviderOptions>(ExternalIdProviderOptions.ConfigSection);
 
             services.AddTransient<ILogOptions>(s => s.GetRequiredService<IOptions<LoggingOptions>>().Value)
                 .Configure<HealthCheckPublisherOptions>(options =>
@@ -97,7 +103,7 @@ internal static class IServiceCollectionExtensions
             moduleHost.AddUiHostServices(services,
                 (svc) =>
                 {
-                    return svc
+                    var identityBuilder = svc
                         .AddIdentity<SuiteUser, SuiteRole>(options =>
                         {
                             options.SignIn.RequireConfirmedAccount
@@ -108,6 +114,10 @@ internal static class IServiceCollectionExtensions
                         })
                         .AddEntityFrameworkStores<UserDbContext>()
                         .AddDefaultTokenProviders();
+                    services.AddTransient<IExternalAuthenticationSettings, ExternalAuthenticationSettings>();
+
+                    services.AddExternalAuthentication(config);
+                    return identityBuilder;
                 });
 
             // here we should have a valid configuration and loaded assemblies
@@ -140,6 +150,40 @@ internal static class IServiceCollectionExtensions
 
             return services;
         }
+
+        private void AddExternalAuthentication(IConfiguration config)
+        {
+            var externalIdProvider = config.GetExternalIdProviderOptions()?.Providers.FirstOrDefault();
+
+            if (externalIdProvider is null)
+                return;
+
+            services.AddAuthentication()
+                .AddOpenIdConnect(connectOptions =>
+                {
+                    connectOptions.Authority = externalIdProvider.Authority;
+                    connectOptions.ClientId = externalIdProvider.ClientId;
+                    connectOptions.ClientSecret = externalIdProvider.ClientSecret;
+
+                    connectOptions.ResponseType = OpenIdConnectResponseType.Code;
+                    connectOptions.SaveTokens = true;
+
+                    // IMPORTANT: Set to false ONLY for local HTTP development. MUST be true in production.
+                    connectOptions.RequireHttpsMetadata = true;
+
+                    connectOptions.Scope.Clear();
+                    connectOptions.Scope.Add(OpenIdConnectScope.OpenId); // Required for OIDC
+                    connectOptions.Scope.Add(OpenIdConnectScope.Profile); // Request basic user profile claims
+                    connectOptions.Scope.Add(OpenIdConnectScope.Email); // Request email claim
+
+                    connectOptions.CallbackPath = "/signin-oidc";
+                    connectOptions.SignedOutCallbackPath = "/signout-callback-oidc";
+
+                    connectOptions.GetClaimsFromUserInfoEndpoint = false;
+                    connectOptions.MapInboundClaims = true;
+                });
+        }
+
 
         private IServiceCollection AddCoreDbContexts()
         {

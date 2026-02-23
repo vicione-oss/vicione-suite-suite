@@ -3,7 +3,7 @@ using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 
-namespace Core.OS.Security;
+namespace Core.OS.UserManagement.Security;
 
 public class AccountVerification(
     IMailSenderStatus mailSenderStatus,

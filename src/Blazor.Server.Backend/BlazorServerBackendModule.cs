@@ -80,7 +80,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
         services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();
     }
-
+    
     public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccured = null)
     {
         var failedModuleIds = new List<string>();
@@ -176,6 +176,8 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
         // map endpoints for e.g. DebugController
         endpoints.MapControllers();
+
+        endpoints.MapExternalIdentityEndpoints();
 
         // add authentication pages /Account/*
         // https://andrewlock.net/should-you-use-the-dotnet-8-identity-api-endpoints/

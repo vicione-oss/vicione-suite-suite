@@ -5,6 +5,10 @@
 ### Added
 
 - A button to copy system information for easy bug reporting was added to the `System & Notification` sidebar
+- Support for external OIDC providers, allowing users to authenticate via third-party identity providers
+- Configuration options for OIDC discovery endpoints, client IDs, and client secrets
+
+- `Microsoft.AspNetCore.Authentication.OpenIdConnect` package
 
 ### Changed
 
@@ -323,7 +327,7 @@
 
 ### Changed
 
-- Update of control panels, navigation tiles and notification elements when authentication state changes
+- Update of control panels, navigation tiles, and notification elements when authentication state changes
 
 ### Updated
 
@@ -597,7 +601,7 @@
 
 ### Fixed
 
-- Fix configuration source ordering (overide module options by appsettings, env or secrets)
+- Fix configuration source ordering (overide module options by appsettings, env, or secrets)
 
 ## 0.19.0 - 2024-11-08
 
