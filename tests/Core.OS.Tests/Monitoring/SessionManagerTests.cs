@@ -16,7 +16,7 @@ public class SessionManagerTests
             // Arrange
             var fieldSet = new[] { "level", "status" };
             var session = Substitute.For<IJournalGenericSession>();
-            session.GetLogs(int.MaxValue, true, false).Returns(
+            session.GetLogs(Arg.Any<int>(), true, false).Returns(
             [
                 new Dictionary<string,string> { ["level"]="info", ["status"]="ok", ["ignored"]="x" },
                 new Dictionary<string,string> { ["status"]="ok" }
@@ -53,7 +53,7 @@ public class SessionManagerTests
         {
             // Arrange
             var session = Substitute.For<IJournalGenericSession>();
-            session.GetLogs(int.MaxValue, true, false)
+            session.GetLogs(Arg.Any<int>(), true, false)
                 .Returns([new Dictionary<string, string> { ["level"] = "info" }]);
             session.GetCursor().Returns("C1");
 
@@ -78,11 +78,11 @@ public class SessionManagerTests
         {
             // Arrange
             var session = Substitute.For<IJournalGenericSession>();
-            session.GetLogs(int.MaxValue, Arg.Any<bool>(), true)
+            session.GetLogs(Arg.Any<int>(), Arg.Any<bool>(), true)
                 .Returns([
                     new Dictionary<string, string> { ["level"] = "info" },
                 ]);
-            session.GetLogs(int.MaxValue, Arg.Any<bool>(), false)
+            session.GetLogs(Arg.Any<int>(), Arg.Any<bool>(), false)
                 .Returns([
                     new Dictionary<string, string> { ["level"] = "info" },
                     new Dictionary<string, string> { ["level"] = "info" },

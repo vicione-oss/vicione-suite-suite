@@ -19,7 +19,7 @@ internal static class IServiceCollectionExtensions
             if (OperatingSystem.IsLinux())
             {
                 services.AddOptions<JournalOptions>();
-                services.AddSingleton<JournalService>();
+                services.AddSingleton<IJournalService, JournalService>();
             }
             return services;
         }

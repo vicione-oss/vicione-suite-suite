@@ -14,6 +14,8 @@
 
 - Replaced `DxPopup` with `ViciOne.Ui.Blazor.Components.Popup`
 - `SystemDefaultControlPanelPage`, changed wording in description banner
+- Updated `Serilog.Sinks.Journal` to `1.1.0`
+- Updated `ViciOne.Journal` to `1.1.0`
 
 ### Removed
 

@@ -12,7 +12,7 @@ public sealed partial class JournalView : ComponentBase, IDisposable
 {
     private JournalLookBehindSession? _lookBehind;
 
-    [Inject] private JournalService JournalService { get; set; } = default!;
+    [Inject] private IJournalService JournalService { get; set; } = default!;
     [Inject] private ILogger<JournalView> Logger { get; set; } = default!;
     [Parameter] public string Filter { get; set; } = string.Empty;
 

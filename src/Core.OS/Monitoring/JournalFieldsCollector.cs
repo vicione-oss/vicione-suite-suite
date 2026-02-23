@@ -15,7 +15,7 @@ public sealed class JournalFieldsCollector(IOptions<JournalFieldsCollectorOption
     public int IntervalInMinutes => 1;
     public string Name => Collectors.JournalFields;
 
-    public JournalFieldsCollector(IOptions<JournalFieldsCollectorOptions> options, IJournalMonitoring journalMonitoring, JournalService journalService)
+    public JournalFieldsCollector(IOptions<JournalFieldsCollectorOptions> options, IJournalMonitoring journalMonitoring, IJournalService journalService)
         : this(options, journalMonitoring, async c => await journalService.CreateGeneric(c).ConfigureAwait(false))
     { }
 

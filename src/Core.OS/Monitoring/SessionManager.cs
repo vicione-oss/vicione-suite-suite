@@ -4,6 +4,8 @@ namespace Core.OS.Monitoring;
 
 internal sealed class SessionManager(Func<CancellationToken, Task<IJournalGenericSession>> createGenericSession, string filter, IReadOnlyCollection<string> fields, StringComparer stringComparer)
 {
+    private const int MaxLogEntries = 1000;
+
     private string? _lastCursor;
 
     private readonly Dictionary<string, int> _countsBuffer = new(stringComparer);
@@ -16,7 +18,7 @@ internal sealed class SessionManager(Func<CancellationToken, Task<IJournalGeneri
         session.SetFilter(filter);
         var positionIsCursor = SetPosition();
 
-        foreach (var entry in session.GetLogs(int.MaxValue, true, positionIsCursor))
+        foreach (var entry in session.GetLogs(MaxLogEntries, true, positionIsCursor))
         {
             cancellationToken.ThrowIfCancellationRequested();
 

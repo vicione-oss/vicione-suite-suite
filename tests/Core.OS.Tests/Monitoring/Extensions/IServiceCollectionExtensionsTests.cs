@@ -31,7 +31,7 @@ public sealed class IServiceCollectionExtensionsTests
             if (!OperatingSystem.IsLinux())
                 return;
 
-            services.Should().Contain(s => s.ServiceType == typeof(JournalService));
+            services.Should().Contain(s => s.ServiceType == typeof(IJournalService));
 
             await using var sp = services.BuildServiceProvider();
             sp.GetService<IOptions<JournalOptions>>().Should().NotBeNull();
