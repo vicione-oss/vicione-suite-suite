@@ -1,5 +1,6 @@
 ﻿using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts;
+using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.Options;
 using Timer = System.Timers.Timer;
 
@@ -10,6 +11,8 @@ public sealed class SystemConfigurationCache(IOptions<HostManagementOptions> opt
     private readonly long _cacheLifetimeMs = options.Value.ConfigurationCacheLifetimeMs;
     private Timer? _cacheInvalidationTimer;
     private SystemConfiguration? _cachedConfiguration;
+    private Dictionary<string, DHCPLease?>? _cachedDhcpLeases;
+    private List<string>? _cachedNtpFallbackServers;
     private readonly Lock _lock = new();
 
     public void Set(SystemConfiguration config)
@@ -33,6 +36,28 @@ public sealed class SystemConfigurationCache(IOptions<HostManagementOptions> opt
     public SystemConfiguration? Get()
         => _cachedConfiguration;
 
+    public void SetDhcpLeases(Dictionary<string, DHCPLease?> dhcpLeases)
+    {
+        lock (_lock)
+        {
+            _cachedDhcpLeases = dhcpLeases;
+        }
+    }
+
+    public Dictionary<string, DHCPLease?>? GetDhcpLeases()
+        => _cachedDhcpLeases;
+
+    public void SetNtpFallbackServers(List<string> fallbackServers)
+    {
+        lock (_lock)
+        {
+            _cachedNtpFallbackServers = fallbackServers;
+        }
+    }
+
+    public List<string>? GetNtpFallbackServers()
+        => _cachedNtpFallbackServers;
+
     public void Dispose() => _cacheInvalidationTimer?.Dispose();
 
     public void Invalidate()
@@ -40,6 +65,8 @@ public sealed class SystemConfigurationCache(IOptions<HostManagementOptions> opt
         lock (_lock)
         {
             _cachedConfiguration = null;
+            _cachedDhcpLeases = null;
+            _cachedNtpFallbackServers = null;
             _cacheInvalidationTimer?.Dispose();
             _cacheInvalidationTimer = null;
         }

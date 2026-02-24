@@ -8,7 +8,7 @@ using HostManagement.Shared.Contracts.Service;
 using HostManagement.Shared.Enums;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration;
-using SdkServiceState = Sdk.SystemConfiguration.Contracts.Service.ServiceState;
+using SdkServiceState = Sdk.SystemConfiguration.Contracts.ServiceState;
 
 namespace Core.OS.HostManagement;
 

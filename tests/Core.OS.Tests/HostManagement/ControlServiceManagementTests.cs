@@ -2,13 +2,13 @@
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement.Services;
 using AwesomeAssertions;
-using HostManagement.Shared.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.SystemConfiguration;
-using Sdk.SystemConfiguration.Contracts.Service;
+using Sdk.SystemConfiguration.Contracts;
 using Xunit;
+using HmSystemConfiguration = HostManagement.Shared.Contracts.SystemConfiguration;
 
 namespace Core.OS.Tests.HostManagement;
 
@@ -20,7 +20,7 @@ public sealed class ControlServiceManagementTests
     {
         var systemConfigurationService = Substitute.For<ISystemConfigurationService>();
 
-        systemConfigurationService.SystemConfiguration.Returns(new SystemConfiguration());
+        systemConfigurationService.SystemConfiguration.Returns(new HmSystemConfiguration());
 
         return new ServiceCollection()
             .AddSingleton<ControlServiceManagement>()

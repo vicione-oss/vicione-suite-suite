@@ -2,7 +2,7 @@
 using System.IO.Compression;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
-using Sdk.SystemConfiguration.Contracts;
+using HostManagement.Shared.Contracts;
 
 namespace Core.OS.Instance.Services;
 
@@ -16,7 +16,7 @@ public static class BackupReader
 
     public static async Task<BackupMetadata> GetBackupMetadata(Stream archiveStream, CancellationToken cancellationToken = default)
     {
-        using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read, true);
+        await using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read, true);
         return await GetBackupMetadata(archive, cancellationToken);
     }
 
@@ -76,7 +76,7 @@ public static class BackupReader
 
     public static async Task<SystemConfiguration?> GetSystemConfiguration(Stream archiveStream, CancellationToken cancellationToken = default)
     {
-        using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read, true);
+        await using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read, true);
         return await GetSystemConfiguration(archive, cancellationToken);
     }
 
