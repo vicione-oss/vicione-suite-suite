@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
-using Core.OS.HostManagement.Mappers;
 using Core.OS.Instance;
 using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Contracts;
@@ -24,13 +23,6 @@ internal static class IPipeClientExtensions
                 CommunicationJsonContext.Default.InstallSignedDebianPackageResult);
         }
 
-        public Task<SetSystemConfigurationResult?> SetMappedSystemConfiguration(Sdk.SystemConfiguration.Contracts.SystemConfiguration systemConfiguration, CancellationToken cancellationToken = default)
-        {
-            var mapper = new SystemConfigurationMapper();
-            var hmConfig = mapper.ToHostManagementFormat(systemConfiguration);
-
-            return pipeClient.SetSystemConfiguration(hmConfig, cancellationToken);
-        }
 
         public async Task<SetSystemConfigurationResult?> SetSystemConfiguration(SystemConfiguration systemConfiguration, CancellationToken cancellationToken = default)
         {

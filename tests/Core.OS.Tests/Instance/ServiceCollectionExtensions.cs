@@ -1,12 +1,12 @@
 ﻿using AutoFixture;
 using Core.OS.Modules;
+using Core.Shared.HostManagement;
 using Core.Shared.Modules.Contracts;
+using HostManagement.Shared.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Modules;
-using Sdk.SystemConfiguration.Contracts;
-using Sdk.SystemConfiguration.Requests;
 using Sdk.Testing.Backend;
 
 namespace Core.OS.Tests.Instance;
@@ -66,8 +66,8 @@ public static class ServiceCollectionExtensions
 
             var mediator = Substitute.For<ISuiteMediator>();
             mediator.SetupRequest(
-                new GetSystemConfiguration(),
-                new GetSystemConfigurationResponse
+                new GetHostMgmtSystemConfiguration(),
+                new GetHostMgmtSystemConfigurationResponse
                 {
                     Configuration = systemConfiguration
                 });

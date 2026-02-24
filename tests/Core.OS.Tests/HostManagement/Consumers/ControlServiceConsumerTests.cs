@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration;
-using Sdk.SystemConfiguration.Contracts.Service;
+using Sdk.SystemConfiguration.Contracts;
 using Sdk.SystemConfiguration.Events;
 using Sdk.Testing.Backend;
 using Xunit;

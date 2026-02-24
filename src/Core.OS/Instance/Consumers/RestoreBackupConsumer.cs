@@ -2,7 +2,6 @@
 using Core.Module.Comparer;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Extensions;
-using Core.OS.HostManagement.Mappers;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
@@ -11,11 +10,11 @@ using Core.Shared.Instance.Commands;
 using Core.Shared.Persistence.Commands;
 using Core.Shared.Persistence.Events;
 using HostManagement.Shared.Communication.Enums;
+using HostManagement.Shared.Contracts;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using Sdk.Backend.Modules;
 using Sdk.Messaging;
-using Sdk.SystemConfiguration.Contracts;
 
 namespace Core.OS.Instance.Consumers;
 
@@ -146,7 +145,7 @@ public sealed partial class RestoreBackupConsumer(
 
         // If we apply configuration from backup and we have network changes
         // a restart of the system/suite will be triggered
-        var result = await pipeClient.SetMappedSystemConfiguration(systemConfiguration, context.CancellationToken);
+        var result = await pipeClient.SetSystemConfiguration(systemConfiguration, context.CancellationToken);
         if (result?.Status != OperationStatus.Success)
             throw new InvalidOperationException(result?.Message);
 
@@ -159,11 +158,10 @@ public sealed partial class RestoreBackupConsumer(
             return false;
 
         var configurationResult = await pipeClient.GetSystemConfiguration(cancellationToken);
-        if (configurationResult?.Status != OperationStatus.Success)
+        if (configurationResult?.Status != OperationStatus.Success || configurationResult.Configuration is null)
             return false;
 
-        var mapper = new SystemConfigurationMapper();
-        var current = mapper.ToSuiteFormat(configurationResult.Configuration);
+        var current = configurationResult.Configuration;
 
         // configuration that modifies linux netplan config can trigger restart of network interface
         // that will automatically trigger suite restart

@@ -1,6 +1,8 @@
 ﻿using Core.OS.HostManagement.Extensions;
 using Core.OS.HostManagement.Mappers;
 using HostManagement.Shared.Communication.Enums;
+using HostManagement.Shared.Contracts;
+using HostManagement.Shared.Contracts.Network;
 using MassTransit;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration.Requests;
@@ -12,11 +14,11 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
 {
     protected override async Task<GetSystemConfigurationResponse> Respond(ConsumeContext<GetSystemConfiguration> context)
     {
-        var mapper = new SystemConfigurationMapper();
         var config = responseCache.Get();
         if (config is not null)
         {
-            return new GetSystemConfigurationResponse { Configuration = mapper.ToSuiteFormat(config) };
+            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(config, context.CancellationToken);
+            return new GetSystemConfigurationResponse { Configuration = config.ToSuiteFormat(dhcpLeases, ntpFallback) };
         }
 
         var configurationResult = await pipeClient.GetSystemConfiguration(context.CancellationToken);
@@ -31,19 +33,72 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
             responseCache.Set(configurationResult.Configuration);
 
         if (configurationResult.Status == OperationStatus.Success)
-            return new GetSystemConfigurationResponse { Configuration = mapper.ToSuiteFormat(configurationResult.Configuration) };
+        {
+            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(configurationResult.Configuration, context.CancellationToken);
+            return new GetSystemConfigurationResponse { Configuration = configurationResult.Configuration.ToSuiteFormat(dhcpLeases, ntpFallback) };
+        }
 
         if (configurationResult.Status == OperationStatus.Warning)
         {
             LogWarningStatusReturned(logger, configurationResult.Message);
 
-            return new GetSystemConfigurationResponse { Configuration = mapper.ToSuiteFormat(configurationResult.Configuration) };
+            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(configurationResult.Configuration, context.CancellationToken);
+            return new GetSystemConfigurationResponse { Configuration = configurationResult.Configuration.ToSuiteFormat(dhcpLeases, ntpFallback) };
         }
 
         // OperationStatus.Error
         LogErrorStatusReturned(logger, configurationResult.Message);
 
         return new GetSystemConfigurationResponse { RequestError = new ErrorInfo(3, configurationResult.Message) };
+    }
+
+    private async Task<(Dictionary<string, DHCPLease?> DhcpLeases, List<string> NtpFallback)> GetOrFetchAdditionalData(
+        SystemConfiguration? config, CancellationToken cancellationToken)
+    {
+        var dhcpLeases = responseCache.GetDhcpLeases();
+        if (dhcpLeases is null)
+        {
+            dhcpLeases = await FetchDhcpLeases(config, cancellationToken);
+            responseCache.SetDhcpLeases(dhcpLeases);
+        }
+
+        var ntpFallback = responseCache.GetNtpFallbackServers();
+        if (ntpFallback is null)
+        {
+            ntpFallback = await FetchNtpFallbackServers(cancellationToken);
+            responseCache.SetNtpFallbackServers(ntpFallback);
+        }
+
+        return (dhcpLeases, ntpFallback);
+    }
+
+    private async Task<Dictionary<string, DHCPLease?>> FetchDhcpLeases(SystemConfiguration? config, CancellationToken cancellationToken)
+    {
+        var leases = new Dictionary<string, DHCPLease?>();
+
+        if (config?.NetworkInterfacesSettings is null)
+            return leases;
+
+        foreach (var nInterface in config.NetworkInterfacesSettings.NetworkInterfaces)
+        {
+            if (!nInterface.IPv4.DHCPEnabled)
+                continue;
+
+            var result = await pipeClient.GetDHCPLeaseInformation(nInterface.CommonInformation.Name, cancellationToken);
+            leases[nInterface.CommonInformation.Name] = result is { Status: OperationStatus.Success }
+                ? result.DHCPLease
+                : null;
+        }
+
+        return leases;
+    }
+
+    private async Task<List<string>> FetchNtpFallbackServers(CancellationToken cancellationToken)
+    {
+        var result = await pipeClient.GetNTPFallbackInformation(cancellationToken);
+        return result is { Status: OperationStatus.Success }
+            ? result.FallbackNTPServers
+            : [];
     }
 
     protected override Task<GetSystemConfigurationResponse> HandleException(ConsumeContext<GetSystemConfiguration> context,

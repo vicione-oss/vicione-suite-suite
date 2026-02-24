@@ -3,12 +3,12 @@ using System.IO.Compression;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Modules;
+using Core.Shared.HostManagement;
 using Core.Shared.Persistence.Contracts;
+using HostManagement.Shared.Contracts;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Sdk.Modules;
-using Sdk.SystemConfiguration.Contracts;
-using Sdk.SystemConfiguration.Requests;
 
 namespace Core.OS.Instance.Services;
 
@@ -265,7 +265,7 @@ internal sealed partial class BackupBuilder
 
         using var scope = services.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<ISuiteMediator>();
-        var response = await mediator.Request<GetSystemConfiguration, GetSystemConfigurationResponse>(new(), cancellationToken);
+        var response = await mediator.Request<GetHostMgmtSystemConfiguration, GetHostMgmtSystemConfigurationResponse>(new(), cancellationToken);
 
         // if no HM is installed SystemConfiguration can be null
         return await AddSystemConfigurationBackupEntry(zipArchive, response.Configuration, cancellationToken);
