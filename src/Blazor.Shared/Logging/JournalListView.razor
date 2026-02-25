@@ -6,6 +6,7 @@
     @if (LoadMore is not null)
     {
         <Button OnClick="LoadMore" Text="Load More" CssClass="journal-button"/>
+        <Button OnClick="@(() => DownloadEntriesAsync())" Text="Download" CssClass="journal-button"/>
     }
     <ul class="journal-list">
         @foreach (var entry in Entries)
