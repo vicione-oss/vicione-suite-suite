@@ -15,6 +15,14 @@
 - Replaced `DxPopup` with `ViciOne.Ui.Blazor.Components.Popup`
 - `SystemDefaultControlPanelPage`, changed wording in description banner
 
+### Removed
+
+- `SettingsContainerContentHeader`, removed workaround to control size of "navigate back" icon, replaced by using larger icon and placement adjustments
+
+### Fixed
+
+- Tags in `ConnectionChanged` event after deleting a connection will now be properly filled
+
 ### Updated
 
 - `AspNetCore.SassCompiler` packages, update to version `1.97.1`
@@ -37,10 +45,6 @@
 - `ViciOne.Ui.Shared.Dx` packages, update to version `0.19.1`
 - `xunit` packages, update to version `xunit.v3 - 3.2.2`
 - `xunit.extensibility.core` packages, update to version `xunit.v3.extensibility.core - 3.2.2`
-
-### Removed
-
-- `SettingsContainerContentHeader`, removed workaround to control size of "navigate back" icon, replaced by using larger icon and placement adjustments
 
 ## 1.1.0 - 2025-12-18
 
