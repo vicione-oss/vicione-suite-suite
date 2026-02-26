@@ -24,7 +24,7 @@ public sealed class CreateConnectionConsumerDefinition : ConsumerDefinition<Crea
 /// <summary>
 /// this is used by modules to seed connections - only new connections will be added! 
 /// </summary>
-public class CreateConnectionConsumer(IConnectionDbContext dbContext, ILogger<CreateConnectionConsumer> logger) : IConsumer<CreateConnection>
+public sealed class CreateConnectionConsumer(IConnectionDbContext dbContext, ILogger<CreateConnectionConsumer> logger) : IConsumer<CreateConnection>
 {
     public async Task Consume(ConsumeContext<CreateConnection> context)
     {

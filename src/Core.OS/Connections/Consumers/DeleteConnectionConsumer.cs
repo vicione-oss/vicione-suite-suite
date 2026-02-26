@@ -18,6 +18,7 @@ public sealed class DeleteConnectionConsumer(IConnectionDbContext dbContext, ILo
             nameof(DeleteConnection), correlationId, context.Message.ConnectionId);
 
         var connectionToDelete = await dbContext.Connections
+            .Include(c => c.Tags)
             .SingleOrDefaultAsync(connection => connection.Id.Equals(context.Message.ConnectionId), context.CancellationToken);
         if (connectionToDelete is null)
             return;
