@@ -15,6 +15,18 @@ public sealed class LoggingOptions : ILogOptions
     public LoggingResourceOptions? Resources { get; set; }
     [ValidateObjectMembers]
     public LoggingLogLevelOptions? LogLevel { get; set; }
+    [ValidateObjectMembers]
+    public LoggingSpamGuardOptions? SpamGuard { get; set; }
+}
+
+public sealed class LoggingSpamGuardOptions
+{
+    public const string ConfigSection = "SpamGuard";
+
+    public bool? Enabled { get; set; }
+    public int? WindowSizeSeconds { get; set; }
+    [Range(1, int.MaxValue)]
+    public int? SummaryCountThreshold { get; set; }
 }
 
 public sealed class LoggingResourceOptions

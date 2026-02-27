@@ -10,9 +10,9 @@ namespace Blazor.Shared.Logging;
 [SupportedOSPlatform("linux")]
 public sealed partial class JournalFollowView : ComponentBase, IDisposable
 {
-    private JournalFollowSession? _follower;
+    private IJournalFollowSession? _follower;
 
-    [Inject] private JournalService JournalService { get; set; } = default!;
+    [Inject] private IJournalService JournalService { get; set; } = default!;
     [Inject] private ILogger<JournalView> Logger { get; set; } = default!;
     [Parameter] public string Filter { get; set; } = string.Empty;
 

@@ -85,7 +85,7 @@ internal static class LoggingConfiguration
     }
 
     private static LoggerConfiguration AddLoggingTargets(this LoggerConfiguration loggerConfiguration,
-        ILogOptions logOptions)
+        LoggingOptions logOptions)
     {
         var logTargets = logOptions.GetLogTargets().ToArray();
 
@@ -133,7 +133,12 @@ internal static class LoggingConfiguration
             var template = new ExpressionTemplate(JournalLogtemplate);
 
 #pragma warning disable CA2000 // Serilog calls Dispose
-            loggerConfiguration.WriteTo.Sink(new JournalSink(null, template));
+            loggerConfiguration.WriteTo.Sink(new JournalSink(null, template, true, true, new()
+            {
+                Enabled = logOptions.SpamGuard?.Enabled ?? true,
+                Window = TimeSpan.FromSeconds(logOptions.SpamGuard?.WindowSizeSeconds ?? 5),
+                SummaryCountThreshold = logOptions.SpamGuard?.SummaryCountThreshold ?? 1000,
+            }));
 #pragma warning restore CA2000
         }
 
