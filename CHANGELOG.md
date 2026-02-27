@@ -9,6 +9,7 @@
 - Configuration options for OIDC discovery endpoints, client IDs, and client secrets
 
 - `Microsoft.AspNetCore.Authentication.OpenIdConnect` package
+- A Button to download Journal entries as text was added to `JournalListView`
 
 ### Changed
 
