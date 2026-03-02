@@ -69,7 +69,7 @@ public class InMemoryClusterInformationProviderTests
 
             await clusterInformationProvider.Initialize(mediator, TestContext.Current.CancellationToken);
 
-            var result = await clusterInformationProvider.GetHealthStatus(guid);
+            var result = await clusterInformationProvider.GetHealthStatus(guid, TestContext.Current.CancellationToken);
 
             result.Should().BeNull();
         }
@@ -159,7 +159,7 @@ public class InMemoryClusterInformationProviderTests
             if (slaveHealthStatus is not null)
                 await clusterInformationProvider.ChangeHealthInfo(guidSlave, (HealthStatus)slaveHealthStatus, DateTimeOffset.Now);
 
-            var result = await clusterInformationProvider.IsClusterHealthy();
+            var result = await clusterInformationProvider.IsClusterHealthy(TestContext.Current.CancellationToken);
 
             result.Should().Be(expected);
         }
@@ -264,7 +264,7 @@ public class InMemoryClusterInformationProviderTests
 
             await clusterInformationProvider.ChangeHealthInfo(guid, HealthStatus.Healthy, DateTimeOffset.Now);
 
-            var result = await clusterInformationProvider.GetHealthStatus(guid);
+            var result = await clusterInformationProvider.GetHealthStatus(guid, TestContext.Current.CancellationToken);
 
             result.Should().Be(HealthStatus.Healthy);
             called.Should().BeTrue();

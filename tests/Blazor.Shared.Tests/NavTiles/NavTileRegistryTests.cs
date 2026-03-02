@@ -178,6 +178,169 @@ public sealed class NavTileRegistryTests
         navTileRegistryChanged.Should().BeTrue();
     }
 
+    [Fact]
+    public void Should_not_trigger_changed_event_after_begin_update()
+    {
+        // Arrange
+        var services = new ServiceCollection()
+            .AddNavTilesInfrastructure()
+            .AddNavTiles<TestClientModuleA>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        var navTileRegistry = serviceProvider.GetRequiredService<INavTileRegistry<TestClientModuleA>>();
+
+        var navTileRegistryChanged = false;
+        navTileRegistry.Changed += () => navTileRegistryChanged = true;
+
+        // Act
+        navTileRegistry.BeginUpdate();
+
+        navTileRegistry.Add<TestClientModuleA.NavTile>(Guid.NewGuid().ToString());
+
+        while (navTileRegistry.Any())
+            navTileRegistry.Remove(navTileRegistry.First().Id);
+
+        // Assert
+        navTileRegistryChanged.Should().Be(false);
+    }
+
+    [Fact]
+    public void Should_trigger_changed_event_on_end_update()
+    {
+        // Arrange
+        var services = new ServiceCollection()
+            .AddNavTilesInfrastructure()
+            .AddNavTiles<TestClientModuleA>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        var navTileRegistryChangedCounter = 0;
+
+        var navTileRegistry = serviceProvider.GetRequiredService<INavTileRegistry<TestClientModuleA>>();
+        navTileRegistry.Changed += () => navTileRegistryChangedCounter++;
+
+        // Act
+        navTileRegistry.BeginUpdate();
+        try
+        {
+            navTileRegistry.Add<TestClientModuleA.NavTile>(Guid.NewGuid().ToString());
+            navTileRegistry.Remove(navTileRegistry.First().Id);
+        }
+        finally
+        {
+            navTileRegistry.EndUpdate();
+        }
+
+        // Assert
+        navTileRegistryChangedCounter.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Should_trigger_changed_event_on_outer_end_update()
+    {
+        // Arrange
+        var services = new ServiceCollection()
+            .AddNavTilesInfrastructure()
+            .AddNavTiles<TestClientModuleA>();
+
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        var navTileRegistryChangedCounter = 0;
+
+        var navTileRegistry = serviceProvider.GetRequiredService<INavTileRegistry<TestClientModuleA>>();
+        navTileRegistry.Changed += () => ++navTileRegistryChangedCounter;
+
+        static async Task RandomUpdateTask(Random random, INavTileRegistry<TestClientModuleA> registry)
+        {
+            var delay = random.Next(0, 100);
+            await Task.Delay(delay);
+
+            registry.BeginUpdate();
+            try
+            {
+                var coinToss = random.Next(0, 2);
+
+                if (coinToss == 0)
+                {
+                    var registryItem = registry.FirstOrDefault();
+                    if (registryItem is not null)
+                        registry.Remove(registryItem.Id);
+                    else
+                        coinToss = 1;
+                }
+
+                if (coinToss == 1)
+                {
+                    registry.Add<TestClientModuleA.NavTile>(Guid.NewGuid().ToString());
+                }
+            }
+            finally
+            {
+                registry.EndUpdate();
+            }
+        }
+
+        // Act
+        navTileRegistry.BeginUpdate();
+        try
+        {
+            var random = new Random();
+
+            var updateTasks = new List<Task>();
+            for (var i = 0; i < 1000; i++)
+                updateTasks.Add(RandomUpdateTask(random, navTileRegistry));
+
+            await Task.WhenAll(updateTasks);
+        }
+        finally
+        {
+            navTileRegistry.EndUpdate();
+        }
+
+        // Assert
+        navTileRegistryChangedCounter.Should().Be(1);
+    }
+
+    [Fact]
+    public void Should_increase_update_lock_on_begin_update()
+    {
+        // Arrange
+        var services = new ServiceCollection()
+            .AddNavTilesInfrastructure()
+            .AddNavTiles<TestClientModuleA>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        var navTileRegistry = serviceProvider.GetRequiredService<INavTileRegistry<TestClientModuleA>>();
+
+        // Act
+        navTileRegistry.BeginUpdate();
+
+        // Assert
+        navTileRegistry.UpdateLock.Should().Be(1);
+    }
+
+    [Fact]
+    public void Should_decrease_update_lock_on_end_update()
+    {
+        // Arrange
+        var services = new ServiceCollection()
+            .AddNavTilesInfrastructure()
+            .AddNavTiles<TestClientModuleA>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        var navTileRegistry = serviceProvider.GetRequiredService<INavTileRegistry<TestClientModuleA>>();
+
+        // Act
+        navTileRegistry.BeginUpdate();
+        navTileRegistry.EndUpdate();
+
+        // Assert
+        navTileRegistry.UpdateLock.Should().Be(0);
+    }
+
     public sealed class TestClientModuleA : IClientModule
     {
         public const string ModuleId = "TestClientModuleA";

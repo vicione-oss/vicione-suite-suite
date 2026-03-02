@@ -61,7 +61,7 @@ public sealed partial class AuthenticationCookieUpdater : ComponentBase, IAsyncD
 
         var nonce = await NonceStore.Create(cancellationToken);
 
-        _jsModuleReference ??= await JsInterop.IncludeModuleScript<SharedClientModule>("authentication-cookie-updater.js");
+        _jsModuleReference ??= await JsInterop.IncludeModuleScript<SharedClientModule>("authentication-cookie-updater.js", cancellationToken);
         if (_jsModuleReference is not null)
         {
             _jsAttachResult ??= await _jsModuleReference.InvokeAsync<IJSObjectReference?>("attach", cancellationToken);

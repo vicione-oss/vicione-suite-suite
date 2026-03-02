@@ -15,8 +15,8 @@ internal sealed class InstanceInformationProvider(ISuiteMediator mediator, ILoca
 {
     public IInstanceInformation Local => localProvider.Local;
 
-    public async Task<IReadOnlyCollection<ModuleMetadata>> GetInstalledModules()
-        => (await metadataCache.GetInstalledModuleMetadata())
+    public async Task<IReadOnlyCollection<ModuleMetadata>> GetInstalledModules(CancellationToken cancellationToken = default)
+        => (await metadataCache.GetInstalledModuleMetadata(cancellationToken))
         .Select(k => k.Metadata)
         .ToList().AsReadOnly();
 
