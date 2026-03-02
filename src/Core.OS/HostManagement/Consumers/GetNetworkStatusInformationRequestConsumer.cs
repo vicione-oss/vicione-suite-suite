@@ -2,6 +2,7 @@
 using Core.OS.HostManagement.Mappers;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
+using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 using Sdk.NetworkStatus.Requests;
 

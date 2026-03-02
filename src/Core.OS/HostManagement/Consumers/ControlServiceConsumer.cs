@@ -1,6 +1,7 @@
 ﻿using MassTransit;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration;
+using Sdk.SystemConfiguration.Commands;
 using Sdk.SystemConfiguration.Events;
 
 namespace Core.OS.HostManagement.Consumers;

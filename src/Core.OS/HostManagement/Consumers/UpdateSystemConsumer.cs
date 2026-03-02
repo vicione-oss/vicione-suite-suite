@@ -1,16 +1,13 @@
-﻿using System.Text.Json;
-using Core.OS.HostManagement.Extensions;
+﻿using Core.OS.HostManagement.Extensions;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
 using Core.Shared.UserManagement.Contracts;
-using HostManagement.Shared.Communication;
-using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Sdk.Messaging;
-using Sdk.SystemConfiguration;
+using Sdk.SystemConfiguration.Events;
 
 namespace Core.OS.HostManagement.Consumers;
 

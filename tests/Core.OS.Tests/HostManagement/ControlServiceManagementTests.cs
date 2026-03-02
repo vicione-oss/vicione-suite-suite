@@ -5,7 +5,7 @@ using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Sdk.SystemConfiguration;
+using Sdk.SystemConfiguration.Commands;
 using Sdk.SystemConfiguration.Contracts;
 using Xunit;
 using HmSystemConfiguration = HostManagement.Shared.Contracts.SystemConfiguration;

@@ -5,7 +5,7 @@ using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Requests;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Sdk.Messaging;
+using Sdk.Backend.Messaging;
 using Sdk.Modules;
 using Semver;
 

@@ -2,10 +2,9 @@
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Extensions;
 using MassTransit;
-using MassTransit.Initializers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Sdk.Messaging;
+using Sdk.Backend.Messaging;
 using Sdk.UserManagement.Contracts;
 using Sdk.UserManagement.Requests;
 

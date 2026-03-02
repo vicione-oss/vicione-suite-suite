@@ -13,7 +13,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Sdk.Messaging;
-using Sdk.SystemConfiguration;
+using Sdk.SystemConfiguration.Events;
 
 namespace Core.OS.HostManagement.Consumers;
 
