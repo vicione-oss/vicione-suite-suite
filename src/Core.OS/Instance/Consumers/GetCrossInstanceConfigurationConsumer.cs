@@ -3,7 +3,7 @@ using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Requests;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using Sdk.Messaging;
+using Sdk.Backend.Messaging;
 
 namespace Core.OS.Instance.Consumers;
 

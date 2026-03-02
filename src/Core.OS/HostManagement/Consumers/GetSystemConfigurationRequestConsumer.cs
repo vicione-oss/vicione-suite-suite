@@ -4,6 +4,7 @@ using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using MassTransit;
+using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration.Requests;
 

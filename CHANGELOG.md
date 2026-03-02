@@ -40,7 +40,7 @@
 - `Serilog.AspNetCore` packages, update to version `10.0.0`
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2354124557`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2358556570`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.3.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.2.0`
@@ -178,7 +178,7 @@
 - Support cancellation on preparing WebHost startup
 - Set journal page title
 - Implement Serilog Enricher for ModuleId
-- Implement Journal Sink 
+- Implement Journal Sink
 - Users can now change their display language and time zone individually in the profile area
 - Provide implementation of IArtifactQueryApi for JFrog to allow querying suite artifacts
 

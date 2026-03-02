@@ -1,10 +1,8 @@
-﻿using System.Text.Json;
-using Core.OS.HostManagement.Extensions;
+﻿using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
-using HostManagement.Shared.Communication;
-using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
+using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 
 namespace Core.OS.HostManagement.Consumers;

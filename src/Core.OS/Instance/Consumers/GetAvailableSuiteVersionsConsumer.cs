@@ -3,6 +3,7 @@ using Core.Module.Comparer;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts.Network;
 using MassTransit;
+using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Sdk.Messaging;
 using Semver;

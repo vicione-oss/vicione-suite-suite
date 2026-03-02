@@ -1,6 +1,6 @@
 ﻿using Core.Shared.Persistence.Requests;
 using MassTransit;
-using Sdk.Messaging;
+using Sdk.Backend.Messaging;
 
 namespace Core.OS.Instance.Consumers;
 

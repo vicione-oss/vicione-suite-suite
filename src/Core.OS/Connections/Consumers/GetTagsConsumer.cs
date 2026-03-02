@@ -1,9 +1,9 @@
 ﻿using Core.OS.DbContext;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Sdk.Backend.Messaging;
 using Sdk.Connections.Events;
 using Sdk.Connections.Requests;
-using Sdk.Messaging;
 
 namespace Core.OS.Connections.Consumers;
 

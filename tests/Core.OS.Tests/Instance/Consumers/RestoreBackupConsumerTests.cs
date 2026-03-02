@@ -20,7 +20,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sdk.Backend.Modules;
 using Sdk.Instance;
-using Sdk.SystemConfiguration;
+using Sdk.SystemConfiguration.Commands;
 using Sdk.Testing.Backend;
 using Xunit;
 
