@@ -16,13 +16,13 @@ public sealed class InMemoryClusterInformationProvider(ILogger<InMemoryClusterIn
     public event Func<Guid, Task>? InstanceDeleted;
     public event Func<Guid, Task>? DeleteInstanceFailed;
 
-    public Task<HealthStatus?> GetHealthStatus(Guid instanceId)
+    public Task<HealthStatus?> GetHealthStatus(Guid instanceId, CancellationToken token = default)
         => Task.FromResult(_instances[instanceId].HealthStatus);
 
     public Task<List<IInstanceInformation>> GetInstancesInCluster(CancellationToken token = default)
         => Task.FromResult(_instances.Select(i => i.Value.InstanceInformation).ToList());
 
-    public Task<bool> IsClusterHealthy()
+    public Task<bool> IsClusterHealthy(CancellationToken token = default)
         => Task.FromResult(_instances.All(i => i.Value.HealthStatus == HealthStatus.Healthy));
 
     internal async Task Initialize(ISuiteMediator mediator, CancellationToken token)
@@ -75,8 +75,10 @@ public sealed class InMemoryClusterInformationProvider(ILogger<InMemoryClusterIn
         if (!_instances.TryGetValue(instanceInformation.Id, out var instance))
             throw new InvalidOperationException($"Instance with id '{instanceInformation.Id}' does not exist.");
 
-        var clusterInfo = new ClusterInstanceInformation(instanceInformation);
-        clusterInfo.HealthStatus = instance.HealthStatus;
+        var clusterInfo = new ClusterInstanceInformation(instanceInformation)
+        {
+            HealthStatus = instance.HealthStatus
+        };
 
         if (!_instances.TryUpdate(instanceInformation.Id, clusterInfo, instance))
             throw new InvalidOperationException($"Failed to update instance with id '{instanceInformation.Id}'.");

@@ -16,7 +16,7 @@ internal class TestInstanceInformationProvider : IInstanceInformationProvider
         InstalledModules = []
     };
 
-    public Task<IReadOnlyCollection<ModuleMetadata>> GetInstalledModules()
+    public Task<IReadOnlyCollection<ModuleMetadata>> GetInstalledModules(CancellationToken cancellationToken = default)
     {
         var x = Local.InstalledModules
             .Select(k => new ModuleMetadata { Name = k, Version = "0.0.1", MinSuiteSdkVersion = "1.0.0" })

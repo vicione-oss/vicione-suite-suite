@@ -253,7 +253,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
 
             using var memoryStream = new MemoryStream(response.Content);
 
-            await JsInterop.DownloadAs(memoryStream, response.FileName);
+            await JsInterop.DownloadAs(memoryStream, response.FileName, cancellationToken);
         }
         catch (Exception e)
         {

@@ -10,7 +10,7 @@ namespace Blazor.Shared.Services;
 
 public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) : IJsInterop
 {
-    public async Task SetCookie(string name, string value, int days)
+    public async Task SetCookie(string name, string value, int days, CancellationToken token = default)
     {
         try
         {
@@ -24,7 +24,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task<string> GetCookie(string name)
+    public async Task<string> GetCookie(string name, CancellationToken token = default)
     {
         try
         {
@@ -38,7 +38,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task UpdateTitle(string title)
+    public async Task UpdateTitle(string title, CancellationToken token = default)
     {
         try
         {
@@ -52,7 +52,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task IncludeMeta(string id, string attribute, string name, string content, string key)
+    public async Task IncludeMeta(string id, string attribute, string name, string content, string key, CancellationToken token = default)
     {
         try
         {
@@ -66,7 +66,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task IncludeLink(string id, string rel, Uri href, string type, string integrity, string crossorigin, string key)
+    public async Task IncludeLink(string id, string rel, Uri href, string type, string integrity, string crossorigin, string key, CancellationToken token = default)
     {
         try
         {
@@ -80,7 +80,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task IncludeLinks(object[] links)
+    public async Task IncludeLinks(object[] links, CancellationToken token = default)
     {
         try
         {
@@ -94,7 +94,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task IncludeScript(string id, Uri src, string integrity, string crossorigin, string content, string location, string key)
+    public async Task IncludeScript(string id, Uri src, string integrity, string crossorigin, string content, string location, string key, CancellationToken token = default)
     {
         try
         {
@@ -108,7 +108,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task<IJSObjectReference?> IncludeModuleScript(Uri location)
+    public async Task<IJSObjectReference?> IncludeModuleScript(Uri location, CancellationToken token = default)
     {
         try
         {
@@ -124,11 +124,11 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public Task<IJSObjectReference?> IncludeModuleScript<T>(string filename)
+    public Task<IJSObjectReference?> IncludeModuleScript<T>(string filename, CancellationToken token = default)
         where T : IModule
-        => IncludeModuleScript(ModuleAssetHelper.GetModuleJsUrl<T>(filename));
+        => IncludeModuleScript(ModuleAssetHelper.GetModuleJsUrl<T>(filename), token);
 
-    public async Task IncludeScripts(object[] scripts)
+    public async Task IncludeScripts(object[] scripts, CancellationToken token = default)
     {
         try
         {
@@ -142,7 +142,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task RemoveElementsById(string prefix, string first, string last)
+    public async Task RemoveElementsById(string prefix, string first, string last, CancellationToken token = default)
     {
         try
         {
@@ -157,7 +157,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task RemoveScriptsBySource(Uri source)
+    public async Task RemoveScriptsBySource(Uri source, CancellationToken token = default)
     {
         try
         {
@@ -172,7 +172,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task<string> GetElementByName(string name)
+    public async Task<string> GetElementByName(string name, CancellationToken token = default)
     {
         try
         {
@@ -186,7 +186,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task SubmitForm(string path, object fields)
+    public async Task SubmitForm(string path, object fields, CancellationToken token = default)
     {
         try
         {
@@ -200,7 +200,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task<string[]> GetFiles(string id)
+    public async Task<string[]> GetFiles(string id, CancellationToken token = default)
     {
         try
         {
@@ -214,7 +214,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task UploadFiles(string posturl, string folder, string id)
+    public async Task UploadFiles(string posturl, string folder, string id, CancellationToken token = default)
     {
         try
         {
@@ -228,7 +228,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task RefreshBrowser(bool force, int wait)
+    public async Task RefreshBrowser(bool force, int wait, CancellationToken token = default)
     {
         try
         {
@@ -242,7 +242,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task RedirectBrowser(Uri url, int wait)
+    public async Task RedirectBrowser(Uri url, int wait, CancellationToken token = default)
     {
         try
         {
@@ -256,7 +256,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task<bool> FormValid(ElementReference form)
+    public async Task<bool> FormValid(ElementReference form, CancellationToken token = default)
     {
         try
         {
@@ -270,7 +270,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task SetElementAttribute(string id, string attribute, string value)
+    public async Task SetElementAttribute(string id, string attribute, string value, CancellationToken token = default)
     {
         try
         {
@@ -284,14 +284,14 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
     }
 
-    public async Task DownloadAs(string content, string name)
+    public async Task DownloadAs(string content, string name, CancellationToken token = default)
     {
         using var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
 
-        await DownloadAs(memoryStream, name);
+        await DownloadAs(memoryStream, name, token);
     }
 
-    public async Task DownloadAs(Stream content, string name)
+    public async Task DownloadAs(Stream content, string name, CancellationToken token = default)
     {
         try
         {

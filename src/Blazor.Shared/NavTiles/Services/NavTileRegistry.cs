@@ -15,7 +15,11 @@ namespace Blazor.Shared.NavTiles.Services;
 internal sealed class NavTileRegistry<TClientModule> : INavTileRegistry<TClientModule>
     where TClientModule : class, IClientModule
 {
+    private readonly Lock _concurrentLock = new();
     private readonly Dictionary<string, NavTileRegistryItem> _itemMap = [];
+    private bool _hasDeferredChanges;
+
+    public int UpdateLock { get; private set; }
 
     public event Action? Changed;
 
@@ -64,27 +68,80 @@ internal sealed class NavTileRegistry<TClientModule> : INavTileRegistry<TClientM
             AuthorizationRequirement = authorizationRequirement
         };
 
-        _itemMap.Add(item.Id, item);
+        lock (_concurrentLock)
+        {
+            _itemMap.Add(item.Id, item);
 
-        Changed?.Invoke();
+            if (UpdateLock == 0)
+                Changed?.Invoke();
+            else
+                _hasDeferredChanges = true;
+        }
 
         return item;
     }
 
     public bool Remove(string id)
     {
-        if (_itemMap.Remove(id))
+        lock (_concurrentLock)
         {
-            Changed?.Invoke();
+            if (_itemMap.Remove(id))
+            {
+                if (UpdateLock == 0)
+                    Changed?.Invoke();
+                else
+                    _hasDeferredChanges = true;
 
-            return true;
-        }
-        else
-        {
-            return false;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
-    public IEnumerator<INavTileRegistryItem> GetEnumerator() => _itemMap.Values.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => _itemMap.Values.GetEnumerator();
+    public IEnumerator<INavTileRegistryItem> GetEnumerator()
+    {
+        lock (_concurrentLock)
+        {
+            return _itemMap.Values.ToList().GetEnumerator();
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        lock (_concurrentLock)
+        {
+            return _itemMap.Values.ToList().GetEnumerator();
+        }
+    }
+
+    public void BeginUpdate()
+    {
+        lock (_concurrentLock)
+        {
+            UpdateLock++;
+        }
+    }
+
+    public void EndUpdate()
+    {
+        lock (_concurrentLock)
+        {
+            UpdateLock--;
+
+            if (UpdateLock <= 0)
+            {
+                UpdateLock = 0;
+
+                if (_hasDeferredChanges)
+                {
+                    Changed?.Invoke();
+
+                    _hasDeferredChanges = false;
+                }
+            }
+        }
+    }
 }
