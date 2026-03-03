@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +15,7 @@ internal sealed class NonceStore(IApplicationDbContext dbContext) : INonceStore
         var nonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow };
 
         await dbContext.Nonces.AddAsync(nonce, cancellationToken);
-        await dbContext.Instance.SaveChangesAsync(cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return nonce;
     }
@@ -26,9 +26,9 @@ internal sealed class NonceStore(IApplicationDbContext dbContext) : INonceStore
         if (existing is null)
             return false;
 
-        dbContext.Instance.Remove(nonce);
+        dbContext.Nonces.Remove(nonce);
 
-        var affectedRows = await dbContext.Instance.SaveChangesAsync(cancellationToken);
+        var affectedRows = await dbContext.SaveChangesAsync(cancellationToken);
 
         return affectedRows == 1;
     }
@@ -41,6 +41,6 @@ internal sealed class NonceStore(IApplicationDbContext dbContext) : INonceStore
         if (orphanedNonces.Count > 0)
             dbContext.Nonces.RemoveRange(orphanedNonces);
 
-        await dbContext.Instance.SaveChangesAsync(cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

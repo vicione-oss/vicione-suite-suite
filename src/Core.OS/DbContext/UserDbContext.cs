@@ -1,4 +1,4 @@
-﻿using Core.OS.UserManagement.Entities;
+using Core.OS.UserManagement.Entities;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +11,13 @@ public abstract class UserDbContext(DbContextOptions options) : IdentityDbContex
 {
     internal const string DbSchemaName = "user";
 
-    public Microsoft.EntityFrameworkCore.DbContext Instance => this;
     public string DefaultSchemaName => DbSchemaName;
     public IEnumerable<Type> NotSynchronizedEntityTypes => [typeof(UserTicket)];
 
     public DbSet<UserTicket> Tickets => Set<UserTicket>();
+
+    public Task MigrateAsync(CancellationToken cancellationToken = default)
+        => Database.MigrateAsync(cancellationToken);
 
     protected sealed override void OnModelCreating(ModelBuilder builder)
     {

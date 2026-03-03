@@ -26,7 +26,7 @@ public class BurgerBackendModuleTests
             null,
             busMock =>
             {
-                busMock.AddSagaStateMachine<OrderBurgerStateMachine, OrderBurgerState>(null)
+                busMock.AddSagaStateMachine<OrderBurgerStateMachine, OrderBurgerState>()
                     .Returns(Substitute.For<ISagaRegistrationConfigurator<OrderBurgerState>>());
             });
 

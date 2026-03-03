@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.UserManagement.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -47,6 +47,6 @@ internal sealed partial class UserTicketCleanupService(IServiceProvider serviceP
             dbContext.Tickets.Remove(ticket);
         }
 
-        await dbContext.Instance.SaveChangesAsync(cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }

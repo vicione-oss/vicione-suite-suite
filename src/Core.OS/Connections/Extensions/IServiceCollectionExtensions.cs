@@ -1,7 +1,8 @@
-﻿using Core.OS.Connections.Mqtt;
+using Core.OS.Connections.Mqtt;
 using Core.OS.DbContext;
-using Core.OS.DbContext.Extensions;
 using Core.OS.Instance;
+using Core.OS.Modules;
+using Core.OS.Persistence;
 using Microsoft.Extensions.Options;
 using Sdk.Connections;
 using Sdk.Connections.Contracts;
@@ -13,8 +14,12 @@ internal static class IServiceCollectionExtensions
 {
     public static void AddConnectionServices(this IServiceCollection services)
     {
-        services.AddCoreDbContext<IConnectionDbContext, ConnectionDbContextSqlite, ConnectionDbContextPostgres>(
-            ConnectionDbContext.DbSchemaName);
+        services.RegisterModuleDbContext<IConnectionDbContext, ConnectionDbContextSqlite, ConnectionDbContextPostgres>(
+            Shared.Constants.SystemModuleId,
+            typeof(SystemBackendModule),
+            ConnectionDbContext.DbSchemaName,
+            enableSynchronization: true);
+
         services.AddSingleton<IConnectionTypeRegistry, ConnectionTypeRegistry>(s =>
         {
             ConnectionTypeRegistry registry = new();

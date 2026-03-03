@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
@@ -36,7 +36,7 @@ public sealed class SetCrossInstanceConfigurationConsumer(IApplicationDbContext 
             if (context.Message.TimeZoneId is not null)
                 crossInstanceConfiguration.TimeZoneId = context.Message.TimeZoneId;
 
-            await dbContext.Instance.SaveChangesAsync(context.CancellationToken);
+            await dbContext.SaveChangesAsync(context.CancellationToken);
 
             await context.Publish(new CrossInstanceConfigurationChanged(correlationId, crossInstanceConfiguration)).ConfigureAwait(false);
         }

@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.Shared.Instance.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Instance;
@@ -28,7 +28,7 @@ internal static class ApplicationDbContextExtensions
 
         }
 
-        dbContext.Instance.SaveChanges();
+        dbContext.SaveChanges();
 
         return dbContext.InstanceInfo.AsNoTracking().ToList();
     }

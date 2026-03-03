@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Mqtt;
+using Core.OS.Connections.Mqtt;
 using Core.OS.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Connections;
@@ -77,7 +77,7 @@ internal static class IConnectionDbContextExtensions
                     MqttConnectionType.WebSocket,
                     stoppingToken);
 
-            await dbContext.Instance.SaveChangesAsync(stoppingToken);
+            await dbContext.SaveChangesAsync(stoppingToken);
         }
 
         private Task SeedMqttServiceConnection(MqttConnectionOptions options,
@@ -123,7 +123,7 @@ internal static class IConnectionDbContextExtensions
 
             dbContext.Tags.Add(ConnectionConstants.Tags.SystemDefault);
 
-            await dbContext.Instance.SaveChangesAsync(stoppingToken);
+            await dbContext.SaveChangesAsync(stoppingToken);
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Core.OS.Instance.Contracts;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +45,7 @@ public sealed class SyncDataActivity(IServiceProvider services, ILogger<SyncData
         using var scope = _services.CreateScope();
         var dbContext = (IModuleDbContext)scope.ServiceProvider.GetRequiredService(contextType);
 
-        await using var conn = dbContext.Instance.Database.GetDbConnection();
+        await using var conn = dbContext.Database.GetDbConnection();
         await using var cmd = conn.CreateCommand();
         await conn.OpenAsync(context.CancellationToken);
 

@@ -5,7 +5,6 @@ using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using NSubstitute;
-using NSubstitute.ReceivedExtensions;
 using Sdk.Client.Services;
 using Xunit;
 
@@ -26,8 +25,8 @@ public class SystemMonitoringComponentTests
         ctx.Services
             .AddSingleton(_jsInterop)
             .AddSingleton<MonitoringService>()
-            .AddSingleton<ISuiteControlService>(Substitute.For<ISuiteControlService>())
-            .AddKeyedScoped(Sdk.Constants.ClientTimeProviderServiceKey, (_, __) => timeProvider);
+            .AddSingleton(Substitute.For<ISuiteControlService>())
+            .AddKeyedScoped(Sdk.Constants.ClientTimeProviderServiceKey, (_, _) => timeProvider);
 
         // Act
         var component = ctx.Render<SystemMonitoringComponent>();
@@ -49,10 +48,10 @@ public class SystemMonitoringComponentTests
             ctx.Services
             .AddSingleton(_jsInterop)
             .AddSingleton<MonitoringService>()
-            .AddSingleton<ISuiteControlService>(Substitute.For<ISuiteControlService>())
-            .AddKeyedScoped<TimeProvider>(Sdk.Constants.ClientTimeProviderServiceKey, (_, __) => timeProvider);
+            .AddSingleton(Substitute.For<ISuiteControlService>())
+            .AddKeyedScoped<TimeProvider>(Sdk.Constants.ClientTimeProviderServiceKey, (_, _) => timeProvider);
 
-            _jsInterop.IncludeModuleScript<SharedClientModule>("system-monitoring-component.js").Returns(_jsModuleReference);
+            _jsInterop.IncludeModuleScript<SharedClientModule>("system-monitoring-component.js", Arg.Any<CancellationToken>()).Returns(_jsModuleReference);
 
             // Act
             var component = ctx.Render<SystemMonitoringComponent>();

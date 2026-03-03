@@ -29,7 +29,8 @@
 ### Updated
 
 - `AspNetCore.SassCompiler` packages, update to version `1.97.1`
-- `Bunit` packages, update to version `2.5.3`
+- `AwesomeAssertions` packages, update to version `9.4.0`
+- `Bunit` packages, update to version `2.6.2`
 - `Npgsql.EntityFrameworkCore.PostgreSQL` package, update to version `10.0.0`
 - `MassTransit` packages, update to version `8.5.8`
 - `MailKit` package, update to version `4.15.0`
@@ -40,11 +41,11 @@
 - `Serilog.AspNetCore` packages, update to version `10.0.0`
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2358556570`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2361222928`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.3.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
-- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.2.0`
-- `ViciOne.Ui.Localization` package, update version to `3.1.0`
+- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.3.0`
+- `ViciOne.Ui.Localization` package, update version to `3.2.0`
 - `ViciOne.Ui.Shared.Dx` packages, update to version `0.19.1`
 - `xunit` packages, update to version `xunit.v3 - 3.2.2`
 - `xunit.extensibility.core` packages, update to version `xunit.v3.extensibility.core - 3.2.2`
@@ -72,6 +73,7 @@
 - Add password reset flow (forgot password, reset password, reset confirmation)
 - Add conditional email account verification and confirmation page for identity
 - Add reboot system feature to system information area
+- Add database context registration logic in the form of `ModuleDbContextRegistrar` from sdk to suite
 
 ### Changed
 

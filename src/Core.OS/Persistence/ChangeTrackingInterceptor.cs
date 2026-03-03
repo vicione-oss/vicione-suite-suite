@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +13,6 @@ namespace Core.OS.Persistence;
 
 public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator) : ISaveChangesInterceptor
 {
-    private readonly ISuiteMediator _mediator = mediator;
     private readonly ConcurrentQueue<List<ChangedEntity>> _stagedChanges = new();
 
     public ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -25,7 +24,7 @@ public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator) : ISaveCh
             return new ValueTask<InterceptionResult<int>>(result);
 
         var ignoredEntries = new List<EntityEntry>();
-        var entities = context.Instance.ChangeTracker.Entries().ToArray();
+        var entities = context.ChangeTracker.Entries().ToArray();
         GetIgnoredEntities(entities, ignoredEntries, context, false, null);
 
         var changeList = (from entityEntry in entities
@@ -78,7 +77,7 @@ public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator) : ISaveCh
             return result;
 
         var message = new DbChangeSet(changes.Where(c => c.Entity is not null).ToList(), contextType.FullName ?? contextType.Name);
-        await _mediator.Publish(message, cancellationToken);
+        await mediator.Publish(message, cancellationToken);
 
         return result;
     }
@@ -124,7 +123,7 @@ public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator) : ISaveCh
 
                     foreach (var relatedEntity in navigationCollection)
                     {
-                        var relatedEntityEntry = dbContext.Instance.Entry(relatedEntity);
+                        var relatedEntityEntry = ((Microsoft.EntityFrameworkCore.DbContext)dbContext).Entry(relatedEntity);
                         GetIgnoredEntities([relatedEntityEntry], ignoredEntities, dbContext, true, processedNavigations);
                     }
                     continue;
@@ -132,7 +131,7 @@ public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator) : ISaveCh
 
                 if (navigation.CurrentValue is { } entity)
                 {
-                    var relatedEntityEntry = dbContext.Instance.Entry(entity);
+                    var relatedEntityEntry = ((Microsoft.EntityFrameworkCore.DbContext)dbContext).Entry(entity);
                     GetIgnoredEntities([relatedEntityEntry], ignoredEntities, dbContext, true, processedNavigations);
                 }
             }

@@ -1,4 +1,4 @@
-﻿using Burger.Backend.DbContext;
+using Burger.Backend.DbContext;
 using Burger.Backend.Services;
 using Burger.Backend.StateMachines;
 using Burger.Internal;
@@ -22,7 +22,7 @@ public sealed class BurgerBackendModule : BackendModule
     {
         services.AddSingleton<IGrill, Grill>();
 
-        services.AddDynamicDbContext<IBurgerDbContext, BurgerDbContextSqlite, BurgerDbContextPostgres>(this, enableSynchronization: false);
+        services.AddModuleDbContext<IBurgerDbContext, BurgerDbContextSqlite, BurgerDbContextPostgres>(this, enableSynchronization: false);
     }
 
     public override void ConfigureMessageBus(IServiceCollection busConfig, InstanceType instanceType)

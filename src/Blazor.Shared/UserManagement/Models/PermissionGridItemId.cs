@@ -1,4 +1,4 @@
-﻿namespace Blazor.Shared.UserManagement.ControlPanels.Models;
+﻿namespace Blazor.Shared.UserManagement.Models;
 
 [StronglyTypedId(backingType: StronglyTypedIdBackingType.Guid, jsonConverter: StronglyTypedIdJsonConverter.SystemTextJson)]
 public readonly partial struct PermissionGridItemId

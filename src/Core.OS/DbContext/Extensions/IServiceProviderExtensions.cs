@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -21,9 +21,9 @@ internal static class IServiceProviderExtensions
         // If we have a lock entry in `__EFMigrationsLock` table already we get back a task
         // that is waiting for activation...forever! Therefore we clear the lock because
         // suite is lord of migrations and there will be only 1 suite accessing the db
-        await TryToClearMigrationsLock(context.Instance.Database, cancellationToken);
+        await TryToClearMigrationsLock(context.Database, cancellationToken);
 
-        await context.Instance.Database.MigrateAsync(cancellationToken);
+        await context.MigrateAsync(cancellationToken);
 
         logger.LogTrace("Migrating database finished");
     }

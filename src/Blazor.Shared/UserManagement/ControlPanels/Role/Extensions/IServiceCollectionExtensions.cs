@@ -1,7 +1,7 @@
-﻿using Blazor.Shared.UserManagement.ControlPanels.Models;
-using Blazor.Shared.UserManagement.ControlPanels.Role.Components;
+﻿using Blazor.Shared.UserManagement.ControlPanels.Role.Components;
 using Blazor.Shared.UserManagement.ControlPanels.Role.Services;
 using Blazor.Shared.UserManagement.ControlPanels.Roles.Models;
+using Blazor.Shared.UserManagement.Models;
 using Blazor.Shared.UserManagement.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.ControlPanels.Extensions;

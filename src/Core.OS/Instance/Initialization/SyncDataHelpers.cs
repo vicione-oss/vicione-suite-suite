@@ -1,4 +1,4 @@
-﻿using System.Data.Common;
+using System.Data.Common;
 using Core.OS.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Persistence;
@@ -94,7 +94,7 @@ internal static class SyncDataHelpers
             if (contextModule != moduleId || services.GetService(contextType) is not IModuleDbContext context)
                 continue;
 
-            var connection = context.Instance.Database.GetDbConnection();
+            var connection = context.Database.GetDbConnection();
             await connection.OpenAsync(cancellationToken);
             await using var command = connection.CreateCommand();
 

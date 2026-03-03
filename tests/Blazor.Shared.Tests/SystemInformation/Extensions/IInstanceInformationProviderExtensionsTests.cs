@@ -21,7 +21,7 @@ public sealed class IInstanceInformationProviderExtensionsTests
         local.SystemType.Returns(string.Empty);
 
         provider.Local.Returns(local);
-        provider.GetInstalledModules()
+        provider.GetInstalledModules(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<ModuleMetadata>>([]));
 
         // Act
@@ -43,7 +43,7 @@ public sealed class IInstanceInformationProviderExtensionsTests
         // Ensure LF only (no CR)
         Assert.DoesNotContain('\r', md);
 
-        await provider.Received(1).GetInstalledModules();
+        await provider.Received(1).GetInstalledModules(Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public sealed class IInstanceInformationProviderExtensionsTests
         local.SystemType.Returns("MySystem");
 
         provider.Local.Returns(local);
-        provider.GetInstalledModules()
+        provider.GetInstalledModules(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IReadOnlyCollection<ModuleMetadata>>([]));
 
         // Act
@@ -90,7 +90,8 @@ public sealed class IInstanceInformationProviderExtensionsTests
             CreateModuleMetadata("ModB", "0.1.0")
         };
 
-        provider.GetInstalledModules().Returns(Task.FromResult<IReadOnlyCollection<ModuleMetadata>>(modules));
+        provider.GetInstalledModules(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IReadOnlyCollection<ModuleMetadata>>(modules));
 
         // Act
         var md = await provider.GetSystemInformationMarkdown();
@@ -128,7 +129,8 @@ public sealed class IInstanceInformationProviderExtensionsTests
             CreateModuleMetadata("Name|With|Pipes", "Ver|1")
         };
 
-        provider.GetInstalledModules().Returns(Task.FromResult<IReadOnlyCollection<ModuleMetadata>>(modules));
+        provider.GetInstalledModules(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IReadOnlyCollection<ModuleMetadata>>(modules));
 
         // Act
         var md = await provider.GetSystemInformationMarkdown();

@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.Instance.Mappers;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Services;
@@ -57,7 +57,7 @@ internal sealed class OnboardingStateStore(IApplicationDbContext dbContext) : IO
 
                 onboardingState.MapTo(targetOnboardingState);
 
-                await dbContext.Instance.SaveChangesAsync(cancellationToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
             finally
             {

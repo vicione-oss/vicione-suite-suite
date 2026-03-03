@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.Instance.Initialization;
 using Core.OS.Tests.DataTransfer.Helpers;
 using MassTransit;
@@ -73,7 +73,7 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
         var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
-        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await using var dbDestConnection = dbDestContext.Database.GetDbConnection();
         await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 
@@ -125,7 +125,7 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
         var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
-        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await using var dbDestConnection = dbDestContext.Database.GetDbConnection();
         await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
         var tableList = await command.GetTablesSqlite(TestContext.Current.CancellationToken);
@@ -179,7 +179,7 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
         var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
-        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await using var dbDestConnection = dbDestContext.Database.GetDbConnection();
         await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 

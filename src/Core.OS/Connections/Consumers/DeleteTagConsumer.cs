@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Connections.Commands;
@@ -30,7 +30,7 @@ public sealed class DeleteTagConsumer(IConnectionDbContext dbContext, ILogger<De
 
         dbContext.Tags.Remove(tagToDelete);
 
-        await dbContext.Instance.SaveChangesAsync(context.CancellationToken);
+        await dbContext.SaveChangesAsync(context.CancellationToken);
 
         // We publish an event also when SaveChangesAsync() does nothing because some services rely on a response
         await context.Publish(new TagsChanged(correlationId, CrudAction.Deleted, [tagToDelete])).ConfigureAwait(false);

@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.UserManagement.Entities;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -29,7 +29,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
             return;
 
         dbContext.Tickets.Remove(ticket);
-        await dbContext.Instance.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task RenewAsync(string key, AuthenticationTicket authTicket)
@@ -53,7 +53,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
 
         try
         {
-            await dbContext.Instance.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
         }
         catch (DbUpdateException)
         {
@@ -96,7 +96,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
 
         try
         {
-            await dbContext.Instance.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
             LogLastActivityUpdate(logger, ticket.Id);
         }
         catch (DbUpdateException)
@@ -143,7 +143,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
         var dbContext = scope.ServiceProvider.GetRequiredService<IUserDbContext>();
 
         await dbContext.Tickets.AddAsync(authenticationTicket);
-        await dbContext.Instance.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return authenticationTicket.Id.ToString();
     }

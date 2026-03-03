@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Consumers;
+using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using Core.OS.Tests.Extensions;
 using MassTransit;
@@ -83,7 +83,7 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
         await using var tester = new MassTransitTester(_configureServices);
         var dbContext = tester.Services.GetRequiredService<IConnectionDbContext>();
         dbContext.Tags.Add(ConnectionConstants.Tags.SystemDefault);
-        await dbContext.Instance.SaveChangesAsync(tester.Harness.CancellationToken);
+        await dbContext.SaveChangesAsync(tester.Harness.CancellationToken);
 
         var command = new UpsertConnection(ConnectionFactory.CreateSQLiteConnection(tags:
         [
