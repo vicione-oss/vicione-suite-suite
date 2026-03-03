@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Core.OS.Connections.Extensions;
 using Core.OS.Connections.Mqtt;
 using Core.OS.DbContext;
@@ -115,7 +115,7 @@ public sealed class RegisterInstanceConsumer(IServiceProvider services, ILogger<
             if (isNewInstance)
                 logger.LogWarning("Update existing instance {InstanceId} but it is marked as new", existing.Id);
 
-            await _appDb.Instance.SaveChangesAsync(cancellationToken);
+            await _appDb.SaveChangesAsync(cancellationToken);
 
             return existing;
         }
@@ -145,7 +145,7 @@ public sealed class RegisterInstanceConsumer(IServiceProvider services, ILogger<
         if (!isNewInstance)
             logger.LogWarning("Added new instance {InstanceId} but it is marked as existing", command.InstanceId);
 
-        await _appDb.Instance.SaveChangesAsync(cancellationToken);
+        await _appDb.SaveChangesAsync(cancellationToken);
 
         return newInfo;
     }

@@ -1,8 +1,8 @@
-﻿using Blazor.Shared.UserManagement.ControlPanels.Models;
-using Blazor.Shared.UserManagement.ControlPanels.User.Components;
+﻿using Blazor.Shared.UserManagement.ControlPanels.User.Components;
 using Blazor.Shared.UserManagement.ControlPanels.User.Models;
 using Blazor.Shared.UserManagement.ControlPanels.User.Services;
 using Blazor.Shared.UserManagement.Extensions;
+using Blazor.Shared.UserManagement.Models;
 using Blazor.Shared.UserManagement.Services;
 using Blazor.Shared.Validation.Extensions;
 using Microsoft.Extensions.DependencyInjection;

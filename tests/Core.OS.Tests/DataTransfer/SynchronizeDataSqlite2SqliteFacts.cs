@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.Instance.Initialization;
 using Core.OS.Tests.DataTransfer.Helpers;
 using MassTransit;
@@ -74,7 +74,7 @@ public class SynchronizeDataSqlite2SqliteFacts
         var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
-        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await using var dbDestConnection = dbDestContext.Database.GetDbConnection();
         await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 
@@ -126,7 +126,7 @@ public class SynchronizeDataSqlite2SqliteFacts
         var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
-        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await using var dbDestConnection = dbDestContext.Database.GetDbConnection();
         await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 
@@ -177,7 +177,7 @@ public class SynchronizeDataSqlite2SqliteFacts
         var loggerMock = Substitute.For<ILogger<SyncDataActivity>>();
         SyncDataActivity sdActivity = new(serviceProviderSlave, loggerMock);
 
-        await using var dbDestConnection = dbDestContext.Instance.Database.GetDbConnection();
+        await using var dbDestConnection = dbDestContext.Database.GetDbConnection();
         await dbDestConnection.OpenAsync(TestContext.Current.CancellationToken);
         await using var command = dbDestConnection.CreateCommand();
 

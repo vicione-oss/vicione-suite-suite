@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Core.OS.Persistence;
 using AwesomeAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -23,14 +23,13 @@ public class ChangeTrackingInterceptorTests
         _mockMediator = Substitute.For<ISuiteMediator>();
         _interceptor = new ChangeTrackingInterceptor(_mockMediator);
         _result = InterceptionResult<int>.SuppressWithResult(1);
-        _cancellationToken = new CancellationToken();
+        _cancellationToken = CancellationToken.None;
     }
 
     [Fact]
     public async Task SavingChangesAsync_Should_Return_Result_If_Context_Is_Not_IModuleDbContext()
     {
-        var context = Substitute.For<IModuleDbContext>();
-        var eventData = new DbContextEventData(default!, default!, context.Instance);
+        var eventData = new DbContextEventData(default!, default!, null);
         var returnedResult = await _interceptor.SavingChangesAsync(eventData, _result, _cancellationToken);
 
         // Verify the changes are not added to the queue
@@ -75,7 +74,7 @@ public class ChangeTrackingInterceptorTests
     public async Task SavedChangesAsync_Should_Throw_DbUpdateException_If_Changes_Are_Not_Staged()
     {
         await using var context = TestDbContext.CreateContext(_mockMediator);
-        var eventData = new SaveChangesCompletedEventData(default!, Do, context.Instance, 1);
+        var eventData = new SaveChangesCompletedEventData(default!, Do, context, 1);
         var exception = await Assert.ThrowsAsync<DbUpdateException>(() =>
             _interceptor.SavedChangesAsync(eventData, 1, _cancellationToken).AsTask());
         Assert.Equal("Db was changed, but no changes were staged for distribution", exception.Message);
@@ -87,8 +86,7 @@ public class ChangeTrackingInterceptorTests
     [Fact]
     public void SavingChanges_Should_Throw_InvalidOperationException()
     {
-        var context = Substitute.For<IModuleDbContext>();
-        var eventData = new DbContextEventData(default!, default!, context.Instance);
+        var eventData = new DbContextEventData(default!, default!, null);
         var exception = Assert.Throws<InvalidOperationException>(() => _interceptor.SavingChanges(eventData, _result));
         Assert.Equal("Do not save changes synchronously. Use 'SaveChangesAsync' instead!", exception.Message);
     }
@@ -167,7 +165,7 @@ public class ChangeTrackingInterceptorTests
         DbSet<BlacklistedTestType> BlacklistedTestTypes { get; }
     }
 
-    private class TestDbContext(DbContextOptions<ChangeTrackingInterceptorTests.TestDbContext> dbContextOptions) :
+    private class TestDbContext(DbContextOptions<TestDbContext> dbContextOptions) :
         ModuleDbContext(dbContextOptions), ITestDbContext
     {
         public override string DefaultSchemaName => "Schema";

@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Consumers;
+using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using AwesomeAssertions;
 using MassTransit;
@@ -49,7 +49,7 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
         };
 
         dbContext.Tags.Add(tag);
-        await dbContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await tester.TestCommand<DeleteTag, DeleteTagConsumer>(new DeleteTag(tagId));
@@ -73,7 +73,7 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
         };
 
         dbContext.Tags.Add(tag);
-        await dbContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await tester.TestCommand<DeleteTag, DeleteTagConsumer>(new DeleteTag(tagId, true));
@@ -94,7 +94,7 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
         var tag = new Tag("test", tagId);
 
         dbContext.Tags.Add(tag);
-        await dbContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         await tester.TestCommand<DeleteTag, DeleteTagConsumer>(new DeleteTag(tagId));

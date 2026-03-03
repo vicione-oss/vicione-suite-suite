@@ -1,10 +1,9 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reflection;
 using Core.Module.Options;
 using Core.OS.Connections.Extensions;
 using Core.OS.DataProtection.Extensions;
 using Core.OS.DbContext;
-using Core.OS.DbContext.Extensions;
 using Core.OS.Diagnostics;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance;
@@ -16,6 +15,7 @@ using Core.OS.MessageBus.MassTransit.Configuration;
 using Core.OS.Modules;
 using Core.OS.Modules.Services;
 using Core.OS.Monitoring.Extensions;
+using Core.OS.Persistence;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Extensions;
 using Core.OS.UserManagement.Security;
@@ -27,6 +27,7 @@ using Core.Shared.Security;
 using Core.Shared.UserManagement.Configuration;
 using Core.Shared.UserManagement.Contracts;
 using MassTransit.Logging;
+using Sdk.Backend.Persistence;
 using MassTransit.Monitoring;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -93,6 +94,7 @@ internal static class IServiceCollectionExtensions
 
             services
                 .AddSingleton(fileSystem)
+                .AddSingleton<IModuleDbContextRegistrar>(new ModuleDbContextRegistrar())
                 .AddCoreDbContexts()
                 .AddInstanceServices(instanceOptions, messageBusOptions.UseInMemoryBus)
                 .AddConnectionServices();
@@ -184,14 +186,19 @@ internal static class IServiceCollectionExtensions
                 });
         }
 
-
         private IServiceCollection AddCoreDbContexts()
         {
-            services.AddCoreDbContext<IApplicationDbContext, ApplicationDbContextSqlite, ApplicationDbContextPostgres>(
-                ApplicationDbContext.DbSchemaName);
+            services.RegisterModuleDbContext<IApplicationDbContext, ApplicationDbContextSqlite, ApplicationDbContextPostgres>(
+                Constants.SystemModuleId,
+                typeof(SystemBackendModule),
+                ApplicationDbContext.DbSchemaName,
+                enableSynchronization: true);
 
-            services.AddCoreDbContext<IUserDbContext, UserDbContextSqlite, UserDbContextPostgres>(
-                UserDbContext.DbSchemaName);
+            services.RegisterModuleDbContext<IUserDbContext, UserDbContextSqlite, UserDbContextPostgres>(
+                Constants.SystemModuleId,
+                typeof(SystemBackendModule),
+                UserDbContext.DbSchemaName,
+                enableSynchronization: true);
 
             return services;
         }

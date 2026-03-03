@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
@@ -147,11 +147,11 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
     {
         // Arrange
         var applicationContext = _appFactory.Services.GetRequiredService<IApplicationDbContext>();
-        await applicationContext.Instance.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await applicationContext.MigrateAsync(TestContext.Current.CancellationToken);
 
         var orphanedNonce = new Nonce { Value = Guid.NewGuid(), CreatedAt = DateTimeOffset.UtcNow.AddDays(-1) };
         applicationContext.Nonces.Add(orphanedNonce);
-        await applicationContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await applicationContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var nonceStore = _appFactory.Services.GetRequiredService<INonceStore>();
 
@@ -174,11 +174,11 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
     {
         // Arrange
         var applicationContext = _appFactory.Services.GetRequiredService<IApplicationDbContext>();
-        await applicationContext.Instance.Database.MigrateAsync(TestContext.Current.CancellationToken);
+        await applicationContext.MigrateAsync(TestContext.Current.CancellationToken);
 
         var applicationConfiguration = new CrossInstanceConfiguration { CultureName = "ja-JP" };
         applicationContext.CrossInstanceConfiguration.Add(applicationConfiguration);
-        await applicationContext.Instance.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await applicationContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         _localInstanceInformationMock.SetupLocalInstanceInformation();
 

@@ -33,7 +33,7 @@ public sealed class UpsertTagConsumer(IConnectionDbContext dbContext, ILogger<Up
             dbContext.Tags.Update(existingTag);
         }
 
-        _ = await dbContext.Instance.SaveChangesAsync(context.CancellationToken);
+        _ = await dbContext.SaveChangesAsync(context.CancellationToken);
 
         // if we publish the existing tag it's the reference to the real entity
         // therefore we make a copy to avoid event consumer issues!

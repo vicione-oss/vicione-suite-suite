@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.Sqlite;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Backend.Persistence;
@@ -17,8 +17,8 @@ internal class UnitTestHelper
         var optionsBuilderReference = new DbContextOptionsBuilder<TestModuleDbContextPostgres>().UseNpgsql(connection);
         var dbContext = new TestModuleDbContextPostgres(optionsBuilderReference.Options, seedData);
 
-        dbContext.Instance.Database.EnsureDeleted();
-        dbContext.Instance.Database.EnsureCreated();
+        dbContext.Database.EnsureDeleted();
+        dbContext.Database.EnsureCreated();
         return dbContext;
     }
 
@@ -31,8 +31,8 @@ internal class UnitTestHelper
         optionsBuilderDest.UseSqlite(connectionDest);
         var dbContext = new TestModuleDbContextSqlite(optionsBuilderDest.Options, seedData);
 
-        dbContext.Instance.Database.EnsureDeleted();
-        dbContext.Instance.Database.EnsureCreated();
+        dbContext.Database.EnsureDeleted();
+        dbContext.Database.EnsureCreated();
         return dbContext;
     }
 
@@ -42,8 +42,8 @@ internal class UnitTestHelper
             .UseNpgsql(connection);
         var dbContext = new ReferenceDbContextPostgres(optionsBuilderReference.Options);
 
-        dbContext.Instance.Database.EnsureDeleted();
-        dbContext.Instance.Database.EnsureCreated();
+        dbContext.Database.EnsureDeleted();
+        dbContext.Database.EnsureCreated();
         SeedData.SeedMasterDbData(dbContext, titleCase);
         return dbContext;
     }
@@ -56,8 +56,8 @@ internal class UnitTestHelper
         optionsBuilderDest.UseSqlite(connectionDest);
         var dbContext = new ReferenceDbContextSqlite(optionsBuilderDest.Options);
 
-        dbContext.Instance.Database.EnsureDeleted();
-        dbContext.Instance.Database.EnsureCreated();
+        dbContext.Database.EnsureDeleted();
+        dbContext.Database.EnsureCreated();
         return dbContext;
     }
 

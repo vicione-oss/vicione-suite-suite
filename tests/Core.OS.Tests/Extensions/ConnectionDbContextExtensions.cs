@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Extensions;
+using Core.OS.Connections.Extensions;
 using Core.OS.DbContext;
 using Core.OS.Tests.Connections;
 using Sdk.Connections.Contracts;
@@ -12,14 +12,14 @@ internal static class ConnectionDbContextExtensions
         public Connection SeedDatabaseConnection(HashSet<Tag>? tags = null)
         {
             var entry = dbContext.Connections.Add(ConnectionFactory.CreateSQLiteConnection(tags: tags));
-            dbContext.Instance.SaveChanges();
+            dbContext.SaveChanges();
             return entry.Entity;
         }
 
         public Connection SeedMqttConnection(HashSet<Tag>? tags = null)
         {
             var entry = dbContext.Connections.Add(ConnectionFactory.CreateMqttConnection("MqttService", tags: tags));
-            dbContext.Instance.SaveChanges();
+            dbContext.SaveChanges();
             return entry.Entity;
         }
 
@@ -29,14 +29,14 @@ internal static class ConnectionDbContextExtensions
             connection.SetInstanceMetadata(instanceId, protocol);
 
             var entry = dbContext.Connections.Add(connection);
-            dbContext.Instance.SaveChanges();
+            dbContext.SaveChanges();
             return entry.Entity;
         }
 
         public Connection SeedCloudConnection(HashSet<Tag>? tags = null)
         {
             var entry = dbContext.Connections.Add(ConnectionFactory.HttpConnection(tags));
-            dbContext.Instance.SaveChanges();
+            dbContext.SaveChanges();
             return entry.Entity;
         }
     }

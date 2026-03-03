@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Extensions;
+using Core.OS.Connections.Extensions;
 using Core.OS.DbContext;
 using MassTransit;
 using MassTransit.Configuration;
@@ -54,7 +54,7 @@ public sealed class CreateConnectionConsumer(IConnectionDbContext dbContext, ILo
 
         try
         {
-            if (await dbContext.Instance.SaveChangesAsync(context.CancellationToken) > 0)
+            if (await dbContext.SaveChangesAsync(context.CancellationToken) > 0)
             {
                 await context.Publish(new TagsChanged(correlationId, CrudAction.Created, addedTags)).ConfigureAwait(false);
 

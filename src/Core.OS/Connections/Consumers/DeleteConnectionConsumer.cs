@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Connections.Commands;
@@ -27,7 +27,7 @@ public sealed class DeleteConnectionConsumer(IConnectionDbContext dbContext, ILo
 
         try
         {
-            await dbContext.Instance.SaveChangesAsync(context.CancellationToken);
+            await dbContext.SaveChangesAsync(context.CancellationToken);
 
             // We publish events also when SaveChangesAsync() does nothing because some services rely on a response
             await context.Publish(new ConnectionChanged(correlationId, CrudAction.Deleted, connectionToDelete, [], []))

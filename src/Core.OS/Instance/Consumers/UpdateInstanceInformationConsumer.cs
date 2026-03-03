@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.Instance.Services;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Events;
@@ -39,7 +39,7 @@ public sealed class UpdateInstanceInformationConsumer(
 
         try
         {
-            if (await dbContext.Instance.SaveChangesAsync(context.CancellationToken) > 0)
+            if (await dbContext.SaveChangesAsync(context.CancellationToken) > 0)
             {
                 // update memory instances
                 informationProvider.UpdateInstanceInformation(existingInfo);

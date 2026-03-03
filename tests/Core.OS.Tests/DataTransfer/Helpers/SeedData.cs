@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using TestModule.Backend.Contracts;
 using TestModule.Backend.DbContext;
 using static TestModule.Backend.Contracts.Employees;
@@ -65,7 +65,7 @@ internal class SeedData
         dbSourceContext.DepartmentManagers.AddRange(GetDepartmentManager());
         dbSourceContext.Titles.AddRange(GetTitles(titleCase));
         dbSourceContext.Salaries.AddRange(GetSalaries());
-        dbSourceContext.Instance.SaveChanges();
+        dbSourceContext.SaveChanges();
     }
 
     private static List<Employees> GetSomeEmployees()

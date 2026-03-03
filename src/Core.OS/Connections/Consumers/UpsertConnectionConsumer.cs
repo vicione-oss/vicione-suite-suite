@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Extensions;
+using Core.OS.Connections.Extensions;
 using Core.OS.DbContext;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +52,7 @@ public sealed class UpsertConnectionConsumer(IConnectionDbContext dbContext, ILo
 
         try
         {
-            await dbContext.Instance.SaveChangesAsync(context.CancellationToken);
+            await dbContext.SaveChangesAsync(context.CancellationToken);
 
             // We publish events also when SaveChangesAsync() does nothing because some services rely on a response
             await context.Publish(new TagsChanged(correlationId, CrudAction.Created, addedTags)).ConfigureAwait(false);

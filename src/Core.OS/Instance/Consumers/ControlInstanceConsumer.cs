@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Text.Json;
 using Core.OS.DbContext;
 using Core.OS.HostManagement;
@@ -115,7 +115,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
 
         // todo: removing an instance from the system can have impact to the cluster. actions need to be defined
         _applicationDb.InstanceInfo.Remove(instanceInfo);
-        await _applicationDb.Instance.SaveChangesAsync(context.CancellationToken);
+        await _applicationDb.SaveChangesAsync(context.CancellationToken);
 
         await context.Publish(new ControlInstanceCompleted(instanceInfo.Id, InstanceCommand.Delete), context.CancellationToken);
     }

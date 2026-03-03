@@ -1,4 +1,4 @@
-﻿using MassTransit.EntityFrameworkCoreIntegration;
+using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Sdk.Backend.Persistence;
@@ -9,7 +9,6 @@ public class BurgerDbContext(DbContextOptions options) : SagaDbContext(options),
 {
     internal const string DbSchemaName = "burger";
 
-    public Microsoft.EntityFrameworkCore.DbContext Instance => this;
     public string DefaultSchemaName => DbSchemaName;
     public IEnumerable<Type> NotSynchronizedEntityTypes => [];
     protected override IEnumerable<ISagaClassMap> Configurations
@@ -19,6 +18,9 @@ public class BurgerDbContext(DbContextOptions options) : SagaDbContext(options),
             yield return new OrderBurgerClassMap();
         }
     }
+
+    public Task MigrateAsync(CancellationToken cancellationToken = default)
+        => Database.MigrateAsync(cancellationToken);
 
     protected sealed override void OnModelCreating(ModelBuilder modelBuilder)
     {

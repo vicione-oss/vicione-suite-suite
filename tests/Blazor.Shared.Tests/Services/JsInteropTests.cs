@@ -62,7 +62,7 @@ public class JsInteropTests
         var interop = new JsInterop(ctx.JSInterop.JSRuntime, _loggerMock);
 
         // Act
-        var result = await interop.GetCookie(Guid.NewGuid().ToString());
+        var result = await interop.GetCookie(Guid.NewGuid().ToString(), Xunit.TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(string.IsNullOrEmpty(result));
@@ -79,7 +79,7 @@ public class JsInteropTests
         var reference = new ElementReference();
 
         // Act
-        var result = await interop.FormValid(reference);
+        var result = await interop.FormValid(reference, Xunit.TestContext.Current.CancellationToken);
 
         // Assert
         Assert.False(result);
@@ -95,7 +95,7 @@ public class JsInteropTests
         var interop = new JsInterop(ctx.JSInterop.JSRuntime, _loggerMock);
 
         // Act
-        var element = await interop.GetElementByName("name");
+        var element = await interop.GetElementByName("name", Xunit.TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(string.IsNullOrEmpty(element));
