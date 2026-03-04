@@ -53,7 +53,9 @@ internal static class ModuleAssemblyLoader
         }
         catch (Exception e)
         {
-            result.ErrorDlls.Add(moduleDllFile, e);
+            // if we have an error loading the module, we want to keep track of it in the context.
+            // Context is used to identify module dependency issues before loading the assembly
+            suiteContext.Modules.First(k => k.AssemblyPath == moduleDllFile).StartupErrors.Add(e);
         }
     }
 }

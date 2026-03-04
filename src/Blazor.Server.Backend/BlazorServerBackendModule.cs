@@ -80,7 +80,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
         services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();
     }
-    
+
     public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccured = null)
     {
         var failedModuleIds = new List<string>();

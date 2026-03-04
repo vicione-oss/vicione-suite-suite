@@ -143,10 +143,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
         // load the modules depending on suite context
         // based on the context we load the module assemblies into the application
-        var result = ModuleAssemblyLoader.LoadBackendModuleBundles<BackendModule>(_suiteContext);
-        LogModuleBundleResult(result);
-
-        return result;
+        return ModuleAssemblyLoader.LoadBackendModuleBundles<BackendModule>(_suiteContext);
     }
 
     private async Task SynchronizeModules(CancellationToken cancellationToken)
@@ -388,14 +385,5 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         foreach (var module in suiteContext.Modules.Where(m => m.IsDebugSource))
             Log.Information("Debug module '{ModuleId}' from path '{ModulePath}'", module.AssemblyName, module.AssemblyFolder);
 #endif
-    }
-
-    private static void LogModuleBundleResult<TModule>(ModuleBundleLoadResult<ModuleBundle<TModule>> result) where TModule : IModule
-    {
-        foreach (var bundle in result.Bundles)
-            Log.Debug("Loaded bundle '{ModuleId}' from path '{ModulePath}'", bundle.Module.ModuleKey.ModuleId, bundle.AssemblyLocation);
-
-        foreach (var error in result.ErrorDlls)
-            Log.Error(error.Value, "Failed to load dll from '{ModulePath}'", error.Key);
     }
 }
