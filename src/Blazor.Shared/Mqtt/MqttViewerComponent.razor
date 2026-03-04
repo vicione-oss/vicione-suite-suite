@@ -1,8 +1,10 @@
-﻿@using Sdk.Authorization
+@using Sdk.Authorization
 @using ViciOne.Ui.Blazor.Components.Button
 @using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.MonochromeIcons.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 @using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
 @attribute [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
 
 <div class="mqtt-viewer">
@@ -59,25 +61,22 @@
             <MqttMessagesComponent />
         </div>
 
-        <div class="message">
-            @if (ViewerService.DisplayMessageDetails)
-            {
-                <div class="message-details ms-4 me-3 my-3">
-                    <div class="headline-container">
-                        <h4>@Localization.MqttViewer.MessageDetails</h4>
+        @if (ViewerService.DisplayMessageDetails)
+        {
+            <div class="message ms-4 me-3 my-3">
+                <div class="headline-and-close-button">
+                    <h4 class="headline">@Localization.MqttViewer.MessageDetails</h4>
 
-                        <Button IconCssClass="@MonochromeIconName.CloseMedium.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated()"
-                                Size="ButtonSize.Medium"
-                                OnClick="@ViewerService.CloseMessageDetails" />
-
-                    </div>
-
-                    <DxMemo Text="@ViewerService.GetMessageDetails()"
-                            ReadOnly="true"
-                            ResizeMode="MemoResizeMode.Disabled" />
+                    <button class="close-button" @onclick="@ViewerService.CloseMessageDetails">
+                        <MonochromeIcon Name="@MonochromeIconName.CloseMedium" Size="MonochromeIconSize.Medium" />
+                    </button>
                 </div>
-            }
-        </div>
+
+                <pre class="message-details">
+                    @ViewerService.GetMessageDetails()
+                </pre>
+            </div>
+        }
 
         <div class="filter">
             <MqttFilterComponent />
