@@ -208,6 +208,11 @@ Backend services can be provided with connection details using the `MqttClient.S
 }
 ```
 
+## UI Host
+The UI Host is responsible for serving the Blazor application and static files. By default the UI Host is enabled and set to `ViciOne.Suite.Blazor.Server`. To change the UI Host, modify the `ModuleLoader:UiHost`-setting in the `appsettings.json`-file. If you remove the property or set `null` the suite will operate in headless mode, without providing any UI or client modules.
+
+For development, UI host is configured to run on `https://localhost:5001`. You can modify the port and other settings in the `appsettings.json` file under the `Kestrel` section. 
+
 ### OpenID Connect
 
 Using OIDC requires a provider to be configured. 
