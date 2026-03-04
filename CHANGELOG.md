@@ -41,7 +41,7 @@
 - `Serilog.AspNetCore` packages, update to version `10.0.0`
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2361222928`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2363355084`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.3.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.3.0`
