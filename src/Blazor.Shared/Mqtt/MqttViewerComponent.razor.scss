@@ -1,6 +1,7 @@
-﻿@use "../Styles/design/colors";
+@use "../Styles/design/colors";
 @use "../../../shared/styles/colors-staged";
 @use "../../../shared/styles/variables";
+@use "../Styles/buttons/mixins" as buttons;
 
 .mqtt-viewer {
     display: flex;
@@ -37,7 +38,9 @@
         grid-template-rows: 1fr 1fr min-content;
         grid-template-columns: 1fr 1fr min-content;
         grid-template-areas:
-            "list list filter" "list list filter" "message message filter";
+            "list list filter"
+            "list list filter"
+            "message message filter";
         height: 100%;
         padding: 0;
 
@@ -48,19 +51,32 @@
         .message {
             grid-area: message;
 
-            .message-details {
-                display: grid;
-                grid-template-rows: 35px auto;
-                min-height: 300px;
+            display: grid;
+            grid-template-rows: 35px auto;
+            max-height: 300px;
 
-                ::deep .button--medium {
-                    border: none;
-                    align-content: space-between;
+            .headline-and-close-button {
+                display: flex;
+                flex-wrap: nowrap;
+                justify-content: space-between;
+                align-items: center;
+
+                .headline {
+                    margin-bottom: 0;
                 }
             }
 
-            ::deep dxbl-memo-editor {
-                height: 100%;
+            .close-button {
+                @include buttons.lucent-styling();
+            }
+
+            .message-details {
+                background-color: colors.$background-dark;
+                border: 1px solid colors.$border;
+
+                padding: 8px 12px;
+
+                overflow: auto;
             }
         }
 
@@ -68,12 +84,6 @@
             grid-area: filter;
         }
 
-        ::deep .headline-container {
-            display: flex;
-            flex-wrap: nowrap;
-            justify-content: space-between;
-            align-items: baseline;
-        }
         /* these two make dxgrid using the correct space */
         ::deep .mqtt-rel-container {
             position: relative;

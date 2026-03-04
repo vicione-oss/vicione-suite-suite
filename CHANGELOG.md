@@ -13,6 +13,7 @@
 
 ### Changed
 
+- Replaced `DxMemo` with scrollable HTML element
 - Replaced `DxPopup` with `ViciOne.Ui.Blazor.Components.Popup`
 - `SystemDefaultControlPanelPage`, changed wording in description banner
 - Updated `Serilog.Sinks.Journal` to `1.1.0`
