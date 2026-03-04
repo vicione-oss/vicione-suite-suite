@@ -7,7 +7,6 @@ using Core.Module.Utils;
 using Core.Shared.Modules;
 using Core.UiHosting;
 using Sdk.Modules;
-using Serilog;
 
 namespace Core.OS.Modules.Services;
 
@@ -127,12 +126,6 @@ internal sealed class UiHostEnvironment(SuiteDependencyContext suiteContext) : I
 
         AddUiModuleBundles(result, pathInfos, _suiteContext, createBundle);
 
-        // log skips/errors with static logger because it happens before ServiceProvider is built
-        foreach (var error in result.ErrorDlls)
-        {
-            Log.Error(error.Value, "Load module {Assembly} failed", error.Key);
-        }
-
         return result.Bundles;
     }
 
@@ -174,7 +167,7 @@ internal sealed class UiHostEnvironment(SuiteDependencyContext suiteContext) : I
         }
         catch (Exception e)
         {
-            result.ErrorDlls.Add(moduleDllFile, e);
+            suiteContext.Modules.First(k => k.AssemblyPath == moduleDllFile).StartupErrors.Add(e);
         }
     }
 }

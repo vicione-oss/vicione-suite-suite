@@ -21,7 +21,7 @@ using Serilog;
 
 namespace Core.OS.Modules.Services;
 
-internal sealed class ModuleHost : IModuleHost
+internal sealed partial class ModuleHost : IModuleHost
 {
     private readonly List<ModuleBundle<BackendModule>> _loadedModuleBundles;
     private readonly IReadOnlyCollection<ModuleMetadataBundle> _installedModules;
@@ -140,20 +140,20 @@ internal sealed class ModuleHost : IModuleHost
         if (UiHostModule is null)
         {
             const string message = "UI host is disabled";
-            logger.LogInformation(message);
+            LogUiHostDisabled(logger);
             endpoints.MapGet("/", () => message);
         }
 
         foreach (var module in Modules)
         {
-            logger.LogTrace("Mapping endpoints for '{ModuleId}'", module.ModuleId);
+            LogMappingEndpoints(logger, module.ModuleId);
             try
             {
                 module.MapEndpoints(endpoints);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error while mapping endpoints for '{ModuleId}' - skipping", module.ModuleId);
+                LogMappingEndpointsError(logger, e, module.ModuleId);
             }
         }
     }
@@ -166,8 +166,8 @@ internal sealed class ModuleHost : IModuleHost
         if (UiHostModule is null)
             return;
 
-        var logger = app.ApplicationServices.GetRequiredService<ILogger<ModuleHost>>();
-        logger.LogTrace("Use security from '{ModuleId}'", UiHostModule.ModuleId);
+        var logger = GetLogger(app.ApplicationServices);
+        LogUseSecurityFrom(logger, UiHostModule.ModuleId);
 
         try
         {
@@ -175,7 +175,7 @@ internal sealed class ModuleHost : IModuleHost
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error on use '{ModuleId}' security", UiHostModule.ModuleId);
+            LogUseSecurityError(logger, e, UiHostModule.ModuleId);
         }
     }
 
@@ -187,8 +187,8 @@ internal sealed class ModuleHost : IModuleHost
         if (UiHostModule is null)
             return;
 
-        var logger = app.ApplicationServices.GetRequiredService<ILogger<ModuleHost>>();
-        logger.LogInformation("Initialize '{ModuleId}' as the UI host", UiHostModule.ModuleId);
+        var logger = GetLogger(app.ApplicationServices);
+        LogInitializeUiHost(logger, UiHostModule.ModuleId);
 
         try
         {
@@ -198,7 +198,7 @@ internal sealed class ModuleHost : IModuleHost
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error on initialize '{ModuleId}' as the UI host - skipping", UiHostModule.ModuleId);
+            LogInitializeUiHostError(logger, e, UiHostModule.ModuleId);
         }
     }
 
@@ -228,17 +228,17 @@ internal sealed class ModuleHost : IModuleHost
     /// </summary>    
     public void UseModuleServices(IApplicationBuilder app)
     {
-        var logger = app.ApplicationServices.GetRequiredService<ILogger<ModuleHost>>();
+        var logger = GetLogger(app.ApplicationServices);
         foreach (var module in Modules)
         {
-            logger.LogTrace("Configure services for '{ModuleId}'", module.ModuleId);
+            LogConfigureServices(logger, module.ModuleId);
             try
             {
                 module.UseServices(app);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error on configure services for '{ModuleId}' - skipping", module.ModuleId);
+                LogConfigureServicesError(logger, e, module.ModuleId);
             }
         }
 
@@ -247,7 +247,7 @@ internal sealed class ModuleHost : IModuleHost
 
     public void MoveModuleResources(IServiceProvider serviceProvider)
     {
-        var logger = serviceProvider.GetRequiredService<ILogger<ModuleHost>>();
+        var logger = GetLogger(serviceProvider);
         var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
 
         if (string.IsNullOrEmpty(_instanceOptions.HomeDirectory))
@@ -261,7 +261,7 @@ internal sealed class ModuleHost : IModuleHost
             if (string.IsNullOrEmpty(resourceDirectoryName))
                 continue;
 
-            logger.LogTrace("Moving resources for module '{ModuleId}'", module.ModuleKey.ModuleId);
+            LogMovingResources(logger, module.ModuleKey.ModuleId);
 
             try
             {
@@ -272,7 +272,7 @@ internal sealed class ModuleHost : IModuleHost
                 var resourcePath = fileSystem.Path.Combine(assemblyLocation, resourceDirectoryName);
                 if (!fileSystem.Directory.Exists(resourcePath))
                 {
-                    logger.LogWarning("No directory named '{ResourceDirectory}' was found for module '{ModuleId}'", resourcePath, module.ModuleKey.ModuleId);
+                    LogResourceDirectoryNotFound(logger, resourcePath, module.ModuleKey.ModuleId);
                     continue;
                 }
 
@@ -294,14 +294,14 @@ internal sealed class ModuleHost : IModuleHost
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Error on moving resources for {ModuleId} - skipping", module.ModuleKey.ModuleId);
+                LogMovingResourcesError(logger, e, module.ModuleKey.ModuleId);
             }
         }
     }
 
     public async Task MigrateAndSeedModuleData(IServiceScope scope, IConfiguration config, CancellationToken stoppingToken)
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<ModuleHost>>();
+        var logger = GetLogger(scope.ServiceProvider);
         foreach (var module in Modules)
         {
             try
@@ -311,28 +311,29 @@ internal sealed class ModuleHost : IModuleHost
 
                 await module.ModuleInitializer.OnPreMigrate(scope.ServiceProvider, stoppingToken);
 
-                logger.LogTrace("Migrate database for '{ModuleId}'", module.ModuleId);
+                LogMigrateDatabase(logger, module.ModuleId);
                 await module.ModuleInitializer.Migrate(scope.ServiceProvider, stoppingToken);
 
                 if (_instanceOptions.Type != Sdk.Instance.InstanceType.Slave) // Slaves will get their seeds from Master
                 {
-                    logger.LogTrace("Seed data for '{ModuleId}'", module.ModuleId);
+                    LogSeedData(logger, module.ModuleId);
                     await module.ModuleInitializer.OnPostMigrate(scope.ServiceProvider, stoppingToken);
                 }
             }
             catch (Exception e)
             {
                 // todo: this might prevent depending modules working correctly!!
-                logger.LogError(e, "Error on setup data for '{ModuleId}' - skipping", module.ModuleId);
+                LogSetupDataError(logger, e, module.ModuleId);
             }
         }
     }
 
     public Task CallOnInitialized(IServiceScope scope, CancellationToken stoppingToken)
     {
-        return Task.WhenAll(Modules.Select(m => OnInit(m, scope.ServiceProvider, stoppingToken)));
+        var logger = GetLogger(scope.ServiceProvider);
+        return Task.WhenAll(Modules.Select(m => OnInit(m, scope.ServiceProvider, logger, stoppingToken)));
 
-        static async Task OnInit(BackendModule m, IServiceProvider s, CancellationToken ct)
+        static async Task OnInit(BackendModule m, IServiceProvider s, ILogger<ModuleHost> logger, CancellationToken ct)
         {
             try
             {
@@ -341,9 +342,7 @@ internal sealed class ModuleHost : IModuleHost
             }
             catch (Exception e)
             {
-                var logger = s.GetRequiredService<ILogger<ModuleHost>>();
-                logger.LogError(e, "Error calling {Method} for '{ModuleId}' - skipping",
-                    nameof(IModuleInitializer.OnInitialized), m.ModuleId);
+                LogOnInitializedError(logger, e, nameof(IModuleInitializer.OnInitialized), m.ModuleId);
             }
         }
     }
@@ -391,4 +390,55 @@ internal sealed class ModuleHost : IModuleHost
             MissingDependencies = [.. k.MissingDependencies],
         }).ToList();
     }
+
+    private static ILogger<ModuleHost> GetLogger(IServiceProvider provider)
+        => provider.GetRequiredService<ILogger<ModuleHost>>();
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "UI host is disabled")]
+    private static partial void LogUiHostDisabled(ILogger<ModuleHost> logger);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Mapping endpoints for '{ModuleId}'")]
+    private static partial void LogMappingEndpoints(ILogger<ModuleHost> logger, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error while mapping endpoints for '{ModuleId}' - skipping")]
+    private static partial void LogMappingEndpointsError(ILogger<ModuleHost> logger, Exception exception, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Use security from '{ModuleId}'")]
+    private static partial void LogUseSecurityFrom(ILogger<ModuleHost> logger, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error on use '{ModuleId}' security")]
+    private static partial void LogUseSecurityError(ILogger<ModuleHost> logger, Exception exception, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Initialize '{ModuleId}' as the UI host")]
+    private static partial void LogInitializeUiHost(ILogger<ModuleHost> logger, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error on initialize '{ModuleId}' as the UI host - skipping")]
+    private static partial void LogInitializeUiHostError(ILogger<ModuleHost> logger, Exception exception, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Configure services for '{ModuleId}'")]
+    private static partial void LogConfigureServices(ILogger<ModuleHost> logger, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error on configure services for '{ModuleId}' - skipping")]
+    private static partial void LogConfigureServicesError(ILogger<ModuleHost> logger, Exception exception, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Moving resources for module '{ModuleId}'")]
+    private static partial void LogMovingResources(ILogger<ModuleHost> logger, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "No directory named '{ResourceDirectory}' was found for module '{ModuleId}'")]
+    private static partial void LogResourceDirectoryNotFound(ILogger<ModuleHost> logger, string resourceDirectory, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error on moving resources for {ModuleId} - skipping")]
+    private static partial void LogMovingResourcesError(ILogger<ModuleHost> logger, Exception exception, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Migrate database for '{ModuleId}'")]
+    private static partial void LogMigrateDatabase(ILogger<ModuleHost> logger, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Seed data for '{ModuleId}'")]
+    private static partial void LogSeedData(ILogger<ModuleHost> logger, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error on setup data for '{ModuleId}' - skipping")]
+    private static partial void LogSetupDataError(ILogger<ModuleHost> logger, Exception exception, string moduleId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error calling {Method} for '{ModuleId}' - skipping")]
+    private static partial void LogOnInitializedError(ILogger<ModuleHost> logger, Exception exception, string method, string moduleId);
 }
