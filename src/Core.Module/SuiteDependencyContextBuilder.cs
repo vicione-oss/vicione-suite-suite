@@ -135,7 +135,7 @@ public class SuiteDependencyContextBuilder
     }
 
     /// <summary>
-    /// Add options to include client modules. It requires UiHost, so either it was already setup by <see cref="SuiteDependencyContextBuilder.WithUiHost"/>
+    /// Add options to include client modules. It requires UiHost, so either it was already setup by <see cref="WithUiHost"/>
     /// otherwise the call will try to setup UiHost with available loader options
     /// </summary>    
     public SuiteDependencyContextBuilder WithClientModules(ModuleLoaderOptions loaderOptions, Dictionary<string, ModuleOptions> moduleOptions)
@@ -184,12 +184,7 @@ public class SuiteDependencyContextBuilder
 #endif
         ResolveBackendModulePathInfos(fileSystem, _options.BackendLoaderOptions, _options.BackendModuleOptions);
         ResolveUiHostPathInfo(fileSystem, _options.UiHostOptions);
-        // TODO: The following check is a workaround supposed to be addressed in:
-        // https://gitlab.com/vicione-oss/vicione/suite/suite/-/issues/2645
-        if (_options.UiHostOptions is { Enable: true })
-        {
-            ResolveUiModules(fileSystem, _options.ClientLoaderOptions, _options.ClientModuleOptions);
-        }
+        ResolveUiModules(fileSystem, _options.ClientLoaderOptions, _options.ClientModuleOptions);
 
         // cleanup the lists
         CleanupOptions();
@@ -286,17 +281,12 @@ public class SuiteDependencyContextBuilder
 
     private void ResolveUiModules(IFileSystem fileSystem, ModuleLoaderOptions? loaderOptions, Dictionary<string, ModuleOptions>? moduleOptions)
     {
-        if (loaderOptions is null || moduleOptions is null)
+        if (loaderOptions is null || moduleOptions is null || _options.UiHostPathInfo is null)
             return;
-
-        // to share libraries provided by ui host we use it's resolver on our ui modules
-        if (_options.UiHostPathInfo is null)
-            throw new InvalidOperationException("Ui modules can't be added without a valid UiHost");
 
         // when we use deployed modules they don't have e.g. ViciOne.Suite.Sdk.Client on their own
         // because it was removed on deployment cleanup.
         // to resolve these dependencies for ui modules we add the ui host as additional resolver source.
-
         var infos = new HashSet<ModulePathInfo>();
 
         // the debug paths
