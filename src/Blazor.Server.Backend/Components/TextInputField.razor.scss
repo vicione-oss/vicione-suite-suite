@@ -56,7 +56,7 @@
             color: colors.$font-light;
         }
 
-        &:hover:not(:focus) {
+        &:hover:not(:focus):not([disabled]) {
             outline: 1px solid;
             color: var(--vo-ui-bc-color-accent-hover);
         }

@@ -19,10 +19,10 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class ChangePassword {
+    internal class ChangePassword {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization.ChangePassword", typeof(ChangePassword).Assembly);
@@ -51,7 +51,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -61,45 +61,18 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm new Password.
-        /// </summary>
-        public static string ConfirmNewPassword {
-            get {
-                return ResourceManager.GetString("ConfirmNewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} and {1} do not match..
-        /// </summary>
-        public static string ErrorInputsDoNotMatch {
-            get {
-                return ResourceManager.GetString("ErrorInputsDoNotMatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to {0} and {1} must not be the same..
         /// </summary>
-        public static string ErrorInputsMustNotBeTheSame {
+        internal static string ErrorInputsMustNotBeTheSame {
             get {
                 return ResourceManager.GetString("ErrorInputsMustNotBeTheSame", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New Password.
-        /// </summary>
-        public static string NewPassword {
-            get {
-                return ResourceManager.GetString("NewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Your current password has expired. Please change it to continue using the application..
         /// </summary>
-        public static string PasswordExpiredMessage {
+        internal static string PasswordExpiredMessage {
             get {
                 return ResourceManager.GetString("PasswordExpiredMessage", resourceCulture);
             }
@@ -108,7 +81,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         /// <summary>
         ///   Looks up a localized string similar to Change Password.
         /// </summary>
-        public static string Title {
+        internal static string Title {
             get {
                 return ResourceManager.GetString("Title", resourceCulture);
             }
@@ -117,7 +90,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         /// <summary>
         ///   Looks up a localized string similar to User not found..
         /// </summary>
-        public static string UserNotFound {
+        internal static string UserNotFound {
             get {
                 return ResourceManager.GetString("UserNotFound", resourceCulture);
             }

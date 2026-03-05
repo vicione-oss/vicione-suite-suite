@@ -8,7 +8,7 @@ namespace Blazor.Shared.Components.Layout;
 
 public sealed partial class MainLayout : IDisposable
 {
-    private bool _isTemplateLogin;
+    private bool _isLogin;
 
     [Inject] private ILayoutService LayoutService { get; set; } = default!;
     [Inject] private IClientModuleService ModuleService { get; set; } = default!;
@@ -35,7 +35,7 @@ public sealed partial class MainLayout : IDisposable
         {
             await ModuleService.OnUserAuthenticated(ServiceProvider, (await ExistingCascadedAuthenticationState).User);
 
-            _isTemplateLogin = NavigationManager.Uri.Contains("template/", StringComparison.OrdinalIgnoreCase);
+            _isLogin = NavigationManager.Uri.Contains("account/", StringComparison.OrdinalIgnoreCase);
         }
     }
 

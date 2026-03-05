@@ -1,0 +1,35 @@
+@attribute [Route(IdentityConstants.ConfirmMailRoute)]
+
+@using Blazor.Server.Backend.Components
+@using Blazor.Shared.Components
+@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using ViciOne.Ui.Localization.Resources
+
+<PageTitle>@Localization.ConfirmEmail.Title</PageTitle>
+<AccountLayout>
+    <Heading>@Localization.ConfirmEmail.Title</Heading>
+    <LeftSideContent>
+        <div>
+            @if (_wasSuccessful is null)
+            {
+                <label>@(string.Format(Localization.ConfirmEmail.UserNotFound, UserId))</label>
+            }
+            else if (_wasSuccessful is true)
+            {
+                <label>@Localization.ConfirmEmail.VerificationSuccessful</label>
+                <NavigationField Route="@IdentityConstants.LoginRoute">
+                    <Content>
+                        <img src="@(SvgIcon.Back.GetPath())" />
+
+                        <label>@Localization.Common.NavigateToLoginPage</label>
+                    </Content>
+                </NavigationField>
+            }
+            else
+            {
+                <label>@Localization.ConfirmEmail.VerifyingFailed</label>
+            }
+        </div>
+    </LeftSideContent>
+</AccountLayout>

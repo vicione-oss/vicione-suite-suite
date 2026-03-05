@@ -1,10 +1,12 @@
 ﻿@using Sdk.Client.Extensions
 
-@if (Submit)
-{
-    <button class="account-button @(ButtonType.ToString().ToHyphenSeparated())" type="submit" disabled="@Disabled">@Text</button>
+@{
+    var additionalAttributes = new Dictionary<string, object>();
+
+    if (!string.IsNullOrEmpty(Form))
+    {
+        additionalAttributes.Add("form", Form);
+    }
 }
-else
-{
-    <button class="account-button @(ButtonType.ToString().ToHyphenSeparated())" disabled="@Disabled" @onclick="OnClick">@Text</button>
-}
+
+<button class="account-button @(ButtonType.ToString().ToHyphenSeparated())" type="submit" disabled="@Disabled" @attributes="additionalAttributes">@Text</button>
