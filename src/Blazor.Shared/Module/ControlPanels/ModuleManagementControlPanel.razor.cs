@@ -1,17 +1,18 @@
 ﻿using Blazor.Shared.Module.Models;
 using Blazor.Shared.Module.Services;
 using Blazor.Shared.Services;
+using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Events;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
-using Sdk.Client.Services;
 using Sdk.Modules;
 using Sdk.Utils;
-using ViciOne.Ui.Localization.Resources;
+using ViciOne.Ui.Blazor.Components.Grid.Services;
 
 namespace Blazor.Shared.Module.ControlPanels;
 
@@ -23,10 +24,15 @@ namespace Blazor.Shared.Module.ControlPanels;
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
 [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
 public sealed partial class ModuleManagementControlPanel : ControlPanelBase<ModuleManagementControlPanelState>,
-    IEventConsumer<ModuleOptionsUpdatedEvent>
+    IEventConsumer<ModulePackageOperationsChanged>,
+    IEventConsumer<ModulePackageOperationsFailed>
 {
-    private readonly AutoDisposeList<IDisposable> _subscriptionHandle = [];
+    private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
     private bool _dialogVisible;
+    private IQueryable<ModuleMetadataModel> _installedModulesQueryable = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
+    private IQueryable<ModuleMetadataModel> _availableModulesQueryable = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
+    private string _installedModulesFilterText = string.Empty;
+    private string _availableModulesFilterText = string.Empty;
 
     [Inject]
     internal IModuleManagementService ManagementService { get; set; } = default!;
@@ -35,41 +41,75 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     internal IUiMediator Mediator { get; set; } = default!;
 
     [Inject]
-    public IMessageBannerService BannerService { get; set; } = default!;
-
-    [Inject]
     public ISuiteControlService SuiteControlService { get; set; } = default!;
+
+    [Inject] private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
 
     [Inject]
     public ILogger<ModuleManagementControlPanel> Logger { get; set; } = default!;
+
+    [Inject(Key = typeof(ModuleManagementControlPanelServiceKey))] private IGridItemSelection<ModuleMetadataModel> InstalledModuleSelection { get; set; } = default!;
+
+    [Inject(Key = typeof(ModuleManagementControlPanelServiceKey))] private IGridItemSelection<ModuleMetadataModel> AvailableModuleSelection { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        _subscriptionHandle.Add(Mediator.Register(this));
+        State.Changed += StateChanged;
+
+        _installedModulesQueryable = State.InstalledModules.AsQueryable();
+        _availableModulesQueryable = State.AvailableModules.AsQueryable();
+
+        InstalledModuleSelection.Clear();
+        InstalledModuleSelection.Changed -= InstalledModuleSelectionChanged;
+        InstalledModuleSelection.Changed += InstalledModuleSelectionChanged;
+
+        AvailableModuleSelection.Clear();
+        AvailableModuleSelection.Changed -= AvailableModuleSelectionChanged;
+        AvailableModuleSelection.Changed += AvailableModuleSelectionChanged;
+
+        _subscriptionHandles.Add(Mediator.Register<ModulePackageOperationsChanged>(this));
+        _subscriptionHandles.Add(Mediator.Register<ModulePackageOperationsFailed>(this));
     }
+
+    private async void StateChanged(ControlPanelStateChangedEventArgs args)
+    {
+        var stateHasChanged = false;
+
+        if (args.PropertyNames.Contains(nameof(State.InstalledModules)))
+        {
+            _installedModulesQueryable = State.InstalledModules.AsQueryable();
+            stateHasChanged = true;
+        }
+        else if (args.PropertyNames.Contains(nameof(State.AvailableModules)))
+        {
+            _availableModulesQueryable = State.AvailableModules.AsQueryable();
+            stateHasChanged = true;
+        }
+
+        if (stateHasChanged)
+            await InvokeAsync(StateHasChanged);
+    }
+
+    private async void AvailableModuleSelectionChanged(GridItemSelectionChangedEventArgs<ModuleMetadataModel> args)
+        => await InvokeAsync(StateHasChanged);
+
+    private async void InstalledModuleSelectionChanged(GridItemSelectionChangedEventArgs<ModuleMetadataModel> args)
+        => await InvokeAsync(StateHasChanged);
 
     protected override async ValueTask DisposeAsyncCore()
     {
-        _subscriptionHandle.Dispose();
+        _subscriptionHandles.Dispose();
 
         await base.DisposeAsyncCore();
     }
 
-    private Task BeginEditIfChanged()
-    {
-        if (State.EvaluateChanges([.. State.InstalledModules, .. State.AvailableModules]))
-        {
-            return BeginEdit();
-        }
-
-        // we have no changes here -> State.HasChanges == false
-        return CancelEdit();
-    }
-
     private async Task LoadModuleVersions(bool forceReload = false)
     {
+        InstalledModuleSelection.Clear();
+        AvailableModuleSelection.Clear();
+
         State.BeginLoading();
         try
         {
@@ -84,141 +124,98 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         }
     }
 
-    private void SetVersionUpdate(ModuleMetadataModel module)
-    {
-        if (module.UpdateVersion == module.SelectedVersion)
-            return;
-
-        module.UpdateVersion = module.SelectedVersion;
-        BeginEditIfChanged();
-    }
-
-    private void ResetVersionUpdate(ModuleMetadataModel module)
-    {
-        module.UpdateVersion = null;
-        BeginEditIfChanged();
-    }
-
-    private async Task AddModuleOption(ModuleMetadataModel module, ModuleOptionType optionType)
-    {
-        ModuleOptionDeclaration? customOption = null;
-
-        var key = GetUniqueModuleOptionKey(module.EditOptions);
-
-        if (optionType == ModuleOptionType.Boolean)
-            customOption = new ModuleOptionDeclaration { Key = key, Value = $"{false}", OptionType = ModuleOptionType.Boolean };
-        else if (optionType == ModuleOptionType.Number)
-            customOption = new ModuleOptionDeclaration { Key = key, Value = "1", OptionType = ModuleOptionType.Number };
-        else if (optionType == ModuleOptionType.Text)
-            customOption = new ModuleOptionDeclaration { Key = key, Value = CommonVocabulary.Value, OptionType = ModuleOptionType.Text };
-
-        if (customOption is not null)
-        {
-            module.EditOptions.Add(customOption.Key, customOption);
-            module.CustomOptions.Add(customOption);
-
-            await BeginEdit();
-        }
-    }
-
-    private static string GetUniqueModuleOptionKey(Dictionary<string, ModuleOptionDeclaration> moduleOptionMap)
-    {
-        string key;
-        var keyCheckLoopCount = 0;
-        do
-        {
-            if (keyCheckLoopCount++ > 0)
-                key = $"{CommonVocabulary.Key} {keyCheckLoopCount}";
-            else
-                key = $"{CommonVocabulary.Key}";
-        }
-        while (moduleOptionMap.ContainsKey(key));
-
-        return key;
-    }
-
-    private static bool ValidateModuleOptionKey(ModuleMetadataModel module, string key, ModuleOptionDeclaration moduleOption)
-    {
-        if (module.EditOptions.TryGetValue(key, out var mappedModuleOption))
-            return mappedModuleOption == moduleOption;
-        else
-            return true;
-    }
-
-    private static bool CanDeleteModuleOption(ModuleMetadataModel module, ModuleOptionDeclaration moduleOption)
-        => module.CustomOptions.Contains(moduleOption);
-
-    private static Task ModuleOptionChanged(ModuleMetadataModel module, ModuleOptionDeclaration moduleOption)
-    {
-        var p = module.EditOptions.First(p => p.Value == moduleOption);
-        if (p.Key != moduleOption.Key)
-        {
-            module.EditOptions.Remove(p.Key);
-            module.EditOptions.Add(moduleOption.Key, moduleOption);
-        }
-
-        module.HasModifiedOptions = true;
-        //await BeginEdit();    // when we save all at once?
-        return Task.CompletedTask;
-    }
-
-    private static Task ModuleOptionsRemoved(ModuleMetadataModel module, IEnumerable<ModuleOptionDeclaration> moduleOptions)
-    {
-        foreach (var moduleOption in moduleOptions)
-        {
-            if (module.EditOptions.Remove(moduleOption.Key))
-            {
-                module.CustomOptions.Remove(moduleOption);
-                module.HasModifiedOptions = true;
-                //await BeginEdit(); // when we save all at once?
-            }
-        }
-        return Task.CompletedTask;
-    }
-
-    private static async Task ModuleOptionsExpandedChanged(ModuleMetadataModel module)
-    {
-        if (!module.OptionsExpanded && module.OptionGrid is not null)
-        {
-            await module.OptionGrid.CancelEdit();
-            module.HasModifiedOptions = false;
-        }
-    }
-
-    private async Task InstalledModuleInstalledFlagChanged(ModuleMetadataModel module)
-    {
-        if (!module.Installed && module.OptionGrid is not null)
-        {
-            await module.OptionGrid.CancelEdit();
-            module.HasModifiedOptions = false;
-        }
-
-        await BeginEditIfChanged();
-    }
-
-    private async Task UpdateModuleOptions(ModuleMetadataModel module, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(module.ModuleId))
-            return;
-
-        await ManagementService.UpdateModuleOptions(module.ModuleId, module.EditOptions.Values, cancellationToken);
-
-        module.HasModifiedOptions = false;
-    }
-
     private async Task RestartSuite()
     {
         await SuiteControlService.RestartSuite();
         _dialogVisible = false;
     }
 
-    public Task Consume(ClientContext<ModuleOptionsUpdatedEvent> context, CancellationToken cancellationToken)
+    private IQueryable<ModuleMetadataModel> FilterInstalledItems(IQueryable<ModuleMetadataModel> installedModules)
+        => installedModules
+            .Where(i => i.Name.Contains(_installedModulesFilterText, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(d => d.Name);
+
+    private IQueryable<ModuleMetadataModel> FilterAvailableItems(IQueryable<ModuleMetadataModel> installedModules)
+        => installedModules
+            .Where(i => i.Name.Contains(_availableModulesFilterText, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(d => d.Name);
+
+    private bool CanUninstallSelectedModules()
+        => InstalledModuleSelection.Count != 0
+        && InstalledModuleSelection.All(i => i.Installed && i.CanBeModified && !i.Bundle.IsDebugSource && i.Bundle.PendingOperation?.OperationKind != ModulePackageOperationKind.Uninstall);
+
+    private async Task UninstallSelectedModules()
     {
-        var module = State.InstalledModules.FirstOrDefault(k => k.ModuleId == context.Message.ModuleId);
-        if (module != null)
+        var operations = InstalledModuleSelection
+            .Distinct()
+            .Select(item => new ModulePackageOperation(new ModuleDependencyPackage
+            {
+                Name = item.Name,
+                Version = item.Version,
+            },
+            ModulePackageOperationKind.Uninstall))
+            .ToList();
+
+        await ManagementService.SendUpdateModulePackages(operations);
+    }
+
+    private bool CanResetSelectedModules()
+        => AvailableModuleSelection.Count != 0
+        && AvailableModuleSelection.All(k => k.PendingOperation?.OperationKind == ModulePackageOperationKind.Install);
+
+    private async Task ResetPendingInstallation()
+    {
+        var operations = AvailableModuleSelection
+            .Where(k => k.PendingOperation != null && k.PendingOperation.OperationKind == ModulePackageOperationKind.Install)
+            .Distinct()
+            .Select(item => new ModulePackageOperation(new ModuleDependencyPackage
+            {
+                Name = item.Name,
+                Version = item.PendingOperation!.Package.Version,
+            },
+            ModulePackageOperationKind.Uninstall))
+            .ToList();
+
+        await ManagementService.SendUpdateModulePackages(operations);
+    }
+
+    private async Task ShowDetailsAsync(ModuleMetadataModel model)
+    {
+        var result = await ControlPanelRequest.Send<ModuleDetailsControlPanel, ModuleDetailsControlPanelState>(s =>
         {
-            module.HasModifiedOptions = false;
+            s.ModuleMetadata = model;
+        });
+    }
+
+    public async Task Consume(ClientContext<ModulePackageOperationsChanged> context, CancellationToken cancellationToken)
+    {
+        var hasChanged = false;
+
+        foreach (var change in context.Message.Changes)
+        {
+            var installed = State.InstalledModules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
+            if (installed != null)
+            {
+                installed.PendingOperation = change.Operation;
+                hasChanged = true;
+            }
+
+
+            var available = State.AvailableModules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
+            if (available != null)
+            {
+                available.PendingOperation = change.Operation;
+                hasChanged = true;
+            }
         }
+
+        if (hasChanged)
+            await InvokeAsync(StateHasChanged);
+    }
+
+    public Task Consume(ClientContext<ModulePackageOperationsFailed> context, CancellationToken cancellationToken)
+    {
+        // how to treat the errors?
 
         return Task.CompletedTask;
     }

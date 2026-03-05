@@ -21,11 +21,15 @@ internal sealed class ModuleMetadataModel
 
     public string Version => Bundle.Metadata.Version;
 
+    public ModulePackageOperation? PendingOperation
+    {
+        set => Bundle.PendingOperation = value;
+        get => Bundle.PendingOperation;
+    }
+
     public required ModuleMetadataBundle Bundle { get; set; }
 
     public bool Installed { get; set; }
-
-    public bool ToBeInstalled { get; set; }
 
     public required Dictionary<string, ModuleOptionDeclaration> EditOptions { get; set; }
 
@@ -42,6 +46,11 @@ internal sealed class ModuleMetadataModel
     public bool HasError => Bundle.Errors.Count > 0;
 
     public string? UpdateVersion { get; set; }
+
+    /// <summary>
+    /// Latest available version for the module. Versions are ordered from latest to oldest, so the first one is the latest version
+    /// </summary>
+    public string? LatestVersion => Bundle.AvailableVersions.FirstOrDefault();
 
     public List<string> AvailableVersions => Bundle.AvailableVersions;
 

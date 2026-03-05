@@ -1,9 +1,9 @@
-﻿using Blazor.Shared.Module;
+using AwesomeAssertions;
+using Blazor.Shared.Module;
 using Blazor.Shared.Module.Services;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Requests;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Sdk.Client.Infrastructure;
@@ -158,82 +158,50 @@ public class ModuleManagementServiceTests
         }
     }
 
-    public sealed class SetModuleVersions : ModuleManagementServiceTests
+    public sealed class SendUpdateModuleOptions : ModuleManagementServiceTests
     {
         [Fact]
-        public async Task Should_send_command()
+        public async Task Should_skip_options_set_by_environment()
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
-            var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
+            var options = new List<ModuleOptionDeclaration>
+            {
+                new() { Key = "Option1", Value = Core.Shared.Constants.SetByEnvironmentMarker },
+                new() { Key = "Option2", Value = "keep" }
+            };
 
             // Act
-            await service.UpdateModulePackageVersions(models, TestContext.Current.CancellationToken);
+            await service.SendUpdateModuleOptions("module-id", options, TestContext.Current.CancellationToken);
 
-            // Assert
-            await _mediator.Received().Send(Arg.Any<UpdateModulePackageManifest>(), Arg.Any<CancellationToken>());
+            // Assert            
+            await _mediator.Received(1).Send(
+                Arg.Is<UpdateModuleOptions>(command =>
+                    command.ModuleId == "module-id"
+                    && command.Options.Count == 1
+                    && command.Options[0].Value == "keep"),
+                Arg.Any<CancellationToken>());
         }
+    }
 
+    public sealed class SendUpdateModulePackages : ModuleManagementServiceTests
+    {
         [Fact]
-        public async Task Should_keep_installed_modules()
+        public async Task Should_send_update_module_packages_command()
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
-            var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
+            var operations = new List<ModulePackageOperation>();
 
             // Act
-            await service.UpdateModulePackageVersions(models, TestContext.Current.CancellationToken);
+            await service.SendUpdateModulePackages(operations, TestContext.Current.CancellationToken);
 
             // Assert
-            await _mediator.Received().Send(Arg.Is<UpdateModulePackageManifest>(k
-                => k.Manifest.Packages.Count == 2
-                && k.Manifest.Packages.First(m => m.Name == TestClientModuleName).Version.ToString() == TestClientModuleVersion
-                && k.Manifest.Packages.First(m => m.Name == AnotherModuleName).Version.ToString() == AnotherModuleVersion), Arg.Any<CancellationToken>());
-        }
-
-        [Fact]
-        public async Task Should_update_installed_modules()
-        {
-            // Arrange
-            await using var serviceProvider = SetupServiceProvider();
-            var service = serviceProvider.GetRequiredService<ModuleManagementService>();
-            var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
-
-            models.First(k => k.Name == TestClientModuleName).UpdateVersion = TestClientModuleUpdateVersion;
-
-            // Act
-            await service.UpdateModulePackageVersions(models, TestContext.Current.CancellationToken);
-
-            // Assert
-            await _mediator.Received().Send(Arg.Is<UpdateModulePackageManifest>(k
-                => k.Manifest.Packages.Count == 2
-                && k.Manifest.Packages.First(m => m.Name == TestClientModuleName).Version.ToString() == TestClientModuleUpdateVersion
-                && k.Manifest.Packages.First(m => m.Name == AnotherModuleName).Version.ToString() == AnotherModuleVersion), Arg.Any<CancellationToken>());
-        }
-
-        [Fact]
-        public async Task Should_send_available_modules_to_be_installed()
-        {
-            // Arrange
-            await using var serviceProvider = SetupServiceProvider();
-            var service = serviceProvider.GetRequiredService<ModuleManagementService>();
-            var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
-
-            var package = models.First(k => !k.Installed && k.Name == AvailableModulePackageName);
-            package.SelectedVersion = AvailableModuleVersion;
-            package.ToBeInstalled = true;
-
-            // Act
-            await service.UpdateModulePackageVersions(models, TestContext.Current.CancellationToken);
-
-            // Assert
-            await _mediator.Received().Send(Arg.Is<UpdateModulePackageManifest>(k
-                => k.Manifest.Packages.Count == 3
-                && k.Manifest.Packages.First(m => m.Name == TestClientModuleName).Version.ToString() == TestClientModuleVersion
-                && k.Manifest.Packages.First(m => m.Name == AnotherModuleName).Version.ToString() == AnotherModuleVersion
-                && k.Manifest.Packages.First(m => m.Name == AvailableModulePackageName).Version.ToString() == AvailableModuleVersion), Arg.Any<CancellationToken>());
+            await _mediator.Received(1).Send(
+                Arg.Is<UpdateModulePackageOperations>(command => ReferenceEquals(command.Operations, operations)),
+                Arg.Any<CancellationToken>());
         }
     }
 }

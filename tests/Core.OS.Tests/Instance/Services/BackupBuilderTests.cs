@@ -5,6 +5,7 @@ using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
 using Core.OS.Modules;
+using Core.OS.Modules.Contracts;
 using Core.OS.Tests.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -93,8 +94,8 @@ public class BackupBuilderTests
             var builder = new BackupBuilder()
                 .UseModuleBackup();
 
-            var installedModules = await serviceProvider.GetRequiredService<IModuleMetadataCache>()
-                .GetInstalledModuleMetadata(TestContext.Current.CancellationToken);
+            var installedModules = await serviceProvider.GetRequiredService<IModuleMetadataProvider>()
+                .GetModuleMetadata(new GetModuleMetadataOptions(true, false), TestContext.Current.CancellationToken);
 
             // Act
             var result = await builder.BuildBackup(serviceProvider, memoryStream, TestContext.Current.CancellationToken);

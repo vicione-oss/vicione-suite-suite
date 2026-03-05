@@ -31,7 +31,15 @@ public sealed class ModuleMetadataBundle
     /// </summary>
     public bool CanUpdate { get; set; }
 
+    /// <summary>
+    /// Versions available for installation, empty if no compatible version is available in the repository
+    /// </summary>
     public List<string> AvailableVersions { get; set; } = [];
+
+    /// <summary>
+    /// Contains the pending operation for this package if any otherwise <see langword="null"/>
+    /// </summary>
+    public ModulePackageOperation? PendingOperation { get; set; }
 
     /// <summary>
     /// List of errors that occured on init process of the module like missing optios etc.
@@ -47,4 +55,9 @@ public sealed class ModuleMetadataBundle
     /// If true the module has a valid *.Client part
     /// </summary>
     public bool HasFrontend { get; set; }
+
+    /// <summary>
+    /// Set to <see langword="true"/> if the module was loaded from a debug path
+    /// </summary>
+    public bool IsDebugSource { get; set; }
 }

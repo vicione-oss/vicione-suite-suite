@@ -12,7 +12,6 @@ using Sdk.Authorization;
 using Sdk.Authorization.Extensions;
 using Sdk.Client.Connections;
 using Sdk.Client.Infrastructure;
-using Sdk.Client.Services;
 using Sdk.Connections.Contracts;
 using ViciOne.Ui.Localization.Resources;
 

@@ -2,7 +2,7 @@
 
 namespace Blazor.Shared.Module.Services;
 
-internal sealed class ModuleManagementControlPanelCancelHandler(IModuleManagementService moduleManagementService) :
+internal sealed class ModuleManagementControlPanelResetHandler(IModuleManagementService moduleManagementService) :
     IControlPanelResetHandler<ModuleManagementControlPanelState>
 {
     public async Task Reset(ModuleManagementControlPanelState state, CancellationToken cancellationToken)
@@ -12,7 +12,7 @@ internal sealed class ModuleManagementControlPanelCancelHandler(IModuleManagemen
         state.BeginLoading();
         try
         {
-            if (state.IsInitialized && !state.HasChanges)
+            if (state.IsInitialized)
                 return;
 
             // load metadata assets and jsons in one step

@@ -25,7 +25,7 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
     private readonly ILocalInstanceInformationProvider _localInstanceInformationMock =
         Substitute.For<ILocalInstanceInformationProvider>();
 
-    private readonly IModuleMetadataCache _metadataCache = Substitute.For<IModuleMetadataCache>();
+    private readonly IModuleMetadataProvider _metadataProvider = Substitute.For<IModuleMetadataProvider>();
     public InstanceInformationProviderTests(TestApplicationFactory<EmptyTestStartup> appFactory)
     {
         _config = new TestConfig().BuildConfiguration();
@@ -40,7 +40,7 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
             builder.ConfigureTestServices(services =>
             {
                 services.ReplaceConfiguration(_config);
-                services.AddSingleton(_metadataCache);
+                services.AddSingleton(_metadataProvider);
                 services.AddScoped(_ => Substitute.For<ISuiteMediator>());
                 services.AddModuleManagerWithTestModule();
                 services.AddApplicationDbContextsInMemory();

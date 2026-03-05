@@ -1,4 +1,5 @@
 ﻿using Core.OS.Modules;
+using Core.OS.Modules.Contracts;
 using Core.Shared.Instance.Requests;
 using MassTransit;
 using Sdk.Backend.Messaging;
@@ -10,15 +11,19 @@ using Sdk.Modules;
 namespace Core.OS.Instance.Services;
 
 [ReadOnlyConsumer]
-internal sealed class InstanceInformationProvider(ISuiteMediator mediator, ILocalInstanceInformationProvider localProvider, IModuleMetadataCache metadataCache) :
+internal sealed class InstanceInformationProvider(ISuiteMediator mediator, ILocalInstanceInformationProvider localProvider, IModuleMetadataProvider metadataProvider) :
     IInstanceInformationProvider, IConsumer<InstanceCreated>
 {
     public IInstanceInformation Local => localProvider.Local;
 
     public async Task<IReadOnlyCollection<ModuleMetadata>> GetInstalledModules(CancellationToken cancellationToken = default)
-        => (await metadataCache.GetInstalledModuleMetadata(cancellationToken))
-        .Select(k => k.Metadata)
-        .ToList().AsReadOnly();
+    {
+        var getOptions = new GetModuleMetadataOptions(true, false);
+
+        return (await metadataProvider.GetModuleMetadata(getOptions, cancellationToken))
+            .Select(k => k.Metadata)
+            .ToList().AsReadOnly();
+    }
 
     public async Task<List<IInstanceInformation>> GetInstancesInCluster(CancellationToken token)
     {

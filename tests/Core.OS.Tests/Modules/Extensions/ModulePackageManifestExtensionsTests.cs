@@ -150,7 +150,7 @@ public class ModulePackageManifestExtensionsTests
             };
 
             // Act
-            var result = manifest.UpdateManifestPackageVersions(versionMap);
+            var result = manifest.UpdatePackageVersions(versionMap);
 
             // Assert
             result.Should().HaveCount(2);
@@ -183,7 +183,7 @@ public class ModulePackageManifestExtensionsTests
             };
 
             // Act
-            var result = manifest.UpdateManifestPackageVersions(versionMap);
+            var result = manifest.UpdatePackageVersions(versionMap);
 
             // Assert
             result.Single(p => p.Name == "A").Version.Should().Be("9.9.9");
@@ -205,7 +205,7 @@ public class ModulePackageManifestExtensionsTests
             var versionMap = new Dictionary<string, string?>();
 
             // Act
-            var result = manifest.UpdateManifestPackageVersions(versionMap);
+            var result = manifest.UpdatePackageVersions(versionMap);
 
             // Assert
             result.First().Version.Should().Be("current");

@@ -1,252 +1,209 @@
-﻿@using Blazor.Shared.Module.Services
+﻿@using Blazor.Shared.Module.Models
+@using Blazor.Shared.Module.Services
+@using Blazor.Shared.Module.ControlPanels.Extensions;
+@using Microsoft.AspNetCore.Components.Authorization
 @using Sdk.Client.Components.Settings.Expanders
 @using ViciOne.Ui.Blazor.Components.ComboBox
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Blazor.Components.Grid.Models
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.Blazor.Components.CheckBox
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
 
 @inherits ControlPanelBase<ModuleManagementControlPanelState>
 
 <ControlPanelPage Title="@CommonVocabulary.Installed">
+    <div class="installed-modules-control-panel-page">
+        <DescriptionBanner Title="@Localization.ModuleManagementControlPanel.InstalledModules">
+            @Localization.ModuleManagementControlPanel.InstalledModulesBanner
+        </DescriptionBanner>
 
-    <DescriptionBanner Title="@Localization.ModuleManagementControlPanel.InstalledModules">
-        @Localization.ModuleManagementControlPanel.InstalledModulesBanner
-    </DescriptionBanner>
-    <SettingsLayout>
-        <SettingsGroup Title="@TechnicalTerms.OptionPlural">
-            <Expander>
-                <SettingsFieldButton Text="@CommonVocabulary.RefreshVerb"
-                                     Enabled="@(!State.IsLoading)"
-                                     OnClick="@(async () => await LoadModuleVersions(true))" />
-            </Expander>
+        <Grid Items="@FilterInstalledItems(_installedModulesQueryable)" Virtualize="true" CssClass="installed-modules-grid">
+            <ActionButtons>
+                <div style="display:contents;">
+                    <GridActionButton Text="@CommonVocabulary.UninstallVerb"
+                                      OnClick="@(async () => await UninstallSelectedModules())"
+                                      IconCssClass="@MonochromeIconName.UninstallLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()"
+                                      Enabled="@CanUninstallSelectedModules()" />
+                    
+                    <GridActionButton Text="@CommonVocabulary.Restart"
+                                      OnClick="@(() => _dialogVisible = true)"
+                                      IconCssClass="@MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()" />
+                </div>
+            </ActionButtons>
 
-            <BeforeExpander>
-                <SettingsFieldButton Text="@CommonVocabulary.Restart"
-                                     Enabled="@(!State.IsLoading)"
-                                     OnClick="@(() => _dialogVisible = true)" />
-            </BeforeExpander>
-        </SettingsGroup>
+            <Filter>
+                <GridFilterControl @bind-Text="@_installedModulesFilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
+            </Filter>
 
-        @if (State.InstalledModules.Count > 0)
-        {
-            @foreach (var module in State.InstalledModules)
-            {
-                <SettingsGroup Title="@module.Title" Expanded="@module.Installed">
-                    <Expander>
-                        <SwitchExpander @bind-Value="@module.Installed"
-                                        @bind-Value:after="@(async () => await InstalledModuleInstalledFlagChanged(module))"
-                                        Enabled="@module.CanBeModified" />
-                    </Expander>
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item)"
+                                  Selection="@InstalledModuleSelection" />
 
-                    <BeforeExpander>
-                        <div class="version-grid">
-                            @module.Version
-
-                            @if (module.CanUpdate)
-                            {
-                                <span class="mdi mdi-arrow-up-circle-outline"></span>
-                            }
-                            @if (module.HasError)
-                            {
-                                <span class="mdi mdi-alert-circle-outline"></span>
-                            }
+                <PropertyColumn Title="@CommonVocabulary.Name"
+                                Property="@(i => i.Name)"
+                                Sortable="true" />
+                
+                <TemplateColumn Title="@LibraryManagement.InstalledVersion">
+                    <div class="version-wrapper">
+                        <div class="version" title="@context.Version">
+                            @context.Version
                         </div>
-                    </BeforeExpander>
+                    </div>
+                </TemplateColumn>
 
-                    <ChildContent>
-                        <SettingsInformation>
-                            @module.Description
-                        </SettingsInformation>
-
-                        <SettingsField Label="@TechnicalTerms.VersionPlural">
-                            <div class="version-grid">
-                                <div class="version-select">
-                                    <ComboBox Items="@module.AvailableVersions"
-                                              @bind-Value="@module.SelectedVersion" />
-                                </div>
-
-                                @if (string.IsNullOrEmpty(module.UpdateVersion))
-                                {
-                                    <SettingsFieldButton Text="@CommonVocabulary.InstallVerb"
-                                                         Enabled="@(module.SelectedVersion != module.Version)"
-                                                         OnClick="@(() => SetVersionUpdate(module))" />
-                                }
-                                else
-                                {
-                                    <SettingsFieldButton Text="@CommonVocabulary.DiscardVerb"
-                                                         Enabled="@(!string.IsNullOrEmpty(module.UpdateVersion))"
-                                                         OnClick="@(() => ResetVersionUpdate(module))" />
-                                }
-                            </div>
-                        </SettingsField>
-
-                        @if (module.HasError)
+                <TemplateColumn Title="@CommonVocabulary.Status">
+                    <div class="status-wrapper">
+                        @if (context.PendingOperation is not null)
                         {
-                            <SettingsInformation>
-                                <ul>
-                                    @foreach (var option in module.Bundle.Errors)
-                                    {
-                                        <li>@option.Message</li>
-                                    }
-                                </ul>
-                            </SettingsInformation>
+                            @if (context.PendingOperation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Uninstall)
+                            {
+                                <div title="@LibraryManagement.PendingUninstallation" class="icon-wrapper">
+                                    <MonochromeIcon Name="MonochromeIconName.UninstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
+                                </div>
+                            }
+                            else if (context.PendingOperation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Install)
+                            {
+                                <div title="@context.GetInstallOrUpdateTooltip()" class="icon-wrapper">
+                                    <MonochromeIcon Name="MonochromeIconName.InstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
+                                </div>
+                            }
                         }
 
-                        @{
-                #if DEBUG
-                                var optionsSettingsGroupSubline = module.OptionsExpanded ? null : Localization.ModuleManagementControlPanel.ExpandToSeeOptionsProvidedByTheModule;
-                                }
-                <SettingsGroup Title="@TechnicalTerms.OptionPlural"
-                               Subline="@optionsSettingsGroupSubline"
-                               @bind-Expanded="module.OptionsExpanded"
-                               @bind-Expanded:after="@(async () => await ModuleOptionsExpandedChanged(module))">
-                    <SettingsInformation>
-
-                        @if (module.EditOptions.Count > 0)
-                                                {
-                        <div class="module-option-declaration-collection-grid-container">
-                            <ModuleOptionDeclarationCollectionGrid Items="module.EditOptions.Values"
-                                                                   ItemChanged="@(moduleOption => ModuleOptionChanged(module, moduleOption))"
-                                                                   ItemsRemoved="@(moduleOptions => ModuleOptionsRemoved(module, moduleOptions))"
-                                                                   ValidateKey="@((moduleOption, key) => ValidateModuleOptionKey(module, key, moduleOption))"
-                                                                   CanDelete="@(moduleOption => CanDeleteModuleOption(module, moduleOption))"
-                                                                   AddItem="@(moduleOptionType => AddModuleOption(module, moduleOptionType))"
-                                                                   @ref="module.OptionGrid" />
-                        </div>
-                        <div class="add-module-option-buttons">
-                            <SettingsFieldButton Text="@CommonVocabulary.Save"
-                                                 Enabled="@module.HasModifiedOptions"
-                                                 OnClick="@(() => UpdateModuleOptions(module))" />
-                        </div>
-                                                }
-                                                else
-                                                {
-                        @Localization.ModuleManagementControlPanel.NoOptionsProvidedOrDefinedYet
-                                                }
-                    </SettingsInformation>
-                </SettingsGroup>
-                @{
-                #endif
+                        @if (context.Bundle.IsDebugSource)
+                        {                            
+                            <div title="@Localization.ModuleManagementControlPanel.ModuleLoadedFromDebugPath" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.BugLight" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
                         }
-                    </ChildContent>
-                </SettingsGroup>
-            }
-        }
-        else
-        {
-            <SettingsGroup Title="@CommonVocabulary.Information">
-                <SettingsInformation>
-                    @Localization.ModuleManagementControlPanel.NoModulesInstalledYet
-                </SettingsInformation>
-            </SettingsGroup>
-        }
-    </SettingsLayout>
+                        
+                        @if (context.CanUpdate)
+                        {
+                            <div title="@context.GetUpdateAvailableTooltip()" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.UpdateAvailableLight" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+
+                        @if (context.HasError)
+                        {                            
+                            <div title="@context.GetErrorTooltip()" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.ErrorFull" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+                    </div>
+                </TemplateColumn>
+
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@((ModuleMetadataModel model) => ShowDetailsAsync(model))" />
+            </ChildContent>
+
+            <Footer>
+                <SelectionFooter GridSelection="@InstalledModuleSelection" />
+            </Footer>
+        </Grid>
+    </div>
 </ControlPanelPage>
 
 <ControlPanelPage Title="@CommonVocabulary.BrowseVerb">
-
-    <DescriptionBanner Title="@Localization.ModuleManagementControlPanel.BrowseModules">
-        @Localization.ModuleManagementControlPanel.BrowseModulesBanner
-    </DescriptionBanner>
-
-    <SettingsLayout>
-
-        <SettingsGroup Title="@TechnicalTerms.OptionPlural">
-            <Expander>
-                <SettingsFieldButton Text="@CommonVocabulary.RefreshVerb"
-                                     Enabled="@(!State.IsLoading)"
-                                     OnClick="@(async () => await LoadModuleVersions(true))" />
-            </Expander>
-
-            <BeforeExpander>
-                <SettingsFieldButton Text="@CommonVocabulary.Restart"
-                                     Enabled="@(!State.IsLoading)"
-                                     OnClick="@(() => _dialogVisible = true)" />
-            </BeforeExpander>
-        </SettingsGroup>
-
+    
+    <div class="available-modules-control-panel-page">
+        <DescriptionBanner Title="@Localization.ModuleManagementControlPanel.BrowseModules">
+            @Localization.ModuleManagementControlPanel.BrowseModulesBanner
+        </DescriptionBanner>
+    
         @if (State.AvailableModules.Count > 0)
         {
-            @foreach (var module in State.AvailableModules)
-            {
-                <SettingsGroup Title="@module.Title" Expanded="@module.ToBeInstalled">
-                    <Expander>
-                        <SwitchExpander @bind-Value="@module.ToBeInstalled" @bind-Value:after="BeginEditIfChanged" />
-                    </Expander>
+            <Grid Items="@FilterAvailableItems(_availableModulesQueryable)" Virtualize="true" CssClass="available-modules-grid">
+                <ActionButtons>
+                    <div style="display:contents;">
+                        <GridActionButton Text="@CommonVocabulary.ResetVerb"
+                                          OnClick="@(async () => await ResetPendingInstallation())"
+                                          IconCssClass="@MonochromeIconName.UninstallLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()"
+                                          Enabled="@CanResetSelectedModules()" />
 
-                    <BeforeExpander>
-                        <div class="version-select">
-                            <ComboBox Items="@module.AvailableVersions"
-                                      @bind-Value="@module.SelectedVersion" />
-                        </div>
-                    </BeforeExpander>
+                        <GridActionButton Text="@CommonVocabulary.RefreshVerb"
+                                          OnClick="@(async () => await LoadModuleVersions(true))"
+                                          IconCssClass="@MonochromeIconName.Reload.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()" />
 
-                    <ChildContent>
-                        <SettingsInformation>
-                            @module.Description
-                        </SettingsInformation>
+                        <GridActionButton Text="@CommonVocabulary.Restart"
+                                          OnClick="@(() => _dialogVisible = true)"
+                                          IconCssClass="@MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()" />
+                    </div>
+                </ActionButtons>
 
-                        @if (module.MissingDependencies.Count > 0)
-                        {
-                            <SettingsInformation>
-                                <ul>
-                                    @foreach (var dependency in module.MissingDependencies)
-                                    {
-                                        <li>@($"{CommonVocabulary.Requirement} - {CommonVocabulary.InstallVerb} {dependency.Name} v{dependency.Version}")</li>
-                                    }
-                                </ul>
-                            </SettingsInformation>
-                        }
+                <Filter>
+                    <GridFilterControl @bind-Text="@_availableModulesFilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
+                </Filter>
 
-                        <SettingsGroup Title="@TechnicalTerms.OptionPlural"
-                                       @bind-Expanded="module.OptionsExpanded"
-                                       @bind-Expanded:after="@(async () => await ModuleOptionsExpandedChanged(module))">
-                            <SettingsInformation>
+                <ChildContent>
+                    <ItemSelectColumn KeySelector="@(item => item)"
+                                      Selection="@AvailableModuleSelection" />
 
-                                @if (module.EditOptions.Count > 0)
+                    <PropertyColumn Title="@CommonVocabulary.Name"
+                                    Property="@(i => i.Name)"
+                                    Sortable="true" />
+
+                    <PropertyColumn Title="@Localization.ModuleManagementControlPanel.LatestVersion"
+                                    Property="@(i => i.LatestVersion)" />
+
+                    <TemplateColumn Title="@CommonVocabulary.Status">
+                        <div class="status-wrapper">
+                            
+                            @if (context.PendingOperation is not null)
+                            {
+                                @if (context.PendingOperation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Install)
                                 {
-                                    <div class="module-option-declaration-collection-grid-container">
-                                        <ModuleOptionDeclarationCollectionGrid Items="module.EditOptions.Values"
-                                                                               ItemChanged="@(moduleOption => ModuleOptionChanged(module, moduleOption))"
-                                                                               ItemsRemoved="@(moduleOptions => ModuleOptionsRemoved(module, moduleOptions))"
-                                                                               ValidateKey="@((moduleOption, key) => ValidateModuleOptionKey(module, key, moduleOption))"
-                                                                               CanDelete="@(moduleOption => CanDeleteModuleOption(module, moduleOption))"
-                                                                               AddItem="@(moduleOptionType => AddModuleOption(module, moduleOptionType))"
-                                                                               @ref="module.OptionGrid" />
+                                    <div title="@context.GetInstallOrUpdateTooltip()" class="icon-wrapper">
+                                        <MonochromeIcon Name="MonochromeIconName.InstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
                                     </div>
                                 }
-                                else
-                                {
-                                    @Localization.ModuleManagementControlPanel.NoOptionsProvidedOrDefinedYet
-                                }
-                            </SettingsInformation>
+                            }
 
-                        </SettingsGroup>
+                            @if (context.MissingDependencies.Count > 0)
+                            {
+                                <div title="@context.GetMissingDependenciesTooltip()" class="icon-wrapper">
+                                    <MonochromeIcon Name="MonochromeIconName.InfoOutlined" Size="MonochromeIconSize.SmallMedium" />
+                                </div>
+                            }
+                        </div>
+                    </TemplateColumn>
 
-                    </ChildContent>
-                </SettingsGroup>
-            }
+                    <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                      Navigate="@((ModuleMetadataModel model) => ShowDetailsAsync(model))" />
+                </ChildContent>
+
+                <Footer>
+                    <SelectionFooter GridSelection="@AvailableModuleSelection" />
+                </Footer>
+            </Grid>
         }
         else
         {
-            if (State.RequestErrorCode > 0)
-            {
-                <SettingsGroup Title="@Localization.ModuleManagementControlPanel.ModuleApiError">
-                    <SettingsInformation>
-                        @State.RequestErrorMessage
-                    </SettingsInformation>
-                </SettingsGroup>
-            }
-            else
-            {
-                <SettingsGroup Title="@CommonVocabulary.Information">
-                    <SettingsInformation>
-                        @Localization.ModuleManagementControlPanel.NoModulesAvailableToInstall
-                    </SettingsInformation>
-                </SettingsGroup>
-            }
+            <SettingsLayout>
+                @if (State.RequestErrorCode > 0)
+                {
+                    <SettingsGroup Title="@Localization.ModuleManagementControlPanel.ModuleApiError">
+                        <SettingsInformation>
+                            @State.RequestErrorMessage
+                        </SettingsInformation>
+                    </SettingsGroup>
+                }
+                else
+                {
+                    <SettingsGroup Title="@CommonVocabulary.Information">
+                        <SettingsInformation>
+                            @Localization.ModuleManagementControlPanel.NoModulesAvailableToInstall
+                        </SettingsInformation>
+                    </SettingsGroup>
+                }
+            </SettingsLayout>
         }
-    </SettingsLayout>
-
+    </div>
 </ControlPanelPage>
 
 <ConfirmCancelDialog Show="_dialogVisible"

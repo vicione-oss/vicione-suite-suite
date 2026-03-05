@@ -4,7 +4,7 @@ using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Templates;
 using Xunit;
 
-namespace Core.OS.Tests.Modules.Services;
+namespace Core.OS.Tests.UserManagement.Services;
 
 public class FluidTemplateRendererTest
 {

@@ -64,10 +64,9 @@ internal static class IConfigurationExtensions
         /// in the settings. The same way modules from the debug manifest are treated
         /// </summary>    
         /// <returns>{{ModuleId, ModuleOptions}, ..}</returns>
-        internal Dictionary<string, ModuleOptions> CreateModuleOptions(IModuleManifestProvider manifestProvider, params string[] additionalModuleIds)
+        internal Dictionary<string, ModuleOptions> CreateModuleOptions(ModulePackageManifest manifest, params string[] additionalModuleIds)
         {
             var results = new Dictionary<string, ModuleOptions>();
-            var manifest = manifestProvider.GetManifest();
             var packageNames = manifest.Packages
                 .Where(p => !string.IsNullOrWhiteSpace(p.Name))
                 .Select(p => p.Name)

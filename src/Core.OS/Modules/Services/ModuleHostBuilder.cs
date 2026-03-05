@@ -5,6 +5,7 @@ using Core.Module.Contracts;
 using Core.Module.Extensions;
 using Core.Module.Options;
 using Core.OS.Hosting;
+using Core.OS.Instance.Extensions;
 using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Factories;
@@ -23,7 +24,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
     private bool _buildDependencyContext;
     private SuiteDependencyContext? _suiteContext;
-    private IModuleManifestProvider? _manifestProvider;
+    private ModulePackageManifest? _manifest;
     private ArtifactRepositoryOptions? _apiOptions;
     private IConfigurationManager? _configurationManager;
     private IServiceCollection? _services;
@@ -56,9 +57,9 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
     /// <summary>
     /// Resolve module packages marked by 'latest', download if necessary and delete orphaned ones
     /// </summary>    
-    internal ModuleHostBuilder WithSynchronization(IModuleManifestProvider manifestProvider, ArtifactRepositoryOptions apiOptions)
+    internal ModuleHostBuilder WithSynchronization(ModulePackageManifest manifest, ArtifactRepositoryOptions apiOptions)
     {
-        _manifestProvider = manifestProvider;
+        _manifest = manifest;
         _apiOptions = apiOptions;
         return this;
     }
@@ -148,20 +149,19 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
     private async Task SynchronizeModules(CancellationToken cancellationToken)
     {
-        if (_manifestProvider is null || _apiOptions == null)
+        if (_manifest is null || _apiOptions == null)
             return;
 
         // get versions of loaded debug modules
         var debugModuleVersions = await fileSystem.GetDebugModuleVersions(_loaderOptions, cancellationToken);
 
         // contains package versions with dependencies from AppData/modules.json
-        var manifest = _manifestProvider.GetManifest();
         var moduleIds = moduleOptions
             .Where(k => k.Value.Enable)
             .Select(k => k.Key);
 
         // prevent downloading packages that are not enabled by configuration
-        var packages = manifest.GetValidModulePackages([.. moduleIds], debugModuleVersions, Log.Logger);
+        var packages = _manifest.GetValidModulePackages([.. moduleIds], debugModuleVersions, Log.Logger);
 
         using var synchronizer = new ModuleSynchronizer(fileSystem)
             .WithApiAdapter(_apiOptions)
@@ -180,10 +180,18 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         {
             // manifest could contain a module that is only disabled by env or appsettings
             // we don't want to modify these but need to update the resolved package versions
-            var update = manifest.UpdateManifestPackageVersions(resolvedModules);
+            var update = _manifest.UpdatePackageVersions(resolvedModules);
+            if (update is not null)
+            {
+                _manifest.Packages.Clear();
+                _manifest.Packages.AddRange(packages);
+                _manifest.LastModified = DateTimeOffset.UtcNow;
 
-            // persist the resolved package versions so next synchronization won't resolve them again
-            await _manifestProvider.UpdateManifestPackages(update, cancellationToken);
+                var instanceOptions = configuration.GetInstanceOptions();
+
+                // persist the resolved package versions so next synchronization won't resolve them again
+                await ModulePackageManifestStore.Store(_manifest, fileSystem, instanceOptions, cancellationToken);
+            }
         }
 
         var sdkVersion = SuiteVersionUtils.GetSuiteSdkVersion();

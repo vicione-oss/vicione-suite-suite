@@ -1,26 +1,18 @@
-﻿.version-grid {
-    display: grid;
-    grid-auto-flow: column;
-    column-gap: 8px;
-    align-items: start;
-}
+﻿.installed-modules-control-panel-page, .available-modules-control-panel-page {
+    display: contents;
 
-.version-select {
-    width: 130px;
+    ::deep .installed-modules-grid, ::deep .available-modules-grid {
+        max-height: 100%;
 
-    ::deep select {
-        width: 130px;
+        .status-wrapper {
+            display: flex;
+            gap: 8px;
+
+            .icon-wrapper {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+        }
     }
-}
-
-.module-option-declaration-collection-grid-container {
-    justify-self: stretch; // allow grid to fully stretch in horizontal direction
-}
-
-.add-module-option-buttons {
-    // settings adopted from .dirty-state-action-buttons
-    display: grid;
-    grid-auto-flow: column;
-    column-gap: 8px;
-    align-items: start;
 }

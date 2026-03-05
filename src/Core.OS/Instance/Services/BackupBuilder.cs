@@ -3,6 +3,7 @@ using System.IO.Compression;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Modules;
+using Core.OS.Modules.Contracts;
 using Core.Shared.HostManagement;
 using Core.Shared.Persistence.Contracts;
 using HostManagement.Shared.Contracts;
@@ -136,7 +137,7 @@ internal sealed partial class BackupBuilder
         return destinationFilePath;
     }
 
-    private BackupMetadata CreateMetadataEntry(IServiceProvider services)
+    private static BackupMetadata CreateMetadataEntry(IServiceProvider services)
     {
         var informationProvider = services.GetRequiredService<ILocalInstanceInformationProvider>();
 
@@ -151,7 +152,7 @@ internal sealed partial class BackupBuilder
         };
     }
 
-    private Task AddMetadataEntry(ZipArchive zipArchive, BackupMetadata metadata, CancellationToken cancellationToken)
+    private static Task<long> AddMetadataEntry(ZipArchive zipArchive, BackupMetadata metadata, CancellationToken cancellationToken)
     {
         var entry = zipArchive.CreateEntry(MetadataEntryName, CompressionLevel.NoCompression);
         return entry.SerializeToEntry(metadata, cancellationToken);
@@ -184,12 +185,13 @@ internal sealed partial class BackupBuilder
             return [];
 
         var workspaceManagement = services.GetRequiredService<IWorkspaceManagement>();
-        var metadataCache = services.GetRequiredService<IModuleMetadataCache>();
+        var metadataProvider = services.GetRequiredService<IModuleMetadataProvider>();
         var fileSystem = services.GetRequiredService<IFileSystem>();
 
         var options = new Dictionary<string, ModuleMetadata>();
         var result = new List<BackupModuleSummary>();
-        var installedModules = await metadataCache.GetInstalledModuleMetadata(cancellationToken);
+        var getOptions = new GetModuleMetadataOptions(true, false);
+        var installedModules = await metadataProvider.GetModuleMetadata(getOptions, cancellationToken);
 
         // build called without module ids passed - take all
         if (_addModuleIds.Count == 0)
@@ -223,7 +225,7 @@ internal sealed partial class BackupBuilder
         return result;
     }
 
-    private async Task<BackupModuleSummary> AddModuleBackupEntry(ZipArchive zipArchive, IFileSystem fileSystem, string moduleName, string moduleVersion, string moduleWorkspace, bool addPrefix, CancellationToken cancellationToken)
+    private static async Task<BackupModuleSummary> AddModuleBackupEntry(ZipArchive zipArchive, IFileSystem fileSystem, string moduleName, string moduleVersion, string moduleWorkspace, bool addPrefix, CancellationToken cancellationToken)
     {
         // wrap ModuleMetadata to stay independent of sdk changes here
         var prefix = addPrefix ? ModuleEntryPrefix : string.Empty;
@@ -243,7 +245,7 @@ internal sealed partial class BackupBuilder
             // because the file table (central directory) is located at the end of the archive.
             // System.IO.Compression.ZipArchive does not support deletion in Update mode—only adding or replacing files.
             var entry = zipArchive.CreateEntry(summary.EntryName);
-            await using var entryStream = entry.Open();
+            await using var entryStream = await entry.OpenAsync(cancellationToken);
             using var moduleArchive = new ZipArchive(entryStream, ZipArchiveMode.Create, false);
 
             await AddModuleDirectoryToArchive(fileSystem, moduleArchive, moduleWorkspace, summary, cancellationToken);

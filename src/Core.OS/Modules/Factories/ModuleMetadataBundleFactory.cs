@@ -47,7 +47,8 @@ internal static class ModuleMetadataBundleFactory
             Metadata = metadata,
             Installed = true,
             ModuleId = metadata.Name,
-            Errors = context.GetErrorInfos()
+            Errors = context.GetErrorInfos(),
+            IsDebugSource = context.IsDebugSource,
         };
 
     public static ModuleMetadataBundle CreateErrorBundle(ModuleSynchronizationResult result, string minSdkVersion)

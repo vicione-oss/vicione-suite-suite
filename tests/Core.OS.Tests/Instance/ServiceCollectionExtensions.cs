@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using Core.OS.Modules;
+using Core.OS.Modules.Contracts;
 using Core.Shared.HostManagement;
 using Core.Shared.Modules.Contracts;
 using HostManagement.Shared.Contracts;
@@ -41,7 +42,7 @@ public static class ServiceCollectionExtensions
             }
 
             // system module special - it's not an installed module (maybe add a hide option to it once)
-            var metadataCache = Substitute.For<IModuleMetadataCache>();
+            var metadataProvider = Substitute.For<IModuleMetadataProvider>();
             var installedModules = moduleOptions
                 .Where(d => d.Value.Name != Shared.Constants.SystemModuleId)
                 .Select(k => new ModuleMetadataBundle
@@ -51,10 +52,13 @@ public static class ServiceCollectionExtensions
                     Installed = true,
                 })
                 .ToList();
-            metadataCache.GetInstalledModuleMetadata().Returns(installedModules);
+            
+            metadataProvider
+                .GetModuleMetadata(Arg.Any<GetModuleMetadataOptions>(), Arg.Any<CancellationToken>())
+                .Returns(installedModules);
 
             services.AddSingleton(workspaceManagement);
-            services.AddSingleton(metadataCache);
+            services.AddSingleton(metadataProvider);
 
             return services;
         }
