@@ -19,7 +19,7 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ModuleManagementControlPanel {
@@ -79,15 +79,6 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Expand to see options provided by the module.
-        /// </summary>
-        internal static string ExpandToSeeOptionsProvidedByTheModule {
-            get {
-                return ResourceManager.GetString("ExpandToSeeOptionsProvidedByTheModule", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Installed Modules.
         /// </summary>
         internal static string InstalledModules {
@@ -106,11 +97,29 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Latest Version.
+        /// </summary>
+        internal static string LatestVersion {
+            get {
+                return ResourceManager.GetString("LatestVersion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Module API Error.
         /// </summary>
         internal static string ModuleApiError {
             get {
                 return ResourceManager.GetString("ModuleApiError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Module was loaded from debug path.
+        /// </summary>
+        internal static string ModuleLoadedFromDebugPath {
+            get {
+                return ResourceManager.GetString("ModuleLoadedFromDebugPath", resourceCulture);
             }
         }
         
@@ -129,24 +138,6 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
         internal static string NoModulesInstalledYet {
             get {
                 return ResourceManager.GetString("NoModulesInstalledYet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No options provided or defined yet..
-        /// </summary>
-        internal static string NoOptionsProvidedOrDefinedYet {
-            get {
-                return ResourceManager.GetString("NoOptionsProvidedOrDefinedYet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Please use an action from the toolbar.
-        /// </summary>
-        internal static string PleaseUseToolBarAction {
-            get {
-                return ResourceManager.GetString("PleaseUseToolBarAction", resourceCulture);
             }
         }
     }

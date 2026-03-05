@@ -8,7 +8,6 @@ using Core.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Backend.Extensions;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
@@ -222,7 +221,6 @@ public sealed class IConfigurationExtensionsTests
     public sealed class CreateModuleOptions
     {
         private const string _otherModuleId = "OtherModuleId";
-        private readonly IModuleManifestProvider _manifestProvider = Substitute.For<IModuleManifestProvider>();
         private readonly ModulePackageManifest _manifest = new()
         {
             Name = "Test",
@@ -236,8 +234,6 @@ public sealed class IConfigurationExtensionsTests
         public void Should_create_options_from_module_sections()
         {
             // Arrange
-            _manifestProvider.GetManifest().Returns(_manifest);
-
             var builder = new ConfigurationBuilder();
             builder.AddInMemoryCollection(new Dictionary<string, string?>()
             {
@@ -245,7 +241,7 @@ public sealed class IConfigurationExtensionsTests
             });
 
             // Act
-            var moduleOptions = builder.Build().CreateModuleOptions(_manifestProvider);
+            var moduleOptions = builder.Build().CreateModuleOptions(_manifest);
 
             // Assert
             moduleOptions.Should().ContainKeys(TestBackendModule.Id, _otherModuleId);
@@ -257,8 +253,6 @@ public sealed class IConfigurationExtensionsTests
         public void Should_add_additional_module_options_from_parameters()
         {
             // Arrange
-            _manifestProvider.GetManifest().Returns(_manifest);
-
             var builder = new ConfigurationBuilder();
             builder.AddInMemoryCollection(new Dictionary<string, string?>()
             {
@@ -266,7 +260,7 @@ public sealed class IConfigurationExtensionsTests
             });
 
             // Act
-            var moduleOptions = builder.Build().CreateModuleOptions(_manifestProvider, ModuleConstants.SampleModuleIds);
+            var moduleOptions = builder.Build().CreateModuleOptions(_manifest, ModuleConstants.SampleModuleIds);
 
             // Assert
             moduleOptions.Should().ContainKey(TestBackendModule.Id);

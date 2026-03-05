@@ -1,7 +1,5 @@
-﻿using System.IO.Abstractions;
-using Core.Module;
+﻿using Core.Module;
 using Core.Module.JFrog;
-using Core.OS.Instance;
 using Core.OS.Modules.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Backend.Artifacts;
@@ -13,27 +11,16 @@ internal static class IServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        /// <summary>
-        /// Creates an instance of <see cref="ModuleManifestProvider"/>, adds it to service collection and returns it.
-        /// It's used before IServiceProvider is available therefore the instance gets directly used.
-        /// </summary>    
-        public async Task<IModuleManifestProvider> AddModuleManifestProvider(IFileSystem fileSystem, InstanceOptions instanceOptions, Serilog.ILogger logger, CancellationToken cancellationToken = default)
-        {
-            var manifestProvider = new ModuleManifestProvider(fileSystem, instanceOptions);
-            await manifestProvider.LoadPackageManifest(logger, cancellationToken);
-
-            services.AddSingleton<IModuleManifestProvider>(manifestProvider);
-
-            return manifestProvider;
-        }
-
         public IServiceCollection AddModuleServices()
         {
             services.AddModuleArtifactQueryApi();
             services.AddWorkspaceManagement();
 
-            services.AddSingleton<IModuleMetadataCache, ModuleMetadataCache>();
-            services.AddSingleton<IModuleMigrator, ModuleMigrator>();
+            services
+                .AddSingleton<IModuleArtifactCache, ModuleArtifactCache>()
+                .AddTransient<IModuleMetadataProvider, ModuleMetadataProvider>()
+                .AddSingleton<IModulePackageManifestStore, ModulePackageManifestStore>()
+                .AddSingleton<IModulePackageOperationStore, ModulePackageOperationStore>();
 
             return services;
         }

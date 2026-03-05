@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PleaseUseToolBarAction" xml:space="preserve">
-    <value>Bitte ein Aktion aus der Toolbar verwenden</value>
-  </data>
   <data name="BrowseModules" xml:space="preserve">
     <value>Module durchstöbern</value>
   </data>
@@ -138,13 +135,13 @@
   <data name="BrowseModulesBanner" xml:space="preserve">
     <value>Durchsuchen Sie den Store nach Modulen für die Suite. Achtung: Änderungen werden erst nach einem Neustart des Systems wirksam.</value>
   </data>
-  <data name="ExpandToSeeOptionsProvidedByTheModule" xml:space="preserve">
-    <value>Aufklappen um verfügbare Optionen des Moduls zu sehen</value>
-  </data>
-  <data name="NoOptionsProvidedOrDefinedYet" xml:space="preserve">
-    <value>Es sind keine Optionen verfügbar oder es wurden bisher keine Optionen definiert.</value>
-  </data>
   <data name="ModuleApiError" xml:space="preserve">
     <value>Modul-API Fehler</value>
+  </data>
+  <data name="ModuleLoadedFromDebugPath" xml:space="preserve">
+    <value>Modul wurde aus einem Debug-Pfad geladen</value>
+  </data>
+  <data name="LatestVersion" xml:space="preserve">
+    <value>Aktuellste Version</value>
   </data>
 </root>

@@ -52,7 +52,8 @@ public class PlatformConfigurationTests
             .ConfigureAndValidateOptions(instanceOptions)
             .AddLogging()
             .AddSingleton<IConfiguration>(config)
-            .AddSingleton(Substitute.For<IModuleMetadataCache>())
+            .AddSingleton(Substitute.For<IModuleArtifactCache>())
+            .AddSingleton(Substitute.For<IModuleMetadataProvider>())
             .AddSingleton(moduleHost)
             .AddCoreServices(fileSystem, config, moduleHost);
 

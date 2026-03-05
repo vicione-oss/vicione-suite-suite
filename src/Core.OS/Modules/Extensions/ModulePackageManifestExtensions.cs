@@ -66,7 +66,7 @@ internal static class ModulePackageManifestExtensions
             }
         }
 
-        public List<ModuleDependencyPackage> UpdateManifestPackageVersions(Dictionary<string, string?> packageVersions)
+        public List<ModuleDependencyPackage> UpdatePackageVersions(Dictionary<string, string?> packageVersions)
         {
             foreach (var package in manifest.Packages)
             {

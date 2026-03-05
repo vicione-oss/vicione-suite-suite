@@ -387,6 +387,7 @@ internal sealed partial class ModuleHost : IModuleHost
             CanUpdate = k.CanUpdate,
             HasBackend = k.HasBackend,
             HasFrontend = k.HasFrontend,
+            IsDebugSource = k.IsDebugSource,
             MissingDependencies = [.. k.MissingDependencies],
         }).ToList();
     }

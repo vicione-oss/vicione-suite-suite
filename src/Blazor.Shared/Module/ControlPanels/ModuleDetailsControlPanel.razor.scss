@@ -1,0 +1,27 @@
+﻿.module-detail-control-panel-page {
+    ::deep .installed-version-wrapper {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    ::deep .install-version-wrapper {
+        display: contents;
+
+        .combo-box-wrapper {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+            width: 240px;
+        }
+    }
+
+    ::deep img {
+        width: 24px;
+        height: 24px;
+    }
+
+    .module-option-declaration-collection-grid-container {
+        justify-self: stretch; // allow grid to fully stretch in horizontal direction
+    }
+}

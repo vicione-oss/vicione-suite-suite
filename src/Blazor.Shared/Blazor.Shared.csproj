@@ -127,6 +127,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>RestartSuite.resx</DependentUpon>
     </Compile>
+    <Compile Update="Module\ControlPanels\Localization\ModuleDetailsControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ModuleDetailsControlPanel.resx</DependentUpon>
+    </Compile>
     <Compile Update="Module\ControlPanels\Localization\ModuleManagementControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -525,6 +530,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>RestartSuite.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleDetailsControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ModuleDetailsControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleOptionDeclarationCollectionGrid.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ModuleOptionDeclarationCollectionGrid.Designer.cs</LastGenOutput>
@@ -835,6 +844,7 @@
       <MonochromeIcon Include="add-user" Size="16;32" />
       <MonochromeIcon Include="arrow-navigation-light-left" Size="16" />
       <MonochromeIcon Include="arrow-navigation-light-right" Size="16" />
+      <MonochromeIcon Include="bug-light" Size="24" />
       <MonochromeIcon Include="check" Size="16;24" />
       <MonochromeIcon Include="chevron" Size="16" />
       <MonochromeIcon Include="close-medium" Size="16;32" />
@@ -859,6 +869,7 @@
       <MonochromeIcon Include="help-solid" Size="24" />
       <MonochromeIcon Include="import" Size="16" />
       <MonochromeIcon Include="info-outlined" Size="24" />
+      <MonochromeIcon Include="install-pending-light" Size="16;24" />
       <MonochromeIcon Include="instructions" Size="32" />
       <MonochromeIcon Include="key-light" Size="24" />
       <MonochromeIcon Include="keychain-light" Size="24" />
@@ -882,6 +893,9 @@
       <MonochromeIcon Include="test-tube-solid" Size="32" />
       <MonochromeIcon Include="timer" Size="24;32" />
       <MonochromeIcon Include="today" Size="24" />
+      <MonochromeIcon Include="uninstall-light" Size="16;24" />
+      <MonochromeIcon Include="uninstall-pending-light" Size="16;24" />
+      <MonochromeIcon Include="update-available-light" Size="16;24" />
       <MonochromeIcon Include="urgent" Size="24" />
       <MonochromeIcon Include="user-interface-light" Size="24" />
       <MonochromeIcon Include="user-light" Size="24;32" />

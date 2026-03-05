@@ -36,8 +36,10 @@ internal static class TestFactory
     /// <returns></returns>
     internal static SuiteDependencyContext CreateSuiteContext(bool enableUiHost = true, bool enableBackendModules = true, bool enableUiModules = true)
     {
-        var manifestProvider = Substitute.For<IModuleManifestProvider>();
-        manifestProvider.GetManifest().Returns(new ModulePackageManifest());
+        var manifest = new ModulePackageManifest();
+
+        var manifestProvider = Substitute.For<IModulePackageManifestStore>();
+        manifestProvider.Load(Arg.Any<CancellationToken>()).Returns(manifest);
 
         var setup = new TestConfig()
             .ConfigureModuleLoader()
@@ -47,7 +49,7 @@ internal static class TestFactory
         var config = setup.BuildConfiguration();
         var loaderOptions = config.GetModuleLoaderOptions();
         var uiHostOptions = config.CreateUiHostOptions(loaderOptions);
-        var moduleOptions = config.CreateModuleOptions(manifestProvider, TestBackendModule.Id, TestClientModule.Id);
+        var moduleOptions = config.CreateModuleOptions(manifest, TestBackendModule.Id, TestClientModule.Id);
         if (uiHostOptions is not null)
             moduleOptions[loaderOptions.UiHost!] = uiHostOptions;
 

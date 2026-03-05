@@ -22,23 +22,21 @@ public static class WebApplicationBuilderExtensions
 
         builder.Services.AddModuleServices();
 
-        // the module manifest is kept static because it's only loaded on startup and can't be changed on runtime
-        var manifestProvider = await builder.Services.AddModuleManifestProvider(fileSystem, instanceOptions, Log.Logger, token);
+        // now apply enqueued package operations to the manifest and store it if there were any changes.
+        var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(fileSystem, instanceOptions, Log.Logger, token);
 
         var repositoryOptions = builder.Configuration.GetArtifactRepositoryOptions();// nexus|jfrog api, user pwd
         var loaderOptions = builder.Configuration.GetModuleLoaderOptions();// module paths, flags etc.
 
         // combine appsettings, environment etc. with module manifest
         var additionalModules = builder.Environment.IsDevelopment() ? ModuleConstants.SampleModuleIds : [];
-        var moduleOptions = builder.Configuration.CreateModuleOptions(manifestProvider, additionalModules);
+        var moduleOptions = builder.Configuration.CreateModuleOptions(manifest, additionalModules);
         var uiHostOptions = builder.Configuration.CreateUiHostOptions(loaderOptions);
         if (uiHostOptions is not null)
             moduleOptions[loaderOptions.UiHost!] = uiHostOptions;
 
-        WorkspaceManagement.ResetMarkedModuleWorkspace(fileSystem, instanceOptions, Log.Logger);
-
         var hostBuilder = new ModuleHostBuilder(fileSystem, builder.Configuration, moduleOptions)
-            .WithSynchronization(manifestProvider, repositoryOptions)
+            .WithSynchronization(manifest, repositoryOptions)
             .WithSuiteDependencyContext()
             .WithOptionsSupport(builder.Configuration, builder.Services);
 

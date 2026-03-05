@@ -18,34 +18,6 @@ namespace Core.OS.Tests.Modules.Extensions;
 
 public class IServiceCollectionExtensionsTests
 {
-    public sealed class AddModuleManifestProvider
-    {
-        [Fact]
-        public async Task Should_register_expected_services_and_returns_manifest_provider()
-        {
-            // Arrange
-            var services = new ServiceCollection();
-            var fileSystem = Substitute.For<IFileSystem>();
-            var logger = Substitute.For<Serilog.ILogger>();
-            var options = new InstanceOptions()
-            {
-                Type = Sdk.Instance.InstanceType.Standalone,
-                HomeDirectory = "home",
-                CacheDirectory = "cache",
-                BackupDirectory = "backup"
-            };
-
-            // Act
-            var result = await services.AddModuleManifestProvider(fileSystem, options, logger, TestContext.Current.CancellationToken);
-
-            // Assert
-            await using var provider = services.BuildServiceProvider();
-
-            result.Should().NotBeNull();
-            provider.GetService<IModuleManifestProvider>().Should().Be(result);
-        }
-    }
-
     public sealed class AddModuleServices
     {
         [Fact]
@@ -86,8 +58,9 @@ public class IServiceCollectionExtensionsTests
             provider.GetService<ISuiteArtifactRepository>().Should().NotBeNull();
             provider.GetService<ISuiteArtifactRepository>().Should().BeOfType<SuiteArtifactRepository>();
 
-            provider.GetService<IModuleMetadataCache>().Should().NotBeNull();
-            provider.GetService<IModuleMigrator>().Should().NotBeNull();
+            provider.GetService<IModuleArtifactCache>().Should().NotBeNull();
+            provider.GetService<IModulePackageManifestStore>().Should().NotBeNull();
+            provider.GetService<IModulePackageOperationStore>().Should().NotBeNull();
 
             provider.GetService<IWorkspaceManagement>().Should().NotBeNull();
             provider.GetService<IWorkspaceProvider<SystemBackendModule>>().Should().NotBeNull();

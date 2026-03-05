@@ -16,6 +16,7 @@
 - Replaced `DxMemo` with scrollable HTML element
 - Replaced `DxPopup` with `ViciOne.Ui.Blazor.Components.Popup`
 - `SystemDefaultControlPanelPage`, changed wording in description banner
+- Redesign `ModuleManagementControlPanel` to grid layout with details page
 - Updated `Serilog.Sinks.Journal` to `1.1.0`
 - Updated `ViciOne.Journal` to `1.1.0`
 

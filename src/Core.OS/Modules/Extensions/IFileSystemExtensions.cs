@@ -9,7 +9,6 @@ using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
 using Core.OS.Modules.Contracts;
-using Core.OS.Modules.Services;
 using Mono.TextTemplating.CodeCompilation;
 using Sdk.Messaging;
 using Sdk.Modules;
@@ -102,6 +101,12 @@ internal static class IFileSystemExtensions
             return fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(instanceOptions), fileName);
         }
 
+        public string GetModulePackageOperationsFilePath(InstanceOptions instanceOptions)
+            => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(instanceOptions), ModuleConstants.ModuleOperationsFileName);
+
+        public string GetModulePackageOperationsSentinelFilePath(InstanceOptions instanceOptions)
+            => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(instanceOptions), ModuleConstants.ModuleOperationsSentinelFileName);
+
         public string GetOrCreateRootedModulesPath(ModuleLoaderOptions loaderOptions)
         {
             // ensure the download path exists
@@ -147,15 +152,15 @@ internal static class IFileSystemExtensions
         }
 
         /// <summary>
-        /// Try to get full path to <see cref="ModuleMetadataCache.MetadataFileName"/> in module debug folder or one of its ancestors
+        /// Try to get full path to <see cref="ModuleConstants.MetadataFileName"/> in module debug folder or one of its ancestors
         /// </summary>    
         public string? FindModuleMetadataPath(string moduleSrcPath)
         {
-            var parentFolder = fileSystem.GetPathContains(moduleSrcPath, [ModuleMetadataCache.MetadataFileName]);
+            var parentFolder = fileSystem.GetPathContains(moduleSrcPath, [ModuleConstants.MetadataFileName]);
             if (string.IsNullOrEmpty(parentFolder))
                 return null;
 
-            return fileSystem.Path.Combine(parentFolder, ModuleMetadataCache.MetadataFileName);
+            return fileSystem.Path.Combine(parentFolder, ModuleConstants.MetadataFileName);
         }
 
         /// <summary>

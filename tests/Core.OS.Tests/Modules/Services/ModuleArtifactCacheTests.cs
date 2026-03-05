@@ -1,51 +1,38 @@
 ﻿using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using System.Reflection;
+using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Options;
-using Core.OS.Modules;
-using Core.OS.Modules.Consumers;
-using Core.OS.Modules.Factories;
+using Core.Module.Utils;
 using Core.OS.Modules.Services;
-using Core.OS.Tests.Modules.Consumers;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sdk.Backend.Artifacts;
-using TestModule.Backend;
-using Xunit;
-using Core.Module.Utils;
 using Sdk.Modules;
+using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 
-public class ModuleMetadataCacheTests
+public class ModuleArtifactCacheTests
 {
-    private readonly ILogger<ModuleMetadataCache> _logger = Substitute.For<ILogger<ModuleMetadataCache>>();
-    private readonly IModuleArtifactRepository _moduleRepository = Substitute.For<IModuleArtifactRepository>();
-    private readonly IModuleHost _moduleManager = Substitute.For<IModuleHost>();
-    private readonly IModuleOptionsStore _optionsStore = Substitute.For<IModuleOptionsStore>();
     private readonly MockFileSystem _fileSystem = new();
-    private readonly IOptions<ArtifactRepositoryOptions> _options = Substitute.For<IOptions<ArtifactRepositoryOptions>>();
+    private readonly IModuleArtifactRepository _moduleRepository = Substitute.For<IModuleArtifactRepository>();
     private readonly ArtifactRepositoryOptions _apiOptions = new() { PackageCacheLifetimeMs = 800 };
+    private readonly ILogger<ModuleArtifactCache> _logger = Substitute.For<ILogger<ModuleArtifactCache>>();
 
     private ServiceProvider SetupServiceProvider()
     {
-        _options.Value.Returns(_apiOptions);
-
-        _optionsStore.LoadJsonDictionary(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult(new Dictionary<string, string?>()));
+        var options = Substitute.For<IOptions<ArtifactRepositoryOptions>>();
+        options.Value.Returns(_apiOptions);
 
         return new ServiceCollection()
             .AddSingleton(_logger)
-            .AddSingleton(_moduleManager)
             .AddSingleton(_moduleRepository)
-            .AddSingleton(_options)
-            .AddSingleton(_optionsStore)
+            .AddSingleton(options)
             .AddSingleton<IFileSystem>(_fileSystem)
-            .AddSingleton<ModuleMetadataCache>()
+            .AddSingleton<ModuleArtifactCache>()
             .BuildServiceProvider();
     }
 
@@ -89,28 +76,14 @@ public class ModuleMetadataCacheTests
         return [.. moduleArtifacts];
     }
 
-    private void SetupMetadataFiles(SuiteDependencyContext suiteContext)
-    {
-        var assembly = Assembly.GetAssembly(typeof(GetModuleMetadataBundlesConsumerTests));
-        var metadataResource = $"{TestFactory.ModuleResourceNamespace}.{TestFactory.ClusterManagementMetadataResource}";
-
-        foreach (var module in suiteContext.Modules)
-        {
-            var metadataPath = _fileSystem.Path.Combine(module.AssemblyFolder, ModuleMetadataCache.MetadataFileName);
-
-            _fileSystem.AddDirectory(module.AssemblyFolder);
-            _fileSystem.AddFileFromEmbeddedResource(metadataPath, assembly, metadataResource);
-        }
-    }
-
-    public class GetAvailableModuleMetadata : ModuleMetadataCacheTests
+    public class GetAvailableModuleMetadata : ModuleArtifactCacheTests
     {
         [Fact]
         public async Task Should_return_empty_list_if_no_modules_available()
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
+            var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
             _moduleRepository.QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
@@ -125,7 +98,7 @@ public class ModuleMetadataCacheTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
+            var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
             var assets = await SetupTestModuleMetadataAssets(_moduleRepository);
 
             // Act
@@ -140,7 +113,7 @@ public class ModuleMetadataCacheTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
+            var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
             _moduleRepository.QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
@@ -157,7 +130,7 @@ public class ModuleMetadataCacheTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
+            var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
             await SetupTestModuleMetadataAssets(_moduleRepository);
 
             // Act
@@ -175,7 +148,7 @@ public class ModuleMetadataCacheTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
+            var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
             await SetupTestModuleMetadataAssets(_moduleRepository);
 
             // Act
@@ -192,7 +165,7 @@ public class ModuleMetadataCacheTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
+            var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
             await SetupTestModuleMetadataAssets(_moduleRepository);
             var version = new Version("1.0.0");
 
@@ -211,7 +184,7 @@ public class ModuleMetadataCacheTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
+            var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
             var metadataList = await TestFactory.GetEmbeddedModuleMetadata();
             var embeddedArtifacts = await TestFactory.GetEmbeddedModuleArtifacts();
 
@@ -243,7 +216,7 @@ public class ModuleMetadataCacheTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
+            var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
             await SetupTestModuleMetadataAssets(_moduleRepository, false);
 
             // Act
@@ -251,69 +224,6 @@ public class ModuleMetadataCacheTests
 
             // Assert
             packages.Should().HaveCount(10, "8xClusterManagement + 2xDataCollectionWizard");
-        }
-    }
-
-    public class GetInstalledModuleMetadata : ModuleMetadataCacheTests
-    {
-        [Fact]
-        public async Task Should_return_infos_for_debug_modules()
-        {
-            // Arrange
-            await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
-            var coreContext = TestFactory.CreateBackendModuleContext(typeof(GetModuleMetadataBundlesConsumer));
-            var debugContext = TestFactory.CreateBackendModuleContext(typeof(TestBackendModule), true);
-
-            var suiteContext = new SuiteDependencyContext(coreContext, null, [debugContext]);
-            SetupMetadataFiles(suiteContext);
-
-            _moduleManager.GetContext().Returns(suiteContext);
-
-            // Act        
-            var result = await cache.GetInstalledModuleMetadata(TestContext.Current.CancellationToken);
-
-            // Assert       
-            result.Should().NotBeNull();
-        }
-
-        [Fact]
-        public async Task Should_provide_installed_modules()
-        {
-            // Arrange
-            await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
-            var suiteContext = TestFactory.CreateSuiteContext();
-
-            SetupMetadataFiles(suiteContext);
-
-            var bundle = ModuleMetadataBundleFactory.CreateFallbackBundle(_fileSystem, suiteContext.Modules.First());
-
-            _moduleManager.GetManifestModules().Returns([bundle]);
-
-            // Act        
-            var result = await cache.GetInstalledModuleMetadata(TestContext.Current.CancellationToken);
-
-            // Assert       
-            result.Should().HaveCount(1, "ClusterManagement");
-        }
-
-        [Fact]
-        public async Task Should_create_fallback_if_metadata_is_not_available()
-        {
-            // Arrange
-            await using var serviceProvider = SetupServiceProvider();
-            var cache = serviceProvider.GetRequiredService<ModuleMetadataCache>();
-            var suiteContext = TestFactory.CreateSuiteContext();
-            var bundle = ModuleMetadataBundleFactory.CreateFallbackBundle(_fileSystem, suiteContext.Modules.First());
-
-            _moduleManager.GetManifestModules().Returns([bundle]);
-
-            // Act        
-            var result = await cache.GetInstalledModuleMetadata(TestContext.Current.CancellationToken);
-
-            // Assert       
-            result.Should().ContainSingle(k => k.Metadata.Description == "Generated metadata");
         }
     }
 }

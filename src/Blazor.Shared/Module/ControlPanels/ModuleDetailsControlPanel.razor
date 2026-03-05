@@ -1,0 +1,128 @@
+@using Blazor.Shared.Module.Services
+@using Blazor.Shared.Module.ControlPanels.Extensions;
+@using Microsoft.AspNetCore.Components.Authorization
+@using Sdk.Client.Components.Settings
+@using Sdk.Client.ControlPanels.Components
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@inherits ControlPanelBase<ModuleDetailsControlPanelState>
+
+<ControlPanelPage Title="@CommonVocabulary.DetailPlural">
+    <div class="module-detail-control-panel-page">
+        <DescriptionBanner Title="@($"{CommonVocabulary.DetailPlural} {State.ModuleMetadata!.Name}")">
+            @Localization.ModuleDetailsControlPanel.BannerDescription
+        </DescriptionBanner>
+
+        <SettingsLayout>
+            <SettingsGroup Title="@Localization.ModuleDetailsControlPanel.ModuleDetails" @bind-Expanded="_isDetailsExpanded">
+                <SettingsField Label="@CommonVocabulary.Name">
+                    @State.ModuleMetadata.Name
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.Description">
+                    @State.ModuleMetadata.Description
+                </SettingsField>
+
+                <SettingsField Label="@LibraryManagement.InstalledVersion">
+                    <div class="installed-version-wrapper">
+
+                        @if (State.ModuleMetadata.Installed)
+                        {
+                            @State.ModuleMetadata.Version
+
+                            @if (State.ModuleMetadata.PendingOperation?.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Uninstall)
+                            {
+                                <div title="@LibraryManagement.PendingUninstallation" class="icon-wrapper">
+                                    <MonochromeIcon Name="MonochromeIconName.UninstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
+                                </div>
+                            }
+                        }
+
+                        @if (State.ModuleMetadata.HasError)
+                        {
+                            <div title="@State.ModuleMetadata.GetErrorTooltip()" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.ErrorFull" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+                    </div>
+                </SettingsField>
+
+
+                @if (State.ModuleMetadata.Bundle.IsDebugSource)
+                {
+                    <SettingsField Label="Source">
+                        Debug
+                    </SettingsField>
+                }
+
+                @if (State.ModuleMetadata.PendingOperation is not null)
+                {
+                    var operation = State.ModuleMetadata.PendingOperation;
+                    @if (operation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Install)
+                    {
+                        <SettingsInformation>
+                            @State.ModuleMetadata.GetInstallOrUpdateTooltip()
+                        </SettingsInformation>                        
+                    }
+                }
+
+                @if ((State.ModuleMetadata.CanBeModified || State.ModuleMetadata.CanUpdate) 
+                    && State.ModuleMetadata.AvailableVersions.Count > 0
+                    && !State.ModuleMetadata.Bundle.IsDebugSource)
+                {
+                    <SettingsField Label="@UserActions.InstallVersion">
+                        <div class="install-version-wrapper">
+                            <div class="combo-box-wrapper">
+                                <SettingsFieldComboBox Items="@State.ModuleMetadata.AvailableVersions"
+                                                       ValueSelector="@(item => item)"
+                                                       TextSelector="@(item => item)"
+                                                       @bind-Value="@State.VersionToInstall"
+                                                       @bind-Value:after="(async () => await BeginEdit())" />
+
+                                @if (State.ModuleMetadata.CanUpdate)
+                                {
+                                    <div title="@State.ModuleMetadata.GetUpdateAvailableTooltip()" class="icon-wrapper">
+                                        <MonochromeIcon Name="MonochromeIconName.UpdateAvailableLight" Size="MonochromeIconSize.SmallMedium" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </SettingsField>
+                }
+            </SettingsGroup>
+
+            @if (!State.ModuleMetadata.Installed || _isDebug)
+            {
+                var optionsSettingsGroupSubline = State.ModuleMetadata.OptionsExpanded ? null : Localization.ModuleDetailsControlPanel.ExpandToSeeOptionsProvidedByTheModule;
+
+                <SettingsGroup Title="@TechnicalTerms.OptionPlural"
+                               Subline="@optionsSettingsGroupSubline"
+                               @bind-Expanded="State.ModuleMetadata.OptionsExpanded"
+                               @bind-Expanded:after="@(async () => await ModuleOptionsExpandedChanged(State.ModuleMetadata))">
+                    <SettingsInformation>
+
+                        @if (State.ModuleMetadata.EditOptions.Count > 0)
+                        {
+                            <div class="module-option-declaration-collection-grid-container">
+                                <ModuleOptionDeclarationCollectionGrid Items="State.ModuleMetadata.EditOptions.Values"
+                                ItemChanged="@(moduleOption => ModuleOptionChanged(State.ModuleMetadata, moduleOption))"
+                                ItemsRemoved="@(moduleOptions => ModuleOptionsRemoved(State.ModuleMetadata, moduleOptions))"
+                                ValidateKey="@((moduleOption, key) => ValidateModuleOptionKey(State.ModuleMetadata, key, moduleOption))"
+                                CanDelete="@(moduleOption => CanDeleteModuleOption(State.ModuleMetadata, moduleOption))"
+                                AddItem="@(moduleOptionType => AddModuleOption(State.ModuleMetadata, moduleOptionType))"
+                                @ref="State.ModuleMetadata.OptionGrid" />
+                            </div>
+                        }
+                        else
+                        {
+                            @Localization.ModuleDetailsControlPanel.NoOptionsProvidedOrDefinedYet
+                        }
+                    </SettingsInformation>
+                </SettingsGroup>
+            }
+
+            </SettingsLayout>
+        </div>
+    </ControlPanelPage>

@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using Core.OS.Modules;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -27,7 +27,9 @@ internal static class WebApplicationExtensions
         try
         {
             if (host.Environment.IsDevelopment())
+            {
                 host.UseDeveloperExceptionPage();
+            }
             else
             {
                 host.UseExceptionHandler("/Error");
