@@ -280,7 +280,14 @@ export class Monitoring {
         }
     };
 
-    private readonly canvas = document.getElementById('dashboardCanvas') as HTMLCanvasElement;
+    private readonly canvas = (() => {
+        const el = document.getElementById('dashboardCanvas');
+        if (!(el instanceof HTMLCanvasElement))
+            throw new Error('Canvas element not found');
+
+        return el;
+    })();
+
     private dpr = window.devicePixelRatio || 1;
     private readonly ctx = this.canvas.getContext('2d', { willReadFrequently: true })!;
     private hoveredGauge: string | undefined = '';
@@ -290,7 +297,13 @@ export class Monitoring {
     private ramData = new Float32Array((288 * 3) + 3);
     private hddData = new Float32Array((288 * 3) + 3);
     private netData = new Float32Array((288 * 3) + 3);
-    private readonly tooltipDiv = document.getElementById('tooltip') as HTMLDivElement;
+    private readonly tooltipDiv = (() => {
+        const tooltipElement = document.getElementById('tooltip');
+        if (!(tooltipElement instanceof HTMLDivElement))
+            throw new Error('Tooltip element not found');
+
+        return tooltipElement;
+    })();
 
     constructor(private readonly timeZoneOffsetMinutes: number, private readonly timeSpanHours: number) {
         this.setTimeSpan();
@@ -673,15 +686,15 @@ export class Monitoring {
     private drawTriangleForGauge(angle: number, center: Position, size: number, style: { fillStyle: string }) {
         const { strokeWidth } = this.config.gauge.style;
         const { triangleOffset } = this.config.gauge.style;
-        const R = this.config.gauge.style.radius + (strokeWidth / 2) + triangleOffset;
-        const A = {
-            x: center.x + (R * Math.cos(angle)),
-            y: center.y + (R * Math.sin(angle))
+        const r = this.config.gauge.style.radius + (strokeWidth / 2) + triangleOffset;
+        const a = {
+            x: center.x + (r * Math.cos(angle)),
+            y: center.y + (r * Math.sin(angle))
         };
         const h = size * Math.sqrt(3) / 2;
         const baseMid = {
-            x: A.x + (h * Math.cos(angle)),
-            y: A.y + (h * Math.sin(angle))
+            x: a.x + (h * Math.cos(angle)),
+            y: a.y + (h * Math.sin(angle))
         };
         const perp = { x: -Math.sin(angle), y: Math.cos(angle) };
         const baseLeft = {
@@ -693,7 +706,7 @@ export class Monitoring {
             y: baseMid.y - ((size / 2) * perp.y)
         };
         this.ctx.beginPath();
-        this.ctx.moveTo(A.x, A.y);
+        this.ctx.moveTo(a.x, a.y);
         this.ctx.lineTo(baseLeft.x, baseLeft.y);
         this.ctx.lineTo(baseRight.x, baseRight.y);
         this.ctx.closePath();
@@ -756,10 +769,12 @@ export class Monitoring {
             rows[1].querySelector('.value')!.textContent = Math.round(gaugeVal.avg ?? 0) + ' %';
             rows[2].querySelector('.value')!.textContent = Math.round(gaugeVal.max ?? 0) + ' %';
             this.tooltipDiv.querySelectorAll('.tooltip-table .label').forEach(cell => {
-                (cell as HTMLElement).style.width = this.config.popup.labelColumnWidth + 'px';
+                if (cell instanceof HTMLElement)
+                    cell.style.width = this.config.popup.labelColumnWidth + 'px';
             });
             this.tooltipDiv.querySelectorAll('.tooltip-table .value').forEach(cell => {
-                (cell as HTMLElement).style.width = this.config.popup.valueColumnWidth + 'px';
+                if (cell instanceof HTMLElement)
+                    cell.style.width = this.config.popup.valueColumnWidth + 'px';
             });
             const totalWidth = this.config.popup.labelColumnWidth
                 + this.config.popup.gap
@@ -777,11 +792,15 @@ export class Monitoring {
             this.tooltipDiv.style.left = tooltipLeft + 'px';
             this.tooltipDiv.style.top = tooltipTop + 'px';
             const pointerLeft = (totalWidth / 2) - (this.config.popup.pointerWidth / 2);
-            (this.tooltipDiv.querySelector('.tooltip-pointer')! as HTMLElement).style.left = pointerLeft + 'px'; // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
+            const pointerEl = this.tooltipDiv.querySelector('.tooltip-pointer');
+            if (pointerEl instanceof HTMLElement)
+                pointerEl.style.left = pointerLeft + 'px';
             this.tooltipDiv.querySelectorAll('.tooltip-table tr').forEach(row => {
-                (row as HTMLElement).style.height = this.config.popup.rowHeight + 'px';
-                (row as HTMLElement).style.lineHeight = this.config.popup.rowHeight + 'px';
-                (row as HTMLElement).style.marginBottom = this.config.popup.rowSpacing + 'px';
+                if (row instanceof HTMLElement) {
+                    row.style.height = this.config.popup.rowHeight + 'px';
+                    row.style.lineHeight = this.config.popup.rowHeight + 'px';
+                    row.style.marginBottom = this.config.popup.rowSpacing + 'px';
+                }
             });
         } else {
             this.tooltipDiv.style.display = 'none';
