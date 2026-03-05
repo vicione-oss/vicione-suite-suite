@@ -1,0 +1,23 @@
+@attribute [Route(IdentityConstants.EmailConfirmationRoute)]
+@attribute [AllowAnonymous]
+
+@using Blazor.Server.Backend.Components
+@using Blazor.Shared.Components
+@using ViciOne.Ui.Localization.Resources
+
+<PageTitle>@Localization.EmailConfirmation.Title</PageTitle>
+<AccountLayout>
+    <Heading>@Localization.EmailConfirmation.Title</Heading>
+    <LeftSideContent>
+        <div>
+            <label>@Localization.EmailConfirmation.ConfirmEmail</label>
+            <label>@Localization.EmailConfirmation.RecievedConfirmationEmail</label>
+
+            <NavigationField Route="@IdentityConstants.ResendEmailConfirmationRoute">
+                <Content>
+                    @Localization.EmailConfirmation.ClickHere
+                </Content>
+            </NavigationField>
+        </div>
+    </LeftSideContent>
+</AccountLayout>

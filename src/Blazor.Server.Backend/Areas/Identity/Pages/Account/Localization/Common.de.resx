@@ -123,4 +123,19 @@
   <data name="ConfirmPassword" xml:space="preserve">
     <value>Passwort wiederholen</value>
   </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>Neues Passwort</value>
+  </data>
+  <data name="ConfirmNewPassword" xml:space="preserve">
+    <value>Neues Passwort wiederholen</value>
+  </data>
+  <data name="ErrorInputsDoNotMatch" xml:space="preserve">
+    <value>{0} und {1} stimmen nicht überein.</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Passwort zurücksetzen</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Passwort vergessen</value>
+  </data>
 </root>

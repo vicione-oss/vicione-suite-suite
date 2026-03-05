@@ -13,12 +13,26 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
+using Constants = Blazor.Server.Backend.Areas.Identity.Pages.Account.IdentityConstants;
 
 namespace Blazor.Server.Backend.Extensions;
 
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {
-    private static string LoginPage() => "/Account/Login";
+    public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
+    {
+        var accountGroup = endpoints.MapGroup("/account");
+
+        accountGroup.MapPost("/logout", async (
+                [FromServices] SignInManager<SuiteUser> signInManager) =>
+        {
+            await signInManager.SignOutAsync();
+            return Results.LocalRedirect(Constants.LoginRoute);
+        });
+
+        return accountGroup;
+    }
+
 
     public static IEndpointRouteBuilder MapExternalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
     {
@@ -28,11 +42,11 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         if (config == null)
             return endpoints;
 
-        var accountGroup = endpoints.MapGroup("/Account");
+        var accountGroup = endpoints.MapGroup("/account");
 
         MapLoginWithExternalProviderEndpoints(accountGroup);
 
-        var manageGroup = accountGroup.MapGroup("/Manage");
+        var manageGroup = accountGroup.MapGroup("/manage");
 
         MapAddingOfExternalLoginsEndpoints(manageGroup);
 
@@ -41,7 +55,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
     private static void MapAddingOfExternalLoginsEndpoints(RouteGroupBuilder manageGroup)
     {
-        manageGroup.MapPost("/LinkExternalLogin",
+        manageGroup.MapPost("/linkExternalLogin",
             [Authorize] async (
                 HttpContext context,
                 [FromServices] SignInManager<SuiteUser> signInManager,
@@ -52,7 +66,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
-                    "/Account/Manage/ExternalLogins");
+                    "/account/manage/externalLogins");
 
                 var userId = signInManager.UserManager.GetUserId(context.User);
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider,
@@ -74,7 +88,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 {
                     tempData["ExternalError"] = ExternalLoginError.LoginFailed;
                     tempData.Save();
-                    return Results.LocalRedirect(LoginPage());
+                    return Results.LocalRedirect(Constants.LoginRoute);
                 }
 
                 var user = await userManager.GetUserAsync(context.User);
@@ -87,7 +101,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
                 var result = await userManager.AddLoginAsync(user, info);
                 if (!result.Succeeded)
-                    return Results.LocalRedirect(LoginPage());
+                    return Results.LocalRedirect(Constants.LoginRoute);
 
                 // Clear the existing external cookie to ensure a clean login process
                 await context.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -98,7 +112,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
     private static void MapLoginWithExternalProviderEndpoints(RouteGroupBuilder accountGroup)
     {
-        accountGroup.MapPost("/PerformExternalLogin",
+        accountGroup.MapPost("/performExternalLogin",
             (
                 HttpContext context,
                 [FromServices] SignInManager<SuiteUser> signInManager,
@@ -112,14 +126,14 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
-                    "/Account/ExternalLogin",
+                    "/account/externalLogin",
                     QueryString.Create(query));
 
                 var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
                 return TypedResults.Challenge(properties, [provider]);
             });
 
-        accountGroup.MapGet("/ExternalLogin",
+        accountGroup.MapGet("/externalLogin",
             async (HttpContext context,
                 ITempDataDictionaryFactory tempDataFactory,
                 [FromServices] UserManager<SuiteUser> userManager,
@@ -130,7 +144,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 var info = await signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
-                    return Results.LocalRedirect(LoginPage());
+                    return Results.LocalRedirect(Constants.LoginRoute);
                 }
 
                 var signInResult = await signInManager.ExternalLoginSignInAsync(
@@ -148,12 +162,12 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
                 if (signInResult.IsLockedOut)
                 {
-                    return Results.LocalRedirect(LoginPage());
+                    return Results.LocalRedirect(Constants.LoginRoute);
                 }
 
                 tempData["ExternalError"] = ExternalLoginError.UnknownExternalUser;
                 tempData.Save();
-                return Results.LocalRedirect(LoginPage());
+                return Results.LocalRedirect(Constants.LoginRoute);
             });
     }
 }

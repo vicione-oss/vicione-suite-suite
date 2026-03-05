@@ -50,11 +50,7 @@
 }
 
 .button-section {
-    ::deep .navigation-field {
-        margin-top: 32px;
-
-        label:nth-child(3) {
-            padding-left: 4px;
-        }
+    ::deep .account-button:nth-child(2) {
+        margin-top: 8px;
     }
 }

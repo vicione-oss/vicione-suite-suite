@@ -51,10 +51,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Common.resx</DependentUpon>
     </Compile>
-    <Compile Update="Areas\Identity\Pages\Account\Localization\ForgotPassword.Designer.cs">
+    <Compile Update="Areas\Identity\Pages\Account\Localization\ConfirmEmail.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>ForgotPassword.resx</DependentUpon>
+      <DependentUpon>ConfirmEmail.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\ForgotPasswordConfirmation.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ForgotPasswordConfirmation.resx</DependentUpon>
     </Compile>
     <Compile Update="Areas\Identity\Pages\Account\Localization\Login.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -66,10 +71,25 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Register.resx</DependentUpon>
     </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\EmailConfirmation.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EmailConfirmation.resx</DependentUpon>
+    </Compile>
     <Compile Update="Areas\Identity\Pages\Account\Localization\ResendEmailConfirmation.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ResendEmailConfirmation.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\ResetPassword.Designer.cs">
+      <DependentUpon>ResetPassword.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Areas\Identity\Pages\Account\Localization\ResetPasswordConfirmation.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ResetPasswordConfirmation.resx</DependentUpon>
     </Compile>
     <Compile Update="Areas\Identity\Pages\Models\Localization\Validation.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -80,24 +100,32 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ChangePassword.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
+      <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ChangePassword.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\Common.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
+      <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Common.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ForgotPassword.resx">
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ConfirmEmail.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ForgotPassword.Designer.cs</LastGenOutput>
+      <LastGenOutput>ConfirmEmail.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ForgotPasswordConfirmation.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ForgotPasswordConfirmation.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\Login.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
+      <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Login.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\Register.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Register.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\EmailConfirmation.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>EmailConfirmation.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ResendEmailConfirmation.de.resx">
       <Generator></Generator>
@@ -105,6 +133,14 @@
     <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ResendEmailConfirmation.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ResendEmailConfirmation.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ResetPassword.resx">
+      <LastGenOutput>ResetPassword.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\ResetPasswordConfirmation.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResetPasswordConfirmation.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Areas\Identity\Pages\Models\Localization\Validation.resx">
       <Generator>ResXFileCodeGenerator</Generator>

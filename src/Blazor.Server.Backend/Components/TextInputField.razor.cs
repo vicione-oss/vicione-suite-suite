@@ -12,10 +12,16 @@ public sealed partial class TextInputField
     public EventCallback<string?> ValueChanged { get; set; }
 
     [Parameter]
-    public Dictionary<string, object> Attributes { get; set; } = [];
+    public string AutoComplete { get; set; } = default!;
+
+    [Parameter]
+    public bool Required { get; set; }
 
     [Parameter, EditorRequired]
     public string? Placeholder { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = default!;
 
     [Parameter]
     public bool Valid { get; set; } = true;
@@ -24,5 +30,11 @@ public sealed partial class TextInputField
     public bool Password { get; set; } = false;
 
     [Parameter]
+    public bool Enabled { get; set; } = true;
+
+    [Parameter]
     public Expression<Func<string?>>? ValueExpression { get; set; }
+
+    private void TextBoxValueChanged()
+        => ValueChanged.InvokeAsync(Value);
 }

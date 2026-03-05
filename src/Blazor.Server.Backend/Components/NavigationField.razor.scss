@@ -7,14 +7,8 @@
     align-items: stretch;
     width: max-content;
     cursor: pointer;
-
-    input {
-        position: absolute;
-        opacity: 0;
-        cursor: pointer;
-        height: 0;
-        width: 0;
-    }
+    text-decoration: none;
+    color: inherit;
 
     ::deep img {
         width: 16px;
@@ -27,7 +21,11 @@
         user-select: none;
     }
 
-    &:focus-within {
+    &:focus-within, &:hover {
         border-bottom: 1px solid colors-staged.$color-ifm-orange;
+    }
+
+    &:focus-visible {
+        outline: none;
     }
 }

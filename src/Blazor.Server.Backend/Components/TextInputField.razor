@@ -3,10 +3,13 @@
 @using ViciOne.Ui.Blazor.Components.TextBox
 
 <div class="input-field">
-    <TextBox @bind-Value:set="@ValueChanged"
-             @bind-Value:get="@Value"
+    <TextBox @bind-Value="@Value"
+             @bind-Value:after="@TextBoxValueChanged"
              Password="@Password"
              Placeholder="@Placeholder"
+             AutoComplete="@AutoComplete"
+             Enabled="@Enabled"
+             Name="@Name"
              Valid="@Valid" />
 
     <div class="validation-image">

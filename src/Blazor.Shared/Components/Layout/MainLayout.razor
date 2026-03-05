@@ -8,10 +8,10 @@
 
 @inherits LayoutComponentBase
 
-<main class="layout-main-content @(_isTemplateLogin ? "template-login" : string.Empty)">
+<main class="layout-main-content @(_isLogin ? "login" : string.Empty)">
     <PageTitle>@LayoutService.InstanceName</PageTitle>
 
-    @if (!_isTemplateLogin)
+    @if (!_isLogin)
     {
         <div>
             <TopBar />

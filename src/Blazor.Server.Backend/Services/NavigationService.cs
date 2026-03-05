@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Services;
+using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.NotificationArea.Services;
 using Sdk.Client.Services;
@@ -61,8 +61,24 @@ internal sealed class NavigationService : INavigationService, IDisposable
         NavManager.NavigateTo(uriBuilder.Uri.ToString());
     }
 
-    private void NoActiveNotificationElement()
+    public void RedirectTo(string uri)
     {
-        _activeNotificationElementPolicy.NoneActive();
+        uri ??= "";
+
+        // Prevent open redirects.
+        if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))
+            uri = NavManager.ToBaseRelativePath(uri);
+
+        NavManager.NavigateTo(uri);
     }
+
+    public void RedirectTo(string uri, IDictionary<string, object?> queryParameters)
+    {
+        var uriWithoutQuery = NavManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);
+        var newUri = NavManager.GetUriWithQueryParameters(uriWithoutQuery, (IReadOnlyDictionary<string, object?>)queryParameters);
+        RedirectTo(newUri);
+    }
+
+    private void NoActiveNotificationElement()
+        => _activeNotificationElementPolicy.NoneActive();
 }

@@ -1,7 +1,0 @@
-@using Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization
-
-<form method="post" action="/Account/PerformExternalLogin" asp-antiforgery="true" >
-    <button type="submit" name="provider" value="@ViewData["ExternalProviderName"]" class="action-button default">
-        @Login.LoginUsingExternalProvider @ViewData["ExternalProviderDisplayName"]
-    </button>
-</form>

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Blazor.DevAssets;
 using Blazor.Server.Backend.Extensions;
 using Blazor.Server.Backend.Localization;
@@ -178,10 +178,9 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         endpoints.MapControllers();
 
         endpoints.MapExternalIdentityEndpoints();
+        endpoints.MapAdditionalIdentityEndpoints();
 
         // add authentication pages /Account/*
-        // https://andrewlock.net/should-you-use-the-dotnet-8-identity-api-endpoints/
-        // ...endpoints.MapAdditionalIdentityEndpoints();
         endpoints.MapRazorPages();
 
         logger.LogInformation("Mapping endpoints for {Modules}", string.Join(", ", _moduleHost.UiModules.Select(k => k.ModuleId)));

@@ -1,7 +1,5 @@
 ﻿@using Blazor.Shared.Components.ReconnectModal
 @using Microsoft.Extensions.Hosting
-@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication
-@using ViciOne.Ui.Blazor.Components.ContentLoadingIndication.Enums
 
 <!DOCTYPE html>
 <html lang="en">
@@ -19,7 +17,7 @@
     <HeadOutlet @rendermode="RenderModeProvider.HeaderRenderMode" />
 </head>
 <body>
-    <Routes @rendermode="RenderModeProvider.ContentRenderMode" />
+    <Routes @rendermode="ConfiguredRenderMode" />
     <div id="blazor-error-ui">
         @if (Env.IsDevelopment())
         {
