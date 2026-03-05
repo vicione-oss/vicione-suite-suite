@@ -1,18 +1,7 @@
 import xoTypeScript from 'eslint-config-xo-typescript';
 
-// Adjust configuration object according to our requirements
-// https://github.com/xojs/eslint-config-xo-typescript/issues/88
-const tsConfigurationObject = xoTypeScript[1];
-
-// https://github.com/typescript-eslint/typescript-eslint/issues/9739#issuecomment-2296442418
-tsConfigurationObject.languageOptions.parserOptions.projectService = {
-    allowDefaultProject: ['eslint.config.mjs']
-};
-
-const tsxConfigurationObject = xoTypeScript[xoTypeScript.length - 1];
-
-// Include .ts files in liniting, required because file extension .tsx is configured by default
-tsxConfigurationObject.files.push('**/*.ts');
+// https://github.com/xojs/xo/issues/798
+const xoTypeScriptPatched = xoTypeScript.filter(config => config.language?.startsWith('json/') !== true);
 
 export default [
     {
@@ -26,7 +15,16 @@ export default [
             '.nuget/**' // Ignore NuGet package cache (contains vendor JS files after caching implementation)
         ]
     },
-    ...xoTypeScript,
+    ...xoTypeScriptPatched,
+    {
+        languageOptions: {
+            parserOptions: {
+                projectService: {
+                    allowDefaultProject: ['eslint.config.mjs']
+                }
+            }
+        }
+    },
     {
         rules: {
             'no-unused-vars': 'error',
@@ -36,22 +34,20 @@ export default [
             '@stylistic/indent-binary-ops': ['error', 4],
             '@stylistic/comma-dangle': ['error', 'never'],
             '@stylistic/function-paren-newline': ['error', 'consistent'],
+            '@stylistic/curly-newline': ['error', { minElements: 1 }],
             '@stylistic/object-curly-spacing': ['error', 'always'],
             '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
-
-            // Rules added to fix errors of kind "TypeError: Error while loading rule '...': Cannot read properties of undefined"
-            '@typescript-eslint/dot-notation': ['error', { allowKeywords: true }],
-            'no-empty-function': 'off',
-            '@typescript-eslint/no-empty-function': ['error', { allow: [] }],
-            '@typescript-eslint/no-unused-expressions': ['error', { allowShortCircuit: false }],
-            '@stylistic/block-spacing': 'off'
+            'max-params': ['warn', 5]
         }
     },
+
+    // Linting rule adjustments for this file
     {
         files: ['eslint.config.mjs'],
         rules: {
             '@typescript-eslint/no-unsafe-assignment': 'off',
             '@typescript-eslint/no-unsafe-call': 'off',
+            '@typescript-eslint/no-unsafe-member-access': 'off',
             '@typescript-eslint/naming-convention': 'off'
         }
     }

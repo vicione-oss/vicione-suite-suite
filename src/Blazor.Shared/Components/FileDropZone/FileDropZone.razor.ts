@@ -66,7 +66,7 @@ class FileDropZone {
     }
 
     private isSingleFileDrag(dataTransfer: DataTransfer | undefined) {
-        if (dataTransfer && dataTransfer.items.length === 1) {
+        if (dataTransfer?.items.length === 1) {
             const dataTransferItem = dataTransfer.items[0];
 
             return dataTransferItem.kind === 'file';
