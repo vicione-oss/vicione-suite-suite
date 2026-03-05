@@ -1,6 +1,7 @@
-﻿using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Connections.Contracts;
-using Blazor.Shared.Connections.ControlPanels;
+using Blazor.Shared.Connections.ControlPanels.Connections;
+using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.Extensions;
 using Blazor.Shared.Connections.Factories;
 using Blazor.Shared.Connections.Services;

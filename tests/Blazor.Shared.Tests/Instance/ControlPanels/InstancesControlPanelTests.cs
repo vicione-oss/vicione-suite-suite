@@ -1,7 +1,7 @@
 ﻿using AwesomeAssertions;
-using Blazor.Shared.Instance.ControlPanels;
+using Blazor.Shared.Instance.ControlPanels.Instances;
+using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Instance.Extensions;
-using Blazor.Shared.Instance.Services;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
@@ -17,6 +17,7 @@ using Sdk.Instance;
 using Sdk.Testing.Client;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using Xunit;
+using InstanceControlPanel = Blazor.Shared.Instance.ControlPanels.Instances.InstanceControlPanel;
 using TestContext = Xunit.TestContext;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels;

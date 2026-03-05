@@ -1,5 +1,6 @@
-﻿using Blazor.Shared.Module.ControlPanels;
+using Blazor.Shared.Module.ControlPanels;
 using Blazor.Shared.Module.ControlPanels.Extensions;
+using Blazor.Shared.Module.ControlPanels.Services;
 using Blazor.Shared.Module.Services;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.Extensions;

@@ -1,4 +1,4 @@
-﻿using Core.Shared.Connections.Commands;
+using Core.Shared.Connections.Commands;
 using Core.Shared.Connections.Contracts;
 using Core.Shared.Connections.Events;
 using Sdk.Client.Infrastructure;

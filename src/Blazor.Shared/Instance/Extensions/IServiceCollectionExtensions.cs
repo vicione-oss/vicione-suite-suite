@@ -1,8 +1,13 @@
-﻿using Blazor.Shared.Instance.ControlPanels;
-using Blazor.Shared.Instance.Services;
+using Blazor.Shared.Instance.ControlPanels.Instances;
+using Blazor.Shared.Instance.ControlPanels.Instances.Services;
+using Blazor.Shared.Instance.ControlPanels.Update;
+using Blazor.Shared.Instance.ControlPanels.Update.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.ControlPanels.Extensions;
 using ViciOne.Ui.Blazor.Components.Grid.Extensions;
+using InstanceControlPanel = Blazor.Shared.Instance.ControlPanels.Instances.InstanceControlPanel;
+using UpdateControlPanelResetHandler = Blazor.Shared.Instance.ControlPanels.Update.Services.UpdateControlPanelResetHandler;
+using UpdateControlPanelSaveHandler = Blazor.Shared.Instance.ControlPanels.Update.Services.UpdateControlPanelSaveHandler;
 
 namespace Blazor.Shared.Instance.Extensions;
 

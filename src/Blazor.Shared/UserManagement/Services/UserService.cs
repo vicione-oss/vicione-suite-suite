@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using Blazor.Shared.Services;
 using Blazor.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Commands;
 using Core.Shared.UserManagement.Contracts;
@@ -8,70 +8,37 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
 using Sdk.UserManagement.Requests;
-using Sdk.Utils;
 using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.UserManagement.Services;
 
-internal sealed class UserService : IUserService,
+internal sealed class UserService : CompletionSourceHandlerBase<IUserManagementServiceResult>,
+    IUserService,
     IEventConsumer<UserCreatedEvent>,
     IEventConsumer<UserUpdatedEvent>,
     IEventConsumer<UserDeletedEvent>,
-    IEventConsumer<UserErrorEvent>,
-    IDisposable
+    IEventConsumer<UserErrorEvent>
 {
-    private readonly IUiMediator _mediator;
     private readonly AuthenticationStateProvider _authenticationStateProvider;
     private string? _currentUserName;
-    private readonly AutoDisposeList<IDisposable> _subscriptions = [];
-
-    private readonly ConcurrentDictionary<Guid, TaskCompletionSource<ErrorInfo?>> _taskCompletionSourceMap = new();
 
     public event Func<UserProfile, CrudAction, Task>? UserChanged;
 
-    public UserService(IUiMediator mediator, AuthenticationStateProvider authenticationStateProvider)
+    public UserService(IUiMediator mediator, AuthenticationStateProvider authenticationStateProvider) : base(mediator)
     {
-        _mediator = mediator;
         _authenticationStateProvider = authenticationStateProvider;
 
-        _subscriptions.Add(_mediator.Register<UserCreatedEvent>(this));
-        _subscriptions.Add(_mediator.Register<UserUpdatedEvent>(this));
-        _subscriptions.Add(_mediator.Register<UserDeletedEvent>(this));
-        _subscriptions.Add(_mediator.Register<UserErrorEvent>(this));
-    }
-
-    public void Dispose()
-    {
-        _subscriptions.Dispose();
-
-        var correlationIds = _taskCompletionSourceMap.Keys;
-
-        foreach (var correlationId in correlationIds)
-        {
-            if (_taskCompletionSourceMap.TryRemove(correlationId, out var taskCompletionSource))
-                taskCompletionSource.SetCanceled();
-        }
-
-        _taskCompletionSourceMap.Clear();
+        Register<UserCreatedEvent>(this);
+        Register<UserUpdatedEvent>(this);
+        Register<UserDeletedEvent>(this);
+        Register<UserErrorEvent>(this);
     }
 
     public async Task<IUserManagementServiceResult> CreateUser(UserProfile userProfile, CancellationToken cancellationToken = default)
     {
         var command = new CreateUser(userProfile);
 
-        var taskCompletionSource = new TaskCompletionSource<ErrorInfo?>();
-        _taskCompletionSourceMap[command.CorrelationId] = taskCompletionSource;
-
-        try
-        {
-            await _mediator.Send(command, cancellationToken);
-
-            return await WaitForCommandCompletion(taskCompletionSource, cancellationToken);
-        }
-        finally
-        {
-            _taskCompletionSourceMap.TryRemove(command.CorrelationId, out _);
-        }
+        return await SendAndWaitForCompletion(command, cancellationToken);
     }
 
     public async Task<IUserManagementServiceResult> UpdateUser(UserProfile userProfile, CancellationToken cancellationToken = default)
@@ -79,60 +46,33 @@ internal sealed class UserService : IUserService,
         _currentUserName ??= (await _authenticationStateProvider.GetAuthenticationStateAsync()).User.Identity?.Name;
         var command = new UpdateUser(userProfile, _currentUserName ?? throw new InvalidOperationException());
 
-        var taskCompletionSource = new TaskCompletionSource<ErrorInfo?>();
-        _taskCompletionSourceMap[command.CorrelationId] = taskCompletionSource;
-
-        try
-        {
-            await _mediator.Send(command, cancellationToken);
-
-            return await WaitForCommandCompletion(taskCompletionSource, cancellationToken);
-        }
-        finally
-        {
-            _taskCompletionSourceMap.TryRemove(command.CorrelationId, out _);
-        }
+        return await SendAndWaitForCompletion(command, cancellationToken);
     }
 
     public async Task<IUserManagementServiceResult> DeleteUser(UserProfile userProfile, CancellationToken cancellationToken = default)
     {
         var command = new DeleteUser(userProfile);
 
-        var taskCompletionSource = new TaskCompletionSource<ErrorInfo?>();
-        _taskCompletionSourceMap[command.CorrelationId] = taskCompletionSource;
-
-        try
-        {
-            await _mediator.Send(command, cancellationToken);
-
-            return await WaitForCommandCompletion(taskCompletionSource, cancellationToken);
-        }
-        finally
-        {
-            _taskCompletionSourceMap.TryRemove(command.CorrelationId, out _);
-        }
+        return await SendAndWaitForCompletion(command, cancellationToken);
     }
 
     public async Task Consume(ClientContext<UserDeletedEvent> context, CancellationToken cancellationToken = default)
     {
-        if (_taskCompletionSourceMap.TryRemove(context.Message.CorrelationId, out var taskCompletionSource))
-            taskCompletionSource.SetResult(null);
+        CompleteWithSuccess(context.Message.CorrelationId);
 
         await NotifyUserChanged(context.Message.UserProfile, CrudAction.Deleted);
     }
 
     public async Task Consume(ClientContext<UserCreatedEvent> context, CancellationToken cancellationToken = default)
     {
-        if (_taskCompletionSourceMap.TryRemove(context.Message.CorrelationId, out var taskCompletionSource))
-            taskCompletionSource.SetResult(null);
+        CompleteWithSuccess(context.Message.CorrelationId);
 
         await NotifyUserChanged(context.Message.UserProfile, CrudAction.Created);
     }
 
     public async Task Consume(ClientContext<UserUpdatedEvent> context, CancellationToken cancellationToken = default)
     {
-        if (_taskCompletionSourceMap.TryRemove(context.Message.CorrelationId, out var taskCompletionSource))
-            taskCompletionSource.SetResult(null);
+        CompleteWithSuccess(context.Message.CorrelationId);
 
         await NotifyUserChanged(context.Message.UserProfile, CrudAction.Updated);
     }
@@ -146,43 +86,30 @@ internal sealed class UserService : IUserService,
         else
             errorMessage = context.Message.ErrorInfo.Message ?? CommonPhrases.AnUnknownErrorOccurred;
 
-        if (_taskCompletionSourceMap.TryRemove(context.Message.CorrelationId, out var taskCompletionSource))
-            taskCompletionSource.SetResult(new ErrorInfo(context.Message.ErrorInfo.ErrorCode, errorMessage));
+        CompleteWithError(context.Message.CorrelationId, new ErrorInfo(context.Message.ErrorInfo.ErrorCode, errorMessage));
 
         return Task.CompletedTask;
     }
 
     public async Task<List<UserProfile>> GetUsers(UserName? userName = null, CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Request<GetUsers, GetUsersResponse>(new(userName), cancellationToken);
+        var result = await Mediator.Request<GetUsers, GetUsersResponse>(new(userName), cancellationToken);
 
         return result.Users;
     }
 
     public async Task<List<Sdk.UserManagement.Contracts.Role>> GetRoles(CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Request<GetRoles, GetRolesResponse>(new(), cancellationToken);
+        var result = await Mediator.Request<GetRoles, GetRolesResponse>(new(), cancellationToken);
 
         return result.Roles;
     }
 
-    private static async Task<IUserManagementServiceResult> WaitForCommandCompletion(TaskCompletionSource<ErrorInfo?> taskCompletionSource,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var errorInfo = await taskCompletionSource.Task.WaitAsync(TimeSpan.FromMilliseconds(Constants.CommandTimeoutMs), cancellationToken);
+    protected override IUserManagementServiceResult CreateSuccessResult()
+        => new UserManagementServiceSuccessResult();
 
-            if (taskCompletionSource.Task.IsCanceled || errorInfo is null)
-                return new UserManagementServiceSuccessResult();
-
-            return new UserManagementServiceErrorResult(errorInfo.Message ?? CommonPhrases.AnUnknownErrorOccurred, errorInfo.ErrorCode);
-        }
-        catch (TimeoutException)
-        {
-            return new UserManagementServiceErrorResult(CommonPhrases.TheOperationHasTimedOut);
-        }
-    }
+    protected override IUserManagementServiceResult CreateErrorResult(string errorMessage, int? errorCode = null)
+        => new UserManagementServiceErrorResult(errorMessage, errorCode);
 
     private async Task NotifyUserChanged(UserProfile userProfile, CrudAction crudAction)
     {

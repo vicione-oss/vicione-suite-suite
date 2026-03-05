@@ -1,4 +1,7 @@
-﻿using Blazor.Shared.Connections.ControlPanels;
+using Blazor.Shared.Connections.ControlPanels.Connections;
+using Blazor.Shared.Connections.ControlPanels.Connections.Services;
+using Blazor.Shared.Connections.ControlPanels.Tags;
+using Blazor.Shared.Connections.ControlPanels.Tags.Services;
 using Blazor.Shared.Connections.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

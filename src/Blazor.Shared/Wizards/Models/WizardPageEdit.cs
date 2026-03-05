@@ -1,11 +1,10 @@
-﻿using Blazor.Shared.Wizards.Models;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.Models;
 using Sdk.Client.Wizards.Models;
 using Sdk.Client.Wizards.Services;
 
-namespace Blazor.Shared.Wizards.Services;
+namespace Blazor.Shared.Wizards.Models;
 
 internal sealed partial class WizardPageEdit<TWizardPageState>(TWizardPageState wizardPageState, IServiceProvider serviceProvider)
     : IWizardPageEdit

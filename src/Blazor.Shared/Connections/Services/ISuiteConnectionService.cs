@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Connections.Contracts;
+using Blazor.Shared.Connections.Contracts;
 using Sdk.Client.Services;
 using Sdk.Connections.Contracts;
 

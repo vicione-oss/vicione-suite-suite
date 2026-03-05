@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+using System.Globalization;
+using Blazor.Shared.Module.ControlPanels.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Modules;
 using ViciOne.Ui.Blazor.Components.Grid.Services;

@@ -1,4 +1,5 @@
 ﻿using AwesomeAssertions;
+using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Tests.Connections.Extensions;
 using Bunit;
