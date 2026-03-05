@@ -2,6 +2,9 @@
 using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Connections.ControlPanels;
+using Blazor.Shared.Connections.ControlPanels.Connections.Services;
+using Blazor.Shared.Connections.ControlPanels.Tags;
+using Blazor.Shared.Connections.ControlPanels.Tags.Services;
 using Blazor.Shared.Connections.Extensions;
 using Blazor.Shared.Connections.Services;
 using Blazor.Tests.Tools;

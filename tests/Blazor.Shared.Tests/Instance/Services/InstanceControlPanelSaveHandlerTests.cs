@@ -1,5 +1,5 @@
-﻿using Blazor.Shared.Instance.Contracts;
-using Blazor.Shared.Instance.Services;
+﻿using Blazor.Shared.Instance.ControlPanels.Instances.Models;
+using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Services;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Contracts;

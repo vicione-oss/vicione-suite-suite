@@ -1,7 +1,7 @@
 ﻿using Blazor.Shared.Settings.Extensions;
-using Blazor.Shared.Instance.ControlPanels;
+using Blazor.Shared.Instance.ControlPanels.Instances;
+using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Instance.Extensions;
-using Blazor.Shared.Instance.Services;
 using Blazor.Shared.Services;
 using Bunit;
 using Core.Shared.Instance.Requests;

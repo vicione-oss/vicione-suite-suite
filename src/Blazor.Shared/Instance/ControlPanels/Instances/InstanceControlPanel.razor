@@ -1,0 +1,107 @@
+@using Blazor.Shared.Instance.ControlPanels.Instances.Services
+@using Microsoft.Extensions.Logging
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<InstanceControlPanelState>
+
+<DescriptionBanner Title="@Localization.InstanceControlPanel.DescriptionBannerTitle">
+    @Localization.InstanceControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    @if (State.InstanceInformation is not null)
+    {
+        <SettingsGroup Title="@Localization.InstanceControlPanel.Display" @bind-Expanded="@State.DisplaySettingsGroupExpanded">
+            <SettingsField Label="@CommonVocabulary.Name">
+                <SettingsFieldTextBox Placeholder="@CommonVocabulary.Name"
+                                      @bind-Value="@State.InstanceInformation.Name"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@Localization.InstanceControlPanel.FormattedName">
+                <SettingsFieldTextBox Placeholder="@Localization.InstanceControlPanel.FormattedName"
+                                      @bind-Value="@State.InstanceInformation.FormattedName"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@CommonVocabulary.Description">
+                <SettingsFieldTextBox Placeholder="@CommonVocabulary.Description"
+                                      @bind-Value="@State.InstanceInformation.Description"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+        </SettingsGroup>
+
+        <SettingsGroup Title="@CommonVocabulary.Information" @bind-Expanded="@State.CommonSettingsGroupExpanded">
+            <SettingsField Label="Id">
+                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.Id.ToString()" />
+            </SettingsField>
+
+            <SettingsField Label="@TechnicalTerms.SerialNumber">
+                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.SerialNumber" />
+            </SettingsField>
+
+            <SettingsField Label="@TechnicalTerms.Type">
+                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.Type.ToString()" />
+            </SettingsField>
+
+            <SettingsField Label="@TechnicalTerms.Version">
+                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.Version" />
+            </SettingsField>
+
+            <SettingsField Label="@TechnicalAcronyms.Sdk">
+                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.SdkVersion" />
+            </SettingsField>
+
+            <SettingsField Label="@Localization.InstanceControlPanel.LogLevel">
+                <SettingsFieldComboBox Items="@(Enum.GetValues<LogLevel>())"
+                                       @bind-Value="@State.LogLevel"
+                                       @bind-Value:after="BeginEdit" />
+            </SettingsField>
+        </SettingsGroup>
+
+        @if (State.InstanceInformation.Type == Sdk.Instance.InstanceType.Slave)
+        {
+            <SettingsGroup Title="@CommonVocabulary.Status" @bind-Expanded="@State.StatusSettingsGroupExpanded">
+                <SettingsField Label="@Localization.InstanceControlPanel.FirstTimeRegistered">
+                    <SettingsFieldTextBox Enabled="false"
+                                          Value="@State.InstanceInformation.FirstTimeRegistered.ToString()" />
+                </SettingsField>
+
+                <SettingsField Label="@Localization.InstanceControlPanel.LastTimeRegistered">
+                    <SettingsFieldTextBox Enabled="false"
+                                          Value="@State.InstanceInformation.LastRegistered.ToString()" />
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.Status">
+                    @if (State.InstanceInformation.HealthStatus is null)
+                    {
+                        <div>@CommonVocabulary.Unknown</div>
+                    }
+                    else
+                    {
+                        <SettingsFieldTextBox Enabled="false"
+                                              Value="@State.InstanceInformation.HealthStatus.ToString()" />
+                    }
+                </SettingsField>
+
+                <SettingsField Label="@Localization.InstanceControlPanel.LastHealthCheck">
+                    @if (State.InstanceInformation.LastSent is null)
+                    {
+                        <div>@CommonVocabulary.Pending</div>
+                    }
+                    else
+                    {
+                        <SettingsFieldTextBox Enabled="false"
+                                              Value="@State.InstanceInformation.LastSent.ToString()" />
+                    }
+                </SettingsField>
+            </SettingsGroup>
+        }
+    }
+    else
+    {
+        <SettingsInformation>
+            @Localization.InstanceControlPanel.FetchErrorContent
+        </SettingsInformation>
+    }
+</SettingsLayout>

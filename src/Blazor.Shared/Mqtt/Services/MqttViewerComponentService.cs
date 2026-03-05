@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using Blazor.Shared.Mqtt.Contracts;
@@ -7,7 +7,6 @@ using DevExpress.Blazor;
 using MQTTnet.Protocol;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Extensions;
-using Sdk.Extensions;
 
 namespace Blazor.Shared.Mqtt.Services;
 

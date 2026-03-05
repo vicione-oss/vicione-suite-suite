@@ -77,48 +77,13 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ReconnectModal.resx</DependentUpon>
     </Compile>
-    <Compile Update="Connections\ControlPanels\Localization\ConnectionControlPanel.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ConnectionControlPanel.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Connections\ControlPanels\Localization\ConnectionsControlPanel.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ConnectionsControlPanel.resx</DependentUpon>
-    </Compile>
     <Compile Update="Connections\Services\Localization\SuiteConnectionService.Designer.cs">
       <DependentUpon>SuiteConnectionService.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Instance\ControlPanels\Localization\InstanceControlPanel.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>InstanceControlPanel.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Instance\ControlPanels\Localization\UpdateControlPanel.Designer.cs">
-      <DependentUpon>UpdateControlPanel.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Instance\ControlPanels\Localization\InstancesControlPanel.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>InstancesControlPanel.resx</DependentUpon>
-    </Compile>
     <Compile Update="Instance\Localization\Common.Designer.cs">
       <DependentUpon>Common.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Instance\Services\Localization\InstanceControlPanelSaveHandler.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>InstanceControlPanelSaveHandler.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Instance\Services\Localization\UpdateControlPanelSaveHandler.Designer.cs">
-      <DependentUpon>UpdateControlPanelSaveHandler.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
@@ -172,7 +137,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ModuleOptionDeclarationCollectionGrid.resx</DependentUpon>
     </Compile>
-    <Compile Update="Module\Services\Localization\ModuleManagementControlPanelSaveHandler.Designer.cs">
+    <Compile Update="Module\ControlPanels\Localization\ModuleManagementControlPanelSaveHandler.Designer.cs">
       <DependentUpon>ModuleManagementControlPanelSaveHandler.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -221,11 +186,6 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ProxiesControlPanel.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Connections\ControlPanels\Localization\TagControlPanel.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>TagControlPanel.resx</DependentUpon>
     </Compile>
     <Compile Update="Network\ControlPanels\Proxies\Services\Localization\ProxiesControlPanelSaveHandler.Designer.cs">
       <DependentUpon>ProxiesControlPanelSaveHandler.resx</DependentUpon>
@@ -447,20 +407,20 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>TestSettings.resx</DependentUpon>
     </Compile>
-    <Compile Update="Instances\Localization\Instance.Designer.cs">
+    <Compile Update="Instance\ControlPanels\Instances\Localization\InstanceControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Instance.resx</DependentUpon>
+      <DependentUpon>InstanceControlPanel.resx</DependentUpon>
     </Compile>
-    <Compile Update="Instances\Localization\Instances.Designer.cs">
+    <Compile Update="Instance\ControlPanels\Instances\Localization\InstancesControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Instances.resx</DependentUpon>
+      <DependentUpon>InstancesControlPanel.resx</DependentUpon>
     </Compile>
-    <Compile Update="Connections\ControlPanels\Localization\TagsControlPanelPageContent.Designer.cs">
+    <Compile Update="Instance\ControlPanels\Instances\Localization\InstanceControlPanelSaveHandler.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>TagsControlPanelPageContent.resx</DependentUpon>
+      <DependentUpon>InstanceControlPanelSaveHandler.resx</DependentUpon>
     </Compile>
     <Compile Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelSaveHandler.Designer.cs">
       <DependentUpon>UserControlPanelSaveHandler.resx</DependentUpon>
@@ -487,6 +447,30 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Connections\ControlPanels\Connections\Localization\ConnectionControlPanel.Designer.cs">
+      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ConnectionControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\ControlPanels\Connections\Localization\ConnectionsControlPanel.Designer.cs">
+      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ConnectionsControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\ControlPanels\Tags\Localization\TagControlPanel.Designer.cs">
+      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TagControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Connections\ControlPanels\Tags\Localization\TagsControlPanelPageContent.Designer.cs">
+      <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TagsControlPanelPageContent.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -498,32 +482,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ReconnectModal.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Connections\ControlPanels\Localization\ConnectionControlPanel.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ConnectionControlPanel.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Connections\ControlPanels\Localization\ConnectionsControlPanel.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ConnectionsControlPanel.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Update="Connections\Services\Localization\SuiteConnectionService.resx">
       <LastGenOutput>SuiteConnectionService.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Instance\ControlPanels\Localization\UpdateControlPanel.resx">
-      <LastGenOutput>UpdateControlPanel.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
     <EmbeddedResource Update="Instance\Localization\Common.resx">
       <LastGenOutput>Common.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Instance\Services\Localization\InstanceControlPanelSaveHandler.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>InstanceControlPanelSaveHandler.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Instance\Services\Localization\UpdateControlPanelSaveHandler.resx">
-      <LastGenOutput>UpdateControlPanelSaveHandler.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Localization\RestartSuite.resx">
@@ -566,7 +530,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>IndexPage.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Module\Services\Localization\ModuleManagementControlPanelSaveHandler.resx">
+    <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleManagementControlPanelSaveHandler.resx">
       <LastGenOutput>ModuleManagementControlPanelSaveHandler.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
@@ -601,10 +565,6 @@
     <EmbeddedResource Update="Network\ControlPanels\Proxies\Components\Localization\ProxiesControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ProxiesControlPanel.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Connections\ControlPanels\Localization\TagControlPanel.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TagControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Network\ControlPanels\Proxies\Services\Localization\ProxiesControlPanelSaveHandler.resx">
       <LastGenOutput>ProxiesControlPanelSaveHandler.Designer.cs</LastGenOutput>
@@ -762,9 +722,6 @@
       <LastGenOutput>RoleControlPanel.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="UserManagement\ControlPanels\Role\Services\Localization\RoleControlPanelResetHandler.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Update="UserManagement\ControlPanels\Role\Services\Localization\RoleControlPanelResetHandler.resx">
       <LastGenOutput>RoleControlPanelResetHandler.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
@@ -772,18 +729,6 @@
     <EmbeddedResource Update="UserManagement\ControlPanels\Users\Components\Localization\UsersControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>UsersControlPanel.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="UserManagement\ControlPanels\User\Components\Localization\UserControlPanel.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>UserControlPanel.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Instance\ControlPanels\Localization\InstanceControlPanel.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>InstanceControlPanel.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Instance\ControlPanels\Localization\InstancesControlPanel.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>InstancesControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Mqtt\Localization\MqttViewer.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -797,37 +742,17 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TestSettings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Connections\ControlPanels\Localization\TagsControlPanelPageContent.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TagsControlPanelPageContent.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Connections\ControlPanels\Localization\TagsControlPanelPageContent.de.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TagsControlPanelPageContent.de.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelSaveHandler.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelSaveHandler.resx">
       <LastGenOutput>UserControlPanelSaveHandler.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="UserManagement\Localization\Labels.de.resx">
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Update="UserManagement\Localization\Labels.resx">
       <LastGenOutput>Labels.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelResetHandler.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelResetHandler.resx">
       <LastGenOutput>UserControlPanelResetHandler.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="UserManagement\Services\Validators\Localization\RepeatPasswordValidator.de.resx">
-      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Update="UserManagement\Services\Validators\Localization\RepeatPasswordValidator.resx">
       <LastGenOutput>RepeatPasswordValidator.Designer.cs</LastGenOutput>
@@ -836,6 +761,46 @@
     <EmbeddedResource Update="Wizards\Components\Localization\WizardBody.resx">
       <LastGenOutput>WizardBody.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Instances\Localization\InstanceControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InstanceControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Instances\Localization\InstancesControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InstancesControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Instances\Localization\InstancesControlPanelSaveHandler.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InstancesControlPanelSaveHandler.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Update\Localization\UpdateControlPanel.resx">
+      <LastGenOutput>UpdateControlPanel.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Instances\Localization\InstanceControlPanelSaveHandler.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>InstanceControlPanelSaveHandler.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Instances\Localization\UpdateControlPanelSaveHandler.resx">
+      <LastGenOutput>UpdateControlPanelSaveHandler.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Connections\Localization\ConnectionControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ConnectionControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Connections\Localization\ConnectionsControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ConnectionsControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Tags\Localization\TagControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TagControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Connections\ControlPanels\Tags\Localization\TagsControlPanelPageContent.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TagsControlPanelPageContent.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

@@ -1,5 +1,5 @@
-﻿using Blazor.Shared.Instance.ControlPanels;
-using Blazor.Shared.Instance.Services;
+﻿using Blazor.Shared.Instance.ControlPanels.Instances;
+using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
