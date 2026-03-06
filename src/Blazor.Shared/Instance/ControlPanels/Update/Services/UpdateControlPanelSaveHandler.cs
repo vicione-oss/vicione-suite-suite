@@ -1,10 +1,10 @@
-using Blazor.Shared.Services;
 using Blazor.Shared.Validation.Services.Validators;
 using Core.Shared.HostManagement;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Models;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
 using Sdk.Messaging;
@@ -29,10 +29,10 @@ internal sealed partial class UpdateControlPanelSaveHandler : ControlPanelSaveHa
         _requiredValidator = requiredValidator;
         _logger = logger;
 
-        Register<InstallSuiteVersionStarted>(this);
-        Register<InstallSuiteVersionError>(this);
-        Register<UpdateSystemStarted>(this);
-        Register<UpdateSystemError>(this);
+        Register<InstallSuiteVersionStarted>();
+        Register<InstallSuiteVersionError>();
+        Register<UpdateSystemStarted>();
+        Register<UpdateSystemError>();
     }
 
     public override async Task<ISaveResult> Save(UpdateControlPanelState state, CancellationToken cancellationToken)

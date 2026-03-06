@@ -1,5 +1,5 @@
 using Blazor.Shared.Connections.Contracts;
-using Blazor.Shared.Services;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Connections.Commands;
 using Sdk.Connections.Contracts;
@@ -26,9 +26,9 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
 
     public SuiteConnectionService(IUiMediator mediator) : base(mediator)
     {
-        Register<ConnectionChanged>(this);
-        Register<ConnectionErrorOccured>(this);
-        Register<TagsChanged>(this);
+        Register<ConnectionChanged>();
+        Register<ConnectionErrorOccured>();
+        Register<TagsChanged>();
     }
 
     public async Task Initialize(CancellationToken cancellationToken = default)

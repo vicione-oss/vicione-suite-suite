@@ -1,8 +1,8 @@
-using Blazor.Shared.Services;
 using Blazor.Shared.Settings.DateAndTime.Services;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Events;
 using Sdk.Client.ControlPanels.Models;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 
 namespace Blazor.Shared.UserInterface.ControlPanels.DateAndTime.Services;
@@ -17,8 +17,8 @@ internal sealed class DateAndTimeControlPanelSaveHandler : ControlPanelSaveHandl
     {
         _timeZoneDescriptorProvider = timeZoneDescriptorProvider;
 
-        Register<CrossInstanceConfigurationChanged>(this);
-        Register<CrossInstanceConfigurationError>(this);
+        Register<CrossInstanceConfigurationChanged>();
+        Register<CrossInstanceConfigurationError>();
     }
 
     public override async Task<ISaveResult> Save(DateAndTimeControlPanelState state, CancellationToken cancellationToken)

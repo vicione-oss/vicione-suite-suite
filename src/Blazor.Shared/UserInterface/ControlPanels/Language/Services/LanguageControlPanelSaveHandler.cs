@@ -1,7 +1,7 @@
-using Blazor.Shared.Services;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Events;
 using Sdk.Client.ControlPanels.Models;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 
 namespace Blazor.Shared.UserInterface.ControlPanels.Language.Services;
@@ -12,8 +12,8 @@ internal sealed class LanguageControlPanelSaveHandler : ControlPanelSaveHandlerB
 {
     public LanguageControlPanelSaveHandler(IUiMediator mediator) : base(mediator)
     {
-        Register<CrossInstanceConfigurationChanged>(this);
-        Register<CrossInstanceConfigurationError>(this);
+        Register<CrossInstanceConfigurationChanged>();
+        Register<CrossInstanceConfigurationError>();
     }
 
     public override async Task<ISaveResult> Save(LanguageControlPanelState state, CancellationToken cancellationToken)

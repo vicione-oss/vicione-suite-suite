@@ -1,10 +1,10 @@
-using Blazor.Shared.Services;
 using Blazor.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Commands;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Requests;
 using Microsoft.AspNetCore.Components.Authorization;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
 using Sdk.UserManagement.Requests;
@@ -28,10 +28,10 @@ internal sealed class UserService : CompletionSourceHandlerBase<IUserManagementS
     {
         _authenticationStateProvider = authenticationStateProvider;
 
-        Register<UserCreatedEvent>(this);
-        Register<UserUpdatedEvent>(this);
-        Register<UserDeletedEvent>(this);
-        Register<UserErrorEvent>(this);
+        Register<UserCreatedEvent>();
+        Register<UserUpdatedEvent>();
+        Register<UserDeletedEvent>();
+        Register<UserErrorEvent>();
     }
 
     public async Task<IUserManagementServiceResult> CreateUser(UserProfile userProfile, CancellationToken cancellationToken = default)

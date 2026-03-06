@@ -1,6 +1,6 @@
-using Blazor.Shared.Services;
 using Blazor.Shared.UserManagement.Contracts;
 using Microsoft.Extensions.Logging;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
 using Sdk.UserManagement.Commands;
@@ -23,10 +23,10 @@ internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementS
     {
         _logger = logger;
 
-        Register<RoleCreatedEvent>(this);
-        Register<RoleUpdatedEvent>(this);
-        Register<RoleDeletedEvent>(this);
-        Register<RoleErrorEvent>(this);
+        Register<RoleCreatedEvent>();
+        Register<RoleUpdatedEvent>();
+        Register<RoleDeletedEvent>();
+        Register<RoleErrorEvent>();
     }
 
     public async Task<IUserManagementServiceResult> CreateRole(Role role, CancellationToken cancellationToken = default)
