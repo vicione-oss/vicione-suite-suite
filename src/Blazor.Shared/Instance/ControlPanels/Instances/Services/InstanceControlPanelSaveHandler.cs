@@ -3,6 +3,7 @@ using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Events;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Models;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
 using ViciOne.Ui.Localization.Resources;
@@ -20,7 +21,7 @@ internal sealed class InstanceControlPanelSaveHandler : ControlPanelSaveHandlerB
         _logService = logService;
         _logger = logger;
 
-        Register(this);
+        Register<InstanceInformationUpdated>();
     }
 
     public override async Task<ISaveResult> Save(InstanceControlPanelState state, CancellationToken cancellationToken)
@@ -30,7 +31,7 @@ internal sealed class InstanceControlPanelSaveHandler : ControlPanelSaveHandlerB
 
         var command = new UpdateInstanceInformation(state.InstanceInformation);
 
-        return await SendAndWaitForCompletionAfterwards(command, async (_) =>
+        return await SendAndWaitForCompletion(command, async (_) =>
         {
             if (state.LogLevel.HasValue)
             {
