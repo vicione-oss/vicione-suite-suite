@@ -1,53 +1,56 @@
-﻿@using Sdk.Authorization
+@using Sdk.Authorization
+@using ViciOne.Ui.Blazor.Components.Toolbar.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 @inherits ModulePageBase<BurgerClientModule>
 @attribute [Route(BurgerClientModule.ModuleRoute)]
 @attribute [ModuleAuthorize<BurgerClientModule>]
 
 <div class="burger-page">
     <div class="burger-toolbar">
-        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
-                           BeginGroup="true"
-                           IconCssClass="mdi mdi-cube-send"
-                           Click="@SubmitBurgerOrder"
-                           Text="SubmitBurgerOrder" />
+        <Toolbar>
+            <ToolbarGroup>
+                <ToolbarButton Text="Compose your burger:"
+                               Enabled="false"/>
 
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Left"
-                           BeginGroup="true"
-                           Text="Compose your burger:"
-                           Enabled="false" />
+                <ToolbarButton Text="Cheese"
+                               OnClick="@(() => { Burger.Cheese = !Burger.Cheese; })"
+                               IconName="@(Burger.Cheese ? MonochromeIconName.Check : MonochromeIconName.CloseMedium)"/>
 
-            <DxToolbarItem Text="Cheese"
-                           Click="@(() => { Burger.Cheese = !Burger.Cheese; })"
-                           @bind-Checked="@Burger.Cheese" />
+                <ToolbarButton Text="Pickle"
+                               OnClick="@(() => { Burger.Pickle = !Burger.Pickle; })"
+                               IconName="@(Burger.Pickle ? MonochromeIconName.Check : MonochromeIconName.CloseMedium)"/>
 
-            <DxToolbarItem Text="Pickle"
-                           Click="@(() => { Burger.Pickle = !Burger.Pickle; })"
-                           @bind-Checked="@Burger.Pickle" />
+                <ToolbarButton Text="Ketchup"
+                               OnClick="@(() => { Burger.Ketchup = !Burger.Ketchup; })"
+                               IconName="@(Burger.Ketchup ? MonochromeIconName.Check : MonochromeIconName.CloseMedium)"/>
 
-            <DxToolbarItem Text="Ketchup"
-                           Click="@(() => { Burger.Ketchup = !Burger.Ketchup; })"
-                           @bind-Checked="@Burger.Ketchup" />
+                <ToolbarButton Text="Mustard"
+                               OnClick="@(() => { Burger.Mustard = !Burger.Mustard; })"
+                               IconName="@(Burger.Mustard ? MonochromeIconName.Check : MonochromeIconName.CloseMedium)"/>
 
-            <DxToolbarItem Text="Mustard"
-                           Click="@(() => { Burger.Mustard = !Burger.Mustard; })"
-                           @bind-Checked="@Burger.Mustard" />
+                <ToolbarButton Text="BarbecueSauce"
+                               OnClick="@(() => { Burger.BarbecueSauce = !Burger.BarbecueSauce; })"
+                               IconName="@(Burger.BarbecueSauce ? MonochromeIconName.Check : MonochromeIconName.CloseMedium)"/>
 
-            <DxToolbarItem Text="BarbecueSauce"
-                           Click="@(() => { Burger.BarbecueSauce = !Burger.BarbecueSauce; })"
-                           @bind-Checked="@Burger.BarbecueSauce" />
+                <ToolbarButton Text="Onion"
+                               OnClick="@(() => { Burger.Onion = !Burger.Onion; })"
+                               IconName="@(Burger.Onion ? MonochromeIconName.Check : MonochromeIconName.CloseMedium)"/>
 
-            <DxToolbarItem Text="Onion"
-                           Click="@(() => { Burger.Onion = !Burger.Onion; })"
-                           @bind-Checked="@Burger.Onion" />
+                <ToolbarButton Text="Lettuce"
+                               OnClick="@(() => { Burger.Lettuce = !Burger.Lettuce; })"
+                               IconName="@(Burger.Lettuce ? MonochromeIconName.Check : MonochromeIconName.CloseMedium)"/>
 
-            <DxToolbarItem Text="Lettuce"
-                           Click="@(() => { Burger.Lettuce = !Burger.Lettuce; })"
-                           @bind-Checked="@Burger.Lettuce" />
-
-            <DxToolbarItem Text="Error"
-                           Click="@(() => { throw new InvalidOperationException("You wanted this!"); })" />
-        </DxToolbar>
+                <ToolbarButton Text="Error"
+                               OnClick="@(() => throw new InvalidOperationException("You wanted this!"))"
+                               IconName="MonochromeIconName.Urgent"/>
+            </ToolbarGroup>
+            
+            <ToolbarGroup AlignRight>
+                <ToolbarButton Text="Submit Order"
+                               OnClick="@SubmitBurgerOrder"
+                               IconName="MonochromeIconName.Email"/>
+            </ToolbarGroup>
+        </Toolbar>
     </div>
     <div class="burger-table">
         <table class="table">

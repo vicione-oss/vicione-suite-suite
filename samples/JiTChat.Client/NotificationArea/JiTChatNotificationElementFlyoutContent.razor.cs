@@ -2,7 +2,6 @@
 using JiTChat.Public.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Sdk.Authorization;
@@ -14,8 +13,8 @@ namespace JiTChat.Client.NotificationArea;
 
 public sealed partial class JiTChatNotificationElementFlyoutContent : ComponentBase, INotificationElementFlyoutContent, IAsyncDisposable
 {
-    private EditContext? _editContext;
     private IJSObjectReference? _jsModuleReference;
+
     private static string Policy => ModulePolicyProvider.GetPolicy<JiTChatClientModule>();
 
     [Inject]
@@ -32,17 +31,15 @@ public sealed partial class JiTChatNotificationElementFlyoutContent : ComponentB
 
     [CascadingParameter]
     public required Task<AuthenticationState> AuthState { get; set; }
-
-    public string MessageText { get; set; } = string.Empty;
-
-    public string Username { get; private set; } = "Anonymous";
+    
+    internal string MessageText { get; set; } = string.Empty;
+    private string Username { get; set; } = "Anonymous";
 
     protected override async Task OnInitializedAsync()
     {
         JiTChatService.OnMessagePublished += MessagePublished;
         JiTChatService.MarkIncomingMessagesAsRead = true;
 
-        _editContext = new EditContext(this);
         Username = (await AuthState).User.Identity?.Name ?? "Anonymous";
 
         _jsModuleReference = await JsInterop.IncludeModuleScript<JiTChatClientModule>("jit-chat-notification-element-flyout-content.js");
@@ -50,6 +47,9 @@ public sealed partial class JiTChatNotificationElementFlyoutContent : ComponentB
 
     private void MessagePublished(ChatMessage arg)
     {
+        if (arg.User == Username)
+            MessageText = string.Empty;
+
         InvokeAsync(StateHasChanged);
         InvokeAsync(ScrollToBottom);
     }
@@ -64,16 +64,25 @@ public sealed partial class JiTChatNotificationElementFlyoutContent : ComponentB
         }
     }
 
-    private async Task SubmitMessage()
+    private Task MessageTextEnterPressed()
+        => SubmitMessage(MessageText);
+
+    private Task SubmitButtonPressed()
+        => SubmitMessage(MessageText);
+
+    private async Task SubmitMessage(string? text)
     {
-        await JiTChatService.SendMessage(Username, MessageText);
-        MessageText = string.Empty;
+        if (string.IsNullOrWhiteSpace(text))
+            return;
+
+        await JiTChatService.SendMessage(Username, text);
     }
 
     private string OnDraw()
     {
         InvokeAsync(JiTChatService.MarkAllMessagesAsRead);
         InvokeAsync(ScrollToBottom);
+
         return string.Empty;
     }
 

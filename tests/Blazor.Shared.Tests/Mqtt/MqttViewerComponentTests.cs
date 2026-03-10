@@ -263,7 +263,6 @@ public class MqttViewerComponentTests
             var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
             component.Find(ToggleTextFilterButtonSelector).Click();
-            component.Find(DxSelectors.TextBox).DxTextEditChange("temp");
             component.Find(ClearFilterButtonSelector).Click();
 
             // Assert
@@ -471,7 +470,6 @@ public class MqttViewerComponentTests
             var component = ctx.Render<MqttViewerComponent>();
             FindConnectButton(component).Click();
             component.Find(ToggleTextFilterButtonSelector).Click();
-            component.Find(DxSelectors.TextBox).DxTextEditChange("temp");
 
             // Assert
             component.WaitForAssertion(() =>

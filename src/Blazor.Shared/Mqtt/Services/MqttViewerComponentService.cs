@@ -36,7 +36,7 @@ public sealed class MqttViewerComponentService
         EnsureAllTopicExists();
     }
 
-    public Task OnFilterChanged(string filter)
+    public Task OnFilterChanged(string? filter)
     {
         if (filter == TopicFilterText)
             return Task.CompletedTask;
@@ -125,25 +125,25 @@ public sealed class MqttViewerComponentService
         if (TopicGroups.Any(k => k.Topic == MqttViewerConstants.AllTopicText))
             return;
 
-        TopicGroups.Add(new()
+        TopicGroups.Add(new TopicGroup
         {
             Topic = MqttViewerConstants.AllTopicText,
         });
     }
 
-    public IEnumerable<MessageModel?> GetMessagesByTextFilter()
+    public IQueryable<MessageModel?> GetMessagesByTextFilter()
         => (!string.IsNullOrEmpty(TopicFilterText)
-            ? _mqttService.Messages.Where(m => m is not null && m.Topic.Contains(TopicFilterText, StringComparison.Ordinal))
-            : _mqttService.Messages.Where(m => m is not null)).OrderByDescending(m => m?.MessageId);
+            ? _mqttService.Messages.Where(m => m is not null && m.Topic.Contains(TopicFilterText, StringComparison.Ordinal)).AsQueryable()
+            : _mqttService.Messages.Where(m => m is not null)).OrderByDescending(m => m?.MessageId).AsQueryable();
 
-    public IEnumerable<MessageModel> GetMessagesByNodeFilter()
+    public IQueryable<MessageModel> GetMessagesByNodeFilter()
     {
         if (string.IsNullOrEmpty(NodeTopic))
-            return [];
+            return Array.Empty<MessageModel>().AsQueryable();
 
         return NodeTopic == MqttViewerConstants.AllTopicSubscription
-            ? [.. _mqttService.MessagesDict.Values]
-            : _mqttService.MessagesDict.Values.Where(v => v.Topic.StartsWith(NodeTopic + MqttViewerConstants.TopicSeparator, StringComparison.Ordinal));
+            ? _mqttService.MessagesDict.Values.AsQueryable()
+            : _mqttService.MessagesDict.Values.Where(v => v.Topic.StartsWith(NodeTopic + MqttViewerConstants.TopicSeparator, StringComparison.Ordinal)).AsQueryable();
     }
 
     public string GetMessageDetails()
@@ -244,10 +244,10 @@ public sealed class MqttViewerComponentService
 
         return Task.CompletedTask;
     }
-
-    public Task ShowMessageDetails(GridRowClickEventArgs args)
+    
+    public Task ShowMessageDetails(MessageModel model)
     {
-        _selectedMessage = (MessageModel)args.Grid.GetDataItem(args.VisibleIndex);
+        _selectedMessage = model;
         DisplayMessageDetails = true;
 
         return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;

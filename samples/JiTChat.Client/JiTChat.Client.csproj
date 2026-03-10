@@ -7,7 +7,6 @@
   
   <ItemGroup>
     <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
-    <PackageReference Include="DevExpress.Blazor" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild">
       <PrivateAssets>all</PrivateAssets>
@@ -20,6 +19,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JiTChat.Public\JiTChat.Public.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ViciOne.Suite.JiTChat.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
 
   <!-- Prevent Microsoft.NET.Sdk.Razor from copying unnecessary file -->

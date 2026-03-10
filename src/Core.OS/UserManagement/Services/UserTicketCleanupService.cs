@@ -12,16 +12,13 @@ internal sealed partial class UserTicketCleanupService(IServiceProvider serviceP
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogDebug("{Service} started with interval {Interval}", nameof(UserTicketCleanupService), _interval);
+        LogServiceStartedWithIntervalInterval(logger, nameof(UserTicketCleanupService), _interval);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                await using var scope = serviceProvider.CreateAsyncScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<IUserDbContext>();
-
-                await DeleteExpiredTicketsWork(dbContext, stoppingToken);
+                await DeleteExpiredTicketsWork(stoppingToken);
 
                 await Task.Delay(_interval, stoppingToken);
             }
@@ -31,16 +28,19 @@ internal sealed partial class UserTicketCleanupService(IServiceProvider serviceP
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Unhandled exception on deleting expired tickets.");
+                LogUnhandledExceptionOnDeletingExpiredTickets(logger, ex);
             }
         }
 
-        logger.LogDebug("{Service} is stopping.", nameof(UserTicketCleanupService));
+        LogServiceIsStopping(logger, nameof(UserTicketCleanupService));
     }
 
-    private async Task DeleteExpiredTicketsWork(IUserDbContext dbContext, CancellationToken cancellationToken)
+    internal async Task DeleteExpiredTicketsWork(CancellationToken cancellationToken)
     {
-        logger.LogDebug("Deleting expired tickets");
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IUserDbContext>();
+        
+        LogDeletingExpiredTickets(logger);
 
         foreach (var ticket in dbContext.Tickets.AsEnumerable().Where(k => DateTimeOffset.UtcNow >= k.Expires))
         {
@@ -49,4 +49,16 @@ internal sealed partial class UserTicketCleanupService(IServiceProvider serviceP
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    [LoggerMessage(LogLevel.Debug, "{Service} started with interval {Interval}")]
+    static partial void LogServiceStartedWithIntervalInterval(ILogger<UserTicketCleanupService> logger, string Service, TimeSpan Interval);
+
+    [LoggerMessage(LogLevel.Error, "Unhandled exception on deleting expired tickets.")]
+    static partial void LogUnhandledExceptionOnDeletingExpiredTickets(ILogger<UserTicketCleanupService> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Debug, "{Service} is stopping.")]
+    static partial void LogServiceIsStopping(ILogger<UserTicketCleanupService> logger, string Service);
+
+    [LoggerMessage(LogLevel.Debug, "Deleting expired tickets")]
+    static partial void LogDeletingExpiredTickets(ILogger<UserTicketCleanupService> logger);
 }

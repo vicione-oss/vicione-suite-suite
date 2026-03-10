@@ -1,7 +1,9 @@
+﻿@using DevExpress.Blazor
 @using Sdk.Authorization
 @using ViciOne.Ui.Blazor.Components.Button
 @using ViciOne.Ui.Blazor.Components.Button.Enums
-@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.Blazor.Components.ComboBox
+@using ViciOne.Ui.Blazor.Components.Toolbar.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 @using ViciOne.Ui.MonochromeIcons.Core.Extensions
 
@@ -9,52 +11,48 @@
 
 <div class="mqtt-viewer">
     <div class="mqtt-toolbar">
-        <DxToolbar ItemRenderStyleMode="ToolbarRenderStyleMode.Plain">
+        <Toolbar>
+            <ToolbarGroup>
+                <ToolbarButton Text="@GetLifetimeInfo()"
+                                 Enabled="false"/>
+            </ToolbarGroup>
 
-            <DxToolbarItem Text="@GetLifetimeInfo()"
-                           Enabled="false"
-                           Alignment="ToolbarItemAlignment.Left" />
+            <ToolbarGroup AlignRight>
+                <!-- CONNECTION -->
+                <ToolbarButton Text="@Localization.MqttViewer.BrokerConnection" Enabled="false"/>
 
-            <!-- CONNECTION -->
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
-                           BeginGroup="true"
-                           Text="@Localization.MqttViewer.BrokerConnection"
-                           Enabled="false" />
+                <ToolbarContent>
+                    <ComboBox Items="@_connections"
+                              @bind-Value="_selectedConnection"
+                              TextSelector="@(connection => connection.Name ?? connection.Id.ToString())"
+                              CssClass="connections-cbo"/>
+                </ToolbarContent>
 
-            <DxToolbarItem Alignment="ToolbarItemAlignment.Right"
-                           CssClass="loglevel-item">
-                <Template>
-                    <DxComboBox Data="@_connections"
-                                @bind-Value="@_selectedConnection"
-                                TextFieldName="@nameof(Connection.Name)"
-                                InputCssClass="connections-cbo" />
-                </Template>
-            </DxToolbarItem>
+                <ToolbarContent>
+                    <Button Title="_connectionStatusText"
+                            OnClick="@(async () => await ToggleConnection())"
+                            IconCssClass="@_connectionStatusIcon"
+                            CssClass="@("connection-button " + (_isConnected ? "connected" : string.Empty))"
+                            Enabled="@(!_isConnecting)">
+                    </Button>
+                    
+                </ToolbarContent>
+            </ToolbarGroup>
 
-            <DxToolbarItem Tooltip="@_connectionStatusText"
-                           Click="@(async () => await ToggleConnection())"
-                           IconCssClass="@_connectionStatusIcon"
-                           CssClass="@("connection-button " + (_isConnected ? "connected" : string.Empty))"
-                           Enabled="@(!_isConnecting)">
-            </DxToolbarItem>
+            <ToolbarGroup AlignRight>
+                <!-- REFRESH OPTIONS -->
+                <ToolbarButton Text="@Localization.MqttViewer.ReloadInterval" Enabled="false"/>
 
-            <!-- REFRESH OPTIONS -->
-            <DxToolbarItem Text="@Localization.MqttViewer.ReloadInterval"
-                           Alignment="ToolbarItemAlignment.Right"
-                           Enabled="false"
-                           BeginGroup="true" />
-            <DxToolbarItem>
-                <Template>
+                <ToolbarContent>
                     <div class="refresh-box">
-                        <DxComboBox Data="@_reloadIntervals"
-                                    @bind-Value="_selectedReloadInterval"
-                                    SelectedItemChanged="@((int i) => ReloadIntervalChanged(i))" />
+                        <ComboBox Items="@_reloadIntervals"
+                                  Value="_selectedReloadInterval"
+                                  ValueChanged="@((int i) => ReloadIntervalChanged(i))"/>
                         <label>ms</label>
                     </div>
-                </Template>
-            </DxToolbarItem>
-
-        </DxToolbar>
+                </ToolbarContent>
+            </ToolbarGroup>
+        </Toolbar>
     </div>
     <div class="mqtt-content">
         <div class="list">
@@ -67,9 +65,10 @@
                 <div class="headline-and-close-button">
                     <h4 class="headline">@Localization.MqttViewer.MessageDetails</h4>
 
-                    <button class="close-button" @onclick="@ViewerService.CloseMessageDetails">
-                        <MonochromeIcon Name="@MonochromeIconName.CloseMedium" Size="MonochromeIconSize.Medium" />
-                    </button>
+                    <Button IconCssClass="@MonochromeIconName.CloseMedium.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated()"
+                    		Size="ButtonSize.Medium"
+                            OnClick="@ViewerService.CloseMessageDetails">
+                    </Button>
                 </div>
 
                 <pre class="message-details">
@@ -89,6 +88,6 @@
           Show="@(!string.IsNullOrEmpty(ViewerService.ErrorMessage))"
           OnConfirm="@(() => ViewerService.ErrorMessage = string.Empty)">
     <Body>
-    <div>@ViewerService.ErrorMessage</div>
+        <div>@ViewerService.ErrorMessage</div>
     </Body>
 </OkDialog>

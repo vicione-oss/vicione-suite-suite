@@ -55,7 +55,7 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
         if (_selectedReloadInterval != DefaultReloadInterval)
             _timer.Interval = _selectedReloadInterval;
 
-        LayoutService.TitleBarAppName = Localization.MqttViewer.Title;
+        LayoutService.TitleBarAppName = MqttViewer.Title;
     }
 
     private async Task LoadConnections()
@@ -66,7 +66,7 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
         if (_connections.Count != 0)
             _selectedConnection = _connections.First();
         else
-            ViewerService.ErrorMessage = Localization.MqttViewer.NoConnections;
+            ViewerService.ErrorMessage = MqttViewer.NoConnections;
     }
 
     private async Task ToggleConnection()
@@ -110,13 +110,12 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
 
     private void ReloadIntervalChanged(int interval)
     {
+        _selectedReloadInterval = interval;
         if (interval is < MinReloadInterval or > MaxReloadInterval)
         {
-            ViewerService.ErrorMessage = Localization.MqttViewer.IntervalError;
+            ViewerService.ErrorMessage = MqttViewer.IntervalError;
             return;
         }
-
-        _selectedReloadInterval = interval;
 
         _timer.Elapsed -= OnTimerElapsed;
         _timer.Stop();
@@ -138,7 +137,7 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
             ? MqttService.ReceivedMessages / _stopwatch.Elapsed.TotalSeconds
             : 0d;
 
-        return $"{Localization.MqttViewer.MessageCounter} {MqttService.ReceivedMessages} = {messagesPerSecond:0.00} M/s Time: {_stopwatch.Elapsed.ToString("hh\\:mm\\:ss", null)}";
+        return $"{MqttViewer.MessageCounter} {MqttService.ReceivedMessages} = {messagesPerSecond:0.00} M/s Time: {_stopwatch.Elapsed.ToString("hh\\:mm\\:ss", null)}";
     }
 
     private Task OnMqttDisconnected()

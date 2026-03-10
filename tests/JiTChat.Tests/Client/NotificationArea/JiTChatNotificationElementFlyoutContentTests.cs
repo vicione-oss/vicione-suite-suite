@@ -22,7 +22,7 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
         timeProvider.LocalTimeZone.Returns(TimeZoneInfo.Utc);
 
         ctx.SetupSuiteServicesWithBlazorDx(setup =>
-            setup.Services.AddKeyedScoped(Sdk.Constants.ClientTimeProviderServiceKey, (_, __) => timeProvider));
+            setup.Services.AddKeyedScoped(Sdk.Constants.ClientTimeProviderServiceKey, (_, _) => timeProvider));
 
         if (jitChatService is null)
         {
@@ -69,13 +69,16 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
             .SetPolicies(ModulePolicyProvider.GetPolicy<JiTChatClientModule>())
             .SetClaims(new Claim(ModuleIdResolver.ResolveId<JiTChatClientModule>(), nameof(AccessLevel.Partial)));
 
+        const string testMessage = "Hello World!";
+        
         // Act
         var cut = ctx.Render<JiTChatNotificationElementFlyoutContent>();
-        var button = cut.Find(".jit-chat-input > .btn");
-        button.Click();
+        cut.Instance.MessageText = testMessage;
+        var button = cut.Find(".jit-chat-input > .jit-send-button");
+        await button.ClickAsync();
 
         // Assert
-        await jitChatServiceMock.Received(1).SendMessage("Eddy", string.Empty);
+        await jitChatServiceMock.Received(1).SendMessage("Eddy", testMessage);
     }
 
     [Fact]

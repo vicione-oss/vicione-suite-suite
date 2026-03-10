@@ -1,5 +1,9 @@
 ﻿@using Blazor.Shared.Mqtt.Contracts
-@using Blazor.Shared.Mqtt.Helpers
+@using Blazor.Shared.Mqtt.Extensions
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using ViciOne.Ui.Blazor.Components.Button
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Localization.Resources
 
 <div class="mqtt-messages mx-3">
     <div class="headline-container ms-2 mt-2">
@@ -10,49 +14,36 @@
     {
         <div class="mqtt-rel-container mqtt-filtered ms-2">
             <div class="mqtt-abs-container">
-                <DxGrid Data="@ViewerService.GetMessagesByNodeFilter()"
-                        CssClass="mqtt-grid alternating-rows"
-                        RowClick="@(arg => ViewerService.ShowMessageDetails(arg))"
-                        ShowAllRows="true"
-                        AllowSort="true">
-                    <Columns>
-                        <DxGridDataColumn AllowSort="true"
-                                          FieldName="@nameof(MessageModel.Topic)"
-                                          Caption="Topic"
-                                          Context="messageModelContext"
-                                          Width="35%">
-                            <CellDisplayTemplate>
-                                @{
-                                    var model = (MessageModel) messageModelContext.DataItem;
-                                    var topic = ViewerService.NodeTopic == MqttViewerConstants.AllTopicSubscription ?
-                                        model.Topic : model.Topic.Remove(0, ViewerService.NodeTopic.Length + 1);
-                                }
-                                <div class="grid-row-message">@topic</div>
-                            </CellDisplayTemplate>
-                        </DxGridDataColumn>
-
-                        <DxGridDataColumn AllowSort="true"
-                                          Caption="Value"
-                                          Context="messageModelContext"
-                                          FieldName="@nameof(MessageModel.Message)"
-                                          Width="35%">
-                            <CellDisplayTemplate>
-                                <div class="grid-row-message">
-                                    @(((MessageModel) messageModelContext.DataItem).Message)
-                                </div>
-                            </CellDisplayTemplate>
-                        </DxGridDataColumn>
-
-                        <DxGridDataColumn AllowSort="true"
-                                          Caption="Counter" TextAlignment="GridTextAlignment.Left"
-                                          FieldName="@nameof(MessageModel.MessageCount)" />
-
-                        <DxGridDataColumn AllowSort="true"
-                                          Caption="DateTime"
-                                          FieldName="@nameof(MessageModel.Timestamp)"
-                                          DisplayFormat="dd.MM.yyyy hh:mm:ss" />
-                    </Columns>
-                </DxGrid>
+                <Grid Items="@ViewerService.GetMessagesByNodeFilter()"
+                      CssClass="mqtt-grid alternating-rows">
+                    
+                    <ChildContent>
+                        <TemplateColumn Title="@nameof(MessageModel.Topic)"
+                                        Sortable="true">
+                            <div class="grid-row-message">@context.GetRowTopic(ViewerService)</div>
+                        </TemplateColumn>
+                        
+                        <PropertyColumn Title="@nameof(MessageModel.Message)"
+                                        Property="@(m => m.Message)"
+                                        Sortable="true" />
+                        
+                        <PropertyColumn Title="Counter"
+                                        Property="@(m => m.MessageCount)"
+                                        Align="Align.Left"
+                                        Sortable="true" />
+                        
+                        <PropertyColumn Title="@nameof(MessageModel.Timestamp)"
+                                        Property="@(m => m.Timestamp)"
+                                        Format="dd.MM.yyyy hh:mm:ss"
+                                        Sortable="true" />
+                        
+                        <TemplateColumn Title="@CommonVocabulary.Action">
+                            <Button Title="Details" CssClass="details-btn"
+                                    OnClick="@(async () => await ViewerService.ShowMessageDetails(context))">
+                            </Button>
+                        </TemplateColumn>
+                    </ChildContent>
+                </Grid>
             </div>
         </div>
     }
@@ -60,34 +51,28 @@
     {
         <div class="mqtt-rel-container mqtt-all">
             <div class="mqtt-abs-container">
-                <DxGrid Data="@ViewerService.GetMessagesByTextFilter()"
-                        CssClass="mqtt-grid alternating-rows"
-                        RowClick="@(async arg => await ViewerService.ShowMessageDetails(arg))"
-                        ShowAllRows="true"
-                        AllowSort="false">
-                    <Columns>
-                        <DxGridDataColumn>
-                            <CellDisplayTemplate>
-                                @{ var model = (MessageModel) context.DataItem; }
-                                <div class="@(context.VisibleIndex % 2 == 0 ? "mqtt-row" : "mqtt-row-alt")">
-                                    <!-- first row -->
-                                    <div class="mqtt-row-message">@("Topic: " + model.Topic)</div>
-                                    <div class="mqtt-row-cell">
-                                        @if (model.Retained)
-                                        {
-                                            <div class="me-4">Retained</div>
-                                        }
-                                        <div class="me-4">@(model.Timestamp.ToString("dd.MM.yyyy hh:mm:ss"))</div>
-                                        <div>@("QoS: " + Convert.ToInt32(model.Qos))</div>
-                                    </div>
-                                    <!-- second row -->
-                                    <div class="grid-row-message me-4">@(model.Message)</div>
-                                    <div>@(model.MessageId)</div>
+                <Grid Items="@ViewerService.GetMessagesByTextFilter()" CssClass="mqtt-grid alternating-rows">
+                    <ChildContent>
+                        <TemplateColumn Title="@CommonVocabulary.Action">
+                            @* <div class="@( VisibleIndex % 2 == 0 ? "mqtt-row" : "mqtt-row-alt")"> *@
+                            <div class="mqtt-row">
+                                <!-- first row -->
+                                <div class="mqtt-row-message">@("Topic: " + context?.Topic)</div>
+                                <div class="mqtt-row-cell">
+                                    @if (context?.Retained == true)
+                                    {
+                                        <div class="me-4">Retained</div>
+                                    }
+                                    <div class="me-4">@(context?.Timestamp.ToString("dd.MM.yyyy hh:mm:ss"))</div>
+                                    <div>@("QoS: " + Convert.ToInt32(context?.Qos))</div>
                                 </div>
-                            </CellDisplayTemplate>
-                        </DxGridDataColumn>
-                    </Columns>
-                </DxGrid>
+                                <!-- second row -->
+                                <div class="grid-row-message me-4">@(context?.Message)</div>
+                                <div>@(context?.MessageId)</div>
+                            </div>
+                        </TemplateColumn>
+                    </ChildContent>
+                </Grid>
             </div>
         </div>
     }

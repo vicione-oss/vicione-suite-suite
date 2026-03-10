@@ -4,6 +4,7 @@ using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Entities;
 using Core.OS.UserManagement.Services;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -49,21 +50,11 @@ public class UserTicketCleanupServiceTests
 
         var sut = services.GetRequiredService<UserTicketCleanupService>();
 
-        using var cts = new CancellationTokenSource();
-
         // Act
-        await sut.StartAsync(cts.Token);
-        try
-        {
-            await Task.Delay(200, TestContext.Current.CancellationToken);
-        }
-        finally
-        {
-            await sut.StopAsync(TestContext.Current.CancellationToken);
-        }
+        await sut.DeleteExpiredTicketsWork(TestContext.Current.CancellationToken);
 
         // Assert
-        dbContext.Tickets.SingleOrDefault(k => k.Id == t1.Id).Should().BeNull(); // flaky test when testing locally
-        dbContext.Tickets.SingleOrDefault(k => k.Id == t2.Id).Should().NotBeNull();
+        (await dbContext.Tickets.SingleOrDefaultAsync(k => k.Id == t1.Id, TestContext.Current.CancellationToken)).Should().BeNull();
+        (await dbContext.Tickets.SingleOrDefaultAsync(k => k.Id == t2.Id, TestContext.Current.CancellationToken)).Should().NotBeNull();
     }
 }
