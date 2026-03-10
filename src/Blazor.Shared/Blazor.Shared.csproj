@@ -812,13 +812,14 @@
       <MonochromeIcon Include="bug-light" Size="24" />
       <MonochromeIcon Include="check" Size="16;24" />
       <MonochromeIcon Include="chevron" Size="16" />
-      <MonochromeIcon Include="close-medium" Size="16;32" />
+      <MonochromeIcon Include="close-medium" Size="16;24;32" />
       <MonochromeIcon Include="cluster-1" Size="32" />
       <MonochromeIcon Include="connectivity" Size="24;32" />
       <MonochromeIcon Include="dataflow-solid" Size="32" />
       <MonochromeIcon Include="duplicate" Size="16" />
       <MonochromeIcon Include="edit" Size="16;24" />
       <MonochromeIcon Include="edit-host" Size="32" />
+      <MonochromeIcon Include="email" Size="24" />
       <MonochromeIcon Include="error-full" Size="24" />
       <MonochromeIcon Include="exit" Size="16;32" />
       <MonochromeIcon Include="expander-light-left" Size="48" />

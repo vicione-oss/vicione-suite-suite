@@ -4,6 +4,8 @@ using Burger.Client;
 using Burger.Client.Pages;
 using Burger.Client.Services;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using Sdk.Client.Services;
 using Sdk.Testing.Client;
 using Xunit;
 
@@ -16,11 +18,12 @@ public sealed class BurgerPageTests
     {
         // Arrange
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx(setup =>
+        ctx.SetupBlazorUiComponents(setup =>
         {
             setup.Services.AddLocalization<BurgerClientModule>();
+            setup.Services.AddSingleton<OrderBurgerService>();
+            setup.Services.AddSingleton(Substitute.For<IJsInterop>());
         });
-        ctx.Services.AddSingleton<OrderBurgerService>();
 
         // Act
         var sut = ctx.Render<BurgerPage>();

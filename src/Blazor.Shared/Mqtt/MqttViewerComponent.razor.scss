@@ -84,6 +84,13 @@
             grid-area: filter;
         }
 
+        ::deep .headline-container {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
         /* these two make dxgrid using the correct space */
         ::deep .mqtt-rel-container {
             position: relative;

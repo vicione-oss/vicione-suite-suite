@@ -11,7 +11,7 @@ public static class BunitJSInteropExtensions
         /// Possible workaround for bUnit integration with DevExpress Blazor controls provided at
         /// https://supportcenter.devexpress.com/ticket/details/t1056787/devexpress-and-bunit-support
         /// </summary>
-        public BunitJSInterop ConfigureJSInterop()
+        public BunitJSInterop ConfigureJSInteropForDx()
         {
             interop.Mode = JSRuntimeMode.Loose;
 
@@ -21,6 +21,20 @@ public static class BunitJSInteropExtensions
 
             return interop;
         }
+        /// <summary>
+        /// Possible workaround for bUnit integration with DevExpress Blazor controls provided at
+        /// https://supportcenter.devexpress.com/ticket/details/t1056787/devexpress-and-bunit-support
+        /// </summary>
+        public BunitJSInterop ConfigureJSInteropForResizeObserver()
+        {
+            interop.Mode = JSRuntimeMode.Loose;
+
+            var rootModule = interop.SetupModule("./_content/ViciOne.Ui.Blazor.Components/resizing/resize-observer.js");
+            rootModule.Mode = JSRuntimeMode.Loose;
+
+            return interop;
+        }
+        
 
         /// <summary>
         /// Possible workaround for bUnit integration with DevExpress Blazor controls provided at

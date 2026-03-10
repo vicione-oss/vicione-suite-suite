@@ -1,6 +1,7 @@
 ﻿@using Public.Contracts
 @using Microsoft.AspNetCore.Components.Authorization
-@using System.Globalization
+@using ViciOne.Ui.Blazor.Components.TextBox
+@using ViciOne.Ui.Blazor.Components.Button
 @using ViciOne.Ui.Localization.Extensions
 
 @inherits ComponentBase
@@ -31,18 +32,15 @@
                 }
             </div>
 
-            <EditForm Context="editFormContext"
-                      EditContext="_editContext"
-                      OnValidSubmit="@(async () => await SubmitMessage())" >
+            <div class="jit-chat-input">
+                <TextBox CssClass="jit-chat-text-input"
+                         @bind-Value="@MessageText"
+                         EnterPressed="@MessageTextEnterPressed"/>
 
-                <div class="jit-chat-input">
-                    <DxTextBox @bind-Text="MessageText" class="jit-chat-text-input"/>
-
-                    <button class="btn btn-success mdi mdi-send"
-                            type="submit">
-                    </button>
-                </div>
-            </EditForm>
+                <Button CssClass="jit-send-button mdi mdi-send"
+                        Title="Submit"
+                        OnClick="@SubmitButtonPressed" />
+            </div>
         </Authorized>
         <NotAuthorized>
             You are not supposed to be here!

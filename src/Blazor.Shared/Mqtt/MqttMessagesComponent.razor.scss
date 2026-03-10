@@ -17,10 +17,6 @@
     }
 
     .mqtt-all {
-        ::deep .dxbl-grid .dxbl-grid-table > tbody > tr > td:not(.dxbl-grid-expand-button-cell):first-of-type {
-            padding-left: 0 !important;
-        }
-
         ::deep .mqtt-grid {
             overflow: auto;
             height: 100%;

@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Client.NotificationArea.Extensions;
 using Sdk.Client.Services;
 using ViciOne.Ui.Blazor.Components.SectionRail.Extensions;
+using ViciOne.Ui.Blazor.Components.Toolbar.Extensions;
 using ViciOne.Ui.Blazor.Components.Tooltip.Extensions;
 using ViciOne.Ui.Shared.Dx.Components.Scrolling.Extensions;
 
@@ -78,6 +79,7 @@ public static class IServiceCollectionExtensions
                 .AddNotificationArea()
                 .AddScoped<ISuiteControlService, SuiteControlService>()
                 .AddScrolling()
+                .AddToolbar()
                 .AddSingleton<CopyrightYearProvider>();
 
             return services;

@@ -11,8 +11,8 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
-    <PackageReference Include="DevExpress.Blazor" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
+    <PackageReference Include="ViciOne.Ui.Blazor.Components" />
     <PackageReference Include="ViciOne.Suite.Sdk.Client" />
     <PackageReference Include="ViciOne.Ui.Design" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>

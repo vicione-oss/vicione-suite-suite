@@ -1,5 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.JiTChat.Tests</AssemblyName>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AutoFixture" />
   </ItemGroup>

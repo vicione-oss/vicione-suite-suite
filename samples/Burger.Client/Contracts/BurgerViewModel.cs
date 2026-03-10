@@ -1,4 +1,4 @@
-﻿using Burger.Public.Contracts;
+using Burger.Public.Contracts;
 
 namespace Burger.Client.Contracts;
 
@@ -16,6 +16,7 @@ public sealed class BurgerViewModel
     public SuiteBurger ToSuiteBurger() => new()
     {
         BurgerId = Guid.NewGuid(),
+        Lettuce = Lettuce,
         Cheese = Cheese,
         Pickle = Pickle,
         Onion = Onion,

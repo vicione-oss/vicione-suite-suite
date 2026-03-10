@@ -15,7 +15,6 @@ Welcome to the readme of ViciOne Suite. Questions and suggestions for improvemen
 * [Configuration](#configuration)
     * [MessageBus](#messagebus)
     * [MQTT](#mqtt)
-        * [Use internal broker](#use-internal-broker)
         * [Predefine MQTT-Websocket-Client connection](#predefine-mqtt-websocket-client-connection)
         * [Connection details for Backend-Services](#connection-details-for-backend-services)
     * [Modules](./docs/modules.md)
@@ -27,11 +26,10 @@ Welcome to the readme of ViciOne Suite. Questions and suggestions for improvemen
     * [Tools](#tools)
         * [Postgres](#postgres)
         * [RabbitMQ](#rabbitmq)
-        * [ttys](#ttys)
+        * [ttyd](#ttyd)
         * [Access to DigitalOcean Review Deployments](#access-to-digitalocean-review-deployments)
 * [Further information](#further-information)
     * [Database migration](#database-migration)
-    * [Blazor Debuggig](#blazor-debugging)
     * [Update ViciOne.Ui.Shared.DX | .NET-Framework](#update-vicioneuishareddx--net-framework)
 
 ## Changelog
@@ -89,7 +87,7 @@ dotnet user-secrets set "ArtifactRepository:Sources:1:Password" "<password>"
 All npm packages need to be installed before starting the application.
 
 To install the npm packages you have to:
-1. Open a powershell and move into the `.../suite` directory (or run it from there)
+1. Open a PowerShell and move into the `.../suite` directory (or run it from there)
 1. Run the command `npm install`
 1. Run the command `npm run build`
 
@@ -97,11 +95,15 @@ The installation should now run automatically.
 
 > Note: After executing commands such as git clean, this step likely needs to be repeated.
 
+### Dotnet Build
+
+Now with all prerequisites fulfilled, build the **entire solution** using your IDE or by executing `dotnet build` in the `.../suite`-directory.
+
 ## Getting started
-After cloning the ViciOne Suite repo and fulfilling the above mentioned prerequisites, you are now ready to launch the application.
+After cloning the ViciOne Suite repo and fulfilling the above-mentioned prerequisites, you are now ready to launch the application.
 
 To do so:
-1. Open the [solution](/vicione-suite.sln) with Visual Studio/Rider/VS Code
+1. Open the [solution](./vicione-suite.slnx) with Visual Studio/Rider/VS Code
 1. Make sure the `startup-project` is set to **Core.OS**
 1. Choose your preferred `instance mode`:
    1. **Standalone-Ui:** will start a standalone instance (**Recommended**)
@@ -110,7 +112,7 @@ To do so:
    1. **Slave-Ui-2:** will start a slave instance
 1. Start debugging (The first start might take a minute)
 1. Open a browser and go to the URL https://localhost:XXXX*
-1. Login using one of the below mentioned [ViciOne Suite Accounts](#vicione-suite-accounts)
+1. Login using one of the below-mentioned [ViciOne Suite Accounts](#vicione-suite-accounts)
 
 >\*Note: The port depends on chosen instance mode. For example, standalone listens on Port 5001. If you are unsure, check the console for an information like *"Now listening on: https://localhost:XXXX"*
 
@@ -132,7 +134,7 @@ All settings of the application can be adjusted in the `/src/Core.OS/appsettings
 For easy development, by default all necessary parts of the suite run in memory. Further information is found below. 
 
 
-### MessageBus 
+### MessageBus
 The MessageBus utilizes RabbitMQ for communication between Suite-Instances. During development, communication is performed *in-memory* by setting `MessageBus:UseInMemoryBus:true` in the `appsettings.json`-file. 
 
 ```json
