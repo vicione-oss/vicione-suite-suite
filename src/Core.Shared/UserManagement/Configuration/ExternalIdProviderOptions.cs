@@ -19,5 +19,5 @@ public record ExternalIdProvider
 
     [Required] public required string ClientId { get; init; }
 
-    [Required] public required string ClientSecret { get; init; }
+    public required string? ClientSecret { get; init; }
 }

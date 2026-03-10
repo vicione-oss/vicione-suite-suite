@@ -166,6 +166,7 @@ internal static class IServiceCollectionExtensions
                     connectOptions.Authority = externalIdProvider.Authority;
                     connectOptions.ClientId = externalIdProvider.ClientId;
                     connectOptions.ClientSecret = externalIdProvider.ClientSecret;
+                    connectOptions.UsePkce = true;
 
                     connectOptions.ResponseType = OpenIdConnectResponseType.Code;
                     connectOptions.SaveTokens = true;
