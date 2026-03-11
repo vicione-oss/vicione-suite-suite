@@ -1,11 +1,16 @@
-﻿using Blazor.Server.Backend.Services;
+using Blazor.Server.Backend.Services;
 using Blazor.Shared;
+using Blazor.Shared.Components;
 using Blazor.Shared.Connections.Components;
 using Blazor.Shared.Connections.Validators;
 using Blazor.Shared.Extensions;
 using Blazor.Shared.Module.Services;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Authorization;
@@ -21,20 +26,23 @@ internal static class IServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddServerHttpClient()
+        public IServiceCollection AddLocalHttpClient()
         {
-            // Server Side Blazor doesn't register HttpClient by default
-            // Thanks to Robin Sue - Suchiman https://github.com/Suchiman/BlazorDualMode
-
-            // Setup HttpClient for server side in a client side compatible fashion
-            services.TryAddScoped(s =>
+            // https://learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
+            services.AddHttpClient<ILocalHttpClient, LocalHttpClient>((provider, client) =>
             {
-                // Creating the URI helper needs to wait until the JS Runtime is initialized, so defer it.
-                var uriHelper = s.GetRequiredService<NavigationManager>();
-                return new HttpClient
+                // AddressFeature is set once when kestrel is running. Before it is running, it is empty.
+                // So we need to wait until kestrel is running to get the address.
+                var server = provider.GetRequiredService<IServer>();
+                var addressFeature = server.Features.Get<IServerAddressesFeature>();
+                var baseAddress = addressFeature?.Addresses.FirstOrDefault(k => k.StartsWith("https", StringComparison.OrdinalIgnoreCase))
+                    ?? addressFeature?.Addresses.FirstOrDefault(k => k.StartsWith("http", StringComparison.OrdinalIgnoreCase));
+                if (baseAddress is null)
                 {
-                    BaseAddress = new Uri(uriHelper.BaseUri)
-                };
+                    throw new InvalidOperationException("Kestrel server is not yet running or no addresses are configured.");
+                }
+
+                client.BaseAddress = new Uri(baseAddress);
             });
 
             return services;
