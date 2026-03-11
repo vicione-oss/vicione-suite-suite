@@ -76,8 +76,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddTransient(typeof(IUiEventPublisher<>), typeof(UiEventPublisher<>));
         services.AddTransient(typeof(IUiEventSubscriptionHolder<>), typeof(UiEventPublisher<>));
         services.AddSingleton(typeof(IUiEventSubscriptionRegistry<>), typeof(UiEventSubscriptionRegistry<>));
-        services.AddServerHttpClient();
-
+        services.AddLocalHttpClient();
         services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();
     }
 

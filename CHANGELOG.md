@@ -10,6 +10,7 @@
 
 - `Microsoft.AspNetCore.Authentication.OpenIdConnect` package
 - A Button to download Journal entries as text was added to `JournalListView`
+- Add implementation of typed `ILocalHttpClient` to access local services with proper base address
 
 ### Changed
 
@@ -43,7 +44,7 @@
 - `Serilog.AspNetCore` packages, update to version `10.0.0`
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2368079379`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2372428108`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.5.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.3.0`
