@@ -6,8 +6,8 @@
     <HostManagementVersion>1.2.0</HostManagementVersion>
     <OpenTelemetryVersion>1.15.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.8</MassTransitVersion>
-    <ViciOneUiMonochromeIconsVersion>4.3.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>2.0.0-ci2377740620</ViciOneSuiteSdkVersion>
+    <ViciOneUiMonochromeIconsVersion>4.4.0</ViciOneUiMonochromeIconsVersion>
+    <ViciOneSuiteSdkVersion>2.0.0-ci2383089014</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
