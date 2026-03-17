@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Net;
@@ -8,7 +8,6 @@ using Core.Module.JFrog;
 using Core.Module.Options;
 using Core.Tests.Tools;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Testing;
@@ -360,10 +359,10 @@ public class JFrogArtifactQueryApiTests
         fs ??= Substitute.For<IFileSystem>();
         opts ??= SystemTestSettings.ArtifactApiOptions;
 
-        var options = Substitute.For<IOptions<ArtifactRepositoryOptions>>();
-        options.Value.Returns(opts);
+        var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
+        optionsProvider.GetOptions().Returns(opts);
 
-        return new JFrogArtifactRepository(fs, httpClientFactory, options, Substitute.For<ILogger<JFrogArtifactRepository>>());
+        return new JFrogArtifactRepository(fs, httpClientFactory, optionsProvider, Substitute.For<ILogger<JFrogArtifactRepository>>());
     }
 
     /// <summary>

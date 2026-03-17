@@ -1,4 +1,4 @@
-﻿using Sdk.Modules;
+using Sdk.Modules;
 
 namespace Core.OS.Modules;
 
@@ -13,4 +13,11 @@ public interface IModuleArtifactCache
     /// otherwise, it retrieves fresh metadata from the module repository.
     /// </summary>    
     Task<List<ModuleMetadata>> GetAvailableModuleMetadata(Version? sdkVersion = null, bool forceRefresh = false, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Invalidate the cache so next call to <see cref="GetAvailableModuleMetadata"/> will fetch fresh metadata from the module repository. 
+    /// This can be used to proactively refresh the cache when changes to repositories are made, 
+    /// instead of waiting for the automatic invalidation to occur.
+    /// </summary>
+    void Invalidate();
 }

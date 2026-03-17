@@ -1,9 +1,9 @@
-﻿namespace Core.Module.Options;
+namespace Core.Module.Options;
 
 /// <summary>
 /// Represents a single artifact repository source configuration.
 /// </summary>
-public class ArtifactRepositorySource
+public class ArtifactRepositorySourceOption
 {
     /// <summary>
     /// Gets or sets the base URI of the artifact repository endpoint.
@@ -20,5 +20,11 @@ public class ArtifactRepositorySource
     /// Gets or sets the password or token used for authenticating with the repository, if required.
     /// </summary>
     public string? Password { get; set; }
+
+    /// <summary>
+    /// Gets or sets a URI for obtaining an authentication token. 
+    /// Is <see langword="null"/> when the <see cref="Password"/> is used directly for authentication.
+    /// </summary>
+    public string? TokenEndpoint { get; set; }
 }
 

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Text.Json;
 using Core.Module;
 using Core.Module.Contracts;
@@ -25,7 +25,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
     private bool _buildDependencyContext;
     private SuiteDependencyContext? _suiteContext;
     private ModulePackageManifest? _manifest;
-    private ArtifactRepositoryOptions? _apiOptions;
+    private IArtifactRepositoryOptionsProvider? _apiOptionsProvider;
     private IConfigurationManager? _configurationManager;
     private IServiceCollection? _services;
     private ModuleOptionsStore? _moduleOptionsStore;
@@ -57,10 +57,10 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
     /// <summary>
     /// Resolve module packages marked by 'latest', download if necessary and delete orphaned ones
     /// </summary>    
-    internal ModuleHostBuilder WithSynchronization(ModulePackageManifest manifest, ArtifactRepositoryOptions apiOptions)
+    internal ModuleHostBuilder WithSynchronization(ModulePackageManifest manifest, IArtifactRepositoryOptionsProvider apiOptionsProvider)
     {
         _manifest = manifest;
-        _apiOptions = apiOptions;
+        _apiOptionsProvider = apiOptionsProvider;
         return this;
     }
 
@@ -149,7 +149,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
     private async Task SynchronizeModules(CancellationToken cancellationToken)
     {
-        if (_manifest is null || _apiOptions == null)
+        if (_manifest is null || _apiOptionsProvider == null)
             return;
 
         // get versions of loaded debug modules
@@ -164,7 +164,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         var packages = _manifest.GetValidModulePackages([.. moduleIds], debugModuleVersions, Log.Logger);
 
         using var synchronizer = new ModuleSynchronizer(fileSystem)
-            .WithApiAdapter(_apiOptions)
+            .WithApiAdapter(_apiOptionsProvider)
             .WithPackages(packages)
             .WithModulesPath(_loaderOptions)
             .WithPackageSdkValidation()

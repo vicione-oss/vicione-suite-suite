@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Compression;
 using System.Net.Http.Json;
 using System.Net.Mime;
@@ -8,32 +8,18 @@ using Core.Module.Contracts;
 using Core.Module.Extensions;
 using Core.Module.Options;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Sdk.Backend.Artifacts;
 
 namespace Core.Module.JFrog;
 
 /// <inheritdoc />
-public sealed partial class JFrogArtifactRepository : IArtifactRepository
+public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
+    IHttpClientFactory httpClientFactory,
+    IArtifactRepositoryOptionsProvider optionsProvider,
+    ILogger<JFrogArtifactRepository> logger) : IArtifactRepository
 {
     public const char UriSeparator = '/';
     private const string AqlApiPart = "api/search/aql";
-    private readonly List<ApiSourceConfig> _sources;
-
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IFileSystem _fileSystem;
-    private readonly ArtifactRepositoryOptions _apiOptions;
-    private readonly ILogger<JFrogArtifactRepository> _logger;
-
-    public JFrogArtifactRepository(IFileSystem fileSystem, IHttpClientFactory httpClientFactory, IOptions<ArtifactRepositoryOptions> apiOptions, ILogger<JFrogArtifactRepository> logger)
-    {
-        _fileSystem = fileSystem;
-        _httpClientFactory = httpClientFactory;
-        _apiOptions = apiOptions.Value;
-        _logger = logger;
-
-        _sources = [.. CreateSourceConfigurations(_apiOptions)];
-    }
 
     /// <inheritdoc />
     public IArtifactQueryBuilder CreateQueryBuilder()
@@ -45,7 +31,7 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
         var sourceUri = GetDownloadUri(artifact);
         var client = CreateSourceClient(artifact.SourceKey);
 
-        LogDownloadingArtifactToStream(_logger, sourceUri);
+        LogDownloadingArtifactToStream(logger, sourceUri);
 
         return client.GetStreamAsync(sourceUri, cancellationToken);
     }
@@ -56,10 +42,10 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
         var sourceUri = GetDownloadUri(artifact);
         var client = CreateSourceClient(artifact.SourceKey);
 
-        LogDownloadingArtifact(_logger, sourceUri, targetFilePath);
+        LogDownloadingArtifact(logger, sourceUri, targetFilePath);
 
         await using var httpStream = await client.GetStreamAsync(sourceUri, cancellationToken);
-        await using var fs = _fileSystem.FileStream.New(targetFilePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+        await using var fs = fileSystem.FileStream.New(targetFilePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
 
         await httpStream.CopyToAsync(fs, cancellationToken);
     }
@@ -67,13 +53,13 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
     /// <inheritdoc />
     public async Task DownloadAndExtract(IArtifact artifact, string targetFolderPath, CancellationToken cancellationToken)
     {
-        if (!_fileSystem.Directory.Exists(targetFolderPath))
-            _fileSystem.Directory.CreateDirectory(targetFolderPath);
+        if (!fileSystem.Directory.Exists(targetFolderPath))
+            fileSystem.Directory.CreateDirectory(targetFolderPath);
 
         var sourceUri = GetDownloadUri(artifact);
         var client = CreateSourceClient(artifact.SourceKey);
 
-        LogDownloadingArtifactToPatch(_logger, sourceUri, targetFolderPath);
+        LogDownloadingArtifactToPatch(logger, sourceUri, targetFolderPath);
 
         await using var httpStream = await client.GetStreamAsync(sourceUri, cancellationToken);
         await using var ms = new MemoryStream();
@@ -85,13 +71,13 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
         {
             if (archiveEntry.FullName.EndsWith('/'))
             {
-                var entryFolderPath = _fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
-                _fileSystem.Directory.CreateDirectory(entryFolderPath);
+                var entryFolderPath = fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
+                fileSystem.Directory.CreateDirectory(entryFolderPath);
                 continue;
             }
 
-            var entryFilePath = _fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
-            archiveEntry.ExtractToFile(entryFilePath, true);
+            var entryFilePath = fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
+            await archiveEntry.ExtractToFileAsync(entryFilePath, true, cancellationToken);
         }
     }
 
@@ -99,7 +85,8 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
     public async Task<IArtifactQueryResult> Query(string aqlQuery, CancellationToken cancellationToken = default)
     {
         var completeResult = new ArtifactQueryResult();
-        var queryTasks = _sources.Select(source => TryQuerySourceArtifactResult(source, aqlQuery, cancellationToken));
+        var sources = CreateSourceConfigurations();
+        var queryTasks = sources.Select(source => TryQuerySourceArtifactResult(source, aqlQuery, cancellationToken));
         var queryResults = await Task.WhenAll(queryTasks);
 
         foreach (var queryResult in queryResults)
@@ -139,7 +126,7 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
             var repositoryQuery = JFrogArtifactQueryBuilder.InjectRepository(aqlQuery, source.RepositoryKey);
             var client = CreateSourceClient(source);
 
-            LogPostArtifactQuery(_logger, repositoryQuery);
+            LogPostArtifactQuery(logger, repositoryQuery);
 
             using var request = new HttpRequestMessage(HttpMethod.Post, AqlApiPart); // Relative path
             request.Content = new StringContent(repositoryQuery, Encoding.UTF8, MediaTypeNames.Text.Plain); // AQL is sent as plain text
@@ -160,14 +147,15 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
         }
         catch (Exception ex)
         {
-            LogFailedToQueryArtifacts(_logger, ex, source.RepositoryKey, source.SourceKey);
+            LogFailedToQueryArtifacts(logger, ex, source.RepositoryKey, source.SourceKey);
             return new JFrogQueryResult { Error = ex };
         }
     }
 
     public async Task<List<string>> QueryRaw(string aqlQuery, CancellationToken cancellationToken = default)
     {
-        var queryTasks = _sources.Select(source => TryQuerySourceRaw(source, aqlQuery, cancellationToken));
+        var sources = CreateSourceConfigurations();
+        var queryTasks = sources.Select(source => TryQuerySourceRaw(source, aqlQuery, cancellationToken));
         var queryResults = await Task.WhenAll(queryTasks);
 
         return [.. queryResults.Where(k => !string.IsNullOrEmpty(k)).Select(k => k!)];
@@ -180,7 +168,7 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
             var repositoryQuery = JFrogArtifactQueryBuilder.InjectRepository(aqlQuery, source.RepositoryKey);
             var client = CreateSourceClient(source);
 
-            LogPostRawArtifactQuery(_logger, repositoryQuery);
+            LogPostRawArtifactQuery(logger, repositoryQuery);
 
             using var request = new HttpRequestMessage(HttpMethod.Post, AqlApiPart); // Relative path
             request.Content = new StringContent(repositoryQuery, Encoding.UTF8, MediaTypeNames.Text.Plain); // AQL is sent as plain text
@@ -192,7 +180,7 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
         }
         catch (Exception ex)
         {
-            LogFailedToQueryRawData(_logger, ex, source.RepositoryKey, source.SourceKey);
+            LogFailedToQueryRawData(logger, ex, source.RepositoryKey, source.SourceKey);
             return null;
         }
     }
@@ -243,9 +231,10 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
     private ApiSourceConfig GetSourceConfig(string? sourceKey)
     {
         // If we have only one source and source key is empty we take the available one
-        var sourceConfig = string.IsNullOrEmpty(sourceKey) || _sources.Count == 1
-            ? _sources.First()
-            : _sources.FirstOrDefault(k => k.SourceKey == sourceKey);
+        var sources = CreateSourceConfigurations();
+        var sourceConfig = string.IsNullOrEmpty(sourceKey) || sources.Count == 1
+            ? sources.First()
+            : sources.FirstOrDefault(k => k.SourceKey == sourceKey);
 
         return sourceConfig ?? throw new InvalidOperationException($"Artifact source '{sourceKey}' not available!");
     }
@@ -263,7 +252,7 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
     /// <param name="sourceConfig"></param>    
     private HttpClient CreateSourceClient(ApiSourceConfig sourceConfig)
     {
-        var client = _httpClientFactory.CreateClient(sourceConfig.RepositoryKey);
+        var client = httpClientFactory.CreateClient(sourceConfig.RepositoryKey);
         client.BaseAddress ??= sourceConfig.BaseAddress;
 
         if (client.DefaultRequestHeaders.Authorization is null)
@@ -272,31 +261,32 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
         return client;
     }
 
-    private IEnumerable<ApiSourceConfig> CreateSourceConfigurations(ArtifactRepositoryOptions options)
+    private List<ApiSourceConfig> CreateSourceConfigurations()
     {
+        var options = optionsProvider.GetOptions();
+        var list = new List<ApiSourceConfig>();
+
         foreach (var source in options.Sources)
         {
-            ApiSourceConfig? config = null;
-
             try
             {
-                config = new ApiSourceConfig(source);
+                var config = new ApiSourceConfig(source);
+                list.Add(config);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create source configuration for endpoint='{Source}'", source.Endpoint);
+                logger.LogError(ex, "Failed to create source configuration for endpoint='{Source}'", source.Endpoint);
             }
-
-            if (config != null)
-                yield return config;
         }
+
+        return list;
     }
 
-    public IEnumerable<string> GetSourceKeys() => _sources.Select(k => k.SourceKey);
+    public IEnumerable<string> GetSourceKeys() => CreateSourceConfigurations().Select(k => k.SourceKey);
 
     private class ApiSourceConfig
     {
-        public ArtifactRepositorySource ApiSource { get; }
+        public ArtifactRepositorySourceOption ApiSource { get; }
 
         public string SourceKey { get; }
 
@@ -304,7 +294,7 @@ public sealed partial class JFrogArtifactRepository : IArtifactRepository
 
         public Uri BaseAddress { get; }
 
-        public ApiSourceConfig(ArtifactRepositorySource apiSource)
+        public ApiSourceConfig(ArtifactRepositorySourceOption apiSource)
         {
             ApiSource = apiSource;
 

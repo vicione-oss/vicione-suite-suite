@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Services;
+using Blazor.Shared.Services;
 using Blazor.Shared.Settings.Services;
 using Blazor.Tests.Tools;
 using Bunit;
@@ -20,7 +20,7 @@ internal static class TestContextExtensions
 
             return ctx;
         }
-        
+
         private void SetupInternal()
         {
             ctx.Services.AddTransient<SettingsModuleService>();

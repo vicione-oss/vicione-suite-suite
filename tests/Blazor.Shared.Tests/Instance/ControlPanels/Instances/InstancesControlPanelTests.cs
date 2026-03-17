@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Instances;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Instance.Extensions;
@@ -20,7 +20,7 @@ using Xunit;
 using InstanceControlPanel = Blazor.Shared.Instance.ControlPanels.Instances.InstanceControlPanel;
 using TestContext = Xunit.TestContext;
 
-namespace Blazor.Shared.Tests.Instance.ControlPanels;
+namespace Blazor.Shared.Tests.Instance.ControlPanels.Instances;
 
 public class InstancesControlPanelTests
 {

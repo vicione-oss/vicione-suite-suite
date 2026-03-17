@@ -1,10 +1,9 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.Module;
 using Core.Module.JFrog;
 using Core.Module.Options;
 using Core.Module.Utils;
 using Core.OS.Modules.Extensions;
-using Microsoft.Extensions.Options;
 using Sdk.Modules;
 using Semver;
 
@@ -12,7 +11,7 @@ namespace Core.OS.Modules.Services;
 
 internal sealed partial class ModuleSynchronizer : IDisposable
 {
-    private ArtifactRepositoryOptions? _apiOptions;
+    private IArtifactRepositoryOptionsProvider? _apiOptionsProvider;
     private IModuleArtifactRepository? _apiAdapter;
     private ModuleLoaderOptions? _loaderOptions;
     private bool _validatePackages;
@@ -57,9 +56,9 @@ internal sealed partial class ModuleSynchronizer : IDisposable
         return this;
     }
 
-    public ModuleSynchronizer WithApiAdapter(ArtifactRepositoryOptions apiOptions)
+    public ModuleSynchronizer WithApiAdapter(IArtifactRepositoryOptionsProvider apiOptionsProvider)
     {
-        _apiOptions = apiOptions;
+        _apiOptionsProvider = apiOptionsProvider;
         return this;
     }
 
@@ -120,24 +119,23 @@ internal sealed partial class ModuleSynchronizer : IDisposable
 
     private IModuleArtifactRepository GetModuleRepository()
     {
-        if (_apiAdapter is null && _apiOptions is null)
+        if (_apiAdapter is null && _apiOptionsProvider is null)
             throw new InvalidOperationException($"Use one of the {nameof(WithApiAdapter)} methods to configure a valid module API.");
 
-        if (_apiAdapter is not null && _apiOptions is not null)
+        if (_apiAdapter is not null && _apiOptionsProvider is not null)
             throw new InvalidOperationException($"Use only one of the {nameof(WithApiAdapter)} methods to configure a valid module API.");
 
         if (_apiAdapter is not null)
             return _apiAdapter;
 
-        if (_apiOptions is null)
+        if (_apiOptionsProvider is null)
             throw new InvalidOperationException($"Use '{nameof(WithApiAdapter)}' method to setup the module API.");
 
-        var options = Options.Create(_apiOptions);
         _loggerFactory = new LoggerFactory();
         var logger = _loggerFactory.CreateLogger<JFrogArtifactRepository>();
 
         _httpClientFactory = new LowHttpFactory();
-        var artifactory = new JFrogArtifactRepository(fileSystem, _httpClientFactory, options, logger);
+        var artifactory = new JFrogArtifactRepository(fileSystem, _httpClientFactory, _apiOptionsProvider, logger);
 
         return new ModuleArtifactRepository(artifactory, fileSystem);
     }

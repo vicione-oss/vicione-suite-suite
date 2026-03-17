@@ -1,4 +1,4 @@
-﻿namespace Core.Module.Options;
+namespace Core.Module.Options;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Setter properties are required for deserialisation")]
 /// <summary>
@@ -14,7 +14,7 @@ public class ArtifactRepositoryOptions
     /// <summary>
     /// Gets or sets the list of repository sources where artifacts are retrieved from.
     /// </summary>
-    public List<ArtifactRepositorySource> Sources { get; set; } = [];
+    public List<ArtifactRepositorySourceOption> Sources { get; set; } = [];
 
     /// <summary>
     /// Gets or sets the list of public keys (base64 encoded) used to verify the digital signatures
@@ -28,4 +28,10 @@ public class ArtifactRepositoryOptions
     /// </summary>
     /// <remarks>Default is 300,000 ms (5 minutes).</remarks>
     public long PackageCacheLifetimeMs { get; set; } = 300_000;
+
+    /// <summary>
+    /// Gets or set the interval in days for refreshing the source tokens. 
+    /// After this period, the tokens will be refreshed upon the next request.
+    /// </summary>
+    public long SourceTokenRefreshIntervalDays { get; set; } = 7;
 }

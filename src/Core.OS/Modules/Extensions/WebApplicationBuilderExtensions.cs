@@ -1,6 +1,8 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.OS.Instance;
+using Core.OS.Instance.Services;
 using Core.OS.Modules.Services;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Core.OS.Modules.Extensions;
@@ -25,7 +27,16 @@ public static class WebApplicationBuilderExtensions
         // now apply enqueued package operations to the manifest and store it if there were any changes.
         var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(fileSystem, instanceOptions, Log.Logger, token);
 
-        var repositoryOptions = builder.Configuration.GetArtifactRepositoryOptions();// nexus|jfrog api, user pwd
+        // migrate repositories from configuration to file if needed using a temporary instance of the store.
+        // we will create the real one with options support in AddModuleArtifactQueryApi extension
+        using var repositoryStore = new ArtifactRepositoryStore(fileSystem, Options.Create(instanceOptions));
+        await repositoryStore.MigrateConfiguredRepositories(builder.Configuration, token);
+
+        // TODO: we need to refresh the options cache on changes to repositories
+        var repositoryOptionsProvider = new ArtifactRepositoryOptionsCache(builder.Configuration);
+        await repositoryOptionsProvider.ReloadOptions(repositoryStore, token);
+        builder.Services.AddSingleton<IArtifactRepositoryOptionsCache>(repositoryOptionsProvider);
+
         var loaderOptions = builder.Configuration.GetModuleLoaderOptions();// module paths, flags etc.
 
         // combine appsettings, environment etc. with module manifest
@@ -36,7 +47,7 @@ public static class WebApplicationBuilderExtensions
             moduleOptions[loaderOptions.UiHost!] = uiHostOptions;
 
         var hostBuilder = new ModuleHostBuilder(fileSystem, builder.Configuration, moduleOptions)
-            .WithSynchronization(manifest, repositoryOptions)
+            .WithSynchronization(manifest, repositoryOptionsProvider)
             .WithSuiteDependencyContext()
             .WithOptionsSupport(builder.Configuration, builder.Services);
 

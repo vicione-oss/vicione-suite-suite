@@ -1,0 +1,18 @@
+.repo-sources-control-panel {
+    display: contents;
+
+    ::deep .repo-sources-grid {
+        max-height: 100%;
+
+        .status-wrapper {
+            display: flex;
+            gap: 8px;
+
+            .icon-wrapper {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <AssemblyName>ViciOne.Suite.Blazor.Shared</AssemblyName>
@@ -422,6 +422,16 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>InstanceControlPanelSaveHandler.resx</DependentUpon>
     </Compile>
+    <Compile Update="Instance\ControlPanels\Repositories\Localization\ArtifactRepositoriesControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ArtifactRepositoriesControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Instance\ControlPanels\Repositories\Localization\ArtifactRepositoryControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ArtifactRepositoryControlPanel.resx</DependentUpon>
+    </Compile>
     <Compile Update="UserManagement\ControlPanels\User\Services\Localization\UserControlPanelSaveHandler.Designer.cs">
       <DependentUpon>UserControlPanelSaveHandler.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -785,6 +795,14 @@
     <EmbeddedResource Update="Instance\ControlPanels\Instances\Localization\UpdateControlPanelSaveHandler.resx">
       <LastGenOutput>UpdateControlPanelSaveHandler.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Repositories\Localization\ArtifactRepositoriesControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ArtifactRepositoriesControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Instance\ControlPanels\Repositories\Localization\ArtifactRepositoryControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ArtifactRepositoryControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Connections\ControlPanels\Connections\Localization\ConnectionControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>

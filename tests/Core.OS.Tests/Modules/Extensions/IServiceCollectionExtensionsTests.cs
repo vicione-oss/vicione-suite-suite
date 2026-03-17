@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Options;
@@ -35,11 +35,13 @@ public class IServiceCollectionExtensionsTests
             var moduleOptions = new ArtifactRepositoryOptions
             {
                 Sources = [
-                    new ArtifactRepositorySource { Endpoint = "http://test.io" }
+                    new ArtifactRepositorySourceOption { Endpoint = "http://test.io" }
                 ]
             };
 
             var services = new ServiceCollection()
+                .AddSingleton(Substitute.For<IArtifactRepositoryOptionsCache>())
+                .AddSingleton<IArtifactRepositoryOptionsProvider>(s => s.GetRequiredService<IArtifactRepositoryOptionsCache>())
                 .AddSingleton(Substitute.For<IFileSystem>())
                 .AddSingleton(Substitute.For<IModuleHost>())
                 .AddSingleton(Substitute.For<IModuleOptionsStore>())
