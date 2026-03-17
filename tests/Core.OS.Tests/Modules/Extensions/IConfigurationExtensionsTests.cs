@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.Module.Contracts;
 using Core.Module.Options;
 using Core.OS.Modules;
@@ -19,95 +19,6 @@ namespace Core.OS.Tests.Modules.Extensions;
 
 public sealed class IConfigurationExtensionsTests
 {
-    public sealed class GetArtifactRepositoryOptions
-    {
-        [Fact]
-        public void Should_throw_on_missing_section()
-        {
-            // Arrange
-            var config = new TestConfig().BuildConfiguration();
-
-            // Act + Assert
-            Assert.Throws<ConfigurationException>(config.GetArtifactRepositoryOptions);
-        }
-
-        [Fact]
-        public void Should_get_options_from_app_settings()
-        {
-            // Arrange
-            var builder = new ConfigurationBuilder();
-            builder.AddCoreAppSettings("Development");
-
-            // Act
-            var repositoryOptions = builder.Build().GetArtifactRepositoryOptions();
-
-            // Assert
-            repositoryOptions.Sources[0].Endpoint.Should().NotBeNullOrEmpty();
-        }
-
-        [Fact]
-        public void Should_get_backwards_compatible_options_from_memory_collection()
-        {
-            // Arrange
-            var builder = new ConfigurationBuilder();
-            builder.AddInMemoryCollection(new Dictionary<string, string?>()
-            {
-                { "ModuleApi:Endpoint", "https://system.update.ifm/" },
-                { "ModuleApi:UserName", "wildman" },
-                { "ModuleApi:Password", "pa$$w0rd" },
-                { "ModuleApi:PackageCacheLifetimeMs", "3000" }
-            });
-
-            // Act
-            var repositoryOptions = builder.Build().GetArtifactRepositoryOptions();
-
-            // Assert
-            repositoryOptions.Sources.Should().HaveCount(1);
-            repositoryOptions.Sources[0].Endpoint.Should().Be("https://system.update.ifm/");
-            repositoryOptions.Sources[0].UserName.Should().Be("wildman");
-            repositoryOptions.Sources[0].Password.Should().Be("pa$$w0rd");
-            repositoryOptions.PackageCacheLifetimeMs.Should().Be(3000);
-        }
-
-        [Fact]
-        public void Should_merge_options_from_memory_collection()
-        {
-            // Arrange
-            var migrateEndpoint = "https://system.update.ifm/";
-            var currentEndpoint = "https://staging.update.ifm/";
-
-            var builder = new ConfigurationBuilder();
-            builder.AddInMemoryCollection(new Dictionary<string, string?>()
-            {
-                { "ModuleApi:Endpoint", migrateEndpoint },
-                { "ModuleApi:UserName", "wildman" },
-                { "ModuleApi:Password", "pa$$w0rd" },
-                { "ModuleApi:PackageCacheLifetimeMs", "3000" },
-
-                { "ArtifactRepository:Sources:0:Endpoint", currentEndpoint },
-                { "ArtifactRepository:Sources:0:UserName", "hammerer" },
-                { "ArtifactRepository:Sources:0:Password", "d00dle" },
-            });
-
-            // Act
-            var repositoryOptions = builder.Build().GetArtifactRepositoryOptions();
-
-            // Assert
-            repositoryOptions.Sources.Should().HaveCount(2);
-            repositoryOptions.PackageCacheLifetimeMs.Should().Be(3000);
-
-            var migratedOption = repositoryOptions.Sources.First(s => s.Endpoint == migrateEndpoint);
-            migratedOption.Endpoint.Should().Be(migrateEndpoint);
-            migratedOption.UserName.Should().Be("wildman");
-            migratedOption.Password.Should().Be("pa$$w0rd");
-
-            var currentOption = repositoryOptions.Sources.First(s => s.Endpoint == currentEndpoint);
-            currentOption.Endpoint.Should().Be(currentEndpoint);
-            currentOption.UserName.Should().Be("hammerer");
-            currentOption.Password.Should().Be("d00dle");
-        }
-    }
-
     public sealed class GetModuleLoaderOptions
     {
         [Fact]

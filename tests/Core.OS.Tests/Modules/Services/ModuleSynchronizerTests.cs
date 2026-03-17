@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
 using Core.Module;
@@ -77,10 +77,14 @@ public class ModuleSynchronizerTests
         public async Task Should_create_api_adapter_from_options()
         {
             // Arrange            
+            var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
+            optionsProvider.GetOptions()
+                .Returns(new ArtifactRepositoryOptions { Sources = [new ArtifactRepositorySourceOption { Endpoint = "http://vicione-test.ifm.com" }] });
+
             using var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
-                .WithApiAdapter(new ArtifactRepositoryOptions { Sources = [new ArtifactRepositorySource { Endpoint = "http://vicione-test.ifm.com" }] })
+                .WithApiAdapter(optionsProvider)
                 .WithModulesPath(ModulesFolder);
 
             // Act + Assert
@@ -106,12 +110,16 @@ public class ModuleSynchronizerTests
         [Fact]
         public void Should_throw_if_both_methods_are_used()
         {
-            // Arrange            
+            // Arrange
+            var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
+            optionsProvider.GetOptions()
+                .Returns(new ArtifactRepositoryOptions { Sources = [] });
+
             using var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
                 .WithApiAdapter(_moduleRepository)
-                .WithApiAdapter(new ArtifactRepositoryOptions())
+                .WithApiAdapter(optionsProvider)
                 .WithModulesPath(ModulesFolder);
 
             // Act

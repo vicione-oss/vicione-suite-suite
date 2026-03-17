@@ -1,4 +1,4 @@
-﻿using Core.Module.Contracts;
+using Core.Module.Contracts;
 using Core.Module.Options;
 using Core.Shared;
 using Sdk.Backend.Extensions;
@@ -8,49 +8,15 @@ namespace Core.OS.Modules.Extensions;
 
 internal static class IConfigurationExtensions
 {
-    /// <summary>
-    /// Bind section <see cref="Sdk.Constants.ModuleLoaderSection"/> to <see cref="ModuleLoaderOptions"/>
-    /// </summary>    
-    internal static ModuleLoaderOptions GetModuleLoaderOptions(this IConfiguration config)
-        => config.GetSection(ModuleLoaderOptions.ConfigSection).Get<ModuleLoaderOptions>() ??
-            throw new ConfigurationException(ModuleLoaderOptions.ConfigSection);
-
-    /// <summary>
-    /// Bind section <see cref="ArtifactRepositoryOptions.ConfigSection"/> to <see cref="ArtifactRepositoryOptions"/>
-    /// </summary>
-    internal static ArtifactRepositoryOptions GetArtifactRepositoryOptions(this IConfiguration config)
-    {
-        var options = config.GetSection(ArtifactRepositoryOptions.ConfigSection).Get<ArtifactRepositoryOptions>();
-
-        // ModuleApiOptions will get removed once but to stay backwards compatible we
-        // need to integrate it into the new ArtifactRepositoryOptions
-#pragma warning disable CS0618 // Obsolete class usage
-        var obsoleteOptions = config.GetSection(ModuleApiOptions.ConfigSection).Get<ModuleApiOptions>();
-#pragma warning restore CS0618 // Obsolete class usage
-        if (obsoleteOptions is not null)
-        {
-            options ??= new ArtifactRepositoryOptions();
-
-            if (options.Sources.All(k => k.Endpoint != obsoleteOptions.Endpoint))
-            {
-                options.Sources.Add(new ArtifactRepositorySource
-                {
-                    Endpoint = obsoleteOptions.Endpoint,
-                    UserName = obsoleteOptions.UserName,
-                    Password = obsoleteOptions.Password,
-                });
-            }
-
-            options.PackageCacheLifetimeMs = obsoleteOptions.PackageCacheLifetimeMs;
-
-            return options;
-        }
-
-        return options ?? throw new ConfigurationException(ArtifactRepositoryOptions.ConfigSection);
-    }
-
     extension(IConfiguration config)
     {
+        /// <summary>
+        /// Bind section <see cref="Sdk.Constants.ModuleLoaderSection"/> to <see cref="ModuleLoaderOptions"/>
+        /// </summary>    
+        internal ModuleLoaderOptions GetModuleLoaderOptions()
+            => config.GetSection(ModuleLoaderOptions.ConfigSection).Get<ModuleLoaderOptions>() ??
+                throw new ConfigurationException(ModuleLoaderOptions.ConfigSection);
+
         internal UiHostOptions? CreateUiHostOptions(ModuleLoaderOptions options)
         {
             if (string.IsNullOrEmpty(options.UiHost))

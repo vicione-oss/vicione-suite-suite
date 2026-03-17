@@ -1,11 +1,11 @@
-﻿using System.Text;
+using System.Text;
 using Core.Module.Options;
 
 namespace Core.Module.Extensions;
 
 internal static class HttpClientExtension
 {
-    public static void AddDefaultRequestHeaders(this HttpClient client, ArtifactRepositorySource apiOptions)
+    public static void AddDefaultRequestHeaders(this HttpClient client, ArtifactRepositorySourceOption apiOptions)
     {
         if (!string.IsNullOrEmpty(apiOptions.UserName) && !string.IsNullOrEmpty(apiOptions.Password))
         {

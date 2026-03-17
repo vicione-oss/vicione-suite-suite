@@ -9,17 +9,17 @@
 - Configuration options for OIDC discovery endpoints, client IDs, and client secrets
 
 - `Microsoft.AspNetCore.Authentication.OpenIdConnect` package
-- A Button to download Journal entries as text was added to `JournalListView`
-- Add implementation of typed `ILocalHttpClient` to access local services with proper base address
+- `JournalListView`, added download feature of Journal entries as text
+- Added implementation of typed `ILocalHttpClient` to access local services with proper base address
+- Added control panel `Sources` to manage artifact update sources, that provide suite, module updates
 
 ### Changed
 
+- Change `ArtifactRepositorySourceOption` options, add property `TokenEndpoint`
 - Replaced `DxMemo` with scrollable HTML element
 - Replaced `DxPopup` with `ViciOne.Ui.Blazor.Components.Popup`
 - `SystemDefaultControlPanelPage`, changed wording in description banner
 - Redesign `ModuleManagementControlPanel` to grid layout with details page
-- Updated `Serilog.Sinks.Journal` to `1.1.0`
-- Updated `ViciOne.Journal` to `1.1.0`
 
 ### Removed
 
@@ -42,8 +42,10 @@
 - `OpenTelemetry` packages, update to version `1.15.0`
 - `Riok.Mapperly` packages, update to version `4.3.1`
 - `Serilog.AspNetCore` packages, update to version `10.0.0`
+- `Serilog.Sinks.Journal` package, update to `1.1.0`
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
+- `ViciOne.Journal` package, update to version `1.1.0`
 - `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2383089014`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.5.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`

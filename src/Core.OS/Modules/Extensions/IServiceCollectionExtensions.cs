@@ -1,5 +1,6 @@
-﻿using Core.Module;
+using Core.Module;
 using Core.Module.JFrog;
+using Core.OS.Instance;
 using Core.OS.Modules.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Backend.Artifacts;
@@ -30,6 +31,7 @@ internal static class IServiceCollectionExtensions
             services.AddHttpClient();
             services.AddTransient<JFrogArtifactRepository>();
             services.AddTransient<IArtifactRepository, JFrogArtifactRepository>();
+            services.AddSingleton<IArtifactRepositoryOptionsProvider>(s => s.GetRequiredService<IArtifactRepositoryOptionsCache>());
             services.AddTransient<IModuleArtifactRepository, ModuleArtifactRepository>();
             services.AddTransient<ISuiteArtifactRepository, SuiteArtifactRepository>();
 

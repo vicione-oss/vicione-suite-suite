@@ -51,17 +51,27 @@ internal static class IServiceCollectionExtensions
             }
 
             services.AddHostedService<InstanceRecoveryService>();
-            services.AddHostedService<UserTicketCleanupService>();
 
-            // general instance services
+            // User ticket store
+            services.AddHostedService<UserTicketCleanupService>();
+            services.AddSingleton<ITicketStore, UserTicketStore>();
+
+            // Backup & Restore
+            services
+                .AddSingleton<IBackupStore, BackupStore>()
+                .AddTransient<IBackupFactory, BackupFactory>();
+
+            // Artifact repository
+            services.AddTransient<IArtifactRepositoryStore, ArtifactRepositoryStore>();
+            services.AddScoped<IArtifactRepositoryTokenService, ArtifactRepositoryTokenService>();
+            services.AddHostedService<ArtifactRepositoryTokenUpdateService>();
+
+            // General instance services
             return services.AddSingleton<ILocalInstanceInformationProvider, LocalInstanceInformationProvider>()
                 .AddScoped<IInstanceInformationProvider, InstanceInformationProvider>()
                 .AddSingleton<InMemoryClusterInformationProvider>()
                 .AddSingleton<IClusterInformationProvider, InMemoryClusterInformationProvider>(p => p.GetRequiredService<InMemoryClusterInformationProvider>())
                 .AddSingleton<SynchronizationState>()
-                .AddSingleton<ITicketStore, UserTicketStore>()
-                .AddSingleton<IBackupStore, BackupStore>()
-                .AddTransient<IBackupFactory, BackupFactory>()
                 .AddScoped<INonceStore, NonceStore>()
                 .AddScoped<IOnboardingStateStore, OnboardingStateStore>()
                 .AddStreamUploadHandler<SystemBackendModule, DeviceImageContext>(options => options.FilenameTransform = filename => Shared.Constants.DeviceImageFileName);

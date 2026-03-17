@@ -1,0 +1,70 @@
+@using Blazor.Shared.Instance.ControlPanels.Repositories.Services
+@using Blazor.Shared.Settings.Components
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<ArtifactRepositoryControlPanelState>
+
+<DescriptionBanner Title="@Localization.ArtifactRepositoryControlPanel.DescriptionBannerTitle">
+    @Localization.ArtifactRepositoryControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    @if (State.Repository is not null)
+    {
+        <SettingsGroup Title="@CommonVocabulary.SettingPlural">
+            <SettingsField Label="@CommonVocabulary.Name">
+                <SettingsFieldTextBox Placeholder="@CommonVocabulary.Name"
+                                      @bind-Value="@State.Repository.Name"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@Localization.ArtifactRepositoryControlPanel.Active">
+                <SettingsFieldSwitch @bind-Value="@State.Repository.Enabled"
+                                     @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@Localization.ArtifactRepositoryControlPanel.Endpoint">
+                <SettingsFieldTextBox Placeholder="@Localization.ArtifactRepositoryControlPanel.Endpoint"
+                                      @bind-Value="@State.Repository.Endpoint"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@Localization.ArtifactRepositoryControlPanel.TokenEndpoint">
+                <SettingsFieldTextBox Placeholder="@Localization.ArtifactRepositoryControlPanel.TokenEndpoint"
+                                      @bind-Value="@State.Repository.TokenEndpoint"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            @if (IsDebugMode())
+            {
+                <SettingsField Label="@CommonVocabulary.Action">
+                    <SettingsFieldButton Text="@Localization.ArtifactRepositoryControlPanel.RefreshToken"
+                                         IconCssClass="@_refreshIconCssClasses"
+                                         Enabled="@(!string.IsNullOrWhiteSpace(@State.Repository.TokenEndpoint))"
+                                         OnClick="@UpdateTokenButtonClick" />
+                </SettingsField>
+            }
+
+            <SettingsField Label="@CommonVocabulary.User">
+                <SettingsFieldTextBox Placeholder="@CommonVocabulary.User"
+                                      @bind-Value="@State.Repository.UserName"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@CommonVocabulary.Password">
+                <SettingsFieldTextBox Placeholder="@CommonVocabulary.Password"
+                                      Password="true"
+                                      Enabled="@(string.IsNullOrWhiteSpace(State.Repository.TokenEndpoint))"
+                                      @bind-Value="@State.Repository.Password"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+            
+        </SettingsGroup>
+    }
+    else
+    {
+        <SettingsInformation>
+            @Localization.ArtifactRepositoryControlPanel.FetchErrorContent
+        </SettingsInformation>
+    }
+</SettingsLayout>

@@ -1,4 +1,4 @@
-﻿using Core.Module;
+using Core.Module;
 using Core.Module.Options;
 using Microsoft.Extensions.Options;
 using Sdk.Modules;
@@ -75,4 +75,6 @@ public sealed class ModuleArtifactCache : IDisposable, IModuleArtifactCache
     }
 
     public void Dispose() => _cacheInvalidationTimer.Dispose();
+
+    public void Invalidate() => _moduleMetadata = null;
 }
