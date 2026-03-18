@@ -22,6 +22,8 @@ include:
     file: '/CI-Templates/v2/dotnet.yml'
 
   # Cache configuration component
+  # Caches: .mise-data/installs/, .nuget/packages/, node_modules/
+  # MISE_DOTNET_ROOT configured to install dotnet inside .mise-data/installs/
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/cache/cache-config@v0.1.1
 
   # Registry components for artifact storage
@@ -109,9 +111,13 @@ variables:
   when: manual
   allow_failure: true
 
-# mise activation - installs tools from mise.toml (node, dotnet)
-# Use 'mise env' (not activate) in CI for reliable PATH setup
+# mise activation - sets up tools from mise.toml (node, dotnet)
+# Export MISE_DATA_DIR to use project-local installation
+# Export MISE_DOTNET_ROOT to install dotnet inside .mise-data/installs/ (same as other tools)
+# This ensures dotnet gets cached by the cache-config component
 .activate_mise: &activate_mise
+  - export MISE_DATA_DIR="${CI_PROJECT_DIR}/.mise-data"
+  - export MISE_DOTNET_ROOT="${MISE_DATA_DIR}/installs/dotnet"
   - mise install
   - eval "$(mise env)"
 
@@ -126,11 +132,27 @@ variables:
 
 #################### Global
 
-before_script:
-  - *activate_mise
-  - *install_npm_packages
-  - *run_npm_scripts
-  - *run_eslint
+# Removed global before_script antipattern
+# Jobs now extend appropriate templates based on their needs
+
+# Template for jobs needing dotnet + npm (but not eslint/npm build)
+# Used by test jobs that build Blazor projects with SASS/TypeScript
+# NOTE: No explicit dotnet restore - dotnet test/build commands restore automatically
+.dotnet-npm-build:
+  before_script:
+    - *activate_mise
+    - !reference [.nuget_credentials]
+    - *install_npm_packages
+
+# Template for jobs needing mise for deployment scripts
+.mise-only:
+  before_script:
+    - *activate_mise
+
+# Template for jobs with no build requirements
+.minimal:
+  before_script: []
+  cache: []
 
 .patch_version: &patch_version
   - VERSION=undefined
@@ -139,6 +161,7 @@ before_script:
   - sed -i -E "s/##VERSION_REF##/$VERSION/g" src/Core.OS/version.json
 
 .jfrog-package-release:
+  extends: .minimal
   stage: deploy
   image: releases-docker.jfrog.io/jfrog/jfrog-cli-v2-jf
   variables:
@@ -213,9 +236,8 @@ before_script:
 #################### Build stage
 
 Validation:
-  extends: .mise-cache-seed
+  extends: .minimal
   stage: build
-  # Seeds amd64 cache - first amd64 job to run
   script:
     # must be case-sensitive, but gets generated case-insensitive by Visual Studio
     - |
@@ -235,6 +257,7 @@ Validation:
 
 xUnit x64:
   extends:
+    - .dotnet-npm-build
     - .dotnet-test-xunit
     - .mise-cache
   variables:
@@ -246,6 +269,7 @@ xUnit x64:
 
 xUnit arm64:
   extends:
+    - .dotnet-npm-build
     - .dotnet-test-xunit
     - .mise-cache-seed
   # Seeds arm64 cache - first arm64 job to run
@@ -337,8 +361,8 @@ Upload artifacts x64:
       artifacts: true
 
 Versioning:
+  extends: .minimal
   stage: artifacts
-  before_script: []
   script:
     - echo "APP_PIPELINE=${CI_PIPELINE_ID}" >>version.env
     - echo "APP_VERSION=$(cat VERSION)" >>version.env
@@ -384,6 +408,7 @@ trigger deb packaging:
 #################### Review stage
 
 Publish only:
+  extends: .mise-only
   stage: review
   script:
     - !reference [.nuget_credentials]
@@ -401,6 +426,7 @@ Publish only:
   dependencies: []
 
 Start DigitalOcean:
+  extends: .mise-only
   stage: review
   script:
     - !reference [.nuget_credentials]
@@ -428,8 +454,8 @@ Start DigitalOcean:
     auto_stop_in: 1 day
 
 Stop DigitalOcean:
+  extends: .minimal
   stage: review
-  before_script: []
   script:
     # set execution permission
     - chmod +x build/review.sh
@@ -446,6 +472,7 @@ Stop DigitalOcean:
     action: stop
 
 Cleanup orphanded deployments:
+  extends: .minimal
   stage: build
   script:
     # set execution permission
@@ -457,6 +484,7 @@ Cleanup orphanded deployments:
   dependencies: []
 
 Prepare Host for new Snapshot:
+  extends: .minimal
   stage: build
   script:
     # set execution permission
@@ -470,7 +498,9 @@ Prepare Host for new Snapshot:
 ####################  Deploy stage
 
 Cloud master:
+  extends: .mise-only
   stage: deploy
+  cache: []
   script:
     - !reference [.nuget_credentials]
     - *patch_version
@@ -491,7 +521,9 @@ Cloud master:
     url: https://159.89.13.71
 
 Cloud presentation:
+  extends: .mise-only
   stage: deploy
+  cache: []
   variables:
     PRESERVE_DATA: true
   script:
@@ -514,7 +546,9 @@ Cloud presentation:
     url: https://167.71.50.41
 
 Internal slave01:
+  extends: .mise-only
   stage: deploy
+  cache: []
   script:
     - !reference [.nuget_credentials]
     - *patch_version
@@ -535,7 +569,9 @@ Internal slave01:
     url: https://10.45.24.192
 
 Internal minimal:
+  extends: .mise-only
   stage: deploy
+  cache: []
   script:
     - !reference [.nuget_credentials]
     - *patch_version
@@ -556,7 +592,9 @@ Internal minimal:
     url: https://10.45.24.155
 
 Internal ec20-4 server 1:
+  extends: .mise-only
   stage: deploy
+  cache: []
   script:
     - !reference [.nuget_credentials]
     - *patch_version
@@ -577,7 +615,9 @@ Internal ec20-4 server 1:
     url: https://10.45.24.156
 
 Internal ec20-4 server 2:
+  extends: .mise-only
   stage: deploy
+  cache: []
   script:
     - !reference [.nuget_credentials]
     - *patch_version
@@ -598,7 +638,9 @@ Internal ec20-4 server 2:
     url: https://10.45.24.157
 
 Internal ec20-4 server 3:
+  extends: .mise-only
   stage: deploy
+  cache: []
   script:
     - !reference [.nuget_credentials]
     - *patch_version
@@ -619,7 +661,9 @@ Internal ec20-4 server 3:
     url: https://10.45.24.158
 
 Internal rpi5 server 1:
+  extends: .mise-only
   stage: deploy
+  cache: []
   script:
     - !reference [.nuget_credentials]
     - *patch_version
@@ -675,7 +719,9 @@ Prerelease Packages to JFrog:
 #################### Release stage
 
 Docker jFrog:
-  extends: .dotnet-release-docker
+  extends:
+    - .minimal
+    - .dotnet-release-docker
   image: docker:latest
   before_script:
     - apk add --no-cache bash curl sed
