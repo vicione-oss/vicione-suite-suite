@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
+using System.Runtime.InteropServices;
 using AwesomeAssertions;
 using Core.Module.Contracts;
 using Core.Module.JFrog;
@@ -17,16 +18,20 @@ public class SuiteArtifactRepositoryTests
     private static ServiceProvider CreateServiceProvider(ArtifactRepositoryOptions? apiOptions = null)
     {
         var options = Microsoft.Extensions.Options.Options.Create(apiOptions ?? SystemTestSettings.ArtifactApiOptions);
+        var provider = Substitute.For<IArtifactRepositoryOptionsProvider>();
+        provider.GetOptions().Returns(options.Value);
 
         return new ServiceCollection()
-        .AddSingleton<HttpClient>()
-        .AddSingleton<IArtifactRepository, JFrogArtifactRepository>()
-        .AddSingleton<IFileSystem>(new FileSystem())
-        .AddSingleton(Substitute.For<ILogger<SuiteArtifactRepository>>)
-        .AddSingleton<SuiteArtifactRepository>()
-        .AddSingleton(options)
-        .AddHttpClient()
-        .BuildServiceProvider();
+            .AddSingleton<HttpClient>()
+            .AddSingleton(options)
+            .AddSingleton(provider)
+            .AddSingleton<IArtifactRepository, JFrogArtifactRepository>()
+            .AddSingleton<IFileSystem>(new FileSystem())
+            .AddSingleton(Substitute.For<ILogger<SuiteArtifactRepository>>)
+            .AddSingleton<SuiteArtifactRepository>()
+            .AddSingleton(options)
+            .AddHttpClient()
+            .BuildServiceProvider();
     }
 
     [Collection(NonParallelCollectionDefinitionClass.NonParallelCollection)]
@@ -243,6 +248,22 @@ public class SuiteArtifactRepositoryTests
 
             // Assert
             result.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public async Task Should_return_architecture_filter()
+        {
+            // Arrange
+            await using var services = CreateServiceProvider();
+            var repository = services.GetRequiredService<SuiteArtifactRepository>();
+
+            // Act
+            var result = repository.GetOSArchitectureFilter();
+
+            // Assert - vicione-suite_1.0.3_arm64_1.1.0.json
+            var expected = $"*_{RuntimeInformation.OSArchitecture}*";
+
+            string.Compare(result, expected, StringComparison.OrdinalIgnoreCase).Should().Be(0);
         }
     }
 }

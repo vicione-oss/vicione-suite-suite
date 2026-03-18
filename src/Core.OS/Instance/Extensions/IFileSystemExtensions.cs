@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Text.Json;
 using Core.Module.Extensions;
 using Core.OS.Extensions;
@@ -172,7 +172,7 @@ internal static class IFileSystemExtensions
             if (fileSystem.ResetFileExists(options))
                 return;
 
-            fileSystem.File.Create(fileSystem.GetResetFlagPath(options), 0, FileOptions.None);
+            fileSystem.File.Create(fileSystem.GetResetFlagPath(options), 0, FileOptions.None).Dispose();
         }
 
         public bool ResetFileExists(InstanceOptions options)

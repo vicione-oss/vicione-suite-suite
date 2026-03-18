@@ -1,4 +1,4 @@
-﻿using Core.Module.Contracts;
+using Core.Module.Contracts;
 using Sdk.Backend.Artifacts;
 
 namespace Core.Module;
@@ -50,5 +50,5 @@ public interface ISuiteArtifactRepository
     /// <summary>
     /// Returns the current operating system architecture string as LowerInvariant, e.g. "arm64" or "amd64".
     /// </summary>
-    string GetOSArchitectureLowerInvariant();
+    string GetOSArchitectureFilter();
 }

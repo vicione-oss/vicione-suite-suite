@@ -1,4 +1,4 @@
-﻿using Core.Module;
+using Core.Module;
 using Core.Module.Comparer;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts.Network;
@@ -48,7 +48,7 @@ public sealed class GetAvailableSuiteVersionsConsumer(
         {
             suiteVersions.Add(new SuiteVersionPackage
             {
-                Architecture = repository.GetOSArchitectureLowerInvariant(),
+                Architecture = repository.GetOSArchitectureFilter(),
                 HostManagementVersion = hostManagementAssemblyName.Version,
                 PackageName = "vicione-suite",
                 SignatureName = "installed",
