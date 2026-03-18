@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using Core.Module.Contracts;
 using Core.Module.Options;
@@ -159,7 +159,7 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
         // - vicione-suite_1.0.3_arm64_1.1.0.json        
         var aqlQuery = repository.CreateQueryBuilder()
             .AndPathMatches($"{SuitesBaseFolder}")
-            .AndNameMatches($"_{GetOSArchitectureLowerInvariant()}")
+            .AndNameMatches($"{GetOSArchitectureFilter()}")
             .OrderByDescending("path", "name")
             .Build();
 
@@ -215,11 +215,11 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
             : [.. bundles.Where(k => k.PackageSignature is not null)];
     }
 
-    public string GetOSArchitectureLowerInvariant()
+    public string GetOSArchitectureFilter()
     {
         // We have no packages for Windows so for debugging we take arm64
         // There's no host management on Windows too so we can't break anything
-        // return $"*arm64*";
+        // return $"*_arm64*";
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable CA1308 // Normalize strings to uppercase

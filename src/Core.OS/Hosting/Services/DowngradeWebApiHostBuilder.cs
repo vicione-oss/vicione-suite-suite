@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Net.Mime;
 using System.Text;
 using Core.OS.Hosting.Contracts;
@@ -42,9 +42,13 @@ internal static class DowngradeWebApiHostBuilder
     private static void RestartDelayed(IServiceProvider services)
         => Task.Run(async () =>
         {
+            var logger = services.GetRequiredService<Serilog.ILogger>();
+
             try
             {
                 await Task.Delay(StopDelay);
+
+                logger.Information("Stop delay passed by. Requesting restart by hostmanagement now...");
 
                 // this will restart the Core.OS immediately
                 var pipeClient = services.GetRequiredService<IPipeClient>();
@@ -53,7 +57,6 @@ internal static class DowngradeWebApiHostBuilder
             }
             catch (Exception ex)
             {
-                var logger = services.GetRequiredService<Serilog.ILogger>();
                 logger.Error(ex, "Failed to trigger restart");
             }
         }).ConfigureAwait(false);
