@@ -1,0 +1,27 @@
+@using Blazor.Server.Backend.Enums
+@using Blazor.Server.Backend.Localization
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<EditForm method="post" OnValidSubmit="ResendEmail" FormName="resend-email-confirmation" Model="Input" class="@($"resend-email {(BuildingLayout ? "building" : "account")}")">
+    <DataAnnotationsValidator />
+
+    <TextInputField @bind-Value="@Input.Email"
+                    Valid="@(context.FieldCssClass(() => Input.Email) == "valid")"
+                    Placeholder="@CommonVocabulary.Email"
+                    Name="Input.Email"
+                    AutoComplete="email"
+                    Type="@(BuildingLayout ? TextInputFieldTypes.Outline : TextInputFieldTypes.Default)" />
+
+    <div class="button-section">
+        <AccountButton Text="@ResendEmailConfirmation.ResendConfirmationEmail" ButtonType="@(BuildingLayout? AccountButtonType.Outline : AccountButtonType.Active)" />
+        <NavigationField Route="@IdentityConstants.LoginRoute">
+            <Content>
+                <MonochromeIcon Name="MonochromeIconName.ArrowNavigationLightLeft" Size="MonochromeIconSize.Small" />
+
+                <label>@Common.NavigateToLoginPage</label>
+            </Content>
+        </NavigationField>
+    </div>
+</EditForm>

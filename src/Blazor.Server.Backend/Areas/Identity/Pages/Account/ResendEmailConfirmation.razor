@@ -1,36 +1,29 @@
 @attribute [Route(IdentityConstants.ResendEmailConfirmationRoute)]
 
 @using Blazor.Server.Backend.Components
-@using Blazor.Server.Backend.Enums
 @using Blazor.Shared.Components
-@using Blazor.Shared.Enums
-@using Blazor.Shared.Extensions
-@using ViciOne.Ui.Localization.Resources
+@using Core.Shared.Instance.Contracts
 
-<PageTitle>@Localization.ResendEmailConfirmation.Title</PageTitle>
+<PageTitle>@Backend.Localization.ResendEmailConfirmation.Title</PageTitle>
 
-<AccountLayout>
-    <Heading>@Localization.ResendEmailConfirmation.Title</Heading>
-    <LeftSideContent>
-        <EditForm method="post" OnValidSubmit="ResendEmail" FormName="resend-email-confirmation" Model="Input">
-            <DataAnnotationsValidator />
-
-            <TextInputField @bind-Value="@Input.Email"
-                            Valid="@(context.FieldCssClass(() => Input.Email) == "valid")"
-                            Placeholder="@CommonVocabulary.Email"
-                            Name="Input.Email"
-                            AutoComplete="email" />
-
-            <div class="button-section">
-                <AccountButton Text="@Localization.ResendEmailConfirmation.ResendConfirmationEmail" ButtonType="AccountButtonType.Active" />
-                <NavigationField Route="/template/login">
-                    <Content>
-                        <img src="@(SvgIcon.Back.GetPath())" />
-
-                        <label>@Localization.Common.NavigateToLoginPage</label>
-                    </Content>
-                </NavigationField>
-            </div>
-        </EditForm>
-    </LeftSideContent>
-</AccountLayout>
+@if (LoginDesignService.Design == LoginDesign.BuildingAutomation)
+{
+    <div class="building-layout">
+        <BuildingAutomationLayout Heading="@Backend.Localization.ResendEmailConfirmation.Title">
+            <ChildContent>
+                <ResendEmailConfirmationContent BuildingLayout="true" />
+            </ChildContent>
+        </BuildingAutomationLayout>
+    </div>
+}
+else
+{
+    <div class="account-layout">
+        <AccountLayout>
+            <Heading>@Backend.Localization.ResendEmailConfirmation.Title</Heading>
+            <LeftSideContent>
+                <ResendEmailConfirmationContent/>
+            </LeftSideContent>
+        </AccountLayout>
+    </div>
+}

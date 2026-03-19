@@ -1,6 +1,6 @@
-﻿using Blazor.Shared.Enums;
 using Blazor.Shared.Services;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Services;
+using Core.Shared.Instance.Contracts;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using ViciOne.Ui.Localization.Resources;
 
@@ -6,9 +6,11 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Models;
 
 public sealed class LoginFormModel
 {
+    [Display(ResourceType = typeof(CommonVocabulary), Name = nameof(CommonVocabulary.User))]
     [Required(AllowEmptyStrings = false, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.FieldIsRequired))]
     public string Username { get; set; } = string.Empty;
 
+    [Display(ResourceType = typeof(CommonVocabulary), Name = nameof(CommonVocabulary.Password))]
     [DataType(DataType.Password)]
     [Required(AllowEmptyStrings = false, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = nameof(ValidationMessages.FieldIsRequired))]
     public string Password { get; set; } = string.Empty;

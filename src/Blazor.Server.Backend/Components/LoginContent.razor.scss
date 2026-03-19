@@ -1,0 +1,84 @@
+@use "../Styles/design/colors";
+@use "../../../shared/styles/colors-staged";
+@use "../../../shared/styles/typography";
+@use 'sass:color';
+
+.login {
+    &.account {
+        .remember-forgot-section {
+            margin-bottom: 24px;
+            display: grid;
+            grid-template-columns: 50% 50%;
+            user-select: none;
+            height: 17px;
+            font-size: 12px;
+            color: colors.$font-light;
+            letter-spacing: 0.4px;
+            font-weight: typography.$font-weight-light;
+
+            button {
+                padding: 0px;
+            }
+
+            ::deep .navigation-field {
+                justify-self: end;
+            }
+
+            .remember-me {
+                width: max-content;
+
+                .text {
+                    margin-left: 8px;
+                }
+            }
+        }
+    }
+
+    &.building {
+        .remember-me {
+            justify-content: center;
+            margin-bottom: 24px;
+            height: 17px;
+            gap: 8px;
+        }
+
+        .button-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .forgot-password {
+            user-select: none;
+            display: flex;
+            justify-content: center;
+            margin-top: 16px;
+        }
+    }
+
+    .password {
+        margin-top: 16px;
+        margin-bottom: 16px;
+    }
+
+    .button-section {
+        ::deep .account-button:nth-child(2) {
+            margin-top: 8px;
+        }
+    }
+
+    .remember-me {
+        display: flex;
+        position: relative;
+        user-select: none;
+        --vo-ui-bc-color-accent: #{colors-staged.$color-ifm-orange};
+        --vo-ui-bc-color-accent-hover: #{colors-staged.$color-ifm-orange};
+        --vo-ui-bc-check-box-color-accent-focus: #{color.adjust(colors-staged.$color-ifm-orange, $lightness: -10%)};
+        --vo-ui-bc-check-box-color-accent-hover: #{color.adjust(colors-staged.$color-ifm-orange, $lightness: -10%)};
+
+        &:focus-within {
+            .text {
+                border-bottom: 1px solid colors-staged.$color-ifm-orange;
+            }
+        }
+    }
+}

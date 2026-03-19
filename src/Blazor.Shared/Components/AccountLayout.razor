@@ -1,6 +1,8 @@
-﻿@using Blazor.Shared.Enums
+@using Blazor.Shared.Enums
 @using Blazor.Shared.Extensions
 @using System.Reflection
+@using Blazor.Shared.Services
+@using Core.Shared.Instance.Contracts
 @using Sdk.Client.Components.Wallpaper
 @using Sdk.Client.Components.Wallpaper.Enums
 
@@ -33,10 +35,21 @@
                     connect
                 </label>
             }
+            else if (LoginDesignService.Design == LoginDesign.Industry ||
+                     LoginDesignService.Design == LoginDesign.BuildingAutomation)
+            {
+                <div class="title vicione">
+                    <img src="@SvgIcon.VicioneLogo.GetPath()" draggable="false" />
+                </div>
+            }
 
-            <div class="logo">
-                <img src="@SvgIcon.IfmLogo.GetPath()" draggable="false" />
-            </div>
+            @if (LoginDesignService.Design == LoginDesign.Default ||
+                 LoginDesignService.Design == LoginDesign.MoneoConnect)
+            {
+                <div class="logo">
+                    <img src="@SvgIcon.IfmLogo.GetPath()" draggable="false" />
+                </div>
+            }
 
             <div class="version-information">
                 <div>ifm software gmbh @(CopyrightYearProvider.Year)</div>

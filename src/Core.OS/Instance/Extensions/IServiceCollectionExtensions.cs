@@ -1,4 +1,4 @@
-﻿using Core.OS.Instance.Contracts;
+using Core.OS.Instance.Contracts;
 using Core.OS.Instance.HealthCheck;
 using Core.OS.Instance.Services;
 using Core.OS.Modules;
@@ -72,6 +72,7 @@ internal static class IServiceCollectionExtensions
                 .AddSingleton<InMemoryClusterInformationProvider>()
                 .AddSingleton<IClusterInformationProvider, InMemoryClusterInformationProvider>(p => p.GetRequiredService<InMemoryClusterInformationProvider>())
                 .AddSingleton<SynchronizationState>()
+                .AddScoped<ILoginDesignService, LoginDesignService>()
                 .AddScoped<INonceStore, NonceStore>()
                 .AddScoped<IOnboardingStateStore, OnboardingStateStore>()
                 .AddStreamUploadHandler<SystemBackendModule, DeviceImageContext>(options => options.FilenameTransform = filename => Shared.Constants.DeviceImageFileName);

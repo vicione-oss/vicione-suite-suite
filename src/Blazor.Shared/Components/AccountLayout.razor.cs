@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Services;
+using Blazor.Shared.Services;
+using Core.Shared.Instance.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Instance;
 
@@ -19,5 +20,5 @@ public sealed partial class AccountLayout
     public RenderFragment? LeftSideContent { get; set; }
 
     [Inject]
-    private LoginDesignService LoginDesignService { get; set; } = default!;
+    private ILoginDesignService LoginDesignService { get; set; } = default!;
 }

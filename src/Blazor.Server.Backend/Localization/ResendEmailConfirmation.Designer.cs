@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
+namespace Blazor.Server.Backend.Localization {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class ChangePassword {
+    internal class ResendEmailConfirmation {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ChangePassword() {
+        internal ResendEmailConfirmation() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization.ChangePassword", typeof(ChangePassword).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Localization.ResendEmailConfirmation", typeof(ResendEmailConfirmation).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,38 +61,20 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} and {1} must not be the same..
+        ///   Looks up a localized string similar to Resend.
         /// </summary>
-        internal static string ErrorInputsMustNotBeTheSame {
+        internal static string ResendConfirmationEmail {
             get {
-                return ResourceManager.GetString("ErrorInputsMustNotBeTheSame", resourceCulture);
+                return ResourceManager.GetString("ResendConfirmationEmail", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your current password has expired. Please change it to continue using the application..
-        /// </summary>
-        internal static string PasswordExpiredMessage {
-            get {
-                return ResourceManager.GetString("PasswordExpiredMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Change Password.
+        ///   Looks up a localized string similar to Resend email confirmation.
         /// </summary>
         internal static string Title {
             get {
                 return ResourceManager.GetString("Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User not found..
-        /// </summary>
-        internal static string UserNotFound {
-            get {
-                return ResourceManager.GetString("UserNotFound", resourceCulture);
             }
         }
     }

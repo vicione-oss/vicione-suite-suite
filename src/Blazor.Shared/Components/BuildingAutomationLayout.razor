@@ -1,0 +1,28 @@
+@using Blazor.Shared.Components.Layout
+@using Blazor.Shared.Enums
+@using Blazor.Shared.Extensions
+@using Sdk.Client.Components.Wallpaper
+@using Sdk.Client.Extensions
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<div class="building-automation">
+    <Wallpaper Image="Constants.WallpaperImage" BaseUri="Constants.WallpaperBaseUri" />
+
+    <div class="spacer" />
+    
+    <div class="title">
+        <img src="@SvgIcon.VicioneLogo.GetPath()" draggable="false" />
+
+        <div class="heading">
+            @Heading
+        </div>
+    </div>
+
+    <div class="content">
+        @ChildContent
+    </div>
+
+    <div class="spacer" />
+</div>

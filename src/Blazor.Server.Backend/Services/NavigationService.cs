@@ -61,20 +61,20 @@ internal sealed class NavigationService : INavigationService, IDisposable
         NavManager.NavigateTo(uriBuilder.Uri.ToString());
     }
 
-    public void RedirectTo(string uri)
+    public void RedirectTo(string route)
     {
-        uri ??= "";
+        route ??= "";
 
         // Prevent open redirects.
-        if (!Uri.IsWellFormedUriString(uri, UriKind.Relative))
-            uri = NavManager.ToBaseRelativePath(uri);
+        if (!Uri.IsWellFormedUriString(route, UriKind.Relative))
+            route = NavManager.ToBaseRelativePath(route);
 
-        NavManager.NavigateTo(uri);
+        NavManager.NavigateTo(route);
     }
 
-    public void RedirectTo(string uri, IDictionary<string, object?> queryParameters)
+    public void RedirectTo(string route, IDictionary<string, object?> queryParameters)
     {
-        var uriWithoutQuery = NavManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);
+        var uriWithoutQuery = NavManager.ToAbsoluteUri(route).GetLeftPart(UriPartial.Path);
         var newUri = NavManager.GetUriWithQueryParameters(uriWithoutQuery, (IReadOnlyDictionary<string, object?>)queryParameters);
         RedirectTo(newUri);
     }

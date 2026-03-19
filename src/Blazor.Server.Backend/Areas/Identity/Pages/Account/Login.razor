@@ -1,70 +1,29 @@
 @attribute [Route(IdentityConstants.LoginRoute)]
 
 @using Blazor.Server.Backend.Components
-@using Blazor.Server.Backend.Enums
 @using Blazor.Shared.Components
-@using Blazor.Shared.Enums
-@using Blazor.Shared.Extensions
-@using ViciOne.Ui.Blazor.Components.CheckBox
-@using ViciOne.Ui.Localization.Resources
+@using Core.Shared.Instance.Contracts
 
-<PageTitle>@Localization.Login.Title</PageTitle>
-<AccountLayout>
-    <Heading>@Localization.Login.Title</Heading>
-    <LeftSideContent>
-        @if (IsExternalIdProviderConfigured)
-        {
-            <form @formname="external-login" id="external-login" method="post" action="/account/performExternalLogin">
-                <AntiforgeryToken />
-                <input type="hidden" name="provider" value="@_externalProviderName" />
-                <input type="hidden" name="returnUrl" value="@(ReturnUrl ?? "/")" />
-            </form>
-        }
-        <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
-            <DataAnnotationsValidator />
+<PageTitle>@Backend.Localization.Login.Title</PageTitle>
 
-            <TextInputField @bind-Value="@Input.Username"
-                            Valid="@(context.FieldCssClass(() => Input.Username) == "valid" ? true : false)"
-                            Placeholder="@CommonVocabulary.User"
-                            Name="Input.Username"
-                            AutoComplete="username webauthn" />
-
-            <div class="password">
-                <TextInputField @bind-Value="@Input.Password"
-                                Password="true"
-                                Valid="@(context.FieldCssClass(() => Input.Password) == "valid" ? true : false)"
-                                Placeholder="@CommonVocabulary.Password"
-                                Name="Input.Password" />
-            </div>
-
-            <div class="remember-forgot-section">
-                <div>
-                    <label class="remember-me">
-                        <CheckBox Value="@Input.RememberMe" Name="Input.RememberMePostBackValue" />
-                        <span class="text">@Localization.Login.RememberMe</span>
-                    </label>
-                </div>
-
-                @if (SenderStatus.IsConfigured())
-                {
-                    <div>
-                        <NavigationField Route="@IdentityConstants.ForgotPasswordRoute">
-                            <Content>
-                                @Localization.Login.ForgotPassword
-                            </Content>
-                        </NavigationField>
-                    </div>
-                }
-            </div>
-
-            <div class="button-section">
-                <AccountButton Text="@Localization.Login.Title" ButtonType="AccountButtonType.Active" />
-
-                @if (IsExternalIdProviderConfigured)
-                {
-                    <AccountButton Text="@($"{Localization.Login.LoginUsingExternalProvider} {_externalProviderDisplayName}")" Form="external-login" />
-                }
-            </div>
-        </EditForm>
-    </LeftSideContent>
-</AccountLayout>
+@if (LoginDesignService.Design == LoginDesign.BuildingAutomation)
+{
+    <div class="building-layout">
+        <BuildingAutomationLayout Heading="@Backend.Localization.Login.Title">
+            <ChildContent>
+                <LoginContent BuildingLayout="true" />
+            </ChildContent>
+        </BuildingAutomationLayout>
+    </div>
+}
+else
+{
+    <div class="account-layout">
+        <AccountLayout>
+            <Heading>@Backend.Localization.Login.Title</Heading>
+            <LeftSideContent>
+                <LoginContent />
+            </LeftSideContent>
+        </AccountLayout>
+    </div>
+}

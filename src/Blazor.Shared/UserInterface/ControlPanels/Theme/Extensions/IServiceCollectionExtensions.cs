@@ -1,4 +1,3 @@
-﻿using Blazor.Shared.Extensions;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Components;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +13,6 @@ internal static class IServiceCollectionExtensions
             .WithAutoDiscovery<ThemeControlPanelDescriptor>()
             .WithSaveHandler<ThemeControlPanelSaveHandler>()
             .WithResetHandler<ThemeControlPanelResetHandler>();
-
-        services.AddLoginDesignService();
 
         return services;
     }

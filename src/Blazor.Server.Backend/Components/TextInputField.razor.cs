@@ -1,10 +1,13 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
+using Blazor.Server.Backend.Enums;
 using Microsoft.AspNetCore.Components;
 
 namespace Blazor.Server.Backend.Components;
 
 public sealed partial class TextInputField
 {
+    private string _inputId = string.Empty;
+
     [Parameter, EditorRequired]
     public string? Value { get; set; }
 
@@ -34,6 +37,12 @@ public sealed partial class TextInputField
 
     [Parameter]
     public Expression<Func<string?>>? ValueExpression { get; set; }
+
+    [Parameter]
+    public TextInputFieldTypes Type { get; set; } = TextInputFieldTypes.Default;
+
+    protected override void OnInitialized()
+        => _inputId = Guid.NewGuid().ToString();
 
     private void TextBoxValueChanged()
         => ValueChanged.InvokeAsync(Value);

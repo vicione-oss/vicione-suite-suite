@@ -1,10 +1,9 @@
-﻿using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Components;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Extensions;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
 using Xunit;

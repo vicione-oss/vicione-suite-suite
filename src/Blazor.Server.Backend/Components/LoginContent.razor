@@ -1,0 +1,76 @@
+@using Blazor.Server.Backend.Enums
+@using Blazor.Server.Backend.Localization
+@using ViciOne.Ui.Blazor.Components.CheckBox
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@if (IsExternalIdProviderConfigured)
+{
+    <form @formname="@_formId" id="@_formId" method="post" action="/account/performExternalLogin">
+        <AntiforgeryToken />
+        <input type="hidden" name="provider" value="@_externalProviderName" />
+        <input type="hidden" name="returnUrl" value="@(ReturnUrl ?? "/")" />
+    </form>
+
+}
+<EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login" class="@($"login {(BuildingLayout ? "building" : "account")}")">
+    <DataAnnotationsValidator />
+
+    <TextInputField @bind-Value="@Input.Username"
+                    Valid="@(context.FieldCssClass(() => Input.Username) == "valid")"
+                    Placeholder="@CommonVocabulary.User"
+                    Name="Input.Username"
+                    AutoComplete="username webauthn"
+                    Type="@(BuildingLayout ? TextInputFieldTypes.Outline : TextInputFieldTypes.Default)" />
+
+    <div class="password">
+        <TextInputField @bind-Value="@Input.Password"
+                        Password="true"
+                        Valid="@(context.FieldCssClass(() => Input.Password) == "valid")"
+                        Placeholder="@CommonVocabulary.Password"
+                        Name="Input.Password"
+                        Type="@(BuildingLayout ? TextInputFieldTypes.Outline : TextInputFieldTypes.Default)" />
+    </div>
+
+    <div class="remember-forgot-section">
+        <div class="remember-me">
+            <CheckBox Value="@Input.RememberMe" Name="Input.RememberMePostBackValue" />
+            <span class="text">@Login.RememberMe</span>
+        </div>
+
+        @if (SenderStatus.IsConfigured() && !BuildingLayout)
+        {
+            <NavigationField Route="@IdentityConstants.ForgotPasswordRoute">
+                <Content>
+                    @Login.ForgotPassword
+                </Content>
+            </NavigationField>
+        }
+    </div>
+
+    <div class="button-section">
+        <AccountButton Text="@Login.Title"
+                       ButtonType="@(BuildingLayout? AccountButtonType.Outline : AccountButtonType.Active)" />
+
+        @if (IsExternalIdProviderConfigured)
+        {
+            <AccountButton Text="@($"{Login.LoginUsingExternalProvider} {_externalProviderDisplayName}")" 
+                           Form="@_formId"
+                           ButtonType="@(BuildingLayout? AccountButtonType.Outline : AccountButtonType.Default)" />
+        }
+    </div>
+
+    @if (SenderStatus.IsConfigured() && BuildingLayout)
+    {
+        <div class="forgot-password">
+            <NavigationField Route="@IdentityConstants.ForgotPasswordRoute">
+                <Content>
+                    <MonochromeIcon Name="MonochromeIconName.LockActive" Size="MonochromeIconSize.Small" />
+
+                    <label>@Login.ForgotPassword</label>
+                </Content>
+            </NavigationField>
+        </div>
+    }
+</EditForm>

@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
-using Constants = Blazor.Server.Backend.Areas.Identity.Pages.Account.IdentityConstants;
 
 namespace Blazor.Server.Backend.Extensions;
 
@@ -27,7 +26,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 [FromServices] SignInManager<SuiteUser> signInManager) =>
         {
             await signInManager.SignOutAsync();
-            return Results.LocalRedirect(Constants.LoginRoute);
+            return Results.LocalRedirect(IdentityConstants.LoginRoute);
         });
 
         return accountGroup;
@@ -62,7 +61,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 [FromForm] string provider) =>
             {
                 // Clear the existing external cookie to ensure a clean login process
-                await context.SignOutAsync(IdentityConstants.ExternalScheme);
+                await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
 
                 var redirectUrl = UriHelper.BuildRelative(
                     context.Request.PathBase,
@@ -88,7 +87,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 {
                     tempData["ExternalError"] = ExternalLoginError.LoginFailed;
                     tempData.Save();
-                    return Results.LocalRedirect(Constants.LoginRoute);
+                    return Results.LocalRedirect(IdentityConstants.LoginRoute);
                 }
 
                 var user = await userManager.GetUserAsync(context.User);
@@ -101,10 +100,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
                 var result = await userManager.AddLoginAsync(user, info);
                 if (!result.Succeeded)
-                    return Results.LocalRedirect(Constants.LoginRoute);
+                    return Results.LocalRedirect(IdentityConstants.LoginRoute);
 
                 // Clear the existing external cookie to ensure a clean login process
-                await context.SignOutAsync(IdentityConstants.ExternalScheme);
+                await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
 
                 return Results.LocalRedirect("/");
             });
@@ -144,7 +143,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                 var info = await signInManager.GetExternalLoginInfoAsync();
                 if (info == null)
                 {
-                    return Results.LocalRedirect(Constants.LoginRoute);
+                    return Results.LocalRedirect(IdentityConstants.LoginRoute);
                 }
 
                 var signInResult = await signInManager.ExternalLoginSignInAsync(
@@ -156,18 +155,18 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
                 if (signInResult.Succeeded)
                 {
-                    await context.SignOutAsync(IdentityConstants.ExternalScheme);
+                    await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
                     return Results.LocalRedirect(returnUrl);
                 }
 
                 if (signInResult.IsLockedOut)
                 {
-                    return Results.LocalRedirect(Constants.LoginRoute);
+                    return Results.LocalRedirect(IdentityConstants.LoginRoute);
                 }
 
                 tempData["ExternalError"] = ExternalLoginError.UnknownExternalUser;
                 tempData.Save();
-                return Results.LocalRedirect(Constants.LoginRoute);
+                return Results.LocalRedirect(IdentityConstants.LoginRoute);
             });
     }
 }

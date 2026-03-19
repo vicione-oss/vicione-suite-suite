@@ -1,10 +1,13 @@
 @attribute [Route(IdentityConstants.ConfirmMailRoute)]
 
 @using Blazor.Server.Backend.Components
+@using Blazor.Server.Backend.Localization
 @using Blazor.Shared.Components
 @using Blazor.Shared.Enums
 @using Blazor.Shared.Extensions
 @using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 <PageTitle>@Localization.ConfirmEmail.Title</PageTitle>
 <AccountLayout>
@@ -20,9 +23,9 @@
                 <label>@Localization.ConfirmEmail.VerificationSuccessful</label>
                 <NavigationField Route="@IdentityConstants.LoginRoute">
                     <Content>
-                        <img src="@(SvgIcon.Back.GetPath())" />
+                        <MonochromeIcon Name="MonochromeIconName.ArrowNavigationLightLeft" Size="MonochromeIconSize.Small" />
 
-                        <label>@Localization.Common.NavigateToLoginPage</label>
+                        <label>@Common.NavigateToLoginPage</label>
                     </Content>
                 </NavigationField>
             }

@@ -3,6 +3,7 @@
 public enum AccountButtonType
 {
     Default,
-    Active
+    Active,
+    Outline,
 }
 

@@ -1,4 +1,4 @@
-namespace Blazor.Server.Backend.Areas.Identity.Pages.Account;
+namespace Blazor.Server.Backend;
 
 internal class IdentityConstants
 {

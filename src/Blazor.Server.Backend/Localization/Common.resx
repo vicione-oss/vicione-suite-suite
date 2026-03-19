@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -118,24 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="NavigateToLoginPage" xml:space="preserve">
-    <value>Zurück zur Anmeldung</value>
+    <value>Go back to login page</value>
   </data>
   <data name="ConfirmPassword" xml:space="preserve">
-    <value>Passwort wiederholen</value>
+    <value>Confirm password</value>
   </data>
   <data name="NewPassword" xml:space="preserve">
-    <value>Neues Passwort</value>
+    <value>New password</value>
   </data>
   <data name="ConfirmNewPassword" xml:space="preserve">
-    <value>Neues Passwort wiederholen</value>
+    <value>Confirm new password</value>
   </data>
   <data name="ErrorInputsDoNotMatch" xml:space="preserve">
-    <value>{0} und {1} stimmen nicht überein.</value>
+    <value>{0} and {1} do not match.</value>
   </data>
   <data name="ResetPassword" xml:space="preserve">
-    <value>Passwort zurücksetzen</value>
+    <value>Reset password</value>
   </data>
   <data name="ForgotPassword" xml:space="preserve">
-    <value>Passwort vergessen</value>
+    <value>Forgot password</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Change Password</value>
   </data>
 </root>

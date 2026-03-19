@@ -1,4 +1,4 @@
-﻿@use "../Styles/design/colors";
+@use "../Styles/design/colors";
 @use "../../../shared/styles/colors-staged";
 @use "../../../shared/styles/typography";
 @use 'sass:color';
@@ -12,6 +12,7 @@
     text-align: center;
     font-weight: typography.$font-weight-regular;
     width: 320px;
+    max-height: 32px;
     line-height: 19px;
     padding: 6px 16px 7px 16px;
 
@@ -23,6 +24,15 @@
 
     &.active {
         background: colors-staged.$color-ifm-orange;
+    }
+
+    &.outline {
+        background-color: transparent;
+        font-size: 12px;
+        color: color.adjust(colors.$font-light, $alpha: -0.2);
+        letter-spacing: 0.4px;
+        font-weight: typography.$font-weight-extralight;
+        outline: 1px solid #B1B1B1;
     }
 
     &:hover {
