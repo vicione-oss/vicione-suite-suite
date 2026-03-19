@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 
@@ -10,6 +10,7 @@ namespace Blazor.DevAssets;
 internal sealed class DevelopmentFileProvider : IFileProvider
 {
     private const string StaticWebAssetsExtensions = "*staticwebassets.runtime.json";
+
     private readonly List<StaticWebAssetContent> _webAssetFileContents = [];
     private readonly HashSet<string> _loadedAssets = [];
 
@@ -88,20 +89,55 @@ internal sealed class DevelopmentFileProvider : IFileProvider
         var match = WebAssetContentNuGetRegex.Match(search);
         if (match.Success)
         {
-            search = search[match.Value.Length..];
+            var trimmedSearch = search[match.Value.Length..];
+
+            // use the full package name from _content/{packageName}/ to target the exact
+            // staticwebassets.runtime.json — e.g. ViciOne.Suite.ClusterManagement.Client
+            var packageName = ExtractPackageNameFromContentPath(subpath);
+            if (packageName is not null)
+            {
+                var packageContent = FindPackageContent(packageName);
+                var directPath = packageContent?.FindAssetContentPath(trimmedSearch, fileName, lastChance);
+                if (directPath is not null)
+                    return directPath;
+            }
+
+            search = trimmedSearch;
         }
 
         // try to find an entry that contains the requested subpath
-        foreach (var webAsset in _webAssetFileContents)
-        {
-            var assetPath = webAsset.FindAssetContentPath(search, fileName, lastChance);
-            if (assetPath is null)
-                continue;
+        var possibleAssetPaths = _webAssetFileContents
+            .Select(c => c.FindAssetContentPath(search, fileName, lastChance))
+            .Where(p => p is not null)
+            .Distinct()
+            .ToList();
 
-            return assetPath;
-        }
+        return possibleAssetPaths.FirstOrDefault();
+    }
 
-        return null;
+    /// <summary>
+    /// finds the StaticWebAssetContent whose JSON filename matches
+    /// {packageName}.staticwebassets.runtime.json
+    /// </summary>
+    private StaticWebAssetContent? FindPackageContent(string packageName)
+        => _webAssetFileContents.FirstOrDefault(c =>
+            Path.GetFileName(c.JsonPath).StartsWith(packageName + ".", StringComparison.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// extracts the package name from a _content/ subpath
+    /// e.g. /_content/ViciOne.Suite.ClusterManagement.Client/icons/bundle.css
+    ///   -> ViciOne.Suite.ClusterManagement.Client
+    /// </summary>
+    internal static string? ExtractPackageNameFromContentPath(string subpath)
+    {
+        const string contentPrefix = "_content/";
+        var contentIndex = subpath.IndexOf(contentPrefix, StringComparison.OrdinalIgnoreCase);
+        if (contentIndex < 0)
+            return null;
+
+        var afterContent = subpath[(contentIndex + contentPrefix.Length)..];
+        var separatorIndex = afterContent.IndexOfAny(['/', '\\']);
+        return separatorIndex >= 0 ? afterContent[..separatorIndex] : afterContent;
     }
 
     private static string TrimStartDirectoryChar(string path)

@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Xunit;
 
@@ -45,6 +45,47 @@ public partial class DevelopmentFileProviderTests
 
         // Assert
         Assert.NotNull(provider.GetFileInfo(resource));
+    }
+
+    /// <summary>
+    /// Regression: _content/ requests must still resolve correctly when ALL project JSONs are loaded.
+    /// Previously a .Client string marker was used for disambiguation; now the package name from
+    /// _content/{name}/ is matched directly against the JSON filename.
+    /// </summary>
+    [Theory]
+    [InlineData("_content/ViciOne.Ui.Shared.Dx/scripts/vicione-ui-shared-dx.min.js")]
+    [InlineData("_content/ViciOne.Ui.Shared.Dx/css/bootstrap.min.css")]
+    [InlineData("_content/ViciOne.Ui.Shared.Dx/css/dx-bootstrap-custom.css")]
+    public void Provider_resolves_content_asset_when_all_jsons_are_loaded(string resource)
+    {
+        // Arrange — simulate the real dev scenario where every project's JSON is loaded
+        var provider = new DevelopmentFileProvider();
+        provider.AddStaticWebAssetJsons(GetAllStaticWebAssetJsons());
+
+        // Act
+        var asset = provider.GetFileInfo(resource);
+
+        // Assert
+        Assert.NotNull(asset);
+        Assert.True(File.Exists(asset.PhysicalPath), $"Physical file not found: {asset.PhysicalPath}");
+    }
+
+    /// <summary>
+    /// Unit tests for the package-name extraction from a _content/ subpath.
+    /// This is the core logic that replaces the old broad .Client string marker.
+    /// </summary>
+    [Theory]
+    [InlineData("/_content/ViciOne.Suite.ClusterManagement.Client/icons/bundle.css", "ViciOne.Suite.ClusterManagement.Client")]
+    [InlineData("/_content/ViciOne.Ui.Shared.Dx/scripts/foo.js",                    "ViciOne.Ui.Shared.Dx")]
+    [InlineData("_content/Some.Package/dir/file.css",                                "Some.Package")]   // no leading slash
+    [InlineData("/_content/Single/file.js",                                          "Single")]         // single-segment name
+    [InlineData("/js/suite.js",                                                      null)]             // not a _content/ path
+    [InlineData("/index.html",                                                       null)]             // not a _content/ path
+    public void ExtractPackageNameFromContentPath_returns_correct_package_name(string subpath, string? expected)
+    {
+        var result = DevelopmentFileProvider.ExtractPackageNameFromContentPath(subpath);
+
+        Assert.Equal(expected, result);
     }
 
     [Fact]

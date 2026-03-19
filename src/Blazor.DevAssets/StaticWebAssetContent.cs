@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text.Json;
 using MassTransit.Metadata;
 
@@ -20,6 +20,7 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
 
     public IReadOnlyList<StaticWebAssetEntry> Entries => _entries;
     public IReadOnlyList<string> ContentRoots => _contentRoots;
+    internal string JsonPath => _jsonPath;
 
     public string? FindAssetContentPath(string subpath, string fallbackFileName, string lastChance)
     {
