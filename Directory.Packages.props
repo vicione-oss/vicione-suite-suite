@@ -1,13 +1,13 @@
 <Project>
   <PropertyGroup>
     <!--Update of DotNetVersion requires deletion of .\src\Blazor.Server.Backend\wwwroot\_framework\blazor.web.js to update it-->
-    <DotNetVersion>10.0.4</DotNetVersion>
+    <DotNetVersion>10.0.5</DotNetVersion>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <HostManagementVersion>1.2.0</HostManagementVersion>
     <OpenTelemetryVersion>1.15.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.8</MassTransitVersion>
-    <ViciOneUiMonochromeIconsVersion>4.4.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>2.0.0-ci2383089014</ViciOneSuiteSdkVersion>
+    <ViciOneUiMonochromeIconsVersion>4.5.0</ViciOneUiMonochromeIconsVersion>
+    <ViciOneSuiteSdkVersion>2.0.0-ci2393621169</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
@@ -18,7 +18,7 @@
     <PackageVersion Include="Fluid.Core" Version="2.31.0" />
     <PackageVersion Include="HostManagement.Shared" Version="$(HostManagementVersion)" />
     <PackageVersion Include="HostManagement.Shared.Communication" Version="$(HostManagementVersion)" />
-    <PackageVersion Include="MailKit" Version="4.15.0" />
+    <PackageVersion Include="MailKit" Version="4.15.1" />
     <PackageVersion Include="MassTransit" Version="$(MassTransitVersion)" />
     <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="$(MassTransitVersion)" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="$(MassTransitVersion)" />
@@ -37,8 +37,8 @@
     <PackageVersion Include="Microsoft.TypeScript.MSBuild" Version="5.9.3" />
     <PackageVersion Include="minisign-net" Version="1.0.0" />
     <PackageVersion Include="MQTTnet" Version="5.1.0.1559" />
-    <PackageVersion Include="Npgsql" Version="10.0.1" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageVersion Include="Npgsql" Version="10.0.2" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="$(OpenTelemetryVersion)" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="$(OpenTelemetryVersion)" />
@@ -61,7 +61,7 @@
     <PackageVersion Include="ViciOne.Suite.Sdk.Deployment" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.SystemMonitoring" Version="0.10.0" />
     <PackageVersion Include="ViciOne.Ui.Design" Version="2.0.3" />
-    <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="5.5.0" />
+    <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="5.6.0" />
     <PackageVersion Include="ViciOne.Ui.Localization" Version="3.2.0" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Assets" Version="$(ViciOneUiMonochromeIconsVersion)" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Components" Version="$(ViciOneUiMonochromeIconsVersion)" />

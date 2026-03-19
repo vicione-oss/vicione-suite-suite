@@ -34,10 +34,10 @@
 - `AspNetCore.SassCompiler` packages, update to version `1.97.1`
 - `AwesomeAssertions` packages, update to version `9.4.0`
 - `Bunit` packages, update to version `2.6.2`
-- `Npgsql.EntityFrameworkCore.PostgreSQL` package, update to version `10.0.0`
+- `Npgsql.EntityFrameworkCore.PostgreSQL` package, update to version `10.0.2`
 - `MassTransit` packages, update to version `8.5.8`
-- `MailKit` package, update to version `4.15.0`
-- `Microsoft` packages, update to version `10.0.4`
+- `MailKit` package, update to version `4.15.1`
+- `Microsoft` packages, update to version `10.0.5`
 - `MQTTnet` packages, update to version `5.1.0.1559`
 - `OpenTelemetry` packages, update to version `1.15.0`
 - `Riok.Mapperly` packages, update to version `4.3.1`
@@ -46,10 +46,10 @@
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
 - `ViciOne.Journal` package, update to version `1.1.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2383089014`
-- `ViciOne.Ui.Blazor.Components` package, update version to `5.5.0`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2393621169`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.6.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
-- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.4.0`
+- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.5.0`
 - `ViciOne.Ui.Localization` package, update version to `3.2.0`
 - `ViciOne.Ui.Shared.Dx` packages, update to version `0.19.1`
 - `xunit` packages, update to version `xunit.v3 - 3.2.2`
