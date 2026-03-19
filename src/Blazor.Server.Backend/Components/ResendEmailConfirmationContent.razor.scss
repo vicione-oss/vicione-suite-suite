@@ -1,0 +1,23 @@
+.resend-email {
+    &.building {
+        .button-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 24px;
+
+            ::deep .outline {
+                margin-bottom: 16px;
+            }
+        }
+    }
+
+    &.account {
+        .button-section {
+            ::deep .active {
+                margin-top: 24px;
+                margin-bottom: 48px;
+            }
+        }
+    }
+}

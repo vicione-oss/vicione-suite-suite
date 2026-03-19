@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
+namespace Blazor.Server.Backend.Localization {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization.Login", typeof(Login).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Localization.Login", typeof(Login).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

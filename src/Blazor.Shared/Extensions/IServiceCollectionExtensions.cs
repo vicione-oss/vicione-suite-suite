@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Authorization.Extensions;
+using Blazor.Shared.Authorization.Extensions;
 using Blazor.Shared.Connections.Extensions;
 using Blazor.Shared.Instance.Extensions;
 using Blazor.Shared.MessageBanner.Extensions;
@@ -18,7 +18,6 @@ using Blazor.Shared.UserManagement.Extensions;
 using Blazor.Shared.Wizards.Extensions;
 using Core.Shared.HostManagement.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Client.NotificationArea.Extensions;
 using Sdk.Client.Services;
 using ViciOne.Ui.Blazor.Components.SectionRail.Extensions;
@@ -59,19 +58,11 @@ public static class IServiceCollectionExtensions
             return services;
         }
 
-        internal IServiceCollection AddLoginDesignService()
-        {
-            services.TryAddSingleton<LoginDesignService>();
-
-            return services;
-        }
-
         private IServiceCollection AddSharedUiServices()
         {
             // Common
             services.AddScoped<ILayoutService, LayoutService>()
                 .AddTransient<IJsInterop, JsInterop>()
-                .AddLoginDesignService()
                 .AddProfile()
                 .AddSystemInformation()
                 .AddMessageBanner()

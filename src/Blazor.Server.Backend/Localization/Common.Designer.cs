@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
+namespace Blazor.Server.Backend.Localization {
     using System;
     
     
@@ -22,24 +22,24 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class ResetPassword {
+    public class Common {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ResetPassword() {
+        internal Common() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization.ResetPassword", typeof(ResetPassword).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Localization.Common", typeof(Common).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -51,7 +51,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -61,20 +61,74 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your password has been reset..
+        ///   Looks up a localized string similar to Change Password.
         /// </summary>
-        internal static string SuccessMessage {
+        public static string ChangePassword {
             get {
-                return ResourceManager.GetString("SuccessMessage", resourceCulture);
+                return ResourceManager.GetString("ChangePassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm new password.
+        /// </summary>
+        public static string ConfirmNewPassword {
+            get {
+                return ResourceManager.GetString("ConfirmNewPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm password.
+        /// </summary>
+        public static string ConfirmPassword {
+            get {
+                return ResourceManager.GetString("ConfirmPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} and {1} do not match..
+        /// </summary>
+        public static string ErrorInputsDoNotMatch {
+            get {
+                return ResourceManager.GetString("ErrorInputsDoNotMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Forgot password.
+        /// </summary>
+        public static string ForgotPassword {
+            get {
+                return ResourceManager.GetString("ForgotPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Go back to login page.
+        /// </summary>
+        public static string NavigateToLoginPage {
+            get {
+                return ResourceManager.GetString("NavigateToLoginPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New password.
+        /// </summary>
+        public static string NewPassword {
+            get {
+                return ResourceManager.GetString("NewPassword", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Reset password.
         /// </summary>
-        internal static string Title {
+        public static string ResetPassword {
             get {
-                return ResourceManager.GetString("Title", resourceCulture);
+                return ResourceManager.GetString("ResetPassword", resourceCulture);
             }
         }
     }

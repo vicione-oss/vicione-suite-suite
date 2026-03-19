@@ -1,19 +1,35 @@
-﻿@using Blazor.Shared.Enums
+@using Blazor.Shared.Enums
 @using Blazor.Shared.Extensions
+@using Sdk.Client.Extensions
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 @using ViciOne.Ui.Blazor.Components.TextBox
 
-<div class="input-field">
+@{
+    var designType = Type.ToString().ToHyphenSeparated();
+}
+
+<div class="input-field @designType">
     <TextBox @bind-Value="@Value"
              @bind-Value:after="@TextBoxValueChanged"
              Password="@Password"
-             Placeholder="@Placeholder"
-             AutoComplete="@AutoComplete"
+             Placeholder="@Placeholder"AutoComplete="@AutoComplete"
              Enabled="@Enabled"
              Name="@Name"
-             Valid="@Valid" />
+             Id="@_inputId"
+             Valid="@Valid"/>
+
+    @if (Password)
+    {
+        <button type="button" class="show-button" onclick="togglePassword('@_inputId', this)">
+            <MonochromeIcon Name="MonochromeIconName.Show" Size="MonochromeIconSize.Small" CssClass="show-icon"/>
+            
+            <MonochromeIcon Name="MonochromeIconName.Hide" Size="MonochromeIconSize.Small" CssClass="hide-icon" />
+        </button>
+    }
 
     <div class="validation-image">
-        <img src="@(SvgIcon.ErrorFull.GetPath())" />
+        <MonochromeIcon Name="MonochromeIconName.Warning" Size="MonochromeIconSize.SmallMedium" />
 
         <div class="tooltip-info">
             <div class="tooltip-info-tab">
@@ -22,3 +38,8 @@
         </div>
     </div>
 </div>
+
+@if (Password)
+{
+    <script src="@Assets["js/text-input-field.js"]"></script>
+}

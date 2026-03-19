@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Enums;
+using Core.Shared.Instance.Contracts;
 using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.UserInterface.ControlPanels.Theme.Services;

@@ -13,11 +13,13 @@ public sealed partial class ConfirmEmail
 
     [Inject]
     private INavigationService NavigationService { get; set; } = default!;
+
     [Inject]
     private UserManager<SuiteUser> UserManager { get; set; } = default!;
 
     [SupplyParameterFromQuery]
     private string? UserId { get; set; }
+
     [SupplyParameterFromQuery]
     private string? Code { get; set; }
 

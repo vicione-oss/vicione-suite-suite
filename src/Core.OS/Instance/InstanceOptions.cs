@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Core.OS.Instance.HealthCheck;
+using Core.Shared.Instance.Contracts;
 using Microsoft.Extensions.Options;
 using Sdk.Instance;
 
@@ -38,6 +39,8 @@ public sealed class InstanceOptions
     public bool UseHeaderForwarding { get; set; }
 
     public string ServiceName { get; set; } = "vicione-suite.service";
+
+    public LoginDesign LoginDesign { get; set; } = LoginDesign.Default;
 
     [ValidateObjectMembers]
     public InstanceHealthCheckOptions? HealthChecks { get; set; }

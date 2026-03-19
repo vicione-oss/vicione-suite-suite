@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
+namespace Blazor.Server.Backend.Localization {
     using System;
     
     
@@ -19,17 +19,17 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Register {
+    internal class ResetPassword {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Register() {
+        internal ResetPassword() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization.Register", typeof(Register).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Localization.ResetPassword", typeof(ResetPassword).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,20 +61,11 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Resend email confirmation.
+        ///   Looks up a localized string similar to Your password has been reset..
         /// </summary>
-        internal static string ResendConfirmationEmail {
+        internal static string SuccessMessage {
             get {
-                return ResourceManager.GetString("ResendConfirmationEmail", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Register as new user.
-        /// </summary>
-        internal static string Title {
-            get {
-                return ResourceManager.GetString("Title", resourceCulture);
+                return ResourceManager.GetString("SuccessMessage", resourceCulture);
             }
         }
     }

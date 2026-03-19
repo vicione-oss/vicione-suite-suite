@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
+namespace Blazor.Server.Backend.Areas.Identity.Pages.Models.Localization {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Common {
+    internal class ModelValidation {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Common() {
+        internal ModelValidation() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization.Common", typeof(Common).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Areas.Identity.Pages.Models.Localization.ModelValidation", typeof(ModelValidation).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,65 +61,11 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Account.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm new Password.
+        ///   Looks up a localized string similar to The input must be an Email address..
         /// </summary>
-        internal static string ConfirmNewPassword {
+        internal static string ErrorInputNotAEmailAdress {
             get {
-                return ResourceManager.GetString("ConfirmNewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Confirm Password.
-        /// </summary>
-        internal static string ConfirmPassword {
-            get {
-                return ResourceManager.GetString("ConfirmPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0} and {1} do not match..
-        /// </summary>
-        internal static string ErrorInputsDoNotMatch {
-            get {
-                return ResourceManager.GetString("ErrorInputsDoNotMatch", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Forgot Password.
-        /// </summary>
-        internal static string ForgotPassword {
-            get {
-                return ResourceManager.GetString("ForgotPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Go back to login page.
-        /// </summary>
-        internal static string NavigateToLoginPage {
-            get {
-                return ResourceManager.GetString("NavigateToLoginPage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to New Password.
-        /// </summary>
-        internal static string NewPassword {
-            get {
-                return ResourceManager.GetString("NewPassword", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Reset Password.
-        /// </summary>
-        internal static string ResetPassword {
-            get {
-                return ResourceManager.GetString("ResetPassword", resourceCulture);
+                return ResourceManager.GetString("ErrorInputNotAEmailAdress", resourceCulture);
             }
         }
     }

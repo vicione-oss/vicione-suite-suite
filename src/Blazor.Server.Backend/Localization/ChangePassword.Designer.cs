@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Blazor.Server.Backend.Areas.Identity.Pages.Models.Localization {
+namespace Blazor.Server.Backend.Localization {
     using System;
     
     
@@ -19,17 +19,17 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Models.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Validation {
+    internal class ChangePassword {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Validation() {
+        internal ChangePassword() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Models.Localization {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Areas.Identity.Pages.Models.Localization.Validation", typeof(Validation).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Server.Backend.Localization.ChangePassword", typeof(ChangePassword).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,11 +61,29 @@ namespace Blazor.Server.Backend.Areas.Identity.Pages.Models.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The input must be an Email address..
+        ///   Looks up a localized string similar to {0} and {1} must not be the same..
         /// </summary>
-        internal static string ErrorInputNotAEmailAdress {
+        internal static string ErrorInputsMustNotBeTheSame {
             get {
-                return ResourceManager.GetString("ErrorInputNotAEmailAdress", resourceCulture);
+                return ResourceManager.GetString("ErrorInputsMustNotBeTheSame", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your current password has expired. Please change it to continue using the application..
+        /// </summary>
+        internal static string PasswordExpiredMessage {
+            get {
+                return ResourceManager.GetString("PasswordExpiredMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User not found..
+        /// </summary>
+        internal static string UserNotFound {
+            get {
+                return ResourceManager.GetString("UserNotFound", resourceCulture);
             }
         }
     }

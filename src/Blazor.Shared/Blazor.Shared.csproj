@@ -72,11 +72,6 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>LogView.resx</DependentUpon>
     </Compile>
-    <Compile Update="Components\ReconnectModal\Localization\ReconnectModal.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ReconnectModal.resx</DependentUpon>
-    </Compile>
     <Compile Update="Connections\Services\Localization\SuiteConnectionService.Designer.cs">
       <DependentUpon>SuiteConnectionService.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -851,6 +846,7 @@
       <MonochromeIcon Include="general-menu" Size="24" />
       <MonochromeIcon Include="help-light" Size="24" />
       <MonochromeIcon Include="help-solid" Size="24" />
+      <MonochromeIcon Include="hide" Size="16" />
       <MonochromeIcon Include="import" Size="16" />
       <MonochromeIcon Include="info-outlined" Size="24" />
       <MonochromeIcon Include="install-pending-light" Size="16;24" />
@@ -867,7 +863,7 @@
       <MonochromeIcon Include="refresh" Size="16;24;32" />
       <MonochromeIcon Include="reload" Size="16;24" />
       <MonochromeIcon Include="redo" Size="16" />
-      <MonochromeIcon Include="show" Size="32" />
+      <MonochromeIcon Include="show" Size="16;32" />
       <MonochromeIcon Include="save-outline" Size="32" />
       <MonochromeIcon Include="switch-off" Size="16;32" />
       <MonochromeIcon Include="system-messages-light" Size="24" />
@@ -884,6 +880,7 @@
       <MonochromeIcon Include="user-interface-light" Size="24" />
       <MonochromeIcon Include="user-light" Size="24;32" />
       <MonochromeIcon Include="user-solid" Size="24" />
+      <MonochromeIcon Include="warning" Size="24" />
       <MonochromeIcon Include="warning-full" Size="24" />
       <MonochromeIcon Include="wizard" Size="32" />
     </ItemGroup>

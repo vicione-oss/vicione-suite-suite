@@ -1,4 +1,4 @@
-﻿namespace Blazor.Shared.Enums;
+namespace Blazor.Shared.Enums;
 
 public enum SvgIcon
 {
@@ -18,8 +18,5 @@ public enum SvgIcon
     CloseCircle,
     IfmLogo,
     Vicione,
-    UserOutline,
-    Email,
-    Back,
-    ErrorFull
+    VicioneLogo,
 }
