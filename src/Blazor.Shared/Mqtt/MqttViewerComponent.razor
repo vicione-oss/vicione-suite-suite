@@ -1,4 +1,4 @@
-﻿@using DevExpress.Blazor
+@using DevExpress.Blazor
 @using Sdk.Authorization
 @using ViciOne.Ui.Blazor.Components.Button
 @using ViciOne.Ui.Blazor.Components.Button.Enums
@@ -29,11 +29,12 @@
                 </ToolbarContent>
 
                 <ToolbarContent>
-                    <Button Title="_connectionStatusText"
-                            OnClick="@(async () => await ToggleConnection())"
-                            IconCssClass="@_connectionStatusIcon"
-                            CssClass="@("connection-button " + (_isConnected ? "connected" : string.Empty))"
-                            Enabled="@(!_isConnecting)">
+                    <Button Title="@_toggleConnectionButtonTitle"
+                            OnClick="@ToggleConnection"
+                            IconCssClass="@_toggleConnectionButtonIconCssClass"
+                            CssClass="_toggleConnectionButtonCssClass"
+                            Enabled="@(!_isConnecting)"
+                            Size="@ToggleConnectionButtonSize">
                     </Button>
                     
                 </ToolbarContent>

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Blazor.Shared.Mqtt.Localization;
 using Blazor.Shared.Mqtt.Services;
 using Microsoft.AspNetCore.Components;
@@ -6,7 +6,11 @@ using Sdk.Client.Infrastructure;
 using Sdk.Client.Services;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Requests;
+using ViciOne.Ui.Blazor.Components.Button.Enums;
+using ViciOne.Ui.Blazor.Components.Button.Extensions;
 using ViciOne.Ui.Localization.Resources;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
+using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 
 namespace Blazor.Shared.Mqtt;
 
@@ -16,8 +20,16 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
     internal const int MaxReloadInterval = 5000;
     internal const int DefaultReloadInterval = 1000;
 
-    private string _connectionStatusIcon = "mdi mdi-wifi";
-    private string _connectionStatusText = MqttViewer.ConnectTitle;
+    private static readonly ButtonSize ToggleConnectionButtonSize = ButtonSize.Small;
+
+    private readonly string _wifiIconCssClass =
+        MonochromeIconName.Wifi.GetCssClasses(ToggleConnectionButtonSize.ToMonochromeIconSize()).ToSpaceSeparated();
+    private readonly string _wifiOffIconCssClass =
+        MonochromeIconName.WifiOff.GetCssClasses(ToggleConnectionButtonSize.ToMonochromeIconSize()).ToSpaceSeparated();
+
+    private string? _toggleConnectionButtonIconCssClass;
+    private string? _toggleConnectionButtonCssClass;
+    private string? _toggleConnectionButtonTitle;
     private List<Connection> _connections = [];
     private readonly int[] _reloadIntervals =
     [
@@ -42,6 +54,8 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        UpdateToggleConnectionButtonState();
+
         _selectedReloadInterval = ViewerService.LastReloadInterval ?? DefaultReloadInterval;
 
         await LoadConnections();
@@ -99,13 +113,15 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
         }
     }
 
-    private Task OnMqttConnected()
+    private async Task OnMqttConnected()
     {
         _stopwatch.Start();
         _timer.Start();
         _isConnected = true;
 
-        return SetConnectionIcon(true);
+        UpdateToggleConnectionButtonState();
+
+        await InvokeAsync(StateHasChanged);
     }
 
     private void ReloadIntervalChanged(int interval)
@@ -140,14 +156,16 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
         return $"{MqttViewer.MessageCounter} {MqttService.ReceivedMessages} = {messagesPerSecond:0.00} M/s Time: {_stopwatch.Elapsed.ToString("hh\\:mm\\:ss", null)}";
     }
 
-    private Task OnMqttDisconnected()
+    private async Task OnMqttDisconnected()
     {
         _stopwatch.Stop();
         _stopwatch.Reset();
         _timer.Stop();
         _isConnected = false;
 
-        return SetConnectionIcon(false);
+        UpdateToggleConnectionButtonState();
+
+        await InvokeAsync(StateHasChanged);
     }
 
     public async ValueTask DisposeAsync()
@@ -166,10 +184,14 @@ public sealed partial class MqttViewerComponent : IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
-    private Task SetConnectionIcon(bool connected)
+    private void UpdateToggleConnectionButtonState()
     {
-        _connectionStatusIcon = connected ? "mdi mdi-wifi-off" : "mdi mdi-wifi";
-        _connectionStatusText = connected ? CommonVocabulary.DisconnectVerb : MqttViewer.ConnectTitle;
-        return InvokeAsync(StateHasChanged);
+        _toggleConnectionButtonIconCssClass = _isConnected ? _wifiOffIconCssClass : _wifiIconCssClass;
+
+        _toggleConnectionButtonCssClass = "toggle-connection-button";
+        if (_isConnected)
+            _toggleConnectionButtonCssClass += " connected";
+
+        _toggleConnectionButtonTitle = _isConnected ? CommonVocabulary.DisconnectVerb : MqttViewer.ConnectTitle;
     }
 }

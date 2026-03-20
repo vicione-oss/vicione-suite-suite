@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.Json;
 using AngleSharp.Dom;
 using AwesomeAssertions;
@@ -23,10 +23,10 @@ public class MqttViewerComponentTests
     private const string SkipMessage = "#709 - There some timing issue with the async popup rendering that fails in pipeline";
     private const string SkipFailing = "#80x - These tests need to be refactored because they fail to often";
 
-    private const string FilterButtonSelector = ".mdi-magnify";
-    private const string ExpandNodeButtonSelector = ".mdi-chevron-down";
-    private const string ConnectSpanSelector = ".mdi-wifi";
-    private const string DisconnectButtonSelector = ".mdi-wifi-off";
+    private const string FilterButtonSelector = ".monochrome-icon-search";
+    private const string ExpandNodeButtonSelector = ".monochrome-icon-expander-light-down";
+    private const string ConnectButtonSelector = ".monochrome-icon-wifi";
+    private const string DisconnectButtonSelector = ".monochrome-icon-wifi-off";
     private const string ClearFilterButtonSelector = $"button[id={MqttViewerConstants.ClearFilterButtonId}]";
     private const string ToggleTextFilterButtonSelector = $"button[id={MqttViewerConstants.ToggleTextFilterButtonId}]";
     private const string ToggleNodeFilterButtonSelector = $"button[id={MqttViewerConstants.ToggleNodeFilterButtonId}]";
@@ -54,7 +54,7 @@ public class MqttViewerComponentTests
     };
 
     private static IElement FindConnectButton(IRenderedComponent<MqttViewerComponent> component)
-        => component.Find(ConnectSpanSelector).ParentElement ?? throw new ElementNotFoundException(ConnectSpanSelector);
+        => component.Find(ConnectButtonSelector);
 
     private static void ConfigureTestServices(BunitContext ctx, List<Connection>? connections = null, List<MessageModel>? messages = null)
     {

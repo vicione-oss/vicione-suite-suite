@@ -1,5 +1,6 @@
-﻿@using Public.Contracts
+@using Public.Contracts
 @using Microsoft.AspNetCore.Components.Authorization
+@using ViciOne.Ui.Blazor.Components.Button.Enums
 @using ViciOne.Ui.Blazor.Components.TextBox
 @using ViciOne.Ui.Blazor.Components.Button
 @using ViciOne.Ui.Localization.Extensions
@@ -33,12 +34,12 @@
             </div>
 
             <div class="jit-chat-input">
-                <TextBox CssClass="jit-chat-text-input"
-                         @bind-Value="@MessageText"
+                <TextBox @bind-Value="@MessageText"
                          EnterPressed="@MessageTextEnterPressed"/>
 
-                <Button CssClass="jit-send-button mdi mdi-send"
+                <Button IconCssClass="@_sendButtonIconCssClass"
                         Title="Submit"
+                        Size="@ButtonSize.Small"
                         OnClick="@SubmitButtonPressed" />
             </div>
         </Authorized>

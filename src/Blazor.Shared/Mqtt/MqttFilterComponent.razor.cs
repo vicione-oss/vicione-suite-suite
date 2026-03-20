@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Mqtt.Contracts;
+using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Enums;
 using Blazor.Shared.Mqtt.Services;
 using Microsoft.AspNetCore.Components;
@@ -10,14 +10,14 @@ namespace Blazor.Shared.Mqtt;
 public sealed partial class MqttFilterComponent : IDisposable
 {
     private static readonly string _iconCssClass = MonochromeIconName.CloseMedium.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
-    private static readonly MonochromeIconSize _iconSize = MonochromeIconSize.Medium;
 
     private readonly string _filterIconCssClass =
-        MonochromeIconName.FilterLight.GetCssClasses(_iconSize).ToSpaceSeparated();
+        MonochromeIconName.FilterLight.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated();
     private readonly string _fileTreeIconCssClass =
-        MonochromeIconName.DataflowSolid.GetCssClasses(_iconSize).ToSpaceSeparated();
+        MonochromeIconName.DataflowSolid.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated();
     private readonly string _testTubeSolidIconCssClass =
-        MonochromeIconName.TestTubeSolid.GetCssClasses(_iconSize).ToSpaceSeparated();
+        MonochromeIconName.TestTubeSolid.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated();
+
     private SectionId _activeSectionId;
 
     [Inject]
