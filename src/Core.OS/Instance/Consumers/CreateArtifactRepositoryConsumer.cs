@@ -1,3 +1,4 @@
+using Core.OS.Instance.Extensions;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Events;
 using MassTransit;
@@ -7,6 +8,7 @@ namespace Core.OS.Instance.Consumers;
 
 public sealed partial class CreateArtifactRepositoryConsumer(
     IArtifactRepositoryStore repositoryStore,
+    IArtifactRepositoryTokenService tokenService,
     ILogger<CreateArtifactRepositoryConsumer> logger) : IConsumer<CreateArtifactRepository>
 {
     public async Task Consume(ConsumeContext<CreateArtifactRepository> context)
@@ -14,23 +16,30 @@ public sealed partial class CreateArtifactRepositoryConsumer(
         LogConsumeCreateRepository(logger, context.Message.CorrelationId, context.Message.Repository.Id);
 
         var repo = context.Message.Repository;
-        var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Created)
-        {
-            CorrelationId = context.Message.CorrelationId
-        };
 
         try
         {
+            await tokenService.UpdateRepositoryToken(repo, context.CancellationToken);
+
             var result = await repositoryStore.CreateOrUpdate(repo);
 
+            var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Created)
+            {
+                CorrelationId = context.Message.CorrelationId
+            };
 
-            await context.Publish(changeEvent);
+            await context.Publish(changeEvent, context.CancellationToken);
         }
         catch (Exception e)
         {
             LogFailedToUpdateRepository(logger, e, repo.Id);
 
-            await context.Publish(changeEvent with { Error = new ErrorInfo(100, e.Message) });
+            var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Created, new ErrorInfo(100, e.Message))
+            {
+                CorrelationId = context.Message.CorrelationId
+            };
+
+            await context.Publish(changeEvent, context.CancellationToken);
         }
     }
 

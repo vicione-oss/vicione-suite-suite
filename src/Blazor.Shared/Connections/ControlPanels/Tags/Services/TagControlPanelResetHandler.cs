@@ -8,11 +8,11 @@ internal sealed class TagControlPanelResetHandler(ISuiteConnectionService connec
 {
     public async Task Reset(TagControlPanelState state, CancellationToken cancellationToken)
     {
-        var tagId = state.TagId;
-        if (tagId.HasValue)
+        state.BeginLoading();
+        try
         {
-            state.BeginLoading();
-            try
+            var tagId = state.TagId;
+            if (tagId.HasValue)
             {
                 var tag = await connectionService.GetTag(tagId.Value, cancellationToken);
                 if (tag is not null)
@@ -20,15 +20,15 @@ internal sealed class TagControlPanelResetHandler(ISuiteConnectionService connec
                 else
                     state.Tag = null;
             }
-            finally
+            else
             {
-                state.EndLoading();
+                state.Tag = new();
+                state.IsNew = true;
             }
         }
-        else
+        finally
         {
-            state.Tag = new();
-            state.IsNew = true;
+            state.EndLoading();
         }
     }
 }

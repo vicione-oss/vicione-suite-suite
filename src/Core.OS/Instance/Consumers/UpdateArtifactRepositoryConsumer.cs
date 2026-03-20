@@ -1,3 +1,4 @@
+using Core.OS.Instance.Extensions;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
@@ -16,44 +17,30 @@ public sealed partial class UpdateArtifactRepositoryConsumer(
         LogConsumeUpdateArtifactRepository(logger, context.Message.CorrelationId, context.Message.Repository.Id);
 
         var repo = context.Message.Repository;
-        var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Updated)
-        {
-            CorrelationId = context.Message.CorrelationId
-        };
 
         try
         {
-            await UpdateRepositoryToken(repo, context.CancellationToken);
+            await tokenService.UpdateRepositoryToken(repo, context.CancellationToken);
 
             var result = await repositoryStore.CreateOrUpdate(repo);
 
-            await context.Publish(changeEvent);
+            var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Updated)
+            {
+                CorrelationId = context.Message.CorrelationId
+            };
+
+            await context.Publish(changeEvent, context.CancellationToken);
         }
         catch (Exception e)
         {
             LogFailedToUpdateRepository(logger, e, repo.Id);
 
-            await context.Publish(changeEvent with { Error = new ErrorInfo(100, e.Message) });
-        }
-    }
+            var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Updated, new ErrorInfo(100, e.Message))
+            {
+                CorrelationId = context.Message.CorrelationId
+            };
 
-    private async Task UpdateRepositoryToken(ArtifactRepository repo, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(repo.TokenEndpoint))
-            return;
-
-        try
-        {
-            // if token endpoint is set, we assume it's a new token and update the token updated time to now
-            var tokenUri = new Uri(repo.TokenEndpoint);
-            var token = await tokenService.GetToken(tokenUri, cancellationToken); // this will update the token updated time
-
-            repo.Password = token.Token;
-            repo.TokenValidUntil = token.ValidUntil;
-        }
-        catch (Exception e)
-        {
-            throw new InvalidOperationException($"Invalid {nameof(repo.TokenEndpoint)} - failed to retrieve a valid token", e);
+            await context.Publish(changeEvent, context.CancellationToken);
         }
     }
 

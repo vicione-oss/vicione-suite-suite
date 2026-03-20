@@ -1,3 +1,4 @@
+using System.Reactive.Disposables;
 using System.Security.Principal;
 using Blazor.Shared;
 using Blazor.Shared.Services;
@@ -39,12 +40,20 @@ public sealed partial class BlazorServerUiMediator(ISuiteMediator suiteMediator,
     {
         TryScopeIdentityInitialization();
 
-        var logger = services.GetRequiredService<ILogger<BlazorServerUiMediator>>();
+        try
+        {
+            var logger = services.GetRequiredService<ILogger<BlazorServerUiMediator>>();
 
-        LogRegisterEvent(logger, handler.GetType().FullName, typeof(TEvent).FullName, _scopeIdentity?.Name);
+            LogRegisterEvent(logger, handler.GetType().FullName, typeof(TEvent).FullName, _scopeIdentity?.Name);
 
-        var subscriptionHolder = services.GetRequiredService<IUiEventSubscriptionHolder<TEvent>>();
-        return subscriptionHolder.Connect(handler, _scopeIdentity);
+            var subscriptionHolder = services.GetRequiredService<IUiEventSubscriptionHolder<TEvent>>();
+            return subscriptionHolder.Connect(handler, _scopeIdentity);
+        }
+        catch (ObjectDisposedException)
+        {
+            // In case the scope has already been disposed, we return a dummy disposable.
+            return Disposable.Empty;
+        }
     }
 
     /// <summary>

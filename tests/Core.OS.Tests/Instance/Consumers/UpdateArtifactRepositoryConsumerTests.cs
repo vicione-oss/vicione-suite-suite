@@ -46,7 +46,7 @@ public class UpdateArtifactRepositoryConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_ArtifactRepositoryChanged_on_success()
+    public async Task Consume_should_publish_correlated_ArtifactRepositoryChanged_on_success()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
@@ -60,6 +60,7 @@ public class UpdateArtifactRepositoryConsumerTests
 
         // Assert
         response.Should().NotBeNull();
+        response.CorrelationId.Should().Be(command.CorrelationId);
         response.Repository.Should().BeEquivalentTo(repo);
         response.Error.Should().BeNull();
     }
@@ -84,7 +85,7 @@ public class UpdateArtifactRepositoryConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_refresh_token_and_publish_updated_repo_when_token_endpoint_is_set()
+    public async Task Consume_should_refresh_token_and_publish_change_event_when_token_endpoint_is_set()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1", TokenEndpoint = "https://token.example.com" };
@@ -127,7 +128,7 @@ public class UpdateArtifactRepositoryConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_error_when_token_service_throws()
+    public async Task Consume_should_publish_change_with_error_when_token_service_throws()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1", TokenEndpoint = "https://token.example.com" };

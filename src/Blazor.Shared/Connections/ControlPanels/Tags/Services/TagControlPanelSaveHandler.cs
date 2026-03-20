@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Connections.Services;
+using Blazor.Shared.Connections.Contracts;
+using Blazor.Shared.Connections.Services;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
@@ -20,9 +21,10 @@ internal sealed class TagControlPanelSaveHandler(ISuiteConnectionService connect
             Protected = state.Tag.Protected,
         };
 
-        await connectionService.UpsertTag(tag, cancellationToken);
+        var result = await connectionService.UpsertTag(tag, cancellationToken);
+        if (result is SuiteConnectionServiceErrorResult errorResult)
+            return new SaveErrorResult(errorResult.ErrorMessage);
 
         return new SaveSuccessResult();
     }
 }
-
