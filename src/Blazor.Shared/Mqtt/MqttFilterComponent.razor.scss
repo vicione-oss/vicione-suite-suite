@@ -1,4 +1,4 @@
-﻿@use "../Styles/design/colors";
+@use "../Styles/design/colors";
 @use "../../../shared/styles/colors-staged";
 @use "../../../shared/styles/variables";
 
@@ -14,10 +14,7 @@
         grid-template-columns: 1fr auto;
         justify-content: center;
         align-content: start;
-
-        ::deep .text-box {
-            margin-right: 5px;
-        }
+        gap: 5px;
     }
 
     .tree-container {
@@ -31,6 +28,10 @@
             display: flex;
             align-items: center;
 
+            .set-node-topic-filter-button {
+                display: flex;
+            }
+
             label {
                 margin-right: 5px;
             }
@@ -40,7 +41,7 @@
             margin-right: 5px;
 
             span {
-                margin-right: 5px;
+                margin-left: 5px;
             }
         }
 

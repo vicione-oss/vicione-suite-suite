@@ -12,8 +12,7 @@
         padding: variables.$toolbar-padding;
         border-bottom: 1px solid colors.$border;
 
-
-        ::deep .connection-button {
+        ::deep .toggle-connection-button {
 
             &.connected {
                 color: colors-staged.$color-light-green;

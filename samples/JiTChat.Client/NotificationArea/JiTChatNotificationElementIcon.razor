@@ -1,4 +1,11 @@
-﻿@using Sdk.Client.Components.MaterialDesignIcon
-@using Sdk.Client.Enums
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 
-<MaterialDesignIconComponent Name="MaterialDesignIconName.Forum" />
+@if (NotificationElementState.IsActive)
+{
+    <MonochromeIcon Name="MonochromeIconName.SendSolid" />
+}
+else
+{
+    <MonochromeIcon Name="MonochromeIconName.SendLight" />
+}

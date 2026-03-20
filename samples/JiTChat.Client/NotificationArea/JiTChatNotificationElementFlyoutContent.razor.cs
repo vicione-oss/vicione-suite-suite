@@ -1,4 +1,4 @@
-﻿using JiTChat.Client.Contracts;
+using JiTChat.Client.Contracts;
 using JiTChat.Public.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -8,14 +8,23 @@ using Sdk.Authorization;
 using Sdk.Client.Extensions;
 using Sdk.Client.NotificationArea.Components;
 using Sdk.Client.Services;
+using ViciOne.Ui.Blazor.Components.Button.Enums;
+using ViciOne.Ui.Blazor.Components.Button.Extensions;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
+using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 
 namespace JiTChat.Client.NotificationArea;
 
 public sealed partial class JiTChatNotificationElementFlyoutContent : ComponentBase, INotificationElementFlyoutContent, IAsyncDisposable
 {
-    private IJSObjectReference? _jsModuleReference;
+    private static readonly string Policy = ModulePolicyProvider.GetPolicy<JiTChatClientModule>();
 
-    private static string Policy => ModulePolicyProvider.GetPolicy<JiTChatClientModule>();
+    private static readonly ButtonSize SendButtonSize = ButtonSize.Small;
+
+    private readonly string _sendButtonIconCssClass =
+        MonochromeIconName.SendSolid.GetCssClasses(SendButtonSize.ToMonochromeIconSize()).ToSpaceSeparated();
+
+    private IJSObjectReference? _jsModuleReference;
 
     [Inject]
     public IJiTChatService JiTChatService { get; set; } = default!;

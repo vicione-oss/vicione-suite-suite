@@ -835,8 +835,10 @@
       <MonochromeIcon Include="email" Size="24" />
       <MonochromeIcon Include="error-full" Size="24" />
       <MonochromeIcon Include="exit" Size="16;32" />
+      <MonochromeIcon Include="expander-light-down" Size="24" />
       <MonochromeIcon Include="expander-light-left" Size="48" />
       <MonochromeIcon Include="expander-light-right" Size="24" />
+      <MonochromeIcon Include="expander-light-top" Size="24" />
       <MonochromeIcon Include="export" Size="16" />
       <MonochromeIcon Include="external-link" Size="16" />
       <MonochromeIcon Include="folder" Size="16" />
@@ -865,6 +867,9 @@
       <MonochromeIcon Include="redo" Size="16" />
       <MonochromeIcon Include="show" Size="16;32" />
       <MonochromeIcon Include="save-outline" Size="32" />
+      <MonochromeIcon Include="search" Size="16" />
+      <MonochromeIcon Include="send-light" Size="16;32" />
+      <MonochromeIcon Include="send-solid" Size="16;32" />
       <MonochromeIcon Include="switch-off" Size="16;32" />
       <MonochromeIcon Include="system-messages-light" Size="24" />
       <MonochromeIcon Include="system-messages-solid" Size="24" />
@@ -882,6 +887,8 @@
       <MonochromeIcon Include="user-solid" Size="24" />
       <MonochromeIcon Include="warning" Size="24" />
       <MonochromeIcon Include="warning-full" Size="24" />
+      <MonochromeIcon Include="wifi" Size="16" />
+      <MonochromeIcon Include="wifi-off" Size="16" />
       <MonochromeIcon Include="wizard" Size="32" />
     </ItemGroup>
     

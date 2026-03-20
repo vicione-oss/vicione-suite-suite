@@ -1,4 +1,4 @@
-﻿@use "../Styles/design/colors";
+@use "../Styles/design/colors";
 @use "../../../shared/styles/colors-staged";
 @use "../../../shared/styles/typography";
 
@@ -54,16 +54,11 @@
 }
 
 .jit-chat-input {
-    display: flex;
+    display: grid;
+    grid-template-areas:
+        "input send";
+    grid-template-columns: auto min-content;
+    gap: 3px;
+
     padding: 16px 8px 8px;
-
-    ::deep > .jit-chat-text-input {
-        flex-grow: 1;
-    }
-
-    ::deep > .jit-send-button {
-        margin-left: 3px;
-        grid-template-columns: 1fr;
-        width: 32px;
-    }
 }

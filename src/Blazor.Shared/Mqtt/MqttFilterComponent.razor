@@ -1,4 +1,4 @@
-﻿@using DevExpress.Blazor
+@using DevExpress.Blazor
 @using Blazor.Shared.Mqtt.Contracts
 @using Blazor.Shared.Mqtt.Enums
 @using ViciOne.Ui.Blazor.Components.Button
@@ -7,6 +7,8 @@
 @using ViciOne.Ui.Blazor.Components.SectionRail.Components
 @using ViciOne.Ui.Blazor.Components.TextBox
 @using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 <SectionRail @bind-ActiveSectionId="@_activeSectionId" @bind-ActiveSectionId:after="@ActiveSectionIdChanged">
     <Section Id="@SectionId.Filter" Title="@CommonVocabulary.Filter" IconCssClass="@_filterIconCssClass">
@@ -54,22 +56,20 @@
                                 }
                                 else
                                 {
+                                    var expanderIconName = context.Expanded ? MonochromeIconName.ExpanderLightTop : MonochromeIconName.ExpanderLightDown;
+
                                     <div class="tree-element">
-                                        @if (context.Expanded)
-                                        {
-                                            <span class="mdi mdi-chevron-up"></span>
-                                        }
-                                        else
-                                        {
-                                            <span class="mdi mdi-chevron-down"></span>
-                                        }
-                                        @topicGroup.Topic
+                                        <MonochromeIcon Name="@expanderIconName" Size="@MonochromeIconSize.SmallMedium" />
+                                        
+                                        <span>
+                                            @topicGroup.Topic
+                                        </span>
                                     </div>
                                 }
                             }
 
-                            <div @onclick="@(() => ViewerService.SetNodeTopicFilter(context))">
-                                <span class="mdi mdi-magnify"></span>
+                            <div class="set-node-topic-filter-button" @onclick="@(() => ViewerService.SetNodeTopicFilter(context))">
+                                <MonochromeIcon Name="@MonochromeIconName.Search" Size="@MonochromeIconSize.Small" />
                             </div>
                         </div>
                     </NodeTemplate>

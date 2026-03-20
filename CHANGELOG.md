@@ -23,6 +23,7 @@
 
 ### Removed
 
+- Removed dependency to Material design icons
 - `SettingsContainerContentHeader`, removed workaround to control size of "navigate back" icon, replaced by using larger icon and placement adjustments
 
 ### Fixed
@@ -49,7 +50,7 @@
 - `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2393621169`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.6.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
-- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.5.0`
+- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.6.0`
 - `ViciOne.Ui.Localization` package, update version to `3.2.0`
 - `ViciOne.Ui.Shared.Dx` packages, update to version `0.19.1`
 - `xunit` packages, update to version `xunit.v3 - 3.2.2`

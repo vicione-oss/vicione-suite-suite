@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Blazor.Tests.Tools;
 using Bunit;
 using JiTChat.Client;
@@ -74,7 +74,7 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
         // Act
         var cut = ctx.Render<JiTChatNotificationElementFlyoutContent>();
         cut.Instance.MessageText = testMessage;
-        var button = cut.Find(".jit-chat-input > .jit-send-button");
+        var button = cut.Find(".jit-chat-input > button");
         await button.ClickAsync();
 
         // Assert
