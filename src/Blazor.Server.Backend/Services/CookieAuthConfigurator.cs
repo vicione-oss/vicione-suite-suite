@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
@@ -24,7 +24,7 @@ internal sealed class CookieAuthConfigurator(ITicketStore store) : IPostConfigur
          */
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.SlidingExpiration = true;
-        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.ExpireTimeSpan = TimeSpan.FromDays(14);
 
         // Keep user ticket server-side - store needs to be singleton!
         options.SessionStore = store;

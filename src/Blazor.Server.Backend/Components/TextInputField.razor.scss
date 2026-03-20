@@ -68,6 +68,10 @@
             outline: 1px solid;
             color: var(--vo-ui-bc-color-accent-hover);
         }
+
+        &::-ms-reveal {
+            display: none;
+        }
     }
 
     .show-button {
