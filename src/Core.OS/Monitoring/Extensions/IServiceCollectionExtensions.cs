@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Core.OS.Connections.Mqtt;
 using Core.OS.Instance;
 using Core.Shared.Monitoring;
@@ -20,6 +20,10 @@ internal static class IServiceCollectionExtensions
             {
                 services.AddOptions<JournalOptions>();
                 services.AddSingleton<IJournalService, JournalService>();
+            }
+            else
+            {
+                services.AddSingleton<IJournalService, NoOpJournalService>();
             }
             return services;
         }

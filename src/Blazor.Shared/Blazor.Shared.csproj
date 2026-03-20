@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <AssemblyName>ViciOne.Suite.Blazor.Shared</AssemblyName>
@@ -67,7 +67,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Admin\Logging\Localization\LogView.Designer.cs">
+    <Compile Update="Logging\Localization\LogView.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>LogView.resx</DependentUpon>
@@ -479,7 +479,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Admin\Logging\Localization\LogView.resx">
+    <EmbeddedResource Update="Logging\Localization\LogView.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LogView.Designer.cs</LastGenOutput>
     </EmbeddedResource>
@@ -822,6 +822,7 @@
       <MonochromeIcon Include="add-user" Size="16;32" />
       <MonochromeIcon Include="arrow-navigation-light-left" Size="16" />
       <MonochromeIcon Include="arrow-navigation-light-right" Size="16" />
+      <MonochromeIcon Include="arrow-navigation-light-up" Size="24" />      
       <MonochromeIcon Include="bug-light" Size="24" />
       <MonochromeIcon Include="check" Size="16;24" />
       <MonochromeIcon Include="chevron" Size="16" />
@@ -866,6 +867,7 @@
       <MonochromeIcon Include="reload" Size="16;24" />
       <MonochromeIcon Include="redo" Size="16" />
       <MonochromeIcon Include="show" Size="16;32" />
+      <MonochromeIcon Include="save-outline" Size="24;32" />
       <MonochromeIcon Include="save-outline" Size="32" />
       <MonochromeIcon Include="search" Size="16" />
       <MonochromeIcon Include="send-light" Size="16;32" />

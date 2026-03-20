@@ -1,24 +1,52 @@
-﻿@using System.Globalization
+@using System.Globalization
+@using Blazor.Shared.Logging.Localization
 @using ViciOne.Ui.Blazor.Components.Button
 @using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
+@using ViciOne.Ui.Blazor.Components.Toolbar.Components
+@using ViciOne.Ui.Blazor.Components.Toolbar.Enums
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
-<div class="journal-background">
-    @if (LoadMore is not null)
-    {
-        <Button OnClick="LoadMore" Text="Load More" CssClass="journal-button"/>
-        <Button OnClick="@(() => DownloadEntriesAsync())" Text="Download" CssClass="journal-button"/>
-    }
-    <ul class="journal-list">
-        @foreach (var entry in Entries)
+<div class="journal-layout">
+    <div class="journal-top-bar">
+        <Toolbar>
+            <ToolbarGroup>
+                <ToolbarContent>
+                    @if (!_isRunningOnLinux)
+                    {
+                        @Localization.LogView.LogViewAvailableOnlyOnLinux
+                    }
+                </ToolbarContent>
+            </ToolbarGroup>
+            <ToolbarGroup AlignRight="true">
+                @if (LoadMore is not null)
+                {
+                    <ToolbarButton Text="@(string.Format(UserActions.LoadSomething, Localization.LogView.More))"
+                                   IconName="@MonochromeIconName.ArrowNavigationLightUp"
+                                   OnClick="LoadMore"
+                                   TextVisibility="@TextVisibility.Always" />
+                }
+                <ToolbarButton Text="@(CommonVocabulary.DownloadVerb)"
+                               IconName="@MonochromeIconName.SaveOutline"
+                               OnClick="@(() => DownloadEntriesAsync())"
+                               TextVisibility="@TextVisibility.Always" />
+            </ToolbarGroup>
+        </Toolbar>
+    </div>
+
+    <div class="journal-background">
+        <ul class="journal-list">
+            @foreach (var entry in Entries)
+            {
+                <li>
+                    @ComposeHeader(entry)
+                    <span class="@GetClassFromPriority(entry.Priority)">@entry.Message</span>
+                </li>
+            }
+        </ul>
+        @if (ErrorMessage is not null)
         {
-            <li>
-                @ComposeHeader(entry)
-                <span class="@GetClassFromPriority(entry.Priority)">@entry.Message</span>
-            </li>
+            <span class="journal-error">@ErrorMessage</span>
         }
-    </ul>
-    @if (ErrorMessage is not null)
-    {
-        <span class="journal-error">@ErrorMessage</span>
-    }
+    </div>
 </div>

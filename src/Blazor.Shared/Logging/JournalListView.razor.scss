@@ -1,44 +1,59 @@
-﻿.journal-background {
-    background-color: black;
-    font-family: monospace;
-    height: 100%;
-    overflow: auto;
+@use "../Styles/design/colors";
+@use "../../../shared/styles/variables.scss";
 
-    ::deep .journal-button {
-        margin: 10px 0px 5px 5px
+.journal-layout {
+    display: grid;
+    grid-row-gap: 0px;
+    grid-template-rows: variables.$top-bar-height auto min-content;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 0;
+
+    .journal-top-bar {
+        padding: variables.$toolbar-padding;
+        border-bottom: 1px solid colors.$border;
     }
 
-    .journal-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        margin-left: 6px;
+    .journal-background {
+        background-color: black;
+        font-family: monospace;
+        height: 100%;
+        overflow: auto;
 
-        .priority-emergency, .priority-alert, .priority-critical {
+        .journal-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            margin-left: 6px;
+
+            .priority-emergency, .priority-alert, .priority-critical {
+                color: indianred;
+                font-weight: bold;
+            }
+
+            .priority-error {
+                color: indianred;
+            }
+
+            .priority-warning {
+                color: khaki;
+            }
+
+            .priority-notice, .priority-information {
+                color: white;
+            }
+
+            .priority-debug {
+                color: gray;
+            }
+        }
+
+        .journal-error {
+            margin: 10px 0px 5px 5px;
             color: indianred;
             font-weight: bold;
         }
-
-        .priority-error {
-            color: indianred;
-        }
-
-        .priority-warning {
-            color: khaki;
-        }
-
-        .priority-notice, .priority-information {
-            color: white;
-        }
-
-        .priority-debug {
-            color: gray;
-        }
-    }
-
-    .journal-error {
-        margin: 10px 0px 5px 5px;
-        color: indianred;
-        font-weight: bold;
     }
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -134,5 +134,11 @@
   </data>
   <data name="LogViewDescription" xml:space="preserve">
     <value>Suite Protokolle durchsuchen</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>Mehr</value>
+  </data>
+  <data name="LogViewAvailableOnlyOnLinux" xml:space="preserve">
+    <value>Das Log-Feature ist nur auf Linux-Betriebssystemem verfügbar (Journal)</value>
   </data>
 </root>

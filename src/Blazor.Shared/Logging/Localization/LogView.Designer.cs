@@ -9,8 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace Blazor.Shared.Logging.Localization {
-
-
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -18,7 +19,7 @@ namespace Blazor.Shared.Logging.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class LogView {
@@ -96,6 +97,15 @@ namespace Blazor.Shared.Logging.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Logging feature is only supported on linux OS (journal).
+        /// </summary>
+        internal static string LogViewAvailableOnlyOnLinux {
+            get {
+                return ResourceManager.GetString("LogViewAvailableOnlyOnLinux", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to View suite logfiles.
         /// </summary>
         internal static string LogViewDescription {
@@ -110,6 +120,15 @@ namespace Blazor.Shared.Logging.Localization {
         internal static string LogViewTitle {
             get {
                 return ResourceManager.GetString("LogViewTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to More.
+        /// </summary>
+        internal static string More {
+            get {
+                return ResourceManager.GetString("More", resourceCulture);
             }
         }
     }
