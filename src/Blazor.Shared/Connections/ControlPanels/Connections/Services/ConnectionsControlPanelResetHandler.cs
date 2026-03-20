@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Connections.Contracts;
+using Blazor.Shared.Connections.Contracts;
 using Blazor.Shared.Connections.Services;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
@@ -9,17 +9,25 @@ internal sealed class ConnectionsControlPanelResetHandler(ISuiteConnectionServic
 {
     public async Task Reset(ConnectionsControlPanelState state, CancellationToken cancellationToken)
     {
-        var connections = connectionService.Connections.Select(c => new EditConnectionModel(c, connectionRegistry));
-        state.Connections = [.. connections];
+        state.BeginLoading();
+        try
+        {
+            state.DeletingConnections.Clear();
+            state.DeletingTags.Clear();
 
-        // this will trigger StateChanged in ConnectionsControlPanel
-        state.ResetSelectedConnections = true;
-        state.ResetSelectedTags = true;
+            var connections = connectionService.Connections.Select(c => new EditConnectionModel(c, connectionRegistry));
+            state.Connections = [.. connections];
 
-        var tags = await connectionService.GetTags(cancellationToken);
-        state.Tags = tags.ToDictionary(k => k.Id);
+            // this will trigger StateChanged in ConnectionsControlPanel
+            state.ResetSelectedConnections = true;
+            state.ResetSelectedTags = true;
 
-        state.DeletingConnections.Clear();
-        state.DeletingTags.Clear();
+            var tags = await connectionService.GetTags(cancellationToken);
+            state.Tags = tags.ToDictionary(k => k.Id);
+        }
+        finally
+        {
+            state.EndLoading();
+        }
     }
 }

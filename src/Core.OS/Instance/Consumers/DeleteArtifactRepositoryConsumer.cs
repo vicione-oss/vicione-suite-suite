@@ -25,7 +25,7 @@ public sealed partial class DeleteArtifactRepositoryConsumer(
                 CorrelationId = context.Message.CorrelationId
             };
 
-            await context.Publish(changeEvent);
+            await context.Publish(changeEvent, context.CancellationToken);
         }
         catch (Exception e)
         {
@@ -37,7 +37,7 @@ public sealed partial class DeleteArtifactRepositoryConsumer(
                 CorrelationId = context.Message.CorrelationId
             };
 
-            await context.Publish(changeEvent);
+            await context.Publish(changeEvent, context.CancellationToken);
         }
     }
 

@@ -15,10 +15,6 @@ public sealed partial class UpdateArtifactRepositoryTokenConsumer(
         LogConsumeUpdateRepositoryToken(logger, context.Message.CorrelationId, context.Message.Repository.Id);
 
         var repo = context.Message.Repository;
-        var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Updated)
-        {
-            CorrelationId = context.Message.CorrelationId
-        };
 
         try
         {
@@ -33,13 +29,23 @@ public sealed partial class UpdateArtifactRepositoryTokenConsumer(
 
             await repositoryStore.CreateOrUpdate(repo, context.CancellationToken);
 
-            await context.Publish(changeEvent);
+            var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Updated)
+            {
+                CorrelationId = context.Message.CorrelationId
+            };
+
+            await context.Publish(changeEvent, context.CancellationToken);
         }
         catch (Exception e)
         {
             LogFailedToUpdateRepositoryToken(logger, e, repo.Id);
 
-            await context.Publish(changeEvent with { Error = new ErrorInfo(100, e.Message) });
+            var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Updated, new ErrorInfo(100, e.Message))
+            {
+                CorrelationId = context.Message.CorrelationId
+            };
+
+            await context.Publish(changeEvent, context.CancellationToken);
         }
     }
 
