@@ -6,20 +6,13 @@
 
 <AuthorizeView Policy="@ModulePolicyProvider.GetPolicy(Core.Shared.Constants.SystemModuleId, AccessLevel.Full, Constants.LogViewFeature)">
     <Authorized>
-        @if (OperatingSystem.IsLinux())
+        @if (Follow)
         {
-            @if (Follow)
-            {
-                <JournalFollowView Filter="@Filter" />
-            }
-            else
-            {
-                <JournalView Filter="@Filter" />
-            }
+            <JournalFollowView Filter="@Filter" />
         }
         else
         {
-            <p>Journal view is only available on Linux</p>
+            <JournalView Filter="@Filter" />
         }
     </Authorized>
     <NotAuthorized>

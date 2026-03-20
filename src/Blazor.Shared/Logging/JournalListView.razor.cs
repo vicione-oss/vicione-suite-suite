@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
 using Blazor.Shared.Logging.Contracts;
@@ -11,6 +11,8 @@ namespace Blazor.Shared.Logging;
 
 public sealed partial class JournalListView : ComponentBase, IDisposable
 {
+    private bool _isRunningOnLinux = false;
+
     [Inject(Key = Sdk.Constants.ClientTimeProviderServiceKey)] private TimeProvider TimeProvider { get; set; } = default!;
     [Inject] private IJsInterop JsInterop { get; set; } = default!;
     [Inject] public IInstanceInformationProvider InformationProvider { get; set; } = default!;
@@ -21,6 +23,8 @@ public sealed partial class JournalListView : ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        _isRunningOnLinux = OperatingSystem.IsLinux();
+
         Entries.CollectionChanged -= CollectionChanged;
         Entries.CollectionChanged += CollectionChanged;
         await base.OnInitializedAsync();
