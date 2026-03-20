@@ -1,7 +1,6 @@
 ﻿using Core.OS.HostManagement.Extensions;
 using Core.OS.HostManagement.Mappers;
 using HostManagement.Shared.Communication.Enums;
-using MassTransit;
 using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 using Sdk.NetworkStatus.Requests;
@@ -11,11 +10,11 @@ namespace Core.OS.HostManagement.Consumers;
 public sealed partial class GetNetworkStatusInformationRequestConsumer(IPipeClient pipeClient, ILogger<GetNetworkStatusInformationRequestConsumer> logger)
     : RequestConsumer<GetNetworkStatusInformation, GetNetworkStatusInformationResponse>
 {
-    protected override async Task<GetNetworkStatusInformationResponse> Respond(ConsumeContext<GetNetworkStatusInformation> context)
+    public override async Task<GetNetworkStatusInformationResponse> Respond(GetNetworkStatusInformation message, CancellationToken cancellationToken)
     {
         var mapper = new NetworkStatusInformationMapper();
 
-        var result = await pipeClient.GetNetworkStatusInformation(context.Message.NetworkInterfaceName, context.CancellationToken);
+        var result = await pipeClient.GetNetworkStatusInformation(message.NetworkInterfaceName, cancellationToken);
         if (result == null)
         {
             DeserializeReturnedNull(logger);
@@ -39,8 +38,8 @@ public sealed partial class GetNetworkStatusInformationRequestConsumer(IPipeClie
         return new GetNetworkStatusInformationResponse { RequestError = new ErrorInfo(3, result.Message) };
     }
 
-    protected override Task<GetNetworkStatusInformationResponse> HandleException(ConsumeContext<GetNetworkStatusInformation> context,
-        Exception e)
+    public override Task<GetNetworkStatusInformationResponse> HandleException(GetNetworkStatusInformation message,
+        Exception e, CancellationToken cancellationToken)
     {
         ExceptionOccurred(logger, e);
 

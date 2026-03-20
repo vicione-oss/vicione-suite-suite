@@ -1,7 +1,6 @@
 ﻿using Core.OS.DbContext;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Requests;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Messaging;
 
@@ -10,17 +9,17 @@ namespace Core.OS.Instance.Consumers;
 public sealed class GetCrossInstanceConfigurationConsumer(IApplicationDbContext dbContext, ILogger<GetCrossInstanceConfigurationConsumer> logger)
     : RequestConsumer<GetCrossInstanceConfiguration, GetCrossInstanceConfigurationResponse>
 {
-    protected override async Task<GetCrossInstanceConfigurationResponse> Respond(ConsumeContext<GetCrossInstanceConfiguration> context)
+    public override async Task<GetCrossInstanceConfigurationResponse> Respond(GetCrossInstanceConfiguration message, CancellationToken cancellationToken)
     {
         var crossInstanceConfiguration = await dbContext
             .CrossInstanceConfiguration
             .AsNoTracking()
-            .SingleOrDefaultAsync(context.CancellationToken) ?? new CrossInstanceConfiguration();
+            .SingleOrDefaultAsync(cancellationToken) ?? new CrossInstanceConfiguration();
 
         return new GetCrossInstanceConfigurationResponse(crossInstanceConfiguration);
     }
 
-    protected override Task<GetCrossInstanceConfigurationResponse> HandleException(ConsumeContext<GetCrossInstanceConfiguration> context, Exception e)
+    public override Task<GetCrossInstanceConfigurationResponse> HandleException(GetCrossInstanceConfiguration message, Exception e, CancellationToken cancellationToken)
     {
         logger.LogError(e, $"Failed to handle {nameof(GetCrossInstanceConfiguration)}");
 

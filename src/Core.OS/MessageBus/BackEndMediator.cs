@@ -2,6 +2,7 @@
 using Core.Shared.Instance.HealthCheck;
 using MassTransit;
 using Sdk.Backend.Messaging;
+using Sdk.Instance;
 using Sdk.Messaging;
 
 namespace Core.OS.MessageBus;
@@ -39,30 +40,21 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
         CancellationToken cancellationToken = default)
         where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse
-    {
-        var handle = GetRequestHandle<TRequest, TResponse>(request, null, cancellationToken);
-        return GetResponse<TRequest, TResponse>(handle);
-    }
+        => HandleLocalRequest<TRequest, TResponse>(request, null, cancellationToken);
 
     public Task<TResponse> Request<TRequest, TResponse>(TRequest request,
         TimeSpan timeOut,
         CancellationToken cancellationToken = default)
         where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse
-    {
-        var handle = GetRequestHandle<TRequest, TResponse>(request, timeOut, cancellationToken);
-        return GetResponse<TRequest, TResponse>(handle);
-    }
+        => HandleLocalRequest<TRequest, TResponse>(request, timeOut, cancellationToken);
 
     public Task<TResponse> Request<TRequest, TResponse>(TRequest request,
         Guid instanceId,
         CancellationToken cancellationToken = default)
         where TRequest : class, IInstanceDependentRequest<TResponse>
         where TResponse : class, IResponse
-    {
-        var handle = GetRequestHandle<TRequest, TResponse>(request, instanceId, null, cancellationToken);
-        return GetInstanceResponse<TRequest, TResponse>(handle);
-    }
+        => HandleInstanceRequest<TRequest, TResponse>(request, instanceId, null, cancellationToken);
 
     public Task<TResponse> Request<TRequest, TResponse>(TRequest request,
         Guid instanceId,
@@ -70,11 +62,58 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
         CancellationToken cancellationToken = default)
         where TRequest : class, IInstanceDependentRequest<TResponse>
         where TResponse : class, IResponse
+        => HandleInstanceRequest<TRequest, TResponse>(request, instanceId, timeOut, cancellationToken);
+
+    private Task<TResponse> HandleInstanceRequest<TRequest, TResponse>(TRequest request,
+        Guid instanceId,
+        TimeSpan? timeOut,
+        CancellationToken cancellationToken = default)
+        where TRequest : class, IInstanceDependentRequest<TResponse>
+        where TResponse : class, IResponse
     {
+        var localInstanceId = services.GetRequiredService<IInstanceInformationProvider>().Local.Id;
+        if (instanceId == localInstanceId)
+        {
+            var consumer = services.GetService<IConsumer<TRequest>>();
+            if (consumer is InstanceDependentRequestConsumer<TRequest, TResponse> requestConsumer)
+            {
+                try
+                {
+                    return requestConsumer.Respond(request, cancellationToken);
+                }
+                catch (Exception e)
+                {
+                    return requestConsumer.HandleException(request, e, cancellationToken);
+                }
+            }
+        }
         var handle = GetRequestHandle<TRequest, TResponse>(request, instanceId, timeOut, cancellationToken);
         return GetInstanceResponse<TRequest, TResponse>(handle);
     }
-
+    
+    private Task<TResponse> HandleLocalRequest<TRequest, TResponse>(TRequest request,
+        TimeSpan? timeOut,
+        CancellationToken cancellationToken = default)
+        where TRequest : class, IRequest<TResponse>
+        where TResponse : class, IResponse
+    {
+        var consumer = services.GetService<IConsumer<TRequest>>();
+        if (consumer is RequestConsumer<TRequest, TResponse> requestConsumer)
+        {
+            try
+            {
+                return requestConsumer.Respond(request, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                
+                return requestConsumer.HandleException(request, e, cancellationToken);
+            }
+        }
+        var handle = GetRequestHandle<TRequest, TResponse>(request, timeOut, cancellationToken);
+        return GetResponse<TRequest, TResponse>(handle);
+    }
+    
     private RequestHandle<TRequest> GetRequestHandle<TRequest, TResponse>(TRequest request,
         TimeSpan? timeOut,
         CancellationToken cancellationToken)

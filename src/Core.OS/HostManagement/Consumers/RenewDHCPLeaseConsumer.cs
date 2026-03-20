@@ -1,7 +1,6 @@
 ﻿using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Communication.Enums;
-using MassTransit;
 using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 
@@ -10,9 +9,9 @@ namespace Core.OS.HostManagement.Consumers;
 public sealed partial class RenewDHCPLeaseConsumer(IPipeClient pipeClient, ILogger<RenewDHCPLeaseConsumer> logger)
     : RequestConsumer<RenewDHCPLease, RenewDHCPLeaseResponse>
 {
-    protected override async Task<RenewDHCPLeaseResponse> Respond(ConsumeContext<RenewDHCPLease> context)
+    public override async Task<RenewDHCPLeaseResponse> Respond(RenewDHCPLease message, CancellationToken cancellationToken)
     {
-        var dhcpLeaseResult = await pipeClient.RenewDHCPLease(context.Message.NetworkInterfaceName, context.CancellationToken);
+        var dhcpLeaseResult = await pipeClient.RenewDHCPLease(message.NetworkInterfaceName, cancellationToken);
         if (dhcpLeaseResult is null)
         {
             LogDeserializeReturnedNull(logger);
@@ -36,7 +35,7 @@ public sealed partial class RenewDHCPLeaseConsumer(IPipeClient pipeClient, ILogg
         return new RenewDHCPLeaseResponse { RequestError = new ErrorInfo(3, dhcpLeaseResult.Message) };
     }
 
-    protected override Task<RenewDHCPLeaseResponse> HandleException(ConsumeContext<RenewDHCPLease> context, Exception e)
+    public override Task<RenewDHCPLeaseResponse> HandleException(RenewDHCPLease message, Exception e, CancellationToken cancellationToken)
     {
         ExceptionOccurred(logger, e);
 

@@ -1,5 +1,4 @@
 ﻿using Core.OS.DbContext;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Messaging;
 using Sdk.Connections.Contracts;
@@ -11,36 +10,31 @@ namespace Core.OS.Connections.Consumers;
 
 public sealed class GetConnectionsConsumer(IConnectionDbContext dbContext, ILogger<GetConnectionsConsumer> logger) : RequestConsumer<GetConnections, GetConnectionsResponse>
 {
-    protected override async Task<GetConnectionsResponse> Respond(ConsumeContext<GetConnections> context)
+    public override async Task<GetConnectionsResponse> Respond(GetConnections message, CancellationToken cancellationToken)
     {
         var result = new List<Connection>();
 
-        logger.LogDebug("Consume {RequestName} CorrelationId:{CorrelationId} ConnectionId:{ConnectionId}",
-            nameof(GetConnections),
-            context.CorrelationId,
-            context.Message.ConnectionId);
-
-        if (context.Message.ConnectionId is not null)
+        if (message.ConnectionId is not null)
         {
             var connection = await dbContext.Connections
                 .Include(c => c.Tags)
                 .AsNoTracking()
-                .SingleOrDefaultAsync(node => node.Id.Equals(context.Message.ConnectionId), context.CancellationToken);
+                .SingleOrDefaultAsync(node => node.Id.Equals(message.ConnectionId), cancellationToken);
 
             if (connection is not null)
                 result.Add(connection);
         }
-        else if (context.Message.FilterTypeNames is { Count: > 0 })
+        else if (message.FilterTypeNames is { Count: > 0 })
         {
             // .Where(c => __request_FilterTypeNames_0.Contains(c.Type.Name))' could not be translated
             // this was working in test!!
             var connections = await dbContext.Connections
                 .Include(c => c.Tags)
                 .AsNoTracking()
-                .ToListAsync(context.CancellationToken);
+                .ToListAsync(cancellationToken);
 
             result.AddRange(connections
-                .Where(k => context.Message.FilterTypeNames.Contains(k.Type.Name))
+                .Where(k => message.FilterTypeNames.Contains(k.Type.Name))
                 .ToList());
         }
         else
@@ -48,19 +42,19 @@ public sealed class GetConnectionsConsumer(IConnectionDbContext dbContext, ILogg
             result.AddRange(await dbContext.Connections
                 .Include(c => c.Tags)
                 .AsNoTracking()
-                .ToListAsync(context.CancellationToken));
+                .ToListAsync(cancellationToken));
         }
 
-        if (context.Message.RequiredTags is not null)
-            result = result.Where(c => !context.Message.RequiredTags.Except(c.Tags).Any()).ToList();
+        if (message.RequiredTags is not null)
+            result = result.Where(c => !message.RequiredTags.Except(c.Tags).Any()).ToList();
 
-        if (context.Message.InstanceId is not null)
-            result = result.FindInstanceConnections(context.Message.InstanceId.Value).ToList();
+        if (message.InstanceId is not null)
+            result = result.FindInstanceConnections(message.InstanceId.Value).ToList();
 
         return new GetConnectionsResponse(result);
     }
 
-    protected override Task<GetConnectionsResponse> HandleException(ConsumeContext<GetConnections> context, Exception e)
+    public override Task<GetConnectionsResponse> HandleException(GetConnections message, Exception e, CancellationToken cancellationToken)
     {
         logger.LogError(e, $"Failed to handle {nameof(GetConnections)}");
 

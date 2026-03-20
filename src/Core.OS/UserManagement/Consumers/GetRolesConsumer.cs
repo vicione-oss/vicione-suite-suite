@@ -1,7 +1,6 @@
 ﻿using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Extensions;
-using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Messaging;
@@ -13,13 +12,12 @@ namespace Core.OS.UserManagement.Consumers;
 public sealed class GetRolesConsumer(RoleManager<SuiteRole> roleManager, ILogger<GetRolesConsumer> logger) :
     RequestConsumer<GetRoles, GetRolesResponse>
 {
-    protected override async Task<GetRolesResponse> Respond(ConsumeContext<GetRoles> context)
+    public override async Task<GetRolesResponse> Respond(GetRoles message, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Consuming {Request} with CorrelationId '{Id}'", nameof(GetRoles), context.CorrelationId);
         var availableRoles = new List<Role>();
 
         //Get
-        var roles = await roleManager.Roles.ToListAsync(context.CancellationToken);
+        var roles = await roleManager.Roles.ToListAsync(cancellationToken);
 
         foreach (var role in roles)
         {
@@ -31,7 +29,7 @@ public sealed class GetRolesConsumer(RoleManager<SuiteRole> roleManager, ILogger
         return new GetRolesResponse(availableRoles);
     }
 
-    protected override Task<GetRolesResponse> HandleException(ConsumeContext<GetRoles> context, Exception e)
+    public override Task<GetRolesResponse> HandleException(GetRoles message, Exception e, CancellationToken cancellationToken)
     {
         logger.LogError(e, "Consume {Request} failed", nameof(GetRoles));
 

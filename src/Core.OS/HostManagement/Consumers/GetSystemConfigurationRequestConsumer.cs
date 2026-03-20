@@ -3,7 +3,6 @@ using Core.OS.HostManagement.Mappers;
 using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
-using MassTransit;
 using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration.Requests;
@@ -13,16 +12,16 @@ namespace Core.OS.HostManagement.Consumers;
 public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pipeClient, SystemConfigurationCache responseCache, ILogger<GetSystemConfigurationRequestConsumer> logger)
     : RequestConsumer<GetSystemConfiguration, GetSystemConfigurationResponse>
 {
-    protected override async Task<GetSystemConfigurationResponse> Respond(ConsumeContext<GetSystemConfiguration> context)
+    public override async Task<GetSystemConfigurationResponse> Respond(GetSystemConfiguration message, CancellationToken cancellationToken)
     {
         var config = responseCache.Get();
         if (config is not null)
         {
-            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(config, context.CancellationToken);
+            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(config, cancellationToken);
             return new GetSystemConfigurationResponse { Configuration = config.ToSuiteFormat(dhcpLeases, ntpFallback) };
         }
 
-        var configurationResult = await pipeClient.GetSystemConfiguration(context.CancellationToken);
+        var configurationResult = await pipeClient.GetSystemConfiguration(cancellationToken);
         if (configurationResult == null)
         {
             LogDeserializeReturnedNull(logger);
@@ -35,7 +34,7 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
 
         if (configurationResult.Status == OperationStatus.Success)
         {
-            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(configurationResult.Configuration, context.CancellationToken);
+            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(configurationResult.Configuration, cancellationToken);
             return new GetSystemConfigurationResponse { Configuration = configurationResult.Configuration.ToSuiteFormat(dhcpLeases, ntpFallback) };
         }
 
@@ -43,7 +42,7 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
         {
             LogWarningStatusReturned(logger, configurationResult.Message);
 
-            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(configurationResult.Configuration, context.CancellationToken);
+            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(configurationResult.Configuration, cancellationToken);
             return new GetSystemConfigurationResponse { Configuration = configurationResult.Configuration.ToSuiteFormat(dhcpLeases, ntpFallback) };
         }
 
@@ -102,8 +101,8 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
             : [];
     }
 
-    protected override Task<GetSystemConfigurationResponse> HandleException(ConsumeContext<GetSystemConfiguration> context,
-        Exception e)
+    public override Task<GetSystemConfigurationResponse> HandleException(GetSystemConfiguration message,
+        Exception e, CancellationToken cancellationToken)
     {
         LogExceptionOccurred(logger, e);
 
