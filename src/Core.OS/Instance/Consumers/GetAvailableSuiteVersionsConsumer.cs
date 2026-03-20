@@ -2,7 +2,6 @@ using Core.Module;
 using Core.Module.Comparer;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts.Network;
-using MassTransit;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Sdk.Messaging;
@@ -15,7 +14,7 @@ public sealed class GetAvailableSuiteVersionsConsumer(
     IInstanceInformationProvider instanceInformationProvider,
     ILogger<GetAvailableSuiteVersionsConsumer> logger) : RequestConsumer<GetAvailableSuiteVersions, GetAvailableSuiteVersionsResponse>
 {
-    protected override async Task<GetAvailableSuiteVersionsResponse> Respond(ConsumeContext<GetAvailableSuiteVersions> context)
+    public override async Task<GetAvailableSuiteVersionsResponse> Respond(GetAvailableSuiteVersions message, CancellationToken cancellationToken)
     {
         var hostManagementAssemblyName = typeof(NetworkDNSSettings).Assembly.GetName();
         if (hostManagementAssemblyName?.Version is null)
@@ -29,7 +28,7 @@ public sealed class GetAvailableSuiteVersionsConsumer(
             hostManagementAssemblyName.Version);
 
         // All suite bundles that are compatible with installed HostManagement
-        var suiteBundles = await repository.QuerySuiteArtifactBundles(hostManagementAssemblyName.Version, false, context.CancellationToken);
+        var suiteBundles = await repository.QuerySuiteArtifactBundles(hostManagementAssemblyName.Version, false, cancellationToken);
         var suiteVersions = suiteBundles
             .Where(b => IsVersionCompatible(currentVersion, b.Version))
             .DistinctBy(b => b.Version)
@@ -82,7 +81,7 @@ public sealed class GetAvailableSuiteVersionsConsumer(
         return currentVersion.ComparePrecedenceTo(fakeRelease) <= 0;
     }
 
-    protected override Task<GetAvailableSuiteVersionsResponse> HandleException(ConsumeContext<GetAvailableSuiteVersions> context,
-        Exception e)
+    public override Task<GetAvailableSuiteVersionsResponse> HandleException(GetAvailableSuiteVersions message,
+        Exception e, CancellationToken cancellationToken)
         => Task.FromResult(new GetAvailableSuiteVersionsResponse([]) { RequestError = new ErrorInfo(0, e.Message) });
 }

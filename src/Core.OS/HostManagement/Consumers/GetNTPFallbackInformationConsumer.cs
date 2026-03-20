@@ -1,7 +1,6 @@
 ﻿using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Communication.Enums;
-using MassTransit;
 using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 
@@ -9,9 +8,9 @@ namespace Core.OS.HostManagement.Consumers;
 
 public partial class GetNTPFallbackInformationConsumer(IPipeClient pipeClient, ILogger<GetNTPFallbackInformationConsumer> logger) : RequestConsumer<GetNTPFallbackInformation, GetNTPFallbackInformationResponse>
 {
-    protected override async Task<GetNTPFallbackInformationResponse> Respond(ConsumeContext<GetNTPFallbackInformation> context)
+    public override async Task<GetNTPFallbackInformationResponse> Respond(GetNTPFallbackInformation message, CancellationToken cancellationToken)
     {
-        var getNTPFallbackInformation = await pipeClient.GetNTPFallbackInformation(context.CancellationToken);
+        var getNTPFallbackInformation = await pipeClient.GetNTPFallbackInformation(cancellationToken);
         if (getNTPFallbackInformation is null)
         {
             DeserializeReturnedNull(logger);
@@ -35,7 +34,7 @@ public partial class GetNTPFallbackInformationConsumer(IPipeClient pipeClient, I
         return new GetNTPFallbackInformationResponse { RequestError = new ErrorInfo(3, getNTPFallbackInformation.Message) };
     }
 
-    protected override Task<GetNTPFallbackInformationResponse> HandleException(ConsumeContext<GetNTPFallbackInformation> context, Exception e)
+    public override Task<GetNTPFallbackInformationResponse> HandleException(GetNTPFallbackInformation message, Exception e, CancellationToken cancellationToken)
     {
         ExceptionOccurred(logger, e);
 

@@ -1,7 +1,6 @@
 ﻿using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Communication.Enums;
-using MassTransit;
 using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 
@@ -9,16 +8,16 @@ namespace Core.OS.HostManagement.Consumers;
 
 public partial class GetOriginalPhysicalAddressConsumer(IPipeClient pipeClient, ILogger<GetOriginalPhysicalAddressConsumer> logger) : RequestConsumer<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>
 {
-    protected override async Task<GetOriginalPhysicalAddressResponse> Respond(ConsumeContext<GetOriginalPhysicalAddress> context)
+    public override async Task<GetOriginalPhysicalAddressResponse> Respond(GetOriginalPhysicalAddress message, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(context.Message.NetworkInterfaceName))
+        if (string.IsNullOrWhiteSpace(message.NetworkInterfaceName))
         {
             return new GetOriginalPhysicalAddressResponse { RequestError = new ErrorInfo(5, "Network interface name is null or empty") };
         }
 
-        LogPipeRequest(logger, context.Message.NetworkInterfaceName);
+        LogPipeRequest(logger, message.NetworkInterfaceName);
 
-        var getOriginalPhysicalAddressResult = await pipeClient.GetOriginalPhysicalAddress(context.Message.NetworkInterfaceName, context.CancellationToken);
+        var getOriginalPhysicalAddressResult = await pipeClient.GetOriginalPhysicalAddress(message.NetworkInterfaceName, cancellationToken);
         if (getOriginalPhysicalAddressResult is null)
         {
             LogDeserializeReturnedNull(logger);
@@ -42,7 +41,7 @@ public partial class GetOriginalPhysicalAddressConsumer(IPipeClient pipeClient, 
         return new GetOriginalPhysicalAddressResponse { RequestError = new ErrorInfo(3, getOriginalPhysicalAddressResult.Message) };
     }
 
-    protected override Task<GetOriginalPhysicalAddressResponse> HandleException(ConsumeContext<GetOriginalPhysicalAddress> context, Exception e)
+    public override Task<GetOriginalPhysicalAddressResponse> HandleException(GetOriginalPhysicalAddress message, Exception e, CancellationToken cancellationToken)
     {
         LogExceptionOccurred(logger, e);
 

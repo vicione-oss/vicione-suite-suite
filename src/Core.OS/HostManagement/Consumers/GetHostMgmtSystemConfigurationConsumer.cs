@@ -1,7 +1,6 @@
 ﻿using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Communication.Enums;
-using MassTransit;
 using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 
@@ -9,11 +8,11 @@ namespace Core.OS.HostManagement.Consumers;
 
 public sealed class GetHostMgmtSystemConfigurationConsumer(IPipeClient pipeClient, SystemConfigurationCache responseCache) : RequestConsumer<GetHostMgmtSystemConfiguration, GetHostMgmtSystemConfigurationResponse>
 {
-    protected override Task<GetHostMgmtSystemConfigurationResponse> Respond(ConsumeContext<GetHostMgmtSystemConfiguration> context)
-        => FetchSystemConfigurationFromHostManagement(pipeClient, responseCache, context.CancellationToken);
+    public override Task<GetHostMgmtSystemConfigurationResponse> Respond(GetHostMgmtSystemConfiguration message, CancellationToken cancellationToken)
+        => FetchSystemConfigurationFromHostManagement(pipeClient, responseCache, cancellationToken);
 
-    protected override Task<GetHostMgmtSystemConfigurationResponse> HandleException(ConsumeContext<GetHostMgmtSystemConfiguration> context,
-        Exception e)
+    public override Task<GetHostMgmtSystemConfigurationResponse> HandleException(GetHostMgmtSystemConfiguration message,
+        Exception e, CancellationToken cancellationToken)
         => Task.FromResult(new GetHostMgmtSystemConfigurationResponse { RequestError = new ErrorInfo(0, e.Message) });
 
     internal static async Task<GetHostMgmtSystemConfigurationResponse> FetchSystemConfigurationFromHostManagement(IPipeClient pipeClient, SystemConfigurationCache responseCache, CancellationToken cancellationToken = default)

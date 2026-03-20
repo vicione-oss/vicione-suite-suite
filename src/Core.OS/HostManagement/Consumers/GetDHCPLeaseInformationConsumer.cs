@@ -1,7 +1,6 @@
 ﻿using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Communication.Enums;
-using MassTransit;
 using Sdk.Backend.Messaging;
 using Sdk.Messaging;
 
@@ -9,16 +8,16 @@ namespace Core.OS.HostManagement.Consumers;
 
 public partial class GetDHCPLeaseInformationConsumer(IPipeClient pipeClient, ILogger<GetDHCPLeaseInformationConsumer> logger) : RequestConsumer<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>
 {
-    protected override async Task<GetDHCPLeaseInformationResponse> Respond(ConsumeContext<GetDHCPLeaseInformation> context)
+    public override async Task<GetDHCPLeaseInformationResponse> Respond(GetDHCPLeaseInformation message, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(context.Message.NetworkInterfaceName))
+        if (string.IsNullOrWhiteSpace(message.NetworkInterfaceName))
         {
             return new GetDHCPLeaseInformationResponse { RequestError = new ErrorInfo(5, "Network interface name is null or empty") };
         }
 
-        LogPipeRequest(logger, context.Message.NetworkInterfaceName);
+        LogPipeRequest(logger, message.NetworkInterfaceName);
 
-        var getDhcpLeaseResult = await pipeClient.GetDHCPLeaseInformation(context.Message.NetworkInterfaceName);
+        var getDhcpLeaseResult = await pipeClient.GetDHCPLeaseInformation(message.NetworkInterfaceName, cancellationToken);
         if (getDhcpLeaseResult is null)
         {
             LogDeserializeReturnedNull(logger);
@@ -42,7 +41,7 @@ public partial class GetDHCPLeaseInformationConsumer(IPipeClient pipeClient, ILo
         return new GetDHCPLeaseInformationResponse { RequestError = new ErrorInfo(3, getDhcpLeaseResult.Message) };
     }
 
-    protected override Task<GetDHCPLeaseInformationResponse> HandleException(ConsumeContext<GetDHCPLeaseInformation> context, Exception e)
+    public override Task<GetDHCPLeaseInformationResponse> HandleException(GetDHCPLeaseInformation message, Exception e, CancellationToken cancellationToken)
     {
         LogExceptionOccurred(logger, e);
 

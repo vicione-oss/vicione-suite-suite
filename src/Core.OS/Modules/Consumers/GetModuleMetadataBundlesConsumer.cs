@@ -1,7 +1,6 @@
 using Core.OS.Modules.Contracts;
 using Core.Shared.Modules;
 using Core.Shared.Modules.Requests;
-using MassTransit;
 using Sdk.Backend.Messaging;
 
 namespace Core.OS.Modules.Consumers;
@@ -9,16 +8,16 @@ namespace Core.OS.Modules.Consumers;
 public sealed class GetModuleMetadataBundlesConsumer(IModuleMetadataProvider metadataProvider, ILogger<GetModuleMetadataBundlesConsumer> logger)
     : RequestConsumer<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>
 {
-    protected override async Task<GetModuleMetadataBundlesResponse> Respond(ConsumeContext<GetModuleMetadataBundlesRequest> context)
+    public override async Task<GetModuleMetadataBundlesResponse> Respond(GetModuleMetadataBundlesRequest message, CancellationToken cancellationToken)
     {
-        var options = new GetModuleMetadataOptions(context.Message.Installed, context.Message.Available, context.Message.ForceRefresh);
+        var options = new GetModuleMetadataOptions(message.Installed, message.Available, message.ForceRefresh);
 
-        var bundles = await metadataProvider.GetModuleMetadata(options, context.CancellationToken);
+        var bundles = await metadataProvider.GetModuleMetadata(options, cancellationToken);
 
         return new GetModuleMetadataBundlesResponse(bundles);
     }
 
-    protected override Task<GetModuleMetadataBundlesResponse> HandleException(ConsumeContext<GetModuleMetadataBundlesRequest> context, Exception e)
+    public override Task<GetModuleMetadataBundlesResponse> HandleException(GetModuleMetadataBundlesRequest message, Exception e, CancellationToken cancellationToken)
     {
         logger.LogError(e, $"Failed to handle {nameof(GetModuleMetadataBundlesRequest)}");
 

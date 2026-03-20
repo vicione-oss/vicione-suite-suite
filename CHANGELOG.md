@@ -47,7 +47,7 @@
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
 - `ViciOne.Journal` package, update to version `1.1.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2393621169`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2397913518`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.6.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.6.0`
@@ -95,6 +95,7 @@
 - Refactor instance and system control messaging (shutdown flows and instance administration), replacing legacy control commands/events
 - Identity UI: add “Forgot your password?” link and reuse shared instance information partial
 - NTP control panel: removed “adopt/copy system default servers” UI action
+- Local requests will now be handled without MassTransit infrastructure when implementing `RequestConsumer<,>`. This means even large objects can be handled without concern for message size limits and without the overhead of serialization and deserialization.
 
 ### Updated
 

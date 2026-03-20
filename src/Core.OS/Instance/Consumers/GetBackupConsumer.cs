@@ -1,14 +1,13 @@
 ﻿using Core.Shared.Persistence.Requests;
-using MassTransit;
 using Sdk.Backend.Messaging;
 
 namespace Core.OS.Instance.Consumers;
 
 public sealed class GetBackupConsumer(IBackupStore backupStore, ILogger<GetBackupConsumer> logger) : RequestConsumer<GetBackup, GetBackupResponse>
 {
-    protected override async Task<GetBackupResponse> Respond(ConsumeContext<GetBackup> context)
+    public override async Task<GetBackupResponse> Respond(GetBackup message, CancellationToken cancellationToken)
     {
-        var fileName = context.Message.FileName;
+        var fileName = message.FileName;
 
         if (string.IsNullOrEmpty(fileName))
         {
@@ -19,12 +18,12 @@ public sealed class GetBackupConsumer(IBackupStore backupStore, ILogger<GetBacku
 
         var backupStream = backupStore.ReadBackupFile(fileName);
         using var memoryStream = new MemoryStream();
-        await backupStream.CopyToAsync(memoryStream, context.CancellationToken);
+        await backupStream.CopyToAsync(memoryStream, cancellationToken);
 
         return new GetBackupResponse(GetResponseFileName(fileName), memoryStream.ToArray());
     }
 
-    protected override Task<GetBackupResponse> HandleException(ConsumeContext<GetBackup> context, Exception e)
+    public override Task<GetBackupResponse> HandleException(GetBackup message, Exception e, CancellationToken cancellationToken)
     {
         logger.LogError(e, $"Failed to handle {nameof(GetBackup)}");
 

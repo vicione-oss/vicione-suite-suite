@@ -1,5 +1,4 @@
 ﻿using Core.OS.DbContext;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Messaging;
 using Sdk.Connections.Events;
@@ -10,15 +9,13 @@ namespace Core.OS.Connections.Consumers;
 public sealed class GetTagsConsumer(IConnectionDbContext dbContext, ILogger<GetTagsConsumer> logger) :
     RequestConsumer<GetTags, GetTagsResponse>
 {
-    protected override async Task<GetTagsResponse> Respond(ConsumeContext<GetTags> context)
+    public override async Task<GetTagsResponse> Respond(GetTags message, CancellationToken cancellationToken)
     {
-        logger.LogDebug("Consume {RequestName} CorrelationId:{CorrelationId}", nameof(GetTags), context.CorrelationId);
-
-        var result = await dbContext.Tags.ToListAsync(context.CancellationToken);
+        var result = await dbContext.Tags.ToListAsync(cancellationToken);
         return new GetTagsResponse(result);
     }
 
-    protected override Task<GetTagsResponse> HandleException(ConsumeContext<GetTags> context, Exception e)
+    public override Task<GetTagsResponse> HandleException(GetTags message, Exception e, CancellationToken cancellationToken)
     {
         logger.LogError(e, $"Failed to handle {nameof(GetTags)}");
 
