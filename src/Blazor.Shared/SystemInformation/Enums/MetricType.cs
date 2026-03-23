@@ -5,5 +5,8 @@ public enum MetricType
     Cpu,
     Ram,
     Hdd,
-    Net
+    Net,
+    LoadAvg1,
+    LoadAvg5,
+    LoadAvg15
 }

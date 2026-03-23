@@ -11,4 +11,5 @@ public static class Collectors
     public const string ThermalSensors = "thermal_sensors";
     public const string Uptime = "uptime";
     public const string JournalFields = "journal_fields";
+    public const string LoadAverage = "loadavg";
 }

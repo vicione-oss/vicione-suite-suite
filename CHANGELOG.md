@@ -7,6 +7,7 @@
 - A button to copy system information for easy bug reporting was added to the `System & Notification` sidebar
 - Support for external OIDC providers, allowing users to authenticate via third-party identity providers
 - Configuration options for OIDC discovery endpoints, client IDs, and client secrets
+- Load average into `ProcessComponent`
 
 - `Microsoft.AspNetCore.Authentication.OpenIdConnect` package
 - `JournalListView`, added download feature of Journal entries as text
@@ -53,6 +54,7 @@
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.6.0`
 - `ViciOne.Ui.Localization` package, update version to `3.2.0`
 - `ViciOne.Ui.Shared.Dx` packages, update to version `0.19.1`
+- `ViciOne.SystemMonitoring` packages, update to version `1.0.0`
 - `xunit` packages, update to version `xunit.v3 - 3.2.2`
 - `xunit.extensibility.core` packages, update to version `xunit.v3.extensibility.core - 3.2.2`
 

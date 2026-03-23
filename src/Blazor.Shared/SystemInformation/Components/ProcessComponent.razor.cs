@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Blazor.Shared.SystemInformation.Enums;
 using Blazor.Shared.SystemInformation.Extensions;
 using Blazor.Shared.SystemInformation.Services;
@@ -15,6 +15,9 @@ public sealed partial class ProcessComponent : IDisposable
     private float _ramValue;
     private float _hddValue;
     private float _netValue;
+    private float _loadAvg1Value;
+    private float _loadAvg5Value;
+    private float _loadAvg15Value;
     private bool _loadingSpinnerVisible = true;
     private IEnumerable<LinuxProcessInfo> _processes = [];
     private string _filterText = string.Empty;
@@ -56,6 +59,15 @@ public sealed partial class ProcessComponent : IDisposable
             case MetricType.Net:
                 _netValue = (float)Math.Round(MonitoringService.CurrentNetValue, 1);
                 break;
+            case MetricType.LoadAvg1:
+                _loadAvg1Value = (float)Math.Round(MonitoringService.CurrentLoadAvg1Value, 2);
+                break;
+            case MetricType.LoadAvg5:
+                _loadAvg5Value = (float)Math.Round(MonitoringService.CurrentLoadAvg5Value, 2);
+                break;
+            case MetricType.LoadAvg15:
+                _loadAvg15Value = (float)Math.Round(MonitoringService.CurrentLoadAvg15Value, 2);
+                break;
             default:
                 break;
         }
@@ -73,6 +85,9 @@ public sealed partial class ProcessComponent : IDisposable
             _ramValue = (float)Math.Round(MonitoringService.CurrentRamValue, 1);
             _hddValue = (float)Math.Round(MonitoringService.CurrentHddValue, 1);
             _netValue = (float)Math.Round(MonitoringService.CurrentNetValue, 1);
+            _loadAvg1Value = (float)Math.Round(MonitoringService.CurrentLoadAvg1Value, 2);
+            _loadAvg5Value = (float)Math.Round(MonitoringService.CurrentLoadAvg5Value, 2);
+            _loadAvg15Value = (float)Math.Round(MonitoringService.CurrentLoadAvg15Value, 2);
 
             _initialized = true;
         }
@@ -113,6 +128,9 @@ public sealed partial class ProcessComponent : IDisposable
 
         return stateInformation;
     }
+
+    private static string FormatLoadAvgValue(double value, IFormatProvider? provider = null)
+        => string.Format(provider is null ? CultureInfo.CurrentUICulture : provider, "{0:F2}", value);
 
     private static string FormatHardwareValue(double value, IFormatProvider? provider = null)
         => string.Format(provider is null ? CultureInfo.CurrentUICulture : provider, "{0:F1}", value);

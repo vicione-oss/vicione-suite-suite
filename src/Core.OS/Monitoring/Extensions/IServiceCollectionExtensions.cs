@@ -102,5 +102,6 @@ internal static class IServiceCollectionExtensions
         config.EnabledMetrics[Collectors.ThermalSensors] = collectors.ThermalSensors;
         config.EnabledMetrics[Collectors.Uptime] = collectors.Uptime;
         config.EnabledMetrics[Collectors.JournalFields] = collectors.JournalFields;
+        config.EnabledMetrics[Collectors.LoadAverage] = collectors.LoadAvg;
     }
 }

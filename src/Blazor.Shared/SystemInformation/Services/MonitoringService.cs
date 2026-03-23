@@ -17,6 +17,9 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
     private readonly Func<Metric, bool> _filterNet = m => m.Group == Collectors.Network && m.Name == "total_bandwidth_usage" && m.SubGroup == options.Value.DefaultNetworkInterface;
     private readonly Func<Metric, bool> _filterHdd = m => m.Group == Collectors.Disk && m.Name == "usage" && m.SubGroup == "\\";
     private readonly Func<Metric, bool> _filterProcessList = m => m.Group == Collectors.Process && m.Name == "processes";
+    private readonly Func<Metric, bool> _filterLoadAvg1 = m => m.Group == Collectors.LoadAverage && m.Name == "load1";
+    private readonly Func<Metric, bool> _filterLoadAvg5 = m => m.Group == Collectors.LoadAverage && m.Name == "load5";
+    private readonly Func<Metric, bool> _filterLoadAvg15 = m => m.Group == Collectors.LoadAverage && m.Name == "load15";
 
     private readonly Lock _lock = new();
     private bool _firstRun = true;
@@ -35,12 +38,18 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
     private float _currentRamValue;
     private float _currentHddValue;
     private float _currentNetValue;
+    private float _currentLoadAvg1Value;
+    private float _currentLoadAvg5Value;
+    private float _currentLoadAvg15Value;
 
     public IReadOnlyCollection<LinuxProcessInfo> CurrentProcessList => Lock(_currentProcessList.ToArray);
     public float CurrentCpuValue => Lock(() => _currentCpuValue);
     public float CurrentRamValue => Lock(() => _currentRamValue);
     public float CurrentHddValue => Lock(() => _currentHddValue);
     public float CurrentNetValue => Lock(() => _currentNetValue);
+    public float CurrentLoadAvg1Value => Lock(() => _currentLoadAvg1Value);
+    public float CurrentLoadAvg5Value => Lock(() => _currentLoadAvg5Value);
+    public float CurrentLoadAvg15Value => Lock(() => _currentLoadAvg15Value);
 
     public IReadOnlyCollection<float> CpuGraphValues => Lock(_cpuGraphValues.ToArray);
     public IReadOnlyCollection<float> RamGraphValues => Lock(_ramGraphValues.ToArray);
@@ -63,6 +72,9 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
         var ramChanged = false;
         var hddChanged = false;
         var netChanged = false;
+        var loadAvg1Changed = false;
+        var loadAvg5Changed = false;
+        var loadAvg15Changed = false;
         var processListChanged = false;
         var graphValuesHasChanged = false;
 
@@ -73,6 +85,9 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
             ramChanged = CollectMetric<double, float>(metrics, _filterRam, Convert.ToSingle, _ramTempValues, ref _currentRamValue);
             netChanged = CollectMetric<double, float>(metrics, _filterNet, Convert.ToSingle, _netTempValues, ref _currentNetValue);
             hddChanged = CollectMetric<double, float>(metrics, _filterHdd, Convert.ToSingle, null, ref _currentHddValue);
+            loadAvg1Changed = CollectMetric<double, float>(metrics, _filterLoadAvg1, Convert.ToSingle, null, ref _currentLoadAvg1Value);
+            loadAvg5Changed = CollectMetric<double, float>(metrics, _filterLoadAvg5, Convert.ToSingle, null, ref _currentLoadAvg5Value);
+            loadAvg15Changed = CollectMetric<double, float>(metrics, _filterLoadAvg15, Convert.ToSingle, null, ref _currentLoadAvg15Value);
 
             graphValuesHasChanged |= UpdateValuesBuffer(_cpuTempValues, _cpuGraphValues);
             graphValuesHasChanged |= UpdateValuesBuffer(_ramTempValues, _ramGraphValues);
@@ -93,6 +108,12 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
             MetricChanged?.Invoke(MetricType.Hdd);
         if (netChanged)
             MetricChanged?.Invoke(MetricType.Net);
+        if (loadAvg1Changed)
+            MetricChanged?.Invoke(MetricType.LoadAvg1);
+        if (loadAvg5Changed)
+            MetricChanged?.Invoke(MetricType.LoadAvg5);
+        if (loadAvg15Changed)
+            MetricChanged?.Invoke(MetricType.LoadAvg15);
         if (processListChanged)
             ProcessListChanged?.Invoke(CurrentProcessList);
         if (graphValuesHasChanged && GraphValuesChanged is not null)
