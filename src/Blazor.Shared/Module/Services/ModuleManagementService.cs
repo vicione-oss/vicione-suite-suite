@@ -1,28 +1,110 @@
-﻿using Core.Shared.Modules.Commands;
+using Blazor.Shared.Module.ControlPanels.Models;
+using Blazor.Shared.Module.Models;
+using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Contracts;
+using Core.Shared.Modules.Events;
 using Core.Shared.Modules.Requests;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Modules;
 
 namespace Blazor.Shared.Module.Services;
 
-internal sealed class ModuleManagementService(IUiMediator mediator) : IModuleManagementService
+internal sealed class ModuleManagementService : CompletionSourceHandlerBase<IModuleManagementServiceResult>,
+    IModuleManagementService,
+    IEventConsumer<ModulePackageOperationsChanged>,
+    IEventConsumer<ModuleOptionsChanged>
 {
-    public async Task<GetModuleMetadataBundlesResponse> GetModuleMetadata(bool forceReload = false, CancellationToken cancellationToken = default)
+    public event Func<ModulePackageOperationsChanged, CancellationToken, Task>? OperationsChanged;
+
+    public event Func<ModuleOptionsChanged, CancellationToken, Task>? OptionsChanged;
+
+    public ModuleManagementService(IUiMediator mediator) : base(mediator)
+    {
+        Register<ModulePackageOperationsChanged>();
+        Register<ModuleOptionsChanged>();
+    }
+
+    public async Task<List<ModuleMetadataModel>> GetMetadata(bool forceReload = false, CancellationToken cancellationToken = default)
     {
         var request = new GetModuleMetadataBundlesRequest(true, true, forceReload);
-        return await mediator.Request<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>(request, cancellationToken);
+        var response = await Mediator.Request<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>(request, cancellationToken);
+
+        if (response.RequestError is not null)
+            throw new InvalidOperationException($"Failed to retrieve module metadata: {response.RequestError.Message}");
+
+        return ModuleMetadataModelFactory.CreateModels(response.Bundles);
     }
 
-    public async Task SendUpdateModuleOptions(string moduleId, IEnumerable<ModuleOptionDeclaration> options, CancellationToken cancellationToken = default)
+    public async Task<IModuleManagementServiceResult> UpdateOptions(string moduleId, IEnumerable<ModuleOptionDeclaration> options, CancellationToken cancellationToken = default)
     {
-        var command = new UpdateModuleOptions(moduleId, options.Where(k => k.Value != Core.Shared.Constants.SetByEnvironmentMarker).ToList());
-        await mediator.Send(command, cancellationToken);
+        var command = new UpdateModuleOptions(moduleId, [.. options.Where(k => k.Value != Core.Shared.Constants.SetByEnvironmentMarker)]);
+
+        return await SendAndWaitForCompletion(command, cancellationToken);
     }
 
-    public async Task SendUpdateModulePackages(List<ModulePackageOperation> operations, CancellationToken cancellationToken = default)
+    public async Task<IModuleManagementServiceResult> UpdateOperations(List<ModulePackageOperation> operations, CancellationToken cancellationToken = default)
     {
+        if (operations.Count == 0)
+            return CreateSuccessResult();
+
         var command = new UpdateModulePackageOperations(operations);
-        await mediator.Send(command, cancellationToken);
+
+        return await SendAndWaitForCompletion(command, cancellationToken);
+    }
+
+    protected override IModuleManagementServiceResult CreateSuccessResult()
+        => new ModuleManagementServiceSuccessResult();
+
+    protected override IModuleManagementServiceResult CreateErrorResult(string errorMessage, int? errorCode = null)
+        => new ModuleManagementServiceErrorResult(errorMessage, errorCode);
+
+    public async Task Consume(ClientContext<ModulePackageOperationsChanged> context, CancellationToken cancellationToken)
+    {
+        if (context.Message.Error is not null)
+        {
+            CompleteWithError(context.Message.CorrelationId, context.Message.Error);
+            return;
+        }
+
+        try
+        {
+            await NotifyOperationsChanged(context.Message, cancellationToken);
+        }
+        finally
+        {
+            CompleteWithSuccess(context.Message.CorrelationId);
+        }
+    }
+
+
+    public async Task Consume(ClientContext<ModuleOptionsChanged> context, CancellationToken cancellationToken)
+    {
+        if (context.Message.Error is not null)
+        {
+            CompleteWithError(context.Message.CorrelationId, context.Message.Error);
+            return;
+        }
+
+        try
+        {
+            await NotifyOptionsChanged(context.Message, cancellationToken);
+        }
+        finally
+        {
+            CompleteWithSuccess(context.Message.CorrelationId);
+        }
+    }
+
+    private async Task NotifyOperationsChanged(ModulePackageOperationsChanged change, CancellationToken cancellationToken)
+    {
+        if (OperationsChanged is not null)
+            await OperationsChanged.Invoke(change, cancellationToken);
+    }
+
+    private async Task NotifyOptionsChanged(ModuleOptionsChanged change, CancellationToken cancellationToken)
+    {
+        if (OptionsChanged is not null)
+            await OptionsChanged.Invoke(change, cancellationToken);
     }
 }

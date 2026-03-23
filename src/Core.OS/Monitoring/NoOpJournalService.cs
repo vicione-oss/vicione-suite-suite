@@ -51,7 +51,7 @@ internal sealed class NoOpJournalService : IJournalService
         public Task<IReadOnlyCollection<IReadOnlyDictionary<string, string>>> GetNext(CancellationToken cancellationToken = default) => Task.FromResult<IReadOnlyCollection<IReadOnlyDictionary<string, string>>>([]);
         public void Dispose() { }
         public void SetFilter(string filter) { Error?.Invoke(new InvalidOperationException()); }
-        public void Start(int logCount) { }
+        public void Start(int logCount) { NewEntry?.Invoke(new Dictionary<string, string>()); }
         public Task Stop() => Task.CompletedTask;
     }
 }

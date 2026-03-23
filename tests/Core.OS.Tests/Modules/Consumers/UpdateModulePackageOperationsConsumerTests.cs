@@ -1,4 +1,3 @@
-﻿using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.Modules.Consumers;
 using Core.Shared.Modules.Commands;
@@ -89,7 +88,7 @@ public class UpdateModulePackageOperationsConsumerTests
     }
 
     [Fact]
-    public async Task Should_call_dependency_store_with_correct_operations()
+    public async Task Should_call_package_store_with_correct_operations()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -132,8 +131,9 @@ public class UpdateModulePackageOperationsConsumerTests
         await tester.TestCommand<UpdateModulePackageOperations, UpdateModulePackageOperationsConsumer>(command);
 
         // Assert        
-        Assert.True(await tester.Harness.Published.Any<ModulePackageOperationsFailed>(k
+        Assert.True(await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
             => k.Context.Message.CorrelationId == command.CorrelationId
+            && k.Context.Message.Error is not null
             && k.Context.Message.Error.ErrorCode == 230, TestContext.Current.CancellationToken));
     }
 

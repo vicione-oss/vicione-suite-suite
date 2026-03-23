@@ -40,8 +40,9 @@ public class ModuleManagementControlPanelTests
 
         using var ctx = SetupTestContext(_moduleManagementService);
 
-        _moduleManagementService.GetModuleMetadata(false, Arg.Any<CancellationToken>())
-            .Returns(new Core.Shared.Modules.Requests.GetModuleMetadataBundlesResponse([]));
+        _moduleManagementService
+            .GetMetadata(false, Arg.Any<CancellationToken>())
+            .Returns([]);
 
         var registry = ctx.Services.GetRequiredService<IControlPanelRegistry<SharedClientModule>>();
         var registryItem = registry.First();

@@ -39,7 +39,7 @@
             </ActionButtons>
 
             <Filter>
-                <GridFilterControl @bind-Text="@_installedModulesFilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
+                <GridFilterControl @bind-Text="@State.InstalledFilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
             </Filter>
 
             <ChildContent>
@@ -136,7 +136,7 @@
             </ActionButtons>
 
             <Filter>
-                <GridFilterControl @bind-Text="@_availableModulesFilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
+                <GridFilterControl @bind-Text="@State.AvailableFilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
             </Filter>
 
             <ChildContent>

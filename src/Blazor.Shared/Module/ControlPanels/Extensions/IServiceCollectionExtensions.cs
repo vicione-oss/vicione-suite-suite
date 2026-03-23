@@ -1,8 +1,6 @@
 using Blazor.Shared.Module.ControlPanels.Services;
 using Blazor.Shared.Module.Models;
-using Blazor.Shared.Module.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Client.ControlPanels.Extensions;
 using ViciOne.Ui.Blazor.Components.Grid.Extensions;
 
@@ -14,14 +12,22 @@ internal static class IServiceCollectionExtensions
     {
         services.AddControlPanel<SharedClientModule, ModuleManagementControlPanel, ModuleManagementControlPanelState>()
             .WithAutoDiscovery<ModuleManagementControlPanelDescriptor>()
+            .WithSaveHandler<ModuleManagementControlPanelSaveHandler>()
             .WithResetHandler<ModuleManagementControlPanelResetHandler>();
 
+        services.AddGridItemSelectColumn()
+                .AddGridItemSelection<ModuleMetadataModel>(typeof(ModuleManagementControlPanelServiceKey))
+                .AddGridItemSelection<string>(typeof(ModuleOptionDeclarationCollectionGridServiceKey), ServiceLifetime.Transient);
+
+        return services;
+    }
+
+    public static IServiceCollection AddModuleDetailControlPanel(this IServiceCollection services)
+    {
         services.AddControlPanel<SharedClientModule, ModuleDetailsControlPanel, ModuleDetailsControlPanelState>()
             .WithAutoDiscovery<ModuleDetailsControlPanelDescriptor>()
             .WithSaveHandler<ModuleDetailsControlPanelSaveHandler>()
             .WithResetHandler<ModuleDetailsControlPanelResetHandler>();
-
-        services.TryAddScoped<IModuleManagementService, ModuleManagementService>();
 
         services.AddGridItemSelectColumn()
                 .AddGridItemSelection<ModuleMetadataModel>(typeof(ModuleManagementControlPanelServiceKey))
