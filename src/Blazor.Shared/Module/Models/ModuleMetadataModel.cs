@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Blazor.Shared.Module.ControlPanels;
 using Core.Shared.Modules.Contracts;
 using Sdk.Modules;
@@ -9,7 +9,7 @@ namespace Blazor.Shared.Module.Models;
 /// UI wrapper for <see cref="ModuleMetadataBundle"/> 
 /// </summary>
 [DebuggerDisplay("Name = {Name,nq}, Version = {Version,nq}, Installed = {Installed,nq}")]
-internal sealed class ModuleMetadataModel
+public sealed class ModuleMetadataModel
 {
     public string ModuleId => Bundle.ModuleId;
 
@@ -60,5 +60,5 @@ internal sealed class ModuleMetadataModel
 
     public HashSet<ModuleOptionDeclaration> CustomOptions { get; } = [];
 
-    public IModuleOptionDeclarationCollectionGrid? OptionGrid { get; set; }
+    internal IModuleOptionDeclarationCollectionGrid? OptionGrid { get; set; }
 }

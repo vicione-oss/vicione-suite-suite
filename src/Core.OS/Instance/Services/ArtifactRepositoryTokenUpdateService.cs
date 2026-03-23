@@ -44,7 +44,7 @@ public partial class ArtifactRepositoryTokenUpdateService(IServiceProvider servi
 
             // get all repositories and update tokens for those enabled and have token endpoint configured
             var repositories = await repositoryStore.GetRepositories(null, cancellationToken);
-            var updateTasks = repositories.Where(r => r.Enabled && r.TokenEndpoint is not null)
+            var updateTasks = repositories.Where(r => r.Enabled && !string.IsNullOrEmpty(r.TokenEndpoint))
                 .Select(async repo =>
                 {
                     try
@@ -57,7 +57,7 @@ public partial class ArtifactRepositoryTokenUpdateService(IServiceProvider servi
                     }
                     catch (Exception ex)
                     {
-                        LogFailedToGetToken(logger, ex, repo.Name);
+                        LogFailedToGetToken(logger, ex, repo.Name, repo.TokenEndpoint);
                     }
                 }).ToArray();
 
@@ -78,8 +78,8 @@ public partial class ArtifactRepositoryTokenUpdateService(IServiceProvider servi
         }
     }
 
-    [LoggerMessage(LogLevel.Error, "Failed to get token for repository {Name}")]
-    static partial void LogFailedToGetToken(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex, string? Name);
+    [LoggerMessage(LogLevel.Error, "Failed to get token for repository {Name} from '{Endpoint}'")]
+    static partial void LogFailedToGetToken(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex, string? Name, string? Endpoint);
 
     [LoggerMessage(LogLevel.Error, "Failed to update repository tokens")]
     static partial void LogFailedToUpdateRepositoryTokens(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex);

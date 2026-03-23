@@ -17,7 +17,7 @@
         </DescriptionBanner>
 
         <SettingsLayout>
-            <SettingsGroup Title="@Localization.ModuleDetailsControlPanel.ModuleDetails" @bind-Expanded="_isDetailsExpanded">
+            <SettingsGroup Title="@Localization.ModuleDetailsControlPanel.ModuleDetails" @bind-Expanded="State.IsDetailsExpanded">
                 <SettingsField Label="@CommonVocabulary.Name">
                     @State.ModuleMetadata.Name
                 </SettingsField>
@@ -80,7 +80,7 @@
                                                        ValueSelector="@(item => item)"
                                                        TextSelector="@(item => item)"
                                                        @bind-Value="@State.VersionToInstall"
-                                                       @bind-Value:after="(async () => await BeginEdit())" />
+                                                       @bind-Value:after="(async () => await AfterVersionToInstallSelect())" />
 
                                 @if (State.ModuleMetadata.CanUpdate)
                                 {

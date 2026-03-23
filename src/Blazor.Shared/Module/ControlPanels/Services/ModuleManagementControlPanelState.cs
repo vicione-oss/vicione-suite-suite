@@ -1,5 +1,6 @@
 using Blazor.Shared.Module.Models;
-using Core.Shared.Modules.Requests;
+using Core.Shared.Modules.Contracts;
+using Core.Shared.Modules.Events;
 using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Module.ControlPanels.Services;
@@ -9,36 +10,37 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
     private bool _allowPreReleases;
     private int _requestErrorCode;
     private string? _requestErrorMessage;
-    private List<ModuleMetadataModel> _installedModules = [];
-    private List<ModuleMetadataModel> _availableModules = [];
+
+    internal string InstalledFilterText { get; set; } = string.Empty;
+    internal string AvailableFilterText { get; set; } = string.Empty;
 
     internal List<ModuleMetadataModel> InstalledModules
     {
-        get => _installedModules;
+        get;
         set
         {
-            if (value == _installedModules)
+            if (value == field)
                 return;
 
-            _installedModules = value;
+            field = value;
 
             OnPropertyChanged(nameof(InstalledModules));
         }
-    }
+    } = [];
 
     internal List<ModuleMetadataModel> AvailableModules
     {
-        get => _availableModules;
+        get;
         set
         {
-            if (value == _availableModules)
+            if (value == field)
                 return;
 
-            _availableModules = value;
+            field = value;
 
             OnPropertyChanged(nameof(AvailableModules));
         }
-    }
+    } = [];
 
     public bool AllowPreReleases
     {
@@ -84,18 +86,13 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
 
     internal bool IsInitialized { get; private set; }
 
-    internal void Initialize(GetModuleMetadataBundlesResponse response)
+    internal List<ModulePackageOperation> UninstallOperations { get; } = [];
+
+    internal void Initialize(List<ModuleMetadataModel> models)
     {
-        RequestErrorCode = response.RequestError?.ErrorCode ?? 0;
-        RequestErrorMessage = response.RequestError?.Message ?? null;
-
-        var models = ModuleMetadataModelFactory.CreateModels(response.Bundles);
-
         // split them for the tabs
         InstalledModules = [.. models.Where(k => k.Installed).OrderBy(k => k.Title)];
         AvailableModules = [.. models.Where(k => !k.Installed).OrderBy(k => k.Title)];
-
-        IsInitialized = true;
     }
 
     internal async Task CancelEditInOptionGrids()
@@ -109,4 +106,40 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
             }
         }
     }
+
+    internal void UpdateUninstallOperations(List<ModulePackageOperation> operations)
+    {
+        foreach (var operation in operations)
+        {
+            var exists = UninstallOperations.FirstOrDefault(k => k.Package.Name == operation.Package.Name && k.OperationKind == operation.OperationKind);
+            if (exists is not null)
+                UninstallOperations.Remove(operation);
+
+            UninstallOperations.Add(operation);
+        }
+    }
+
+    internal bool ApplyOperationChanges(ModulePackageOperationsChanged changes)
+    {
+        var hasChanged = false;
+        foreach (var change in changes.Changes)
+        {
+            var installed = InstalledModules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
+            if (installed != null)
+            {
+                installed.PendingOperation = change.Operation;
+                hasChanged = true;
+            }
+
+            var available = AvailableModules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
+            if (available != null)
+            {
+                available.PendingOperation = change.Operation;
+                hasChanged = true;
+            }
+        }
+        return hasChanged;
+    }
+
+    internal bool HasPendingChanges() { return UninstallOperations.Count > 0; }
 }

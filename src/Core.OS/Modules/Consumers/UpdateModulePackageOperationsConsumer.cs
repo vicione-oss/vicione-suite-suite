@@ -1,11 +1,11 @@
-﻿using Core.Shared.Modules.Commands;
+using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Events;
 using MassTransit;
 using Sdk.Messaging;
 
 namespace Core.OS.Modules.Consumers;
 
-public sealed class UpdateModulePackageOperationsConsumer(IModulePackageOperationStore store) : IConsumer<UpdateModulePackageOperations>
+public sealed partial class UpdateModulePackageOperationsConsumer(IModulePackageOperationStore store, ILogger<UpdateModulePackageOperationsConsumer> logger) : IConsumer<UpdateModulePackageOperations>
 {
     public async Task Consume(ConsumeContext<UpdateModulePackageOperations> context)
     {
@@ -13,13 +13,27 @@ public sealed class UpdateModulePackageOperationsConsumer(IModulePackageOperatio
         {
             var changes = await store.EnqueueOperations(context.Message.Operations, context.CancellationToken);
 
-            await context.Publish(new ModulePackageOperationsChanged(changes));
+            var changeEvent = new ModulePackageOperationsChanged(changes)
+            {
+                CorrelationId = context.Message.CorrelationId
+            };
+
+            await context.Publish(changeEvent, context.CancellationToken);
         }
         catch (Exception ex)
         {
-            var error = new ErrorInfo(230, ex.Message);
+            LogError(logger, context.Message.Operations.Count);
 
-            await context.Publish(new ModulePackageOperationsFailed(context.Message.CorrelationId, error));
+            var error = new ErrorInfo(230, ex.Message);
+            var changeEvent = new ModulePackageOperationsChanged([], error)
+            {
+                CorrelationId = context.Message.CorrelationId
+            };
+
+            await context.Publish(changeEvent, context.CancellationToken);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to enqueue {OperationCount} operations.")]
+    private static partial void LogError(ILogger<UpdateModulePackageOperationsConsumer> logger, int operationCount);
 }

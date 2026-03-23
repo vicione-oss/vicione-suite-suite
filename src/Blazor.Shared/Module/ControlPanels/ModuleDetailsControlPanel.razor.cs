@@ -6,29 +6,29 @@ using Core.Shared.Modules.Events;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
-using Sdk.Client.Infrastructure;
 using Sdk.Client.Services;
 using Sdk.MessageBanner.Contracts;
 using Sdk.Messaging;
 using Sdk.Modules;
-using Sdk.Utils;
 using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Module.ControlPanels;
 
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
-public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsControlPanelState>,
-    IEventConsumer<ModuleOptionsUpdatedEvent>,
-    IEventConsumer<ModulePackageOperationsChanged>,
-    IEventConsumer<ModulePackageOperationsFailed>
+public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsControlPanelState>
 {
-    private bool _isDetailsExpanded = true;
     private bool _isDebug;
-    private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
 
     [Inject] internal IModuleManagementService ManagementService { get; set; } = default!;
     [Inject] private IMessageBannerService MessageBannerService { get; set; } = default!;
-    [Inject] private IUiMediator Mediator { get; set; } = default!;
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        ManagementService.OptionsChanged -= ManagementService_OptionsChanged;
+        ManagementService.OperationsChanged -= ManagementService_OperationsChanged;
+
+        await base.DisposeAsyncCore();
+    }
 
     protected override void OnInitialized()
     {
@@ -37,10 +37,8 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
 #if DEBUG
         _isDebug = true;
 #endif
-
-        _subscriptionHandles.Add(Mediator.Register<ModuleOptionsUpdatedEvent>(this));
-        _subscriptionHandles.Add(Mediator.Register<ModulePackageOperationsChanged>(this));
-        _subscriptionHandles.Add(Mediator.Register<ModulePackageOperationsFailed>(this));
+        ManagementService.OptionsChanged += ManagementService_OptionsChanged;
+        ManagementService.OperationsChanged += ManagementService_OperationsChanged;
     }
 
     private static string GetUniqueModuleOptionKey(Dictionary<string, ModuleOptionDeclaration> moduleOptionMap)
@@ -105,6 +103,18 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
         }
     }
 
+    private async Task AfterVersionToInstallSelect()
+    {
+        if (State.ModuleMetadata is not null &&
+            State.ModuleMetadata.Installed &&
+            State.VersionToInstall == State.ModuleMetadata.Version)
+        {
+            return;
+        }
+
+        await BeginEdit();
+    }
+
     private async Task AddModuleOption(ModuleMetadataModel module, ModuleOptionType optionType)
     {
         ModuleOptionDeclaration? customOption = null;
@@ -127,29 +137,18 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
         }
     }
 
-    public Task Consume(ClientContext<ModuleOptionsUpdatedEvent> context, CancellationToken cancellationToken)
+    private async Task ManagementService_OperationsChanged(ModulePackageOperationsChanged changeEvent, CancellationToken token)
     {
-        if (State.ModuleMetadata?.ModuleId != context.Message.ModuleId)
-            return Task.CompletedTask;
+        if (changeEvent.Error is not null)
+        {
+            MessageBannerService.ShowMessageBanner(MessageType.Error, changeEvent.Error.Message);
+            return;
+        }
 
-        State.ModuleMetadata?.HasModifiedOptions = false;
-
-        return Task.CompletedTask;
-    }
-
-    protected override async ValueTask DisposeAsyncCore()
-    {
-        _subscriptionHandles.Dispose();
-
-        await base.DisposeAsyncCore();
-    }
-
-    public async Task Consume(ClientContext<ModulePackageOperationsChanged> context, CancellationToken cancellationToken)
-    {
         if (State.ModuleMetadata is null)
             return;
 
-        var change = context.Message.Changes.FirstOrDefault(o => o.Operation.Package.Name == State.ModuleMetadata.Name);
+        var change = changeEvent.Changes.FirstOrDefault(o => o.Operation.Package.Name == State.ModuleMetadata.Name);
         if (change is null)
             return;
 
@@ -166,9 +165,12 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
         await InvokeAsync(StateHasChanged);
     }
 
-    public Task Consume(ClientContext<ModulePackageOperationsFailed> context, CancellationToken cancellationToken)
+    private Task ManagementService_OptionsChanged(ModuleOptionsChanged changeEvent, CancellationToken token)
     {
-        MessageBannerService.ShowMessageBanner(MessageType.Error, context.Message.Error.Message);
+        if (State.ModuleMetadata?.ModuleId != changeEvent.ModuleId)
+            return Task.CompletedTask;
+
+        State.ModuleMetadata?.HasModifiedOptions = false;
 
         return Task.CompletedTask;
     }

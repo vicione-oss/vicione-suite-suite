@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules;
+using Core.OS.Modules;
 using Core.OS.Modules.Consumers;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Events;
@@ -37,10 +37,10 @@ public class UpdateModuleOptionsConsumerTests
         var command = new UpdateModuleOptions(ModuleIdResolver.ResolveId<TestBackendModule>(), []);
 
         // Act
-        var result = await tester.TestCommand<UpdateModuleOptions, UpdateModuleOptionsConsumer, ModuleOptionsUpdatedEvent>(command);
+        var result = await tester.TestCommand<UpdateModuleOptions, UpdateModuleOptionsConsumer, ModuleOptionsChanged>(command);
 
         // Assert
-        result.Success.Should().BeTrue();
+        result.Error.Should().BeNull();
         await _optionsStore.Received()
             .Store(ModuleIdResolver.ResolveId<TestBackendModule>(), Arg.Any<List<ModuleOptionDeclaration>>(), Arg.Any<CancellationToken>());
     }
@@ -56,10 +56,10 @@ public class UpdateModuleOptionsConsumerTests
             .ThrowsAsync(new InvalidOperationException());
 
         // Act
-        var result = await tester.TestCommand<UpdateModuleOptions, UpdateModuleOptionsConsumer, ModuleOptionsUpdatedEvent>(command);
+        var result = await tester.TestCommand<UpdateModuleOptions, UpdateModuleOptionsConsumer, ModuleOptionsChanged>(command);
 
         // Assert
-        result.Success.Should().BeFalse();
+        result.Error.Should().BeNull();
         await _optionsStore.Received()
             .Store(ModuleIdResolver.ResolveId<TestBackendModule>(), Arg.Any<List<ModuleOptionDeclaration>>(), Arg.Any<CancellationToken>());
     }

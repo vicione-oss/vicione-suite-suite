@@ -12,7 +12,7 @@ internal sealed class ThemeControlPanelSaveHandler(ILoginDesignService loginDesi
     {
         //loginDesignService.Design = state.SelectedLoginDesign;
 
-        logger.LogInformation("Login scheme changed to {Scheme}", state.SelectedLoginDesign);
+        logger.LogInformation("Login scheme changed to {Scheme}. Provider design: {Design}", state.SelectedLoginDesign, loginDesignService.Design);
 
         return Task.FromResult<ISaveResult>(new SaveSuccessResult());
     }

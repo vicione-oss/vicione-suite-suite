@@ -1,17 +1,22 @@
 using AwesomeAssertions;
 using Blazor.Shared.Module;
+using Blazor.Shared.Module.ControlPanels.Models;
 using Blazor.Shared.Module.Services;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Contracts;
+using Core.Shared.Modules.Events;
 using Core.Shared.Modules.Requests;
+using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
+using Sdk.Messaging;
 using Sdk.Modules;
 using Xunit;
 
-namespace Blazor.Shared.Tests.Module.Services;
+namespace Blazor.Shared.Tests.Module.ControlPanels.Services;
 
 public class ModuleManagementServiceTests
 {
@@ -26,9 +31,6 @@ public class ModuleManagementServiceTests
 
     private const string AvailableModulePackageName = "ViciOne.Suite.AvailableModule";
     private const string AvailableModuleVersion = "1.0.1";
-
-    private readonly IUiMediator _mediator = Substitute.For<IUiMediator>();
-    private readonly IInstanceInformationProvider _informationProvider = Substitute.For<IInstanceInformationProvider>();
 
     private readonly List<ModuleMetadataBundle> _moduleBundles = [
         new ModuleMetadataBundle {
@@ -89,6 +91,9 @@ public class ModuleManagementServiceTests
             ]
         }];
 
+    private readonly IUiMediator _mediator = Substitute.For<IUiMediator>();
+    private readonly IInstanceInformationProvider _informationProvider = Substitute.For<IInstanceInformationProvider>();
+
     private ServiceProvider SetupServiceProvider()
         => new ServiceCollection()
             .AddSingleton(_mediator)
@@ -112,10 +117,10 @@ public class ModuleManagementServiceTests
             SetupModuleMetadata(_moduleBundles);
 
             // Act
-            var results = await service.GetModuleMetadata(cancellationToken: TestContext.Current.CancellationToken);
+            var results = await service.GetMetadata(cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
-            var available = ModuleMetadataModelFactory.CreateModel(results.Bundles.First(k => k.ModuleId == AvailableModulePackageName));
+            var available = results.First(k => k.ModuleId == AvailableModulePackageName);
             foreach (var option in available.EditOptions.Values)
             {
                 if (string.IsNullOrWhiteSpace(option.DefaultValue))
@@ -136,10 +141,10 @@ public class ModuleManagementServiceTests
             SetupModuleMetadata();
 
             // Act
-            var results = await service.GetModuleMetadata(true, TestContext.Current.CancellationToken);
+            var results = await service.GetMetadata(true, TestContext.Current.CancellationToken);
 
             // Assert
-            results.Bundles.Should().BeEmpty();
+            results.Should().BeEmpty();
         }
 
         [Fact]
@@ -149,59 +154,201 @@ public class ModuleManagementServiceTests
             await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             SetupModuleMetadata(_moduleBundles);
+            var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
 
             // Act
-            var results = await service.GetModuleMetadata(cancellationToken: TestContext.Current.CancellationToken);
+            var results = await service.GetMetadata(cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
-            results.Bundles.Select(k => k).Should().BeEquivalentTo(_moduleBundles);
+            results.Select(k => k).Should().BeEquivalentTo(models);
         }
-    }
 
-    public sealed class SendUpdateModuleOptions : ModuleManagementServiceTests
-    {
         [Fact]
-        public async Task Should_skip_options_set_by_environment()
+        public async Task Should_thrown_on_request_error()
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
-            var options = new List<ModuleOptionDeclaration>
-            {
-                new() { Key = "Option1", Value = Core.Shared.Constants.SetByEnvironmentMarker },
-                new() { Key = "Option2", Value = "keep" }
-            };
+
+            _mediator.Request<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>(
+            Arg.Any<GetModuleMetadataBundlesRequest>(), Arg.Any<CancellationToken>())
+            .Returns(new GetModuleMetadataBundlesResponse([], new ErrorInfo(1, "Request failed")));
 
             // Act
-            await service.SendUpdateModuleOptions("module-id", options, TestContext.Current.CancellationToken);
+            var action = () => service.GetMetadata(cancellationToken: TestContext.Current.CancellationToken);
+
+            // Assert
+            await action.Should().ThrowAsync<InvalidOperationException>();
+        }
+    }
+
+    public sealed class UpdateOptionsTests : ModuleManagementServiceTests
+    {
+        [Fact]
+        public async Task Should_send_create_command_and_return_success()
+        {
+            // Arrange
+            var model = CreateModel();
+            using var service = new ModuleManagementService(_mediator);
+
+            SetupSendAndSimulateEvent<UpdateModuleOptions, ModuleOptionsChanged>(
+                _mediator, service,
+                cmd => new ModuleOptionsChanged(model.ModuleId) { CorrelationId = cmd.CorrelationId });
+
+            // Act
+            var result = await service.UpdateOptions(model.ModuleId, [], TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().BeOfType<ModuleManagementServiceSuccessResult>();
+            await _mediator.Received(1).Send(Arg.Any<UpdateModuleOptions>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Should_return_error_when_backend_reports_error()
+        {
+            // Arrange
+            var model = CreateModel();
+            using var service = new ModuleManagementService(_mediator);
+
+            SetupSendAndSimulateEvent<UpdateModuleOptions, ModuleOptionsChanged>(
+                _mediator, service,
+                cmd => new ModuleOptionsChanged(model.ModuleId, new ErrorInfo(100, "create failed"))
+                { CorrelationId = cmd.CorrelationId });
+
+            // Act
+            var result = await service.UpdateOptions(model.ModuleId, [], TestContext.Current.CancellationToken);
+
+            // Assert
+            var errorResult = result.Should().BeOfType<ModuleManagementServiceErrorResult>().Subject;
+            errorResult.ErrorMessage.Should().Be("create failed");
+        }
+
+        [Fact]
+        public async Task Should_fire_option_changed_event_on_success()
+        {
+            // Arrange
+            var model = CreateModel();
+            using var service = new ModuleManagementService(_mediator);
+
+            SetupSendAndSimulateEvent<UpdateModuleOptions, ModuleOptionsChanged>(
+                _mediator, service,
+                cmd => new ModuleOptionsChanged(model.ModuleId) { CorrelationId = cmd.CorrelationId });
+
+            string? moduleId = null;
+            CancellationToken? cancellationToken = null;
+            service.OptionsChanged += (changed, token) => { moduleId = changed.ModuleId; cancellationToken = token; return Task.CompletedTask; };
+
+            // Act
+            await service.UpdateOptions(model.ModuleId, [], TestContext.Current.CancellationToken);
 
             // Assert            
-            await _mediator.Received(1).Send(
-                Arg.Is<UpdateModuleOptions>(command =>
-                    command.ModuleId == "module-id"
-                    && command.Options.Count == 1
-                    && command.Options[0].Value == "keep"),
-                Arg.Any<CancellationToken>());
+            moduleId.Should().NotBeNullOrEmpty();
         }
     }
 
-    public sealed class SendUpdateModulePackages : ModuleManagementServiceTests
+    public sealed class UpdateOperationsTests : ModuleManagementServiceTests
     {
+        private readonly ModuleDependencyPackage _package = new()
+        {
+            Name = "ViciOne.TestPackage",
+            Version = "1.4.0"
+        };
+
         [Fact]
-        public async Task Should_send_update_module_packages_command()
+        public async Task Should_send_create_command_and_return_success()
         {
             // Arrange
-            await using var serviceProvider = SetupServiceProvider();
-            var service = serviceProvider.GetRequiredService<ModuleManagementService>();
-            var operations = new List<ModulePackageOperation>();
+            var model = CreateModel();
+            var operation = new ModulePackageOperation(_package, ModulePackageOperationKind.Uninstall);
+            using var service = new ModuleManagementService(_mediator);
+
+            SetupSendAndSimulateEvent<UpdateModulePackageOperations, ModulePackageOperationsChanged>(
+                _mediator, service,
+                cmd => new ModulePackageOperationsChanged([new ModulePackageChange(CrudAction.Deleted, operation)]) { CorrelationId = cmd.CorrelationId });
 
             // Act
-            await service.SendUpdateModulePackages(operations, TestContext.Current.CancellationToken);
+            var result = await service.UpdateOperations([operation], TestContext.Current.CancellationToken);
 
             // Assert
-            await _mediator.Received(1).Send(
-                Arg.Is<UpdateModulePackageOperations>(command => ReferenceEquals(command.Operations, operations)),
-                Arg.Any<CancellationToken>());
+            result.Should().BeOfType<ModuleManagementServiceSuccessResult>();
+            await _mediator.Received(1).Send(Arg.Any<UpdateModulePackageOperations>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact]
+        public async Task Should_return_error_when_backend_reports_error()
+        {
+            // Arrange
+            var model = CreateModel();
+            var operation = new ModulePackageOperation(_package, ModulePackageOperationKind.Uninstall);
+            using var service = new ModuleManagementService(_mediator);
+
+            SetupSendAndSimulateEvent<UpdateModulePackageOperations, ModulePackageOperationsChanged>(
+                _mediator, service,
+                cmd => new ModulePackageOperationsChanged([], new ErrorInfo(100, "create failed"))
+                { CorrelationId = cmd.CorrelationId });
+
+            // Act
+            var result = await service.UpdateOperations([operation], TestContext.Current.CancellationToken);
+
+            // Assert
+            var errorResult = result.Should().BeOfType<ModuleManagementServiceErrorResult>().Subject;
+            errorResult.ErrorMessage.Should().Be("create failed");
+        }
+
+        [Fact]
+        public async Task Should_fire_operations_changed_event_on_success()
+        {
+            // Arrange
+            var model = CreateModel();
+            var operation = new ModulePackageOperation(_package, ModulePackageOperationKind.Uninstall);
+            using var service = new ModuleManagementService(_mediator);
+
+            SetupSendAndSimulateEvent<UpdateModulePackageOperations, ModulePackageOperationsChanged>(
+                _mediator, service,
+                cmd => new ModulePackageOperationsChanged([new ModulePackageChange(CrudAction.Deleted, operation)])
+                { CorrelationId = cmd.CorrelationId });
+
+            IReadOnlyCollection<ModulePackageChange>? changes = null;
+            CancellationToken? cancellationToken = null;
+            service.OperationsChanged += (changed, token) => { changes = changed.Changes; cancellationToken = token; return Task.CompletedTask; };
+
+            // Act
+            await service.UpdateOperations([operation], TestContext.Current.CancellationToken);
+
+            // Assert
+            changes.Should().NotBeNullOrEmpty();
+            changes.Should().ContainSingle(c => c.Action == CrudAction.Deleted && c.Operation.Package == _package);
         }
     }
+
+    private static ModuleMetadataBundle CreateModel()
+        => new()
+        {
+            ModuleId = "ViciOne.TestPackage",
+            Metadata = new ModuleMetadata() { MinSuiteSdkVersion = "1.0.0", Name = "ViciOne.TestPackage", Version = "1.2.3" },
+            Installed = true
+        };
+
+    private static void SetupSendAndSimulateEvent<TCommand, TEvent>(
+            IUiMediator mediator,
+            ModuleManagementService service,
+            Func<TCommand, TEvent> eventFactory)
+            where TCommand : class, ICommand
+            where TEvent : class, IEvent
+            => mediator.When(m => m.Send(Arg.Any<TCommand>(), Arg.Any<CancellationToken>()))
+                .Do(async callinfo =>
+                {
+                    var command = callinfo.Arg<TCommand>();
+                    var @event = eventFactory(command);
+                    if (@event is ModulePackageOperationsChanged operationsChanged)
+                    {
+                        var context = new ClientContext<ModulePackageOperationsChanged>(operationsChanged, command.CorrelationId);
+                        await service.Consume(context, CancellationToken.None);
+                    }
+                    else if (@event is ModuleOptionsChanged optionsChanged)
+                    {
+                        var context = new ClientContext<ModuleOptionsChanged>(optionsChanged, command.CorrelationId);
+                        await service.Consume(context, CancellationToken.None);
+                    }
+                });
 }

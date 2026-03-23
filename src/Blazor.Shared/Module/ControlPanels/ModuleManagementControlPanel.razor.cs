@@ -10,7 +10,6 @@ using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Client.Infrastructure;
 using Sdk.Modules;
 using Sdk.Utils;
 using ViciOne.Ui.Blazor.Components.Grid.Services;
@@ -24,40 +23,48 @@ namespace Blazor.Shared.Module.ControlPanels;
 
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
 [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
-public sealed partial class ModuleManagementControlPanel : ControlPanelBase<ModuleManagementControlPanelState>,
-    IEventConsumer<ModulePackageOperationsChanged>,
-    IEventConsumer<ModulePackageOperationsFailed>
+public sealed partial class ModuleManagementControlPanel : ControlPanelBase<ModuleManagementControlPanelState>
 {
     private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
     private bool _dialogVisible;
     private IQueryable<ModuleMetadataModel> _installedModulesQueryable = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
     private IQueryable<ModuleMetadataModel> _availableModulesQueryable = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
-    private string _installedModulesFilterText = string.Empty;
-    private string _availableModulesFilterText = string.Empty;
 
     [Inject]
     internal IModuleManagementService ManagementService { get; set; } = default!;
 
     [Inject]
-    internal IUiMediator Mediator { get; set; } = default!;
-
-    [Inject]
     public ISuiteControlService SuiteControlService { get; set; } = default!;
 
-    [Inject] private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
+    [Inject]
+    private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
 
     [Inject]
     public ILogger<ModuleManagementControlPanel> Logger { get; set; } = default!;
 
-    [Inject(Key = typeof(ModuleManagementControlPanelServiceKey))] private IGridItemSelection<ModuleMetadataModel> InstalledModuleSelection { get; set; } = default!;
+    [Inject(Key = typeof(ModuleManagementControlPanelServiceKey))]
+    private IGridItemSelection<ModuleMetadataModel> InstalledModuleSelection { get; set; } = default!;
 
-    [Inject(Key = typeof(ModuleManagementControlPanelServiceKey))] private IGridItemSelection<ModuleMetadataModel> AvailableModuleSelection { get; set; } = default!;
+    [Inject(Key = typeof(ModuleManagementControlPanelServiceKey))]
+    private IGridItemSelection<ModuleMetadataModel> AvailableModuleSelection { get; set; } = default!;
+
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        _subscriptionHandles.Dispose();
+
+        ManagementService.OperationsChanged -= ManagementService_OperationsChanged;
+        State.Changed -= StateChanged;
+
+        await base.DisposeAsyncCore();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
         State.Changed += StateChanged;
+
+        ManagementService.OperationsChanged += ManagementService_OperationsChanged;
 
         _installedModulesQueryable = State.InstalledModules.AsQueryable();
         _availableModulesQueryable = State.AvailableModules.AsQueryable();
@@ -69,9 +76,13 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         AvailableModuleSelection.Clear();
         AvailableModuleSelection.Changed -= AvailableModuleSelectionChanged;
         AvailableModuleSelection.Changed += AvailableModuleSelectionChanged;
+    }
 
-        _subscriptionHandles.Add(Mediator.Register<ModulePackageOperationsChanged>(this));
-        _subscriptionHandles.Add(Mediator.Register<ModulePackageOperationsFailed>(this));
+    private async Task ManagementService_OperationsChanged(ModulePackageOperationsChanged changes, CancellationToken token)
+    {
+        var hasChanged = State.ApplyOperationChanges(changes);
+        if (hasChanged)
+            await InvokeAsync(StateHasChanged);
     }
 
     private async void StateChanged(ControlPanelStateChangedEventArgs args)
@@ -99,13 +110,6 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     private async void InstalledModuleSelectionChanged(GridItemSelectionChangedEventArgs<ModuleMetadataModel> args)
         => await InvokeAsync(StateHasChanged);
 
-    protected override async ValueTask DisposeAsyncCore()
-    {
-        _subscriptionHandles.Dispose();
-
-        await base.DisposeAsyncCore();
-    }
-
     private async Task LoadModuleVersions(bool forceReload = false)
     {
         InstalledModuleSelection.Clear();
@@ -115,9 +119,15 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         try
         {
             // load metadata assets and jsons in one step
-            var response = await ManagementService.GetModuleMetadata(forceReload);
+            var response = await ManagementService.GetMetadata(forceReload);
 
             State.Initialize(response);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to load module metadata");
+            State.RequestErrorCode = 1;
+            State.RequestErrorMessage = "Failed to load module metadata. Please try again.";
         }
         finally
         {
@@ -133,12 +143,12 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
 
     private IQueryable<ModuleMetadataModel> FilterInstalledItems(IQueryable<ModuleMetadataModel> installedModules)
         => installedModules
-            .Where(i => i.Name.Contains(_installedModulesFilterText, StringComparison.OrdinalIgnoreCase))
+            .Where(i => i.Name.Contains(State.InstalledFilterText, StringComparison.OrdinalIgnoreCase))
             .OrderBy(d => d.Name);
 
     private IQueryable<ModuleMetadataModel> FilterAvailableItems(IQueryable<ModuleMetadataModel> installedModules)
         => installedModules
-            .Where(i => i.Name.Contains(_availableModulesFilterText, StringComparison.OrdinalIgnoreCase))
+            .Where(i => i.Name.Contains(State.AvailableFilterText, StringComparison.OrdinalIgnoreCase))
             .OrderBy(d => d.Name);
 
     private bool CanUninstallSelectedModules()
@@ -157,7 +167,12 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
             ModulePackageOperationKind.Uninstall))
             .ToList();
 
-        await ManagementService.SendUpdateModulePackages(operations);
+        State.UpdateUninstallOperations(operations);
+
+        if (State.HasPendingChanges())
+        {
+            await BeginEdit();
+        }
     }
 
     private bool CanResetSelectedModules()
@@ -177,7 +192,12 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
             ModulePackageOperationKind.Uninstall))
             .ToList();
 
-        await ManagementService.SendUpdateModulePackages(operations);
+        State.UpdateUninstallOperations(operations);
+
+        if (State.HasPendingChanges())
+        {
+            await BeginEdit();
+        }
     }
 
     private async Task ShowDetailsAsync(ModuleMetadataModel model)
@@ -186,38 +206,5 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         {
             s.ModuleMetadata = model;
         });
-    }
-
-    public async Task Consume(ClientContext<ModulePackageOperationsChanged> context, CancellationToken cancellationToken)
-    {
-        var hasChanged = false;
-
-        foreach (var change in context.Message.Changes)
-        {
-            var installed = State.InstalledModules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
-            if (installed != null)
-            {
-                installed.PendingOperation = change.Operation;
-                hasChanged = true;
-            }
-
-
-            var available = State.AvailableModules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
-            if (available != null)
-            {
-                available.PendingOperation = change.Operation;
-                hasChanged = true;
-            }
-        }
-
-        if (hasChanged)
-            await InvokeAsync(StateHasChanged);
-    }
-
-    public Task Consume(ClientContext<ModulePackageOperationsFailed> context, CancellationToken cancellationToken)
-    {
-        // how to treat the errors?
-
-        return Task.CompletedTask;
     }
 }
