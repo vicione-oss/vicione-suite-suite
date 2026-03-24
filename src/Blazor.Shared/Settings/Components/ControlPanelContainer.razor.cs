@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Popup.ContentOverlays.Models;
+using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Factories;
 using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Services;
@@ -18,7 +19,7 @@ public sealed partial class ControlPanelContainer : ComponentBase, IAsyncDisposa
     private IControlPanelEdit? _controlPanelEdit;
 
     [Parameter, EditorRequired] public IControlPanelRegistryItem ControlPanelRegistryItem { get; set; }
-    [Parameter, EditorRequired] public ControlPanelLoadingIndicationSectionId LoadingIndicationSectionId { get; set; }
+    [Parameter, EditorRequired] public ContentOverlaySectionId LoadingIndicationSectionId { get; set; }
 
     [Inject] private IControlPanelEditRegistry ControlPanelEditRegistry { get; set; } = default!;
     [Inject] private ControlPanelEditFactory ControlPanelEditFactory { get; set; } = default!;

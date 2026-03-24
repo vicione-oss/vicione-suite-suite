@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 
-namespace Blazor.Shared.Wizards.ContentOverlays.Components;
+namespace Blazor.Shared.Popup.ContentOverlays.Components;
 
 public sealed partial class OptionalSectionContent
 {

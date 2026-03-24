@@ -1,4 +1,5 @@
-﻿@using Blazor.Shared.Popup.Components
+@using Blazor.Shared.Popup.Components
+@using Blazor.Shared.Popup.ContentOverlays.Models
 @using Blazor.Shared.Settings.Models
 @using Microsoft.AspNetCore.Components.Sections
 @using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
@@ -43,7 +44,7 @@
                 itemAttributes.Add("class", string.Join(" ", itemCssClasses));
 
                 var descriptionBannerSectionId = new DescriptionBannerSectionId();
-                var controlPanelLoadingIndicationSectionId = new ControlPanelLoadingIndicationSectionId();
+                var controlPanelLoadingIndicationSectionId = new ContentOverlaySectionId();
 
                 <div @attributes="itemAttributes" @key="item">
                     @if (renderControlPanel)

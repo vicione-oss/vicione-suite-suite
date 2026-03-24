@@ -1,4 +1,6 @@
-﻿.wizard-page-container {
+@use "../../Popup/Styles/content-overlay";
+
+.wizard-page-container {
     position: relative;
     width: 100%;
     height: 100%;
@@ -6,7 +8,7 @@
     overflow: hidden;
 
     &.blur {
-        filter: blur(5px);
+         @include content-overlay.blur-effect();
     }
 
     .content-preliminary-spacing {
