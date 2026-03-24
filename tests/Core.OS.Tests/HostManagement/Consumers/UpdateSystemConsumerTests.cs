@@ -101,9 +101,8 @@ public sealed class UpdateSystemConsumerTests
 
     private void SetupUpdateSystemRequestSuccess(UpdateSystem command)
     {
-        var result = new UpdateSystemResult()
+        var result = new UpdateSystemResult
         {
-            ResultType = nameof(UpdateSystemResult),
             Status = OperationStatus.Success,
             Message = "Message"
         };

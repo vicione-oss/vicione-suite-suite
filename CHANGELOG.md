@@ -37,6 +37,7 @@
 - `AspNetCore.SassCompiler` packages, update to version `1.97.1`
 - `AwesomeAssertions` packages, update to version `9.4.0`
 - `Bunit` packages, update to version `2.6.2`
+- `HostManagement` packages, update to version `1.3.0`
 - `Npgsql.EntityFrameworkCore.PostgreSQL` package, update to version `10.0.2`
 - `MassTransit` packages, update to version `8.5.8`
 - `MailKit` package, update to version `4.15.1`

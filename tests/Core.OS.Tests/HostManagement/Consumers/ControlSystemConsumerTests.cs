@@ -192,9 +192,8 @@ public sealed class ControlSystemConsumerTests
 
     private void SetupShutdownSystemRequestSuccess()
     {
-        var result = new ShutdownSystemResult()
+        var result = new ShutdownSystemResult
         {
-            ResultType = nameof(ShutdownSystemResult),
             Status = OperationStatus.Success,
             Message = "Message"
         };
