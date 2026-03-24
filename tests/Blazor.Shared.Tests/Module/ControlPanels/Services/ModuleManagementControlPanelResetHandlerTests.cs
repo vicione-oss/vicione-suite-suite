@@ -42,6 +42,7 @@ public sealed class ModuleManagementControlPanelResetHandlerTests
         // Arrange
         await using var serviceProvider = SetupServiceProvider();
         var state = new ModuleManagementControlPanelState();
+        state.InstallOperations.Add(new ModulePackageOperation(_package, ModulePackageOperationKind.Install));
         state.UninstallOperations.Add(new ModulePackageOperation(_anotherPackage, ModulePackageOperationKind.Uninstall));
 
         _mgmtService.GetMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>())
@@ -53,6 +54,7 @@ public sealed class ModuleManagementControlPanelResetHandlerTests
         await saveHandler.Reset(state, TestContext.Current.CancellationToken);
 
         // Assert
+        state.InstallOperations.Should().BeEmpty();
         state.UninstallOperations.Should().BeEmpty();
     }
 
@@ -102,5 +104,30 @@ public sealed class ModuleManagementControlPanelResetHandlerTests
         state.InstalledModules.Should().ContainSingle(k => k.Name == _package.Name);
         state.InstalledModules.Should().ContainSingle(k => k.Name == _anotherPackage.Name);
         state.AvailableModules.Should().ContainSingle(k => k.Name == name);
+    }
+
+    [Fact]
+    public async Task Should_not_call_service_when_we_have_no_changes_and_loaded_metadata()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProvider();
+        var installedBundle = new ModuleMetadataBundle
+        {
+            ModuleId = _package.Name,
+            Metadata = new ModuleMetadata() { MinSuiteSdkVersion = "1.0.0", Name = _package.Name, Version = "1.2.3" },
+            Installed = true
+        };
+        var state = new ModuleManagementControlPanelState()
+        {
+            InstalledModules = ModuleMetadataModelFactory.CreateModels([installedBundle])
+        };
+
+        var saveHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<ModuleManagementControlPanelState>>();
+
+        // Act
+        await saveHandler.Reset(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        await _mgmtService.Received(0).GetMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>());
     }
 }

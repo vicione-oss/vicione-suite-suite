@@ -77,9 +77,9 @@ public sealed class ModuleManagementControlPanelSaveHandlerTests
             .Returns(new ModuleManagementServiceSuccessResult());
 
         await using var serviceProvider = SetupServiceProvider();
-        var operation = new ModulePackageOperation(_package, ModulePackageOperationKind.Uninstall);
+        var uninstallOperation = new ModulePackageOperation(_package, ModulePackageOperationKind.Uninstall);
         var state = new ModuleManagementControlPanelState();
-        state.UninstallOperations.Add(operation);
+        state.UninstallOperations.Add(uninstallOperation);
 
         var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ModuleManagementControlPanelState>>();
 
@@ -88,6 +88,55 @@ public sealed class ModuleManagementControlPanelSaveHandlerTests
 
         // Assert
         result.Should().BeOfType<SaveSuccessResult>();
-        await _mgmtService.Received(1).UpdateOperations(state.UninstallOperations, Arg.Any<CancellationToken>());
+        await _mgmtService.Received(1).UpdateOperations(Arg.Is<List<ModulePackageOperation>>(
+            k => k.Count == 1 && k.Any(op => op == uninstallOperation)), Arg.Any<CancellationToken>());
+        state.UninstallOperations.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_clear_pending_operations_after_update_success()
+    {
+        // Arrange
+        var uninstallPackage = new ModuleDependencyPackage()
+        {
+            Name = "ViciOne.OtherPackage",
+            Version = "2.1.7"
+        };
+
+        _mgmtService.UpdateOperations(Arg.Any<List<ModulePackageOperation>>(), Arg.Any<CancellationToken>())
+            .Returns(new ModuleManagementServiceSuccessResult());
+
+        await using var serviceProvider = SetupServiceProvider();
+        var uninstallOperation = new ModulePackageOperation(uninstallPackage, ModulePackageOperationKind.Uninstall);
+        var installOperation = new ModulePackageOperation(_package, ModulePackageOperationKind.Install);
+        var state = new ModuleManagementControlPanelState();
+        state.InstallOperations.Add(installOperation);
+        state.UninstallOperations.Add(uninstallOperation);
+
+        var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ModuleManagementControlPanelState>>();
+
+        // Act
+        var result = await saveHandler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().BeOfType<SaveSuccessResult>();
+        state.InstallOperations.Should().BeEmpty();
+        state.UninstallOperations.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_not_call_service_if_we_have_no_changes_and_return_success()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProvider();
+        var state = new ModuleManagementControlPanelState();
+        var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ModuleManagementControlPanelState>>();
+
+        // Act
+        var result = await saveHandler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().BeOfType<SaveSuccessResult>();
+        await _mgmtService.Received(0).UpdateOperations(Arg.Any<List<ModulePackageOperation>>(), Arg.Any<CancellationToken>());
     }
 }

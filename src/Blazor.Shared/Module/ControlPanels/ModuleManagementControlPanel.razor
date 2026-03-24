@@ -29,12 +29,12 @@
                 <div style="display:contents;">
                     <GridActionButton Text="@CommonVocabulary.UninstallVerb"
                                       OnClick="@(async () => await UninstallSelectedModules())"
-                                      IconCssClass="@MonochromeIconName.UninstallLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()"
+                                      IconCssClass="@_uninstallIconCssClasses"
                                       Enabled="@CanUninstallSelectedModules()" />
                     
                     <GridActionButton Text="@CommonVocabulary.Restart"
                                       OnClick="@(() => _dialogVisible = true)"
-                                      IconCssClass="@MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()" />
+                                      IconCssClass="@_restartIconCssClasses" />
                 </div>
             </ActionButtons>
 
@@ -121,17 +121,23 @@
             <ActionButtons>
                 <div style="display:contents;">
                     <GridActionButton Text="@CommonVocabulary.ResetVerb"
-                                      OnClick="@(async () => await ResetPendingInstallation())"
-                                      IconCssClass="@MonochromeIconName.UninstallLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()"
-                                      Enabled="@CanResetSelectedModules()" />
+                                      OnClick="@(async () => await ResetAvaliableSelectedModules())"
+                                      IconCssClass="@_uninstallIconCssClasses"
+                                      Enabled="@CanResetAvaliableSelectedModules()" />
+
+                    <GridActionButton Text="@CommonVocabulary.InstallVerb"
+                                      OnClick="InstallSelectedAvailableModules"
+                                      IconCssClass="@_installIconCssClasses"
+                                      Enabled="@CanInstallSelectedAvailableModules()" />
 
                     <GridActionButton Text="@CommonVocabulary.RefreshVerb"
-                                      OnClick="@(async () => await LoadModuleVersions(true))"
-                                      IconCssClass="@MonochromeIconName.Reload.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()" />
+                                      OnClick="@(async () => await LoadAvailableModuleVersions(true))"
+                                      IconCssClass="@_reloadIconCssClasses"
+                                      Enabled="@(!State.IsLoading)"/>
 
                     <GridActionButton Text="@CommonVocabulary.Restart"
                                       OnClick="@(() => _dialogVisible = true)"
-                                      IconCssClass="@MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated()" />
+                                      IconCssClass="@_restartIconCssClasses" />
                 </div>
             </ActionButtons>
 

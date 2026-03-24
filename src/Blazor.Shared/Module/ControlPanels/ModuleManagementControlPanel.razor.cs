@@ -13,18 +13,21 @@ using Sdk.Client.ControlPanels.Services;
 using Sdk.Modules;
 using Sdk.Utils;
 using ViciOne.Ui.Blazor.Components.Grid.Services;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
+using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 
 namespace Blazor.Shared.Module.ControlPanels;
 
-/// <summary>
-/// todo - changing the available version will can lead to changed dependencies, options etc
-/// where to store the options later if we enter passwords etc.
-/// </summary>
 
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
 [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
 public sealed partial class ModuleManagementControlPanel : ControlPanelBase<ModuleManagementControlPanelState>
 {
+    private readonly string _restartIconCssClasses = MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+    private readonly string _reloadIconCssClasses = MonochromeIconName.Reload.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+    private readonly string _installIconCssClasses = MonochromeIconName.Import.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+    private readonly string _uninstallIconCssClasses = MonochromeIconName.UninstallLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+
     private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
     private bool _dialogVisible;
     private IQueryable<ModuleMetadataModel> _installedModulesQueryable = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
@@ -66,9 +69,6 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
 
         ManagementService.OperationsChanged += ManagementService_OperationsChanged;
 
-        _installedModulesQueryable = State.InstalledModules.AsQueryable();
-        _availableModulesQueryable = State.AvailableModules.AsQueryable();
-
         InstalledModuleSelection.Clear();
         InstalledModuleSelection.Changed -= InstalledModuleSelectionChanged;
         InstalledModuleSelection.Changed += InstalledModuleSelectionChanged;
@@ -91,11 +91,13 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
 
         if (args.PropertyNames.Contains(nameof(State.InstalledModules)))
         {
+            InstalledModuleSelection.Clear();
             _installedModulesQueryable = State.InstalledModules.AsQueryable();
             stateHasChanged = true;
         }
         else if (args.PropertyNames.Contains(nameof(State.AvailableModules)))
         {
+            AvailableModuleSelection.Clear();
             _availableModulesQueryable = State.AvailableModules.AsQueryable();
             stateHasChanged = true;
         }
@@ -110,7 +112,7 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     private async void InstalledModuleSelectionChanged(GridItemSelectionChangedEventArgs<ModuleMetadataModel> args)
         => await InvokeAsync(StateHasChanged);
 
-    private async Task LoadModuleVersions(bool forceReload = false)
+    private async Task LoadAvailableModuleVersions(bool forceReload = false)
     {
         InstalledModuleSelection.Clear();
         AvailableModuleSelection.Clear();
@@ -118,9 +120,12 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         State.BeginLoading();
         try
         {
+            await State.CancelEditInOptionGrids();
+
             // load metadata assets and jsons in one step
             var response = await ManagementService.GetMetadata(forceReload);
 
+            // will trigger StateChanged which will update the queryables and clear the selections
             State.Initialize(response);
         }
         catch (Exception ex)
@@ -175,11 +180,37 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         }
     }
 
-    private bool CanResetSelectedModules()
+
+    private bool CanInstallSelectedAvailableModules()
+        => AvailableModuleSelection.Count != 0
+        && AvailableModuleSelection.All(i => i.CanBeModified && !i.Bundle.IsDebugSource && i.Bundle.PendingOperation == null);
+
+    private async Task InstallSelectedAvailableModules()
+    {
+        var operations = AvailableModuleSelection
+            .Distinct()
+            .Select(item => new ModulePackageOperation(new ModuleDependencyPackage
+            {
+                Name = item.Name,
+                Version = item.Version,
+            },
+            ModulePackageOperationKind.Install))
+            .ToList();
+
+        State.UpdateInstallOperations(operations);
+
+        if (State.HasPendingChanges())
+        {
+            await BeginEdit();
+        }
+    }
+
+
+    private bool CanResetAvaliableSelectedModules()
         => AvailableModuleSelection.Count != 0
         && AvailableModuleSelection.All(k => k.PendingOperation?.OperationKind == ModulePackageOperationKind.Install);
 
-    private async Task ResetPendingInstallation()
+    private async Task ResetAvaliableSelectedModules()
     {
         var operations = AvailableModuleSelection
             .Where(k => k.PendingOperation != null && k.PendingOperation.OperationKind == ModulePackageOperationKind.Install)
