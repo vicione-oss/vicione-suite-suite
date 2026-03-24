@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Core.Shared.Monitoring;
 
@@ -22,4 +22,6 @@ public sealed class CollectorOptions
     public bool Uptime { get; set; } = true;
 
     public bool JournalFields { get; set; } = true;
+
+    public bool LoadAvg { get; set; } = true;
 }

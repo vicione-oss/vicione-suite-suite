@@ -1,4 +1,4 @@
-﻿@using System.Globalization
+@using System.Globalization
 @using ViciOne.SystemMonitoring.Collectors
 @using ViciOne.Ui.Blazor.Components.Grid.Components
 @using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
@@ -10,27 +10,36 @@
 {
     <div class="layout">
         <div class="information-wrapper">
-            <div class="hardware-overview">
-                <div>CPU:</div>
-                <div class="outer-bar">
-                    <div class="inner-bar cpu" style="--cpuWidth: @FormatHardwareValue(_cpuValue, CultureInfo.InvariantCulture)%" />
+            <div class="metrics-area">
+                <div class="hardware-overview">
+                    <div>CPU:</div>
+                    <div class="outer-bar">
+                        <div class="inner-bar cpu" style="--cpuWidth: @FormatHardwareValue(_cpuValue, CultureInfo.InvariantCulture)%" />
+                    </div>
+                    <div class="value">@FormatHardwareValue(_cpuValue)%</div>
+                    <div>RAM:</div>
+                    <div class="outer-bar">
+                        <div class="inner-bar ram" style="--ramWidth: @FormatHardwareValue(_ramValue, CultureInfo.InvariantCulture)%" />
+                    </div>
+                    <div class="value">@FormatHardwareValue(_ramValue)%</div>
+                    <div>HDD:</div>
+                    <div class="outer-bar">
+                        <div class="inner-bar hdd" style="--hddWidth: @FormatHardwareValue(_hddValue, CultureInfo.InvariantCulture)%" />
+                    </div>
+                    <div class="value">@FormatHardwareValue(_hddValue)%</div>
+                    <div>NET:</div>
+                    <div class="outer-bar">
+                        <div class="inner-bar net" style="--netWidth: @FormatHardwareValue(_netValue, CultureInfo.InvariantCulture)%" />
+                    </div>
+                    <div class="value">@FormatHardwareValue(_netValue)%</div>
                 </div>
-                <div class="value">@FormatHardwareValue(_cpuValue)%</div>
-                <div>RAM:</div>
-                <div class="outer-bar">
-                    <div class="inner-bar ram" style="--ramWidth: @FormatHardwareValue(_ramValue, CultureInfo.InvariantCulture)%" />
+
+                <div class="load-average">
+                    <span>Load average:</span>
+                    <span class="load-average-value">@FormatLoadAvgValue(_loadAvg1Value)</span>
+                    <span class="load-average-value">@FormatLoadAvgValue(_loadAvg5Value)</span>
+                    <span class="load-average-value">@FormatLoadAvgValue(_loadAvg15Value)</span>
                 </div>
-                <div class="value">@FormatHardwareValue(_ramValue)%</div>
-                <div>HDD:</div>
-                <div class="outer-bar">
-                    <div class="inner-bar hdd" style="--hddWidth: @FormatHardwareValue(_hddValue, CultureInfo.InvariantCulture)%" />
-                </div>
-                <div class="value">@FormatHardwareValue(_hddValue)%</div>
-                <div>NET:</div>
-                <div class="outer-bar">
-                    <div class="inner-bar net" style="--netWidth: @FormatHardwareValue(_netValue, CultureInfo.InvariantCulture)%" />
-                </div>
-                <div class="value">@FormatHardwareValue(_netValue)%</div>
             </div>
 
             <div class="search-container">
