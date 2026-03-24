@@ -18,7 +18,7 @@ public class HostManagmentVersionTests
         var hostMgmtVersionFilePath = fileSystem.Path.Combine(repoRoot, "VERSION_HOSTMANAGEMENT");
 
         var hostManagementAssemblyName = typeof(NetworkDNSSettings).Assembly.GetName();
-        if (hostManagementAssemblyName?.Version is null)
+        if (hostManagementAssemblyName.Version is null)
             throw new InvalidOperationException("Failed to get HostManagement version");
 
         var fileVersionString = fileSystem.File.ReadAllText(hostMgmtVersionFilePath).TrimEnd();

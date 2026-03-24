@@ -17,7 +17,6 @@ internal static class IPipeClientExtensions
             var result = new CommunicationContracts.GetSystemConfigurationResult
             {
                 Status = status,
-                ResultType = nameof(CommunicationContracts.GetSystemConfigurationResult),
                 Message = message,
                 Configuration = TestPipeClient.GetEmbeddedSystemConfiguration()
             };
@@ -31,7 +30,6 @@ internal static class IPipeClientExtensions
             var result = new CommunicationContracts.SetSystemConfigurationResult
             {
                 Status = status,
-                ResultType = nameof(CommunicationContracts.SetSystemConfigurationResult),
                 Message = message
             };
 
@@ -45,7 +43,6 @@ internal static class IPipeClientExtensions
             var result = new CommunicationContracts.ResetSystemResult
             {
                 Status = status,
-                ResultType = nameof(CommunicationContracts.ResetSystemResult),
                 Message = message
             };
 
@@ -58,7 +55,6 @@ internal static class IPipeClientExtensions
             var result = new CommunicationContracts.RestartSystemResult
             {
                 Status = status,
-                ResultType = nameof(CommunicationContracts.RestartSystemResult),
                 Message = message
             };
 
@@ -71,7 +67,6 @@ internal static class IPipeClientExtensions
             var result = new CommunicationContracts.ServiceControlResult
             {
                 Status = status,
-                ResultType = nameof(CommunicationContracts.ServiceControlResult),
                 Message = message
             };
 
