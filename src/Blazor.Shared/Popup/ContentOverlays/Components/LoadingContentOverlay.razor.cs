@@ -1,16 +1,16 @@
-﻿using Blazor.Shared.Popup.Factories;
-using Blazor.Shared.Wizards.ContentOverlays.Models;
+using Blazor.Shared.Popup.ContentOverlays.Models;
+using Blazor.Shared.Popup.Factories;
 using Microsoft.AspNetCore.Components;
 using ViciOne.Ui.Blazor.Components.LoadingSpinner.Models;
 
-namespace Blazor.Shared.Wizards.ContentOverlays.Components;
+namespace Blazor.Shared.Popup.ContentOverlays.Components;
 
 public sealed partial class LoadingContentOverlay
 {
     private TimedMessage? _timedMessage;
     private List<TimedMessage> _timedMessages = [];
 
-    [CascadingParameter] private ContentOverlaySectionId SectionId { get; set; } = default!;
+    [Parameter] public ContentOverlaySectionId? SectionId { get; set; }
 
     [Parameter] public TimedMessage? TimedMessage { get; set; }
 
