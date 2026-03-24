@@ -18,7 +18,9 @@ public sealed class MqttConnectionTest : IConnectionTest
             var builder = new MqttClientOptionsBuilder()
                     .WithSuiteConnection(mqttConnection, new FileSystem());
 
-            await mqttClient.ConnectAsync(builder.Build(), cancellationToken);
+            var connectResult = await mqttClient.ConnectAsync(builder.Build(), cancellationToken);
+            if (connectResult.ResultCode != MqttClientConnectResultCode.Success || !mqttClient.IsConnected)
+                return ConnectionTestResultFactory.CreateFailureResult($"MQTT connection test failed: {connectResult.ResultCode}");
 
             if (mqttClient.IsConnected)
             {
@@ -33,6 +35,6 @@ public sealed class MqttConnectionTest : IConnectionTest
             return ConnectionTestResultFactory.CreateFailureResult($"MQTT connection test failed: {ex.Message}");
         }
 
-        return new(true, null);
+        return new ConnectionTestResult(true, null);
     }
 }
