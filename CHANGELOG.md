@@ -13,6 +13,7 @@
 - `JournalListView`, added download feature of Journal entries as text
 - Added implementation of typed `ILocalHttpClient` to access local services with proper base address
 - Added control panel `Sources` to manage artifact update sources, that provide suite, module updates
+- Add indicator to system monitoring component
 
 ### Changed
 

@@ -127,13 +127,21 @@ class ConfigGauge {
     markers!: ConfigGaugeMarkers;
 }
 
+class IndicatorLineConfig {
+    lineColor!: string;
+    lineWidth!: number;
+}
+
 class Config {
     canvas!: CanvasConfig;
     chart!: ConfigChart;
     gauge!: ConfigGauge;
     gaugeCenters!: Record<string, Position>;
     popup!: PopupConfig;
+    indicatorLine!: IndicatorLineConfig;
 }
+
+const minutesPerPoint = 5;
 
 export class Monitoring {
 
@@ -277,6 +285,10 @@ export class Monitoring {
             rowHeight: 16,
             rowSpacing: 4,
             bottomPadding: 4
+        },
+        indicatorLine: {
+            lineColor: '#ffffff',
+            lineWidth: 1
         }
     };
 
@@ -291,6 +303,7 @@ export class Monitoring {
     private dpr = window.devicePixelRatio || 1;
     private readonly ctx = this.canvas.getContext('2d', { willReadFrequently: true })!;
     private hoveredGauge: string | undefined = '';
+    private hoveredChartDataPosition: number | undefined = undefined;
     private readonly canvasStart = this.parameterToCanvasAngle(this.config.gauge.style.startAngleDeg);
     private canvasEnd = this.parameterToCanvasAngle(this.config.gauge.style.endAngleDeg);
     private cpuData = new Float32Array((288 * 3) + 3);
@@ -316,14 +329,27 @@ export class Monitoring {
             const rect = this.canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
+            const pos = this.config.chart.position;
+
+            const isInsideChart = mouseX >= pos.x && mouseX <= pos.x + pos.width && mouseY >= pos.y && mouseY <= pos.y + pos.height;
             this.hoveredGauge = '';
-            for (const metric in this.config.gaugeCenters) { // eslint-disable-line guard-for-in
-                const gaugeCenter = this.config.gaugeCenters[metric];
-                const dx = mouseX - gaugeCenter.x;
-                const dy = mouseY - gaugeCenter.y;
-                if (Math.sqrt((dx * dx) + (dy * dy)) < this.config.gauge.style.radius + 15) {
-                    this.hoveredGauge = metric;
-                    break;
+
+            if (isInsideChart) {
+                const fraction = 1 - ((mouseX - pos.x) / pos.width);
+                const nMinutes = this.timeSpanHours * 60;
+                const nPoints = this.getPointCount();
+                const j = (fraction * nMinutes) / minutesPerPoint;
+                this.hoveredChartDataPosition = Math.max(0, Math.min(nPoints - 1, j));
+            } else {
+                this.hoveredChartDataPosition = undefined;
+                for (const metric in this.config.gaugeCenters) { // eslint-disable-line guard-for-in
+                    const gaugeCenter = this.config.gaugeCenters[metric];
+                    const dx = mouseX - gaugeCenter.x;
+                    const dy = mouseY - gaugeCenter.y;
+                    if (Math.sqrt((dx * dx) + (dy * dy)) < this.config.gauge.style.radius + 15) {
+                        this.hoveredGauge = metric;
+                        break;
+                    }
                 }
             }
 
@@ -333,6 +359,7 @@ export class Monitoring {
 
         this.canvas.addEventListener('mouseout', () => {
             this.hoveredGauge = '';
+            this.hoveredChartDataPosition = undefined;
             this.render();
             this.updateTooltip();
         });
@@ -368,6 +395,10 @@ export class Monitoring {
         }
     }
 
+    private getPointCount(): number {
+        return 1 + ((this.timeSpanHours * 60) / minutesPerPoint);
+    }
+
     private setTimeSpan() {
         this.config.chart.xAxis.maxValue = this.timeSpanHours;
 
@@ -379,8 +410,8 @@ export class Monitoring {
             this.config.chart.xAxis.labelInterval = 6;
         }
 
-        const nPoints = 1 + ((this.timeSpanHours * 60) / 5);
-        const totalLength = 3 + ((nPoints - 1) * 3);
+        const nPoints = this.getPointCount();
+        const totalLength = nPoints * 3;
         this.cpuData = new Float32Array(totalLength);
         this.ramData = new Float32Array(totalLength);
         this.hddData = new Float32Array(totalLength);
@@ -413,32 +444,23 @@ export class Monitoring {
 
     private getXFromDataPoint(j: number): number { // eslint-disable-line @typescript-eslint/naming-convention
         const nMinutes = this.timeSpanHours * 60;
-        const fraction = (j * 5) / nMinutes;
+        const fraction = (j * minutesPerPoint) / nMinutes;
         return this.config.chart.position.x + (this.config.chart.position.width * (1 - fraction));
     }
 
     private buildPathsForMetric(metricData: Float32Array): { line: Path2D; area: Path2D } {
         const pos = this.config.chart.position;
         const maxPercent = this.config.chart.yAxis.maxValue;
-        const nPoints = 1 + ((this.timeSpanHours * 60) / 5);
+        const nPoints = this.getPointCount();
         const avgPoints: Array<{ x: number; y: number }> = [];
         const minPoints: Array<{ x: number; y: number }> = [];
         const maxPoints: Array<{ x: number; y: number }> = [];
 
         for (let j = 0; j < nPoints; j++) {
-            let minVal: number;
-            let avgVal: number;
-            let maxVal: number;
-            if (j === 0) {
-                minVal = metricData[0];
-                avgVal = metricData[1];
-                maxVal = metricData[2];
-            } else {
-                const idx = 3 + ((j - 1) * 3);
-                minVal = metricData[idx];
-                avgVal = metricData[idx + 1];
-                maxVal = metricData[idx + 2];
-            }
+            const idx = j * 3;
+            const minVal = metricData[idx];
+            const avgVal = metricData[idx + 1];
+            const maxVal = metricData[idx + 2];
 
             const x = this.getXFromDataPoint(j);
             const yAvg = pos.y + pos.height - ((avgVal / maxPercent) * pos.height);
@@ -528,7 +550,7 @@ export class Monitoring {
             default: phase = 0;
         }
 
-        const totalValues = 3 + ((nPoints - 1) * 3);
+        const totalValues = nPoints * 3;
         const arr = new Float32Array(totalValues);
         for (let j = 0; j < nPoints; j++) {
             const t = (j / (nPoints - 1)) * (2 * Math.PI);
@@ -536,16 +558,10 @@ export class Monitoring {
             avg = Math.max(0, Math.min(100, avg));
             const minVal = Math.max(0, avg - offset);
             const maxVal = Math.min(100, avg + offset);
-            if (j === 0) {
-                arr[0] = minVal;
-                arr[1] = avg;
-                arr[2] = maxVal;
-            } else {
-                const idx = 3 + ((j - 1) * 3);
-                arr[idx] = minVal;
-                arr[idx + 1] = avg;
-                arr[idx + 2] = maxVal;
-            }
+            const idx = j * 3;
+            arr[idx] = minVal;
+            arr[idx + 1] = avg;
+            arr[idx + 2] = maxVal;
         }
 
         return arr;
@@ -681,6 +697,21 @@ export class Monitoring {
             this.ctx.lineWidth = 2;
             this.ctx.stroke(new Path2D(paths.line));
         });
+        this.drawIndicatorLine();
+    }
+
+    private drawIndicatorLine() {
+        if (this.hoveredChartDataPosition === undefined) return;
+
+        const pos = this.config.chart.position;
+        const x = this.getXFromDataPoint(this.hoveredChartDataPosition);
+
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = this.config.indicatorLine.lineColor;
+        this.ctx.lineWidth = this.config.indicatorLine.lineWidth;
+        this.ctx.moveTo(x, pos.y);
+        this.ctx.lineTo(x, pos.y + pos.height);
+        this.ctx.stroke();
     }
 
     private drawTriangleForGauge(angle: number, center: Position, size: number, style: { fillStyle: string }) {
@@ -744,13 +775,24 @@ export class Monitoring {
         this.drawTriangleForGauge(maxAngle, center, gaugeStyle.triangleSize, this.config.gauge.markers.max);
     }
 
-    private getGaugeValue(metric: string) {
+    private getDataArray(metric: string): Float32Array {
         switch (metric) {
-            case 'cpu': return { min: this.cpuData[0], avg: this.cpuData[1], max: this.cpuData[2] };
-            case 'ram': return { min: this.ramData[0], avg: this.ramData[1], max: this.ramData[2] };
-            case 'hdd': return { min: this.hddData[0], avg: this.hddData[1], max: this.hddData[2] };
-            default: return { min: this.netData[0], avg: this.netData[1], max: this.netData[2] };
+            case 'cpu': return this.cpuData;
+            case 'ram': return this.ramData;
+            case 'hdd': return this.hddData;
+            default: return this.netData;
         }
+    }
+
+    private getValuesAtIndex(data: Float32Array, j: number): { min: number; avg: number; max: number } {
+        const idx = j * 3;
+        return { min: data[idx], avg: data[idx + 1], max: data[idx + 2] };
+    }
+
+    private getGaugeValue(metric: string) {
+        const data = this.getDataArray(metric);
+        const index = Math.round(this.hoveredChartDataPosition ?? 0);
+        return this.getValuesAtIndex(data, index);
     }
 
     private updateTooltip() {
