@@ -63,10 +63,6 @@ public class IndexPageTests
                 clientModule.Configure(ctx.Services);
         }
 
-        // setup of jsModule.Setup<IJSObjectReference>("initSubline", _ => true); as instructed by bUnit iself throws mysterios exception,
-        // using loose mode instead
-        // https://github.com/bUnit-dev/bUnit/discussions/1248
-        ctx.JSInterop.Mode = JSRuntimeMode.Loose;
 
         // Act
         var component = ctx.Render<IndexPage>();
