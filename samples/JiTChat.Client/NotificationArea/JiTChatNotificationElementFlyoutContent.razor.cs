@@ -67,9 +67,8 @@ public sealed partial class JiTChatNotificationElementFlyoutContent : ComponentB
     {
         if (_jsModuleReference is not null)
         {
-            var jitChat = await _jsModuleReference.InvokeAsync<IJSObjectReference?>("init");
-            if (jitChat is not null)
-                await jitChat.InvokeVoidAsync("scrollToBottom");
+            var jitChat = await _jsModuleReference.InvokeConstructorAsync("JitChat");
+            await jitChat.InvokeVoidAsync("scrollToBottom");
         }
     }
 

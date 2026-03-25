@@ -1,6 +1,6 @@
 import '/_content/ViciOne.Suite.Blazor.Shared/js/event-target-mixins.js';
 
-class FileDropZone {
+export class FileDropZone {
     private inputFile: HTMLInputElement | undefined = undefined;
 
     private dragStartEventListenerBinding: ((e: DragEvent) => void) | undefined = undefined;
@@ -10,9 +10,7 @@ class FileDropZone {
     private dropEventListenerBinding: ((e: DragEvent) => void) | undefined = undefined;
     constructor(readonly dropZone: HTMLElement, readonly dotNetObject: DotNet.DotNetObject, inputFile: HTMLInputElement | undefined) {
         this.inputFile = inputFile;
-    }
 
-    public init() {
         this.dragStartEventListenerBinding = this.dragStart.bind(this);
         this.dropZone.addEventListener('dragstart', this.dragStartEventListenerBinding);
 
@@ -140,9 +138,3 @@ class FileDropZone {
     }
 }
 
-export function attach(dropZone: HTMLElement, dotNetObject: DotNet.DotNetObject, inputFile: HTMLInputElement | undefined) {
-    const fileDropZone = new FileDropZone(dropZone, dotNetObject, inputFile);
-    fileDropZone.init();
-
-    return fileDropZone;
-}

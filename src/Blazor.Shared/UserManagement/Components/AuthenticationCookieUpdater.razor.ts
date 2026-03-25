@@ -1,4 +1,4 @@
-class AuthenticationCookieUpdater {
+export class AuthenticationCookieUpdater {
 
     public async updateAuthenticationCookie(nonce: string) {
         const url = new URL('api/UpdateAuthenticationCookie', document.baseURI);
@@ -11,10 +11,4 @@ class AuthenticationCookieUpdater {
 
         return response.ok && response.status === 204;
     }
-}
-
-export async function attach() {
-    const authenticationCookieUpdater = new AuthenticationCookieUpdater();
-
-    return authenticationCookieUpdater;
 }
