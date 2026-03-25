@@ -1,4 +1,4 @@
-﻿using Sdk.Modules;
+using Sdk.Modules;
 
 namespace Core.OS.Modules.Extensions;
 
@@ -24,7 +24,7 @@ internal static class ModuleMetadataExtensions
             return result;
         }
 
-        public List<string> GetMissingConfigurationKeys(IConfiguration envConf, bool requiredOnly = false)
+        public List<string> GetMissingConfigurationKeys(IConfiguration configuration, bool requiredOnly = false)
         {
             if (metadata.Options is null)
                 return [];
@@ -37,7 +37,9 @@ internal static class ModuleMetadataExtensions
                     continue;
 
                 var optionKey = declaration.GetOptionKey(metadata.Name);
-                var optionValue = envConf[optionKey];
+                var optionValue = configuration[optionKey];
+
+                GetConfigurationOption(declaration, optionKey, configuration);
 
                 // good - it has a value - unvalidated
                 if (!string.IsNullOrWhiteSpace(optionValue) || !string.IsNullOrEmpty(declaration.DefaultValue))
@@ -47,6 +49,26 @@ internal static class ModuleMetadataExtensions
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Attempt to get the option value from configuration will throw if the option
+        /// is totally misconfigured and will result in StartupError of the module       
+        /// </summary>
+        private static void GetConfigurationOption(ModuleOptionDeclaration declaration, string optionKey, IConfiguration configuration)
+        {
+            switch (declaration.OptionType)
+            {
+                case ModuleOptionType.Number:
+                    configuration.GetValue<int>(optionKey);
+                    break;
+                case ModuleOptionType.Text:
+                    configuration.GetValue<string>(optionKey);
+                    break;
+                case ModuleOptionType.Boolean:
+                    configuration.GetValue<bool>(optionKey);
+                    break;
+            }
         }
 
         public List<string> ValidateAndUseDefaultValues(IConfiguration envConf)
