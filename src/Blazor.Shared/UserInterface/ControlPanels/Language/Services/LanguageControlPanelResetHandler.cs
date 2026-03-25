@@ -1,4 +1,4 @@
-﻿using Core.Shared.Instance.Requests;
+using Core.Shared.Instance.Requests;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 
@@ -8,9 +8,12 @@ internal sealed class LanguageControlPanelResetHandler(IUiMediator mediator) : I
 {
     public async Task Reset(LanguageControlPanelState state, CancellationToken cancellationToken)
     {
-        state.SelectedCultureLoading = true;
+        state.BeginLoading();
         try
         {
+            state.ShowPageRefreshInformation = false;
+            state.ShowLanguageDoesNotAffectCurrentUser = false;
+
             var response = await mediator.Request<GetCrossInstanceConfiguration, GetCrossInstanceConfigurationResponse>(new(), cancellationToken);
             state.CrossInstanceConfiguration = response.CrossInstanceConfiguration;
 
@@ -18,7 +21,7 @@ internal sealed class LanguageControlPanelResetHandler(IUiMediator mediator) : I
         }
         finally
         {
-            state.SelectedCultureLoading = false;
+            state.EndLoading();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@using Blazor.Shared.Settings.Components
+@using Blazor.Shared.Settings.Components
 @using Blazor.Shared.UserInterface.ControlPanels.Language.Services
 @using ViciOne.Ui.Localization.Resources
 
@@ -6,20 +6,24 @@
 
 <ControlPanelPage Title="@TechnicalTerms.SystemDefault">
     <DescriptionBanner Title="@CommonVocabulary.Language" IconCssClass="@_languageIconCssClasses">
-        @Localization.SystemDefaultControlPanelPage.DescriptionBannerContent
+        @Localization.LanguageControlPanel.DescriptionBannerContent
     </DescriptionBanner>
 
     <SettingsLayout>
         <SettingsGroup Title="@TechnicalTerms.DisplayLanguage">
-            <SettingsField Label="@CommonVocabulary.Language" IsLoading="@State.SelectedCultureLoading" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
-                <SettingsFieldCultureComboBox Items="@Constants.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="BeginEdit" />
+            <SettingsField Label="@CommonVocabulary.Language">
+                <SettingsFieldCultureComboBox Items="@Constants.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="AfterSelectedCultureChange" />
             </SettingsField>
 
-            <InformationBannerSettingsField Text="@Localization.SystemDefaultControlPanelPage.LanguageChangeSavedBannerText" Visible="@State.ShowLanguageSavedBanner">
+            <!-- optional -->
+            <InformationBannerSettingsField Text="@Localization.LanguageControlPanel.LanguageChangeSavedBannerText" Visible="@State.ShowPageRefreshInformation">
                 <Button>
                     <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.RefreshVerb" OnClick="RefreshButtonClick" />
                 </Button>
             </InformationBannerSettingsField>
+
+            <!-- optional -->
+            <InformationBannerSettingsField Text="@Localization.LanguageControlPanel.LanguageChangeDoesNotAffectUser" Visible="@State.ShowLanguageDoesNotAffectCurrentUser" />
         </SettingsGroup>
     </SettingsLayout>
 </ControlPanelPage>

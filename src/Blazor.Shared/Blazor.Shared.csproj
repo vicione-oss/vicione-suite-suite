@@ -347,10 +347,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>SettingsNotificationElementFlyoutContent.resx</DependentUpon>
     </Compile>
-    <Compile Update="UserInterface\ControlPanels\Language\Components\Localization\SystemDefaultControlPanelPage.Designer.cs">
+    <Compile Update="UserInterface\ControlPanels\Language\Components\Localization\LanguageControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>SystemDefaultControlPanelPage.resx</DependentUpon>
+      <DependentUpon>LanguageControlPanel.resx</DependentUpon>
     </Compile>
     <Compile Update="UserInterface\ControlPanels\Language\Services\Localization\LanguageControlPanelSaveHandler.Designer.cs">
       <DependentUpon>LanguageControlPanelSaveHandler.resx</DependentUpon>
@@ -703,9 +703,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SettingsNotificationElementFlyoutContent.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="UserInterface\ControlPanels\Language\Components\Localization\SystemDefaultControlPanelPage.resx">
+    <EmbeddedResource Update="UserInterface\ControlPanels\Language\Components\Localization\LanguageControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>SystemDefaultControlPanelPage.Designer.cs</LastGenOutput>
+      <LastGenOutput>LanguageControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="UserInterface\ControlPanels\Language\Services\Localization\LanguageControlPanelSaveHandler.resx">
       <LastGenOutput>LanguageControlPanelSaveHandler.Designer.cs</LastGenOutput>

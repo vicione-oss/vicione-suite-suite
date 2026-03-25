@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -37,7 +38,11 @@ namespace Blazor.Server.Backend;
 public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 {
     private readonly UiModuleManager _moduleHost = new();
+    private readonly Lock _lock = new();
+    private string? _defaultRequestCulture;
 
+
+    /// <inheritdoc/>
     public void LoadUiDependencies(IServiceCollection services, IUiHostEnvironment uiEnvironment)
     {
         var moduleBundles = uiEnvironment.LoadModuleBundles(CreateBundle);
@@ -47,6 +52,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddSingleton<IUiModuleManager>(s => s.GetRequiredService<UiModuleManager>());
     }
 
+    /// <inheritdoc/>
     public override void ConfigureServices(IServiceCollection services, IConfiguration config, IMvcBuilder builder)
     {
         builder.Services.AddScoped<CircuitHandler, CultureCircuitHandler>();
@@ -80,6 +86,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();
     }
 
+    /// <inheritdoc/>
     public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccured = null)
     {
         var failedModuleIds = new List<string>();
@@ -110,6 +117,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             _moduleHost.RemoveUiModuleBundle(moduleId);
     }
 
+    /// <inheritdoc/>
     public void UseUiHost(IApplicationBuilder app, IWebHostEnvironment env, IUiHostEnvironment uiEnvironment)
     {
         var logger = GetLogger(app.ApplicationServices);
@@ -141,8 +149,10 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         return new UiModuleBundle(modules.First(), assemblyPath, assembly);
     }
 
+    /// <inheritdoc/>
     public void ConfigureIdentity(IdentityBuilder builder) { }
 
+    /// <inheritdoc/>
     public void UseSecurity(IApplicationBuilder app, bool useHeaderForwarding)
     {
         if (useHeaderForwarding)
@@ -163,12 +173,13 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             DefaultRequestCulture = new(Shared.Constants.SupportedCultures.First()),
             SupportedCultures = Shared.Constants.SupportedCultures,
             SupportedUICultures = Shared.Constants.SupportedCultures,
-            RequestCultureProviders = [new CookieRequestCultureProvider()]
+            RequestCultureProviders = [new CookieRequestCultureProvider(), new DefaultRequestCultureProvider(this)]
         });
 
         app.UseMiddleware<OnboardingMiddleware>();
     }
 
+    /// <inheritdoc/>
     public override void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
         var logger = GetLogger(endpoints.ServiceProvider);
@@ -195,10 +206,39 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
     private static ILogger GetLogger(IServiceProvider provider)
         => provider.GetRequiredService<ILogger<BlazorServerBackendModule>>();
 
+    /// <inheritdoc/>
+    public void SetDefaultRequestCulture(string? cultureName)
+    {
+        lock (_lock)
+        {
+            _defaultRequestCulture = cultureName;
+        }
+    }
+
+    /// <inheritdoc/>
+    public string? GetDefaultRequestCulture() => _defaultRequestCulture;
+
     private class UiModuleBundle(ClientModule module, string assemblyLocation, Assembly? assembly) : IUiModuleBundle
     {
         public IModule Module { get; } = module;
         public string AssemblyLocation { get; } = assemblyLocation;
         public Assembly? Assembly { get; } = assembly;
+    }
+
+    /// <summary>
+    /// If <see cref="CookieRequestCultureProvider"/> does not provide a culture we'll fallback
+    /// to our default request culture provided by our <see cref="IUiHostModule"/>
+    /// </summary>
+    /// <param name="uiHost"></param>
+    private class DefaultRequestCultureProvider(IUiHostModule uiHost) : IRequestCultureProvider
+    {
+        public async Task<ProviderCultureResult?> DetermineProviderCultureResult(HttpContext httpContext)
+        {
+            var defaultCulture = uiHost.GetDefaultRequestCulture();
+            if (string.IsNullOrEmpty(defaultCulture))
+                return null;
+
+            return new ProviderCultureResult(defaultCulture);
+        }
     }
 }

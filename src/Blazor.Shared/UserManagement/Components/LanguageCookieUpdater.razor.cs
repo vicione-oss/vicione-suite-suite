@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Authorization.Extensions;
+using Blazor.Shared.Authorization.Extensions;
 using Blazor.Shared.UserManagement.Services;
 using Core.Shared.Instance.Requests;
 using Core.Shared.Instance.Services;
@@ -42,10 +42,10 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
 
         if (!string.IsNullOrEmpty(userName))
         {
+            var languageCookieValue = LanguageCookieReader.GetCookieValue();
+
             if (!string.IsNullOrEmpty(userLanguage))
             {
-                var languageCookieValue = LanguageCookieReader.GetCookieValue();
-
                 if (string.IsNullOrEmpty(languageCookieValue))
                 {
                     LanguageCookieMissing(Logger, userName, userLanguage);
@@ -53,7 +53,6 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
                     var nonce = await NonceStore.Create(CancellationToken.None);
 
                     UpdateCookie(userLanguage, nonce.Value);
-
                     return;
                 }
                 else if (!languageCookieValue.Contains(userLanguage, StringComparison.OrdinalIgnoreCase))
@@ -63,14 +62,11 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
                     var nonce = await NonceStore.Create(CancellationToken.None);
 
                     UpdateCookie(userLanguage, nonce.Value);
-
                     return;
                 }
             }
             else
             {
-                var languageCookieValue = LanguageCookieReader.GetCookieValue();
-
                 if (!string.IsNullOrEmpty(languageCookieValue))
                 {
                     LanguageCookieExistsAndShouldBeRemoved(Logger, languageCookieValue, _defaultCulture, userName);
@@ -78,7 +74,6 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
                     var nonce = await NonceStore.Create(CancellationToken.None);
 
                     RemoveCookie(nonce.Value);
-
                     return;
                 }
             }
@@ -97,40 +92,56 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
 
     public async Task Consume(ClientContext<UserUpdatedEvent> context, CancellationToken cancellationToken)
     {
-        var user = await AuthenticationStateProvider.GetUser();
-        var userProfile = context.Message.UserProfile;
+        try
+        {
+            var user = await AuthenticationStateProvider.GetUser();
+            var userProfile = context.Message.UserProfile;
 
-        if (!user.IsAssociatedWith(userProfile))
-            return;
+            if (!user.IsAssociatedWith(userProfile))
+                return;
 
-        if (!userProfile.IsLanguageChanged(context.Message.UserProfileBefore))
-            return;
+            if (!userProfile.IsLanguageChanged(context.Message.UserProfileBefore))
+                return;
 
-        var nonce = await NonceStore.Create(cancellationToken);
+            var nonce = await NonceStore.Create(cancellationToken);
 
-        if (userProfile.Language is null)
-            RemoveCookie(nonce.Value);
-        else
-            UpdateCookie(userProfile.Language ?? _defaultCulture, nonce.Value);
+            if (userProfile.Language is null)
+                RemoveCookie(nonce.Value);
+            else
+                UpdateCookie(userProfile.Language ?? _defaultCulture, nonce.Value);
+        }
+        catch (Exception ex)
+        {
+            LogConsumeUserUpdateFailed(Logger, ex);
+        }
     }
 
+    /// <summary>
+    /// Will request backend controller to append language cookie to http header and redirect to ~/ afterwards
+    /// </summary>    
     private void UpdateCookie(string language, Guid nonceValue)
         => NavigationManager.NavigateTo($"{Constants.UpdateLanguageCookieRoute}/Update?language={language}&nonce={nonceValue}", true);
 
+    /// <summary>
+    /// Will request backend controller to remove language cookie from http header and redirect to ~/ afterwards
+    /// </summary>    
     private void RemoveCookie(Guid nonceValue)
         => NavigationManager.NavigateTo($"{Constants.UpdateLanguageCookieRoute}/Remove?nonce={nonceValue}", true);
 
-    [LoggerMessage(1, LogLevel.Debug, @"Language cookie missing, trying to create language cookie with
+    [LoggerMessage(LogLevel.Debug, @"Language cookie missing, trying to create language cookie with
         value '{Language}' for '{UserName}' and doing a redirect")]
     private static partial void LanguageCookieMissing(ILogger logger, string UserName, string Language);
 
-    [LoggerMessage(2, LogLevel.Debug, @"Language cookie has value {LanguageCookieValue} but {UserLanguage} was expected,
+    [LoggerMessage(LogLevel.Debug, @"Language cookie has value {LanguageCookieValue} but {UserLanguage} was expected,
         trying to update language cookie for '{UserName}' and doing a redirect")]
     private static partial void LanguageCookieUnexpectedValue(ILogger logger, string LanguageCookieValue, string UserLanguage,
         string UserName);
 
-    [LoggerMessage(3, LogLevel.Debug, @"Language cookie has value {LanguageCookieValue} but default language {DefaultLanguage}
+    [LoggerMessage(LogLevel.Debug, @"Language cookie has value {LanguageCookieValue} but default language {DefaultLanguage}
         should be used, trying to remove language cookie for '{UserName}' and doing a redirect")]
     private static partial void LanguageCookieExistsAndShouldBeRemoved(ILogger logger, string LanguageCookieValue, string DefaultLanguage,
         string UserName);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed consume use update change")]
+    private static partial void LogConsumeUserUpdateFailed(ILogger logger, Exception exception);
 }

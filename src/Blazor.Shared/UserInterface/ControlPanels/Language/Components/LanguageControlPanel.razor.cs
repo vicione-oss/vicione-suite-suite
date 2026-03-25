@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Services;
+using Blazor.Shared.Services;
 using Blazor.Shared.UserInterface.ControlPanels.Language.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Authorization;
@@ -28,8 +28,20 @@ public sealed partial class LanguageControlPanel : ControlPanelBase<LanguageCont
     {
         ActiveNotificationElementPolicy.NoneActive();
 
-        State.ShowLanguageSavedBanner = false;
+        State.ShowPageRefreshInformation = false;
 
         Navigation.NavigateTo(Navigation.BaseUri, forceLoad: true);
+    }
+
+    private void AfterSelectedCultureChange()
+    {
+        if (State.HasChanges())
+        {
+            BeginEdit();
+        }
+        else
+        {
+            CancelEdit();
+        }
     }
 }

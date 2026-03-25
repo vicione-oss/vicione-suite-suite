@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Core.Shared.Instance.Contracts;
 using Sdk.Client.ControlPanels.Services;
 
@@ -8,16 +8,28 @@ public sealed class LanguageControlPanelState : ControlPanelState
 {
     internal static readonly CultureInfo _selectedCultureDefault = CultureInfo.DefaultThreadCurrentUICulture ?? CultureInfo.CurrentUICulture;
 
-    private bool _showLanguageSavedBanner;
-
-    public bool ShowLanguageSavedBanner
+    public bool ShowPageRefreshInformation
     {
-        get => _showLanguageSavedBanner;
+        get;
         set
         {
-            if (value != _showLanguageSavedBanner)
+            if (value != field)
             {
-                _showLanguageSavedBanner = value;
+                field = value;
+
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool ShowLanguageDoesNotAffectCurrentUser
+    {
+        get;
+        set
+        {
+            if (value != field)
+            {
+                field = value;
 
                 OnPropertyChanged();
             }
@@ -25,8 +37,8 @@ public sealed class LanguageControlPanelState : ControlPanelState
     }
 
     public static CultureInfo SelectedCultureDefault => _selectedCultureDefault;
-
-    internal bool SelectedCultureLoading { get; set; } = true;
     internal CultureInfo SelectedCulture { get; set; } = _selectedCultureDefault;
     internal CrossInstanceConfiguration? CrossInstanceConfiguration { get; set; }
+
+    public bool HasChanges() => SelectedCulture.Name != CrossInstanceConfiguration?.CultureName;
 }

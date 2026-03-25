@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO.Abstractions;
 using Core.Module.Options;
@@ -92,7 +92,7 @@ internal sealed class ApplicationWorker(
 
             await WaitForInitialSyncToBeDone(scope);
 
-            await SetCulture(scope.ServiceProvider.GetRequiredService<IApplicationDbContext>(), cancellationToken);
+            await SetCulture(scope, cancellationToken);
 
             activity?.AddEvent(new ActivityEvent("app.lifecycle.started"));
             logger.LogInformation("Init completed as {InstanceType} ({InstanceId})",
@@ -229,7 +229,7 @@ internal sealed class ApplicationWorker(
         }
     }
 
-    private async Task SetCulture(IApplicationDbContext context, CancellationToken cancellationToken)
+    private async Task SetCulture(IServiceScope scope, CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested)
             return;
@@ -237,12 +237,16 @@ internal sealed class ApplicationWorker(
         using var activity = CoreActivitySource.Source.StartActivity();
         try
         {
+            var appContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
             var crossInstanceConfiguration
-                = await context.CrossInstanceConfiguration.FirstOrDefaultAsync(cancellationToken);
+                = await appContext.CrossInstanceConfiguration.FirstOrDefaultAsync(cancellationToken);
 
             var cultureName = crossInstanceConfiguration?.CultureName ?? CrossInstanceConfiguration.CultureNameDefault;
             activity?.AddTag("process.runtime.culture", cultureName);
             SetCulture(cultureName);
+
+            var moduleHost = scope.ServiceProvider.GetRequiredService<IModuleHost>();
+            moduleHost.SetUiHostCulture(cultureName);
         }
         catch (OperationCanceledException)
         {
