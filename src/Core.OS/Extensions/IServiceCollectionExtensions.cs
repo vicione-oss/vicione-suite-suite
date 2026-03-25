@@ -70,7 +70,8 @@ internal static class IServiceCollectionExtensions
         public void AddSuiteOptions<T>(string sectionName) where T : class
             => services.AddOptions<T>()
                 .BindConfiguration(sectionName)
-                .ValidateDataAnnotations();
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
 
         public IServiceCollection AddServices(IFileSystem fileSystem,
             ConfigurationManager config,

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Text.Json;
 using Core.Module;
 using Core.Module.Extensions;
@@ -51,7 +51,12 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
             var configBuilder = new ConfigurationBuilder();
 
             // add the module json if available
-            if (!AddModuleSettingsJson(moduleContext, configBuilder))
+            var moduleConfig = GetModuleSettingsJson(moduleContext);
+            if (moduleConfig is not null)
+            {
+                configBuilder.AddConfiguration(moduleConfig);
+            }
+            else
             {
                 // here we have no settings yet so we take the ones from metadata
                 var defaultOptions = await StoreDefaultOptions(metadata, cancellationToken);
@@ -59,9 +64,12 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
                 configBuilder.AddInMemoryCollection(defaultOptions.AsConfiguration(moduleContext.ModuleId));
             }
 
-            configBuilder
+            // merge the different sources together - env vars and user secrets might
+            // contain required options that are not in the json
+            var config = configBuilder
                 .AddEnvironmentVariables()
-                .AddUserSecrets<Program>();
+                .AddUserSecrets<Program>()
+                .Build();
 
             ThrowOnMissingOptions(metadata, config);
         }
@@ -75,7 +83,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
         }
     }
 
-    private bool AddModuleSettingsJson(ModuleDependencyContext moduleContext, IConfigurationBuilder configBuilder)
+    private IConfiguration? GetModuleSettingsJson(ModuleDependencyContext moduleContext)
     {
         // try to get existing settings
         ArgumentException.ThrowIfNullOrEmpty(moduleContext.ModuleId, nameof(moduleContext.ModuleId));
@@ -85,7 +93,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
 
         // we have no json settings - continue with metadata
         if (!fileSystem.Path.Exists(moduleSettingsPath))
-            return false;
+            return null;
 
         // if we have a valid settings json we try to build a config with it
         using var fs = fileSystem.FileStream.New(moduleSettingsPath, new FileStreamOptions()
@@ -95,9 +103,10 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
             Share = FileShare.Read,
         });
 
-        // this will throw if the json stream is invalid
-        configBuilder.AddJsonStream(fs);
-        return true;
+        // load the module_settings.json as configuration - this will throw if the json is invalid
+        return new ConfigurationBuilder()
+                    .AddJsonStream(fs)
+                    .Build();
     }
 
     private static void ThrowOnMissingOptions(ModuleMetadata metadata, IConfiguration configuration)

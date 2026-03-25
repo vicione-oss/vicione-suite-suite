@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules.Extensions;
+using Core.OS.Modules.Extensions;
 using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using NSubstitute;
@@ -93,8 +93,8 @@ public class ModuleMetadataExtensionsTests
                 MinSuiteSdkVersion = "1.0.0",
                 Options =
                 [
-                    new() { Key = "Db", IsRequired = true, DefaultValue = null },
-                    new() { Key = "Api", IsRequired = false, DefaultValue = null }
+                    new() { Key = "Db", IsRequired = true, DefaultValue = null, OptionType = ModuleOptionType.Text },
+                    new() { Key = "Api", IsRequired = false, DefaultValue = null, OptionType = ModuleOptionType.Text }
                 ]
             };
 
@@ -120,8 +120,8 @@ public class ModuleMetadataExtensionsTests
                 MinSuiteSdkVersion = "1.0.0",
                 Options =
                 [
-                    new() { Key = "Token", DefaultValue = "abc" },
-                    new() { Key = "Url" }
+                    new() { Key = "Token", DefaultValue = "abc", OptionType = ModuleOptionType.Text },
+                    new() { Key = "Url", OptionType = ModuleOptionType.Text }
                 ]
             };
 
@@ -147,8 +147,8 @@ public class ModuleMetadataExtensionsTests
                 MinSuiteSdkVersion = "1.0.0",
                 Options =
                 [
-                    new() { Key = "Port", IsRequired = true },
-                    new() { Key = "Host", IsRequired = false }
+                    new() { Key = "Port", IsRequired = true, OptionType = ModuleOptionType.Text },
+                    new() { Key = "Host", IsRequired = false, OptionType = ModuleOptionType.Text }
                 ]
             };
 
@@ -161,6 +161,33 @@ public class ModuleMetadataExtensionsTests
 
             // Assert
             result.Should().ContainSingle().Which.Should().Be("Port");
+        }
+
+        [Fact]
+        public void Should_throw_if_get_declaration_option_from_configuration_fails()
+        {
+            // Arrange
+            var metadata = new ModuleMetadata
+            {
+                Name = "ModZ",
+                Version = "1.0.0",
+                MinSuiteSdkVersion = "1.0.0",
+                Options =
+                [
+                    new() { Key = "Port", IsRequired = true, OptionType = ModuleOptionType.Number },
+                    new() { Key = "Host", IsRequired = false, OptionType = ModuleOptionType.Text }
+                ]
+            };
+
+            var config = Substitute.For<IConfiguration>();
+            config["ModZ:Port"].Returns((string?)null);
+            config["ModZ:Host"].Returns((string?)null);
+
+            // Act
+            var action = () => metadata.GetMissingConfigurationKeys(config, requiredOnly: true);
+
+            // Assert
+            action.Should().Throw<InvalidOperationException>();
         }
     }
 
