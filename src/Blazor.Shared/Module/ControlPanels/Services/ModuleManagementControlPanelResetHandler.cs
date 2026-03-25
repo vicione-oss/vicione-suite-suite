@@ -8,15 +8,18 @@ internal sealed class ModuleManagementControlPanelResetHandler(IModuleManagement
 {
     public async Task Reset(ModuleManagementControlPanelState state, CancellationToken cancellationToken)
     {
+        // attempt to avoid unnecessary reload if there are no pending changes and we already have metadata loaded
+        if (!state.HasPendingChanges() && (state.InstalledModules.Count > 0 || state.AvailableModules.Count > 0))
+            return;
+
         state.BeginLoading();
         try
         {
+            await state.CancelEditInOptionGrids();
+
             // load metadata assets and jsons in one step
             var metadataModels = await moduleManagementService.GetMetadata(false, cancellationToken);
             state.Initialize(metadataModels);
-            state.UninstallOperations.Clear();
-
-            await state.CancelEditInOptionGrids();
         }
         finally
         {

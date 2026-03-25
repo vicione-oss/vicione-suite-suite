@@ -850,7 +850,7 @@
       <MonochromeIcon Include="help-light" Size="24" />
       <MonochromeIcon Include="help-solid" Size="24" />
       <MonochromeIcon Include="hide" Size="16" />
-      <MonochromeIcon Include="import" Size="16" />
+      <MonochromeIcon Include="import" Size="16;24" />
       <MonochromeIcon Include="info-outlined" Size="24" />
       <MonochromeIcon Include="install-pending-light" Size="16;24" />
       <MonochromeIcon Include="instructions" Size="32" />
