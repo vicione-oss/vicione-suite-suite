@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Authorization.Extensions;
+using Blazor.Shared.Authorization.Extensions;
 using Core.Shared.Instance.Services;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Extensions;
@@ -16,7 +16,7 @@ public sealed partial class AuthenticationCookieUpdater : ComponentBase, IAsyncD
 {
     private IDisposable? _userUpdatedEventRegistration;
     private IJSObjectReference? _jsModuleReference;
-    private IJSObjectReference? _jsAttachResult;
+    private IJSObjectReference? _jsObjectReference;
     private bool _disposedAsync;
 
     [Inject] public required AuthenticationStateProvider AuthenticationStateProvider { get; set; }
@@ -44,7 +44,7 @@ public sealed partial class AuthenticationCookieUpdater : ComponentBase, IAsyncD
 
     private async Task DisposeJsInteropAsync()
     {
-        await _jsAttachResult.TryDisposeAsync(Logger);
+        await _jsObjectReference.TryDisposeAsync(Logger);
         await _jsModuleReference.TryDisposeAsync(Logger);
     }
 
@@ -64,10 +64,10 @@ public sealed partial class AuthenticationCookieUpdater : ComponentBase, IAsyncD
         _jsModuleReference ??= await JsInterop.IncludeModuleScript<SharedClientModule>("authentication-cookie-updater.js", cancellationToken);
         if (_jsModuleReference is not null)
         {
-            _jsAttachResult ??= await _jsModuleReference.InvokeAsync<IJSObjectReference?>("attach", cancellationToken);
-            if (_jsAttachResult is not null)
+            _jsObjectReference ??= await _jsModuleReference.InvokeConstructorAsync("AuthenticationCookieUpdater");
+            if (_jsObjectReference is not null)
             {
-                var updateResult = await _jsAttachResult.InvokeAsync<bool>("updateAuthenticationCookie", nonce.Value);
+                var updateResult = await _jsObjectReference.InvokeAsync<bool>("updateAuthenticationCookie", nonce.Value);
                 if (!updateResult)
                     RefreshingAuthenticationFailed(Logger);
             }

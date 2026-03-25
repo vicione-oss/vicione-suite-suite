@@ -849,7 +849,3 @@ export class Monitoring {
         }
     }
 }
-
-export function init(timeZoneOffsetMinutes: number, timeSpanHours: number) {
-    return new Monitoring(timeZoneOffsetMinutes, timeSpanHours);
-}

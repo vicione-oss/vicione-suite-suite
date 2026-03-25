@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Components.FileDropZone;
+using Blazor.Shared.Components.FileDropZone;
 using Blazor.Shared.Settings.Models;
 using Core.Shared.Instance.Models;
 using Core.Shared.Instance.Services;
@@ -22,7 +22,7 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
     private IJSObjectReference? _jsModule;
     private DotNetObjectReference<SettingsFieldFileUpload>? _dotNetObjectReference;
     private Task? _attachJsTask;
-    private IJSObjectReference? _jsAttachResult;
+    private IJSObjectReference? _jsObjectReference;
 
     private bool _disposedAsync;
 
@@ -190,11 +190,11 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
 
     private async Task ChooseButtonClick()
     {
-        if (_jsAttachResult is not null)
+        if (_jsObjectReference is not null)
         {
             try
             {
-                await _jsAttachResult.InvokeVoidAsync("showFilePicker", _inputFileForShowPicker?.Element);
+                await _jsObjectReference.InvokeVoidAsync("showFilePicker", _inputFileForShowPicker?.Element);
             }
             catch (JSDisconnectedException)
             {
@@ -302,14 +302,14 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
 
     private async Task AttachJsAsync()
     {
-        if (_jsAttachResult is not null)
+        if (_jsObjectReference is not null)
             return;
 
         _jsModule ??= await JsInterop.IncludeModuleScript<SharedClientModule>("settings-field-file-upload.js");
 
         _dotNetObjectReference ??= DotNetObjectReference.Create(this);
 
-        _jsAttachResult = await _jsModule!.InvokeAsync<IJSObjectReference>("init");
+        _jsObjectReference = await _jsModule!.InvokeConstructorAsync("SettingsFieldFileUpload");
     }
 
     private Task RemoveJsAsync()
@@ -317,9 +317,9 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
 
     private async Task DisposeJsAttachResultAsync()
     {
-        await _jsAttachResult.TryDisposeAsync(Logger);
+        await _jsObjectReference.TryDisposeAsync(Logger);
 
-        _jsAttachResult = null;
+        _jsObjectReference = null;
     }
     private async Task UploadHandlerProgress(IStreamUploadProgress progress)
     {

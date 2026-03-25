@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Sdk.Client.Extensions;
@@ -16,7 +16,7 @@ public sealed partial class FileDropZone : ComponentBase, IFileDropZone, IAsyncD
     private IJSObjectReference? _jsModule;
     private DotNetObjectReference<FileDropZone>? _dotNetObjectReference;
     private Task? _attachJsTask;
-    private IJSObjectReference? _jsAttachResult;
+    private IJSObjectReference? _jsObjectReference;
     private bool _jsSetInputFile;
 
     [Inject] private IJsInterop JsInterop { get; set; } = default!;
@@ -47,11 +47,11 @@ public sealed partial class FileDropZone : ComponentBase, IFileDropZone, IAsyncD
             await _attachJsTask;
         }
 
-        if (_jsSetInputFile && _jsAttachResult is not null)
+        if (_jsSetInputFile && _jsObjectReference is not null)
         {
             try
             {
-                await _jsAttachResult.InvokeVoidAsync("setInputFile", _inputFileElementReference);
+                await _jsObjectReference.InvokeVoidAsync("setInputFile", _inputFileElementReference);
 
                 _jsSetInputFile = false;
             }
@@ -100,7 +100,7 @@ public sealed partial class FileDropZone : ComponentBase, IFileDropZone, IAsyncD
 
     private async Task AttachJsAsync()
     {
-        if (_jsAttachResult is not null)
+        if (_jsObjectReference is not null)
             return;
 
         _jsModule ??= await JsInterop.IncludeModuleScript<SharedClientModule>("file-drop-zone.js");
@@ -110,7 +110,7 @@ public sealed partial class FileDropZone : ComponentBase, IFileDropZone, IAsyncD
 
         _dotNetObjectReference ??= DotNetObjectReference.Create(this);
 
-        _jsAttachResult = await _jsModule!.InvokeAsync<IJSObjectReference>("attach", _elementReference, _dotNetObjectReference,
+        _jsObjectReference = await _jsModule!.InvokeConstructorAsync("FileDropZone", _elementReference, _dotNetObjectReference,
             _inputFileElementReference);
 
         _jsSetInputFile = false;
@@ -121,10 +121,10 @@ public sealed partial class FileDropZone : ComponentBase, IFileDropZone, IAsyncD
 
     private async Task DisposeJsAttachResultAsync()
     {
-        await _jsAttachResult.TryInvokeVoidAsync("dispose", Logger);
-        await _jsAttachResult.TryDisposeAsync(Logger);
+        await _jsObjectReference.TryInvokeVoidAsync("dispose", Logger);
+        await _jsObjectReference.TryDisposeAsync(Logger);
 
-        _jsAttachResult = null;
+        _jsObjectReference = null;
     }
 
     [JSInvokable]

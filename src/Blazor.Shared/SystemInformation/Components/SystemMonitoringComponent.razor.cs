@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.SystemInformation.Services;
+using Blazor.Shared.SystemInformation.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
@@ -37,7 +37,7 @@ public sealed partial class SystemMonitoringComponent : IAsyncDisposable
             _jsModuleReference = await JsInterop.IncludeModuleScript<SharedClientModule>("system-monitoring-component.js");
             if (_jsModuleReference is not null)
             {
-                _monitoring = await _jsModuleReference.InvokeAsync<IJSObjectReference?>("init", TimeProvider.LocalTimeZone.GetUtcOffset(DateTimeOffset.UtcNow).TotalMinutes, TimeSpanHours);
+                _monitoring = await _jsModuleReference.InvokeConstructorAsync("Monitoring", TimeProvider.LocalTimeZone.GetUtcOffset(DateTimeOffset.UtcNow).TotalMinutes, TimeSpanHours);
 
                 if (_monitoring is null)
                     return;
