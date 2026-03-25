@@ -1,4 +1,4 @@
-﻿using Core.UiHosting;
+using Core.UiHosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +14,8 @@ public class TestUiHostBackend : BackendModule, IUiHostModule
 {
     public const string Id = "ViciOne.Suite.Test.UiHost";
     public const string AssemblyName = Id + ".Backend";
+
+    private string? _defaultCulture;
 
     public event EventHandler<string>? CallReceived;
 
@@ -38,4 +40,6 @@ public class TestUiHostBackend : BackendModule, IUiHostModule
     public void UseUiHost(IApplicationBuilder app, IWebHostEnvironment env, IUiHostEnvironment uiEnvironment)
         => CallReceived?.Invoke(this, nameof(UseUiHost));
     public static string GetAssemblyName() => $"{typeof(TestUiHostBackend).Assembly!.GetName()!.Name}.dll";
+    public void SetDefaultRequestCulture(string? cultureName) => _defaultCulture = cultureName;
+    public string? GetDefaultRequestCulture() => _defaultCulture;
 }

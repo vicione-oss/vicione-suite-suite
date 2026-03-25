@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -122,6 +122,9 @@
   </data>
   <data name="DescriptionBannerTitle" xml:space="preserve">
     <value>Language settings</value>
+  </data>
+  <data name="LanguageChangeDoesNotAffectUser" xml:space="preserve">
+    <value>This change does not affect your current display language. Your personal language preference configured in your profile settings takes precedence over the system default.</value>
   </data>
   <data name="LanguageChangeSavedBannerText" xml:space="preserve">
     <value>The language has been changed. The application needs to be refreshed to make the change take effect. This will close the settings dialog and navigate to the main page.</value>

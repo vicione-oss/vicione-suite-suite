@@ -70,11 +70,7 @@
             </SettingsGroup>
         }
 
-        <SettingsGroup Title="@Localization.UpdateControlPanel.FlashDevice" Expanded="@State.FlashDeviceEnabled">
-            <Expander>
-                <SwitchExpander @bind-Value="@State.FlashDeviceEnabled" @bind-Value:after="BeginEdit" />
-            </Expander>
-
+        <SettingsGroup Title="@Localization.UpdateControlPanel.FlashDevice" @bind-Expanded="State.FlashDeviceEnabled">
             <ChildContent>
                 <SettingsField Label="@TechnicalTerms.Image">
                     <SettingsFieldFileUpload @bind-Filename="State.SwuFilename"
@@ -110,7 +106,7 @@
                 <SettingsFieldButton Text="@CommonVocabulary.ExportVerb"
                                      IconCssClass="@_exportIconCssClasses"
                                      OnClick="OnExportButtonClick"
-                                     Enabled="@(!_isRestoreInProgress && !_isExportInProgress)"/>
+                                     Enabled="@(!_isRestoreInProgress && !_isExportInProgress)" />
             </SettingsField>
 
             <SettingsFieldSeparator />
@@ -129,7 +125,7 @@
                 <div class="input">
                     <InputFile id="item-upload"
                                accept="@(Core.Shared.Constants.BackupFileExtension)"
-                               OnChange="OnRestoreFileChange" disabled="@_isRestoreInProgress"/>
+                               OnChange="OnRestoreFileChange" disabled="@_isRestoreInProgress" />
                 </div>
             </SettingsField>
 

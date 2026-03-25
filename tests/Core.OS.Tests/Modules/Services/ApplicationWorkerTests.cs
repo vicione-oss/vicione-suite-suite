@@ -7,16 +7,17 @@ using Core.OS.Instance;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Services;
+using Core.OS.Modules;
 using Core.OS.Modules.Services;
 using Core.OS.Tests.Extensions;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Requests;
 using Core.Shared.Instance.Services;
+using Core.UiHosting;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -25,6 +26,7 @@ using NSubstitute;
 using OpenTelemetry.Trace;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
+using TestUiHost;
 using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
@@ -180,6 +182,11 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         applicationContext.CrossInstanceConfiguration.Add(applicationConfiguration);
         await applicationContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
+        var moduleHost = _appFactory.Services.GetRequiredService<IModuleHost>();
+        var module = Substitute.For<IUiHostModule>();
+        var host = new TestUiHostBackend();
+        moduleHost.GetModules().Returns([host]);
+
         _localInstanceInformationMock.SetupLocalInstanceInformation();
 
         _mediatorMock.Request<GetInstances, GetInstancesResponse>(Arg.Any<GetInstances>(), Arg.Any<CancellationToken>())
@@ -195,6 +202,10 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
 
         CultureInfo.DefaultThreadCurrentUICulture.Should().NotBeNull();
         CultureInfo.DefaultThreadCurrentUICulture.Name.Should().Be(applicationConfiguration.CultureName);
+
+        var uiHost = (IUiHostModule?)moduleHost.GetModules().FirstOrDefault(k => k is IUiHostModule);
+        uiHost.Should().NotBeNull();
+        uiHost.GetDefaultRequestCulture().Should().Be("ja-JP");
     }
 
     [Fact]
