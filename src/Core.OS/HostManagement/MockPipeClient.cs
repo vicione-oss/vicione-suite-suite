@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO.Abstractions;
 using System.Reflection;
 using System.Text.Json;
@@ -72,8 +72,8 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                 return content;
 
             case Topics.InstallSignedDebianPackage:
-                return JsonSerializer.Serialize(new InstallSignedDebianPackageResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.InstallSignedDebianPackageResult);
+                return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
+                    SourceGenerationContext.Default.SystemControlResult);
 
             case Topics.GetNetworkStatusInformation:
                 return HandleGetGetNetworkStatusInformationNet(content);
@@ -85,8 +85,8 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                 return HandleRestartSystem();
 
             case Topics.ResetSystem:
-                return JsonSerializer.Serialize(new ResetSystemResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.ResetSystemResult);
+                return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
+                    SourceGenerationContext.Default.SystemControlResult);
 
             case Topics.StartService:
             case Topics.StopService:
@@ -94,12 +94,12 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                     SourceGenerationContext.Default.ServiceControlResult);
 
             case Topics.UpdateSystem:
-                return JsonSerializer.Serialize(new UpdateSystemResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.UpdateSystemResult);
+                return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
+                    SourceGenerationContext.Default.SystemControlResult);
 
             case Topics.ShutdownSystem:
-                return JsonSerializer.Serialize(new ShutdownSystemResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.ShutdownSystemResult);
+                return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
+                    SourceGenerationContext.Default.SystemControlResult);
 
             case Topics.RenewDHCPLease:
                 return JsonSerializer.Serialize(new GetDHCPLeaseInformationResult()
@@ -184,8 +184,8 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
     {
         lifetime.StopApplication();
 
-        return JsonSerializer.Serialize(new RestartSystemResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.RestartSystemResult);
+        return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
+                    SourceGenerationContext.Default.SystemControlResult);
     }
 
     private Task<string> HandleGetSystemConfiguration()

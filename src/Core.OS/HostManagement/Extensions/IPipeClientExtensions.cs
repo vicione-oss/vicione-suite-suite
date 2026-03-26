@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Core.OS.Instance;
 using HostManagement.Shared.Communication;
@@ -14,13 +14,13 @@ internal static class IPipeClientExtensions
 {
     extension(IPipeClient pipeClient)
     {
-        public async Task<InstallSignedDebianPackageResult?> InstallSignedDebianPackage(SignedDebianPackage debianPackage, CancellationToken cancellationToken = default)
+        public async Task<SystemControlResult?> InstallSignedDebianPackage(SignedDebianPackage debianPackage, CancellationToken cancellationToken = default)
         {
             var requestJson = JsonSerializer.Serialize(debianPackage, SharedJsonContext.Default.SignedDebianPackage);
 
             return await GetRequestResult(
                 () => pipeClient.SendRequest(Topics.InstallSignedDebianPackage, requestJson, cancellationToken),
-                CommunicationJsonContext.Default.InstallSignedDebianPackageResult);
+                CommunicationJsonContext.Default.SystemControlResult);
         }
 
 
@@ -65,20 +65,20 @@ internal static class IPipeClientExtensions
                 () => pipeClient.SendRequest(Topics.RenewDHCPLease, networkInterfaceName, cancellationToken),
                 CommunicationJsonContext.Default.RenewDHCPLeaseResult);
 
-        public async Task<UpdateSystemResult?> UpdateSystem(string filePath, CancellationToken cancellationToken = default)
+        public async Task<SystemControlResult?> UpdateSystem(string filePath, CancellationToken cancellationToken = default)
             => await GetRequestResult(
                 () => pipeClient.SendRequest(Topics.UpdateSystem, filePath, cancellationToken),
-                CommunicationJsonContext.Default.UpdateSystemResult);
+                CommunicationJsonContext.Default.SystemControlResult);
 
-        public async Task<ResetSystemResult?> ResetSystem(CancellationToken cancellationToken = default)
+        public async Task<SystemControlResult?> ResetSystem(CancellationToken cancellationToken = default)
             => await GetRequestResult(
                 () => pipeClient.SendRequest(Topics.ResetSystem, string.Empty, cancellationToken),
-                CommunicationJsonContext.Default.ResetSystemResult);
+                CommunicationJsonContext.Default.SystemControlResult);
 
-        public async Task<RestartSystemResult?> RestartSystem(CancellationToken cancellationToken = default)
+        public async Task<SystemControlResult?> RestartSystem(CancellationToken cancellationToken = default)
             => await GetRequestResult(
                 () => pipeClient.SendRequest(Topics.RestartSystem, string.Empty, cancellationToken),
-                CommunicationJsonContext.Default.RestartSystemResult);
+                CommunicationJsonContext.Default.SystemControlResult);
 
         public async Task<ServiceControlResult> RestartService(string serviceName, CancellationToken cancellationToken = default)
             => (await GetRequestResult(
@@ -89,10 +89,10 @@ internal static class IPipeClientExtensions
         public Task<ServiceControlResult> RestartSuite(InstanceOptions options, CancellationToken cancellationToken = default)
             => pipeClient.RestartService(options.ServiceName, cancellationToken);
 
-        public async Task<ShutdownSystemResult?> ShutdownSystem(CancellationToken cancellationToken = default)
+        public async Task<SystemControlResult?> ShutdownSystem(CancellationToken cancellationToken = default)
             => await GetRequestResult(
                 () => pipeClient.SendRequest(Topics.ShutdownSystem, string.Empty, cancellationToken),
-                CommunicationJsonContext.Default.ShutdownSystemResult);
+                CommunicationJsonContext.Default.SystemControlResult);
 
         public async Task<ServiceControlResult?> StartService(string serviceName, CancellationToken cancellationToken = default)
             => await GetRequestResult(
