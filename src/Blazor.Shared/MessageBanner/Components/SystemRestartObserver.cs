@@ -1,10 +1,10 @@
-﻿using Blazor.Shared.Enums;
 using Blazor.Shared.MessageBanner.Models;
 using Blazor.Shared.MessageBanner.Services;
 using Core.Shared.HostManagement.Events;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.Infrastructure;
 using Sdk.MessageBanner.Contracts;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
 namespace Blazor.Shared.MessageBanner.Components;
 
@@ -33,7 +33,7 @@ public sealed class SystemRestartObserver : ComponentBase, IDisposable,
         var message = new Message
         {
             Type = MessageType.Warning,
-            Icon = SvgIcon.RtmWarning,
+            Icon = MonochromeIconName.WarningLight,
         };
 
         switch (context.Message.Reason)

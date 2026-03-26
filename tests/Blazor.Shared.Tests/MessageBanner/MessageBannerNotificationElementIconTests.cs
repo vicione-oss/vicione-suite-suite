@@ -1,11 +1,12 @@
-﻿using Blazor.Shared.Enums;
-using Blazor.Shared.Extensions;
+using AwesomeAssertions;
 using Blazor.Shared.MessageBanner.NotificationArea;
 using Bunit;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.MessageBanner.Contracts;
 using Sdk.Testing.Extensions;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
+using ViciOne.Ui.MonochromeIcons.Core.Extensions;
+using ViciOne.Ui.MonochromeIcons.Core.Factories;
 using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner;
@@ -32,7 +33,7 @@ public sealed class MessageBannerNotificationElementIconTests
     public void Should_render_icon()
     {
         // Arrange
-        var state = new MessageBannerNotificationElementIconState { Icon = SvgIcon.CSharp };
+        var state = new MessageBannerNotificationElementIconState { Icon = MonochromeIconName.InfoLight };
 
         using var ctx = new BunitContext();
         ctx.Services.AddScoped(_ => state);
@@ -41,8 +42,8 @@ public sealed class MessageBannerNotificationElementIconTests
         var renderedComponent = ctx.Render<MessageBannerNotificationElementIcon>();
 
         // Assert
-        var icon = renderedComponent.Find("img");
-        icon.GetAttribute("src").Should().Be(SvgIcon.CSharp.GetPath().OriginalString);
+        var icon = renderedComponent.Find("i");
+        icon.GetAttribute("class").Should().ContainAll(MonochromeIconName.InfoLight.GetCssClasses(MonochromeIconSize.Medium));
     }
 
     [Fact]
@@ -65,9 +66,15 @@ public sealed class MessageBannerNotificationElementIconTests
                 var coinToss = random.Next(0, 2);
 
                 if (coinToss == 0)
-                    state.Icon = random.NextEnum<SvgIcon>();
+                {
+                    var iconNames = TypeSafeEnumFactory<MonochromeIconName>.CreateAll();
+
+                    state.Icon = iconNames.ElementAt(random.Next(iconNames.Count - 1));
+                }
                 else
+                {
                     state.MessageType = random.NextEnum<MessageType>();
+                }
             }
             finally
             {

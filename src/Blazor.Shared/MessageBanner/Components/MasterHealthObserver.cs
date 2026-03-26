@@ -1,4 +1,3 @@
-﻿using Blazor.Shared.Enums;
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.Models;
 using Blazor.Shared.MessageBanner.Services;
@@ -6,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance.HealthCheck.Events;
 using Sdk.MessageBanner.Contracts;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
 namespace Blazor.Shared.MessageBanner.Components;
 
@@ -58,7 +58,7 @@ public sealed class MasterHealthObserver : ComponentBase, IDisposable, IEventCon
             {
                 _message ??= new Message();
                 _message.Type = MessageType.Warning;
-                _message.Icon = SvgIcon.Offline;
+                _message.Icon = MonochromeIconName.OfflineLight;
                 _message.Title = MessageType.Warning.ToTitle();
                 _message.Description = Localization.MessageBanner.MasterNotReachable;
 

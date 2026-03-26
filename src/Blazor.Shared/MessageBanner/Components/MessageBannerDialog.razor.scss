@@ -1,4 +1,4 @@
-﻿.message-banner-dialog {
+.message-banner-dialog {
     bottom: 40px;
     position: absolute;
     min-width: 487px;
@@ -18,22 +18,13 @@
         position: absolute;
         width: 24px;
         height: 24px;
-
-        > img {
-            width: inherit;
-            height: inherit;
-        }
+        color: #2a2a2a;
     }
 
     .sign {
         width: 48px;
         height: 48px;
         margin: 24px 48px 24px 24px;
-
-        > img {
-            width: inherit;
-            height: inherit;
-        }
     }
 
     .wrapper {

@@ -1,15 +1,15 @@
-﻿using Blazor.Shared.Enums;
+using AwesomeAssertions;
 using Blazor.Shared.MessageBanner.Components;
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.Models;
 using Blazor.Shared.MessageBanner.Services;
 using Bunit;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance.HealthCheck.Events;
 using Sdk.MessageBanner.Contracts;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner;
@@ -54,7 +54,7 @@ public sealed class MasterHealthObserverTests
         messageBannerMediator.Received(1).ShowMessageBanner(Arg.Is<IMessage>(message =>
             message.Type == expectedMessageType &&
             message.Description == Shared.MessageBanner.Localization.MessageBanner.MasterNotReachable &&
-            message.Icon == SvgIcon.Offline &&
+            message.Icon == MonochromeIconName.OfflineLight &&
             message.Title == expectedMessageType.ToTitle()));
     }
 

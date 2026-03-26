@@ -1,5 +1,5 @@
-﻿using Blazor.Shared.Enums;
 using Sdk.MessageBanner.Contracts;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
 namespace Blazor.Shared.MessageBanner.NotificationArea;
 
@@ -9,10 +9,10 @@ public sealed class MessageBannerNotificationElementIconState
     private int _updateLock;
     private int _changeCount;
 
-    private SvgIcon _icon;
+    private MonochromeIconName _icon;
     private MessageType _messageType;
 
-    public SvgIcon Icon
+    public MonochromeIconName Icon
     {
         get => _icon;
         set

@@ -1,16 +1,18 @@
-﻿@using Blazor.Shared.Enums
+@using Blazor.Shared.Enums
 @using Blazor.Shared.Extensions
 @using Sdk.Client.Extensions
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 @if (State.Visible)
 {
     <div class="message-banner-dialog @State.Message.Type.ToString().ToHyphenSeparated()">
         <button class="minimize-button" @onclick="MinimizeButtonClick">
-            <img src="@SvgIcon.CloseCircle.GetPath()" />
+            <MonochromeIcon Name="MonochromeIconName.CloseCircleSolid" Size="MonochromeIconSize.SmallMedium" />
         </button>
 
         <div class="sign">
-            <img src="@State.Message.Icon.GetPath()" />
+            <MonochromeIcon Name="@State.Message.Icon" Size="MonochromeIconSize.MediumLarge" />
         </div>
 
         <div class="wrapper">
