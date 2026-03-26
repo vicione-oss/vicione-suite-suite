@@ -7,14 +7,10 @@ namespace Blazor.Shared.Module.ControlPanels.Services;
 
 public sealed class ModuleManagementControlPanelState : ControlPanelState
 {
-    private bool _allowPreReleases;
-    private int _requestErrorCode;
-    private string? _requestErrorMessage;
-
     internal string InstalledFilterText { get; set; } = string.Empty;
     internal string AvailableFilterText { get; set; } = string.Empty;
 
-    internal List<ModuleMetadataModel> InstalledModules
+    internal IQueryable<ModuleMetadataModel> InstalledModules
     {
         get;
         set
@@ -26,9 +22,9 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
 
             OnPropertyChanged(nameof(InstalledModules));
         }
-    } = [];
+    } = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
 
-    internal List<ModuleMetadataModel> AvailableModules
+    internal IQueryable<ModuleMetadataModel> AvailableModules
     {
         get;
         set
@@ -40,16 +36,16 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
 
             OnPropertyChanged(nameof(AvailableModules));
         }
-    } = [];
+    } = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
 
     public bool AllowPreReleases
     {
-        get => _allowPreReleases;
+        get;
         set
         {
-            if (value != _allowPreReleases)
+            if (value != field)
             {
-                _allowPreReleases = value;
+                field = value;
 
                 OnPropertyChanged();
             }
@@ -58,12 +54,12 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
 
     public int RequestErrorCode
     {
-        get => _requestErrorCode;
+        get;
         set
         {
-            if (value != _requestErrorCode)
+            if (value != field)
             {
-                _requestErrorCode = value;
+                field = value;
 
                 OnPropertyChanged();
             }
@@ -72,12 +68,12 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
 
     public string? RequestErrorMessage
     {
-        get => _requestErrorMessage;
+        get;
         set
         {
-            if (value != _requestErrorMessage)
+            if (value != field)
             {
-                _requestErrorMessage = value;
+                field = value;
 
                 OnPropertyChanged();
             }
@@ -96,8 +92,8 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
         InstallOperations.Clear();
 
         // split them for the tabs
-        InstalledModules = [.. models.Where(k => k.Installed).OrderBy(k => k.Title)];
-        AvailableModules = [.. models.Where(k => !k.Installed).OrderBy(k => k.Title)];
+        InstalledModules = models.Where(k => k.Installed).OrderBy(k => k.Title).AsQueryable();
+        AvailableModules = models.Where(k => !k.Installed).OrderBy(k => k.Title).AsQueryable();
     }
 
     internal async Task CancelEditInOptionGrids()
@@ -158,7 +154,7 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
         }
         return hasChanged;
 
-        ModulePackageOperation? UpdateOperation(ModulePackageOperation? pending, ModulePackageChange change)
+        static ModulePackageOperation? UpdateOperation(ModulePackageOperation? pending, ModulePackageChange change)
         {
             if (pending?.OperationKind == ModulePackageOperationKind.Install &&
                     change.Operation.OperationKind == ModulePackageOperationKind.Uninstall)
@@ -176,5 +172,5 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
         }
     }
 
-    internal bool HasPendingChanges() { return InstallOperations.Count > 0 || UninstallOperations.Count > 0; }
+    internal bool HasPendingChanges() => InstallOperations.Count > 0 || UninstallOperations.Count > 0;
 }

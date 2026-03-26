@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Blazor.Shared.Module;
 using Blazor.Shared.Module.ControlPanels.Services;
+using Blazor.Shared.Module.Models;
 using Blazor.Shared.Module.Services;
 using Core.Shared.Modules.Contracts;
 using Microsoft.Extensions.DependencyInjection;
@@ -117,9 +118,11 @@ public sealed class ModuleManagementControlPanelResetHandlerTests
             Metadata = new ModuleMetadata() { MinSuiteSdkVersion = "1.0.0", Name = _package.Name, Version = "1.2.3" },
             Installed = true
         };
+        List<ModuleMetadataModel> installedModules = [.. ModuleMetadataModelFactory.CreateModels([installedBundle])];
+
         var state = new ModuleManagementControlPanelState()
         {
-            InstalledModules = ModuleMetadataModelFactory.CreateModels([installedBundle])
+            InstalledModules = installedModules.AsQueryable(),
         };
 
         var saveHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<ModuleManagementControlPanelState>>();

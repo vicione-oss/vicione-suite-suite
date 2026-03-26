@@ -24,7 +24,7 @@ public sealed class ModuleDetailsControlPanelSaveHandlerTests
 
     private readonly IModuleManagementService _mgmtService = Substitute.For<IModuleManagementService>();
     private readonly IMessageBannerService _bannerService = Substitute.For<IMessageBannerService>();
-    private readonly ModuleMetadataBundle _installedBundle = new ModuleMetadataBundle
+    private readonly ModuleMetadataBundle _installedBundle = new()
     {
         ModuleId = "ViciOne.TestPackage",
         Metadata = new ModuleMetadata() { MinSuiteSdkVersion = "1.0.0", Name = _package.Name, Version = _package.Version },

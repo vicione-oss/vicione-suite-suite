@@ -30,8 +30,6 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
 
     private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
     private bool _dialogVisible;
-    private IQueryable<ModuleMetadataModel> _installedModulesQueryable = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
-    private IQueryable<ModuleMetadataModel> _availableModulesQueryable = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
 
     [Inject]
     internal IModuleManagementService ManagementService { get; set; } = default!;
@@ -45,10 +43,10 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     [Inject]
     public ILogger<ModuleManagementControlPanel> Logger { get; set; } = default!;
 
-    [Inject(Key = typeof(ModuleManagementControlPanelServiceKey))]
+    [Inject(Key = typeof(InstalledModuleManagementControlPanelServiceKey))]
     private IGridItemSelection<ModuleMetadataModel> InstalledModuleSelection { get; set; } = default!;
 
-    [Inject(Key = typeof(ModuleManagementControlPanelServiceKey))]
+    [Inject(Key = typeof(AvailableModuleManagementControlPanelServiceKey))]
     private IGridItemSelection<ModuleMetadataModel> AvailableModuleSelection { get; set; } = default!;
 
     protected override async ValueTask DisposeAsyncCore()
@@ -92,13 +90,11 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         if (args.PropertyNames.Contains(nameof(State.InstalledModules)))
         {
             InstalledModuleSelection.Clear();
-            _installedModulesQueryable = State.InstalledModules.AsQueryable();
             stateHasChanged = true;
         }
         else if (args.PropertyNames.Contains(nameof(State.AvailableModules)))
         {
             AvailableModuleSelection.Clear();
-            _availableModulesQueryable = State.AvailableModules.AsQueryable();
             stateHasChanged = true;
         }
 
@@ -180,6 +176,30 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         }
     }
 
+    private bool CanResetInstalledSelectedModules()
+        => InstalledModuleSelection.Count != 0
+        && InstalledModuleSelection.All(k => k.PendingOperation?.OperationKind == ModulePackageOperationKind.Uninstall);
+
+    private async Task ResetInstalledSelectedModules()
+    {
+        var operations = InstalledModuleSelection
+            .Where(k => k.PendingOperation != null && k.PendingOperation.OperationKind == ModulePackageOperationKind.Uninstall)
+            .Distinct()
+            .Select(item => new ModulePackageOperation(new ModuleDependencyPackage
+            {
+                Name = item.Name,
+                Version = item.PendingOperation!.Package.Version,
+            },
+            ModulePackageOperationKind.Install))
+            .ToList();
+
+        State.UpdateUninstallOperations(operations);
+
+        if (State.HasPendingChanges())
+        {
+            await BeginEdit();
+        }
+    }
 
     private bool CanInstallSelectedAvailableModules()
         => AvailableModuleSelection.Count != 0
@@ -205,12 +225,11 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         }
     }
 
-
-    private bool CanResetAvaliableSelectedModules()
+    private bool CanResetAvailableSelectedModules()
         => AvailableModuleSelection.Count != 0
         && AvailableModuleSelection.All(k => k.PendingOperation?.OperationKind == ModulePackageOperationKind.Install);
 
-    private async Task ResetAvaliableSelectedModules()
+    private async Task ResetAvailableSelectedModules()
     {
         var operations = AvailableModuleSelection
             .Where(k => k.PendingOperation != null && k.PendingOperation.OperationKind == ModulePackageOperationKind.Install)

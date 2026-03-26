@@ -24,7 +24,7 @@
             @Localization.ModuleManagementControlPanel.InstalledModulesBanner
         </DescriptionBanner>
 
-        <Grid Items="@FilterInstalledItems(_installedModulesQueryable)" Virtualize="true" CssClass="installed-modules-grid">
+        <Grid Items="@FilterInstalledItems(State.InstalledModules)" Virtualize="true" CssClass="installed-modules-grid">
             <ActionButtons>
                 <div style="display:contents;">
                     <GridActionButton Text="@CommonVocabulary.UninstallVerb"
@@ -32,6 +32,11 @@
                                       IconCssClass="@_uninstallIconCssClasses"
                                       Enabled="@CanUninstallSelectedModules()" />
                     
+                    <GridActionButton Text="@CommonVocabulary.ResetVerb"
+                                      OnClick="@(async () => await ResetInstalledSelectedModules())"
+                                      IconCssClass="@_uninstallIconCssClasses"
+                                      Enabled="@CanResetInstalledSelectedModules()" />
+
                     <GridActionButton Text="@CommonVocabulary.Restart"
                                       OnClick="@(() => _dialogVisible = true)"
                                       IconCssClass="@_restartIconCssClasses" />
@@ -117,18 +122,18 @@
             @Localization.ModuleManagementControlPanel.BrowseModulesBanner
         </DescriptionBanner>
     
-        <Grid Items="@FilterAvailableItems(_availableModulesQueryable)" Virtualize="true" CssClass="available-modules-grid">
+        <Grid Items="@FilterAvailableItems(State.AvailableModules)" Virtualize="true" CssClass="available-modules-grid">
             <ActionButtons>
-                <div style="display:contents;">
-                    <GridActionButton Text="@CommonVocabulary.ResetVerb"
-                                      OnClick="@(async () => await ResetAvaliableSelectedModules())"
-                                      IconCssClass="@_uninstallIconCssClasses"
-                                      Enabled="@CanResetAvaliableSelectedModules()" />
-
+                <div style="display:contents;">                    
                     <GridActionButton Text="@CommonVocabulary.InstallVerb"
                                       OnClick="InstallSelectedAvailableModules"
                                       IconCssClass="@_installIconCssClasses"
                                       Enabled="@CanInstallSelectedAvailableModules()" />
+
+                    <GridActionButton Text="@CommonVocabulary.ResetVerb"
+                                      OnClick="@(async () => await ResetAvailableSelectedModules())"
+                                      IconCssClass="@_uninstallIconCssClasses"
+                                      Enabled="@CanResetAvailableSelectedModules()" />
 
                     <GridActionButton Text="@CommonVocabulary.RefreshVerb"
                                       OnClick="@(async () => await LoadAvailableModuleVersions(true))"
