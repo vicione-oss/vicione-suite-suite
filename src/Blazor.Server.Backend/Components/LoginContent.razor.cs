@@ -121,7 +121,7 @@ public sealed partial class LoginContent
 
         if (result.Succeeded)
         {
-            Logger.LogInformation("User logged in");
+            LogUserLoggedIn(Logger);
 
             if (user.PasswordExpirationDate <= DateTimeOffset.UtcNow)
             {
@@ -137,13 +137,20 @@ public sealed partial class LoginContent
                     });
             }
 
-            NavigationService.NavManager.NavigateTo(ReturnUrl);
+            try
+            {
+                NavigationService.NavManager.NavigateTo(ReturnUrl);
+            }
+            catch (NavigationException ex)
+            {
+                LogNavigationError(Logger, ex.Message);
+            }
             return;
         }
 
         if (result.IsNotAllowed && await IsAccountVerificationNeeded(user.Id))
         {
-            Logger.LogInformation("User logged in but is not yet verified");
+            LogUserNotYetVerified(Logger);
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
             await SendVerificationEmail(user, code);
 
@@ -153,7 +160,7 @@ public sealed partial class LoginContent
 
         if (result.IsLockedOut)
         {
-            Logger.LogWarning("User account locked out");
+            LogUserLockedOut(Logger);
             NavigationService.RedirectTo("./Lockout");
             return;
         }
@@ -192,4 +199,16 @@ public sealed partial class LoginContent
     private Task SendVerificationEmail(SuiteUser user, string code)
         => Mediator.Send(new SendVerifyEmailAddressLink(user.Id,
             NavigationService.CreateCallbackLink(IdentityConstants.ConfirmMailRoute, user.Id, code)));
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User logged in")]
+    private static partial void LogUserLoggedIn(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Navigation error: {Message}")]
+    private static partial void LogNavigationError(ILogger logger, string message);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "User logged in but is not yet verified")]
+    private static partial void LogUserNotYetVerified(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "User account locked out")]
+    private static partial void LogUserLockedOut(ILogger logger);
 }

@@ -9,7 +9,7 @@ internal sealed class ModuleManagementControlPanelResetHandler(IModuleManagement
     public async Task Reset(ModuleManagementControlPanelState state, CancellationToken cancellationToken)
     {
         // attempt to avoid unnecessary reload if there are no pending changes and we already have metadata loaded
-        if (!state.HasPendingChanges() && (state.InstalledModules.Count > 0 || state.AvailableModules.Count > 0))
+        if (!state.HasPendingChanges() && (state.InstalledModules.Any() || state.AvailableModules.Any()))
             return;
 
         state.BeginLoading();

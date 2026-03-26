@@ -16,7 +16,8 @@ internal static class IServiceCollectionExtensions
             .WithResetHandler<ModuleManagementControlPanelResetHandler>();
 
         services.AddGridItemSelectColumn()
-                .AddGridItemSelection<ModuleMetadataModel>(typeof(ModuleManagementControlPanelServiceKey))
+                .AddGridItemSelection<ModuleMetadataModel>(typeof(InstalledModuleManagementControlPanelServiceKey))
+                .AddGridItemSelection<ModuleMetadataModel>(typeof(AvailableModuleManagementControlPanelServiceKey))
                 .AddGridItemSelection<string>(typeof(ModuleOptionDeclarationCollectionGridServiceKey), ServiceLifetime.Transient);
 
         return services;
@@ -28,10 +29,6 @@ internal static class IServiceCollectionExtensions
             .WithAutoDiscovery<ModuleDetailsControlPanelDescriptor>()
             .WithSaveHandler<ModuleDetailsControlPanelSaveHandler>()
             .WithResetHandler<ModuleDetailsControlPanelResetHandler>();
-
-        services.AddGridItemSelectColumn()
-                .AddGridItemSelection<ModuleMetadataModel>(typeof(ModuleManagementControlPanelServiceKey))
-                .AddGridItemSelection<string>(typeof(ModuleOptionDeclarationCollectionGridServiceKey), ServiceLifetime.Transient);
 
         return services;
     }

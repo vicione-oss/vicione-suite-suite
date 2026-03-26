@@ -6,17 +6,15 @@ using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Events;
 using Core.Shared.Modules.Requests;
-using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
 using Sdk.Messaging;
 using Sdk.Modules;
 using Xunit;
 
-namespace Blazor.Shared.Tests.Module.ControlPanels.Services;
+namespace Blazor.Shared.Tests.Module.Services;
 
 public class ModuleManagementServiceTests
 {
