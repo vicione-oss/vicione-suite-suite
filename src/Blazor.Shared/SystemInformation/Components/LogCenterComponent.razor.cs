@@ -76,8 +76,8 @@ public sealed partial class LogCenterComponent : IDisposable
     private static MonochromeIconName CalculateIconFromThreshold(LogCenterEntry entry)
         => entry switch
         {
-            { ErrorCount: > 0 } => MonochromeIconName.ErrorFull,
-            { WarningCount: > 0, ErrorCount: 0 } => MonochromeIconName.WarningFull,
+            { ErrorCount: > 0 } => MonochromeIconName.ErrorSolid,
+            { WarningCount: > 0, ErrorCount: 0 } => MonochromeIconName.WarningSolid,
             _ => MonochromeIconName.InfoOutlined
         };
 

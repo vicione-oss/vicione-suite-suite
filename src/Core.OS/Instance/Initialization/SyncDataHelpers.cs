@@ -1,5 +1,5 @@
 using System.Data.Common;
-using Core.OS.DbContext;
+using Core.OS.DbContext.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Persistence;
 
