@@ -1,4 +1,4 @@
-using Core.OS.DbContext;
+using Core.OS.DbContext.Extensions;
 using Core.OS.Instance.Initialization;
 using Core.OS.Tests.DataTransfer.Helpers;
 using MassTransit;

@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text;
 
-namespace Core.OS.DbContext;
+namespace Core.OS.DbContext.Extensions;
 
 public static class DbCommandExtensions
 {
