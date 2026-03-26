@@ -1,7 +1,8 @@
-﻿using Blazor.Shared.Enums;
-using Blazor.Shared.MessageBanner.NotificationArea;
 using AwesomeAssertions;
+using Blazor.Shared.MessageBanner.NotificationArea;
 using Sdk.MessageBanner.Contracts;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
+using ViciOne.Ui.MonochromeIcons.Core.Factories;
 using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner;
@@ -9,17 +10,17 @@ namespace Blazor.Shared.Tests.MessageBanner;
 public sealed class MessageBannerNotificationElementIconStateTests
 {
     [Theory]
-    [InlineData(SvgIcon.InfoOutlined, SvgIcon.InfoOutlined, false)]
-    [InlineData(SvgIcon.InfoOutlined, SvgIcon.CloseCircle, true)]
-    public void Assert_changed_event_handling_when_icon_name_is_set(SvgIcon initialIcon,
-        SvgIcon icon, bool shouldTriggerChangedEvent)
+    [InlineData(nameof(MonochromeIconName.InfoLight), nameof(MonochromeIconName.InfoLight), false)]
+    [InlineData(nameof(MonochromeIconName.InfoLight), nameof(MonochromeIconName.CloseCircleSolid), true)]
+    public void Assert_changed_event_handling_when_icon_name_is_set(string initialIcon,
+        string icon, bool shouldTriggerChangedEvent)
     {
         // Arrange
-        var state = new MessageBannerNotificationElementIconState { Icon = initialIcon };
+        var state = new MessageBannerNotificationElementIconState { Icon = TypeSafeEnumFactory<MonochromeIconName>.Create(initialIcon) };
         var stateMonitor = state.Monitor();
 
         // Act
-        state.Icon = icon;
+        state.Icon = TypeSafeEnumFactory<MonochromeIconName>.Create(icon);
 
         // Assert
         if (shouldTriggerChangedEvent)

@@ -1,6 +1,6 @@
-﻿using Blazor.Shared.Enums;
 using Blazor.Shared.MessageBanner.Models;
 using Sdk.MessageBanner.Contracts;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
 namespace Blazor.Shared.Tests.MessageBanner;
 
@@ -8,7 +8,7 @@ internal sealed class DummyMessage : IMessage
 {
     public MessageType Type => MessageType.Information;
 
-    public SvgIcon Icon => SvgIcon.CloudConnection;
+    public MonochromeIconName Icon => MonochromeIconName.InfoLight;
 
     public string Title => "Dummy title";
 

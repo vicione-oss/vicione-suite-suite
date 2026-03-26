@@ -822,10 +822,11 @@
       <MonochromeIcon Include="add-user" Size="16;32" />
       <MonochromeIcon Include="arrow-navigation-light-left" Size="16" />
       <MonochromeIcon Include="arrow-navigation-light-right" Size="16" />
-      <MonochromeIcon Include="arrow-navigation-light-up" Size="24" />      
+      <MonochromeIcon Include="arrow-navigation-light-up" Size="24" />
       <MonochromeIcon Include="bug-light" Size="24" />
       <MonochromeIcon Include="check" Size="16;24" />
       <MonochromeIcon Include="chevron" Size="16" />
+      <MonochromeIcon Include="close-circle-solid" Size="24" />
       <MonochromeIcon Include="close-medium" Size="16;24;32" />
       <MonochromeIcon Include="cluster-1" Size="32" />
       <MonochromeIcon Include="connectivity" Size="24;32" />
@@ -835,6 +836,7 @@
       <MonochromeIcon Include="edit-host" Size="32" />
       <MonochromeIcon Include="email" Size="24" />
       <MonochromeIcon Include="error-full" Size="24" />
+      <MonochromeIcon Include="error-light" Size="32;48" />
       <MonochromeIcon Include="exit" Size="16;32" />
       <MonochromeIcon Include="expander-light-down" Size="24" />
       <MonochromeIcon Include="expander-light-left" Size="48" />
@@ -852,6 +854,7 @@
       <MonochromeIcon Include="hide" Size="16" />
       <MonochromeIcon Include="import" Size="16;24" />
       <MonochromeIcon Include="info-outlined" Size="24" />
+      <MonochromeIcon Include="info-light" Size="32;48" />
       <MonochromeIcon Include="install-pending-light" Size="16;24" />
       <MonochromeIcon Include="instructions" Size="32" />
       <MonochromeIcon Include="key-light" Size="24" />
@@ -859,6 +862,7 @@
       <MonochromeIcon Include="language" Size="32" />
       <MonochromeIcon Include="lock-active" Size="16" />
       <MonochromeIcon Include="network-topology" Size="32" />
+      <MonochromeIcon Include="offline-light" Size="32;48" />
       <MonochromeIcon Include="open-in-new-window" Size="16;32" />
       <MonochromeIcon Include="permission-none" Size="16" />
       <MonochromeIcon Include="permission-view-and-edit" Size="16" />
@@ -889,6 +893,7 @@
       <MonochromeIcon Include="user-solid" Size="24" />
       <MonochromeIcon Include="warning" Size="24" />
       <MonochromeIcon Include="warning-full" Size="24" />
+      <MonochromeIcon Include="warning-light" Size="32;48" />
       <MonochromeIcon Include="wifi" Size="16" />
       <MonochromeIcon Include="wifi-off" Size="16" />
       <MonochromeIcon Include="wizard" Size="32" />

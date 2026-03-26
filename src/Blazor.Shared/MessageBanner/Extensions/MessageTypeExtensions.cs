@@ -1,7 +1,6 @@
-﻿using Blazor.Shared.Enums;
-using ViciOne.Ui.Localization.Resources;
-
 using Sdk.MessageBanner.Contracts;
+using ViciOne.Ui.Localization.Resources;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
 namespace Blazor.Shared.MessageBanner.Extensions;
 
@@ -9,11 +8,11 @@ internal static class MessageTypeExtensions
 {
     extension(MessageType messageType)
     {
-        public SvgIcon ToIcon() => messageType switch
+        public MonochromeIconName ToIcon() => messageType switch
         {
-            MessageType.Warning => SvgIcon.RtmWarning,
-            MessageType.Error => SvgIcon.RtmError,
-            _ => SvgIcon.InfoOutlined
+            MessageType.Warning => MonochromeIconName.WarningLight,
+            MessageType.Error => MonochromeIconName.ErrorLight,
+            _ => MonochromeIconName.InfoLight
         };
 
         public string ToTitle() => messageType switch
