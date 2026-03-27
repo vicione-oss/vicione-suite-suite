@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Core.OS.HostManagement;
 using HostManagement.Shared.Communication;
 using NSubstitute;
@@ -40,26 +40,26 @@ internal static class IPipeClientExtensions
 
         public void SetupResetSystemResult(CommunicationEnums.OperationStatus status, string message = "OK")
         {
-            var result = new CommunicationContracts.ResetSystemResult
+            var result = new CommunicationContracts.SystemControlResult
             {
                 Status = status,
                 Message = message
             };
 
             pipeClient.SendRequest(Topics.ResetSystem, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.ResetSystemResult));
+                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.SystemControlResult));
         }
 
         public void SetupRestartSystemResult(CommunicationEnums.OperationStatus status, string message = "OK")
         {
-            var result = new CommunicationContracts.RestartSystemResult
+            var result = new CommunicationContracts.SystemControlResult
             {
                 Status = status,
                 Message = message
             };
 
             pipeClient.SendRequest(Topics.RestartSystem, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.RestartSystemResult));
+                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.SystemControlResult));
         }
 
         public void SetupRestartServiceResult(CommunicationEnums.OperationStatus status, string message = "OK")

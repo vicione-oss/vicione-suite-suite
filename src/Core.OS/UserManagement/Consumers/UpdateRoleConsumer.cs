@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Core.Shared.UserManagement.Contracts;
-using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Extensions;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
@@ -12,51 +11,71 @@ using Sdk.UserManagement.Events;
 
 namespace Core.OS.UserManagement.Consumers;
 
-public sealed class UpdateRoleConsumer(RoleManager<SuiteRole> roleManager,
+public sealed partial class UpdateRoleConsumer(RoleManager<SuiteRole> roleManager,
     IEqualityComparer<Claim> claimEqualityComparer, ILogger<UpdateRoleConsumer> logger)
         : IConsumer<UpdateRole>
 {
     public async Task Consume(ConsumeContext<UpdateRole> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
-
-        logger.LogInformation("Consuming {Command} with CorrelationId '{Id}'", nameof(UpdateRole), correlationId);
-
-        var suiteRole = await roleManager.FindByNameAsync(context.Message.Role.Name);
-        if (suiteRole is null)
-        {
-            await context.Publish(new RoleErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.UpdateFailedNotFound,
-                    $"Could not update role '{context.Message.Role.Name}'. No role was found with that name"),
-                context.Message.Role));
-            return;
-        }
-
-        if (suiteRole.Managed is true)
-        {
-            await context.Publish(new RoleErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.UpdateFailed,
-                    $"Update role '{context.Message.Role.Name}' cancelled. Default roles can't be edited."),
-                context.Message.Role));
-            return;
-        }
-
-        if (suiteRole.Description != context.Message.Role.Description)
-            suiteRole.Description = context.Message.Role.Description;
+        var correlationId = context.Message.CorrelationId;
 
         try
         {
+            var suiteRole = await roleManager.FindByNameAsync(context.Message.Role.Name);
+            if (suiteRole is null)
+            {
+                var errorInfo = new ErrorInfo(RoleErrorCodes.UpdateFailedNotFound,
+                            $"Could not update role '{context.Message.Role.Name}'. No role was found with that name");
+                var errorResponse = new RoleUpdatedEvent(context.Message.Role)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = errorInfo
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
+                return;
+            }
+
+            if (suiteRole.Managed is true)
+            {
+                var errorInfo = new ErrorInfo(RoleErrorCodes.UpdateFailed,
+                            $"Update role '{context.Message.Role.Name}' cancelled. Default roles can't be edited.");
+                var errorResponse = new RoleUpdatedEvent(context.Message.Role)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = errorInfo
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
+                return;
+            }
+
+            if (suiteRole.Description != context.Message.Role.Description)
+                suiteRole.Description = context.Message.Role.Description;
+
             await roleManager.UpdateAsync(suiteRole);
             await AssignClaims(context.Message.Role.Claims, suiteRole);
 
-            await context.Publish(new RoleUpdatedEvent(correlationId, suiteRole.ToRole(context.Message.Role.Claims)));
+            var response = new RoleUpdatedEvent(suiteRole.ToRole(context.Message.Role.Claims)) { CorrelationId = correlationId };
+
+            await context.Publish(response, context.CancellationToken);
         }
         catch (Exception ex)
         {
-            await context.Publish(new RoleErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.UpdateFailed,
-                    $"Could not update role '{context.Message.Role.Name}'. {ex.Message}."),
-                context.Message.Role));
-            return;
+            LogError(logger, ex, context.Message.Role.Name, correlationId);
+
+            var errorInfo = new ErrorInfo(RoleErrorCodes.UpdateFailed,
+                        $"Could not update role '{context.Message.Role.Name}'. {ex.Message}.");
+            var errorResponse = new RoleUpdatedEvent(context.Message.Role)
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = errorInfo
+            };
+
+            await context.Publish(errorResponse, context.CancellationToken);
         }
     }
+
 
     private async Task AssignClaims(IEnumerable<UserManagementClaim> claims, SuiteRole role)
     {
@@ -85,4 +104,7 @@ public sealed class UpdateRoleConsumer(RoleManager<SuiteRole> roleManager,
             }
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update role '{name}' correlated by '{correlationId}'.")]
+    private static partial void LogError(ILogger<UpdateRoleConsumer> logger, Exception ex, string name, Guid correlationId);
 }

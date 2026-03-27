@@ -24,50 +24,58 @@ public sealed class CreateConnectionConsumerDefinition : ConsumerDefinition<Crea
 /// <summary>
 /// this is used by modules to seed connections - only new connections will be added! 
 /// </summary>
-public sealed class CreateConnectionConsumer(IConnectionDbContext dbContext, ILogger<CreateConnectionConsumer> logger) : IConsumer<CreateConnection>
+public sealed partial class CreateConnectionConsumer(IConnectionDbContext dbContext, ILogger<CreateConnectionConsumer> logger) : IConsumer<CreateConnection>
 {
     public async Task Consume(ConsumeContext<CreateConnection> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
-
-        logger.LogDebug("Consume {Command} CorrelationId:{CorrelationId} ConnectionId:{ConnectionId}",
-            nameof(CreateConnection), correlationId, context.Message.Connection.Id);
-
-        var existingConn = await dbContext.Connections
-            .Include(c => c.Tags)
-            .FirstOrDefaultAsync(conn => conn.Id == context.Message.Connection.Id);
-
-        if (existingConn is not null)
-            return;
-
-        var addedTags = new List<Tag>();
-        var changedTags = new List<Tag>();
-
-        context.Message.Connection.Tags = await dbContext.ProcessTags(context.Message.Connection,
-            addedTags, changedTags, context.CancellationToken);
-
-        existingConn = dbContext.Connections.Add(context.Message.Connection).Entity;
-
-        // add the new tags
-        foreach (var addedTag in addedTags)
-            dbContext.Tags.Add(addedTag);
+        var correlationId = context.Message.CorrelationId;
 
         try
         {
+            var existingConn = await dbContext.Connections
+                .Include(c => c.Tags)
+                .FirstOrDefaultAsync(conn => conn.Id == context.Message.Connection.Id);
+
+            if (existingConn is not null)
+                return;
+
+            var addedTags = new List<Tag>();
+            var changedTags = new List<Tag>();
+
+            context.Message.Connection.Tags = await dbContext.ProcessTags(context.Message.Connection,
+                addedTags, changedTags, context.CancellationToken);
+
+            existingConn = dbContext.Connections.Add(context.Message.Connection).Entity;
+
+            // add the new tags
+            foreach (var addedTag in addedTags)
+                dbContext.Tags.Add(addedTag);
+
             if (await dbContext.SaveChangesAsync(context.CancellationToken) > 0)
             {
-                await context.Publish(new TagsChanged(correlationId, CrudAction.Created, addedTags)).ConfigureAwait(false);
+                var createdEvent = new TagsChanged(CrudAction.Created, addedTags) { CorrelationId = correlationId };
+                await context.Publish(createdEvent, context.CancellationToken).ConfigureAwait(false);
 
-                await context.Publish(new ConnectionChanged(correlationId, CrudAction.Created, existingConn, addedTags, changedTags))
-                    .ConfigureAwait(false);
+                var connectionEvent = new ConnectionChanged(CrudAction.Created, existingConn, addedTags, changedTags) { CorrelationId = correlationId };
+                await context.Publish(connectionEvent, context.CancellationToken).ConfigureAwait(false);
 
-                await context.Publish(new TagsChanged(correlationId, CrudAction.Updated, changedTags)).ConfigureAwait(false);
+                var updatedEvent = new TagsChanged(CrudAction.Updated, changedTags) { CorrelationId = correlationId };
+                await context.Publish(updatedEvent, context.CancellationToken).ConfigureAwait(false);
             }
         }
-        catch (DbUpdateException e)
+        catch (Exception ex)
         {
-            await context.Publish(new ConnectionErrorOccured(correlationId,
-                new ErrorInfo(ConnectionErrorOccured.AddOrUpdateConnectionFailed, e.Message), existingConn.Id)).ConfigureAwait(false);
+            LogError(logger, ex, context.Message.Connection.Id, correlationId);
+            var errorInfo = new ErrorInfo(ConnectionErrorCodes.AddOrUpdateConnectionFailed, ex.Message);
+            var changeEvent = new ConnectionChanged(CrudAction.Created, context.Message.Connection, [], [])
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = errorInfo
+            };
+            await context.Publish(changeEvent, context.CancellationToken).ConfigureAwait(false);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create connection '{connectionId}' correlated by '{correlationId}'.")]
+    private static partial void LogError(ILogger<CreateConnectionConsumer> logger, Exception ex, Guid? connectionId, Guid correlationId);
 }

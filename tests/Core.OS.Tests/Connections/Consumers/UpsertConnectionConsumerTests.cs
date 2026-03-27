@@ -150,9 +150,9 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
 
     private static async Task AssertUpsertConnectionConsumed(ITestHarness harness, IConnectionDbContext dbContext, UpsertConnection command, CrudAction action)
     {
-        Assert.False(await harness.Published.Any<ConnectionErrorOccured>(TestContext.Current.CancellationToken));
         Assert.True(await harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == action &&
+            r.Context.Message.ErrorInfo == null &&
             Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken));
 
         Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, TestContext.Current.CancellationToken));

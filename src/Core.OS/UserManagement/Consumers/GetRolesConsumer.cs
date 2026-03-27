@@ -1,4 +1,4 @@
-﻿using Core.Shared.UserManagement.Contracts;
+using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Extensions;
 using Microsoft.AspNetCore.Identity;
@@ -33,6 +33,6 @@ public sealed class GetRolesConsumer(RoleManager<SuiteRole> roleManager, ILogger
     {
         logger.LogError(e, "Consume {Request} failed", nameof(GetRoles));
 
-        return Task.FromResult(new GetRolesResponse([], new(UserErrorEvent.UnknownError, e.Message)));
+        return Task.FromResult(new GetRolesResponse([], new(UserErrorCodes.UnknownError, e.Message)));
     }
 }

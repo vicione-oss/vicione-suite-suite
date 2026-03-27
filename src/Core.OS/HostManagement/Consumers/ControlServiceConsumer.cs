@@ -1,7 +1,8 @@
-﻿using MassTransit;
+using MassTransit;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration;
 using Sdk.SystemConfiguration.Commands;
+using Sdk.SystemConfiguration.Contracts;
 using Sdk.SystemConfiguration.Events;
 
 namespace Core.OS.HostManagement.Consumers;
@@ -11,7 +12,7 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
 {
     public async Task Consume(ConsumeContext<ControlService> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
+        var correlationId = context.Message.CorrelationId;
 
         try
         {
@@ -24,18 +25,32 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
 
             if (!result.Success)
             {
-                await context.Publish(new ControlServiceError(correlationId, context.Message.ServiceName, result.Error!), context.CancellationToken);
+                var errorResponse = new ControlServiceCompleted(context.Message.ServiceName, result.State)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = result.Error!
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
                 return;
             }
 
-            await context.Publish(new SystemConfigurationChanged(correlationId), context.CancellationToken);
-            await context.Publish(new ControlServiceCompleted(correlationId, context.Message.ServiceName, result.State), context.CancellationToken);
+            await context.Publish(new SystemConfigurationChanged { CorrelationId = correlationId }, context.CancellationToken);
+
+            var response = new ControlServiceCompleted(context.Message.ServiceName, result.State) { CorrelationId = correlationId };
+            await context.Publish(response, context.CancellationToken);
         }
         catch (Exception e)
         {
             LogControlServiceError(logger, e, context.Message.ServiceName);
 
-            await context.Publish(new ControlServiceError(correlationId, context.Message.ServiceName, new ErrorInfo(ControlServiceError.UnknownError, e.Message)), context.CancellationToken);
+            var errorResponse = new ControlServiceCompleted(context.Message.ServiceName, ServiceState.Unknown)
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = new ErrorInfo(ControlServiceErrorCodes.UnknownError, e.Message)
+            };
+
+            await context.Publish(errorResponse, context.CancellationToken);
         }
     }
 

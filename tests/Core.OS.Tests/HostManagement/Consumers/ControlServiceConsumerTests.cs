@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement.Consumers;
+using Core.OS.HostManagement.Consumers;
 using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,6 +75,7 @@ public class ControlServiceConsumerTests
         await tester.TestInstanceDependentCommand<ControlService, ControlServiceConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlServiceError>(TestContext.Current.CancellationToken)).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlServiceCompleted>(r =>
+            r.Context.Message.ErrorInfo != null, TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 }

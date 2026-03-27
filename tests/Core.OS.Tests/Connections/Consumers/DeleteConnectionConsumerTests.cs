@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Consumers;
+using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using Core.OS.Tests.Extensions;
 using MassTransit;
@@ -50,9 +50,9 @@ public sealed class DeleteConnectionConsumerTests : TestWithDbContextSqlite<Conn
         await tester.TestCommand<DeleteConnection, DeleteConnectionConsumer>(command);
 
         // Assert
-        Assert.False(await tester.Harness.Published.Any<ConnectionErrorOccured>(TestContext.Current.CancellationToken));
         Assert.True(await tester.Harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == CrudAction.Deleted &&
+            r.Context.Message.ErrorInfo == null &&
             r.Context.Message.Connection.Id == connection.Id, TestContext.Current.CancellationToken));
 
         Assert.False(await dbContext.Connections.AnyAsync(c => c.Id == connection.Id, cancellationToken: TestContext.Current.CancellationToken));

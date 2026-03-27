@@ -1,8 +1,7 @@
-﻿using Core.Shared.UserManagement.Contracts;
-using MassTransit;
+using Core.Shared.UserManagement.Contracts;
 using Sdk.Messaging;
 
 namespace Core.Shared.UserManagement.Events;
 
 [ForwardToUI]
-public sealed record UserDeletedEvent(Guid CorrelationId, UserProfile UserProfile) : IEvent, CorrelatedBy<Guid>;
+public sealed record UserDeletedEvent(UserProfile UserProfile) : ResponseEventBase;

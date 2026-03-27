@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules;
+using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
 using Core.OS.UserManagement.Extensions;
@@ -59,7 +59,7 @@ public class DeleteUserConsumerTests
 
         // Act/Assert
         var response = await tester.TestCommand<DeleteUser, DeleteUserConsumer, UserDeletedEvent>(command);
-        response.Should().BeEquivalentTo(new UserDeletedEvent(command.CorrelationId, userProfile));
+        response.Should().BeEquivalentTo(new UserDeletedEvent(userProfile) { CorrelationId = command.CorrelationId });
     }
 
     [Fact]
@@ -78,10 +78,10 @@ public class DeleteUserConsumerTests
         var command = new DeleteUser(user);
 
         // Act/Assert
-        var response = await tester.TestCommand<DeleteUser, DeleteUserConsumer, UserErrorEvent>(command);
+        var response = await tester.TestCommand<DeleteUser, DeleteUserConsumer, UserDeletedEvent>(command);
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.DeleteFailedNotFound);
-        response.Username.Should().Be(user.UserName);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.DeleteFailedNotFound);
+        response.UserProfile.UserName.Should().Be(user.UserName);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class DeleteUserConsumerTests
 
         // Act/Assert
         var response = await tester.TestCommand<DeleteUser, DeleteUserConsumer, UserDeletedEvent>(command);
-        response.Should().BeEquivalentTo(new UserDeletedEvent(command.CorrelationId, userProfile));
+        response.Should().BeEquivalentTo(new UserDeletedEvent(userProfile) { CorrelationId = command.CorrelationId });
     }
 
     [Fact]
@@ -116,9 +116,9 @@ public class DeleteUserConsumerTests
         var command = new DeleteUser(userProfile);
 
         // Act/Assert
-        var response = await tester.TestCommand<DeleteUser, DeleteUserConsumer, UserErrorEvent>(command);
+        var response = await tester.TestCommand<DeleteUser, DeleteUserConsumer, UserDeletedEvent>(command);
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.SystemAdminLockout);
-        response.Username.Should().Be(command.UserProfile.UserName);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.SystemAdminLockout);
+        response.UserProfile.UserName.Should().Be(command.UserProfile.UserName);
     }
 }

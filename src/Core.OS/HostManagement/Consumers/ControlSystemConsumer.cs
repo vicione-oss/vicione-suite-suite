@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO.Abstractions;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance;
@@ -56,16 +56,19 @@ public sealed partial class ControlSystemConsumer(
 
             if (result?.Status != OperationStatus.Success)
             {
-                await context.Publish(new ControlSystemError(correlationId,
-                        context.Message.Command,
-                        new ErrorInfo(
-                            (int?)result?.Status ?? ControlSystemError.UnknownError,
-                            result?.Message)),
-                    context.CancellationToken);
+                var errorResponse = new ControlSystemCompleted(context.Message.Command)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = new ErrorInfo((int?)result?.Status ?? ControlSystemCompleted.UnknownError, result?.Message)
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
                 return;
             }
 
-            await context.Publish(new ControlSystemCompleted(correlationId, context.Message.Command), context.CancellationToken);
+            var response = new ControlSystemCompleted(context.Message.Command) { CorrelationId = correlationId };
+
+            await context.Publish(response, context.CancellationToken);
 
             if (context.Message.Command == SystemCommand.Reset)
             {
@@ -78,7 +81,13 @@ public sealed partial class ControlSystemConsumer(
         {
             LogControlSystemError(logger, e, context.Message.Command);
 
-            await context.Publish(new ControlSystemError(correlationId, context.Message.Command, new ErrorInfo(ControlServiceError.UnknownError, e.Message)), context.CancellationToken);
+            var response = new ControlSystemCompleted(context.Message.Command)
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = new ErrorInfo(ControlServiceErrorCodes.UnknownError, e.Message)
+            };
+
+            await context.Publish(response, context.CancellationToken);
         }
     }
 

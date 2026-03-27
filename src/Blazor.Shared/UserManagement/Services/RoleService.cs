@@ -2,20 +2,17 @@ using Blazor.Shared.UserManagement.Contracts;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
-using Sdk.Messaging;
 using Sdk.UserManagement.Commands;
 using Sdk.UserManagement.Contracts;
 using Sdk.UserManagement.Events;
 using Sdk.UserManagement.Requests;
-using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.UserManagement.Services;
 
 internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementServiceResult>, IRoleService,
     IEventConsumer<RoleCreatedEvent>,
     IEventConsumer<RoleUpdatedEvent>,
-    IEventConsumer<RoleDeletedEvent>,
-    IEventConsumer<RoleErrorEvent>
+    IEventConsumer<RoleDeletedEvent>
 {
     private readonly ILogger<RoleService> _logger;
 
@@ -26,7 +23,6 @@ internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementS
         Register<RoleCreatedEvent>();
         Register<RoleUpdatedEvent>();
         Register<RoleDeletedEvent>();
-        Register<RoleErrorEvent>();
     }
 
     public async Task<IUserManagementServiceResult> CreateRole(Role role, CancellationToken cancellationToken = default)
@@ -64,6 +60,12 @@ internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementS
 
     public Task Consume(ClientContext<RoleCreatedEvent> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return Task.CompletedTask;
+        }
+
         CompleteWithSuccess(context.Message.CorrelationId);
 
         return Task.CompletedTask;
@@ -71,6 +73,12 @@ internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementS
 
     public Task Consume(ClientContext<RoleUpdatedEvent> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return Task.CompletedTask;
+        }
+
         CompleteWithSuccess(context.Message.CorrelationId);
 
         return Task.CompletedTask;
@@ -78,17 +86,13 @@ internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementS
 
     public Task Consume(ClientContext<RoleDeletedEvent> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return Task.CompletedTask;
+        }
+
         CompleteWithSuccess(context.Message.CorrelationId);
-
-        return Task.CompletedTask;
-    }
-
-    public Task Consume(ClientContext<RoleErrorEvent> context, CancellationToken cancellationToken)
-    {
-        var errorMessage = context.Message.ErrorInfo.Message ?? CommonPhrases.AnUnknownErrorOccurred;
-
-        CompleteWithError(context.Message.CorrelationId,
-            new ErrorInfo(context.Message.ErrorInfo.ErrorCode, errorMessage));
 
         return Task.CompletedTask;
     }

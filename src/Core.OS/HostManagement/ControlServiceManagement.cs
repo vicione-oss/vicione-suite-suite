@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.HostManagement.Extensions;
 using HostManagement.Shared.Communication.Contracts;
@@ -22,7 +22,7 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
     {
         if (!IsAvailable)
         {
-            var errorInfo = new ErrorInfo(ControlServiceError.ControlServiceUnavailable, "Operation not supported. HMS not installed or connected.");
+            var errorInfo = new ErrorInfo(ControlServiceErrorCodes.ControlServiceUnavailable, "Operation not supported. HMS not installed or connected.");
             return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
         }
 
@@ -35,7 +35,7 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
         catch (Exception e)
         {
             logger.LogError(e, "Failed to {Command} service '{ServiceName}'.", command, serviceName);
-            var errorInfo = new ErrorInfo(ControlServiceError.UnknownError, e.Message);
+            var errorInfo = new ErrorInfo(ControlServiceErrorCodes.UnknownError, e.Message);
             return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
         }
     }
@@ -57,7 +57,7 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
         if (setResult?.Status == OperationStatus.Success)
             return new ControlServiceManagementResult(serviceName, ToSuiteState(command));
 
-        var errorCode = (int?)setResult?.Status ?? ControlServiceError.UnknownError;
+        var errorCode = (int?)setResult?.Status ?? ControlServiceErrorCodes.UnknownError;
         var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
         logger.LogError("{Command} service '{ServiceName}' failed with {ErrorCode}. {Message}", command, serviceName, errorCode, setResult?.Message);
         return new ControlServiceManagementResult(serviceName, ToSuiteState(command), errorInfo);
@@ -128,7 +128,7 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
     {
         if (setResult?.Status != OperationStatus.Success)
         {
-            var errorCode = (int?)setResult?.Status ?? ControlServiceError.UnknownError;
+            var errorCode = (int?)setResult?.Status ?? ControlServiceErrorCodes.UnknownError;
             var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
             logger.LogError("{Command} service '{ServiceName}' failed with {ErrorCode}. {Message}", command, serviceName, errorCode, setResult?.Message);
             return new ControlServiceManagementResult(serviceName, ToSuiteState(command), errorInfo);

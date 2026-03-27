@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
@@ -72,11 +72,11 @@ public class CreateRoleConsumerTests
         var command = new CreateRole(role);
 
         // Act
-        var response = await tester.TestCommand<CreateRole, CreateRoleConsumer, RoleErrorEvent>(command);
+        var response = await tester.TestCommand<CreateRole, CreateRoleConsumer, RoleCreatedEvent>(command);
 
         // Assert
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(RoleErrorEvent.CreateFailedAlreadyExists);
+        response.ErrorInfo.ErrorCode.Should().Be(RoleErrorCodes.CreateFailedAlreadyExists);
         response.Role.Name.Should().Be(role.Name);
     }
 }

@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Messaging;
 using Sdk.Connections.Events;
@@ -19,6 +19,6 @@ public sealed class GetTagsConsumer(IConnectionDbContext dbContext, ILogger<GetT
     {
         logger.LogError(e, $"Failed to handle {nameof(GetTags)}");
 
-        return Task.FromResult(new GetTagsResponse([], new(ConnectionErrorOccured.UnknownError, e.Message)));
+        return Task.FromResult(new GetTagsResponse([], new(TagErrorCodes.UnknownError, e.Message)));
     }
 }

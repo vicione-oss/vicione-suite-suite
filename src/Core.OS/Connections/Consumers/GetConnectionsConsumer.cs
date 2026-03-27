@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Messaging;
 using Sdk.Connections.Contracts;
@@ -58,6 +58,6 @@ public sealed class GetConnectionsConsumer(IConnectionDbContext dbContext, ILogg
     {
         logger.LogError(e, $"Failed to handle {nameof(GetConnections)}");
 
-        return Task.FromResult(new GetConnectionsResponse([], new(ConnectionErrorOccured.UnknownError, e.Message)));
+        return Task.FromResult(new GetConnectionsResponse([], new(ConnectionErrorCodes.UnknownError, e.Message)));
     }
 }

@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
@@ -128,10 +128,10 @@ public class UpdateUserConsumerTests
         var command = new UpdateUser(user);
 
         // Act/Assert
-        var response = await tester.TestCommand<UpdateUser, UpdateUserConsumer, UserErrorEvent>(command);
+        var response = await tester.TestCommand<UpdateUser, UpdateUserConsumer, UserUpdatedEvent>(command);
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.UpdateFailedNotFound);
-        response.Username.Should().Be(user.UserName);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.UpdateFailedNotFound);
+        response.UserProfile.UserName.Should().Be(user.UserName);
     }
 
     [Fact]
@@ -147,10 +147,10 @@ public class UpdateUserConsumerTests
         var command = new UpdateUser(user);
 
         // Act/Assert
-        var response = await tester.TestCommand<UpdateUser, UpdateUserConsumer, UserErrorEvent>(command);
+        var response = await tester.TestCommand<UpdateUser, UpdateUserConsumer, UserUpdatedEvent>(command);
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.UpdateFailedPassword);
-        response.Username.Should().Be(user.UserName);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.UpdateFailedPassword);
+        response.UserProfile.UserName.Should().Be(user.UserName);
     }
 
     [Fact]
@@ -166,9 +166,9 @@ public class UpdateUserConsumerTests
         var command = new UpdateUser(user);
 
         // Act/Assert
-        var response = await tester.TestCommand<UpdateUser, UpdateUserConsumer, UserErrorEvent>(command);
+        var response = await tester.TestCommand<UpdateUser, UpdateUserConsumer, UserUpdatedEvent>(command);
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.UpdateFailedPassword);
-        response.Username.Should().Be(user.UserName);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.UpdateFailedPassword);
+        response.UserProfile.UserName.Should().Be(user.UserName);
     }
 }

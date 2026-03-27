@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement;
+using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,7 +22,7 @@ public sealed class SystemConfigurationChangedConsumerTests
             cfg.AddSingleton<SystemConfigurationCache>();
         });
         var logger = tester.Services.GetRequiredService<ILogger<SystemConfigurationChangedConsumer>>();
-        var changeEvent = new SystemConfigurationChanged(Guid.NewGuid());
+        var changeEvent = new SystemConfigurationChanged { CorrelationId = Guid.NewGuid() };
 
         // Act + Assert
         await tester.TestEvent<SystemConfigurationChanged, SystemConfigurationChangedConsumer>(changeEvent);

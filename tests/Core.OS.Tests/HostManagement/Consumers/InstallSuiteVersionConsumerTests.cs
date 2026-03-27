@@ -1,10 +1,11 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Contracts;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Modules;
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement;
+using Core.Shared.HostManagement.Events;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -69,6 +70,7 @@ public sealed class InstallSuiteVersionConsumerTests
         await tester.TestCommand<InstallSuiteVersion, InstallSuiteVersionConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<InstallSuiteVersionError>(TestContext.Current.CancellationToken)).Should().BeTrue();
+        (await tester.Harness.Published.Any<InstallSuiteVersionStarted>(r =>
+            r.Context.Message.ErrorInfo != null, TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 }

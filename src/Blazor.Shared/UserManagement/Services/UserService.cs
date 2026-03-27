@@ -16,8 +16,7 @@ internal sealed class UserService : CompletionSourceHandlerBase<IUserManagementS
     IUserService,
     IEventConsumer<UserCreatedEvent>,
     IEventConsumer<UserUpdatedEvent>,
-    IEventConsumer<UserDeletedEvent>,
-    IEventConsumer<UserErrorEvent>
+    IEventConsumer<UserDeletedEvent>
 {
     private readonly AuthenticationStateProvider _authenticationStateProvider;
     private string? _currentUserName;
@@ -31,7 +30,6 @@ internal sealed class UserService : CompletionSourceHandlerBase<IUserManagementS
         Register<UserCreatedEvent>();
         Register<UserUpdatedEvent>();
         Register<UserDeletedEvent>();
-        Register<UserErrorEvent>();
     }
 
     public async Task<IUserManagementServiceResult> CreateUser(UserProfile userProfile, CancellationToken cancellationToken = default)
@@ -58,6 +56,12 @@ internal sealed class UserService : CompletionSourceHandlerBase<IUserManagementS
 
     public async Task Consume(ClientContext<UserDeletedEvent> context, CancellationToken cancellationToken = default)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            HandleError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return;
+        }
+
         CompleteWithSuccess(context.Message.CorrelationId);
 
         await NotifyUserChanged(context.Message.UserProfile, CrudAction.Deleted);
@@ -65,6 +69,12 @@ internal sealed class UserService : CompletionSourceHandlerBase<IUserManagementS
 
     public async Task Consume(ClientContext<UserCreatedEvent> context, CancellationToken cancellationToken = default)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            HandleError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return;
+        }
+
         CompleteWithSuccess(context.Message.CorrelationId);
 
         await NotifyUserChanged(context.Message.UserProfile, CrudAction.Created);
@@ -72,23 +82,27 @@ internal sealed class UserService : CompletionSourceHandlerBase<IUserManagementS
 
     public async Task Consume(ClientContext<UserUpdatedEvent> context, CancellationToken cancellationToken = default)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            HandleError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return;
+        }
+
         CompleteWithSuccess(context.Message.CorrelationId);
 
         await NotifyUserChanged(context.Message.UserProfile, CrudAction.Updated);
     }
 
-    public Task Consume(ClientContext<UserErrorEvent> context, CancellationToken cancellationToken = default)
+    public void HandleError(Guid correlationId, ErrorInfo errorInfo)
     {
         string errorMessage;
 
-        if (context.Message.ErrorInfo.ErrorCode == UserErrorEvent.UpdateFailedPassword)
+        if (errorInfo.ErrorCode == UserErrorCodes.UpdateFailedPassword)
             errorMessage = string.Format(ValidationMessages.Culture, ValidationMessages.FieldDoesNotEqualToTheRecordedValue, Localization.Labels.CurrentPassword);
         else
-            errorMessage = context.Message.ErrorInfo.Message ?? CommonPhrases.AnUnknownErrorOccurred;
+            errorMessage = errorInfo.Message ?? CommonPhrases.AnUnknownErrorOccurred;
 
-        CompleteWithError(context.Message.CorrelationId, new ErrorInfo(context.Message.ErrorInfo.ErrorCode, errorMessage));
-
-        return Task.CompletedTask;
+        CompleteWithError(correlationId, new ErrorInfo(errorInfo.ErrorCode, errorMessage));
     }
 
     public async Task<List<UserProfile>> GetUsers(UserName? userName = null, CancellationToken cancellationToken = default)

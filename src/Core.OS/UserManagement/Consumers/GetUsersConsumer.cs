@@ -1,4 +1,4 @@
-﻿using Core.OS.UserManagement.Extensions;
+using Core.OS.UserManagement.Extensions;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Requests;
@@ -18,7 +18,7 @@ public sealed class GetUsersConsumer(UserManager<SuiteUser> userManager, ILogger
         {
             var suiteUser = await userManager.FindByNameAsync(message.UserName.Value.Value);
             if (suiteUser is null)
-                return new GetUsersResponse([], new ErrorInfo(UserErrorEvent.NotFound, $"Could not find user '{message.UserName}'"));
+                return new GetUsersResponse([], new ErrorInfo(UserErrorCodes.NotFound, $"Could not find user '{message.UserName}'"));
             var user = await suiteUser.CreateUserProfile(userManager);
             return new GetUsersResponse([user]);
         }
@@ -34,6 +34,6 @@ public sealed class GetUsersConsumer(UserManager<SuiteUser> userManager, ILogger
     {
         logger.LogError(e, "Consume {Request} failed", nameof(GetUsers));
 
-        return Task.FromResult(new GetUsersResponse([], new ErrorInfo(UserErrorEvent.UnknownError, e.Message)));
+        return Task.FromResult(new GetUsersResponse([], new ErrorInfo(UserErrorCodes.UnknownError, e.Message)));
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Blazor.Shared.Services;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
@@ -14,7 +14,6 @@ namespace Blazor.Shared.SystemInformation.NotificationArea;
 
 public sealed partial class SystemInformationNotificationElementFlyoutContent : INotificationElementFlyoutContent,
     IEventConsumer<ControlSystemCompleted>,
-    IEventConsumer<ControlSystemError>,
     IDisposable
 {
     private AuthenticationState? _authState;
@@ -45,8 +44,7 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
 
     protected override async Task OnInitializedAsync()
     {
-        _subscriptionHandles.Add(Mediator.Register<ControlSystemCompleted>(this));
-        _subscriptionHandles.Add(Mediator.Register<ControlSystemError>(this));
+        _subscriptionHandles.Add(Mediator.Register(this));
 
         // ToDo - Setzen
         if (AuthenticationStateTask is not null)
@@ -76,14 +74,13 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
 
     public Task Consume(ClientContext<ControlSystemCompleted> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            LogControlSystemFailed(Logger, context.Message.Command, context.Message.ErrorInfo.ErrorCode, context.Message.ErrorInfo.Message);
+            return Task.CompletedTask;
+        }
+
         LogControlSystemCompleted(Logger, context.Message.Command);
-
-        return Task.CompletedTask;
-    }
-
-    public Task Consume(ClientContext<ControlSystemError> context, CancellationToken cancellationToken)
-    {
-        LogControlSystemFailed(Logger, context.Message.Command, context.Message.Error.ErrorCode, context.Message.Error.Message);
 
         return Task.CompletedTask;
     }

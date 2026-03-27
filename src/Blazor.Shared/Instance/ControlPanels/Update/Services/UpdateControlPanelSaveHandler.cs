@@ -2,6 +2,7 @@ using Blazor.Shared.Validation.Services.Validators;
 using Core.Shared.HostManagement;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
+using DevExpress.Blazor.Internal.GridCustomData;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
@@ -13,8 +14,8 @@ using ViciOne.Ui.Localization.Resources;
 namespace Blazor.Shared.Instance.ControlPanels.Update.Services;
 
 internal sealed partial class UpdateControlPanelSaveHandler : ControlPanelSaveHandlerBase<UpdateControlPanelState>,
-    IEventConsumer<InstallSuiteVersionStarted>, IEventConsumer<InstallSuiteVersionError>,
-    IEventConsumer<UpdateSystemStarted>, IEventConsumer<UpdateSystemError>
+    IEventConsumer<InstallSuiteVersionStarted>,
+    IEventConsumer<UpdateSystemStarted>
 {
     private readonly IInstanceInformationProvider _instanceInformationProvider;
     private readonly IRequiredValidator _requiredValidator;
@@ -30,9 +31,7 @@ internal sealed partial class UpdateControlPanelSaveHandler : ControlPanelSaveHa
         _logger = logger;
 
         Register<InstallSuiteVersionStarted>();
-        Register<InstallSuiteVersionError>();
         Register<UpdateSystemStarted>();
-        Register<UpdateSystemError>();
     }
 
     public override async Task<ISaveResult> Save(UpdateControlPanelState state, CancellationToken cancellationToken)
@@ -93,6 +92,14 @@ internal sealed partial class UpdateControlPanelSaveHandler : ControlPanelSaveHa
 
     public Task Consume(ClientContext<InstallSuiteVersionStarted> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            InstallOfSelectedVersionFailed(_logger, context.Message.ErrorInfo.ErrorCode, context.Message.ErrorInfo.Message);
+
+            CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return Task.CompletedTask;
+        }
+
         CompleteWithSuccess(context.Message.CorrelationId);
 
         InstallOfSelectedVersionStarted(_logger, context.Message.Message, context.Message.WithWarnings);
@@ -100,29 +107,19 @@ internal sealed partial class UpdateControlPanelSaveHandler : ControlPanelSaveHa
         return Task.CompletedTask;
     }
 
-    public Task Consume(ClientContext<InstallSuiteVersionError> context, CancellationToken cancellationToken)
-    {
-        CompleteWithError(context.Message.CorrelationId, context.Message.Error);
-
-        InstallOfSelectedVersionFailed(_logger, context.Message.Error.ErrorCode, context.Message.Error.Message);
-
-        return Task.CompletedTask;
-    }
-
     public Task Consume(ClientContext<UpdateSystemStarted> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            UpdateSystemFailed(_logger, context.Message.ErrorInfo.ErrorCode, context.Message.ErrorInfo.Message);
+
+            CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return Task.CompletedTask;
+        }
+
         CompleteWithSuccess(context.Message.CorrelationId);
 
         UpdateSystemStarted(_logger, context.Message.Message, context.Message.WithWarnings);
-
-        return Task.CompletedTask;
-    }
-
-    public Task Consume(ClientContext<UpdateSystemError> context, CancellationToken cancellationToken)
-    {
-        CompleteWithError(context.Message.CorrelationId, context.Message.Error);
-
-        UpdateSystemFailed(_logger, context.Message.Error.ErrorCode, context.Message.Error.Message);
 
         return Task.CompletedTask;
     }

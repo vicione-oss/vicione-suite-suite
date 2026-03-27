@@ -145,10 +145,14 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
 
             return aqlResult;
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             LogFailedToQueryArtifacts(logger, ex, source.RepositoryKey, source.SourceKey);
-            return new JFrogQueryResult { Error = ex };
+            return new JFrogQueryResult { Error = ex, Source = source.SourceKey };
         }
     }
 
@@ -177,6 +181,10 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
             response.EnsureSuccessStatusCode(); // Throw exception if API call failed
 
             return await response.Content.ReadAsStringAsync(cancellationToken: cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception ex)
         {
