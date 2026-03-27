@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using AwesomeAssertions;
@@ -458,6 +458,86 @@ public class ModuleMetadataProviderTests
                 .All(k => k.Metadata.Name == installed.Metadata.Name)
                 .Should()
                 .BeTrue("Only available metadata assets of installed module");
+        }
+
+        [Fact]
+        public async Task Should_include_lower_ci_versions_if_installed_version_is_ci()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
+            var module = metadata.First();
+            var installedCiVersion = $"{module.Version}-ci99999";
+            var lowerCiVersion = $"{module.Version}-ci11111";
+
+            var installed = new List<ModuleMetadataBundle>
+            {
+                new()
+                {
+                    ModuleId = module.Name,
+                    Metadata = new ModuleMetadata { Name = module.Name, Version = installedCiVersion, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+                    Installed = true,
+                }
+            };
+            var available = new List<ModuleMetadata>
+            {
+                new() { Name = module.Name, Version = lowerCiVersion, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+            };
+
+            _moduleManager.GetManifestModules().Returns(installed);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
+
+            // Assert
+            result
+                .First(k => k.ModuleId == module.Name)
+                .AvailableVersions
+                .Should()
+                .Contain(lowerCiVersion);
+        }
+
+        [Fact]
+        public async Task Should_not_include_lower_ci_versions_of_different_base_if_installed_is_ci()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
+            var module = metadata.First();
+            var moduleVersion = Version.Parse(module.Version);
+            var installedCiVersion = $"{moduleVersion}-ci99999";
+            var lowerBaseVersion = new Version(moduleVersion.Major, moduleVersion.Minor - 1, moduleVersion.Build);
+            var lowerBaseCiVersion = $"{lowerBaseVersion}-ci11111";
+
+            var installed = new List<ModuleMetadataBundle>
+            {
+                new()
+                {
+                    ModuleId = module.Name,
+                    Metadata = new ModuleMetadata { Name = module.Name, Version = installedCiVersion, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+                    Installed = true,
+                }
+            };
+            var available = new List<ModuleMetadata>
+            {
+                new() { Name = module.Name, Version = lowerBaseCiVersion, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+            };
+
+            _moduleManager.GetManifestModules().Returns(installed);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
+
+            // Assert
+            result
+                .First(k => k.ModuleId == module.Name)
+                .AvailableVersions
+                .Should()
+                .NotContain(lowerBaseCiVersion);
         }
     }
 }

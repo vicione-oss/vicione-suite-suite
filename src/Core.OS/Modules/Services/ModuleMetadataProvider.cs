@@ -1,4 +1,3 @@
-﻿using Core.Module.Comparer;
 using Core.Module.Options;
 using Core.Module.Utils;
 using Core.OS.Modules.Contracts;
@@ -114,8 +113,6 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
             available.RemoveAll(k => installed.All(i => i.Metadata.Name != k.Name));
         }
 
-        var comparer = new StringVersionComparer();
-
         // handle available ones - dependencies, versions -> todo: metadata for selected version
         foreach (var metadata in available)
         {
@@ -134,13 +131,20 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
             }
 
             // if module is defined in manifest but not downloaded...
-            var existingVersion = existing.Metadata.Version != ModuleConstants.UnresolvedVersionMarker
+            var existingVersionStr = existing.Metadata.Version != ModuleConstants.UnresolvedVersionMarker
                 ? existing.Metadata.Version : "0.0.0";
 
+            // parse both versions once for comparison and CI version check
+            if (!SemVersion.TryParse(existingVersionStr, out var existingSemVer))
+                continue;
+
+            if (!SemVersion.TryParse(metadata.Version, out var availableSemVer))
+                continue;
+
             // it's installed already so it also has the available versions - we don't allow downgrade
-            // because of migrations etc.
-            var compareResult = comparer.Compare(metadata.Version, existingVersion);
-            if (existing.Installed && compareResult < 0)
+            // because of migrations etc. - for installed ci-versions we allow downgrades
+            if (existing.Installed && CompareSemVersions(availableSemVer, existingSemVer) < 0
+                && !IsSameBaseCiVersion(existingSemVer, availableSemVer))
                 continue;
 
             // it happened that different packages contained the same version - this would
@@ -162,7 +166,12 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
             }
 
             // todo - this sorting could maybe done by api query
-            bundle.AvailableVersions.Sort((x, y) => comparer.Compare(y, x));
+            bundle.AvailableVersions.Sort((x, y) =>
+            {
+                SemVersion.TryParse(x, out var xSemVer);
+                SemVersion.TryParse(y, out var ySemVer);
+                return CompareSemVersions(ySemVer, xSemVer); // descending
+            });
         }
 
         return result;
@@ -178,6 +187,30 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
         model.MissingDependencies.AddRange(model.Metadata.Dependencies
             .Where(k => !installed.Any(i => IsDependencySupported(i.Metadata, k))));
     }
+
+    private static int CompareSemVersions(SemVersion? x, SemVersion? y)
+    {
+        if (x is null && y is null)
+            return 0;
+
+        if (x is not null && y is null)
+            return 1;
+
+        if (x is null && y is not null)
+            return -1;
+
+        return SemVersion.CompareSortOrder(x, y);
+    }
+
+    private static bool IsSameBaseCiVersion(SemVersion? existing, SemVersion? available) =>
+        existing is not null && IsCiVersion(existing)
+        && available is not null && IsCiVersion(available)
+        && existing.Major == available.Major
+        && existing.Minor == available.Minor
+        && existing.Patch == available.Patch;
+
+    private static bool IsCiVersion(SemVersion version) =>
+        version.IsPrerelease && version.Prerelease.StartsWith("ci", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsDependencySupported(ModuleMetadata metadata, ModuleDependencyPackage dependency)
     {
