@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Core.Shared;
 using Core.Shared.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -36,10 +36,7 @@ internal static class LoggingConfiguration
         SetLoggingSwitchSwitchLogLevel(configuration);
 
         Log.Logger = new LoggerConfiguration()
-                .MinimumLevel
-                .ControlledBy(_loggingLevelSwitch.WrappedBaseLoggingLevelSwitch)
-                .AddLoggingTargets(configuration.GetLoggingSettings())
-                .ReadFrom.Configuration(configuration)
+                .ApplyConfiguration(configuration)
                 .CreateLogger();
     }
 
@@ -50,35 +47,44 @@ internal static class LoggingConfiguration
             _loggingLevelSwitch.LogLevel = logSettings.LogLevel.Default;
     }
 
-    internal static IHostBuilder ConfigureLogging(this IHostBuilder builder)
+    internal static IServiceCollection ConfigureLogging(this IServiceCollection services, IConfiguration configuration)
     {
-        builder.UseSerilog((context, loggerConfiguration) =>
-        {
-            SetLoggingSwitchSwitchLogLevel(context.Configuration);
+        // this one is used to log on startup before service provider is ready
+        SetupStaticStartupLogger(configuration);
 
-            loggerConfiguration
-                .OverrideMinimumLevel(context.Configuration, "MassTransit", LogEventLevel.Warning)
-                .OverrideMinimumLevel(context.Configuration, "Microsoft", LogEventLevel.Warning)
-                .OverrideMinimumLevel(context.Configuration, "Microsoft.Hosting.Lifetime", LogEventLevel.Warning)
-                .OverrideMinimumLevel(context.Configuration, "Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
-                .OverrideMinimumLevel(context.Configuration, "Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
-                .OverrideMinimumLevel(context.Configuration, "AspNetCore.HealthChecks", LogEventLevel.Warning)
-                .OverrideMinimumLevel(context.Configuration, "System", LogEventLevel.Warning)
+        SetLoggingSwitchSwitchLogLevel(configuration);
+
+        // configure serilog
+        services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.ClearProviders(); // clear default providers, otherwise we would have double entries in console
+            loggingBuilder.AddSerilog(Log.Logger, dispose: true);
+        });
+
+        services.TryAddSingleton<ILogLevelSwitch>(_loggingLevelSwitch);
+
+        return services;
+    }
+
+    private static LoggerConfiguration ApplyConfiguration(this LoggerConfiguration loggerConfiguration, IConfiguration configuration)
+    {
+        loggerConfiguration
+                .OverrideMinimumLevel(configuration, "MassTransit", LogEventLevel.Warning)
+                .OverrideMinimumLevel(configuration, "Microsoft", LogEventLevel.Warning)
+                .OverrideMinimumLevel(configuration, "Microsoft.Hosting.Lifetime", LogEventLevel.Warning)
+                .OverrideMinimumLevel(configuration, "Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+                .OverrideMinimumLevel(configuration, "Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
+                .OverrideMinimumLevel(configuration, "AspNetCore.HealthChecks", LogEventLevel.Warning)
+                .OverrideMinimumLevel(configuration, "System", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .Enrich.WithModuleId();
 
-            loggerConfiguration
-                .AddLoggingTargets(context.Configuration.GetLoggingSettings())
-                .ReadFrom.Configuration(context.Configuration)
-                .MinimumLevel.ControlledBy(_loggingLevelSwitch.WrappedBaseLoggingLevelSwitch);
-        });
+        loggerConfiguration
+            .AddLoggingTargets(configuration.GetLoggingSettings())
+            .ReadFrom.Configuration(configuration)
+            .MinimumLevel.ControlledBy(_loggingLevelSwitch.WrappedBaseLoggingLevelSwitch);
 
-        builder.ConfigureServices((_, services) =>
-        {
-            services.TryAddSingleton<ILogLevelSwitch>(_loggingLevelSwitch);
-        });
-
-        return builder;
+        return loggerConfiguration;
     }
 
     private static LoggerConfiguration AddLoggingTargets(this LoggerConfiguration loggerConfiguration,

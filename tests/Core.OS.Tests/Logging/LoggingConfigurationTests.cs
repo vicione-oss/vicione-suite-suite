@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using Core.OS.Logging;
 using Core.OS.Tests.Extensions;
 using Core.Shared;
@@ -52,7 +52,7 @@ public class LoggingConfigurationTests
             .ConfigureLogging(s =>
             {
                 s.LogPath = "AppData";
-                s.LogTargets = ["Console", "Logfile", "Syslog"];
+                s.LogTargets = ["Console", "Logfile", "Journal"];
                 s.LogLevel = new LoggingLogLevelOptions
                 {
                     Default = LogLevel.Debug,
@@ -90,7 +90,7 @@ public class LoggingConfigurationTests
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                settings["Logging:LogTargets:0"] = "Syslog";
+                settings["Logging:LogTargets:0"] = "Journal";
             }
             else
             {
@@ -99,7 +99,10 @@ public class LoggingConfigurationTests
             config.AddInMemoryCollection(settings!);
         });
 
-        var host = builder.ConfigureLogging().Build();
+        var host = builder.ConfigureServices((context, services) =>
+        {
+            services.ConfigureLogging(context.Configuration);
+        }).Build();
 
         // Assert
         Assert.NotNull(host.Services.GetService<ILogLevelSwitch>());
