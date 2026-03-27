@@ -1,6 +1,8 @@
-﻿using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Authorization.Extensions;
+using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Models;
@@ -19,6 +21,8 @@ public sealed class SettingsNotificationElement : NotificationElement<Notificati
     [Inject] private ISettingsPopupRequest SettingsPopupRequest { get; set; } = default!;
     [Inject] private ISettingsPopupState SettingsPopupState { get; set; } = default!;
     [Inject] private IEnumerable<IUpdateControlPanelRegistryHandler> UpdateControlPanelRegistryHandlers { get; set; } = default!;
+    [Inject] private IControlPanelRegistryItemCache ControlPanelRegistryItemCache { get; set; } = default!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
     [Inject] private ILogger<SettingsNotificationElement> Logger { get; set; } = default!;
 
     public SettingsNotificationElement()
@@ -50,8 +54,24 @@ public sealed class SettingsNotificationElement : NotificationElement<Notificati
         }
 
         SettingsPopupState.Changed += SettingsPopupStateChanged;
+        ControlPanelRegistryItemCache.Changed += ControlPanelRegistryItemCacheChanged;
 
-        State.Visible = true;
+        await SetVisibility();
+    }
+
+    private async void ControlPanelRegistryItemCacheChanged()
+        => await SetVisibility();
+
+    private async Task SetVisibility()
+    {
+        var user = await AuthenticationStateProvider.GetUser();
+
+        var controlPanelRegistryItems = await ControlPanelRegistryItemCache.GetAll(user);
+
+        if (controlPanelRegistryItems.Any(i => i.Descriptor.ShowInNavigation))
+            State.Visible = true;
+        else
+            State.Visible = false;
     }
 
     protected override void Dispose(bool disposing)
@@ -59,6 +79,7 @@ public sealed class SettingsNotificationElement : NotificationElement<Notificati
         if (disposing)
         {
             SettingsPopupState.Changed -= SettingsPopupStateChanged;
+            ControlPanelRegistryItemCache.Changed -= ControlPanelRegistryItemCacheChanged;
 
             _cancellationTokenSource.Cancel();
             _cancellationTokenSource.Dispose();
