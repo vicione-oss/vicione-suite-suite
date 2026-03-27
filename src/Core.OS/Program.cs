@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.OS;
 using Core.OS.Extensions;
 using Core.OS.Instance.Extensions;
@@ -15,8 +15,7 @@ builder.Services.Configure<HostOptions>(c =>
     c.ServicesStopConcurrently = true;
 });
 
-// this one is used to log on startup before service provider is ready
-LoggingConfiguration.SetupStaticStartupLogger(builder.Configuration);
+builder.Services.ConfigureLogging(builder.Configuration);
 
 // on preparation we access http api, load modules etc.
 await CancelableAppPreparation.Execute(async (cancellationToken) =>
@@ -30,8 +29,7 @@ await CancelableAppPreparation.Execute(async (cancellationToken) =>
         return;
     }
 
-    // configure serilog
-    builder.Host.ConfigureLogging();
+    builder.Host.UseSerilog();
 
     // validate appsettings, env vars etc.
     builder.Services.ConfigureAndValidateOptions(instanceOptions);
