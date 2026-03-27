@@ -1,6 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Sdk.Backend.Modules;
 using Sdk.Backend.Persistence;
 using EfDbContext = Microsoft.EntityFrameworkCore.DbContext;
@@ -61,12 +62,14 @@ internal static class ModuleDbContextServiceCollectionExtensions
             return ActivatorUtilities.CreateInstance<TSqliteImplementation>(services,
                 new DbContextOptionsBuilder<TSqliteImplementation>()
                     .UseSqlite(GetSqliteConnectionString(services, moduleType, sqliteDbName))
+                    .ReplaceService<IMigrationsDatabaseLock, NoOpMigrationsDatabaseLock>()
                     .UseApplicationServiceProvider(services)
                     .Options);
         }
 
         var optionsBuilder = new DbContextOptionsBuilder<TPostgresImplementation>()
             .UseNpgsql(connectionStringProvider.ConnectionString)
+            .ReplaceService<IMigrationsDatabaseLock, NoOpMigrationsDatabaseLock>()
             .UseApplicationServiceProvider(services);
 
         if (enableSynchronization)

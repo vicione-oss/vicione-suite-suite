@@ -32,6 +32,7 @@
 ### Fixed
 
 - Tags in `ConnectionChanged` event after deleting a connection will now be properly filled
+- Prevented database-related error messages on first startup
 
 ### Updated
 
