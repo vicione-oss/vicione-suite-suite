@@ -27,6 +27,7 @@
 
 - Removed dependency to Material design icons
 - `SettingsContainerContentHeader`, removed workaround to control size of "navigate back" icon, replaced by using larger icon and placement adjustments
+- Removed support for logging with Syslog
 
 ### Fixed
 

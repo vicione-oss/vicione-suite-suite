@@ -18,9 +18,6 @@ internal static class LoggingConfiguration
     private const string LogTemplate =
         "[{Timestamp:dd.MM.yyyy HH:mm:ss.FFF zzz} {Level:u3}] {CorrelationId} {SourceContext} {NewLine}\t{Message:lj}{NewLine}{Exception}";
 
-    private const string SyslogTemplate =
-        "{SourceContext} {Message:lj} {Exception}";
-
     private const string JournalLogtemplate =
         "{#if SourceContext is not null}[{SourceContext}]{#if ModuleId is not null}({ModuleId}){#end} {#end}{@m}\n{@x}";
 
@@ -115,14 +112,6 @@ internal static class LoggingConfiguration
                     outputTemplate: LogTemplate,
                     formatProvider: CultureInfo.InvariantCulture
                 );
-        }
-
-        if (logTargets.Contains(LogTarget.Syslog))
-        {
-            if (!OperatingSystem.IsLinux())
-                throw new InvalidOperationException("Syslog can only be configured for linux");
-
-            loggerConfiguration.WriteTo.LocalSyslog(outputTemplate: SyslogTemplate);
         }
 
         if (logTargets.Contains(LogTarget.Journal))
