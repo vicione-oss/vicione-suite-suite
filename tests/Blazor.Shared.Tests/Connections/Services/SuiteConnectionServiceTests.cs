@@ -39,7 +39,7 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertTag, TagsChanged>(
-                (command) => new TagsChanged(command.CorrelationId, CrudAction.Created, [command.Tag]),
+                (command) => new TagsChanged(CrudAction.Created, [command.Tag]) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             // Act
@@ -67,7 +67,7 @@ public class SuiteConnectionServiceTests
             var eventFactoryCallCount = 0;
 
             uiMediator.Setup<UpsertTag, TagsChanged>(
-                (command) => new TagsChanged(command.CorrelationId, eventFactoryCallCount++ == 0 ? CrudAction.Created : CrudAction.Updated, [command.Tag]),
+                (command) => new TagsChanged(eventFactoryCallCount++ == 0 ? CrudAction.Created : CrudAction.Updated, [command.Tag]) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             await suiteConnectionService.UpsertTag(tag, Xunit.TestContext.Current.CancellationToken);
@@ -104,11 +104,11 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertTag, TagsChanged>(
-                (command) => new TagsChanged(command.CorrelationId, CrudAction.Created, [command.Tag]),
+                (command) => new TagsChanged(CrudAction.Created, [command.Tag]) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             uiMediator.Setup<DeleteTag, TagsChanged>(
-                (command) => new TagsChanged(command.CorrelationId, CrudAction.Deleted, [tagMap[command.TagId]]),
+                (command) => new TagsChanged(CrudAction.Deleted, [tagMap[command.TagId]]) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             await suiteConnectionService.UpsertTag(deleteTag, Xunit.TestContext.Current.CancellationToken);
@@ -142,11 +142,11 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertTag, TagsChanged>(
-                (command) => new TagsChanged(command.CorrelationId, CrudAction.Created, [command.Tag]),
+                (command) => new TagsChanged(CrudAction.Created, [command.Tag]) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             uiMediator.Setup<DeleteTag, TagsChanged>(
-                (command) => new TagsChanged(command.CorrelationId, CrudAction.Deleted, [tagMap[command.TagId]]),
+                (command) => new TagsChanged(CrudAction.Deleted, [tagMap[command.TagId]]) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             await suiteConnectionService.UpsertTag(protectedTag, Xunit.TestContext.Current.CancellationToken);
@@ -285,7 +285,7 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertConnection, ConnectionChanged>(
-                (command) => new ConnectionChanged(command.CorrelationId, CrudAction.Created, command.Connection, [.. command.Connection.Tags], []),
+                (command) => new ConnectionChanged(CrudAction.Created, command.Connection, [.. command.Connection.Tags], []) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             // Act
@@ -310,7 +310,7 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertConnection, ConnectionChanged>(
-                (command) => new ConnectionChanged(command.CorrelationId, CrudAction.Updated, command.Connection, [], []),
+                (command) => new ConnectionChanged(CrudAction.Updated, command.Connection, [], []) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             var databaseConnection = ConnectionFactory.SQLiteConnection;
@@ -338,7 +338,7 @@ public class SuiteConnectionServiceTests
             var unknownCorrelationId = Guid.NewGuid(); // unknown correlation-id causes timeout
 
             uiMediator.Setup<UpsertConnection, ConnectionChanged>(
-                (command) => new ConnectionChanged(unknownCorrelationId, CrudAction.Updated, command.Connection, [], []),
+                (command) => new ConnectionChanged(CrudAction.Updated, command.Connection, [], []) { CorrelationId = unknownCorrelationId },
                 () => suiteConnectionService);
 
             // Act
@@ -369,11 +369,11 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.Initialize(Xunit.TestContext.Current.CancellationToken);
 
             uiMediator.Setup<UpsertConnection, ConnectionChanged>(
-                    (command) => new ConnectionChanged(command.CorrelationId, CrudAction.Created, command.Connection, [.. command.Connection.Tags], []),
+                    (command) => new ConnectionChanged(CrudAction.Created, command.Connection, [.. command.Connection.Tags], []) { CorrelationId = command.CorrelationId },
                     () => suiteConnectionService);
 
             uiMediator.Setup<DeleteConnection, ConnectionChanged>(
-                (command) => new ConnectionChanged(command.CorrelationId, CrudAction.Deleted, connectionMap[command.ConnectionId], [], []),
+                (command) => new ConnectionChanged(CrudAction.Deleted, connectionMap[command.ConnectionId], [], []) { CorrelationId = command.CorrelationId },
                 () => suiteConnectionService);
 
             await suiteConnectionService.UpsertConnection(connection, Xunit.TestContext.Current.CancellationToken);
@@ -432,7 +432,7 @@ public class SuiteConnectionServiceTests
                             var correlationId = command.CorrelationId;
                             var connection = command.Connection;
 
-                            var message = new ConnectionChanged(correlationId, CrudAction.Updated, connection, [], []);
+                            var message = new ConnectionChanged(CrudAction.Updated, connection, [], []) { CorrelationId = correlationId };
                             var context = new ClientContext<ConnectionChanged>(message, Guid.NewGuid());
 
                             await connectionService.Initialize(ct);
@@ -478,7 +478,7 @@ public class SuiteConnectionServiceTests
                             var correlationId = Guid.NewGuid(); // unknown correlation-id causes timeout
                             var connection = command.Connection;
 
-                            var message = new ConnectionChanged(correlationId, CrudAction.Updated, connection, [], []);
+                            var message = new ConnectionChanged(CrudAction.Updated, connection, [], []) { CorrelationId = correlationId };
                             var context = new ClientContext<ConnectionChanged>(message, Guid.NewGuid());
 
                             await connectionService.Initialize(ct);

@@ -1,5 +1,4 @@
-﻿using Core.Shared.UserManagement.Contracts;
-using Core.Shared.UserManagement.Events;
+using Core.Shared.UserManagement.Contracts;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Sdk.Messaging;
@@ -8,43 +7,68 @@ using Sdk.UserManagement.Events;
 
 namespace Core.OS.UserManagement.Consumers;
 
-public sealed class DeleteRoleConsumer(RoleManager<SuiteRole> roleManager, ILogger<DeleteRoleConsumer> logger) : IConsumer<DeleteRole>
+public sealed partial class DeleteRoleConsumer(RoleManager<SuiteRole> roleManager, ILogger<DeleteRoleConsumer> logger) : IConsumer<DeleteRole>
 {
     public async Task Consume(ConsumeContext<DeleteRole> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
-
-        logger.LogInformation("Consuming {Command} with CorrelationId '{Id}'", nameof(DeleteRole), correlationId);
-
-        var role = await roleManager.FindByNameAsync(context.Message.Role.Name);
-        if (role is null)
-        {
-            await context.Publish(new RoleErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.DeleteFailedNotFound,
-                    $"Could not delete role '{context.Message.Role.Name}'. No role was found with that name"),
-                context.Message.Role));
-            return;
-        }
-
-        if (role.Managed is true)
-        {
-            await context.Publish(new RoleErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.DeleteFailed,
-                    $"Delete role '{context.Message.Role.Name}' cancelled. Default roles can't be deleted"),
-                context.Message.Role));
-            return;
-        }
+        var correlationId = context.Message.CorrelationId;
 
         try
         {
+            var role = await roleManager.FindByNameAsync(context.Message.Role.Name);
+            if (role is null)
+            {
+                var errorInfo = new ErrorInfo(RoleErrorCodes.DeleteFailedNotFound,
+                        $"Could not delete role '{context.Message.Role.Name}'. No role was found with that name");
+                var errorResponse = new RoleDeletedEvent(context.Message.Role)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = errorInfo
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
+                return;
+            }
+
+            if (role.Managed is true)
+            {
+                var errorInfo = new ErrorInfo(RoleErrorCodes.DeleteFailed,
+                        $"Delete role '{context.Message.Role.Name}' cancelled. Default roles can't be deleted");
+                var errorResponse = new RoleDeletedEvent(context.Message.Role)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = errorInfo
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
+                return;
+            }
+
             await roleManager.DeleteAsync(role);
+
+            var response = new RoleDeletedEvent(context.Message.Role)
+            {
+                CorrelationId = correlationId
+            };
+
+            await context.Publish(response, context.CancellationToken);
         }
         catch (Exception ex)
         {
-            await context.Publish(new RoleErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.DeleteFailed,
-                    $"Could not delete role '{context.Message.Role.Name}'. {ex.Message}."),
-                context.Message.Role));
-            return;
-        }
+            LogError(logger, ex, context.Message.Role.Name, correlationId);
 
-        await context.Publish(new RoleDeletedEvent(correlationId, context.Message.Role));
+            var errorInfo = new ErrorInfo(RoleErrorCodes.CreateFailed,
+                        $"Could not delete role '{context.Message.Role.Name}'. {ex.Message}.");
+            var errorResponse = new RoleDeletedEvent(context.Message.Role)
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = errorInfo
+            };
+
+            await context.Publish(errorResponse, context.CancellationToken);
+        }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete role '{name}' correlated by '{correlationId}'.")]
+    private static partial void LogError(ILogger<DeleteRoleConsumer> logger, Exception ex, string name, Guid correlationId);
 }

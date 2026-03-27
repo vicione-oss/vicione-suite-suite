@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement.Extensions;
+using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
 using HostManagement.Shared.Communication.Enums;
@@ -33,7 +33,7 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
             var result = await pipeClient.SetSystemConfiguration(context.Message.SystemConfiguration, context.CancellationToken);
             if (result?.Status == OperationStatus.Success)
             {
-                await context.Publish(new SystemConfigurationChanged(correlationId), context.CancellationToken);
+                await context.Publish(new SystemConfigurationChanged { CorrelationId = correlationId }, context.CancellationToken);
 
                 if (EvaluateRequireSystemRestart(context.Message.SystemConfiguration, previousConfig))
                 {

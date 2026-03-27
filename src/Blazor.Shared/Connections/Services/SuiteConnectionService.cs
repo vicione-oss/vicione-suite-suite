@@ -13,7 +13,6 @@ namespace Blazor.Shared.Connections.Services;
 internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuiteConnectionServiceResult>,
     ISuiteConnectionService,
     IEventConsumer<ConnectionChanged>,
-    IEventConsumer<ConnectionErrorOccured>,
     IEventConsumer<TagsChanged>
 {
     private bool _initialized;
@@ -27,7 +26,6 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
     public SuiteConnectionService(IUiMediator mediator) : base(mediator)
     {
         Register<ConnectionChanged>();
-        Register<ConnectionErrorOccured>();
         Register<TagsChanged>();
     }
 
@@ -92,45 +90,17 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
         if (!_initialized)
             return;
 
+        if (context.Message.ErrorInfo is not null)
+        {
+            CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return;
+        }
+
         var somethingChanged = false;
-        var connection = context.Message.Connection;
 
         try
         {
-            switch (context.Message.Action)
-            {
-                case CrudAction.Created:
-                    foreach (var tag in context.Message.AddedTags)
-                        somethingChanged |= _tags.Add(tag);
-
-                    if (!_connections.Any(c => c.Id == connection.Id))
-                    {
-                        _connections.Add(connection);
-
-                        somethingChanged = true;
-                    }
-
-                    break;
-
-                case CrudAction.Updated:
-                    foreach (var tag in context.Message.AddedTags)
-                        somethingChanged |= _tags.Add(tag);
-
-                    var existingConnection = _connections.FirstOrDefault(c => c.Id == connection.Id);
-                    if (existingConnection is not null)
-                    {
-                        existingConnection.Assign(connection);
-
-                        somethingChanged = true;
-                    }
-
-                    break;
-
-                case CrudAction.Deleted:
-                    somethingChanged = _connections.RemoveAll(c => c.Id == connection.Id) > 0;
-
-                    break;
-            }
+            somethingChanged = ApplyConnectionChange(context.Message);
         }
         finally
         {
@@ -141,16 +111,52 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
             await NotifyConnectionStateChanged();
     }
 
+    private bool ApplyConnectionChange(ConnectionChanged message)
+    {
+        var somethingChanged = false;
+
+        switch (message.Action)
+        {
+            case CrudAction.Created:
+                foreach (var tag in message.AddedTags)
+                    somethingChanged |= _tags.Add(tag);
+
+                if (!_connections.Any(c => c.Id == message.Connection.Id))
+                {
+                    _connections.Add(message.Connection);
+
+                    somethingChanged = true;
+                }
+
+                break;
+
+            case CrudAction.Updated:
+                foreach (var tag in message.AddedTags)
+                    somethingChanged |= _tags.Add(tag);
+
+                var existingConnection = _connections.FirstOrDefault(c => c.Id == message.Connection.Id);
+                if (existingConnection is not null)
+                {
+                    existingConnection.Assign(message.Connection);
+
+                    somethingChanged = true;
+                }
+
+                break;
+
+            case CrudAction.Deleted:
+                somethingChanged = _connections.RemoveAll(c => c.Id == message.Connection.Id) > 0;
+
+                break;
+        }
+
+        return somethingChanged;
+    }
+
     private async Task NotifyConnectionStateChanged()
     {
         if (ConnectionStateChanged is not null)
             await ConnectionStateChanged.Invoke(_connections);
-    }
-
-    public Task Consume(ClientContext<ConnectionErrorOccured> context, CancellationToken cancellationToken = default)
-    {
-        CompleteWithError(context.Message.CorrelationId, context.Message.Error);
-        return Task.CompletedTask;
     }
 
     public async Task<ISuiteConnectionServiceResult> UpsertTag(Tag tag, CancellationToken cancellationToken = default)
@@ -175,45 +181,17 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
         if (!_initialized)
             return Task.CompletedTask;
 
+        if (context.Message.ErrorInfo is not null)
+        {
+            CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
+            return Task.CompletedTask;
+        }
+
         var connectionChanged = false;
 
         try
         {
-            switch (context.Message.Action)
-            {
-                case CrudAction.Created:
-                    foreach (var tag in context.Message.Tags)
-                        _tags.Add(tag);
-
-                    break;
-
-                case CrudAction.Updated:
-                    foreach (var tag in context.Message.Tags)
-                    {
-                        if (_tags.TryGetValue(tag, out var existing))
-                            existing.Text = tag.Text;
-                        foreach (var connection in _connections.Where(connection => connection.Tags.Contains(tag)))
-                        {
-                            connection.Tags.First(t => t.Id == tag.Id).Text = tag.Text;
-                            connectionChanged = true;
-                        }
-                    }
-
-                    break;
-
-                case CrudAction.Deleted:
-                    foreach (var tag in context.Message.Tags)
-                    {
-                        _tags.Remove(tag);
-                        foreach (var connection in _connections.Where(connection => connection.Tags.Contains(tag)))
-                        {
-                            connection.Tags.Remove(tag);
-                            connectionChanged = true;
-                        }
-                    }
-
-                    break;
-            }
+            connectionChanged = ApplyTagChange(context.Message);
         }
         finally
         {
@@ -221,6 +199,49 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
         }
 
         return connectionChanged ? NotifyConnectionStateChanged() : Task.CompletedTask;
+    }
+
+    private bool ApplyTagChange(TagsChanged message)
+    {
+        var connectionChanged = false;
+        switch (message.Action)
+        {
+            case CrudAction.Created:
+                foreach (var tag in message.Tags)
+                    _tags.Add(tag);
+
+                break;
+
+            case CrudAction.Updated:
+                foreach (var tag in message.Tags)
+                {
+                    if (_tags.TryGetValue(tag, out var existing))
+                        existing.Text = tag.Text;
+
+                    foreach (var connection in _connections.Where(connection => connection.Tags.Contains(tag)))
+                    {
+                        connection.Tags.First(t => t.Id == tag.Id).Text = tag.Text;
+                        connectionChanged = true;
+                    }
+                }
+
+                break;
+
+            case CrudAction.Deleted:
+                foreach (var tag in message.Tags)
+                {
+                    _tags.Remove(tag);
+
+                    foreach (var connection in _connections.Where(connection => connection.Tags.Contains(tag)))
+                    {
+                        connection.Tags.Remove(tag);
+                        connectionChanged = true;
+                    }
+                }
+
+                break;
+        }
+        return connectionChanged;
     }
 
     protected override ISuiteConnectionServiceResult CreateSuccessResult()

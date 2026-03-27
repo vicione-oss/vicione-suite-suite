@@ -1,4 +1,4 @@
-﻿using Core.OS.UserManagement.Extensions;
+using Core.OS.UserManagement.Extensions;
 using Core.Shared.UserManagement.Commands;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
@@ -8,32 +8,68 @@ using Sdk.Messaging;
 
 namespace Core.OS.UserManagement.Consumers;
 
-public sealed class DeleteUserConsumer(UserManager<SuiteUser> userManager, ILogger<DeleteUserConsumer> logger) : IConsumer<DeleteUser>
+public sealed partial class DeleteUserConsumer(UserManager<SuiteUser> userManager, ILogger<DeleteUserConsumer> logger) : IConsumer<DeleteUser>
 {
     public async Task Consume(ConsumeContext<DeleteUser> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
+        var correlationId = context.Message.CorrelationId;
 
-        logger.LogInformation("Consuming {Command} with CorrelationId '{Id}'", nameof(DeleteUser), correlationId);
-
-        var user = await userManager.FindByNameAsync(context.Message.UserProfile.UserName.Value);
-        if (user is null)
+        try
         {
-            await context.Publish(new UserErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.DeleteFailedNotFound,
-                    $"Could not delete user '{context.Message.UserProfile.UserName}'. No user was found with that name"),
-                context.Message.UserProfile.UserName));
-            return;
-        }
+            var user = await userManager.FindByNameAsync(context.Message.UserProfile.UserName.Value);
+            if (user is null)
+            {
+                var errorInfo = new ErrorInfo(UserErrorCodes.DeleteFailedNotFound,
+                             $"Could not delete user '{context.Message.UserProfile.UserName}'. No user was found with that name");
+                var errorResponse = new UserDeletedEvent(context.Message.UserProfile)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = errorInfo
+                };
 
-        if (await userManager.IsLastSystemAdministrator(user))
+                await context.Publish(errorResponse, context.CancellationToken);
+                return;
+            }
+
+            if (await userManager.IsLastSystemAdministrator(user))
+            {
+                var errorInfo = new ErrorInfo(UserErrorCodes.SystemAdminLockout,
+                             $"Delete user '{context.Message.UserProfile.UserName}' cancelled. Last system administrator can't be deleted");
+                var errorResponse = new UserDeletedEvent(context.Message.UserProfile)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = errorInfo
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
+                return;
+            }
+
+            await userManager.DeleteAsync(user);
+
+            var response = new UserDeletedEvent(context.Message.UserProfile)
+            {
+                CorrelationId = correlationId
+            };
+
+            await context.Publish(response, context.CancellationToken);
+        }
+        catch (Exception ex)
         {
-            await context.Publish(new UserErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.SystemAdminLockout,
-                    $"Delete user '{context.Message.UserProfile.UserName}' cancelled. Last system administrator can't be deleted"),
-                context.Message.UserProfile.UserName));
-            return;
-        }
+            LogError(logger, ex, context.Message.UserProfile.UserName.Value, correlationId);
 
-        await userManager.DeleteAsync(user);
-        await context.Publish(new UserDeletedEvent(correlationId, context.Message.UserProfile));
+            var errorInfo = new ErrorInfo(UserErrorCodes.DeleteFailed,
+                         $"Could not delete user '{context.Message.UserProfile.UserName}'. {ex.Message}.");
+            var errorResponse = new UserDeletedEvent(context.Message.UserProfile)
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = errorInfo
+            };
+
+            await context.Publish(errorResponse, context.CancellationToken);
+        }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete user '{name}' correlated by '{correlationId}'.")]
+    private static partial void LogError(ILogger<DeleteUserConsumer> logger, Exception ex, string name, Guid correlationId);
 }

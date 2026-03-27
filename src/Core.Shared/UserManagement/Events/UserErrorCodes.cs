@@ -1,11 +1,6 @@
-﻿using Core.Shared.UserManagement.Contracts;
-using MassTransit;
-using Sdk.Messaging;
-
 namespace Core.Shared.UserManagement.Events;
 
-[ForwardToUI]
-public sealed record UserErrorEvent(Guid CorrelationId, ErrorInfo ErrorInfo, UserName Username) : IEvent, CorrelatedBy<Guid>
+public static class UserErrorCodes
 {
     public const int UnknownError = 0;
     public const int NotFound = 1;

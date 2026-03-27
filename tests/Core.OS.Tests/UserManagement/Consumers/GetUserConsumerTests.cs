@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules;
+using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
 using Core.OS.UserManagement.Extensions;
@@ -85,7 +85,7 @@ public class GetUserConsumerTests
         // Act/Assert
         var response = await tester.TestRequest<GetUsersResponse, GetUsers>(request);
         response.RequestError.Should().NotBeNull();
-        response.RequestError!.ErrorCode.Should().Be(UserErrorEvent.NotFound);
+        response.RequestError!.ErrorCode.Should().Be(UserErrorCodes.NotFound);
         response.Users.Should().BeEmpty();
     }
 }

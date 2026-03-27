@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement.Extensions;
+using Core.OS.HostManagement.Extensions;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
@@ -16,9 +16,7 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
 {
     public async Task Consume(ConsumeContext<UpdateSystem> context)
     {
-        var correlationId = context.CorrelationId ?? context.Message.CorrelationId;
-
-        LogConsumingCommand(logger, nameof(UpdateSystem), correlationId);
+        var correlationId = context.Message.CorrelationId;
 
         try
         {
@@ -27,24 +25,37 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
             var result = await pipeClient.UpdateSystem(context.Message.FilePath, context.CancellationToken);
             if (result is not null && result.Status != OperationStatus.Error)
             {
-                await context.Publish(new UpdateSystemStarted(correlationId, result.Message, result.Status == OperationStatus.Warning),
-                    context.CancellationToken);
+                var startedEvent = new UpdateSystemStarted(result.Message, result.Status == OperationStatus.Warning)
+                {
+                    CorrelationId = correlationId
+                };
+
+                await context.Publish(startedEvent, context.CancellationToken);
             }
             else
             {
-                await context.Publish(new UpdateSystemError(correlationId, new ErrorInfo((int?)result?.Status ?? UpdateSystemError.UnknownError, result?.Message)),
-                    context.CancellationToken);
+                var errorResponse = new UpdateSystemStarted(null, false)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = new ErrorInfo((int?)result?.Status ?? UpdateSystemStarted.UnknownError, result?.Message)
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
             }
         }
         catch (Exception e)
         {
-            await context.Publish(new UpdateSystemError(correlationId, new ErrorInfo(ControlServiceError.UnknownError, e.Message)), context.CancellationToken);
             LogUpdateSystemError(logger, e, context.Message.FilePath);
+
+            var errorResponse = new UpdateSystemStarted(null, false)
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = new ErrorInfo(ControlServiceErrorCodes.UnknownError, e.Message)
+            };
+
+            await context.Publish(errorResponse, context.CancellationToken);
         }
     }
-
-    [LoggerMessage(Level = LogLevel.Information, Message = "Consuming {Command} with CorrelationId '{Id}'")]
-    private static partial void LogConsumingCommand(ILogger logger, string Command, object? Id);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while initiating the update from '{FilePath}'")]
     private static partial void LogUpdateSystemError(ILogger logger, Exception exception, string FilePath);

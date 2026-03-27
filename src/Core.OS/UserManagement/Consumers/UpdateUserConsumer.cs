@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared;
 using Core.Shared.UserManagement.Commands;
@@ -13,46 +13,78 @@ using Sdk.Modules;
 
 namespace Core.OS.UserManagement.Consumers;
 
-public sealed class UpdateUserConsumer(UserManager<SuiteUser> userManager, RoleManager<SuiteRole> roleManager,
+public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManager, RoleManager<SuiteRole> roleManager,
     IEqualityComparer<Claim> claimEqualityComparer, ILogger<UpdateUserConsumer> logger)
         : IConsumer<UpdateUser>
 {
     public async Task Consume(ConsumeContext<UpdateUser> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
-
-        logger.LogInformation("Consuming {Command} with CorrelationId '{Id}'", nameof(UpdateUser), correlationId);
-
+        var correlationId = context.Message.CorrelationId;
         var desiredProfile = context.Message.UserProfile;
 
-        var existingSuiteUser = await userManager.FindByNameAsync(desiredProfile.UserName.Value);
-        if (existingSuiteUser is null)
+        try
         {
-            await context.Publish(new UserErrorEvent(correlationId, new ErrorInfo(UserErrorEvent.UpdateFailedNotFound,
-                    $"Could not update user '{desiredProfile.UserName}'. No user was found with that name"),
-                desiredProfile.UserName));
-            return;
+            var existingSuiteUser = await userManager.FindByNameAsync(desiredProfile.UserName.Value);
+            if (existingSuiteUser is null)
+            {
+                var existsError = new ErrorInfo(UserErrorCodes.UpdateFailedNotFound,
+                                 $"Could not update user '{desiredProfile.UserName}'. No user was found with that name");
+                var errorResponse = new UserUpdatedEvent(desiredProfile, desiredProfile)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = existsError
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
+                return;
+            }
+
+            var profileBefore = await existingSuiteUser.CreateUserProfile(userManager);
+
+            existingSuiteUser.AssignOptionalData(desiredProfile);
+            if (existingSuiteUser.Email != desiredProfile.Email)
+                existingSuiteUser.Email = desiredProfile.Email;
+
+            await userManager.UpdateAsync(existingSuiteUser);
+
+            var errorInfo = await AssignNewPassword(desiredProfile, existingSuiteUser, context.Message.RequestingUserName);
+            if (errorInfo is not null)
+            {
+                var errorResponse = new UserUpdatedEvent(desiredProfile, profileBefore)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = errorInfo
+                };
+
+                await context.Publish(errorResponse, context.CancellationToken);
+                return;
+            }
+
+
+            await AssignRoles(desiredProfile, existingSuiteUser);
+            await AssignClaims(desiredProfile, existingSuiteUser);
+
+            var response = new UserUpdatedEvent(desiredProfile, profileBefore)
+            {
+                CorrelationId = correlationId
+            };
+
+            await context.Publish(response, context.CancellationToken);
         }
-
-        var profileBefore = await existingSuiteUser.CreateUserProfile(userManager);
-
-        existingSuiteUser.AssignOptionalData(desiredProfile);
-        if (existingSuiteUser.Email != desiredProfile.Email)
-            existingSuiteUser.Email = desiredProfile.Email;
-
-        await userManager.UpdateAsync(existingSuiteUser);
-
-        var errorInfo = await AssignNewPassword(desiredProfile, existingSuiteUser, context.Message.RequestingUserName);
-        if (errorInfo is not null)
+        catch (Exception ex)
         {
-            await context.Publish(new UserErrorEvent(correlationId, errorInfo, desiredProfile.UserName));
-            return;
+            LogError(logger, ex, context.Message.UserProfile.UserName.Value, correlationId);
+
+            var errorInfo = new ErrorInfo(UserErrorCodes.UpdateFailed,
+                         $"Could not update user '{context.Message.UserProfile.UserName}'. {ex.Message}.");
+            var errorResponse = new UserUpdatedEvent(desiredProfile, desiredProfile)
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = errorInfo
+            };
+
+            await context.Publish(errorResponse, context.CancellationToken);
         }
-
-        await AssignRoles(desiredProfile, existingSuiteUser);
-        await AssignClaims(desiredProfile, existingSuiteUser);
-
-        await context.Publish(new UserUpdatedEvent(correlationId, desiredProfile, profileBefore));
     }
 
     private async Task<ErrorInfo?> AssignNewPassword(UserProfile desiredProfile, SuiteUser existingSuiteUser, string requestingUserName)
@@ -64,7 +96,7 @@ public sealed class UpdateUserConsumer(UserManager<SuiteUser> userManager, RoleM
         if (desiredProfile.CurrentPassword is not null)
         {
             if (string.Equals(desiredProfile.CurrentPassword, desiredProfile.NewPassword, StringComparison.Ordinal))
-                return new ErrorInfo(UserErrorEvent.UpdateFailed, "Your new password cannot be the same as your current password.");
+                return new ErrorInfo(UserErrorCodes.UpdateFailed, "Your new password cannot be the same as your current password.");
 
             result = await userManager.ChangePasswordAsync(existingSuiteUser,
                 desiredProfile.CurrentPassword,
@@ -72,7 +104,7 @@ public sealed class UpdateUserConsumer(UserManager<SuiteUser> userManager, RoleM
         }
         else if (existingSuiteUser.UserName == requestingUserName)
         {
-            return new ErrorInfo(UserErrorEvent.UpdateFailed, "Current password must be provided.");
+            return new ErrorInfo(UserErrorCodes.UpdateFailed, "Current password must be provided.");
         }
         else
         {
@@ -86,16 +118,16 @@ public sealed class UpdateUserConsumer(UserManager<SuiteUser> userManager, RoleM
                 sysadminClaim.Type,
                 sysadminClaim.Value);
             if (!hasClaim)
-                return new ErrorInfo(UserErrorEvent.UpdateFailed, "Only administrators may change another user's password.");
-            
+                return new ErrorInfo(UserErrorCodes.UpdateFailed, "Only administrators may change another user's password.");
+
             result = await userManager.RemovePasswordAsync(existingSuiteUser);
-            if(result.Succeeded)
+            if (result.Succeeded)
                 result = await userManager.AddPasswordAsync(existingSuiteUser, desiredProfile.NewPassword);
         }
 
         if (result.Succeeded)
             return null;
-        return new ErrorInfo(UserErrorEvent.UpdateFailedPassword,
+        return new ErrorInfo(UserErrorCodes.UpdateFailedPassword,
                     $"Could not update user '{desiredProfile.UserName}'. Error: {string.Join(Environment.NewLine, result.Errors.Select(e => e.Description))}");
     }
 
@@ -150,8 +182,8 @@ public sealed class UpdateUserConsumer(UserManager<SuiteUser> userManager, RoleM
             }
         }
     }
-    
-    private  static async Task<bool> HasClaimIncludingRolesAsync(
+
+    private static async Task<bool> HasClaimIncludingRolesAsync(
         UserManager<SuiteUser> userManager,
         RoleManager<SuiteRole> roleManager,
         SuiteUser user,
@@ -176,4 +208,7 @@ public sealed class UpdateUserConsumer(UserManager<SuiteUser> userManager, RoleM
 
         return false;
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update user '{name}' correlated by '{correlationId}'.")]
+    private static partial void LogError(ILogger<UpdateUserConsumer> logger, Exception ex, string name, Guid correlationId);
 }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using AwesomeAssertions;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
@@ -96,19 +96,20 @@ public sealed class UpdateSystemConsumerTests
         await tester.TestInstanceDependentCommand<UpdateSystem, UpdateSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<UpdateSystemError>(TestContext.Current.CancellationToken)).Should().BeTrue();
+        (await tester.Harness.Published.Any<UpdateSystemStarted>(r =>
+            r.Context.Message.ErrorInfo != null, TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     private void SetupUpdateSystemRequestSuccess(UpdateSystem command)
     {
-        var result = new UpdateSystemResult
+        var result = new SystemControlResult
         {
             Status = OperationStatus.Success,
             Message = "Message"
         };
         _pipeClient.SendRequest(Topics.UpdateSystem,
                 command.FilePath,
-                Arg.Any<CancellationToken>()).Returns(JsonSerializer.Serialize<UpdateSystemResult>(result, SourceGenerationContext.Default.UpdateSystemResult));
+                Arg.Any<CancellationToken>()).Returns(JsonSerializer.Serialize<SystemControlResult>(result, SourceGenerationContext.Default.SystemControlResult));
 
     }
 }

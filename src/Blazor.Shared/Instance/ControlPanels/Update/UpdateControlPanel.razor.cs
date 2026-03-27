@@ -29,8 +29,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Update;
 public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlPanelState>,
     IEventConsumer<RestoreBackupPrepared>,
     IEventConsumer<BackupFinished>,
-    IEventConsumer<ControlSystemCompleted>,
-    IEventConsumer<ControlSystemError>
+    IEventConsumer<ControlSystemCompleted>
 {
     private readonly string _closeIconCssClass = MonochromeIconName.CloseMedium.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
     private readonly string _exportIconCssClasses = MonochromeIconName.Export.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
@@ -77,7 +76,6 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
         _subscriptionHandle.Add(Mediator.Register<BackupFinished>(this));
 
         _subscriptionHandle.Add(Mediator.Register<ControlSystemCompleted>(this));
-        _subscriptionHandle.Add(Mediator.Register<ControlSystemError>(this));
 
         base.OnInitialized();
     }
@@ -207,6 +205,18 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
 
     public async Task Consume(ClientContext<ControlSystemCompleted> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+        {
+            if (context.Message.CorrelationId != _resetCorrelationId)
+                return;
+
+            _errorMessage = context.Message.ErrorInfo.Message;
+            _isResetInProgress = false;
+            _resetCorrelationId = null;
+            BannerService.ShowMessageBanner(MessageType.Information, _errorMessage);
+            return;
+        }
+
         // we don't correlate it because it's relevant for all users
         _errorMessage = null;
         _isResetInProgress = false;
@@ -214,19 +224,6 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
 
         // No delay here because if we receive it restart will come immediately so user can't probably read the banner
         await NavigationManager.Logout();
-    }
-
-    public Task Consume(ClientContext<ControlSystemError> context, CancellationToken cancellationToken)
-    {
-        // this is correlated because only the user that triggered the restore needs to know about occured error
-        if (context.Message.CorrelationId != _resetCorrelationId)
-            return Task.CompletedTask;
-
-        _errorMessage = context.Message.Error.Message;
-        _isResetInProgress = false;
-        _resetCorrelationId = null;
-        BannerService.ShowMessageBanner(MessageType.Information, _errorMessage);
-        return Task.CompletedTask;
     }
 
     public async Task Consume(ClientContext<BackupFinished> context, CancellationToken cancellationToken)

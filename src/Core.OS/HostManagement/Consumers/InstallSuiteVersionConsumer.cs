@@ -1,15 +1,12 @@
-﻿using System.Text.Json;
 using Core.Module;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Modules;
 using Core.Shared.HostManagement;
-using HostManagement.Shared.Communication;
+using Core.Shared.HostManagement.Events;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
 using Sdk.Backend.Modules;
 using Sdk.Messaging;
-using CommunicationJsonContext = HostManagement.Shared.Communication.Contracts.SourceGenerationContext;
-using SharedJsonContext = HostManagement.Shared.Contracts.SourceGenerationContext;
 using SystemContracts = HostManagement.Shared.Contracts.System;
 
 namespace Core.OS.HostManagement.Consumers;
@@ -37,23 +34,36 @@ public sealed partial class InstallSuiteVersionConsumer(IPipeClient pipeClient,
                 SignatureFilePath = suitePackage.SignatureFilePath,
             };
 
-            var result = await pipeClient.InstallSignedDebianPackage(signedPackage, context.CancellationToken);            
+            var result = await pipeClient.InstallSignedDebianPackage(signedPackage, context.CancellationToken);
             if (result is not null && result.Status != OperationStatus.Error)
             {
-                await context.Publish(new InstallSuiteVersionStarted(correlationId, result.Message, result.Status == OperationStatus.Warning),
-                    context.CancellationToken);
+                var response = new InstallSuiteVersionStarted(result.Message, result.Status == OperationStatus.Warning)
+                {
+                    CorrelationId = correlationId
+                };
+
+                await context.Publish(response, context.CancellationToken);
             }
             else
             {
-                await context.Publish(new InstallSuiteVersionError(correlationId, new ErrorInfo((int?)result?.Status ?? -1, result?.Message)),
-                    context.CancellationToken);
+                var response = new InstallSuiteVersionStarted(result?.Message, result?.Status == OperationStatus.Warning)
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = new ErrorInfo((int?)result?.Status ?? -1, result?.Message)
+                };
+                await context.Publish(response, context.CancellationToken);
             }
         }
         catch (Exception ex)
         {
             LogInstallSuiteVersionFailed(logger, ex, context.Message.PackageName, context.Message.SignatureName);
 
-            await context.Publish(new InstallSuiteVersionError(correlationId, new ErrorInfo(-1, ex.Message)), context.CancellationToken);
+            var response = new InstallSuiteVersionStarted(null, false)
+            {
+                CorrelationId = correlationId,
+                ErrorInfo = new ErrorInfo(-1, ex.Message)
+            };
+            await context.Publish(response, context.CancellationToken);
         }
     }
 

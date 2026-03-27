@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
@@ -65,7 +65,7 @@ public class CreateUserConsumerTests
 
         // Act/Assert
         var response = await tester.TestCommand<CreateUser, CreateUserConsumer, UserCreatedEvent>(command);
-        response.Should().BeEquivalentTo(new UserCreatedEvent(command.CorrelationId, userProfile));
+        response.Should().BeEquivalentTo(new UserCreatedEvent(userProfile) { CorrelationId = command.CorrelationId });
     }
 
     [Fact]
@@ -79,10 +79,10 @@ public class CreateUserConsumerTests
         var command = new CreateUser(user);
 
         // Act/Assert
-        var response = await tester.TestCommand<CreateUser, CreateUserConsumer, UserErrorEvent>(command);
+        var response = await tester.TestCommand<CreateUser, CreateUserConsumer, UserCreatedEvent>(command);
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.CreateFailedAlreadyExists);
-        response.Username.Should().Be(user.UserName);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.CreateFailedAlreadyExists);
+        response.UserProfile.UserName.Should().Be(user.UserName);
     }
 
     [Fact]
@@ -102,10 +102,10 @@ public class CreateUserConsumerTests
         var command = new CreateUser(user);
 
         // Act/Assert
-        var response = await tester.TestCommand<CreateUser, CreateUserConsumer, UserErrorEvent>(command);
+        var response = await tester.TestCommand<CreateUser, CreateUserConsumer, UserCreatedEvent>(command);
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.CreateFailedMissingPw);
-        response.Username.Should().Be(user.UserName);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.CreateFailedMissingPw);
+        response.UserProfile.UserName.Should().Be(user.UserName);
     }
 
     [Fact]
@@ -127,9 +127,9 @@ public class CreateUserConsumerTests
         var command = new CreateUser(user);
 
         // Act/Assert
-        var response = await tester.TestCommand<CreateUser, CreateUserConsumer, UserErrorEvent>(command);
+        var response = await tester.TestCommand<CreateUser, CreateUserConsumer, UserCreatedEvent>(command);
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.CreateFailed);
-        response.Username.Should().Be(user.UserName);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.CreateFailed);
+        response.UserProfile.UserName.Should().Be(user.UserName);
     }
 }

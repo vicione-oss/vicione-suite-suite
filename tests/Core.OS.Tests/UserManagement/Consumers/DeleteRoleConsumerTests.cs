@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
@@ -78,11 +78,11 @@ public class DeleteRoleConsumerTests
         var command = new DeleteRole(role);
 
         // Act
-        var response = await tester.TestCommand<DeleteRole, DeleteRoleConsumer, RoleErrorEvent>(command);
+        var response = await tester.TestCommand<DeleteRole, DeleteRoleConsumer, RoleDeletedEvent>(command);
 
         // Assert
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.DeleteFailedNotFound);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.DeleteFailedNotFound);
         response.Role.Name.Should().Be(role.Name);
     }
 
@@ -97,11 +97,11 @@ public class DeleteRoleConsumerTests
         var command = new DeleteRole(role);
 
         // Act
-        var response = await tester.TestCommand<DeleteRole, DeleteRoleConsumer, RoleErrorEvent>(command);
+        var response = await tester.TestCommand<DeleteRole, DeleteRoleConsumer, RoleDeletedEvent>(command);
 
         // Assert
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorEvent.DeleteFailed);
+        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.DeleteFailed);
         response.Role.Name.Should().Be(role.Name);
     }
 }

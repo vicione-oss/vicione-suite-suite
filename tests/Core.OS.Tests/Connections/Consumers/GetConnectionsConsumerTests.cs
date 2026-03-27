@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Consumers;
+using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using Core.OS.Tests.Extensions;
 using AwesomeAssertions;
@@ -153,6 +153,6 @@ public sealed class GetConnectionsConsumerTests : TestWithDbContextSqlite<Connec
         var response = await tester.TestRequest<GetConnectionsResponse, GetConnections>(request);
 
         // Assert
-        response.Should().BeEquivalentTo(new GetConnectionsResponse([], new(ConnectionErrorOccured.UnknownError, "test")));
+        response.Should().BeEquivalentTo(new GetConnectionsResponse([], new(ConnectionErrorCodes.UnknownError, "test")));
     }
 }

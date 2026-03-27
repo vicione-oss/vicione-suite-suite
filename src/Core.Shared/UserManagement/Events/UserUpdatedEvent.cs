@@ -1,9 +1,7 @@
-﻿using Core.Shared.UserManagement.Contracts;
-using MassTransit;
+using Core.Shared.UserManagement.Contracts;
 using Sdk.Messaging;
 
 namespace Core.Shared.UserManagement.Events;
 
 [ForwardToUI]
-public sealed record UserUpdatedEvent(Guid CorrelationId, UserProfile UserProfile, UserProfile UserProfileBefore)
-    : IEvent, CorrelatedBy<Guid>;
+public sealed record UserUpdatedEvent(UserProfile UserProfile, UserProfile UserProfileBefore) : ResponseEventBase;

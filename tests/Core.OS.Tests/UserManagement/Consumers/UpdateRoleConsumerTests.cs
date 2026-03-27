@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
@@ -79,11 +79,11 @@ public class UpdateRoleConsumerTests
         var command = new UpdateRole(role);
 
         // Act
-        var response = await tester.TestCommand<UpdateRole, UpdateRoleConsumer, RoleErrorEvent>(command);
+        var response = await tester.TestCommand<UpdateRole, UpdateRoleConsumer, RoleUpdatedEvent>(command);
 
         // Assert
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(RoleErrorEvent.UpdateFailed);
+        response.ErrorInfo.ErrorCode.Should().Be(RoleErrorCodes.UpdateFailed);
         response.Role.Name.Should().Be(SeedingExtensions.AdminRoleName);
     }
 
@@ -98,11 +98,11 @@ public class UpdateRoleConsumerTests
         var command = new UpdateRole(role);
 
         // Act
-        var response = await tester.TestCommand<UpdateRole, UpdateRoleConsumer, RoleErrorEvent>(command);
+        var response = await tester.TestCommand<UpdateRole, UpdateRoleConsumer, RoleUpdatedEvent>(command);
 
         // Assert
         response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(RoleErrorEvent.UpdateFailedNotFound);
+        response.ErrorInfo.ErrorCode.Should().Be(RoleErrorCodes.UpdateFailedNotFound);
         response.Role.Name.Should().Be(role.Name);
     }
 }

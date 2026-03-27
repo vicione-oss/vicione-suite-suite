@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
 using AwesomeAssertions;
@@ -107,7 +107,8 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemError>(TestContext.Current.CancellationToken)).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemCompleted>(r =>
+            r.Context.Message.ErrorInfo != null, TestContext.Current.CancellationToken)).Should().BeTrue();
         await _pipeClient.Received().SendRequest(Topics.ResetSystem, string.Empty, Arg.Any<CancellationToken>());
     }
 
@@ -140,7 +141,8 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemError>(TestContext.Current.CancellationToken)).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemCompleted>(r => r.Context.Message.ErrorInfo != null,
+            TestContext.Current.CancellationToken)).Should().BeTrue();
         await _pipeClient.Received().SendRequest(Topics.RestartSystem, string.Empty, Arg.Any<CancellationToken>());
     }
 
@@ -187,12 +189,13 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        (await tester.Harness.Published.Any<ControlSystemError>(TestContext.Current.CancellationToken)).Should().BeTrue();
+        (await tester.Harness.Published.Any<ControlSystemCompleted>(r =>
+            r.Context.Message.ErrorInfo != null, TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     private void SetupShutdownSystemRequestSuccess()
     {
-        var result = new ShutdownSystemResult
+        var result = new SystemControlResult
         {
             Status = OperationStatus.Success,
             Message = "Message"
@@ -200,7 +203,7 @@ public sealed class ControlSystemConsumerTests
 
         _pipeClient.SendRequest(Topics.ShutdownSystem,
                 string.Empty,
-                Arg.Any<CancellationToken>()).Returns(JsonSerializer.Serialize(result, SourceGenerationContext.Default.ShutdownSystemResult));
+                Arg.Any<CancellationToken>()).Returns(JsonSerializer.Serialize(result, SourceGenerationContext.Default.SystemControlResult));
 
     }
 }
