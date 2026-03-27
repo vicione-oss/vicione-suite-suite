@@ -58,7 +58,7 @@
     <PackageVersion Include="ViciOne.Suite.Sdk.Backend" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Client" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Deployment" Version="$(ViciOneSuiteSdkVersion)" />
-    <PackageVersion Include="ViciOne.SystemMonitoring" Version="1.0.0" />
+    <PackageVersion Include="ViciOne.SystemMonitoring" Version="1.0.1" />
     <PackageVersion Include="ViciOne.Ui.Design" Version="2.0.3" />
     <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="5.6.0" />
     <PackageVersion Include="ViciOne.Ui.Localization" Version="3.2.0" />

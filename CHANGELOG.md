@@ -58,7 +58,7 @@
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.7.0`
 - `ViciOne.Ui.Localization` package, update version to `3.2.0`
 - `ViciOne.Ui.Shared.Dx` packages, update to version `0.19.1`
-- `ViciOne.SystemMonitoring` packages, update to version `1.0.0`
+- `ViciOne.SystemMonitoring` packages, update to version `1.0.1`
 - `xunit` packages, update to version `xunit.v3 - 3.2.2`
 - `xunit.extensibility.core` packages, update to version `xunit.v3.extensibility.core - 3.2.2`
 
