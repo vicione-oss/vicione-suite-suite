@@ -22,7 +22,6 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using OpenTelemetry.Trace;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 
@@ -38,20 +37,6 @@ internal sealed class ApplicationWorker(
     {
         try
         {
-            /*
-             * This is only needed to ensure that the tracer provider is constructed before we are trying to use activities.
-             * OpenTelemetry itself registers a service and is only fully functional when its service is started.
-             * As we do the heavy lifting, in `StartingAsync`, before the services are started, even with this reference, tracing
-             * might not show up in jaeger. Starting in debug mode will most likely be enabling traces.
-             *
-             * Will be addressed in https://gitlab.com/vicione-oss/vicione/suite/suite/-/issues/2654
-             */
-            var tracerProvider = services.GetService<TracerProvider>();
-            if (tracerProvider is null)
-            {
-                logger.LogWarning("TracerProvider is not available, tracing will not work");
-            }
-
             logger.LogInformation("Starting application initialization");
 
             using var scope = services.CreateScope();

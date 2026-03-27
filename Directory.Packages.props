@@ -49,7 +49,6 @@
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
     <PackageVersion Include="Serilog.Sinks.Journal" Version="1.1.0" />
-    <PackageVersion Include="Serilog.Sinks.SyslogMessages" Version="4.1.0" />
     <PackageVersion Include="StronglyTypedId" Version="0.2.1" />
     <PackageVersion Include="System.IO.Abstractions" Version="22.1.0" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(DotNetVersion)" />

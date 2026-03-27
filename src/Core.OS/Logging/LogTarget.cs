@@ -4,6 +4,5 @@ public enum LogTarget
 {
     Console,
     LogFile,
-    Syslog,
     Journal
 }
