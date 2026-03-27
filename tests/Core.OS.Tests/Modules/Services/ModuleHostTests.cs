@@ -356,7 +356,8 @@ public class ModuleHostTests
             await using var serviceProvider = services.BuildServiceProvider();
 
             var testFolder = fileSystem.Path.GetDirectoryName(testAssembly.Location);
-            var resourceDirectory = fileSystem.Path.Combine(testFolder!, module.GetResourceDirectory(serviceProvider));
+            var resourceOptions = module.GetResourceOptions(serviceProvider)!;
+            var resourceDirectory = fileSystem.Path.Combine(testFolder!, resourceOptions.Directory);
             const string image = "image.png";
             const string markdown = "readme.md";
 
@@ -396,6 +397,136 @@ public class ModuleHostTests
             // Act + Assert
             manager.MoveModuleResources(services);
         }
+
+        [Fact]
+        public async Task Module_with_null_resource_options_should_be_skipped()
+        {
+            // Arrange
+            var module = new TestBackendModule(); // default returns resources, we need a no-resource module
+            var noResourceModule = Substitute.ForPartsOf<BackendModule>();
+            noResourceModule.GetResourceOptions(Arg.Any<IServiceProvider>()).Returns((ModuleResourceOptions?)null);
+
+            var config = CreateConfiguration();
+            var manager = CreateModuleHost(noResourceModule, config);
+            var fileSystem = new MockFileSystem();
+
+            await using var services = new ServiceCollection()
+                .AddSingleton(config)
+                .AddSingleton<IFileSystem>(fileSystem)
+                .AddLogging()
+                .BuildServiceProvider();
+
+            // Act + Assert — should not throw
+            manager.MoveModuleResources(services);
+        }
+
+        [Fact]
+        public async Task CopyAlways_should_overwrite_existing_files()
+        {
+            // Arrange
+            var module = new TestBackendModule(null,
+                new ModuleResourceOptions { Directory = "Resources", DefaultBehavior = ResourceCopyBehavior.CopyAlways });
+            var config = CreateConfiguration();
+            var manager = CreateModuleHost(module, config);
+            var testAssembly = Assembly.GetExecutingAssembly();
+            var fileSystem = new MockFileSystem();
+            var services = new ServiceCollection();
+            services.AddSingleton(config);
+            services.AddSingleton<IFileSystem>(fileSystem);
+            services.AddLogging();
+            await using var serviceProvider = services.BuildServiceProvider();
+
+            var testFolder = fileSystem.Path.GetDirectoryName(testAssembly.Location)!;
+            var resourceDirectory = fileSystem.Path.Combine(testFolder, "Resources");
+            const string fileName = "data.txt";
+
+            fileSystem.AddDirectory(resourceDirectory);
+            fileSystem.AddFile(fileSystem.Path.Combine(resourceDirectory, fileName), new MockFileData("new content"));
+
+            var targetDirectory = fileSystem.CreateModuleAppDataDirectory(config.GetInstanceOptions(), module.ModuleKey.ModuleId);
+            fileSystem.AddFile(fileSystem.Path.Combine(targetDirectory, fileName), new MockFileData("old content"));
+
+            // Act
+            manager.MoveModuleResources(serviceProvider);
+
+            // Assert
+            var targetContent = fileSystem.File.ReadAllText(fileSystem.Path.Combine(targetDirectory, fileName));
+            targetContent.Should().Be("new content");
+        }
+
+        [Fact]
+        public async Task NeverCopy_should_skip_matching_files()
+        {
+            // Arrange
+            var module = new TestBackendModule(null,
+                new ModuleResourceOptions
+                {
+                    Directory = "Resources",
+                    Rules = [new ResourceRule("*.dev", ResourceCopyBehavior.NeverCopy)],
+                });
+            var config = CreateConfiguration();
+            var manager = CreateModuleHost(module, config);
+            var testAssembly = Assembly.GetExecutingAssembly();
+            var fileSystem = new MockFileSystem();
+            var services = new ServiceCollection();
+            services.AddSingleton(config);
+            services.AddSingleton<IFileSystem>(fileSystem);
+            services.AddLogging();
+            await using var serviceProvider = services.BuildServiceProvider();
+
+            var testFolder = fileSystem.Path.GetDirectoryName(testAssembly.Location)!;
+            var resourceDirectory = fileSystem.Path.Combine(testFolder, "Resources");
+
+            fileSystem.AddDirectory(resourceDirectory);
+            fileSystem.AddFile(fileSystem.Path.Combine(resourceDirectory, "keep.txt"), new MockFileData("keep"));
+            fileSystem.AddFile(fileSystem.Path.Combine(resourceDirectory, "skip.dev"), new MockFileData("dev-only"));
+
+            // Act
+            manager.MoveModuleResources(serviceProvider);
+
+            // Assert
+            var targetDirectory = fileSystem.CreateModuleAppDataDirectory(config.GetInstanceOptions(), module.ModuleKey.ModuleId);
+            fileSystem.File.Exists(fileSystem.Path.Combine(targetDirectory, "keep.txt")).Should().BeTrue();
+            fileSystem.File.Exists(fileSystem.Path.Combine(targetDirectory, "skip.dev")).Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task Rule_should_override_default_behavior()
+        {
+            // Arrange — default is NeverCopy, but *.txt rule says CopyAlways
+            var module = new TestBackendModule(null,
+                new ModuleResourceOptions
+                {
+                    Directory = "Resources",
+                    DefaultBehavior = ResourceCopyBehavior.NeverCopy,
+                    Rules = [new ResourceRule("*.txt", ResourceCopyBehavior.CopyAlways)],
+                });
+            var config = CreateConfiguration();
+            var manager = CreateModuleHost(module, config);
+            var testAssembly = Assembly.GetExecutingAssembly();
+            var fileSystem = new MockFileSystem();
+            var services = new ServiceCollection();
+            services.AddSingleton(config);
+            services.AddSingleton<IFileSystem>(fileSystem);
+            services.AddLogging();
+            await using var serviceProvider = services.BuildServiceProvider();
+
+            var testFolder = fileSystem.Path.GetDirectoryName(testAssembly.Location)!;
+            var resourceDirectory = fileSystem.Path.Combine(testFolder, "Resources");
+
+            fileSystem.AddDirectory(resourceDirectory);
+            fileSystem.AddFile(fileSystem.Path.Combine(resourceDirectory, "included.txt"), new MockFileData("yes"));
+            fileSystem.AddFile(fileSystem.Path.Combine(resourceDirectory, "excluded.xml"), new MockFileData("no"));
+
+            // Act
+            manager.MoveModuleResources(serviceProvider);
+
+            // Assert
+            var targetDirectory = fileSystem.CreateModuleAppDataDirectory(config.GetInstanceOptions(), module.ModuleKey.ModuleId);
+            fileSystem.File.Exists(fileSystem.Path.Combine(targetDirectory, "included.txt")).Should().BeTrue();
+            fileSystem.File.Exists(fileSystem.Path.Combine(targetDirectory, "excluded.xml")).Should().BeFalse();
+        }
+
     }
 
     public class MigrateAndSeedModuleData : ModuleHostTests

@@ -12,6 +12,7 @@ using Core.Shared.Modules.Contracts;
 using Core.UiHosting;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Sdk.Authorization;
 using Sdk.Authorization.Extensions;
 using Sdk.Backend.Extensions;
@@ -257,8 +258,8 @@ internal sealed partial class ModuleHost : IModuleHost
         {
             var module = bundle.Module;
 
-            var resourceDirectoryName = module.GetResourceDirectory(serviceProvider);
-            if (string.IsNullOrEmpty(resourceDirectoryName))
+            var resourceOptions = module.GetResourceOptions(serviceProvider);
+            if (resourceOptions is null)
                 continue;
 
             LogMovingResources(logger, module.ModuleKey.ModuleId);
@@ -269,7 +270,7 @@ internal sealed partial class ModuleHost : IModuleHost
                 if (string.IsNullOrEmpty(assemblyLocation))
                     throw new InvalidOperationException($"Assembly location for bundle '{bundle.Module}' not found.");
 
-                var resourcePath = fileSystem.Path.Combine(assemblyLocation, resourceDirectoryName);
+                var resourcePath = fileSystem.Path.Combine(assemblyLocation, resourceOptions.Directory);
                 if (!fileSystem.Directory.Exists(resourcePath))
                 {
                     LogResourceDirectoryNotFound(logger, resourcePath, module.ModuleKey.ModuleId);
@@ -280,16 +281,28 @@ internal sealed partial class ModuleHost : IModuleHost
 
                 foreach (var resource in fileSystem.Directory.GetFiles(resourcePath, "*.*", SearchOption.AllDirectories))
                 {
-                    var targetPath = fileSystem.Path.Combine(moduleAppData, fileSystem.Path.GetRelativePath(resourcePath, resource));
+                    var relativePath = fileSystem.Path.GetRelativePath(resourcePath, resource);
+                    var behavior = ResolveResourceCopyBehavior(resourceOptions, relativePath);
+
+                    if (behavior == ResourceCopyBehavior.NeverCopy)
+                        continue;
+
+                    var targetPath = fileSystem.Path.Combine(moduleAppData, relativePath);
                     var targetDirectory = fileSystem.Path.GetDirectoryName(targetPath);
                     if (string.IsNullOrEmpty(targetDirectory))
                         throw new InvalidOperationException($"Target directory for bundle '{bundle.Module}' is empty.");
 
                     fileSystem.Directory.CreateDirectory(targetDirectory);
 
-                    // file updates not supported - files won't be overriden! 
-                    if (!fileSystem.File.Exists(targetPath))
-                        fileSystem.File.Copy(resource, targetPath, false);
+                    var targetExists = fileSystem.File.Exists(targetPath);
+
+                    switch (behavior)
+                    {
+                        case ResourceCopyBehavior.CopyIfNotExists when !targetExists:
+                        case ResourceCopyBehavior.CopyAlways:
+                            fileSystem.File.Copy(resource, targetPath, overwrite: targetExists);
+                            break;
+                    }
                 }
             }
             catch (Exception e)
@@ -297,6 +310,19 @@ internal sealed partial class ModuleHost : IModuleHost
                 LogMovingResourcesError(logger, e, module.ModuleKey.ModuleId);
             }
         }
+    }
+
+    private static ResourceCopyBehavior ResolveResourceCopyBehavior(ModuleResourceOptions options, string relativePath)
+    {
+        foreach (var rule in options.Rules)
+        {
+            var matcher = new Matcher();
+            matcher.AddInclude(rule.Pattern);
+            if (matcher.Match(relativePath).HasMatches)
+                return rule.Behavior;
+        }
+
+        return options.DefaultBehavior;
     }
 
     public async Task MigrateAndSeedModuleData(IServiceScope scope, IConfiguration config, CancellationToken stoppingToken)

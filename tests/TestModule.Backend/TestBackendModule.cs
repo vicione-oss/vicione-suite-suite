@@ -8,19 +8,20 @@ using Sdk.Modules;
 
 namespace TestModule.Backend;
 
-public class TestBackendModule(IModuleInitializer? initializer) : BackendModule
+public class TestBackendModule(IModuleInitializer? initializer, ModuleResourceOptions? resourceOptions) : BackendModule
 {
     public static string Id => ModuleIdResolver.ResolveId<TestBackendModule>();
     public override IModuleInitializer? ModuleInitializer { get; } = initializer;
 
     public event EventHandler<string>? CallReceived;
 
-    public TestBackendModule() : this(null)
-    {
+    public TestBackendModule() : this(null, new ModuleResourceOptions { Directory = "Resources" })
+    { }
 
-    }
+    public TestBackendModule(IModuleInitializer? initializer) : this(initializer, new ModuleResourceOptions { Directory = "Resources" })
+    { }
 
-    public override string GetResourceDirectory(IServiceProvider services) => "Resources";
+    public override ModuleResourceOptions? GetResourceOptions(IServiceProvider services) => resourceOptions;
 
     public override void ConfigureServices(IServiceCollection services, IConfiguration config, IMvcBuilder builder)
         => CallReceived?.Invoke(this, nameof(ConfigureServices));
