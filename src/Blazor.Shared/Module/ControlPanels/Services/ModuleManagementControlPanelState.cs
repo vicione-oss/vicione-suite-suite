@@ -7,8 +7,8 @@ namespace Blazor.Shared.Module.ControlPanels.Services;
 
 public sealed class ModuleManagementControlPanelState : ControlPanelState
 {
-    internal string InstalledFilterText { get; set; } = string.Empty;
-    internal string AvailableFilterText { get; set; } = string.Empty;
+    internal string? InstalledFilterText { get; set; }
+    internal string? AvailableFilterText { get; set; }
 
     internal IQueryable<ModuleMetadataModel> InstalledModules
     {

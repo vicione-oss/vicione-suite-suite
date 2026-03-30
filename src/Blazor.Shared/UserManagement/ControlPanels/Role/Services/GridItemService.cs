@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.UserManagement.Models;
+using Blazor.Shared.UserManagement.Models;
 using Core.Shared.UserManagement.Extensions;
 using Sdk.Authorization;
 using Sdk.UserManagement.Contracts;
@@ -14,9 +14,12 @@ internal class GridItemService(IModuleAuthorizationClaimParser moduleAuthorizati
             .ThenBy(pgi => pgi.Feature)
             .ToList();
 
-        gridItems = [.. gridItems.Where(gi =>
+        if (!string.IsNullOrEmpty(state.FilterText))
+        {
+            gridItems = [.. gridItems.Where(gi =>
             gi.ModuleId.Contains(state.FilterText, StringComparison.OrdinalIgnoreCase)
             || gi.Feature.Contains(state.FilterText, StringComparison.OrdinalIgnoreCase))];
+        }
 
         var module = "";
         for (var i = 0; i < gridItems.Count; i++)
