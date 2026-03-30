@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Security.Claims;
 using Blazor.Shared.UserManagement.Models;
 using Blazor.Shared.UserManagement.Services;
@@ -29,7 +29,7 @@ public sealed class UserControlPanelState(IModuleAuthorizationClaimParser module
     internal IEnumerable<string>? AvailableUserRoles { get; set; }
     internal IEnumerable<string>? AvailableRoles { get; set; }
     internal IEnumerable<IModuleFeature> Features { get; set; } = [];
-    internal string FilterText { get; set; } = string.Empty;
+    internal string? FilterText { get; set; }
     internal IQueryable<PermissionGridItem> FilteredGridItems { get; set; } = Enumerable.Empty<PermissionGridItem>().AsQueryable();
 
     internal string RoleToAdd { get; set; } = string.Empty;
@@ -157,9 +157,12 @@ public sealed class UserControlPanelState(IModuleAuthorizationClaimParser module
             .ThenBy(pgi => pgi.Feature)
             .ToList();
 
-        gridItems = [.. gridItems.Where(gi =>
+        if (!string.IsNullOrEmpty(FilterText))
+        {
+            gridItems = [.. gridItems.Where(gi =>
             gi.ModuleId.Contains(FilterText, StringComparison.OrdinalIgnoreCase)
             || gi.Feature.Contains(FilterText, StringComparison.OrdinalIgnoreCase))];
+        }
 
         var module = "";
         for (var i = 0; i < gridItems.Count; i++)

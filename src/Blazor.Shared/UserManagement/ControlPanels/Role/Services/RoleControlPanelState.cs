@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.UserManagement.Models;
+using Blazor.Shared.UserManagement.Models;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.UserManagement.Contracts;
@@ -15,7 +15,7 @@ public sealed class RoleControlPanelState : ControlPanelState
 
     internal IEnumerable<UserManagementClaim> AvailableClaims { get; set; } = [];
     internal IEnumerable<IModuleFeature> Features { get; set; } = [];
-    internal string FilterText { get; set; } = string.Empty;
+    internal string? FilterText { get; set; }
     internal IQueryable<PermissionGridItem> FilteredGridItems { get; set; } = Enumerable.Empty<PermissionGridItem>().AsQueryable();
     internal bool IsEditMode => !string.IsNullOrEmpty(_roleName);
 

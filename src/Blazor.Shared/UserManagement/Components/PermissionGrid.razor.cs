@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.UserManagement.Models;
+using Blazor.Shared.UserManagement.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace Blazor.Shared.UserManagement.Components;
@@ -9,7 +9,7 @@ public sealed partial class PermissionGrid
     public required IQueryable<PermissionGridItem> Items { get; set; }
 
     [Parameter, EditorRequired]
-    public required string Filter { get; set; }
+    public required string? Filter { get; set; }
 
     [Parameter]
     public EventCallback<string?> FilterChanged { get; set; }

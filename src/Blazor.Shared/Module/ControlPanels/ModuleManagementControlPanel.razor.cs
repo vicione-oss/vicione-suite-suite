@@ -143,14 +143,24 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     }
 
     private IQueryable<ModuleMetadataModel> FilterInstalledItems(IQueryable<ModuleMetadataModel> installedModules)
-        => installedModules
-            .Where(i => i.Name.Contains(State.InstalledFilterText, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(d => d.Name);
+    {
+        if (string.IsNullOrEmpty(State.InstalledFilterText))
+            return installedModules.OrderBy(d => d.Name);
 
-    private IQueryable<ModuleMetadataModel> FilterAvailableItems(IQueryable<ModuleMetadataModel> installedModules)
-        => installedModules
-            .Where(i => i.Name.Contains(State.AvailableFilterText, StringComparison.OrdinalIgnoreCase))
-            .OrderBy(d => d.Name);
+        return installedModules
+                .Where(i => i.Name.Contains(State.InstalledFilterText, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(d => d.Name);
+    }
+
+    private IQueryable<ModuleMetadataModel> FilterAvailableItems(IQueryable<ModuleMetadataModel> availableModules)
+    {
+        if (string.IsNullOrEmpty(State.AvailableFilterText))
+            return availableModules.OrderBy(d => d.Name);
+
+        return availableModules
+                .Where(i => i.Name.Contains(State.AvailableFilterText, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(d => d.Name);
+    }
 
     private bool CanUninstallSelectedModules()
         => InstalledModuleSelection.Count != 0
