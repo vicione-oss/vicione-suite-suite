@@ -18,7 +18,7 @@
                     }
                 </ToolbarContent>
             </ToolbarGroup>
-            <ToolbarGroup AlignRight="true">
+            <ToolbarGroup>
                 @if (LoadMore is not null)
                 {
                     <ToolbarButton Text="@(string.Format(UserActions.LoadSomething, Localization.LogView.More))"
@@ -27,7 +27,7 @@
                                    TextVisibility="@TextVisibility.Always" />
                 }
                 <ToolbarButton Text="@(CommonVocabulary.DownloadVerb)"
-                               IconName="@MonochromeIconName.SaveOutline"
+                               IconName="@MonochromeIconName.Import"
                                OnClick="@(() => DownloadEntriesAsync())"
                                TextVisibility="@TextVisibility.Always" />
             </ToolbarGroup>

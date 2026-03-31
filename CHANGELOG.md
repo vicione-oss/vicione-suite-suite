@@ -52,7 +52,7 @@
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
 - `ViciOne.Journal` package, update to version `1.1.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2413287596`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2420388812`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.7.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.7.0`
