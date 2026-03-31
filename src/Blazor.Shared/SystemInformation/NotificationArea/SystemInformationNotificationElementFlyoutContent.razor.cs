@@ -55,22 +55,13 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
         => NavigationManager.NavigateTo(Constants.ProcessRoute);
 
     private async Task RestartSuite()
-    {
-        await SuiteControlService.RestartSuite();
-        _restartDialogVisible = false;
-    }
+        => await SuiteControlService.RestartSuite();
 
     private async Task RestartSystem()
-    {
-        await SuiteControlService.RestartSystem();
-        _restartSystemDialogVisible = false;
-    }
+        => await SuiteControlService.RestartSystem();
 
     private async Task ShutdownSystem()
-    {
-        await SuiteControlService.ShutdownSystem();
-        _shutdownDialogVisible = false;
-    }
+        => await SuiteControlService.ShutdownSystem();
 
     public Task Consume(ClientContext<ControlSystemCompleted> context, CancellationToken cancellationToken)
     {

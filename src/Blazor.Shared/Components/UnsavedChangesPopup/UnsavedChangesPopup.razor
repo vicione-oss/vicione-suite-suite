@@ -1,21 +1,21 @@
-﻿@using ViciOne.Ui.Localization.Resources
-@using ViciOne.Ui.Shared.Dx.Components
+@using ViciOne.Ui.Blazor.Components.Dialog.Components
+@using ViciOne.Ui.Localization.Resources
 
-<DxDialog @ref="_refDialog"
-          Closing="@Closing"
-          CloseOnOutsideClick="false"
-          Header="@Localization.UnsavedChangesPopup.Title"
-          Height="35%"
-          IsTextOnly="true"
-          Width="35%">
+<Dialog HeaderText="@Localization.UnsavedChangesPopup.Title"
+        Height="35%"
+        Width="35%"
+        Visible="@_visible"
+        OnClosing="@DialogClosing">
 
     <Body>
-        @Localization.UnsavedChangesPopup.Message
+        <DialogBodyTextLayout>
+            @Localization.UnsavedChangesPopup.Message
+        </DialogBodyTextLayout>
     </Body>
 
     <Footer>
-        <DxDialogFooterButton OnClick="@SaveButtonClick" Text="@CommonVocabulary.Save" />
-        <DxDialogFooterButton OnClick="@RevertButtonClick" Text="@CommonVocabulary.RevertVerb" />
-        <DxDialogFooterButton OnClick="@CancelButtonClick" Text="@CommonVocabulary.Cancel" />
+        <DialogFooterButton OnClick="@SaveButtonClick" Text="@CommonVocabulary.Save" />
+        <DialogFooterButton OnClick="@RevertButtonClick" Text="@CommonVocabulary.RevertVerb" />
+        <DialogFooterButton OnClick="@CancelButtonClick" Text="@CommonVocabulary.Cancel" />
     </Footer>
-</DxDialog>
+</Dialog>

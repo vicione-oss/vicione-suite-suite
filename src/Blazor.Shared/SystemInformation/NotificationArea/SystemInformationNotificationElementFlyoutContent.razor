@@ -1,4 +1,4 @@
-﻿@using DevExpress.Blazor
+@using DevExpress.Blazor
 @using Blazor.Shared.SystemInformation.Components
 @using Microsoft.AspNetCore.Components.Authorization
 @using Sdk.Authorization
@@ -67,28 +67,25 @@
         </Footer>
     </NotificationElementFlyoutContentLayout>
 
-    <ConfirmCancelDialog Show="_restartSystemDialogVisible"
-                         HeaderText="@Localization.SystemInformationNotificationElementFlyoutContent.RestartSystemDialogHeader"
-                         OnConfirm="@(async () => await RestartSystem())"
-                         OnCancel="@(() => _restartSystemDialogVisible = false)">
+    <ConfirmCancelDialog HeaderText="@Localization.SystemInformationNotificationElementFlyoutContent.RestartSystemDialogHeader"
+                         OnConfirm="@RestartSystem"
+                         @bind-Visible="_restartSystemDialogVisible">
         <Body>
             @Localization.SystemInformationNotificationElementFlyoutContent.RestartSystemDialogBody
         </Body>
     </ConfirmCancelDialog>
 
-    <ConfirmCancelDialog Show="_restartDialogVisible"
-                         HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
-                         OnConfirm="@(async () => await RestartSuite())"
-                         OnCancel="@(() => _restartDialogVisible = false)">
+    <ConfirmCancelDialog HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
+                         OnConfirm="@RestartSuite"
+                         @bind-Visible="_restartDialogVisible">
         <Body>
             @Blazor.Shared.Localization.RestartSuite.DialogBody
         </Body>
     </ConfirmCancelDialog>
 
-    <ConfirmCancelDialog Show="_shutdownDialogVisible"
-                         HeaderText="@Localization.SystemInformationNotificationElementFlyoutContent.ShutdownSystemDialogHeader"
-                         OnConfirm="@(async () => await ShutdownSystem())"
-                         OnCancel="@(() => _shutdownDialogVisible = false)">
+    <ConfirmCancelDialog HeaderText="@Localization.SystemInformationNotificationElementFlyoutContent.ShutdownSystemDialogHeader"
+                         OnConfirm="@ShutdownSystem"
+                         @bind-Visible="_shutdownDialogVisible">
         <Body>
             @Localization.SystemInformationNotificationElementFlyoutContent.ShutdownSystemDialogBody
         </Body>

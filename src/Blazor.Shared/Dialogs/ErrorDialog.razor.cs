@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 
 namespace Blazor.Shared.Dialogs;
 
@@ -8,7 +8,14 @@ public sealed partial class ErrorDialog
 
     [Parameter] public bool IsDebugEnabled { get; set; }
 
-    [Parameter] public bool Show { get; set; }
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
 
     [Parameter] public EventCallback OnConfirm { get; set; }
+
+    private async Task OkDialogChanged()
+    {
+        if (VisibleChanged.HasDelegate)
+            await VisibleChanged.InvokeAsync(Visible);
+    }
 }

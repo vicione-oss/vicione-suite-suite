@@ -18,7 +18,6 @@ using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 
 namespace Blazor.Shared.Module.ControlPanels;
 
-
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
 [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
 public sealed partial class ModuleManagementControlPanel : ControlPanelBase<ModuleManagementControlPanelState>
@@ -137,10 +136,7 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     }
 
     private async Task RestartSuite()
-    {
-        await SuiteControlService.RestartSuite();
-        _dialogVisible = false;
-    }
+        => await SuiteControlService.RestartSuite();
 
     private IQueryable<ModuleMetadataModel> FilterInstalledItems(IQueryable<ModuleMetadataModel> installedModules)
     {

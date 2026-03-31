@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.ControlPanels.NetworkInterface.Components;
+using Blazor.Shared.Network.ControlPanels.NetworkInterface.Components;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Network.Extensions;
 using Blazor.Shared.Network.Services;
@@ -18,7 +18,7 @@ namespace Blazor.Shared.Tests.Network.ControlPanels;
 public class NetworkInterfaceControlPanelTests
 {
     [Fact]
-    public void ComponentShouldRender()
+    public async Task ComponentShouldRender()
     {
         // Arrange
         var timeProvider = Substitute.For<TimeProvider>();
@@ -33,7 +33,7 @@ public class NetworkInterfaceControlPanelTests
         mediator.Request<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>(Arg.Any<GetDHCPLeaseInformation>(), Arg.Any<CancellationToken>())
             .Returns(new GetDHCPLeaseInformationResponse());
 
-        using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
         ctx.SetupBlazorSharedSettings(setup =>
         {
             setup.Services.AddSingleton(systemConfigurationService);

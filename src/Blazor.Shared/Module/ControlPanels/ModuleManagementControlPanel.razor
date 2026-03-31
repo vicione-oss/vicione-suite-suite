@@ -200,15 +200,14 @@
                         @State.RequestErrorMessage
                     </SettingsInformation>
                 </SettingsGroup>
-            }            
+            }
         </SettingsLayout>
     </div>
 </ControlPanelPage>
 
-<ConfirmCancelDialog Show="_dialogVisible"
-                     HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
-                     OnConfirm="@(async () => await RestartSuite())"
-                     OnCancel="@(() => _dialogVisible = false)">
+<ConfirmCancelDialog HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
+                     OnConfirm="@RestartSuite"
+                     @bind-Visible="_dialogVisible">
     <Body>
         @Blazor.Shared.Localization.RestartSuite.DialogBody
     </Body>

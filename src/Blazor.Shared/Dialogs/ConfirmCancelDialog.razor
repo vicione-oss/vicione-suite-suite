@@ -1,20 +1,25 @@
-﻿@using ViciOne.Ui.Localization.Resources
-@using ViciOne.Ui.Shared.Dx.Components
+@using ViciOne.Ui.Blazor.Components.Dialog.Components
+@using ViciOne.Ui.Localization.Resources
 
-<DxDialog @ref="@_refDialog"
-        Closing="@OnCancel"
-        Header="@HeaderText" 
+<Dialog CssClass="confirm-cancel-dialog"
+        HeaderText="@HeaderText"
         Height="35%"
-        IsTextOnly="true"
-        Width="35%">
-    <Body>
-        @Body
-    </Body>
-    <Footer>
-        <DxDialogFooterButton OnClick="@OnConfirm"
-                              Text="@CommonVocabulary.Confirm" />
+        Width="35%"
+        OnClosing="@DialogClosing"
+        @bind-Visible:get="_visible"
+        @bind-Visible:set="UpdateVisible">
 
-        <DxDialogFooterButton OnClick="@OnCancel"
-                              Text="@CommonVocabulary.Cancel" />
+    <Body>
+        <DialogBodyTextLayout>
+            @Body
+        </DialogBodyTextLayout>
+    </Body>
+
+    <Footer>
+        <DialogFooterButton OnClick="@ConfirmButtonClick"
+                            Text="@CommonVocabulary.Confirm" />
+
+        <DialogFooterButton OnClick="@CancelButtonClick"
+                            Text="@CommonVocabulary.Cancel" />
     </Footer>
-</DxDialog>
+</Dialog>

@@ -1,7 +1,11 @@
-﻿using Blazor.Shared.Dialogs;
-using Blazor.Tests.Tools;
-using Bunit;
 using AwesomeAssertions;
+using Blazor.Shared.Dialogs;
+using Bunit;
+using Bunit.Rendering;
+using ViciOne.Ui.Blazor.Components.Dialog.Components;
+using ViciOne.Ui.Blazor.Components.Dialog.Extensions;
+using ViciOne.Ui.Blazor.Components.Popup.Components;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.Dialog.Extensions;
 using Xunit;
 
 namespace Blazor.Shared.Tests.Dialogs;
@@ -9,11 +13,11 @@ namespace Blazor.Shared.Tests.Dialogs;
 public sealed class ConfirmCancelDialogTests
 {
     [Fact]
-    public void ComponentGetsRendered()
+    public async Task ComponentGetsRendered()
     {
         // Arrange
-        using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        await using var ctx = new BunitContext();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<ConfirmCancelDialog>();
@@ -23,142 +27,157 @@ public sealed class ConfirmCancelDialogTests
     }
 
     [Fact]
-    public void Should_Be_Rendered_Hidden()
+    public async Task Should_Be_Rendered_Hidden()
     {
         // Arrange
-        using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        await using var ctx = new BunitContext();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<ConfirmCancelDialog>();
 
         // Assert
-        Assert.NotNull(cut);
-        Assert.Throws<ElementNotFoundException>(() => cut.Find(".dxbs-popup"));
+        var innerDialog = cut.FindComponent<Dialog>();
+
+        Assert.Throws<ComponentNotFoundException>(() => innerDialog.RenderSectionContent(ctx));
     }
 
     [Fact]
-    public void Should_Be_Rendered_Visible()
+    public async Task Should_Be_Rendered_Visible()
     {
         // Arrange
-        using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        await using var ctx = new BunitContext();
+        ctx.Services.AddDialog();
 
         // Act
-        var cut = ctx.Render<ConfirmCancelDialog>();
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
+        var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
 
         // Assert
-        Assert.NotNull(cut);
-        Assert.NotNull(cut.Find(".dxbl-popup"));
+        Assert.NotNull(sectionContent.Find(".confirm-cancel-dialog"));
     }
 
     [Fact]
-    public void OnConfirm_Event_Is_Fired_On_Confirmed_Button_Click()
+    public async Task OnConfirm_Event_Is_Fired_On_Confirmed_Button_Click()
     {
         // Arrange
         var onConfirmFired = false;
         var onCancelFired = false;
-        using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        await using var ctx = new BunitContext();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
             .Add(p => p.OnCancel, () => { onCancelFired = true; })
-        );
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        cut.FindDialogConfirmButton().Click();
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
+        var confirmButton = sectionContent.FindFooterButton(button => button.Text == "Confirm");
+        var innerButton = confirmButton.FindInnerButton();
+
+        await innerButton.ClickAsync();
 
         // Assert
-        Assert.NotNull(cut);
         Assert.True(onConfirmFired);
         Assert.False(onCancelFired);
     }
 
     [Fact]
-    public void OnCancel_Event_Is_Fired_On_Cancel_Button_Click()
+    public async Task OnCancel_Event_Is_Fired_On_Cancel_Button_Click()
     {
         // Arrange
         var onConfirmFired = false;
         var onCancelFired = false;
-        using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        await using var ctx = new BunitContext();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
             .Add(p => p.OnCancel, () => { onCancelFired = true; })
-        );
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        cut.FindDialogCancelButton().Click();
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
+        var confirmButton = sectionContent.FindFooterButton(button => button.Text == "Cancel");
+        var innerButton = confirmButton.FindInnerButton();
+
+        await innerButton.ClickAsync();
 
         // Assert
-        Assert.NotNull(cut);
         Assert.False(onConfirmFired);
         Assert.True(onCancelFired);
     }
 
     [Fact]
-    public void OnCancel_Event_Is_Fired_On_Cross_Button_Click()
+    public async Task OnCancel_Event_Is_Fired_On_Close_Button_Click()
     {
         // Arrange
         var onConfirmFired = false;
         var onCancelFired = false;
-        using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        await using var ctx = new BunitContext();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
             .Add(p => p.OnCancel, () => { onCancelFired = true; })
-        );
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        cut.FindDialogCancelButton().Click();
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
+        var closeButton = sectionContent.FindComponent<PopupHeaderCloseActionButton>();
+        var innerButton = closeButton.Find("button");
+
+        await innerButton.ClickAsync();
 
         // Assert
-        Assert.NotNull(cut);
         Assert.False(onConfirmFired);
         Assert.True(onCancelFired);
     }
 
     [Fact]
-    public void Header_Is_Rendered()
+    public async Task Header_Text_Is_Passed_To_Dialog()
     {
         // Arrange
         var headerText = "Test header";
-        using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        await using var ctx = new BunitContext();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
-            .Add(p => p.HeaderText, headerText));
+            .Add(p => p.HeaderText, headerText)
+            .Add(p => p.Visible, true));
 
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        var headerElement = cut.Find(".dxbl-popup-header");
+        var innerDialog = cut.FindComponent<Dialog>();
 
         // Assert
-        Assert.NotNull(cut);
-        headerElement.InnerHtml.Should().Contain(headerText);
+        innerDialog.Instance.HeaderText.Should().Be(headerText);
     }
 
     [Fact]
-    public void Body_Is_Rendered()
+    public async Task Body_Is_Rendered()
     {
         // Arrange
         var body = "<p>Test body</p>";
-        using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        await using var ctx = new BunitContext();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<ConfirmCancelDialog>(parameters => parameters
             .Add(p => p.Body, body)
-        );
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        var bodyContainer = cut.Find(".content-container");
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
+        var bodyLayout = sectionContent.FindComponent<DialogBodyTextLayout>();
 
         // Assert
-        Assert.NotNull(cut);
-        Assert.Contains(body, bodyContainer.InnerHtml, StringComparison.OrdinalIgnoreCase);
+        bodyLayout.Markup.Should().Contain(body);
     }
 }

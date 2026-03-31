@@ -1,3 +1,4 @@
+using Blazor.Shared.Dialogs.Extensions;
 using Blazor.Shared.Module.ControlPanels.Services;
 using Blazor.Shared.Module.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,8 @@ internal static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddModuleManagementControlPanel(this IServiceCollection services)
     {
+        services.AddDialogs();
+
         services.AddControlPanel<SharedClientModule, ModuleManagementControlPanel, ModuleManagementControlPanelState>()
             .WithAutoDiscovery<ModuleManagementControlPanelDescriptor>()
             .WithSaveHandler<ModuleManagementControlPanelSaveHandler>()

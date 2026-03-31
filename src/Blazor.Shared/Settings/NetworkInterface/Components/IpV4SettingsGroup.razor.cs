@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Settings.NetworkInterface.Enums;
+using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Blazor.Shared.Settings.NetworkInterface.Enums.Extensions;
 using Microsoft.AspNetCore.Components;
 using ViciOne.Ui.Blazor.Components.ComboBox;
@@ -96,14 +96,13 @@ public sealed partial class IpV4SettingsGroup : ComponentBase
         if (!_confirmed)
             ConfigurationMode = _configurationModeBefore;
 
-        _dialogVisible = false;
         _confirmed = false;
     }
 
     private async Task OnConfirm()
     {
-        _dialogVisible = false;
         _confirmed = true;
+
         await NotifyConfigurationModeChanged();
     }
 }

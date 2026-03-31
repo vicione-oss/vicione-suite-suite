@@ -1,4 +1,4 @@
-﻿@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions
 @using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models
 @using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services
 @using Blazor.Shared.Settings.NetworkInterface.Components
@@ -255,11 +255,8 @@
 </ControlPanelPage>
 
 <OkDialog HeaderText="@CommonVocabulary.Error"
-          Show="@_showErrorDialog"
-          OnConfirm="() => _showErrorDialog = false">
+          @bind-Visible="_showErrorDialog">
     <Body>
-        <p>
-             @(_errorMessage is null ? CommonPhrases.AnUnknownErrorOccurred : string.Format(Localization.TcpIpControlPanelPage.ErrorBody, _errorMessage))
-        </p>
+        @(_errorMessage is null ? CommonPhrases.AnUnknownErrorOccurred : string.Format(Localization.TcpIpControlPanelPage.ErrorBody, _errorMessage))
     </Body>
 </OkDialog>
