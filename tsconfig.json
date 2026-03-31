@@ -1,8 +1,8 @@
-﻿{
+{
     "compileOnSave": true,
     "compilerOptions": {
-        "target": "es6",
-        "module": "es6",
+        "target": "es2022",
+        "module": "es2022",
         "inlineSourceMap": true,
         "inlineSources": true,
         "strict": true,
