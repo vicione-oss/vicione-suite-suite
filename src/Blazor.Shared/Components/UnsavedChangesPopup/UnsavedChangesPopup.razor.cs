@@ -1,14 +1,11 @@
-﻿using Blazor.Shared.Extensions;
 using Microsoft.AspNetCore.Components;
-using ViciOne.Ui.Shared.Dx.Components;
 
 namespace Blazor.Shared.Components.UnsavedChangesPopup;
 
 public sealed partial class UnsavedChangesPopup
 {
-    private DxDialog? _refDialog;
     private bool _visible;
-    private bool _invokeOnCancelOnClosing = true;
+    private bool _invokeOnCancelWhenClosing = true;
 
     [Parameter]
     public EventCallback OnCancel { get; set; }
@@ -28,16 +25,13 @@ public sealed partial class UnsavedChangesPopup
         {
             _visible = Visible;
 
-            _invokeOnCancelOnClosing = _visible;
+            _invokeOnCancelWhenClosing = _visible;
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-        => await _refDialog.OpenOrCloseDialog(Visible);
-
     private async Task SaveButtonClick()
     {
-        _invokeOnCancelOnClosing = false;
+        _invokeOnCancelWhenClosing = false;
 
         if (OnSave.HasDelegate)
             await OnSave.InvokeAsync();
@@ -45,7 +39,7 @@ public sealed partial class UnsavedChangesPopup
 
     private async Task RevertButtonClick()
     {
-        _invokeOnCancelOnClosing = false;
+        _invokeOnCancelWhenClosing = false;
 
         if (OnRevert.HasDelegate)
             await OnRevert.InvokeAsync();
@@ -53,15 +47,15 @@ public sealed partial class UnsavedChangesPopup
 
     private async Task CancelButtonClick()
     {
-        _invokeOnCancelOnClosing = false;
+        _invokeOnCancelWhenClosing = false;
 
         if (OnCancel.HasDelegate)
             await OnCancel.InvokeAsync();
     }
 
-    private async Task Closing()
+    private async Task DialogClosing()
     {
-        if (_invokeOnCancelOnClosing && OnCancel.HasDelegate)
+        if (_invokeOnCancelWhenClosing && OnCancel.HasDelegate)
             await OnCancel.InvokeAsync();
     }
 }

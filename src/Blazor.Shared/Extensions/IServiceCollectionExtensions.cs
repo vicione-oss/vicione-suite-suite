@@ -1,5 +1,6 @@
 using Blazor.Shared.Authorization.Extensions;
 using Blazor.Shared.Connections.Extensions;
+using Blazor.Shared.Dialogs.Extensions;
 using Blazor.Shared.Instance.Extensions;
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.Module.Extensions;
@@ -40,6 +41,7 @@ public static class IServiceCollectionExtensions
             services.AddNotificationElements<SharedClientModule>();
 
             services.AddBlazorSharedAuthorization()
+                .AddDialogs()
                 .AddSettings()
                 .AddNetwork()
                 .AddConnectionManagement()

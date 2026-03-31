@@ -1,34 +1,28 @@
-﻿@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.Blazor.Components.Dialog.Components
+@using ViciOne.Ui.Localization.Resources
 
-<OkDialog HeaderText="@Localization.ErrorDialog.HeaderText"
+<OkDialog CssClass="error-dialog"
+          HeaderText="@Localization.ErrorDialog.HeaderText"
           OnConfirm="@OnConfirm"
-          Show="@Show"
-          ZIndex="110">
+          @bind-Visible="@Visible"
+          @bind-Visible:after="OkDialogChanged">
 
     <Body>
         @if (IsDebugEnabled && Exception != null)
         {
-            <div>
-                <label>@TechnicalTerms.Type</label>
-                <div>
-                    <p style="width: 100%">@Exception.GetType().ToString()</p>
-                </div>
-            </div>
+            <section>
+                <h5>@TechnicalTerms.Type</h5>
+                <p>@Exception.GetType().ToString()</p>
+            </section>
 
-            <div>
-                <label>@CommonVocabulary.Message</label>
-                <div>
-                    <p style="width: 100%">@Exception.Message</p>
-                </div>
-            </div>
+            <section>
+                <h5>@CommonVocabulary.Message</h5>
+                <p>@Exception.Message</p>
+            </section>
         }
         else
         {
-            <div>
-                <p style="width: 100%">
-                    @Localization.ErrorDialog.ErrorText
-                </p>
-            </div>
+            @Localization.ErrorDialog.ErrorText
         }
     </Body>
 </OkDialog>

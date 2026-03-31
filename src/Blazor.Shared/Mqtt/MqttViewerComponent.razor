@@ -86,9 +86,9 @@
 </div>
 
 <OkDialog HeaderText="@Localization.MqttViewer.ErrorHeader"
-          Show="@(!string.IsNullOrEmpty(ViewerService.ErrorMessage))"
+          Visible="@(!string.IsNullOrEmpty(ViewerService.ErrorMessage))"
           OnConfirm="@(() => ViewerService.ErrorMessage = string.Empty)">
     <Body>
-        <div>@ViewerService.ErrorMessage</div>
+        @ViewerService.ErrorMessage
     </Body>
 </OkDialog>

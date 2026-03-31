@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Sdk.Client.Wizards.Components;
 using PopupComponent = ViciOne.Ui.Blazor.Components.Popup.Components.Popup;
 
@@ -25,7 +25,7 @@ public sealed partial class WizardContent<TContext> : ComponentBase, IWizardCont
     private async Task WizardBodyOnExit()
     {
         if (_popup is not null)
-            await _popup.HideAsync();
+            await _popup.CloseAsync();
     }
 
     private void OnCancelUnsavedChanges()

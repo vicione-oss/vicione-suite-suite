@@ -1,4 +1,4 @@
-﻿@using Blazor.Shared.Settings.NetworkInterface.Enums
+@using Blazor.Shared.Settings.NetworkInterface.Enums
 @using Sdk.Client.Components.Settings.Expanders
 @using ViciOne.Ui.Localization.Resources
 
@@ -32,9 +32,9 @@
 </SettingsGroup>
 
 <ConfirmCancelDialog HeaderText="@CommonVocabulary.Warning"
-                     Show="_dialogVisible"
-                     OnCancel="OnCancel"
-                     OnConfirm="@(async () => await OnConfirm())">
+                     OnConfirm="@OnConfirm"
+                     OnCancel="@OnCancel"
+                     @bind-Visible="_dialogVisible">
     <Body>
         @Localization.IpV4SettingsGroup.DialogBody
     </Body>

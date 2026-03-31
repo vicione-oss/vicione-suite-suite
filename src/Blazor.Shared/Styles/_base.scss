@@ -1,4 +1,4 @@
-﻿@use "design/colors";
+@use "design/colors";
 @use "../../../shared/styles/colors-staged";
 
 :root {
@@ -158,10 +158,6 @@ a:hover {
 .show > .btn-success.dropdown-toggle {
     background-color: colors-staged.$color-accent-dark;
     border-color: colors.$accent;
-}
-
-dxbl-popup-cell {
-    z-index: 105 !important;
 }
 
 .card {

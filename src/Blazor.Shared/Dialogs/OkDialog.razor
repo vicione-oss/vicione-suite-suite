@@ -1,20 +1,22 @@
-﻿@using ViciOne.Ui.Localization.Resources
-@using ViciOne.Ui.Shared.Dx.Components
+@using ViciOne.Ui.Blazor.Components.Dialog.Components
+@using ViciOne.Ui.Localization.Resources
 
-<DxDialog @ref="_refDialog"
-    Closing="@OnConfirm"
-    CloseOnOutsideClick="false"
-    Header="@HeaderText"
-    IsTextOnly="true"
-    Height="35%"
-    Width="35%">
+<Dialog CssClass="@CssClass"
+        HeaderText="@HeaderText"
+        Height="35%"
+        Width="35%"
+        OnClosing="@OnConfirm"
+        @bind-Visible:get="Visible"
+        @bind-Visible:set="UpdateVisible">
 
     <Body>
-        @Body
+        <DialogBodyTextLayout>
+            @Body
+        </DialogBodyTextLayout>
     </Body>
 
     <Footer>
-        <DxDialogFooterButton OnClick="@OnConfirm"
-                              Text="@CommonVocabulary.Ok" />
+        <DialogFooterButton OnClick="@OkButtonClick"
+                            Text="@CommonVocabulary.Ok" />
     </Footer>
-</DxDialog>
+</Dialog>

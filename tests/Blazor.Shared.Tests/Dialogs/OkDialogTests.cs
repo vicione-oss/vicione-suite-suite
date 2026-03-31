@@ -1,7 +1,11 @@
-﻿using Blazor.Shared.Dialogs;
-using Blazor.Tests.Tools;
-using Bunit;
 using AwesomeAssertions;
+using Blazor.Shared.Dialogs;
+using Bunit;
+using Bunit.Rendering;
+using ViciOne.Ui.Blazor.Components.Dialog.Components;
+using ViciOne.Ui.Blazor.Components.Dialog.Extensions;
+using ViciOne.Ui.Blazor.Components.Popup.Components;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.Dialog.Extensions;
 using Xunit;
 
 namespace Blazor.Shared.Tests.Dialogs;
@@ -13,7 +17,7 @@ public sealed class OkDialogTests
     {
         // Arrange
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<OkDialog>();
@@ -27,14 +31,15 @@ public sealed class OkDialogTests
     {
         // Arrange
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<OkDialog>();
 
         // Assert
-        Assert.NotNull(cut);
-        Assert.Throws<ElementNotFoundException>(() => cut.Find(".dxbs-popup"));
+        var innerDialog = cut.FindComponent<Dialog>();
+
+        Assert.Throws<ComponentNotFoundException>(() => innerDialog.RenderSectionContent(ctx));
     }
 
     [Fact]
@@ -42,15 +47,17 @@ public sealed class OkDialogTests
     {
         // Arrange
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.Services.AddDialog();
 
         // Act
-        var cut = ctx.Render<OkDialog>();
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
+        var cut = ctx.Render<OkDialog>(parameters => parameters
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
 
         // Assert
-        Assert.NotNull(cut);
-        Assert.NotNull(cut.Find(".dxbl-popup"));
+        Assert.NotNull(sectionContent.Find(".ok-dialog"));
     }
 
     [Fact]
@@ -59,59 +66,65 @@ public sealed class OkDialogTests
         // Arrange
         var onConfirmFired = false;
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<OkDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
-        );
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        cut.Instance.Refresh();
-        cut.Find(".btn-footer").Click();
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
+        var confirmButton = sectionContent.FindFooterButton(button => button.Text == "Ok");
+        var innerButton = confirmButton.FindInnerButton();
+
+        await innerButton.ClickAsync();
 
         // Assert
-        Assert.NotNull(cut);
         Assert.True(onConfirmFired);
     }
 
     [Fact]
-    public async Task OnConfirm_Event_Is_Fired_On_Cross_Button_Click()
+    public async Task OnConfirm_Event_Is_Fired_On_Close_Button_Click()
     {
         // Arrange
         var onConfirmFired = false;
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<OkDialog>(parameters => parameters
             .Add(p => p.OnConfirm, () => { onConfirmFired = true; })
-        );
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        cut.FindAll("button")[1].Click();
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
+        var closeButton = sectionContent.FindComponent<PopupHeaderCloseActionButton>();
+        var innerButton = closeButton.Find("button");
+
+        await innerButton.ClickAsync();
 
         // Assert
-        Assert.NotNull(cut);
         Assert.True(onConfirmFired);
     }
 
     [Fact]
-    public async Task Header_Is_Rendered()
+    public async Task Header_Text_Is_Passed_To_Dialog()
     {
         // Arrange
         var headerText = "Test header";
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<OkDialog>(parameters => parameters
             .Add(p => p.HeaderText, headerText)
-        );
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        var headerElement = cut.Find(".header-bar");
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
 
         // Assert
-        Assert.NotNull(cut);
-        headerElement.InnerHtml.Should().Contain(headerText);
+        innerDialog.Instance.HeaderText.Should().Be(headerText);
     }
 
     [Fact]
@@ -120,17 +133,18 @@ public sealed class OkDialogTests
         // Arrange
         var body = "<p>Test body</p>";
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.Services.AddDialog();
 
         // Act
         var cut = ctx.Render<OkDialog>(parameters => parameters
             .Add(p => p.Body, body)
-        );
-        cut.Render(parameters => parameters.Add(p => p.Show, true));
-        var bodyContainer = cut.Find(".content-container");
+            .Add(p => p.Visible, true));
+
+        var innerDialog = cut.FindComponent<Dialog>();
+        var sectionContent = innerDialog.RenderSectionContent(ctx);
+        var bodyLayout = sectionContent.FindComponent<DialogBodyTextLayout>();
 
         // Assert
-        Assert.NotNull(cut);
-        Assert.Contains(body, bodyContainer.InnerHtml, StringComparison.OrdinalIgnoreCase);
+        bodyLayout.Markup.Should().Contain(body);
     }
 }

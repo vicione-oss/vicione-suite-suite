@@ -33,12 +33,12 @@ public class ModuleManagementControlPanelTests
     }
 
     [Fact]
-    public void Should_render_component()
+    public async Task Should_render_component()
     {
         // Arrange
         var state = new ModuleManagementControlPanelState();
 
-        using var ctx = SetupTestContext(_moduleManagementService);
+        await using var ctx = SetupTestContext(_moduleManagementService);
 
         _moduleManagementService
             .GetMetadata(false, Arg.Any<CancellationToken>())

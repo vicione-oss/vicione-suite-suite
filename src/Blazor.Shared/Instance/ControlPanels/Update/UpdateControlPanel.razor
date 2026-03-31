@@ -202,9 +202,9 @@
 </ControlPanelPage>
 
 <OkDialog HeaderText="@Localization.UpdateControlPanel.BackupErrorTitle"
-          Show="@_showErrorDialog"
-          OnConfirm="@(() => _showErrorDialog = false)">
+          @bind-Visible="_showErrorDialog">
+
     <Body>
-        <div>@Localization.UpdateControlPanel.BackupErrorText</div>
+        @Localization.UpdateControlPanel.BackupErrorText
     </Body>
 </OkDialog>
