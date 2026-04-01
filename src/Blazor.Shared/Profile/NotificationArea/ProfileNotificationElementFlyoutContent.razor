@@ -1,4 +1,4 @@
-﻿@using Blazor.Shared.Profile.Components
+@using Blazor.Shared.Profile.Components
 @using Blazor.Shared.Profile.Extensions
 @using Blazor.Shared.Profile.NotificationArea.Enums
 @using Blazor.Shared.Profile.NotificationArea.Extensions
@@ -11,7 +11,6 @@
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
-@using ViciOne.Ui.Shared.Dx.Components.Scrolling
 @using ViciOne.Ui.Blazor.Components.ComboBox
 
 
@@ -58,7 +57,7 @@
                     </div>
                 </div>
             </div>
-            <ScrollContainer CssClass="center">
+            <div class="center">
                 @if (_editUserDataStarted && _userProfile is not null)
                 {
                     <div class="user-profile-edit-form">
@@ -150,7 +149,7 @@
                 </div>
 
                 <div class="overflow-area"></div>
-            </ScrollContainer>
+            </div>
             <div class="bottom">
                 <div class="add-external-login">
                     @if (ShowAddExternalLogin)

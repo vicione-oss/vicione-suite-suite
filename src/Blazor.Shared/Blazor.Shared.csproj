@@ -912,12 +912,6 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="ConfigureDxLib" BeforeTargets="BeforeDxLibTargets">
-    <PropertyGroup>
-      <DxLibScrollingScssOutputFolder>$(MSBuildProjectDirectory)/Styles/scrolling</DxLibScrollingScssOutputFolder>
-    </PropertyGroup>
-  </Target>
-
   <Target Name="ConfigureSdkClientUnpack" BeforeTargets="BeforeWallpaperTargets">
     <PropertyGroup>
       <WallpaperImagesOutputFolder>$(MSBuildProjectDirectory)/wwwroot/images/wallpapers</WallpaperImagesOutputFolder>
