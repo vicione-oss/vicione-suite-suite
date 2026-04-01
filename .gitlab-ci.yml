@@ -232,6 +232,7 @@ variables:
   rules:
     - <<: *rules_merge_request_manual
     - <<: *rules_web_manual
+    - <<: *rules_default_branch_manual
 
 #################### Build stage
 
