@@ -1,9 +1,8 @@
-﻿@use "../../Styles/design/colors";
+@use "../../Styles/design/colors";
 @use "../../../../shared/styles/colors-staged";
 @use "../../../../shared/styles/overflow";
-@use "../../Styles/scrolling/scroll-container";
 @use "../../Styles/mixins";
-@use "../../Styles/scrolling/scrollbar";
+@use "../../Styles/design/scrollbar";
 @use "../../Styles/typography/fonts/noto-sans/variables" as noto-sans;
 @use 'sass:color';
 
@@ -117,23 +116,12 @@
         }
     }
 
-    ::deep .center {
-
-        @mixin adjust-scrolling()
-        {
-            @include scroll-container.adjust-styles($width: 6px, $offset-x: 0px, $offset-y: 0px);
-
-            @include scrollbar.adjust-styles(
-                $bg: color.adjust(colors.$theme, $alpha: -0.6),
-                $bg-hover: color.adjust(colors.$theme, $alpha: -0.6),
-                $slider-bg: #494949,
-                $border-width: 0px);
-        }
+    .center {
+        @include scrollbar.adjust-styles();
+        overflow: auto;
 
         width: 100%;
         height: 100%;
-
-        @include adjust-scrolling();
 
         .user-profile-edit-form {
             padding-left: 23px;
