@@ -55,7 +55,13 @@ internal static class ModuleAssemblyLoader
         {
             // if we have an error loading the module, we want to keep track of it in the context.
             // Context is used to identify module dependency issues before loading the assembly
-            suiteContext.Modules.First(k => k.AssemblyPath == moduleDllFile).StartupErrors.Add(e);
+            var moduleContext = (suiteContext.UiHost?.AssemblyPath == moduleDllFile ? suiteContext.UiHost : null)
+                                ?? suiteContext.Modules.FirstOrDefault(k => k.AssemblyPath == moduleDllFile);
+
+            if (moduleContext is not null)
+                moduleContext.StartupErrors.Add(e);
+            else
+                throw;
         }
     }
 }
