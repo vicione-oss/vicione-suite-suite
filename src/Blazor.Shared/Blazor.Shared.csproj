@@ -893,7 +893,7 @@
       <MonochromeIcon Include="user-solid" Size="24" />
       <MonochromeIcon Include="warning" Size="24" />
       <MonochromeIcon Include="warning-full" Size="24" />
-      <MonochromeIcon Include="warning-light" Size="32;48" />
+      <MonochromeIcon Include="warning-light" Size="24;32;48" />
       <MonochromeIcon Include="wifi" Size="16" />
       <MonochromeIcon Include="wifi-off" Size="16" />
       <MonochromeIcon Include="wizard" Size="32" />
