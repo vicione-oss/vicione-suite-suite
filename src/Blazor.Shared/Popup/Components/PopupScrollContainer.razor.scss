@@ -1,4 +1,4 @@
-﻿@use "../../Styles/design/scrollbar";
+@use "../../Styles/design/scrollbar";
 
 .popup-scroll-container {
     flex-grow: 1;
@@ -18,8 +18,9 @@
 
         .popup-scroll-container__content {
             height: 100%;
-
             overflow: auto;
+
+            @include scrollbar.adjust-styles();
         }
     }
 
@@ -28,6 +29,4 @@
             padding-bottom: 40px !important;
         }
     }
-
-    @include scrollbar.adjust-styles();
 }
