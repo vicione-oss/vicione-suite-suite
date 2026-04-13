@@ -38,20 +38,6 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
         }
     } = Enumerable.Empty<ModuleMetadataModel>().AsQueryable();
 
-    public bool AllowPreReleases
-    {
-        get;
-        set
-        {
-            if (value != field)
-            {
-                field = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
-
     public int RequestErrorCode
     {
         get;
@@ -80,7 +66,7 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
         }
     }
 
-    internal bool IsInitialized { get; private set; }
+    internal bool AllowInstallation { get; private set; }
 
     internal List<ModulePackageOperation> InstallOperations { get; } = [];
 
@@ -90,6 +76,9 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
     {
         UninstallOperations.Clear();
         InstallOperations.Clear();
+
+        // no module allows modification so installation is not allowed
+        AllowInstallation = models.Any(k => k.CanBeModified);
 
         // split them for the tabs
         InstalledModules = models.Where(k => k.Installed).OrderBy(k => k.Title).AsQueryable();

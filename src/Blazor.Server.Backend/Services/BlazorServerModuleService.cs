@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Claims;
 using Blazor.Shared.Extensions;
 using Blazor.Shared.Module.Services;
@@ -55,6 +55,10 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
         {
 
             await serviceProvider.InitializeSharedServices();
+        }
+        catch (ObjectDisposedException)
+        {
+            // ignore gracefully
         }
         catch (Exception e)
         {

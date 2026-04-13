@@ -74,16 +74,16 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
         var localInstanceId = services.GetRequiredService<IInstanceInformationProvider>().Local.Id;
         if (instanceId == localInstanceId)
         {
-            var consumer = services.GetService<IConsumer<TRequest>>();
-            if (consumer is InstanceDependentRequestConsumer<TRequest, TResponse> requestConsumer)
+            var consumer = services.GetService<InstanceDependentRequestConsumer<TRequest, TResponse>>();
+            if (consumer is not null)
             {
                 try
                 {
-                    return requestConsumer.Respond(request, cancellationToken);
+                    return consumer.Respond(request, cancellationToken);
                 }
                 catch (Exception e)
                 {
-                    return requestConsumer.HandleException(request, e, cancellationToken);
+                    return consumer.HandleException(request, e, cancellationToken);
                 }
             }
         }
@@ -97,17 +97,17 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
         where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse
     {
-        var consumer = services.GetService<IConsumer<TRequest>>();
-        if (consumer is RequestConsumer<TRequest, TResponse> requestConsumer)
+        var consumer = services.GetService<RequestConsumer<TRequest, TResponse>>();
+        if (consumer is not null)
         {
             try
             {
-                return requestConsumer.Respond(request, cancellationToken);
+                return consumer.Respond(request, cancellationToken);
             }
             catch (Exception e)
             {
                 
-                return requestConsumer.HandleException(request, e, cancellationToken);
+                return consumer.HandleException(request, e, cancellationToken);
             }
         }
         var handle = GetRequestHandle<TRequest, TResponse>(request, timeOut, cancellationToken);
@@ -140,7 +140,7 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
         {
             var logger = services.GetRequiredService<ILogger<BackEndMediator>>();
             LogTaskCancelled(logger, typeof(TRequest).Name, typeof(TResponse).Name);
-            return default!;
+            throw; //when we have discriminated unions, we could return a "TaskCanceledResponse" instead
         }
     }
 
@@ -169,7 +169,7 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
         {
             var logger = services.GetRequiredService<ILogger<BackEndMediator>>();
             LogTaskCancelled(logger, typeof(TRequest).Name, typeof(TResponse).Name);
-            return default!;
+            throw; //when we have discriminated unions, we could return a "TaskCanceledResponse" instead
         }
     }
 

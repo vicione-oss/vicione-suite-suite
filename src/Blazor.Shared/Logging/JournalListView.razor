@@ -11,14 +11,13 @@
     <div class="journal-top-bar">
         <Toolbar>
             <ToolbarGroup>
-                <ToolbarContent>
-                    @if (!_isRunningOnLinux)
-                    {
+                @if (!_isRunningOnLinux)
+                {
+                    <ToolbarContent>
                         @Localization.LogView.LogViewAvailableOnlyOnLinux
-                    }
-                </ToolbarContent>
-            </ToolbarGroup>
-            <ToolbarGroup>
+                    </ToolbarContent>                    
+                }                
+
                 @if (LoadMore is not null)
                 {
                     <ToolbarButton Text="@(string.Format(UserActions.LoadSomething, Localization.LogView.More))"

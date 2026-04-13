@@ -119,6 +119,8 @@ internal static class MassTransitConfiguration
                 busConfig.AddUIForwardingConsumers();
 
                 busConfig.AddInstanceDependentActions(instanceOptions, assembliesToScan);
+
+                busConfig.AddRequestConsumers(assembliesToScan);
             });
 
             // Remove MassTransitHostedService to manually control bus start in our ApplicationWorker
@@ -138,6 +140,25 @@ internal static class MassTransitConfiguration
                     cfg.ConfigureEndpoints(context);
                 });
             });
+
+        private void AddRequestConsumers(Assembly[] assembliesToScan)
+        {
+            if (assembliesToScan.Length == 0)
+                assembliesToScan = AppDomain.CurrentDomain.GetAssemblies();
+
+            var types = AssemblyTypeCache.FindTypes(assembliesToScan, RegistrationMetadata.IsConsumerOrDefinition).GetAwaiter().GetResult();
+
+            foreach (var consumerType in types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed))
+            {
+                if (consumerType.BaseType is { IsGenericType: true } baseType
+                    && (baseType.GetGenericTypeDefinition() == typeof(RequestConsumer<,>)
+                        || baseType.GetGenericTypeDefinition() == typeof(InstanceDependentRequestConsumer<,>))
+                    )
+                {
+                    services.AddScoped(baseType, consumerType);
+                }
+            }
+        }
     }
 
     private static void Configure<T>(IRegistrationContext context, T cfg, InstanceType instanceType)

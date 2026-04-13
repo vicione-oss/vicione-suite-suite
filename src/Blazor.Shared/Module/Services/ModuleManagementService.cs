@@ -67,14 +67,11 @@ internal sealed class ModuleManagementService : CompletionSourceHandlerBase<IMod
             return;
         }
 
-        try
-        {
-            await NotifyOperationsChanged(context.Message, cancellationToken);
-        }
-        finally
-        {
-            CompleteWithSuccess(context.Message.CorrelationId);
-        }
+        // we complete the command as soon as we receive the event
+        CompleteWithSuccess(context.Message.CorrelationId);
+
+        // we propagate non error changes to the subscribers of the service
+        await NotifyOperationsChanged(context.Message, cancellationToken);
     }
 
 
@@ -86,14 +83,11 @@ internal sealed class ModuleManagementService : CompletionSourceHandlerBase<IMod
             return;
         }
 
-        try
-        {
-            await NotifyOptionsChanged(context.Message, cancellationToken);
-        }
-        finally
-        {
-            CompleteWithSuccess(context.Message.CorrelationId);
-        }
+        // we complete the command as soon as we receive the event
+        CompleteWithSuccess(context.Message.CorrelationId);
+
+        // we propagate non error changes to the subscribers of the service
+        await NotifyOptionsChanged(context.Message, cancellationToken);
     }
 
     private async Task NotifyOperationsChanged(ModulePackageOperationsChanged change, CancellationToken cancellationToken)

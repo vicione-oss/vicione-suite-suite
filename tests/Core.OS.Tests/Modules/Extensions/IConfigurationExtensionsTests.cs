@@ -53,7 +53,6 @@ public sealed class IConfigurationExtensionsTests
             builder.AddInMemoryCollection(new Dictionary<string, string?>()
             {
                 { "ModuleLoader:AllowInstallation", "true" },
-                { "ModuleLoader:AllowPreReleases", "true" },
                 { "ModuleLoader:DumpMappingFilePath", "/path/to/context-dump" },
                 { "ModuleLoader:ManifestSeedPath", "/path/to/manifest-seed.json" },
                 { "ModuleLoader:ModulesPath", "/path/to/modules" },
