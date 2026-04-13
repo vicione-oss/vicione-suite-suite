@@ -19,7 +19,7 @@ internal static class LoggingConfiguration
         "[{Timestamp:dd.MM.yyyy HH:mm:ss.FFF zzz} {Level:u3}] {CorrelationId} {SourceContext} {NewLine}\t{Message:lj}{NewLine}{Exception}";
 
     private const string JournalLogtemplate =
-        "{#if SourceContext is not null}[{SourceContext}]{#if ModuleId is not null}({ModuleId}){#end} {#end}{@m}\n{@x}";
+        "{#if SourceContext is not null}[{SourceContext}]{#if ModuleId is not null}({ModuleId}){#end} {#end}{@m}{#if @x is not null}\n{@x}{#end}";
 
     private static readonly SerilogLogLevelSwitch _loggingLevelSwitch
         = new(new LoggingLevelSwitch(LogEventLevel.Warning));

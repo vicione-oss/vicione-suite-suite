@@ -49,12 +49,12 @@
     <PackageVersion Include="Semver" Version="3.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
-    <PackageVersion Include="Serilog.Sinks.Journal" Version="1.1.0" />
+    <PackageVersion Include="Serilog.Sinks.Journal" Version="1.2.0" />
     <PackageVersion Include="StronglyTypedId" Version="0.2.1" />
     <PackageVersion Include="System.IO.Abstractions" Version="22.1.0" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(DotNetVersion)" />
     <PackageVersion Include="TimeZoneNames" Version="7.0.0" />
-    <PackageVersion Include="ViciOne.Journal" Version="1.1.0" />
+    <PackageVersion Include="ViciOne.Journal" Version="1.2.0" />
     <PackageVersion Include="ViciOne.Suite.Sdk" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Backend" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Client" Version="$(ViciOneSuiteSdkVersion)" />

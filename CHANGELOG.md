@@ -48,10 +48,10 @@
 - `OpenTelemetry` packages, update to version `1.15.0`
 - `Riok.Mapperly` packages, update to version `4.3.1`
 - `Serilog.AspNetCore` packages, update to version `10.0.0`
-- `Serilog.Sinks.Journal` package, update to `1.1.0`
+- `Serilog.Sinks.Journal` package, update to `1.2.0`
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
-- `ViciOne.Journal` package, update to version `1.1.0`
+- `ViciOne.Journal` package, update to version `1.2.0`
 - `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2420388812`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.7.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
