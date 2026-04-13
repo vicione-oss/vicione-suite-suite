@@ -263,12 +263,12 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to parse suite artifact metadata name '{Name}'")]
     public static partial void LogFailedToParseSuiteArtifactMetadataName(ILogger logger, string name);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "HostManagement version '{Version}' is lower than minimum required version '{MinVersion}' for '{Name}'")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "HostManagement version '{Version}' is lower than minimum required version '{MinVersion}' for '{Name}'")]
     public static partial void LogHostManagementVersionLowerThanMinimum(ILogger logger, Version version, SemVersion minVersion, string name);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to find suite package for '{Name}'")]
     public static partial void LogFailedToFindSuitePackageFor(ILogger logger, string name);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to find suite package signature for '{Name}'")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Failed to find suite package signature for '{Name}'")]
     public static partial void LogFailedToFindSuitePackageSignatureFor(ILogger logger, string name);
 }

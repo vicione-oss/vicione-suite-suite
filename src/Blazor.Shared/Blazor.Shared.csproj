@@ -837,6 +837,7 @@
       <MonochromeIcon Include="email" Size="24" />
       <MonochromeIcon Include="error-full" Size="24" />
       <MonochromeIcon Include="error-light" Size="32;48" />
+      <MonochromeIcon Include="error-solid" Size="24" />
       <MonochromeIcon Include="exit" Size="16;32" />
       <MonochromeIcon Include="expander-light-down" Size="24" />
       <MonochromeIcon Include="expander-light-left" Size="48" />
@@ -893,7 +894,8 @@
       <MonochromeIcon Include="user-solid" Size="24" />
       <MonochromeIcon Include="warning" Size="24" />
       <MonochromeIcon Include="warning-full" Size="24" />
-      <MonochromeIcon Include="warning-light" Size="24;32;48" />
+      <MonochromeIcon Include="warning-light" Size="24;32;48" />      
+      <MonochromeIcon Include="warning-solid" Size="24" />
       <MonochromeIcon Include="wifi" Size="16" />
       <MonochromeIcon Include="wifi-off" Size="16" />
       <MonochromeIcon Include="wizard" Size="32" />

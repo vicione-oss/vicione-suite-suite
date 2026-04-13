@@ -61,17 +61,24 @@ public sealed class SystemConfigurationService : ISystemConfigurationService,
     public async Task Initialize(CancellationToken cancellationToken = default)
     {
         var request = new GetHostMgmtSystemConfiguration();
-        var response = await _mediator.Request<GetHostMgmtSystemConfiguration, GetHostMgmtSystemConfigurationResponse>(request, cancellationToken);
+        try
+        {
+            var response = await _mediator.Request<GetHostMgmtSystemConfiguration, GetHostMgmtSystemConfigurationResponse>(request, cancellationToken);
 
-        _logger.LogDebug("Initialized system configuration - error:{Error}", response.RequestError is not null);
+            _logger.LogDebug("Initialized system configuration - error:{Error}", response.RequestError is not null);
 
-        if (response.RequestError is not null)
-            throw new InvalidOperationException($"Requesting system configuration failed - {response.RequestError.Message}");
+            if (response.RequestError is not null)
+                throw new InvalidOperationException($"Requesting system configuration failed - {response.RequestError.Message}");
 
-        if (response.Configuration is null)
-            throw new InvalidOperationException($"Requesting system configuration failed - configuration is not set");
+            if (response.Configuration is null)
+                throw new InvalidOperationException($"Requesting system configuration failed - configuration is not set");
 
-        await SetSystemConfiguration(response.Configuration);
+            await SetSystemConfiguration(response.Configuration);
+        }
+        catch (OperationCanceledException)
+        {
+            // nothing to do. Will be logged by the mediator
+        }
     }
 
     public void Dispose()

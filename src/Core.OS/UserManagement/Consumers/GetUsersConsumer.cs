@@ -14,7 +14,7 @@ public sealed class GetUsersConsumer(UserManager<SuiteUser> userManager, ILogger
 {
     public override async Task<GetUsersResponse> Respond(GetUsers message, CancellationToken cancellationToken)
     {
-        if (message.UserName.HasValue)
+        if (message.UserName?.Value is not null)
         {
             var suiteUser = await userManager.FindByNameAsync(message.UserName.Value.Value);
             if (suiteUser is null)

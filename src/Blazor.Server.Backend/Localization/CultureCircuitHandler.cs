@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Blazor.Shared;
 using Core.Shared.Instance.Requests;
 using Core.Shared.UserManagement.Contracts;
@@ -16,7 +16,8 @@ public sealed class CultureCircuitHandler(IServiceProvider serviceProvider) : Ci
 {
     public override async Task OnConnectionUpAsync(Circuit circuit, CancellationToken cancellationToken)
     {
-        await using var scope = serviceProvider.CreateAsyncScope(); // new Scope is needed sometimes
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var logger = scope.ServiceProvider.GetService<ILogger<CultureCircuitHandler>>();
 
         try
         {
@@ -28,7 +29,7 @@ public sealed class CultureCircuitHandler(IServiceProvider serviceProvider) : Ci
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SuiteUser>>();
             var userName = userManager.GetUserName(httpContext.User);
-            if (userName is null)
+            if (userName is null || cancellationToken.IsCancellationRequested)
                 return;
 
             var cache = scope.ServiceProvider.GetRequiredService<IMemoryCache>();
@@ -43,6 +44,9 @@ public sealed class CultureCircuitHandler(IServiceProvider serviceProvider) : Ci
                     cache.Set(cacheKey, cultureString);
                 }
             }
+
+            if (cancellationToken.IsCancellationRequested)
+                return;
 
             if (cultureString is null) // no user-override
             {
@@ -66,7 +70,6 @@ public sealed class CultureCircuitHandler(IServiceProvider serviceProvider) : Ci
         }
         catch (Exception ex)
         {
-            var logger = scope.ServiceProvider.GetService<ILogger<CultureCircuitHandler>>();
             logger?.LogError(ex, "Failed to set culture on circuit connection up.");
         }
     }

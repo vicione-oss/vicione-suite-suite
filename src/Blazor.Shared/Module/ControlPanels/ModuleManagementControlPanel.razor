@@ -82,7 +82,7 @@
                         }
 
                         @if (context.Bundle.IsDebugSource)
-                        {                            
+                        {
                             <div title="@Localization.ModuleManagementControlPanel.ModuleLoadedFromDebugPath" class="icon-wrapper">
                                 <MonochromeIcon Name="MonochromeIconName.BugLight" Size="MonochromeIconSize.SmallMedium" />
                             </div>
@@ -96,7 +96,7 @@
                         }
 
                         @if (context.HasError)
-                        {                            
+                        {
                             <div title="@context.GetErrorTooltip()" class="icon-wrapper">
                                 <MonochromeIcon Name="MonochromeIconName.ErrorSolid" Size="MonochromeIconSize.SmallMedium" />
                             </div>
@@ -115,95 +115,98 @@
     </div>
 </ControlPanelPage>
 
-<ControlPanelPage Title="@CommonVocabulary.BrowseVerb">
-    
-    <div class="available-modules-control-panel-page">
-        <DescriptionBanner Title="@Localization.ModuleManagementControlPanel.BrowseModules">
-            @Localization.ModuleManagementControlPanel.BrowseModulesBanner
-        </DescriptionBanner>
-    
-        <Grid Items="@FilterAvailableItems(State.AvailableModules)" Virtualize="true" CssClass="available-modules-grid">
-            <ActionButtons>
-                <div style="display:contents;">                    
-                    <GridActionButton Text="@CommonVocabulary.InstallVerb"
-                                      OnClick="InstallSelectedAvailableModules"
-                                      IconCssClass="@_installIconCssClasses"
-                                      Enabled="@CanInstallSelectedAvailableModules()" />
+@if (State.AllowInstallation)
+{
+    <ControlPanelPage Title="@CommonVocabulary.BrowseVerb">
 
-                    <GridActionButton Text="@CommonVocabulary.ResetVerb"
-                                      OnClick="@(async () => await ResetAvailableSelectedModules())"
-                                      IconCssClass="@_uninstallIconCssClasses"
-                                      Enabled="@CanResetAvailableSelectedModules()" />
+        <div class="available-modules-control-panel-page">
+            <DescriptionBanner Title="@Localization.ModuleManagementControlPanel.BrowseModules">
+                @Localization.ModuleManagementControlPanel.BrowseModulesBanner
+            </DescriptionBanner>
 
-                    <GridActionButton Text="@CommonVocabulary.RefreshVerb"
-                                      OnClick="@(async () => await LoadAvailableModuleVersions(true))"
-                                      IconCssClass="@_reloadIconCssClasses"
-                                      Enabled="@(!State.IsLoading)"/>
+            <Grid Items="@FilterAvailableItems(State.AvailableModules)" Virtualize="true" CssClass="available-modules-grid">
+                <ActionButtons>
+                    <div style="display:contents;">
+                        <GridActionButton Text="@CommonVocabulary.InstallVerb"
+                                          OnClick="InstallSelectedAvailableModules"
+                                          IconCssClass="@_installIconCssClasses"
+                                          Enabled="@CanInstallSelectedAvailableModules()" />
 
-                    <GridActionButton Text="@CommonVocabulary.Restart"
-                                      OnClick="@(() => _dialogVisible = true)"
-                                      IconCssClass="@_restartIconCssClasses" />
-                </div>
-            </ActionButtons>
+                        <GridActionButton Text="@CommonVocabulary.ResetVerb"
+                                          OnClick="@(async () => await ResetAvailableSelectedModules())"
+                                          IconCssClass="@_uninstallIconCssClasses"
+                                          Enabled="@CanResetAvailableSelectedModules()" />
 
-            <Filter>
-                <GridFilterControl @bind-Text="@State.AvailableFilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
-            </Filter>
+                        <GridActionButton Text="@CommonVocabulary.RefreshVerb"
+                                          OnClick="@(async () => await LoadAvailableModuleVersions(true))"
+                                          IconCssClass="@_reloadIconCssClasses"
+                                          Enabled="@(!State.IsLoading)" />
 
-            <ChildContent>
-                <ItemSelectColumn KeySelector="@(item => item)"
-                                  Selection="@AvailableModuleSelection" />
+                        <GridActionButton Text="@CommonVocabulary.Restart"
+                                          OnClick="@(() => _dialogVisible = true)"
+                                          IconCssClass="@_restartIconCssClasses" />
+                    </div>
+                </ActionButtons>
 
-                <PropertyColumn Title="@CommonVocabulary.Name"
-                                Property="@(i => i.Name)"
-                                Sortable="true" />
+                <Filter>
+                    <GridFilterControl @bind-Text="@State.AvailableFilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
+                </Filter>
 
-                <PropertyColumn Title="@Localization.ModuleManagementControlPanel.LatestVersion"
-                                Property="@(i => i.LatestVersion)" />
+                <ChildContent>
+                    <ItemSelectColumn KeySelector="@(item => item)"
+                                      Selection="@AvailableModuleSelection" />
 
-                <TemplateColumn Title="@CommonVocabulary.Status">
-                    <div class="status-wrapper">
-                            
-                        @if (context.PendingOperation is not null)
-                        {
-                            @if (context.PendingOperation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Install)
+                    <PropertyColumn Title="@CommonVocabulary.Name"
+                                    Property="@(i => i.Name)"
+                                    Sortable="true" />
+
+                    <PropertyColumn Title="@Localization.ModuleManagementControlPanel.LatestVersion"
+                                    Property="@(i => i.LatestVersion)" />
+
+                    <TemplateColumn Title="@CommonVocabulary.Status">
+                        <div class="status-wrapper">
+
+                            @if (context.PendingOperation is not null)
                             {
-                                <div title="@context.GetInstallOrUpdateTooltip()" class="icon-wrapper">
-                                    <MonochromeIcon Name="MonochromeIconName.InstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
+                                @if (context.PendingOperation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Install)
+                                {
+                                    <div title="@context.GetInstallOrUpdateTooltip()" class="icon-wrapper">
+                                        <MonochromeIcon Name="MonochromeIconName.InstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
+                                    </div>
+                                }
+                            }
+
+                            @if (context.MissingDependencies.Count > 0)
+                            {
+                                <div title="@context.GetMissingDependenciesTooltip()" class="icon-wrapper">
+                                    <MonochromeIcon Name="MonochromeIconName.InfoOutlined" Size="MonochromeIconSize.SmallMedium" />
                                 </div>
                             }
-                        }
+                        </div>
+                    </TemplateColumn>
 
-                        @if (context.MissingDependencies.Count > 0)
-                        {
-                            <div title="@context.GetMissingDependenciesTooltip()" class="icon-wrapper">
-                                <MonochromeIcon Name="MonochromeIconName.InfoOutlined" Size="MonochromeIconSize.SmallMedium" />
-                            </div>
-                        }
-                    </div>
-                </TemplateColumn>
+                    <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                      Navigate="@((ModuleMetadataModel model) => ShowDetailsAsync(model))" />
+                </ChildContent>
 
-                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
-                                  Navigate="@((ModuleMetadataModel model) => ShowDetailsAsync(model))" />
-            </ChildContent>
+                <Footer>
+                    <SelectionFooter GridSelection="@AvailableModuleSelection" />
+                </Footer>
+            </Grid>
 
-            <Footer>
-                <SelectionFooter GridSelection="@AvailableModuleSelection" />
-            </Footer>
-        </Grid>
-
-        <SettingsLayout>
-            @if (State.RequestErrorCode > 0)
-            {
-                <SettingsGroup Title="@Localization.ModuleManagementControlPanel.ModuleApiError">
-                    <SettingsInformation>
-                        @State.RequestErrorMessage
-                    </SettingsInformation>
-                </SettingsGroup>
-            }
-        </SettingsLayout>
-    </div>
-</ControlPanelPage>
+            <SettingsLayout>
+                @if (State.RequestErrorCode > 0)
+                {
+                    <SettingsGroup Title="@Localization.ModuleManagementControlPanel.ModuleApiError">
+                        <SettingsInformation>
+                            @State.RequestErrorMessage
+                        </SettingsInformation>
+                    </SettingsGroup>
+                }
+            </SettingsLayout>
+        </div>
+    </ControlPanelPage>
+}
 
 <ConfirmCancelDialog HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
                      OnConfirm="@RestartSuite"

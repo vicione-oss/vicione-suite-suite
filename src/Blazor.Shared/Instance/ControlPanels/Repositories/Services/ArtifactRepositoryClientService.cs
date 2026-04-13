@@ -54,14 +54,9 @@ internal sealed class ArtifactRepositoryClientService : CompletionSourceHandlerB
             return;
         }
 
-        try
-        {
-            await NotifyRepositoryChanged(context.Message.Repository, context.Message.Action);
-        }
-        finally
-        {
-            CompleteWithSuccess(context.Message.CorrelationId);
-        }
+        CompleteWithSuccess(context.Message.CorrelationId);
+
+        await NotifyRepositoryChanged(context.Message.Repository, context.Message.Action);
     }
 
     protected override IArtifactRepositoryServiceResult CreateSuccessResult()
