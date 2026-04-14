@@ -1,0 +1,39 @@
+@using Blazor.Shared.UserManagement.ControlPanels.User.Models
+@using Blazor.Shared.UserManagement.ControlPanels.User.Services
+@using ViciOne.Ui.Blazor.Components.ComboBox
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+
+<ControlPanelPage Title="@CommonVocabulary.RolePlural">
+    <div class="roles-control-panel-page">
+        <DescriptionBanner Title="@Localization.UserControlPanel.RolesDescriptionBannerTitle">
+            @Localization.UserControlPanel.RolesDescriptionBannerContent
+        </DescriptionBanner>
+
+        <Grid Items="@_assignedUserRoles" Virtualize="true" CssClass="roles-grid">
+            <ActionButtons>
+                @if (State.AvailableUserRoles?.Any() == true)
+                {
+                    <ComboBox Items="@State.AvailableUserRoles" @bind-Value="State.RoleToAdd" />
+                    <AddGridActionButton OnClick="@AddToRole" Enabled="@(State.RoleToAdd != null)"/>
+                }
+                <DeleteGridActionButton Enabled="@_deleteRoleActionButtonEnabled" OnClick="@RemoveSelectedRoles" />
+            </ActionButtons>
+
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item)" Selection="@RolesGridItemSelection" />
+
+                <TemplateColumn Title="@CommonVocabulary.RolePlural">
+                    @context
+                </TemplateColumn>
+            </ChildContent>
+
+            <Footer>
+                <SelectionFooter GridSelection="RolesGridItemSelection" />
+            </Footer>
+        </Grid>
+    </div>
+</ControlPanelPage>
