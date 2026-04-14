@@ -80,20 +80,19 @@
                                 </div>
                             }
                         }
+                        else if (context.CanUpdate)
+                        {
+                            <div title="@context.GetUpdateAvailableTooltip()" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.UpdateAvailableLight" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
 
                         @if (context.Bundle.IsDebugSource)
                         {
                             <div title="@Localization.ModuleManagementControlPanel.ModuleLoadedFromDebugPath" class="icon-wrapper">
                                 <MonochromeIcon Name="MonochromeIconName.BugLight" Size="MonochromeIconSize.SmallMedium" />
                             </div>
-                        }
-                        
-                        @if (context.CanUpdate)
-                        {
-                            <div title="@context.GetUpdateAvailableTooltip()" class="icon-wrapper">
-                                <MonochromeIcon Name="MonochromeIconName.UpdateAvailableLight" Size="MonochromeIconSize.SmallMedium" />
-                            </div>
-                        }
+                        }                        
 
                         @if (context.HasError)
                         {
