@@ -154,6 +154,7 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
                 continue;
 
             existing.AvailableVersions.Add(metadata.Version);
+            existing.CanUpdate = existing.Installed;    // it's installed and we have at least one update version
         }
 
         foreach (var bundle in result)
@@ -168,8 +169,8 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
             // todo - this sorting could maybe done by api query
             bundle.AvailableVersions.Sort((x, y) =>
             {
-                SemVersion.TryParse(x, out var xSemVer);
-                SemVersion.TryParse(y, out var ySemVer);
+                _ = SemVersion.TryParse(x, out var xSemVer);
+                _ = SemVersion.TryParse(y, out var ySemVer);
                 return CompareSemVersions(ySemVer, xSemVer); // descending
             });
         }

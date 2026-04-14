@@ -1,4 +1,4 @@
-﻿@using Blazor.Shared.MessageBanner.Components
+@using Blazor.Shared.MessageBanner.Components
 @using Blazor.Shared.Settings.Components
 @using Blazor.Shared.UserManagement.Components
 @using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
@@ -19,7 +19,6 @@
     }
 
     <div class="layout-main-body">
-        <LoadingSpinner Visible="@LayoutService.IsLoadingOverlayVisible" />
 
         <AdvancedErrorBoundary PrepareRecover="@OnPrepareRecover">
             <ChildContent>
@@ -27,6 +26,7 @@
             </ChildContent>
         </AdvancedErrorBoundary>
 
+        <LoadingSpinner Visible="@LayoutService.IsLoadingOverlayVisible" />
         <MessageBannerDialog />
         <MasterHealthObserver />
         <SystemRestartObserver />
