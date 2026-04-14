@@ -1,21 +1,8 @@
-﻿@using Blazor.Shared.Localization
-@using Blazor.Shared.UserManagement.Components
-@using Blazor.Shared.UserManagement.ControlPanels.User.Models
+@using Blazor.Shared.Localization
 @using Blazor.Shared.UserManagement.ControlPanels.User.Services
-@using Blazor.Shared.UserManagement.Models
 @using Labels = Blazor.Shared.UserManagement.Localization.Labels;
-@using Microsoft.AspNetCore.Components.Forms
 @using Sdk.Client.Components.Settings.Expanders
-@using ViciOne.Ui.Blazor.Components.ComboBox
-@using ViciOne.Ui.Blazor.Components.Grid.Components
-@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
-@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
-@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
-@using ViciOne.Ui.Blazor.Components.Switch
 @using ViciOne.Ui.Localization.Resources
-@using ViciOne.Ui.MonochromeIcons.Components
-@using ViciOne.Ui.MonochromeIcons.Core.Enums
-@using ViciOne.Ui.Shared.Dx.Components
 
 @inherits ControlPanelBase<UserControlPanelState>
 
@@ -127,36 +114,7 @@
     </SettingsLayout>
 </ControlPanelPage>
 
-<ControlPanelPage Title="@CommonVocabulary.RolePlural">
-    <div class="roles-control-panel-page">
-        <DescriptionBanner Title="@Localization.UserControlPanel.RolesDescriptionBannerTitle">
-            @Localization.UserControlPanel.RolesDescriptionBannerContent
-        </DescriptionBanner>
-
-        <Grid Items="@_assignedUserRoles" Virtualize="true" CssClass="roles-grid">
-            <ActionButtons>
-                @if (State.AvailableUserRoles?.Any() == true)
-                {
-                    <ComboBox Items="@State.AvailableUserRoles" @bind-Value="State.RoleToAdd" />
-                    <AddGridActionButton OnClick="@AddToRole" Enabled="@(State.RoleToAdd != null)"/>
-                }
-                <DeleteGridActionButton Enabled="@_deleteRoleActionButtonEnabled" OnClick="@RemoveSelectedRoles" />
-            </ActionButtons>
-
-            <ChildContent>
-                <ItemSelectColumn KeySelector="@(item => item)" Selection="@RolesGridItemSelection" />
-
-                <TemplateColumn Title="@CommonVocabulary.RolePlural">
-                    @context
-                </TemplateColumn>
-            </ChildContent>
-
-            <Footer>
-                <SelectionFooter GridSelection="RolesGridItemSelection" />
-            </Footer>
-        </Grid>
-    </div>
-</ControlPanelPage>
+<UserRolesControlPanelPage State="State" OnEdit="BeginEdit" />
 
 @* Commented-out sections are part of the UI design, but have no functionality until implemented *@
 
@@ -166,16 +124,7 @@
 @*     </DescriptionBanner> *@
 @* </ControlPanelPage> *@
 
-<ControlPanelPage Title="@TechnicalTerms.PermissionPlural">
-    <DescriptionBanner Title="@(string.Format(Localization.UserControlPanel.PermissionsDescriptionBannerTitle, State.UserName))">
-        @Localization.UserControlPanel.PermissionsDescriptionBannerContent
-    </DescriptionBanner>
-
-    <PermissionGrid Items="State.FilteredGridItems"
-                    @bind-Filter="State.FilterText"
-                    @bind-Filter:after="State.UpdateGridItems"
-                    AccessLevelChanged="@(async (i) => await AccessLevelChangedAsync(i))" />
-</ControlPanelPage>
+<UserPermissionsControlPanelPage State="State" OnEdit="BeginEdit" />
 
 @* <ControlPanelPage Title="@CommonVocabulary.DevicePlural"> *@
 @*     <DescriptionBanner Title="@Localization.UserControlPanel.DevicesDescriptionBannerTitle"> *@

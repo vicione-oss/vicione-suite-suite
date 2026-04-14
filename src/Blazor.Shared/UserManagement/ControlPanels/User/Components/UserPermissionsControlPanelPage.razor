@@ -1,0 +1,14 @@
+@using Blazor.Shared.UserManagement.Components
+@using Blazor.Shared.UserManagement.ControlPanels.User.Services
+@using ViciOne.Ui.Localization.Resources
+
+<ControlPanelPage Title="@TechnicalTerms.PermissionPlural">
+    <DescriptionBanner Title="@(string.Format(Localization.UserControlPanel.PermissionsDescriptionBannerTitle, State.UserName))">
+        @Localization.UserControlPanel.PermissionsDescriptionBannerContent
+    </DescriptionBanner>
+
+    <PermissionGrid Items="State.FilteredGridItems"
+                    @bind-Filter="State.FilterText"
+                    @bind-Filter:after="State.UpdateGridItems"
+                    AccessLevelChanged="@(async (i) => await AccessLevelChangedAsync(i))" />
+</ControlPanelPage>
