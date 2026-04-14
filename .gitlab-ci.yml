@@ -462,43 +462,43 @@ Publish only:
   rules: *rules_common_manual
   dependencies: []
 
-Start DigitalOcean:
-  extends: .mise-only
-  stage: review
-  script:
-    - !reference [.update_nuget_source_ro]
-    - *patch_version
-    # set execution permission
-    - chmod +x build/review.sh
-    # create / update the review instance
-    - build/review.sh
-  artifacts:
-    paths:
-      - debug.pub
-      - debug
-    reports:
-      dotenv: deploy.env
-  rules: *rules_common_manual
-  dependencies: []
-  environment:
-    name: review/$CI_COMMIT_REF_SLUG
-    url: https://$DROPLET_IP
-    on_stop: Stop DigitalOcean
-    auto_stop_in: 1 day
+# Start DigitalOcean:
+#   extends: .mise-only
+#   stage: review
+#   script:
+#     - !reference [.update_nuget_source_ro]
+#     - *patch_version
+#     # set execution permission
+#     - chmod +x build/review.sh
+#     # create / update the review instance
+#     - build/review.sh
+#   artifacts:
+#     paths:
+#       - debug.pub
+#       - debug
+#     reports:
+#       dotenv: deploy.env
+#   rules: *rules_common_manual
+#   dependencies: []
+#   environment:
+#     name: review/$CI_COMMIT_REF_SLUG
+#     url: https://$DROPLET_IP
+#     on_stop: Stop DigitalOcean
+#     auto_stop_in: 1 day
 
-Stop DigitalOcean:
-  extends: .minimal
-  stage: review
-  script:
-    # set execution permission
-    - chmod +x build/review.sh
-    # destroy the environment
-    - build/review.sh --stop-review
-  rules: *rules_common_manual
-  dependencies: []
-  environment:
-    name: review/$CI_COMMIT_REF_SLUG
-    action: stop
+# Stop DigitalOcean:
+#   extends: .minimal
+#   stage: review
+#   script:
+#     # set execution permission
+#     - chmod +x build/review.sh
+#     # destroy the environment
+#     - build/review.sh --stop-review
+#   rules: *rules_common_manual
+#   dependencies: []
+#   environment:
+#     name: review/$CI_COMMIT_REF_SLUG
+#     action: stop
 
 Cleanup orphanded deployments:
   extends: .minimal
@@ -529,104 +529,104 @@ Prepare Host for new Snapshot:
 # Base template for all permanent deployment targets.
 # Override DEPLOY_HOST, DEPLOY_ENV, and optionally DEPLOY_PLATFORM (defaults to x64)
 # and PRESERVE_DATA (set to "true" to pass --preserve-data).
-.deploy-base:
-  extends: .mise-only
-  stage: deploy
-  cache: []
-  script:
-    - !reference [.update_nuget_source_ro]
-    - *patch_version
-    - chmod +x build/deploy.sh
-    - |
-      PRESERVE_DATA_PARAM=''
-      if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi
-      PLATFORM_PARAM=''
-      if [[ -n "${DEPLOY_PLATFORM}" ]]; then PLATFORM_PARAM="--platform ${DEPLOY_PLATFORM}"; fi
-      build/deploy.sh --host "${DEPLOY_HOST}" --environment "${DEPLOY_ENV}" ${PLATFORM_PARAM} ${PRESERVE_DATA_PARAM}
-  rules:
-    - <<: *rules_tag_manual
-    - <<: *rules_default_branch_manual
-    - <<: *rules_merge_request_manual
-    - <<: *rules_web_manual
-  dependencies: []
+# .deploy-base:
+#   extends: .mise-only
+#   stage: deploy
+#   cache: []
+#   script:
+#     - !reference [.update_nuget_source_ro]
+#     - *patch_version
+#     - chmod +x build/deploy.sh
+#     - |
+#       PRESERVE_DATA_PARAM=''
+#       if [[ "${PRESERVE_DATA}" == 'true' ]]; then PRESERVE_DATA_PARAM='--preserve-data'; fi
+#       PLATFORM_PARAM=''
+#       if [[ -n "${DEPLOY_PLATFORM}" ]]; then PLATFORM_PARAM="--platform ${DEPLOY_PLATFORM}"; fi
+#       build/deploy.sh --host "${DEPLOY_HOST}" --environment "${DEPLOY_ENV}" ${PLATFORM_PARAM} ${PRESERVE_DATA_PARAM}
+#   rules:
+#     - <<: *rules_tag_manual
+#     - <<: *rules_default_branch_manual
+#     - <<: *rules_merge_request_manual
+#     - <<: *rules_web_manual
+#   dependencies: []
 
-Cloud master:
-  extends: .deploy-base
-  variables:
-    DEPLOY_HOST: "159.89.13.71"
-    DEPLOY_ENV: "Master"
-  environment:
-    name: deployments/cloud-master
-    url: https://159.89.13.71
+# Cloud master:
+#   extends: .deploy-base
+#   variables:
+#     DEPLOY_HOST: "159.89.13.71"
+#     DEPLOY_ENV: "Master"
+#   environment:
+#     name: deployments/cloud-master
+#     url: https://159.89.13.71
 
-Cloud presentation:
-  extends: .deploy-base
-  variables:
-    DEPLOY_HOST: "167.71.50.41"
-    DEPLOY_ENV: "Standalone"
-    PRESERVE_DATA: "true"
-  environment:
-    name: deployments/cloud-presentation
-    url: https://167.71.50.41
+# Cloud presentation:
+#   extends: .deploy-base
+#   variables:
+#     DEPLOY_HOST: "167.71.50.41"
+#     DEPLOY_ENV: "Standalone"
+#     PRESERVE_DATA: "true"
+#   environment:
+#     name: deployments/cloud-presentation
+#     url: https://167.71.50.41
 
-Internal slave01:
-  extends: .deploy-base
-  variables:
-    DEPLOY_HOST: "10.45.24.192"
-    DEPLOY_ENV: "Slave"
-  environment:
-    name: deployments/internal-slave01
-    url: https://10.45.24.192
+# Internal slave01:
+#   extends: .deploy-base
+#   variables:
+#     DEPLOY_HOST: "10.45.24.192"
+#     DEPLOY_ENV: "Slave"
+#   environment:
+#     name: deployments/internal-slave01
+#     url: https://10.45.24.192
 
-Internal minimal:
-  extends: .deploy-base
-  variables:
-    DEPLOY_HOST: "10.45.24.155"
-    DEPLOY_ENV: "Minimal"
-    DEPLOY_PLATFORM: "linux-arm64"
-  environment:
-    name: deployments/minimal
-    url: https://10.45.24.155
+# Internal minimal:
+#   extends: .deploy-base
+#   variables:
+#     DEPLOY_HOST: "10.45.24.155"
+#     DEPLOY_ENV: "Minimal"
+#     DEPLOY_PLATFORM: "linux-arm64"
+#   environment:
+#     name: deployments/minimal
+#     url: https://10.45.24.155
 
-Internal ec20-4 server 1:
-  extends: .deploy-base
-  variables:
-    DEPLOY_HOST: "10.45.24.156"
-    DEPLOY_ENV: "Standalone"
-    DEPLOY_PLATFORM: "linux-arm64"
-  environment:
-    name: deployments/internal-ec20-4-server-1
-    url: https://10.45.24.156
+# Internal ec20-4 server 1:
+#   extends: .deploy-base
+#   variables:
+#     DEPLOY_HOST: "10.45.24.156"
+#     DEPLOY_ENV: "Standalone"
+#     DEPLOY_PLATFORM: "linux-arm64"
+#   environment:
+#     name: deployments/internal-ec20-4-server-1
+#     url: https://10.45.24.156
 
-Internal ec20-4 server 2:
-  extends: .deploy-base
-  variables:
-    DEPLOY_HOST: "10.45.24.157"
-    DEPLOY_ENV: "Standalone"
-    DEPLOY_PLATFORM: "linux-arm64"
-  environment:
-    name: deployments/internal-ec20-4-server-2
-    url: https://10.45.24.157
+# Internal ec20-4 server 2:
+#   extends: .deploy-base
+#   variables:
+#     DEPLOY_HOST: "10.45.24.157"
+#     DEPLOY_ENV: "Standalone"
+#     DEPLOY_PLATFORM: "linux-arm64"
+#   environment:
+#     name: deployments/internal-ec20-4-server-2
+#     url: https://10.45.24.157
 
-Internal ec20-4 server 3:
-  extends: .deploy-base
-  variables:
-    DEPLOY_HOST: "10.45.24.158"
-    DEPLOY_ENV: "Standalone"
-    DEPLOY_PLATFORM: "linux-arm64"
-  environment:
-    name: deployments/internal-ec20-4-server-3
-    url: https://10.45.24.158
+# Internal ec20-4 server 3:
+#   extends: .deploy-base
+#   variables:
+#     DEPLOY_HOST: "10.45.24.158"
+#     DEPLOY_ENV: "Standalone"
+#     DEPLOY_PLATFORM: "linux-arm64"
+#   environment:
+#     name: deployments/internal-ec20-4-server-3
+#     url: https://10.45.24.158
 
-Internal rpi5 server 1:
-  extends: .deploy-base
-  variables:
-    DEPLOY_HOST: "10.45.24.201"
-    DEPLOY_ENV: "Standalone"
-    DEPLOY_PLATFORM: "linux-arm64"
-  environment:
-    name: deployments/internal-rpi5-server-1
-    url: https://10.45.24.201
+# Internal rpi5 server 1:
+#   extends: .deploy-base
+#   variables:
+#     DEPLOY_HOST: "10.45.24.201"
+#     DEPLOY_ENV: "Standalone"
+#     DEPLOY_PLATFORM: "linux-arm64"
+#   environment:
+#     name: deployments/internal-rpi5-server-1
+#     url: https://10.45.24.201
 
 # TODO: Remove after migration - internal JFrog no longer accessible
 # Docker jFrog dev release:
