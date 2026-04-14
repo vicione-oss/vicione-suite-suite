@@ -31,6 +31,7 @@
         <Copyright>Copyright © $(Company) $(Year)</Copyright>
         <NeutralLanguage>en-US</NeutralLanguage>
         <SatelliteResourceLanguages>en;de</SatelliteResourceLanguages>
+        <RunSettingsFilePath>$(MSBuildThisFileDirectory)tests.runsettings</RunSettingsFilePath>
         <!-- code quality -->
         <WarningsNotAsErrors>612,618</WarningsNotAsErrors>
         <NoWarn Condition="'$(CI)' == ''">$(NoWarn);NU1507</NoWarn>
