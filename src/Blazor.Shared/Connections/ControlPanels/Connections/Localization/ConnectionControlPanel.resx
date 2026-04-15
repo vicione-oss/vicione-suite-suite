@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -146,5 +146,11 @@
   </data>
   <data name="Managed" xml:space="preserve">
     <value>Managed</value>
+  </data>
+  <data name="ConnectionDetails" xml:space="preserve">
+    <value>Connection details</value>
+  </data>
+  <data name="ConnectionDetailsForSpecificConnection" xml:space="preserve">
+    <value>{0} connection details</value>
   </data>
 </root>
