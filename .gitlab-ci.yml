@@ -1,5 +1,5 @@
 default:
-  image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-latest
+  image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
   tags:
     - saas-linux-large-amd64
   # Cache configuration provided by cache-config component
@@ -99,7 +99,7 @@ include:
         - RUNNER_ARCH: [arm64, amd64]
       tags:
         - saas-linux-large-$RUNNER_ARCH
-      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-latest
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
       filter: 'Category!=System & Category!=ManualDbTest & Category!=Integration'
       coverage_report_pattern: 'artifacts/tests/**/coverage.cobertura.xml'
       test_report_pattern: 'artifacts/tests/*-test-report.xml'
