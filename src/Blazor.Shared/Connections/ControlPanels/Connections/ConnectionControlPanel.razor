@@ -51,13 +51,15 @@
 
         @if (State.EditConnectionModel.TypedConnection is not null)
         {
-            <SettingsGroup Title="@(connectionTypeUiRegistry.TryGetDisplayName(State.EditConnectionModel.Type, out var displayName) ? displayName : string.Empty)" Expanded="true">
+            <SettingsGroup Title="@GetTitleOfConnectionDetails()" Expanded="true">
                 <Expander>
+                    @if (!State.ConnectionId.HasValue)
+                    {
                         <ComboBoxExpander Items="@_connectionTypes"
-                                          ReadOnly="@State.ConnectionId.HasValue"
                                           ValueSelector="@(i => i.Value)"
                                           TextSelector="@(i => i.Text)"
                                           @bind-Value="@State.EditConnectionModel.Type" />
+                    }
                 </Expander>
 
                 <ChildContent>

@@ -1,10 +1,15 @@
+using System.Globalization;
+using Blazor.Shared.Connections.Contracts;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.Connections;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
+using Sdk.Client.Infrastructure;
 using Sdk.Connections.Contracts;
+using Sdk.Connections.Events;
+using Sdk.Messaging;
 using ViciOne.Ui.Blazor.Components.ComboBox;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Extensions;
@@ -12,17 +17,20 @@ using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 namespace Blazor.Shared.Connections.ControlPanels.Connections;
 
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
-public sealed partial class ConnectionControlPanel(IConnectionTypeRegistry connectionTypeRegistry, IConnectionTypeUiRegistry connectionTypeUiRegistry) : ControlPanelBase<ConnectionControlPanelState>
+public sealed partial class ConnectionControlPanel(IUiMediator mediator, IConnectionTypeRegistry connectionTypeRegistry, IConnectionTypeUiRegistry connectionTypeUiRegistry) : ControlPanelBase<ConnectionControlPanelState>, IEventConsumer<ConnectionChanged>
 {
     private readonly string _descriptionBannerIconCssClass = MonochromeIconName.Connectivity.GetCssClasses().ToSpaceSeparated();
     private readonly List<ComboBoxItem<ConnectionType, string>> _connectionTypes = connectionTypeRegistry.GetConnectionTypes().Select(e => new ComboBoxItem<ConnectionType, string>() { Text = connectionTypeUiRegistry.TryGetDisplayName(e, out var displayName) ? displayName : e, Value = new ConnectionType(e) }).ToList();
     private readonly Dictionary<string, object> _connectionSettingsComponentParameters = [];
+    private IDisposable? _subscriptionHandle;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        _connectionSettingsComponentParameters.Add(nameof(ConnectionSettingsComponentBase<MqttConnection>.Changed),
+        _subscriptionHandle = mediator.Register(this);
+
+        _connectionSettingsComponentParameters.Add(nameof(ConnectionSettingsComponentBase<>.Changed),
             EventCallback.Factory.Create(this, ConnectionSettingsChanged));
     }
 
@@ -65,5 +73,41 @@ public sealed partial class ConnectionControlPanel(IConnectionTypeRegistry conne
             await BeginEdit();
             break;
         }
+    }
+
+    private string GetTitleOfConnectionDetails()
+    {
+        if (State.EditConnectionModel is null ||
+            !State.ConnectionId.HasValue ||
+            !connectionTypeUiRegistry.TryGetDisplayName(State.EditConnectionModel.Type, out var displayName) ||
+            string.IsNullOrEmpty(displayName))
+        {
+            return Localization.ConnectionControlPanel.ConnectionDetails;
+        }
+
+        return string.Format(CultureInfo.CurrentCulture, Localization.ConnectionControlPanel.ConnectionDetailsForSpecificConnection, displayName);
+    }
+
+    public async Task Consume(ClientContext<ConnectionChanged> context, CancellationToken cancellationToken)
+    {
+        if (context.Message.Connection.Id != State.EditConnectionModel?.Connection.Id ||
+            context.Message.ErrorInfo is not null)
+        {
+            return;
+        }
+
+        if (context.Message.Action is CrudAction.Created or CrudAction.Updated)
+        {
+            State.ConnectionId = context.Message.Connection.Id;
+            State.EditConnectionModel = new EditConnectionModel(context.Message.Connection, connectionTypeRegistry);
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    protected override ValueTask DisposeAsyncCore()
+    {
+        _subscriptionHandle?.Dispose();
+
+        return base.DisposeAsyncCore();
     }
 }
