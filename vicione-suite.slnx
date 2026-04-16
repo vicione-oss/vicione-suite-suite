@@ -23,6 +23,7 @@
     <File Path="Directory.Packages.props" />
     <File Path="eslint.config.mjs" />
     <File Path="global.json" />
+    <File Path="mise.toml" />
     <File Path="NuGet.Config" />
     <File Path="package.json" />
     <File Path="README.md" />

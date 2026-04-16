@@ -43,7 +43,7 @@
 - `Npgsql.EntityFrameworkCore.PostgreSQL` package, update to version `10.0.2`
 - `MassTransit` packages, update to version `8.5.9`
 - `MailKit` package, update to version `4.15.1`
-- `Microsoft` packages, update to version `10.0.5`
+- `Microsoft` packages, update to version `10.0.6`
 - `MQTTnet` packages, update to version `5.1.0.1559`
 - `OpenTelemetry` packages, update to version `1.15.0`
 - `Riok.Mapperly` packages, update to version `4.3.1`
@@ -52,7 +52,7 @@
 - `Serilog.Sinks.SyslogMessages` packages, update to version `4.0.0`
 - `ViciOne.CodeAnalysis` packages, update to version `1.4.0`
 - `ViciOne.Journal` package, update to version `1.2.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2451533346`
+- `ViciOne.Suite.Sdk` packages, update to version `2.0.0-ci2455538948`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.8.0`
 - `ViciOne.Ui.Design` package, update version to `2.0.3`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.7.0`

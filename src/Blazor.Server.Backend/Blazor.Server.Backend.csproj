@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <AssemblyName>ViciOne.Suite.Blazor.Server.Backend</AssemblyName>
@@ -12,13 +12,14 @@
     <!-- https://github.com/koenvzeijl/AspNetCore.SassCompiler/issues/160 -->
     <SassCompilerEnableWatcher>false</SassCompilerEnableWatcher>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\Blazor.DevAssets\Blazor.DevAssets.csproj" />
     <ProjectReference Include="..\Blazor.Shared\Blazor.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App.Internal.Assets" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
     <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
     <PackageReference Include="System.IO.Abstractions" />
@@ -167,15 +168,15 @@
       <!-- it's worth removing it to save ~17MB -->
       <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\devextreme\dx.all.debug.js" />
       <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\analytics-core\dx-analytics-core.js" />
-      <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\analytics-core\dx-querybuilder.js" />      
+      <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\analytics-core\dx-querybuilder.js" />
     </ItemGroup>
 
     <RemoveDir Directories="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Themes" />
-    
+
     <Delete Files="@(FilesToDelete)">
       <Output TaskParameter="DeletedFiles" ItemName="DeletedList" />
     </Delete>
-    
+
     <Message Text="Deleted DexExpress themes and '@(DeletedList)'" Importance="high" />
   </Target>
 
@@ -191,23 +192,42 @@
     </PropertyGroup>
   </Target>
 
-  <!-- This target was introduced with .NET10 update where UseStaticFiles does not include the blazor.web.js anymore.
-    See https://github.com/Lapiniot/Net.MQTT/issues/116 and https://github.com/dotnet/aspnetcore/issues/64381#issuecomment-3546832403
-    If we update the .NET version, we have to update the version number in the path below
+  <PropertyGroup>
+    <_BlazorWebJs>_framework\blazor.web.js</_BlazorWebJs>
+    <_BlazorWebJsStaticWebAssetFile>wwwroot\$(_BlazorWebJs)</_BlazorWebJsStaticWebAssetFile>
+    <_BlazorWebJsSource>$(NuGetPackageRoot)\microsoft.aspnetcore.app.internal.assets\$(DotNetVersion)\$(_BlazorWebJs)</_BlazorWebJsSource>
+    <_BlazorWebJsDest>$(MSBuildProjectDirectory)\$(_BlazorWebJsStaticWebAssetFile)</_BlazorWebJsDest>
+  </PropertyGroup>
+
+  <!--
+    This target was introduced with .NET 10 update where UseStaticFiles does not include the blazor.web.js anymore.
+
+    See https://github.com/Lapiniot/Net.MQTT/issues/116 and https://github.com/dotnet/aspnetcore/issues/64381#issuecomment-3546832403.
   -->
-  <Target Name="CopyBlazorWebJsToWwwrootFramework" AfterTargets="Build" Condition="'$(DesignTimeBuild)' != 'true' and !Exists('$(MSBuildProjectDirectory)\wwwroot\_framework\blazor.web.js')">
-    <PropertyGroup>
-      <_BlazorFrameworkPackDir>$(NuGetPackageRoot)microsoft.aspnetcore.app.internal.assets\10.0.1\_framework\</_BlazorFrameworkPackDir>
-      <_BlazorWebJsSource>$(_BlazorFrameworkPackDir)blazor.web.js</_BlazorWebJsSource>
-      <_BlazorWebJsDestDir>$(MSBuildProjectDirectory)\wwwroot\_framework\</_BlazorWebJsDestDir>
-      <_BlazorWebJsDest>$(_BlazorWebJsDestDir)blazor.web.js</_BlazorWebJsDest>
-    </PropertyGroup>
+  <Target Name="CopyBlazorWebJsToWwwrootFramework" BeforeTargets="PreBuildEvent">
+    <Error Condition="!Exists('$(_BlazorWebJsSource)')" Text="'$(_BlazorWebJsSource)' not found. Ensure Microsoft.AspNetCore.App.Internal.Assets is restored and version is set correctly." />
 
-    <Message Text="Copying blazor.web.js from '$(_BlazorWebJsSource)' to '$(_BlazorWebJsDest)'" Importance="high" />
+    <Message Text="Copying '$(_BlazorWebJsSource)' to '$(_BlazorWebJsDest)'" Importance="high" />
+   
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName($(_BlazorWebJsDest)))" />
+    <Copy SourceFiles="$(_BlazorWebJsSource)" DestinationFiles="$(_BlazorWebJsDest)"/>
 
-    <Error Condition="!Exists('$(_BlazorWebJsSource)')" Text="blazor.web.js not found at '$(_BlazorWebJsSource)'. Ensure Microsoft.AspNetCore.App.Internal.Assets is restored and version is set correctly." />
-
-    <MakeDir Directories="$(_BlazorWebJsDestDir)" />
-    <Copy SourceFiles="$(_BlazorWebJsSource)" DestinationFiles="$(_BlazorWebJsDest)" SkipUnchangedFiles="true" />
+    <ItemGroup>
+      <!--
+        @(Content) is passed to DiscoverStaticWebAssets task in an early stage of the build, way before our copy steps will execute.
+        This results in the build system / targets / tasks not knowing about the file copied.
+        We fix this by adding a content item for the file copied.
+      -->
+      <Content Include="$(_BlazorWebJsStaticWebAssetFile)" Condition="!@(Content->AnyHaveMetadataValue('Identity', $(_BlazorWebJsStaticWebAssetFile)))" />
+    </ItemGroup>
   </Target>
+
+  <Target Name="CleanBlazorWebJs" BeforeTargets="Clean" Condition="Exists('$(_BlazorWebJsDest)')">
+    <Delete Files="$(_BlazorWebJsDest)" />
+
+    <ItemGroup>
+      <Content Remove="$(_BlazorWebJsDest)" Condition="@(Content-&gt;AnyHaveMetadataValue('Identity', $(_BlazorWebJsDest)))" />
+    </ItemGroup>
+  </Target>
+
 </Project>
