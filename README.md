@@ -122,12 +122,12 @@ It is possible to start multiple instances using the launch profiles Master-Ui &
 
 ## ViciOne Suite Accounts
 
-| User     | Password       | Note                      |
-|----------|----------------|---------------------------|
-| `Bob`    | `Up2noGood!!!` | User                      |
-| `Alice`  | `Up2noGood!!!` | User                      |
-| `Admin`  | `Up2noGood!!!` | Administrator             |
-| `Eddy`   | `Up2noGood!!!` | Administrator + SA claims |
+| User     | Password       | Role          |
+|----------|----------------|---------------|
+| `Bob`    | `Up2noGood!!!` | User          |
+| `Alice`  | `Up2noGood!!!` | User          |
+| `Admin`  | `Up2noGood!!!` | Administrator |
+| `Eddy`   | `Up2noGood!!!` | Administrator |
 
 ## Configuration
 All settings of the application can be adjusted in the `/src/Core.OS/appsettings.[ENVIRONMENT].json`-file.
