@@ -1,4 +1,4 @@
-﻿using Core.Module.JFrog;
+using Core.Module.JFrog;
 using Sdk.Backend.Artifacts;
 using Xunit;
 
@@ -75,6 +75,24 @@ public class JFrogArtifactQueryBuilderTests
 
             // Assert
             Assert.Contains("\"name\":{\"$match\":\"file.txt\"}", result);
+        }
+    }
+
+    public sealed class AndModifiedAfter
+    {
+        [Fact]
+        public void Should_add_modified_greater_than()
+        {
+            // Arrange - 16.07.2012 19:20:30
+            var builder = new JFrogArtifactQueryBuilder();
+            var date = new DateTimeOffset(2012, 7, 16, 19, 20, 30, 45, TimeSpan.FromHours(1));
+
+            // Act
+            builder.ModifiedAfter(date);
+            var result = builder.Build();
+
+            // Assert
+            Assert.Contains("{\"modified\":{\"$gt\":\"2012-07-16T18:20:30.0450000Z\"}}", result);
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using Core.Module.Contracts;
+using Core.Module.Contracts;
 using Sdk.Backend.Artifacts;
 using Sdk.Modules;
 
@@ -83,9 +83,11 @@ public interface IModuleArtifactRepository
     /// optionally filtering by SDK version and pre-release availability.
     /// </summary>
     /// <param name="sdkVersion">The minimum SDK version required for compatibility, or <see langword="null"/> to skip filtering.</param>
+    /// <param name="modifiedAfter">Filter results to get only ones modified after datetime, or <see langword="null"/> to skip filtering.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     Task<List<IArtifact>> QueryModuleMetadataArtifacts(
         Version? sdkVersion,
+        DateTimeOffset? modifiedAfter,
         CancellationToken cancellationToken);
 
     /// <summary>
@@ -94,7 +96,6 @@ public interface IModuleArtifactRepository
     /// </summary>
     /// <param name="sdkVersion">The SDK version to match against.</param>
     /// <param name="packageName">The name of the module package.</param>
-    /// <param name="includePreRelease">Whether to include pre-release artifacts in the query.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     Task<IArtifact?> QueryLatestModuleMetadataArtifact(
         Version sdkVersion,

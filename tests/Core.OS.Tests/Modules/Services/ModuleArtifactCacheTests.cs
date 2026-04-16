@@ -71,7 +71,7 @@ public class ModuleArtifactCacheTests
             moduleArtifacts.Add(artifact);
         }
 
-        moduleRepository.QueryModuleMetadataArtifacts(Arg.Any<Version>(), Arg.Any<CancellationToken>()).Returns([.. moduleArtifacts]);
+        moduleRepository.QueryModuleMetadataArtifacts(Arg.Any<Version>(), null, Arg.Any<CancellationToken>()).Returns([.. moduleArtifacts]);
 
         return [.. moduleArtifacts];
     }
@@ -84,7 +84,7 @@ public class ModuleArtifactCacheTests
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
-            _moduleRepository.QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>()).Returns([]);
+            _moduleRepository.QueryModuleMetadataArtifacts(null, null,Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
             var metadata = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
@@ -114,7 +114,7 @@ public class ModuleArtifactCacheTests
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
-            _moduleRepository.QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>()).Returns([]);
+            _moduleRepository.QueryModuleMetadataArtifacts(null, null,Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
             var metadata1 = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
@@ -122,7 +122,7 @@ public class ModuleArtifactCacheTests
 
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
-            await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>());
+            await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(null, null, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -140,7 +140,7 @@ public class ModuleArtifactCacheTests
 
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
-            await _moduleRepository.Received(2).QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>());
+            await _moduleRepository.Received(2).QueryModuleMetadataArtifacts(null, null, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -157,7 +157,7 @@ public class ModuleArtifactCacheTests
 
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
-            await _moduleRepository.Received(2).QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>());
+            await _moduleRepository.Received(2).QueryModuleMetadataArtifacts(null, null, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -175,8 +175,8 @@ public class ModuleArtifactCacheTests
 
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
-            await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>());
-            await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(version, Arg.Any<CancellationToken>());
+            await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(null, null, Arg.Any<CancellationToken>());
+            await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(version, null,Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -198,7 +198,7 @@ public class ModuleArtifactCacheTests
             var firstMetadata = metadataList.FirstOrDefault(k => firstArtifact.Path.Contains(k.Name, StringComparison.Ordinal));
             var moduleArtifacts = metadataArtifacts.Select(k => k);
 
-            _moduleRepository.QueryModuleMetadataArtifacts(null, Arg.Any<CancellationToken>())
+            _moduleRepository.QueryModuleMetadataArtifacts(null, null, Arg.Any<CancellationToken>())
                 .Returns([.. moduleArtifacts]);
 
             _moduleRepository.GetModuleMetadata(Arg.Is<IArtifact>(k => k.Name == firstArtifact.Name), Arg.Any<CancellationToken>())

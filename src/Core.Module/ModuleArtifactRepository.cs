@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using Core.Module.Contracts;
 using Core.Module.Utils;
@@ -102,7 +102,7 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
         return [.. result.Artifacts];
     }
 
-    public async Task<List<IArtifact>> QueryModuleMetadataArtifacts(Version? sdkVersion = null,
+    public async Task<List<IArtifact>> QueryModuleMetadataArtifacts(Version? sdkVersion = null, DateTimeOffset? modifiedAfter = null,
         CancellationToken cancellationToken = default)
     {
         var queryBuilder = artifactRepository.CreateQueryBuilder()
@@ -110,6 +110,10 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
             .AndNameMatches($"{CreateNameMatchFilter(sdkVersion)}.json")
             .OrderByDescending("path", "name");
 
+        if (modifiedAfter is not null)
+            queryBuilder.ModifiedAfter(modifiedAfter.Value);
+
+        // e.g. items.find({"modified":{"$gt":"2026-04-13T03:59:57.57TZD"}},{"repo":"__repository__","$and":[{"path":{"$match":"modules/*"}},{"name":{"$match":"*win-x64*.json"}}]}).sort({"$desc":["path","name"]})
         var aqlQuery = queryBuilder.Build();
         var result = await artifactRepository.Query(aqlQuery, cancellationToken);
 
