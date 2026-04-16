@@ -20,13 +20,14 @@ public class ModuleArtifactRepositoryTests
 
     private static ServiceProvider CreateServiceProvider()
     {
-        var options = Microsoft.Extensions.Options.Options.Create(SystemTestSettings.ArtifactApiOptions);
+        var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
+        optionsProvider.GetOptions().Returns(SystemTestSettings.ArtifactApiOptions);
 
         return new ServiceCollection()
             .AddSingleton<IArtifactRepository, JFrogArtifactRepository>()
             .AddSingleton<IFileSystem>(new FileSystem())
             .AddSingleton<ModuleArtifactRepository>()
-            .AddSingleton(options)
+            .AddSingleton(optionsProvider)
             .AddHttpClient()
             .BuildServiceProvider();
     }
@@ -218,11 +219,27 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var assets = await repository.QueryModuleMetadataArtifacts(_sdkVersion, TestContext.Current.CancellationToken);
+            var assets = await repository.QueryModuleMetadataArtifacts(_sdkVersion, null, TestContext.Current.CancellationToken);
 
             // Assert
             assets.Should().NotBeEmpty();
             assets.Should().AllSatisfy(k => k.Name.Should().Contain($"_{_sdkVersion.Major}.{_sdkVersion.Minor}."));
+        }
+        
+        [Fact]
+        public async Task Should_return_available_module_artifacts_modified_after()
+        {
+            // Arrange
+            await using var services = CreateServiceProvider();
+            var repository = services.GetRequiredService<ModuleArtifactRepository>();
+            var datetime =  DateTime.UtcNow.Subtract(TimeSpan.FromDays(2));
+            
+            // Act
+            var assets = await repository.QueryModuleMetadataArtifacts(null, datetime, TestContext.Current.CancellationToken);
+
+            // Assert
+            assets.Should().NotBeEmpty();
+            assets.Should().AllSatisfy(k => k.Modified.Should().BeAfter(datetime));
         }
     }
 

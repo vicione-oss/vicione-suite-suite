@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+using System.Globalization;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -16,6 +17,7 @@ internal class JFrogArtifactQueryBuilder() : IArtifactQueryBuilder
     private List<string>? _includes;
     private object? _sort;
     private object? _typeFilter;
+    private object? _modifiedAfterFilter;
     private int? _limit;
     private int? _offset;
 
@@ -55,7 +57,6 @@ internal class JFrogArtifactQueryBuilder() : IArtifactQueryBuilder
     /// adds "name":{"$match":"expression"}
     /// </summary>
     /// <param name="expression">e.g. NameXyz or NameXy*</param>
-    /// <returns></returns>
     public IArtifactQueryBuilder AndNameNotMatches(string expression)
     {
         _query.Criteria ??= [];
@@ -68,6 +69,18 @@ internal class JFrogArtifactQueryBuilder() : IArtifactQueryBuilder
         return this;
     }
 
+    /// <summary>
+    /// adds "modified":{"$gt":"datetime:O"}
+    /// </summary>
+    public IArtifactQueryBuilder ModifiedAfter(DateTimeOffset value)
+    {
+        // https://learn.microsoft.com/en-us/dotnet/standard/base-types/standard-date-and-time-format-strings#Roundtrip
+        var formattedDate = value.UtcDateTime.ToString("O", CultureInfo.InvariantCulture);
+        var expression = new AqlGreaterThanExpression { Expression = formattedDate };
+        _modifiedAfterFilter = new AqlModifiedAfter { After = expression };
+
+        return this;
+    }
 
     /// <summary>
     /// adds .include("item1", "item2") to query string
@@ -142,6 +155,12 @@ internal class JFrogArtifactQueryBuilder() : IArtifactQueryBuilder
             sb.Append(',');
         }
 
+        if (_modifiedAfterFilter is not null)
+        {
+            sb.Append(JsonSerializer.Serialize(_modifiedAfterFilter, DefaultJsonSerializerSettings.Default));
+            sb.Append(',');
+        }
+
         sb.Append(JsonSerializer.Serialize(_query, DefaultJsonSerializerSettings.Default));
         sb.Append(')');
 
@@ -209,6 +228,18 @@ internal class JFrogArtifactQueryBuilder() : IArtifactQueryBuilder
     {
         [JsonPropertyName("name")]
         public required object Match { get; set; }
+    }
+
+    internal class AqlModifiedAfter
+    {
+        [JsonPropertyName("modified")]
+        public required AqlGreaterThanExpression After { get; set; }
+    }
+
+    internal class AqlGreaterThanExpression
+    {
+        [JsonPropertyName("$gt")]
+        public required string Expression { get; set; }
     }
 
     internal class AqlMatchExpression

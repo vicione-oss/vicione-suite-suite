@@ -42,7 +42,7 @@ public sealed class ModuleArtifactCache : IDisposable, IModuleArtifactCache
 
         // todo: maybe it's better to request only the available versions per installed module here
         // more requests but less data...
-        var assets = await _moduleRepository.QueryModuleMetadataArtifacts(sdkVersion, cancellationToken);
+        var assets = await _moduleRepository.QueryModuleMetadataArtifacts(sdkVersion, null, cancellationToken);
         if (assets.Count == 0)
         {
             _logger.LogWarning("No modules found for Sdk version {Version}", sdkVersion);
