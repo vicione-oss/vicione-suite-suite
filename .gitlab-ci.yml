@@ -23,14 +23,12 @@ stages:
   - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_JFrog -p $NuGet_PW_JFrog --store-password-in-clear-text
   - dotnet nuget update source JFrogDevExpressProxy --configfile NuGet.Config -u $NuGet_User_JFrog -p $NuGet_PW_JFrog --store-password-in-clear-text
 
-
 # Anchors defined before include section so they can be used in component inputs
 .activate_mise: &activate_mise
   - export MISE_DATA_DIR="${CI_PROJECT_DIR}/.mise-data"
   - export MISE_DOTNET_ROOT="${MISE_DATA_DIR}/installs/dotnet"
   - mise install
   - eval "$(mise env)"
-
 
 .install_npm_packages: &install_npm_packages
   - npm install
@@ -46,12 +44,12 @@ stages:
 
 # Rules anchors (defined here so they can be used in component inputs)
 .rules_tag_manual: &rules_tag_manual
-  if: '$CI_COMMIT_TAG'
+  if: "$CI_COMMIT_TAG"
   when: manual
   allow_failure: true
 
 .rules_default_branch: &rules_default_branch
-  if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
 
 .rules_merge_request: &rules_merge_request
   if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
@@ -60,7 +58,7 @@ stages:
   if: '$CI_PIPELINE_SOURCE == "web"'
 
 .rules_default_branch_manual: &rules_default_branch_manual
-  if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
   when: manual
   allow_failure: true
 
@@ -89,24 +87,52 @@ stages:
   - <<: *rules_web_manual
 
 include:
-  # xUnit test job (both x64 and arm64 via parallel matrix)
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@v1.0.2
+  # Build component
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-build@v2.4.0
     inputs:
-      name: 'xUnit'
-      stage: 'test'
-      no_build: false
+      name: "Build"
+      stage: "build"
+      compress_artifacts: true
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
+      before_script: [*activate_mise, *install_npm_packages, *run_npm_scripts]
       execution_matrix:
         - RUNNER_ARCH: [arm64, amd64]
       tags:
         - saas-linux-large-$RUNNER_ARCH
-      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
-      filter: 'Category!=System & Category!=ManualDbTest & Category!=Integration'
-      coverage_report_pattern: 'artifacts/tests/**/coverage.cobertura.xml'
-      test_report_pattern: 'artifacts/tests/*-test-report.xml'
-      before_script: [*activate_mise, *update_nuget_source_ro, *install_npm_packages]
       rules: *rules_common
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-restore@v2.4.0
+    inputs:
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
+      name: "Restore"
+      execution_matrix:
+        - RUNNER_ARCH: [arm64, amd64]
+      tags:
+        - saas-linux-large-$RUNNER_ARCH
+      stage: "restore"
+      rules: *rules_common
+      before_script: [*activate_mise, *update_nuget_source_ro]
 
-
+  # xUnit test job (both x64 and arm64 via parallel matrix)
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@1.1.0
+    inputs:
+      name: "xUnit"
+      stage: "test"
+      execution_matrix:
+        - RUNNER_ARCH: [arm64, amd64]
+      tags:
+        - saas-linux-large-$RUNNER_ARCH
+      before_script:
+        - apt-get update -qq && apt-get install -y -qq zstd
+        - *activate_mise
+        - !reference [.update_nuget_source_ro]
+        - *install_npm_packages
+      decompress_artifacts: true
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
+      filter: "Category!=System & Category!=ManualDbTest & Category!=Integration"
+      coverage_report_pattern: "artifacts/tests/**/coverage.cobertura.xml"
+      test_report_pattern: "artifacts/tests/*-test-report.xml"
+      # before_script: [*activate_mise, *update_nuget_source_ro, *install_npm_packages]
+      rules: *rules_common
 
   # Cache configuration component
   # Caches: .mise-data/installs/, .nuget/packages/, node_modules/
@@ -145,8 +171,8 @@ include:
 variables:
   PACKAGE_NAME: "ci-artifacts"
   ARTIFACT_PREFIX: "suite"
-  DEB_PACKAGING_PROJECT: 'vicione-oss/vicione/suite/deb-packaging'
-  DEB_PACKAGING_BRANCH: 'master'
+  DEB_PACKAGING_PROJECT: "vicione-oss/vicione/suite/deb-packaging"
+  DEB_PACKAGING_BRANCH: "master"
   # mise HTTP settings - retry transient network failures with exponential backoff
   MISE_HTTP_TIMEOUT: "60"
   MISE_HTTP_RETRIES: "3"
@@ -259,6 +285,54 @@ variables:
     - <<: *rules_web_manual
     - <<: *rules_default_branch_manual
 
+# Override Build job artifacts and cache for architecture-specific builds
+# Cache keys include $RUNNER_ARCH to prevent amd64/arm64 cache collision
+# (node_modules, .mise-data, .nuget cause "413 Request Entity Too Large")
+Restore:
+  cache:
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      policy: pull-push
+    - key:
+        prefix: nuget-${OS}${ARCH}
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${OS}${ARCH}-${CI_DEFAULT_BRANCH}
+      paths:
+        - ./packages/
+        - ./**/obj/
+      policy: pull-push
+
+Build:
+  before_script:
+    - *activate_mise
+    - *install_npm_packages
+    - *run_npm_scripts
+  cache:
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      policy: pull
+    - key:
+        prefix: nuget-${OS}${ARCH}
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${OS}${ARCH}-${CI_DEFAULT_BRANCH}
+      paths:
+        - ./packages/ # NuGet packages
+        - ./**/obj/ # restore information per project
+      policy: pull
 
 Validation:
   extends: .minimal
@@ -282,34 +356,11 @@ Validation:
 #Override needs - Validation job doesn't use parallel matrix
 # https://docs.gitlab.com/ci/yaml/matrix_expressions/#matrix-expressions-in-needsparallelmatrix
 "xUnit":
-  needs: []
-  cache:
-    - key:
-        prefix: mise-${RUNNER_ARCH}-v2
-        files:
-          - mise.toml
-      paths:
-        - ${CI_PROJECT_DIR}/.mise-data
-      policy: pull-push
-    - key:
-        prefix: nuget-${RUNNER_ARCH}-v2
-        files:
-          - Directory.Packages.props
-          - global.json
-      fallback_keys:
-        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
-      paths:
-        - .nuget/packages/
-        - ./**/obj/
-      policy: pull-push
-
-#################### Artifacts stage
-
-Build artifacts x64:
-  stage: artifacts
-  variables:
-    DOTNET_ARCH: 'linux-x64'
-    RUNNER_ARCH: amd64
+  needs:
+    - job: Build
+      parallel:
+        matrix:
+          - RUNNER_ARCH: ["$[[ matrix.RUNNER_ARCH ]]"]
   cache:
     - key:
         prefix: mise-${RUNNER_ARCH}-v2
@@ -319,14 +370,43 @@ Build artifacts x64:
         - ${CI_PROJECT_DIR}/.mise-data
       policy: pull
     - key:
-        prefix: nuget-${RUNNER_ARCH}-v2
+        prefix: nuget-${OS}${ARCH}
         files:
           - Directory.Packages.props
           - global.json
       fallback_keys:
-        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
+        - nuget-${OS}${ARCH}-${CI_DEFAULT_BRANCH}
       paths:
-        - .nuget/packages/
+        - ./packages/ # NuGet packages
+        - ./**/obj/ # restore information per project
+      policy: pull
+
+#################### Artifacts stage
+
+Build artifacts x64:
+  stage: artifacts
+  dependencies: []
+  variables:
+    DOTNET_ARCH: "linux-x64"
+    RUNNER_ARCH: amd64
+    NUGET_PACKAGES: $CI_PROJECT_DIR/packages
+  cache:
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      policy: pull
+    - key:
+        prefix: nuget-${OS}${ARCH}
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${OS}${ARCH}-${CI_DEFAULT_BRANCH}
+      paths:
+        - ./packages/
         - ./**/obj/
       policy: pull
   before_script:
@@ -350,9 +430,11 @@ Build artifacts x64:
 
 Build artifacts arm64:
   stage: artifacts
+  dependencies: []
   variables:
-    DOTNET_ARCH: 'linux-arm64'
+    DOTNET_ARCH: "linux-arm64"
     RUNNER_ARCH: arm64
+    NUGET_PACKAGES: $CI_PROJECT_DIR/packages
   cache:
     - key:
         prefix: mise-${RUNNER_ARCH}-v2
@@ -362,14 +444,14 @@ Build artifacts arm64:
         - ${CI_PROJECT_DIR}/.mise-data
       policy: pull
     - key:
-        prefix: nuget-${RUNNER_ARCH}-v2
+        prefix: nuget-${OS}${ARCH}
         files:
           - Directory.Packages.props
           - global.json
       fallback_keys:
-        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
+        - nuget-${OS}${ARCH}-${CI_DEFAULT_BRANCH}
       paths:
-        - .nuget/packages/
+        - ./packages/
         - ./**/obj/
       policy: pull
   before_script:

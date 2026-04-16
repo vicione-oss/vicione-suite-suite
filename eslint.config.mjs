@@ -12,7 +12,8 @@ export default [
             'src/Blazor.Shared/Scripts/*.js',
             'tests/**/*.js',
             '**/*.d.ts',
-            '.nuget/**' // Ignore NuGet package cache (contains vendor JS files after caching implementation)
+            '.nuget/**', // Ignore NuGet package cache (contains vendor JS files after caching implementation)
+            'packages/**' // Ignore NuGet packages restored to ./packages/ (dotnet-component cache path)
         ]
     },
     ...xoTypeScriptPatched,
