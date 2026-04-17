@@ -55,6 +55,7 @@ internal sealed class LocalInstanceInformationProvider(IServiceProvider serviceP
             _info.Description = info.Description;
             _info.FormattedName = info.FormattedName;
             _info.SerialNumber = info.SerialNumber;
+            _info.SystemType = info.SystemType;
             _info.InstalledModules = [.. info.InstalledModules];
 
             //Changing Types should be avoided, but if we want to prevent a change here it should be in a different place

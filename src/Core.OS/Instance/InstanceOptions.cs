@@ -26,6 +26,8 @@ public sealed class InstanceOptions
 
     public string? SerialNumber { get; set; }
 
+    public string? SystemType { get; set; }
+
     [StringLength(100)]
     public string? NamePreload { get; set; }
 
