@@ -13,7 +13,8 @@
 - `JournalListView`, added download feature of Journal entries as text
 - Added implementation of typed `ILocalHttpClient` to access local services with proper base address
 - Added control panel `Sources` to manage artifact update sources, that provide suite, module updates
-- Add indicator to system monitoring component
+- Added indicator to system monitoring component
+- Added SystemType instance information
 
 ### Changed
 
@@ -21,7 +22,7 @@
 - Replaced `DxMemo` with scrollable HTML element
 - Replaced `DxPopup` with `ViciOne.Ui.Blazor.Components.Popup`
 - `SystemDefaultControlPanelPage`, changed wording in description banner
-- Redesign `ModuleManagementControlPanel` to grid layout with details page
+- Redesigned `ModuleManagementControlPanel` to grid layout with details page
 
 ### Removed
 

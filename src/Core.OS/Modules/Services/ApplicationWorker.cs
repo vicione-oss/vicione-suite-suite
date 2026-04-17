@@ -323,6 +323,7 @@ internal sealed class ApplicationWorker(
                 Id = instanceId,
                 Type = instanceOptions.Type,
                 SerialNumber = instanceOptions.SerialNumber ?? instanceId.ToString("N"),
+                SystemType = instanceOptions.SystemType ?? "not set"
             };
 
             // optional
