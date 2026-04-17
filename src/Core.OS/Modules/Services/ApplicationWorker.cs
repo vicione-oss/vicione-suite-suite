@@ -322,8 +322,7 @@ internal sealed class ApplicationWorker(
             {
                 Id = instanceId,
                 Type = instanceOptions.Type,
-                SerialNumber = instanceOptions.SerialNumber ?? instanceId.ToString("N"),
-                SystemType = instanceOptions.SystemType ?? "not set"
+                SerialNumber = instanceOptions.SerialNumber ?? instanceId.ToString("N")
             };
 
             // optional
@@ -348,6 +347,7 @@ internal sealed class ApplicationWorker(
         instanceInfo.Version = fileSystem.EvaluateLocalVersionString(out var branchName);
         instanceInfo.BranchName = branchName;
         instanceInfo.SdkVersion = moduleHost.GetSdkVersion();
+        instanceInfo.SystemType = instanceOptions.SystemType ?? "not set";
 
         // update local instance info to what we have already because modules might access it
         // on their init process e.g. ClusterManagement on PostMigrate
