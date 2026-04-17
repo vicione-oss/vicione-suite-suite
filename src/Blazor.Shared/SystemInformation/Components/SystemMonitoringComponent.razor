@@ -4,7 +4,7 @@
 @using Blazor.Shared.SystemInformation.Services
 
 <div class="systeminfo-monitor-diagramm systeminfo-font-bold">
-    <canvas id="dashboardCanvas" width="252" height="176"></canvas>
+    <canvas @ref="_canvasRef" width="252" height="176"></canvas>
     <div id="tooltip">
         <div class="tooltip-pointer"></div>
         <div class="tooltip-header"></div>

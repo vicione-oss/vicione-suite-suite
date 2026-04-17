@@ -11,6 +11,7 @@ public sealed partial class SystemMonitoringComponent : IAsyncDisposable
 {
     private IJSObjectReference? _jsModuleReference;
     private IJSObjectReference? _monitoring;
+    private ElementReference _canvasRef;
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     [Inject(Key = Sdk.Constants.ClientTimeProviderServiceKey)]
@@ -28,8 +29,11 @@ public sealed partial class SystemMonitoringComponent : IAsyncDisposable
     [Parameter]
     public int TimeSpanHours { get; set; } = 24;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender)
+            return;
+
         await _semaphore.WaitAsync();
 
         try
@@ -37,7 +41,7 @@ public sealed partial class SystemMonitoringComponent : IAsyncDisposable
             _jsModuleReference = await JsInterop.IncludeModuleScript<SharedClientModule>("system-monitoring-component.js");
             if (_jsModuleReference is not null)
             {
-                _monitoring = await _jsModuleReference.InvokeConstructorAsync("Monitoring", TimeProvider.LocalTimeZone.GetUtcOffset(DateTimeOffset.UtcNow).TotalMinutes, TimeSpanHours);
+                _monitoring = await _jsModuleReference.InvokeConstructorAsync("Monitoring", _canvasRef, TimeProvider.LocalTimeZone.GetUtcOffset(DateTimeOffset.UtcNow).TotalMinutes, TimeSpanHours);
 
                 if (_monitoring is null)
                     return;
