@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Backend.Artifacts;
+using Semver;
 using Xunit;
 
 namespace Core.Module.Tests;
@@ -48,7 +49,7 @@ public class SuiteArtifactRepositoryTests
         private readonly SuiteArtifactBundle _bundle = new()
         {
             Architecture = "amd64",
-            Version = "1.1.0-ci1944853",
+            Version = SemVersion.Parse("1.1.0-ci1944853"),
             // Suite deb package has ~ 66Mb
             Package = new Artifact
             {

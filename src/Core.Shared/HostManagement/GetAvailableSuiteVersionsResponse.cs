@@ -11,7 +11,7 @@ public class SuiteVersionPackage
 {
     public required string Architecture { get; set; }
 
-    public required Version HostManagementVersion { get; set; }
+    public required string HostManagementVersion { get; set; }
 
     public required string PackageName { get; set; }
 

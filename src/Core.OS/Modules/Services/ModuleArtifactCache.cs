@@ -59,6 +59,11 @@ public sealed class ModuleArtifactCache : IDisposable, IModuleArtifactCache
                 return await _moduleRepository.GetModuleMetadata(asset, cancellationToken)
                     ?? throw new InvalidOperationException($"Failed to extract metadata from repo '{asset.Repository}' item '{asset.Path}/{asset.Name}'");
             }
+            catch (OperationCanceledException)
+            {
+                // ignore this one, we don't want to log errors on cancellation
+                return null;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed read module metadata repo '{Repo}' item '{Path}/{Name}'", asset.Repository, asset.Path, asset.Name);

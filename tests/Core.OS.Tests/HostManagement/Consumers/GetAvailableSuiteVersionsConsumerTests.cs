@@ -20,11 +20,12 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
 
     private readonly ISuiteArtifactRepository _repository = Substitute.For<ISuiteArtifactRepository>();
 
-    private readonly SuiteBundleVersion _bundle104 = new("1.0.4", new Version(1, 1, 1));
-    private readonly SuiteBundleVersion _bundle106 = new("1.0.6", new Version(1, 1, 1));
-    private readonly SuiteBundleVersion _bundle110 = new("1.1.0", new Version(1, 2, 1));
-    private readonly SuiteBundleVersion _bundle110dev = new("1.1.0-ci324324", new Version(1, 2, 0));
-    private readonly SuiteBundleVersion _bundle117 = new("1.1.7", new Version(1, 2, 1));
+    private readonly SuiteBundleVersion _bundle104 = new("1.0.4", "1.1.1");
+    private readonly SuiteBundleVersion _bundle106 = new("1.0.6", "1.1.1");
+    private readonly SuiteBundleVersion _bundle110 = new("1.1.0", "1.2.1");
+    private readonly SuiteBundleVersion _bundle110dev = new("1.1.0-ci324324", "1.2.0");
+    private readonly SuiteBundleVersion _bundle110rc1 = new("1.1.0-rc1", "1.2.0");
+    private readonly SuiteBundleVersion _bundle117 = new("1.1.7", "1.2.1");
 
     private MassTransitTester SetupTester(string installedSuiteVersion) =>
         new(cfg =>
@@ -106,6 +107,7 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
             .Returns([
                 CreateSuiteArtifactBundle(_bundle117.SuiteVersion, _bundle117.HostManagementVersion),
                 CreateSuiteArtifactBundle(_bundle110dev.SuiteVersion, _bundle110dev.HostManagementVersion),
+                CreateSuiteArtifactBundle(_bundle110rc1.SuiteVersion, _bundle110rc1.HostManagementVersion),
                 CreateSuiteArtifactBundle(_bundle104.SuiteVersion, _bundle104.HostManagementVersion),
                 CreateSuiteArtifactBundle(_bundle110.SuiteVersion, _bundle110.HostManagementVersion),
                 CreateSuiteArtifactBundle(_bundle106.SuiteVersion, _bundle106.HostManagementVersion),
@@ -116,7 +118,7 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
 
         // Assert
         response.Should().NotBeNull();
-        response.Versions.Should().HaveCount(3, "1.1.0, 1.1.0dev, 1.1.7");
+        response.Versions.Should().HaveCount(4, "1.1.0, 1.1.0dev, 110rc1, 1.1.7");
         response.RequestError.Should().BeNull();
     }
 
@@ -251,7 +253,7 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
         response.Should().NotBeNull();
         var syntheticEntry = response.Versions.Should().ContainSingle(v => v.Version == installedVersion).Subject;
         syntheticEntry.Architecture.Should().Be(osArchitecture);
-        syntheticEntry.SignatureName.Should().Be("installed");
+        syntheticEntry.SignatureName.Should().Be("vicione-suite-sig");
         syntheticEntry.Installed.Should().BeTrue();
     }
 
@@ -267,6 +269,7 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
             .Returns([
                 CreateSuiteArtifactBundle(_bundle117.SuiteVersion, _bundle117.HostManagementVersion),
                 CreateSuiteArtifactBundle(_bundle110dev.SuiteVersion, _bundle110dev.HostManagementVersion),
+                CreateSuiteArtifactBundle(_bundle110rc1.SuiteVersion, _bundle110rc1.HostManagementVersion),
             ]);
 
         // Act
@@ -278,27 +281,27 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
         response.Versions.Should().NotContain(v => v.Version == _bundle110dev.SuiteVersion);
     }
 
-    private static SuiteArtifactBundle CreateSuiteArtifactBundle(string suiteVersion, Version? hostMgmtVersion)
+    private static SuiteArtifactBundle CreateSuiteArtifactBundle(string suiteVersion, string? hostMgmtVersion)
     {
         return new()
         {
             Architecture = Architecture,
-            Version = suiteVersion,
-            HostManagementVersion = hostMgmtVersion,
+            Version = SemVersion.Parse(suiteVersion),
+            HostManagementVersion = hostMgmtVersion != null ? SemVersion.Parse(hostMgmtVersion) : null,
             Package = new Artifact
             {
-                Name = $"vicione-suite_{suiteVersion.Replace("-ci", "~", StringComparison.Ordinal)}_{Architecture}.deb",
+                Name = $"vicione-suite_{suiteVersion.Replace("-", "~", StringComparison.Ordinal)}_{Architecture}.deb",
                 Path = "suites",
                 Repository = "vicione-suite"
             },
             PackageSignature = new Artifact
             {
-                Name = $"vicione-suite_{suiteVersion.Replace("-ci", "~", StringComparison.Ordinal)}_{Architecture}.deb.minisig",
+                Name = $"vicione-suite_{suiteVersion.Replace("-", "~", StringComparison.Ordinal)}_{Architecture}.deb.minisig",
                 Path = "suites",
                 Repository = "vicione-suite"
             },
         };
     }
 
-    private record SuiteBundleVersion(string SuiteVersion, Version HostManagementVersion);
+    private record SuiteBundleVersion(string SuiteVersion, string HostManagementVersion);
 }

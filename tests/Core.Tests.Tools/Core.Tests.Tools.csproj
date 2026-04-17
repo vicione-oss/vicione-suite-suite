@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />    
+    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
+    <PackageReference Include="ViciOne.Suite.Sdk.Testing" />
   </ItemGroup>
   
   <ItemGroup>
