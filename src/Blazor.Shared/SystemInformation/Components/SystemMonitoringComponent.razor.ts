@@ -292,16 +292,9 @@ export class Monitoring {
         }
     };
 
-    readonly #canvas = (() => {
-        const el = document.getElementById('dashboardCanvas');
-        if (!(el instanceof HTMLCanvasElement))
-            throw new Error('Canvas element not found');
-
-        return el;
-    })();
-
+    readonly #canvas: HTMLCanvasElement;
     #dpr = window.devicePixelRatio || 1;
-    readonly #ctx = this.#canvas.getContext('2d', { willReadFrequently: true })!;
+    readonly #ctx: CanvasRenderingContext2D;
     #hoveredGauge: string | undefined = '';
     #hoveredChartDataPosition: number | undefined = undefined;
     readonly #canvasStart = this.#parameterToCanvasAngle(this.#config.gauge.style.startAngleDeg);
@@ -310,18 +303,23 @@ export class Monitoring {
     #ramData: Float32Array = new Float32Array((288 * 3) + 3);
     #hddData: Float32Array = new Float32Array((288 * 3) + 3);
     #netData: Float32Array = new Float32Array((288 * 3) + 3);
-    readonly #tooltipDiv = (() => {
-        const tooltipElement = document.getElementById('tooltip');
-        if (!(tooltipElement instanceof HTMLDivElement))
-            throw new Error('Tooltip element not found');
-
-        return tooltipElement;
-    })();
+    readonly #tooltipDiv: HTMLDivElement;
 
     readonly #timeZoneOffsetMinutes: number;
     readonly #timeSpanHours: number;
 
-    constructor(timeZoneOffsetMinutes: number, timeSpanHours: number) {
+    constructor(canvasElement: HTMLCanvasElement, timeZoneOffsetMinutes: number, timeSpanHours: number) {
+        if (!(canvasElement instanceof HTMLCanvasElement))
+            throw new Error('Canvas element not found');
+
+        this.#canvas = canvasElement;
+        this.#ctx = this.#canvas.getContext('2d', { willReadFrequently: true })!;
+
+        const tooltipElement = this.#canvas.closest('.systeminfo-monitor-diagramm')?.querySelector('#tooltip');
+        if (!(tooltipElement instanceof HTMLDivElement))
+            throw new Error('Tooltip element not found');
+
+        this.#tooltipDiv = tooltipElement;
         this.#timeZoneOffsetMinutes = timeZoneOffsetMinutes;
         this.#timeSpanHours = timeSpanHours;
         this.#setTimeSpan();
