@@ -1,4 +1,5 @@
 ﻿using Sdk.Backend.Artifacts;
+using Semver;
 
 namespace Core.Module.Contracts;
 
@@ -12,7 +13,7 @@ public class SuiteArtifactBundle
     /// <summary>
     /// Gets the HostManagement version parsed from the artifact name
     /// </summary>
-    public Version? HostManagementVersion { get; init; }
+    public SemVersion? HostManagementVersion { get; init; }
 
     /// <summary>
     /// Gets the architecture string parsed from the artifact name, e.g. "win-x64".
@@ -22,7 +23,7 @@ public class SuiteArtifactBundle
     /// <summary>
     /// Gets the version string parsed from the artifact name, e.g. "1.1.0".
     /// </summary>
-    public required string Version { get; init; }
+    public required SemVersion Version { get; init; }
 
     /// <summary>
     /// Gets the suite package artifact associated with this bundle.

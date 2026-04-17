@@ -154,7 +154,6 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
                 continue;
 
             existing.AvailableVersions.Add(metadata.Version);
-            existing.CanUpdate = existing.Installed;    // it's installed and we have at least one update version
         }
 
         foreach (var bundle in result)
@@ -173,6 +172,15 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
                 _ = SemVersion.TryParse(y, out var ySemVer);
                 return CompareSemVersions(ySemVer, xSemVer); // descending
             });
+
+            if (!bundle.Installed)
+                continue;
+
+            var latest = bundle.AvailableVersions.First();
+
+            // if we have a newer version available and the module is not marked as unresolvable, we can update
+            bundle.CanUpdate = bundle.Metadata.Version != ModuleConstants.UnresolvedVersionMarker
+                && bundle.Metadata.Version != latest;
         }
 
         return result;

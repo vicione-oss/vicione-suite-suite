@@ -1,4 +1,4 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <!-- Versionierung -->
     <PropertyGroup>
         <VersionWithSuffix>$([System.IO.File]::ReadAllText('$(MsBuildThisFileDirectory)VERSION').Trim())</VersionWithSuffix>
@@ -58,7 +58,7 @@
     </ItemGroup>
 
     <!-- Testprojekten die Test.SDK-/XUnit-Paket-Referenzen hinzufuegen -->
-    <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests')) Or $(MSBuildProjectName.EndsWith('Tests.Tools'))">
+    <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
         <PackageReference Include="AwesomeAssertions" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="xunit.v3" />

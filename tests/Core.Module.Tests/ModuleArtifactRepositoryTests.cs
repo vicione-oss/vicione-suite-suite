@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using Core.Module.JFrog;
 using Core.Tests.Tools;

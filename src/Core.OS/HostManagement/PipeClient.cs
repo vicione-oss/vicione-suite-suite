@@ -1,4 +1,4 @@
-﻿using System.IO.Pipes;
+using System.IO.Pipes;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Contracts;
@@ -58,9 +58,15 @@ public sealed class PipeClient(IOptions<HostManagementOptions> options, ILogger<
                 _pipeClientStream = null;
             }
 
-            _requestLock.Release();
-
-            logger.LogDebug("Sent request for topic='{Topic}' and released lock", topic);
+            if (_requestLock.CurrentCount < 1)
+            {
+                _requestLock.Release();
+                logger.LogDebug("Sent request for topic='{Topic}' and released lock", topic);
+            }
+            else
+            {
+                logger.LogDebug("Sent request for topic='{Topic}'", topic);       
+            }
         }
     }
 

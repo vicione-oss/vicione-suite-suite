@@ -1,4 +1,5 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
+using Semver;
 using Xunit;
 
 namespace Core.Module.Tests;
@@ -10,10 +11,10 @@ public sealed class SuiteArtifactNameParserTests
         [Theory]
         [InlineData("vicione-suite_1.0.4_arm64.deb", "1.0.4", "arm64")]
         [InlineData("vicione-suite_1.1.0_amd64.deb", "1.1.0", "amd64")]
-        [InlineData("vicione-suite_1.1.0~3423423_amd64.deb", "1.1.0-ci3423423", "amd64")]
+        [InlineData("vicione-suite_1.1.0~3423423_amd64.deb", "1.1.0-3423423", "amd64")]
         [InlineData("vicione-suite_1.0.4_arm64.deb.minisig", "1.0.4", "arm64")]
         [InlineData("vicione-suite_1.50.5_amd64.deb.minisig", "1.50.5", "amd64")]
-        [InlineData("vicione-suite_1.1.0~3423423_amd64.deb.minisig", "1.1.0-ci3423423", "amd64")]
+        [InlineData("vicione-suite_1.1.0~3423423_amd64.deb.minisig", "1.1.0-3423423", "amd64")]
         public void Should_return_true_on_parse_valid_package_name(string input, string expectedSuiteVersion, string expectedArchitecture)
         {
             // Act
@@ -22,7 +23,7 @@ public sealed class SuiteArtifactNameParserTests
             // Assert
             result.Should().BeTrue();
 
-            suiteVersion.Should().Be(expectedSuiteVersion);
+            suiteVersion.Should().Be(SemVersion.Parse(expectedSuiteVersion));
             architecture.Should().Be(expectedArchitecture);
         }
 
@@ -52,7 +53,8 @@ public sealed class SuiteArtifactNameParserTests
         [Theory]
         [InlineData("vicione-suite_1.0.4_arm64_1.1.1.json", "1.0.4", "arm64", "1.1.1")]
         [InlineData("vicione-suite_1.1.0_amd64_1.2.1.json", "1.1.0", "amd64", "1.2.1")]
-        [InlineData("vicione-suite_1.1.0~3423423_amd64_1.2.1.json", "1.1.0-ci3423423", "amd64", "1.2.1")]
+        [InlineData("vicione-suite_1.1.0~3423423_amd64_1.2.1.json", "1.1.0-3423423", "amd64", "1.2.1")]
+        [InlineData("vicione-suite_1.1.0~rc1_amd64_1.2.1.json", "1.1.0-rc1", "amd64", "1.2.1")]
         public void Should_return_true_on_parse_valid_package_name(string input, string expectedSuiteVersion, string expectedArchitecture, string expectedHmVersion)
         {
             // Act
@@ -61,8 +63,8 @@ public sealed class SuiteArtifactNameParserTests
             // Assert
             result.Should().BeTrue();
 
-            suiteVersion.Should().Be(expectedSuiteVersion);
-            hmVersion.Should().Be(Version.Parse(expectedHmVersion));
+            suiteVersion.Should().Be(SemVersion.Parse(expectedSuiteVersion));
+            hmVersion.Should().Be(SemVersion.Parse(expectedHmVersion));
             architecture.Should().Be(expectedArchitecture);
         }
 

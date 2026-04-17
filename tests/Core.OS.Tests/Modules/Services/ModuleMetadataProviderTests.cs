@@ -299,12 +299,60 @@ public class ModuleMetadataProviderTests
             // Act        
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
 
-            // Assert       
-            result
-                .First(k => k.ModuleId == metadata.First().Name)
+            // Assert
+            var bundle = result.First(k => k.ModuleId == metadata.First().Name);
+            bundle
                 .AvailableVersions
                 .Should()
                 .HaveCount(2, "the 2 pre release versions should be available");
+
+            bundle.CanUpdate.Should().BeTrue("the installed version can be updated to the pre release versions");
+        }
+
+        [Fact]
+        public async Task Should_not_set_can_update_flag_if_no_update_is_available()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata();
+            var installed = metadata
+                .Take(2)
+                .Select(k => new ModuleMetadataBundle
+                {
+                    ModuleId = k.Name,
+                    Metadata = k,
+                    Installed = true
+                })
+                .ToList();
+
+            var module = installed.First();
+            var moduleVersion = Version.Parse(module.Metadata.Version);
+            var available = new List<ModuleMetadata>
+            {
+                new()
+                {
+                    Name = module.ModuleId,
+                    Version = $"{moduleVersion.Major}.{moduleVersion.Minor}.{moduleVersion.Build}-ci23423423",
+                    MinSuiteSdkVersion = module.Metadata.MinSuiteSdkVersion,
+                },
+                new()
+                {
+                    Name = module.ModuleId,
+                    Version = $"{moduleVersion.Major}.{moduleVersion.Minor-1}.{moduleVersion.Build}",
+                    MinSuiteSdkVersion = module.Metadata.MinSuiteSdkVersion,
+                },
+            };
+
+            _moduleManager.GetManifestModules().Returns(installed);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+
+            // Act        
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
+
+            // Assert
+            var bundle = result.First(k => k.ModuleId == metadata.First().Name);
+            bundle.CanUpdate.Should().BeFalse("No update version available");
         }
 
         [Fact]
