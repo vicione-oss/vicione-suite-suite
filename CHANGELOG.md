@@ -1,6 +1,12 @@
 # Changelog
 
-## 1.2.0 - Unreleased
+## 1.2.1 - Unreleased
+
+### Changed
+
+- Stopped catching `NavigationException`s in `LoginContent.razor.cs`, as ASP.NET uses them to perform the redirection during prerendering
+
+## 1.2.0 - 2026-04-17
 
 ### Added
 

@@ -22,7 +22,8 @@ public sealed class SystemInformationNotificationElementFlyoutContentTests
             .AddSystemInformation()
             .AddSingleton(Substitute.For<IUiMediator>())
             .AddSingleton(Substitute.For<IInstanceInformationProvider>())
-            .AddSingleton(Substitute.For<ISuiteControlService>());
+            .AddSingleton(Substitute.For<ISuiteControlService>())
+            .AddSingleton(Substitute.For<INavigationService>());
 
         // Act
         var component = ctx.Render<SystemInformationNotificationElementFlyoutContent>();
