@@ -1,11 +1,18 @@
 @attribute [Route(IdentityConstants.ConfirmMailRoute)]
 
+
+@*
+This page must be accessible without prior authentication ([AllowAnonymous]).
+When 'RequireAccountVerificationToLogIn' is enabled, users must verify their
+email address before they can log in. This means the email confirmation page
+must be reachable without an active session, as the user has not yet been
+able to complete the login process.
+*@
+@attribute [AllowAnonymous]
+
 @using Blazor.Server.Backend.Components
 @using Blazor.Server.Backend.Localization
 @using Blazor.Shared.Components
-@using Blazor.Shared.Enums
-@using Blazor.Shared.Extensions
-@using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 
