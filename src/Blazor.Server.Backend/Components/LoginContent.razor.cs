@@ -87,7 +87,7 @@ public sealed partial class LoginContent
 
     public async Task LoginUser()
     {
-        ReturnUrl = "/";
+        ReturnUrl ??= "/";
 
         if (!editContext.Validate())
         {
@@ -137,14 +137,8 @@ public sealed partial class LoginContent
                     });
             }
 
-            try
-            {
-                NavigationService.NavManager.NavigateTo(ReturnUrl);
-            }
-            catch (NavigationException ex)
-            {
-                LogNavigationError(Logger, ex.Message);
-            }
+            NavigationService.RedirectTo(ReturnUrl);
+
             return;
         }
 
@@ -167,7 +161,6 @@ public sealed partial class LoginContent
 
         messageStore?.Add(() => Input.Username, Login.UserOrPasswordIsIncorrect);
         messageStore?.Add(() => Input.Password, Login.UserOrPasswordIsIncorrect);
-        return;
     }
 
     private static string MapToErrorMessage(ExternalLoginError externalError)
@@ -202,9 +195,6 @@ public sealed partial class LoginContent
 
     [LoggerMessage(Level = LogLevel.Information, Message = "User logged in")]
     private static partial void LogUserLoggedIn(ILogger logger);
-
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Navigation error: {Message}")]
-    private static partial void LogNavigationError(ILogger logger, string message);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "User logged in but is not yet verified")]
     private static partial void LogUserNotYetVerified(ILogger logger);

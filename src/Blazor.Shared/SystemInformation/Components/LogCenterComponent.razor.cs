@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 using System.Text.Encodings.Web;
+using Blazor.Shared.Services;
 using Blazor.Shared.SystemInformation.Colors;
 using Blazor.Shared.SystemInformation.Enums;
 using Blazor.Shared.SystemInformation.Models;
@@ -15,13 +16,13 @@ public sealed partial class LogCenterComponent : IDisposable
 {
     [Inject] private IJournalMonitoring JournalMonitoring { get; set; } = default!;
     [Inject] private LogCenterService LogCenterService { get; set; } = default!;
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private INavigationService NavigationService { get; set; } = default!;
 
     private void OpenJournal()
-        => NavigationManager.NavigateTo(Constants.JournalViewRoute);
+        => NavigationService.RedirectTo(Constants.JournalViewRoute);
 
     private void OpenJournal(JournalFilterEntry filterEntry)
-        => NavigationManager.NavigateTo($"{Constants.JournalViewRoute}?filter={UrlEncoder.Default.Encode(filterEntry.Filter)}");
+        => NavigationService.RedirectTo($"{Constants.JournalViewRoute}?filter={UrlEncoder.Default.Encode(filterEntry.Filter)}");
 
     private IEnumerable<(string Key, LogCenterEntry LogEntry, JournalFilterEntry FilterEntry)> GetEntries()
     {

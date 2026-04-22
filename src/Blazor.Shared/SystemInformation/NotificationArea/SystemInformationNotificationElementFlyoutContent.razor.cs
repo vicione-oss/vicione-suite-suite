@@ -35,7 +35,7 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
     private IUiMediator Mediator { get; set; } = default!;
 
     [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
+    private INavigationService NavigationService { get; set; } = default!;
 
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
@@ -52,7 +52,7 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
     }
 
     private void OpenMonitor()
-        => NavigationManager.NavigateTo(Constants.ProcessRoute);
+        => NavigationService.RedirectTo(Constants.ProcessRoute);
 
     private async Task RestartSuite()
         => await SuiteControlService.RestartSuite();
