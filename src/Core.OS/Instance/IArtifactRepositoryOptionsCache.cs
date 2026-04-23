@@ -1,4 +1,4 @@
-using Core.Module;
+using Core.Artifacts;
 
 namespace Core.OS.Instance;
 

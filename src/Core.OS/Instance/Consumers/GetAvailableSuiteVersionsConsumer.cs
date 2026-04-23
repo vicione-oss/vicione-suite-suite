@@ -1,6 +1,6 @@
+using Core.Artifacts;
 using Core.Module;
 using Core.Module.Contracts;
-using Core.Module.Utils;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts.Network;
 using Sdk.Backend.Messaging;
@@ -37,19 +37,22 @@ public sealed class GetAvailableSuiteVersionsConsumer(
         // If current version can't be downloaded anymore we have to add it manually
         if (filteredVersions.All(b => b.Version != currentVersion))
         {
+            var localPackage = ArtifactRepositoryFactory.CreateArtifact("vicione-suite", "local", "local");
+            var localSignature = ArtifactRepositoryFactory.CreateArtifact("vicione-suite-sig", "local", "local");
+
             filteredVersions.Add(new SuiteArtifactBundle
             {
                 Architecture = repository.GetOSArchitectureFilter(),
                 Version = currentVersion,
-                Package = new Artifact { Name = "vicione-suite", Path = "local" },
-                PackageSignature = new Artifact{ Name = "vicione-suite-sig", Path = "local" },
+                Package = localPackage,
+                PackageSignature = localSignature,
                 HostManagementVersion = SemVersion.FromVersion(hostManagementAssemblyName.Version)
             });
         }
 
         // Sort the list by real version instead of string        
-        filteredVersions.Sort(((package, versionPackage) => SemVersion.ComparePrecedence(package.Version, versionPackage.Version)));
-        
+        filteredVersions.Sort((package, versionPackage) => SemVersion.ComparePrecedence(package.Version, versionPackage.Version));
+
         var suiteVersions = filteredVersions.Select(b => new SuiteVersionPackage
         {
             Architecture = b.Architecture,
@@ -59,7 +62,7 @@ public sealed class GetAvailableSuiteVersionsConsumer(
             Version = b.Version.ToString(),
             Installed = b.Version == currentVersion
         });
-        
+
         return new GetAvailableSuiteVersionsResponse([.. suiteVersions]);
     }
 

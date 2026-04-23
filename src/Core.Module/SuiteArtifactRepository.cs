@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
+using Core.Artifacts;
 using Core.Module.Contracts;
-using Core.Module.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sdk.Backend.Artifacts;

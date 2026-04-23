@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using System.Text.Json;
+using Core.Artifacts;
 using Core.Module;
 using Core.Module.Contracts;
 using Core.Module.Extensions;

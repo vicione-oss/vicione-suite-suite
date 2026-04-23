@@ -1,12 +1,11 @@
 using System.Globalization;
-using System.Linq.Expressions;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Sdk.Backend.Artifacts;
 using Sdk.Messaging;
 
-namespace Core.Module.JFrog;
+namespace Core.Artifacts.JFrog;
 
 /// <inheritdoc />
 internal class JFrogArtifactQueryBuilder() : IArtifactQueryBuilder

@@ -1,8 +1,8 @@
-using Core.Module.JFrog;
+using Core.Artifacts.JFrog;
 using Sdk.Backend.Artifacts;
 using Xunit;
 
-namespace Core.Module.Tests.JFrog;
+namespace Core.Artifacts.Tests;
 
 public class JFrogArtifactQueryBuilderTests
 {

@@ -1,4 +1,4 @@
-using Core.Module.Options;
+using Core.Artifacts;
 using Microsoft.Extensions.Options;
 
 namespace Core.OS.Instance.Services;

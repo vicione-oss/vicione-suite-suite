@@ -1,4 +1,4 @@
-using Core.Module.Options;
+using Core.Artifacts;
 
 namespace Core.OS.Instance.Services;
 

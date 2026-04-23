@@ -6,7 +6,6 @@ default:
   # Jobs should extend .mise-cache or .mise-cache-seed
 
 stages:
-  - restore
   - build
   - test
   - artifacts
@@ -34,9 +33,6 @@ stages:
 
 .install_npm_packages: &install_npm_packages
   - npm install
-
-.dotnet_restore: &dotnet_restore
-  - dotnet restore
 
 .run_npm_scripts: &run_npm_scripts
   - npm run build
@@ -141,6 +137,34 @@ include:
       hours: "4"
       rules:
         - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  
+  ### Pack
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-pack@v2.4.0
+    inputs:
+      name: "Pack Core.Artifacts"
+      stage: "packaging"
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable      
+      project: "src/Core.Artifacts/Core.Artifacts.csproj"
+      rules: *rules_common_manual
+      before_script:
+        - *activate_mise
+        - *update_nuget_source_ro
+        - dotnet restore --packages packages
+        - dotnet build src/Core.Artifacts/Core.Artifacts.csproj -c Release --no-restore
+
+  ### Push
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-nuget-push@v2.4.0
+    inputs:
+      pack_job_name: "Pack Core.Artifacts"
+      name: "Push Core.Artifacts"
+      stage: "release"
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
+      source: "JFrogViciOne"
+      filename_pattern: "./src/Core.Artifacts/*"
+      rules: *rules_common_manual
+      before_script: 
+        - *activate_mise
+        - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_RW_JFrog -p $NuGet_PW_RW_JFrog --store-password-in-clear-text
 
 variables:
   PACKAGE_NAME: "ci-artifacts"
@@ -259,10 +283,32 @@ variables:
     - <<: *rules_web_manual
     - <<: *rules_default_branch_manual
 
+Version:
+  stage: .pre
+  rules:
+    - if: '$CI_COMMIT_TAG'
+    - <<: *rules_default_branch
+    - <<: *rules_merge_request
+    - <<: *rules_web
+  script:
+    - if [[ -f "VERSION" ]]; then VERSION=$(head -n 1 VERSION); fi
+    - if [[ ! -z "${CI_COMMIT_TAG}" ]]; then VERSION=$(echo $CI_COMMIT_TAG | sed 's/v//g'); fi
+    - if [[ -z "${VERSION}" ]]; then VERSION='0.1.0'; fi
+    - if [[ -z "${CI_COMMIT_TAG}" ]]; then VERSION="${VERSION}-ci${CI_PIPELINE_ID}"; fi
+    - echo "Version=${VERSION}" >> version.env
+    - echo "PackageVersion=${VERSION}" >> version.env
+    - echo "APP_PIPELINE=${CI_PIPELINE_ID}" >> version.env
+    - echo "APP_VERSION=$(cat VERSION)" >> version.env
+    - echo "APP_TAG=${CI_COMMIT_TAG}" >> version.env
+    - cat version.env
+  artifacts:
+    reports:
+      dotenv: version.env
+    expire_in: 30 days
 
 Validation:
   extends: .minimal
-  stage: restore
+  stage: test
   script:
     # must be case-sensitive, but gets generated case-insensitive by Visual Studio
     - |
@@ -409,21 +455,6 @@ Upload artifacts x64:
     - job: "Build artifacts x64"
       artifacts: true
 
-Versioning:
-  extends: .minimal
-  stage: artifacts
-  script:
-    - echo "APP_PIPELINE=${CI_PIPELINE_ID}" >>version.env
-    - echo "APP_VERSION=$(cat VERSION)" >>version.env
-    - echo "APP_TAG=${CI_COMMIT_TAG}" >>version.env
-    - cat version.env
-  artifacts:
-    reports:
-      dotenv: version.env
-    expire_in: 30 days
-  when: manual
-  rules: *rules_common
-
 #################### Packaging stage
 
 trigger deb packaging:
@@ -441,8 +472,7 @@ trigger deb packaging:
   needs:
     - "Upload artifacts arm64"
     - "Upload artifacts x64"
-    - job: "Versioning"
-      artifacts: true
+    - Version
   when: manual
   rules: *rules_common
 

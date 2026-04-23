@@ -1,8 +1,8 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
+using Core.Artifacts;
 using Core.Module;
-using Core.Module.Options;
 using Core.Module.Utils;
 using Core.OS.Modules.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -84,7 +84,7 @@ public class ModuleArtifactCacheTests
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
-            _moduleRepository.QueryModuleMetadataArtifacts(null, null,Arg.Any<CancellationToken>()).Returns([]);
+            _moduleRepository.QueryModuleMetadataArtifacts(null, null, Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
             var metadata = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
@@ -114,7 +114,7 @@ public class ModuleArtifactCacheTests
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<ModuleArtifactCache>();
-            _moduleRepository.QueryModuleMetadataArtifacts(null, null,Arg.Any<CancellationToken>()).Returns([]);
+            _moduleRepository.QueryModuleMetadataArtifacts(null, null, Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
             var metadata1 = await cache.GetAvailableModuleMetadata(null, false, TestContext.Current.CancellationToken);
@@ -176,7 +176,7 @@ public class ModuleArtifactCacheTests
             // Assert
             metadata1.Should().BeEquivalentTo(metadata2);
             await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(null, null, Arg.Any<CancellationToken>());
-            await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(version, null,Arg.Any<CancellationToken>());
+            await _moduleRepository.Received(1).QueryModuleMetadataArtifacts(version, null, Arg.Any<CancellationToken>());
         }
 
         [Fact]

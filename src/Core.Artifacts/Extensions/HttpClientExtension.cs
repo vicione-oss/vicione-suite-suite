@@ -1,7 +1,6 @@
 using System.Text;
-using Core.Module.Options;
 
-namespace Core.Module.Extensions;
+namespace Core.Artifacts.Extensions;
 
 internal static class HttpClientExtension
 {

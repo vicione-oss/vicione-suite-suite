@@ -66,6 +66,7 @@
     <Project Path="src/Blazor.Shared/Blazor.Shared.csproj">
       <BuildDependency Project="src/Core.Deployment/Core.Deployment.csproj" />
     </Project>
+    <Project Path="src/Core.Artifacts/Core.Artifacts.csproj" />
     <Project Path="src/Core.Deployment/Core.Deployment.csproj" />
     <Project Path="src/Core.Module/Core.Module.csproj" />
     <Project Path="src/Core.OS/Core.OS.csproj" />
@@ -77,6 +78,7 @@
     <Project Path="tests/Blazor.Server.Tests/Blazor.Server.Tests.csproj" />
     <Project Path="tests/Blazor.Shared.Tests/Blazor.Shared.Tests.csproj" />
     <Project Path="tests/Blazor.Tests.Tools/Blazor.Tests.Tools.csproj" />
+    <Project Path="tests/Core.Artifacts.Tests/Core.Artifacts.Tests.csproj" />
     <Project Path="tests/Core.Module.Tests/Core.Module.Tests.csproj" />
     <Project Path="tests/Core.OS.Tests/Core.OS.Tests.csproj" />
     <Project Path="tests/Core.Shared.Tests/Core.Shared.Tests.csproj" />

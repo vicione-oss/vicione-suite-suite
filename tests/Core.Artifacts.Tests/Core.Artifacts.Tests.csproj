@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Core.Artifacts.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core.Artifacts\Core.Artifacts.csproj" />
+    <ProjectReference Include="..\Core.Tests.Tools\Core.Tests.Tools.csproj" />
+  </ItemGroup>
+</Project>

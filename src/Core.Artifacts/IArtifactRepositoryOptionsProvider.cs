@@ -1,6 +1,4 @@
-using Core.Module.Options;
-
-namespace Core.Module;
+namespace Core.Artifacts;
 
 /// <summary>
 /// Interface to be implemented by services capable of providing <see cref="ArtifactRepositoryOptions"/>. 

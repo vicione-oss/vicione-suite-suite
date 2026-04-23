@@ -37,6 +37,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Core.Artifacts;
 
 namespace Core.OS.Extensions;
 
