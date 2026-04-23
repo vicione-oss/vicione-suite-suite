@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
+using Core.Artifacts;
 using Core.Module;
 using Core.Module.Options;
 using Core.Module.Utils;

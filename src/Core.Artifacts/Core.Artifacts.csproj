@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Core.Artifacts</AssemblyName>
+    <RootNamespace>Core.Artifacts</RootNamespace>
+  </PropertyGroup>
+  
+  <ItemGroup>        
+    <PackageReference Include="System.IO.Abstractions" />
+    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ViciOne.Suite.Core.Artifacts.Tests" />    
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <!-- NuGet package configuration -->
+  <PropertyGroup>
+    <PackageProjectUrl>https://gitlab.com/vicione-oss/vicione/suite/suite/-/tree/master/src/Core.Artifacts?ref_type=heads</PackageProjectUrl>
+    <Authors>$(Company)</Authors>
+  </PropertyGroup>
+</Project>

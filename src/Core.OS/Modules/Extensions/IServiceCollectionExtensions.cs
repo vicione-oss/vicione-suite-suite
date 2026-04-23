@@ -1,9 +1,8 @@
+using Core.Artifacts.Extensions;
 using Core.Module;
-using Core.Module.JFrog;
 using Core.OS.Instance;
 using Core.OS.Modules.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Sdk.Backend.Artifacts;
 using Sdk.Backend.Modules;
 
 namespace Core.OS.Modules.Extensions;
@@ -28,10 +27,7 @@ internal static class IServiceCollectionExtensions
 
         private IServiceCollection AddModuleArtifactQueryApi()
         {
-            services.AddHttpClient();
-            services.AddTransient<JFrogArtifactRepository>();
-            services.AddTransient<IArtifactRepository, JFrogArtifactRepository>();
-            services.AddSingleton<IArtifactRepositoryOptionsProvider>(s => s.GetRequiredService<IArtifactRepositoryOptionsCache>());
+            services.AddArtifactRepository(s => s.GetRequiredService<IArtifactRepositoryOptionsCache>());
             services.AddTransient<IModuleArtifactRepository, ModuleArtifactRepository>();
             services.AddTransient<ISuiteArtifactRepository, SuiteArtifactRepository>();
 

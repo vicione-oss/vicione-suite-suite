@@ -4,8 +4,7 @@ using System.IO.Compression;
 using System.Net;
 using System.Text;
 using AwesomeAssertions;
-using Core.Module.JFrog;
-using Core.Module.Options;
+using Core.Artifacts.JFrog;
 using Core.Tests.Tools;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -13,7 +12,7 @@ using Sdk.Backend.Artifacts;
 using Sdk.Testing;
 using Xunit;
 
-namespace Core.Module.Tests.JFrog;
+namespace Core.Artifacts.Tests;
 
 /// <summary>
 /// https://jfrog.com/help/r/jfrog-rest-apis/artifactory-query-language
@@ -357,7 +356,7 @@ public class JFrogArtifactQueryApiTests
         ArtifactRepositoryOptions? opts = null)
     {
         fs ??= Substitute.For<IFileSystem>();
-        opts ??= SystemTestSettings.ArtifactApiOptions;
+        opts ??= SystemTestSettings.GetArtifactRepositoryOptions();
 
         var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
         optionsProvider.GetOptions().Returns(opts);

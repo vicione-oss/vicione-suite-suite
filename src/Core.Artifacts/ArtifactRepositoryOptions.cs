@@ -1,4 +1,4 @@
-namespace Core.Module.Options;
+namespace Core.Artifacts;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Setter properties are required for deserialisation")]
 /// <summary>

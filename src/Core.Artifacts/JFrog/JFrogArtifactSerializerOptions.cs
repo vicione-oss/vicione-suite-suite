@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Sdk.Backend.Artifacts;
 
-namespace Core.Module.JFrog;
+namespace Core.Artifacts.JFrog;
 
 internal static class JFrogArtifactSerializerOptions
 {

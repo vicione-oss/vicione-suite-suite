@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
+using Core.Artifacts;
 using Core.Module;
-using Core.Module.JFrog;
 using Core.Module.Options;
 using Core.Module.Utils;
 using Core.OS.Modules.Extensions;
@@ -132,10 +132,9 @@ internal sealed partial class ModuleSynchronizer : IDisposable
             throw new InvalidOperationException($"Use '{nameof(WithApiAdapter)}' method to setup the module API.");
 
         _loggerFactory = new LoggerFactory();
-        var logger = _loggerFactory.CreateLogger<JFrogArtifactRepository>();
-
         _httpClientFactory = new LowHttpFactory();
-        var artifactory = new JFrogArtifactRepository(fileSystem, _httpClientFactory, _apiOptionsProvider, logger);
+
+        var artifactory = ArtifactRepositoryFactory.Create(fileSystem, _httpClientFactory, _apiOptionsProvider, _loggerFactory);
 
         return new ModuleArtifactRepository(artifactory, fileSystem);
     }

@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 using Sdk.Backend.Artifacts;
 
-namespace Core.Module.Contracts;
+namespace Core.Artifacts.Contracts;
 
 /// <inheritdoc/>
 [DebuggerDisplay("StartPosition = {StartPosition,nq}, EndPosition = {EndPosition,nq}, Total = {Total,nq}")]

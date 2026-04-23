@@ -4,13 +4,12 @@ using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json.Serialization;
-using Core.Module.Contracts;
-using Core.Module.Extensions;
-using Core.Module.Options;
+using Core.Artifacts.Contracts;
+using Core.Artifacts.Extensions;
 using Microsoft.Extensions.Logging;
 using Sdk.Backend.Artifacts;
 
-namespace Core.Module.JFrog;
+namespace Core.Artifacts.JFrog;
 
 /// <inheritdoc />
 public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,

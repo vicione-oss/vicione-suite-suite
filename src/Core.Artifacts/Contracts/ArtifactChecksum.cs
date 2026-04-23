@@ -1,6 +1,6 @@
-﻿using Sdk.Backend.Artifacts;
+using Sdk.Backend.Artifacts;
 
-namespace Core.Module.Contracts;
+namespace Core.Artifacts.Contracts;
 
 /// <inheritdoc />
 internal class ArtifactChecksum : IArtifactChecksum

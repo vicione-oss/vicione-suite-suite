@@ -1,7 +1,7 @@
 using System.IO.Abstractions;
 using AwesomeAssertions;
+using Core.Artifacts;
 using Core.Module;
-using Core.Module.Options;
 using Core.OS.Instance;
 using Core.OS.Modules;
 using Core.OS.Modules.Extensions;

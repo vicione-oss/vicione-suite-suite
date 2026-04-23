@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
-using Core.Module.JFrog;
 using Core.Tests.Tools;
 using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +8,8 @@ using Sdk.Backend.Artifacts;
 using Sdk.Modules;
 using Sdk.Testing;
 using Xunit;
+using Core.Artifacts;
+using Core.Artifacts.Extensions;
 
 namespace Core.Module.Tests;
 
@@ -24,11 +25,11 @@ public class ModuleArtifactRepositoryTests
         optionsProvider.GetOptions().Returns(SystemTestSettings.ArtifactApiOptions);
 
         return new ServiceCollection()
-            .AddSingleton<IArtifactRepository, JFrogArtifactRepository>()
             .AddSingleton<IFileSystem>(new FileSystem())
             .AddSingleton<ModuleArtifactRepository>()
             .AddSingleton(optionsProvider)
             .AddHttpClient()
+            .AddArtifactRepository(s => optionsProvider)
             .BuildServiceProvider();
     }
 
@@ -225,15 +226,15 @@ public class ModuleArtifactRepositoryTests
             assets.Should().NotBeEmpty();
             assets.Should().AllSatisfy(k => k.Name.Should().Contain($"_{_sdkVersion.Major}.{_sdkVersion.Minor}."));
         }
-        
+
         [Fact]
         public async Task Should_return_available_module_artifacts_modified_after()
         {
             // Arrange
             await using var services = CreateServiceProvider();
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
-            var datetime =  DateTime.UtcNow.Subtract(TimeSpan.FromDays(2));
-            
+            var datetime = DateTime.UtcNow.Subtract(TimeSpan.FromDays(2));
+
             // Act
             var assets = await repository.QueryModuleMetadataArtifacts(null, datetime, TestContext.Current.CancellationToken);
 

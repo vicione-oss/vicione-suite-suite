@@ -1,4 +1,4 @@
-namespace Core.Module.Options;
+namespace Core.Artifacts;
 
 /// <summary>
 /// Represents a single artifact repository source configuration.

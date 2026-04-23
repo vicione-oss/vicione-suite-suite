@@ -1,3 +1,4 @@
+using Core.Artifacts;
 using Core.Module;
 using Core.Module.Options;
 using Microsoft.Extensions.Options;

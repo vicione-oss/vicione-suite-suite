@@ -1,7 +1,7 @@
-﻿using Sdk.Backend.Artifacts;
+using Sdk.Backend.Artifacts;
 using Sdk.Messaging;
 
-namespace Core.Module.Contracts;
+namespace Core.Artifacts.Contracts;
 
 internal class ArtifactQueryError : IArtifactQueryError
 {

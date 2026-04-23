@@ -1,14 +1,15 @@
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using AwesomeAssertions;
+using Core.Artifacts;
+using Core.Artifacts.Extensions;
 using Core.Module.Contracts;
-using Core.Module.JFrog;
-using Core.Module.Options;
 using Core.Tests.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Backend.Artifacts;
+using Sdk.Testing.Client;
 using Semver;
 using Xunit;
 
@@ -19,19 +20,18 @@ public class SuiteArtifactRepositoryTests
     private static ServiceProvider CreateServiceProvider(ArtifactRepositoryOptions? apiOptions = null)
     {
         var options = Microsoft.Extensions.Options.Options.Create(apiOptions ?? SystemTestSettings.ArtifactApiOptions);
-        var provider = Substitute.For<IArtifactRepositoryOptionsProvider>();
-        provider.GetOptions().Returns(options.Value);
+        var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
+        optionsProvider.GetOptions().Returns(options.Value);
 
         return new ServiceCollection()
             .AddSingleton<HttpClient>()
             .AddSingleton(options)
-            .AddSingleton(provider)
-            .AddSingleton<IArtifactRepository, JFrogArtifactRepository>()
             .AddSingleton<IFileSystem>(new FileSystem())
             .AddSingleton(Substitute.For<ILogger<SuiteArtifactRepository>>)
             .AddSingleton<SuiteArtifactRepository>()
             .AddSingleton(options)
             .AddHttpClient()
+            .AddArtifactRepository(s => optionsProvider)
             .BuildServiceProvider();
     }
 
@@ -46,25 +46,30 @@ public class SuiteArtifactRepositoryTests
             "RWSbNk9dC1tWG0M19wR8eHH3F4nsqeVi7r6kgVBMYJd6aabbUsqpTLUT"
             ];
 
-        private readonly SuiteArtifactBundle _bundle = new()
+        private readonly SuiteArtifactBundle _bundle;
+
+        public DownloadAndValidate()
         {
-            Architecture = "amd64",
-            Version = SemVersion.Parse("1.1.0-ci1944853"),
-            // Suite deb package has ~ 66Mb
-            Package = new Artifact
-            {
-                Name = "vicione-suite_1.1.0~1944853_amd64.deb",
-                Path = "suites",
-                Repository = "vicione-suite-dev"
-            },
+            var package = Substitute.For<IArtifact>();
+            package.Name.Returns("vicione-suite_1.1.0~1944853_amd64.deb");
+            package.Path.Returns("suites");
+            package.Repository.Returns("vicione-suite-dev");
+
             // Only 330 byte
-            PackageSignature = new Artifact
+            var packageSignature = Substitute.For<IArtifact>();
+            packageSignature.Name.Returns("vicione-suite_1.1.0~1944853_amd64.deb.minisig");
+            packageSignature.Path.Returns("suites");
+            packageSignature.Repository.Returns("vicione-suite-dev");
+
+            // Suite deb package has ~ 66Mb
+            _bundle = new SuiteArtifactBundle
             {
-                Name = "vicione-suite_1.1.0~1944853_amd64.deb.minisig",
-                Path = "suites",
-                Repository = "vicione-suite-dev"
-            }
-        };
+                Architecture = "amd64",
+                Version = SemVersion.Parse("1.1.0-ci1944853"),
+                Package = package,
+                PackageSignature = packageSignature
+            };
+        }
 
         private ArtifactRepositoryOptions CreateOptionsWithKeys()
         {
@@ -152,12 +157,10 @@ public class SuiteArtifactRepositoryTests
             // Arrange
             await using var services = CreateServiceProvider();
             var repository = services.GetRequiredService<SuiteArtifactRepository>();
-            var suiteArtifact = new Artifact
-            {
-                Name = "i_does_not_exist_on_repo",
-                Path = "suites",
-                Repository = "vicione-suite"
-            };
+            var suiteArtifact = Substitute.For<IArtifact>();
+            suiteArtifact.Name.Returns("i_does_not_exist_on_repo");
+            suiteArtifact.Path.Returns("suites");
+            suiteArtifact.Repository.Returns("vicione-suite");
             var suiteBundle = new SuiteArtifactBundle
             {
                 Version = _bundle.Version,
@@ -179,17 +182,16 @@ public class SuiteArtifactRepositoryTests
             // Arrange
             await using var services = CreateServiceProvider();
             var repository = services.GetRequiredService<SuiteArtifactRepository>();
+            var invalidSignature = Substitute.For<IArtifact>();
+            invalidSignature.Name.Returns("i_does_not_exist_on_repo");
+            invalidSignature.Path.Returns("suites");
+            invalidSignature.Repository.Returns("vicione-suite");
             var suiteBundle = new SuiteArtifactBundle
             {
                 Version = _bundle.Version,
                 Architecture = _bundle.Architecture,
                 Package = _bundle.Package,
-                PackageSignature = new Artifact
-                {
-                    Name = "i_does_not_exist_on_repo",
-                    Path = "suites",
-                    Repository = "vicione-suite"
-                }
+                PackageSignature = invalidSignature
             };
 
             // Act

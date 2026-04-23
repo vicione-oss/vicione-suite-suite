@@ -1,7 +1,7 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using Sdk.Backend.Artifacts;
 
-namespace Core.Module.Contracts;
+namespace Core.Artifacts.Contracts;
 
 /// <inheritdoc />
 internal class ArtifactQueryResult : IArtifactQueryResult
