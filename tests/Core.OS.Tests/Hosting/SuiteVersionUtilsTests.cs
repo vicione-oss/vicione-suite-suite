@@ -30,4 +30,28 @@ public sealed class SuiteVersionUtilsTests
             SuiteVersionUtils.IsPatchUpdate(oldVersion, newVersion).Should().BeTrue();
         }
     }
+
+    public sealed class IsVersionCompatible
+    {
+        [Theory]        
+        [InlineData("0.10.1", "0.10.1-ci1632286")]
+        [InlineData("0.10.1", "0.10.0")]
+        [InlineData("0.10.1", "1.10.1")]
+        [InlineData("0.10.1-ci1632286", "0.10.1-ci1622286")]
+        public void Should_detect_incompatible_versions(string oldVersion, string newVersion)
+        {
+            SuiteVersionUtils.IsVersionCompatible(oldVersion, newVersion).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("0.10.1", "0.10.1")]
+        [InlineData("0.10.1", "0.10.2")]
+        [InlineData("0.10.1", "0.14.1")]
+        [InlineData("0.10.1", "0.11.9")]
+        [InlineData("0.10.1-ci1622286", "0.10.1")]
+        public void Should_detect_compatible_versions(string oldVersion, string newVersion)
+        {
+            SuiteVersionUtils.IsVersionCompatible(oldVersion, newVersion).Should().BeTrue();
+        }
+    }
 }

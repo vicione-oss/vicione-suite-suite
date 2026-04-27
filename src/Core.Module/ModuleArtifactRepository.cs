@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using Core.Module.Contracts;
+using Core.Module.Extensions;
 using Core.Module.Utils;
 using Sdk.Backend.Artifacts;
 using Sdk.Modules;
@@ -146,9 +147,8 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
         var aqlQuery = queryBuilder.Build();
         var result = await artifactRepository.Query(aqlQuery, cancellationToken);
 
-        // Map, Filter in C#, Find Latest
-        return result.Artifacts
-            .FirstOrDefault(); // AQL already sorted, first item after filtering is latest
+        return result.OrderModuleArtifactsByVersionDesc(k => !k.IsPrerelease)
+            .FirstOrDefault();
     }
 
     private static string CreateNameMatchFilter(Version? sdkVersion)

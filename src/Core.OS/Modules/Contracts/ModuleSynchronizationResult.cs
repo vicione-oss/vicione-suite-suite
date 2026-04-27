@@ -1,10 +1,11 @@
-﻿using Sdk.Messaging;
+using Sdk.Messaging;
+using Semver;
 
 namespace Core.OS.Modules.Contracts;
 
 internal record ModuleSynchronizationResult(string Name)
 {
-    public string? Version { get; set; }
+    public SemVersion? Version { get; set; }
 
     public string? RelativeFolder { get; set; }
 

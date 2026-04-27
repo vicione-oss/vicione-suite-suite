@@ -1,7 +1,8 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Modules.Extensions;
 using NSubstitute;
 using Sdk.Modules;
+using Semver;
 using Xunit;
 
 namespace Core.OS.Tests.Modules.Extensions;
@@ -67,22 +68,27 @@ public class ModulePackageManifestExtensionsTests
             _logger.Received().Warning(Arg.Is<string>(msg => msg.StartsWith("Disable module")), "A", dependency.Name, dependency.Version);
         }
 
-        [Fact]
-        public void Should_include_package_when_dependencies_are_supported()
+        [Theory]
+        [InlineData("1.0.0", "1.0.0")]
+        [InlineData("1.0.4", "1.0.0")]
+        [InlineData("1.0.0", "1.0.0-ci342343")]
+        [InlineData("1.1.0", "1.0.0")]
+        [InlineData("1.1.0-ci342343", "1.0.0")]
+        public void Should_include_package_when_dependencies_are_supported(string installedVersion, string minDependency)
         {
             // Arrange
             var manifest = new ModulePackageManifest
             {
                 Packages =
                 [
-                    new() { Name = "Dep", Version = "1.0.0" },
+                    new() { Name = "Dep", Version = installedVersion },
                     new()
                     {
                         Name = "A",
                         Version = "2.0.0",
                         DependingOn =
                         [
-                            new() { Name = "Dep", Version = "1.0.0" }
+                            new() { Name = "Dep", Version = minDependency }
                         ]
                     }
                 ]
@@ -97,22 +103,28 @@ public class ModulePackageManifestExtensionsTests
             result.Select(p => p.Name).Should().Contain("A");
         }
 
-        [Fact]
-        public void Should_include_package_when_dependencies_are_supported_by_pre_release()
+        [Theory]
+        [InlineData("0.9.0", "1.0.0")]
+        [InlineData("1.0.0", "1.0.4")]
+        [InlineData("1.0.0-ci342343", "1.0.0")]
+        [InlineData("1.0.0-ci342343", "1.0.0-ci352343")]
+        [InlineData("2.2.0-rc1", "2.2.0")]
+        [InlineData("2.1.0", "1.0.0")]
+        public void Should_exclude_package_when_dependencies_are_not_supported(string installedVersion, string minDependency)
         {
             // Arrange
             var manifest = new ModulePackageManifest
             {
                 Packages =
                 [
-                    new() { Name = "Dep", Version = "1.0.0" },
+                    new() { Name = "Dep", Version = installedVersion },
                     new()
                     {
                         Name = "A",
                         Version = "2.0.0",
                         DependingOn =
                         [
-                            new() { Name = "Dep", Version = "1.0.0-ci234234" }
+                            new() { Name = "Dep", Version = minDependency }
                         ]
                     }
                 ]
@@ -124,7 +136,7 @@ public class ModulePackageManifestExtensionsTests
             var result = manifest.GetValidModulePackages(moduleIds, [], _logger);
 
             // Assert
-            result.Select(p => p.Name).Should().Contain("A");
+            result.Select(p => p.Name).Should().NotContain("A");
         }
     }
 
@@ -143,10 +155,10 @@ public class ModulePackageManifestExtensionsTests
                 ]
             };
 
-            var versionMap = new Dictionary<string, string?>
+            var versionMap = new Dictionary<string, SemVersion?>
             {
-                ["A"] = "1.2.3",
-                ["B"] = "2.3.4"
+                ["A"] = SemVersion.Parse("1.2.3"),
+                ["B"] = SemVersion.Parse("2.3.4")
             };
 
             // Act
@@ -177,9 +189,9 @@ public class ModulePackageManifestExtensionsTests
                 ]
             };
 
-            var versionMap = new Dictionary<string, string?>
+            var versionMap = new Dictionary<string, SemVersion?>
             {
-                ["A"] = "9.9.9"
+                ["A"] = SemVersion.Parse("9.9.9")
             };
 
             // Act
@@ -202,7 +214,7 @@ public class ModulePackageManifestExtensionsTests
                 ]
             };
 
-            var versionMap = new Dictionary<string, string?>();
+            var versionMap = new Dictionary<string, SemVersion?>();
 
             // Act
             var result = manifest.UpdatePackageVersions(versionMap);

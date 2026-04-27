@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
+using Core.Module.Comparer;
 using Core.Module.Utils;
-using Mono.TextTemplating.CodeCompilation;
+using Semver;
 
 namespace Core.OS.Hosting;
 
@@ -22,44 +23,56 @@ internal static class SuiteVersionUtils
         => ModuleHelpers.GetNormalizedVersion(ModuleHelpers.GetSdkAssemblyVersion());
 
     /// <summary>
-    /// Evaluates if <see cref="newVersion"/> is a patch for <see cref="oldVersion"/> like here
-    /// Version 10.1.4 is a patch of 10.1.0 or 1.2.3-ci50000 is a patch of 1.2.3-ci30000
+    /// Evaluates if <paramref name="update"/> is equal or a minor or patch update for <paramref name="version"/> like here
+    /// Version 10.2.4 is a minor update of 10.1.0 or 1.4.3-ci50000 is a minor update of 1.2.3-ci30000 or
+    /// 1.1.2 is equal to 1.1.2
     /// </summary>
-    /// <param name="oldVersion"></param>
-    /// <param name="newVersion"></param>
+    /// <param name="version">Version string by SemVer specs 2.0.0</param>
+    /// <param name="update">Version string by SemVer specs 2.0.0</param>
     /// <returns></returns>
     /// <exception cref="FormatException">Thrown if one of the versions can't be parsed</exception>
-    public static bool IsPatchUpdate(string oldVersion, string newVersion)
+    public static bool IsVersionCompatible(string version, string update)
     {
-        if (!SemVersion.TryParse(oldVersion, out var oldSemVersion))
-            throw new FormatException($"Version can't be parsed: {oldVersion}");
+        var origVersion = SemVersion.Parse(version);
+        var updateVersion = SemVersion.Parse(update);
 
-        if (!SemVersion.TryParse(newVersion, out var newSemVersion))
-            throw new FormatException($"Version can't be parsed: {oldVersion}");
-
-        if (newSemVersion.Major != oldSemVersion.Major)
+        // https://semver.org/#spec-item-8
+        if (origVersion.Major != updateVersion.Major)
             return false;
 
-        if (newSemVersion.Minor != oldSemVersion.Minor)
-            return false;
-
-        if (newSemVersion.Patch == oldSemVersion.Patch)
-        {
-            // e.g. old 0.2.4 can't be patched to version 0.2.4
-            if (!oldSemVersion.IsPreRelease && !newSemVersion.IsPreRelease)
-                return false;
-
-            // e.g. old 0.2.4 can't be patched to ci version 0.2.4-ci123423
-            if (!oldSemVersion.IsPreRelease && newSemVersion.IsPreRelease)
-                return false;
-
-            // e.g. old 0.2.4-ci123423 can be patched to released version 0.2.4
-            if (oldSemVersion.IsPreRelease && !newSemVersion.IsPreRelease)
-                return true;
-
-            return string.CompareOrdinal(newSemVersion.PreRelease, oldSemVersion.PreRelease) > 0;
-        }
-
-        return newSemVersion.Patch > oldSemVersion.Patch;
+        // is update equal or higher?
+        return SemVersion.ComparePrecedence(origVersion, updateVersion) <= 0;
     }
+
+    /// <summary>
+    /// Evaluates if <paramref name="update"/> is a patch for <paramref name="version"/> like here
+    /// Version 10.1.4 is a patch of 10.1.0 or 1.2.3-ci50000 is a patch of 1.2.3-ci30000
+    /// </summary>
+    /// <param name="version">Version string by SemVer specs 2.0.0</param>
+    /// <param name="update">Version string by SemVer specs 2.0.0</param>
+    /// <returns></returns>
+    /// <exception cref="FormatException">Thrown if one of the versions can't be parsed</exception>
+    public static bool IsPatchUpdate(string version, string update)
+    {
+        var origVersion = SemVersion.Parse(version);
+        var updateVersion = SemVersion.Parse(update);
+
+        return IsPatchUpdate(origVersion, updateVersion);
+    }
+
+    public static bool IsPatchUpdate(SemVersion version, SemVersion update)
+    {
+        // https://semver.org/#spec-item-8
+        if (version.Major != update.Major)
+            return false;
+
+        // https://semver.org/#spec-item-7
+        if (version.Minor != update.Minor)
+            return false;
+
+        return SemVersion.ComparePrecedence(version, update) == -1;
+    }
+
+    public static int Compare(string? x, string? y)
+        => new StringVersionComparer().Compare(x, y);
 }

@@ -73,6 +73,7 @@ public interface IModuleArtifactRepository
     /// <summary>
     /// Queries the repository for a module artifact (.zip) matching name and version of <paramref name="package"/>
     /// </summary>
+    /// <param name="package">The module package with name and version.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     Task<IArtifact?> QueryModuleArtifact(
         ModuleDependencyPackage package,
@@ -91,8 +92,7 @@ public interface IModuleArtifactRepository
         CancellationToken cancellationToken);
 
     /// <summary>
-    /// Queries the latest available metadata artifact for the specified module name and SDK version,
-    /// optionally including pre-release versions.
+    /// Queries the latest available metadata tagged artifact for the specified module name and SDK version. No ci-versions!
     /// </summary>
     /// <param name="sdkVersion">The SDK version to match against.</param>
     /// <param name="packageName">The name of the module package.</param>
