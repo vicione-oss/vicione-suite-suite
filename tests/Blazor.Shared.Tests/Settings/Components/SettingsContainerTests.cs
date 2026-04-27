@@ -1,13 +1,14 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
+using AwesomeAssertions;
 using Blazor.Shared.Popup.Services;
 using Blazor.Shared.Settings.Components;
 using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Services;
 using Bunit;
 using Core.Shared.UserManagement.Comparers;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Sdk.Client.ControlPanels.Attributes;
@@ -17,8 +18,6 @@ using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Modules;
 using Sdk.Modules;
 using Xunit;
-using Blazor.Shared.Settings.Models;
-using Blazor.Shared.Settings.Factories;
 
 namespace Blazor.Shared.Tests.Settings.Components;
 
@@ -114,19 +113,19 @@ public class SettingsContainerTests
 
         var categoryTitle = "Network";
 
-        var networkAccordionItemText = component.FindAll(".dxbl-accordion-item-text")
+        var networkAccordionItemText = component.FindAll(".accordion-item .header .text")
             .FirstOrDefault(i => i.Text() == categoryTitle);
 
         Assert.NotNull(networkAccordionItemText);
         networkAccordionItemText.Click();
 
-        var updatedNetworkAccordionItem = component.FindAll(".dxbl-accordion-item")
+        var updatedNetworkAccordionItem = component.FindAll(".accordion-item")
             .FirstOrDefault(i => i.Descendants<IHtmlSpanElement>()
-                .Any(span => span.ClassList.Contains("dxbl-accordion-item-text") && span.Text() == categoryTitle));
+                .Any(span => span.ClassList.Contains("text") && span.Text() == categoryTitle));
         Assert.NotNull(updatedNetworkAccordionItem);
 
         var menuEntries = updatedNetworkAccordionItem
-            .Descendants<IHtmlDivElement>()
+            .Descendants<IHtmlButtonElement>()
             .Where(menuEntry => menuEntry.ClassList.Contains("menu-entry"));
 
         menuEntries.Should().HaveCount(1);
@@ -143,20 +142,21 @@ public class SettingsContainerTests
 
         var categoryTitle = "Network";
 
-        var networkAccordionItemText = component.FindAll(".dxbl-accordion-item-text")
+        var networkAccordionItemText = component.FindAll(".accordion-item .header .text")
             .FirstOrDefault(i => i.Text() == categoryTitle);
 
         Assert.NotNull(networkAccordionItemText);
         networkAccordionItemText.Click();
 
-        var updatedNetworkAccordionItem = component.FindAll(".dxbl-accordion-item")
+        var updatedNetworkAccordionItem = component.FindAll(".accordion-item")
             .FirstOrDefault(i => i.Descendants<IHtmlSpanElement>()
-                .Any(span => span.ClassList.Contains("dxbl-accordion-item-text") && span.Text() == categoryTitle));
+                .Any(span => span.ClassList.Contains("text") && span.Text() == categoryTitle));
         Assert.NotNull(updatedNetworkAccordionItem);
 
         var cloudMenuItem = updatedNetworkAccordionItem
-            .Descendants<IHtmlDivElement>()
-            .FirstOrDefault(menuEntry => menuEntry.Descendants<IHtmlDivElement>().Any(div => div.Text() == "Cloud"));
+            .Descendants<IHtmlButtonElement>()
+            .FirstOrDefault(menuEntry => menuEntry.ClassList.Contains("menu-entry") &&
+                menuEntry.Descendants<IHtmlDivElement>().Any(div => div.Text() == "Cloud"));
 
         Assert.NotNull(cloudMenuItem);
         cloudMenuItem.Click();
@@ -200,7 +200,7 @@ public class SettingsContainerTests
         component.Render();
 
         var saveButton = component.Find(".popup-content-action-button--confirm");
-        saveButton.Click();
+        await saveButton.ClickAsync();
 
         // Assert
         Assert.NotNull(component.Find(".error-message"));

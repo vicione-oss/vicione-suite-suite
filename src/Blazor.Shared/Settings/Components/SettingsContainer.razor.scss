@@ -1,5 +1,6 @@
-﻿@use "../../Styles/design/colors";
+@use "../../Styles/design/colors";
 @use "../../Styles/design/popup";
+@use "../../Styles/design/typography";
 
 @use 'sass:color';
 
@@ -15,31 +16,7 @@
             width: 100%;
         }
 
-        .dxbl-accordion {
-
-            // General resets
-            --bs-body-bg: transparent;
-            
-            .dxbl-group {
-                --dxbl-group-border-radius: 0px;
-
-                --dxbl-group-font-size: 12px;
-                --dxbl-group-color: #{colors.$font-light};
-
-                .dxbl-group-header {
-                    --dxbl-group-header-font-size: 14px;
-                    --dxbl-group-header-font-weight: #{popup.$font-weight};
-
-                    &::before {
-                        display: none;
-                    }
-
-                    .dxbl-text {
-                        --dxbl-text-border-width: 0px;
-                        --dxbl-text-padding-x: 10px;
-                    }
-                }
-            }
+        .accordion {
 
             // General styles
             &:not(:last-child) {
@@ -47,130 +24,105 @@
             }
 
             // Menu item 1st level
-            .dxbl-accordion-group {
-                --dxbl-accordion-group-border-width: 0;
-
-                &:not(:first-child) {
-                    margin-top: 8px;
-                }
-
-                $hover-bg: color.adjust(colors.$theme-inverted, $alpha: -0.95);
-
-                .dxbl-accordion-group-header {
-                    @include background-color-transition();
-
-                    --dxbl-group-header-bg: transparent;
-                    --dxbl-group-header-color: #{colors.$font-light};
-                    --dxbl-group-header-padding-x: 24px;
-                    --dxbl-group-header-padding-y: 0px;
-
-                    --dxbl-accordion-group-header-text-padding-y: 0px;
-
-                    --dxbl-accordion-group-header-hover-bg: #{$hover-bg};
-                    --dxbl-accordion-group-header-hover-color: #{colors.$font-light};
-
-                    --dxbl-accordion-group-item-spacing: 0px;
-
-                    border-radius: 0;
-                    min-height: 40px;
-
-                    .dxbl-accordion-item-content {
-                        grid-column-gap: 10px;
-                        overflow: hidden;
-
-                        .dxbl-image {
-                            width: 24px;
-                            height: 24px;
-                        }
-
-                        .dxbl-text {
-                            padding: 0px;
-                            overflow: inherit;
-
-                            .dxbl-accordion-item-text {
-                                overflow: hidden;
-                                text-overflow: ellipsis;
-                                white-space: nowrap;
-                            }
-                        }
-                    }
-                }
+            .accordion-item {
 
                 &.active {
-                    .dxbl-accordion-group-header {
-                        --dxbl-group-header-font-weight: 400;
+                    .header {
+                        font-weight: typography.$font-weight-regular;
                     }
                 }
 
                 // Menu item 2nd level
-                .menu-entry {
-                    @include background-color-transition();
+                .content {
+                    display: flex;
+                    flex-flow: column nowrap;
 
-                    min-height: 28px;
+                    .menu-entry {
+                        // General resets
+                        box-sizing: border-box;
+                        padding: 0;
+                        margin: 0;
+                        border: 0;
+                        color: unset;
+                        background-color: unset;
+                        font-family: unset;
+                        font-weight: unset;
+                        line-height: unset;
 
-                    display: grid;
-                    grid-template-areas: "guideline spacer text";
-                    grid-template-columns: 2px 21px 1fr;
+                        @include background-color-transition();
 
-                    padding-left: 35px;
+                        min-height: 28px;
 
-                    cursor: pointer;
+                        display: grid;
+                        grid-template-areas: "guideline spacer text";
+                        grid-template-columns: 2px 21px 1fr;
 
-                    $guideline-bg: $hover-bg;
-                    $guideline-protution: 6px;
+                        padding-left: 35px;
 
-                    margin-top: $guideline-protution;
-                    margin-bottom: $guideline-protution;
+                        cursor: pointer;
 
-                    &:first-child {
-                        margin-top: $guideline-protution + 8px;
-                    }
+                        $guideline-bg: color.adjust(colors.$theme-inverted, $alpha: -0.95);
+                        $guideline-protution: 6px;
 
-                    .menu-entry-guideline {
-                        grid-area: guideline;
+                        margin-top: $guideline-protution;
+                        margin-bottom: $guideline-protution;
 
-                        background-color: $guideline-bg;
-
-                        margin-top: 0 - $guideline-protution;
-                        margin-bottom: 0 - $guideline-protution;
-
-                        position: relative;
-
-                        &:before {
-                            content: "";
-
-                            position: absolute;
-                            left: 0;
-                            right: 0;
-                            top: $guideline-protution;
-                            bottom: $guideline-protution;
-
-                            background-color: var(--menu-entry-guideline-before-bg, transparent);
-                            @include background-color-transition();
+                        &:first-child {
+                            margin-top: $guideline-protution + 8px;
                         }
-                    }
-
-                    .menu-entry-text {
-                        grid-area: text;
-
-                        align-self: center;
-
-                        letter-spacing: 0.4px;
-                    }
-
-                    &:hover {
-                        background-color: $guideline-bg;
 
                         .menu-entry-guideline {
-                            --menu-entry-guideline-before-bg: #{color.adjust($guideline-bg, $alpha: +0.25)};
+                            grid-area: guideline;
+
+                            background-color: $guideline-bg;
+
+                            margin-top: 0 - $guideline-protution;
+                            margin-bottom: 0 - $guideline-protution;
+
+                            position: relative;
+
+                            &:before {
+                                content: "";
+
+                                position: absolute;
+                                left: 0;
+                                right: 0;
+                                top: $guideline-protution;
+                                bottom: $guideline-protution;
+
+                                background-color: var(--menu-entry-guideline-before-bg, transparent);
+                                @include background-color-transition();
+                            }
                         }
-                    }
 
-                    &.active {
-                        font-weight: 400;
+                        .menu-entry-text {
+                            grid-area: text;
 
-                        .menu-entry-guideline {
-                            --menu-entry-guideline-before-bg: #{colors.$accent};
+                            align-self: center;
+                            justify-self: start;
+
+                            letter-spacing: 0.4px;
+                        }
+
+                        &:hover,
+                        &:focus-visible {
+                            background-color: $guideline-bg;
+
+                            .menu-entry-guideline {
+                                --menu-entry-guideline-before-bg: #{color.adjust($guideline-bg, $alpha: +0.25)};
+                            }
+                        }
+
+                        &:focus-visible {
+                            outline: none;
+                        }
+
+                        &.active {
+                            font-weight: typography.$font-weight-regular;
+
+                            .menu-entry-guideline {
+                                --menu-entry-guideline-before-bg: #{colors.$accent};
+                            }
                         }
                     }
                 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Globalization;
 using Blazor.Shared.Authorization.Extensions;
 using Blazor.Shared.Popup.Factories;
@@ -7,14 +7,15 @@ using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Models.Actions;
 using Blazor.Shared.Settings.Services;
-using DevExpress.Blazor;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Models;
 using Sdk.Client.Services;
+using ViciOne.Ui.Blazor.Components.Accordion.Models;
 using ViciOne.Ui.Blazor.Components.LoadingSpinner.Models;
 
 namespace Blazor.Shared.Settings.Components;
@@ -236,7 +237,9 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
                 var firstSettingsCategory = _settingsCategoryMaps[firstSettingsGroup].Values.Sort().FirstOrDefault();
                 if (firstSettingsCategory is not null)
                 {
-                    if (_settingsEntriesMap.TryGetValue(firstSettingsGroup, firstSettingsCategory, out var settingsEntries))
+                    var settingsEntriesKey = new SettingsEntriesKey { SettingsGroup = firstSettingsGroup, SettingsCategory = firstSettingsCategory };
+
+                    if (_settingsEntriesMap.TryGetValue(settingsEntriesKey, out var settingsEntries))
                     {
                         activeControlPanelRegistryItem = settingsEntries.FirstOrDefault()?.ControlPanelRegistryItem;
                     }
@@ -462,25 +465,8 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         }
     }
 
-    private async Task OnBeforeExpandAccordionItem(AccordionItemCancelEventArgs args, SettingsGroup settingsGroup)
+    private async Task OnBeforeExpandAccordionItem(AccordionItemCancelEventArgs args, SettingsEntriesKey settingsEntriesKey)
     {
-        if (args.Reason == NavigationItemStateChangeReason.ApiCall)
-        {
-            // Call originates from IControlPanelRequest<> or other code parts whereas it is expected
-            // that these code parts adjust state as needed, therefore we simply return and do nothing.
-            return;
-        }
-
-        var settingsCategoryTitle = args.ItemInfo.Text;
-
-        if (!_settingsCategoryMaps.TryGetValue(settingsGroup, out var settingsCategoryMap))
-            return;
-
-        if (!settingsCategoryMap.TryGetValue(settingsCategoryTitle, out var settingsCategory))
-            return;
-
-        var settingsEntriesKey = new SettingsEntriesKey { SettingsGroup = settingsGroup, SettingsCategory = settingsCategory };
-
         if (IsAnyControlPanelEditRunning())
         {
             args.Cancel = true;
@@ -506,7 +492,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         {
             // Try to make the first control panel in settingsCategory the active control panel
 
-            if (_settingsEntriesMap.TryGetValue(settingsEntriesKey.SettingsGroup, settingsEntriesKey.SettingsCategory, out var settingsEntries))
+            if (_settingsEntriesMap.TryGetValue(settingsEntriesKey, out var settingsEntries))
             {
                 var firstSettingsEntry = settingsEntries.FirstOrDefault();
                 if (firstSettingsEntry is not null)
@@ -515,40 +501,14 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         }
     }
 
-    private void OnBeforeCollapseAccordionItem(AccordionItemCancelEventArgs args, SettingsGroup settingsGroup)
+    private void OnBeforeCollapseAccordionItem(AccordionItemCancelEventArgs args, SettingsEntriesKey settingsEntriesKey)
     {
-        if (args.Reason == NavigationItemStateChangeReason.ApiCall)
-        {
-            // Call originates from IControlPanelRequest<> or other code parts whereas it is expected
-            // that these code parts adjust state as needed, therefore we simply return an do nothing.
-            return;
-        }
-
-        var settingsEntriesKey = GetSettingsEntriesKey(args, settingsGroup);
-        if (settingsEntriesKey is null)
-            return;
-
         // prevent collapse of expanded category
         if (State.ExpandedSettingsCategory == settingsEntriesKey.SettingsCategory &&
             State.ExpandedSettingsCategory?.GroupPosition == settingsEntriesKey.SettingsGroup.Position)
         {
             args.Cancel = true;
         }
-    }
-
-    private SettingsEntriesKey? GetSettingsEntriesKey(AccordionItemStateChangeEventArgs args, SettingsGroup settingsGroup)
-    {
-        var settingsCategoryTitle = args.ItemInfo.Text;
-
-        if (!_settingsCategoryMaps.TryGetValue(settingsGroup, out var settingsCategoryMap))
-            return null;
-
-        if (!settingsCategoryMap.TryGetValue(settingsCategoryTitle, out var settingsCategory))
-            return null;
-
-        var settingsEntriesKey = new SettingsEntriesKey { SettingsGroup = settingsGroup, SettingsCategory = settingsCategory };
-
-        return settingsEntriesKey;
     }
 
     private async Task OnSettingsEntryClick(SettingsEntry settingsEntry)

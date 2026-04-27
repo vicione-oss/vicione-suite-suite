@@ -1,4 +1,5 @@
-﻿@using DevExpress.Blazor
+@using Blazor.Shared.Settings.Models
+@using ViciOne.Ui.Blazor.Components.Accordion.Components
 @using Blazor.Shared.Popup.Components
 @using Blazor.Shared.Popup.Enums
 @using Blazor.Shared.Settings.Extensions
@@ -25,61 +26,61 @@
                     <Content>
                         @foreach (var settingsGroup in _settingsGroups)
                         {
-                            <DxAccordion ExpandMode="AccordionExpandMode.SingleOrNone"
-                                         ExpandCollapseAction="AccordionExpandCollapseAction.HeaderClick"
-                                         RootItemExpandButtonDisplayMode="AccordionExpandButtonDisplayMode.None"
-                                         BeforeExpand="@(async args => await OnBeforeExpandAccordionItem(args, settingsGroup))"
-                                         BeforeCollapse="@(args => OnBeforeCollapseAccordionItem(args, settingsGroup))"
-                                         @key="settingsGroup">
-                                <Items>
-                                    @foreach (var settingsCategory in _settingsCategoryMaps[settingsGroup].Values.Sort())
+                            <Accordion @key="settingsGroup">
+
+                                @foreach (var settingsCategory in _settingsCategoryMaps[settingsGroup].Values.Sort())
+                                {
+                                    var settingsEntriesKey = new SettingsEntriesKey { SettingsGroup = settingsGroup, SettingsCategory = settingsCategory };
+
+                                    if (!_settingsEntriesMap.TryGetValue(settingsEntriesKey, out var settingsEntriesEnumerable))
+                                        continue;
+
+                                    var settingsEntries = settingsEntriesEnumerable.ToList();
+
+                                    var isExpanded = State.ExpandedSettingsCategory == settingsCategory;
+                                    var isActive = _activeSettingsEntry is not null && settingsEntries.Contains(_activeSettingsEntry);
+
+                                    string? iconCssClass = settingsCategory.IconCssClass;
+                                    Uri? iconUrl = settingsCategory.IconUrl;
+
+                                    if (iconCssClass is null && iconUrl is null)
                                     {
-                                        var isExpanded = State.ExpandedSettingsCategory == settingsCategory;
+                                        var firstSettingsEntry = settingsEntries.FirstOrDefault();
+                                        if (firstSettingsEntry is not null)
+                                            iconUrl = firstSettingsEntry.IconUrl;
 
-                                        var isActive = false;
-                                        if (!_settingsEntriesMap.TryGetValue(settingsGroup, settingsCategory, out var entriesEnumerable))
-                                            continue;
-
-                                        var settingsEntries = entriesEnumerable.ToList();
-                                        isActive = _activeSettingsEntry is not null && settingsEntries.Contains(_activeSettingsEntry);
-                                        string? iconCssClass = settingsCategory.IconCssClass;
-                                        Uri? iconUrl = settingsCategory.IconUrl;
-
-                                        if (iconCssClass is null && iconUrl is null)
-                                        {
-                                            var firstSettingsEntry = settingsEntries.FirstOrDefault();
-                                            if (firstSettingsEntry is not null)
-                                                iconUrl = firstSettingsEntry.IconUrl;
-
-                                            if (iconUrl is null)
-                                                iconCssClass = "empty-icon";
-                                        }
-
-                                        <DxAccordionItem Attributes="@(new Dictionary<string, object> { { "title", settingsCategory.Title } })"
-                                                         Text="@settingsCategory.Title"
-                                                         Expanded="@isExpanded"
-                                                         CssClass="@(isActive ? "active" : null)"
-                                                         IconCssClass="@iconCssClass"
-                                                         IconUrl="@(iconUrl?.OriginalString ?? string.Empty)"
-                                                         @key="@settingsCategory.Title">
-                                            <ContentTemplate>
-                                                @foreach (var settingsEntry in settingsEntries)
-                                                {
-                                                    var cssClasses = new List<string> { "menu-entry" };
-
-                                                    if (settingsEntry == _activeSettingsEntry)
-                                                        cssClasses.Add("active");
-
-                                                    <div class="@string.Join(" ", cssClasses)" @onclick="() => OnSettingsEntryClick(settingsEntry)" @key=@settingsEntry.ControlPanelRegistryItem>
-                                                        <div class="menu-entry-guideline"></div>
-                                                        <div class="menu-entry-text">@settingsEntry.Title</div>
-                                                    </div>
-                                                }
-                                            </ContentTemplate>
-                                        </DxAccordionItem>
+                                        if (iconUrl is null)
+                                            iconCssClass = "empty-icon";
                                     }
-                                </Items>
-                            </DxAccordion>
+
+                                    <AccordionItem Title="@settingsCategory.Title"
+                                                   Text="@settingsCategory.Title"
+                                                   Expanded="@isExpanded"
+                                                   CssClass="@(isActive ? "active" : null)"
+                                                   IconCssClass="@iconCssClass"
+                                                   IconUrl="@iconUrl"
+                                                   OnBeforeExpand="@(async args => await OnBeforeExpandAccordionItem(args, settingsEntriesKey))"
+                                                   OnBeforeCollapse="@(args => OnBeforeCollapseAccordionItem(args, settingsEntriesKey))"
+                                                   @key="@settingsCategory.Title">
+
+                                        @foreach (var settingsEntry in settingsEntries)
+                                        {
+                                            var cssClasses = new List<string> { "menu-entry" };
+
+                                            if (settingsEntry == _activeSettingsEntry)
+                                                cssClasses.Add("active");
+
+                                            <button class="@string.Join(" ", cssClasses)"
+                                                    @onclick="() => OnSettingsEntryClick(settingsEntry)"
+                                                    @key=@settingsEntry.ControlPanelRegistryItem>
+
+                                                <div class="menu-entry-guideline"></div>
+                                                <div class="menu-entry-text">@settingsEntry.Title</div>
+                                            </button>
+                                        }
+                                    </AccordionItem>
+                                }
+                            </Accordion>
                         }
                     </Content>
 
