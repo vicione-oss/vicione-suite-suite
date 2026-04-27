@@ -1,6 +1,5 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Core.UiHosting;
-using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions;
 using NSubstitute;
 using TestModule.Client;
 
@@ -14,7 +13,7 @@ namespace Blazor.Server.Tests.Helpers
         {
             var uiBundleTestClientModule = Substitute.For<IUiModuleBundle>();
             uiBundleTestClientModule.Module.Returns(new TestClientModule());
-            uiBundleTestClientModule.AssemblyLocation.Returns(_blazorServerTestAssembly.GetAssemblyLocation());
+            uiBundleTestClientModule.AssemblyLocation.Returns(_blazorServerTestAssembly.Location);
             uiBundleTestClientModule.Assembly.Returns(_blazorServerTestAssembly);
 
             var uiBundles = new List<IUiModuleBundle>
@@ -28,7 +27,7 @@ namespace Blazor.Server.Tests.Helpers
         {
             var uiBundleTestClientModule = Substitute.For<IUiModuleBundle>();
             uiBundleTestClientModule.Module.Returns(new TestBlazorServerClientModule());
-            uiBundleTestClientModule.AssemblyLocation.Returns(_blazorServerTestAssembly.GetAssemblyLocation());
+            uiBundleTestClientModule.AssemblyLocation.Returns(_blazorServerTestAssembly.Location);
             uiBundleTestClientModule.Assembly.Returns(_blazorServerTestAssembly);
 
             var uiBundles = new List<IUiModuleBundle>

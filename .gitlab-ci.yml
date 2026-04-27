@@ -86,7 +86,7 @@ stages:
 
 include:
   # xUnit test job (both x64 and arm64 via parallel matrix)
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@v1.0.2
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@2
     inputs:
       name: 'xUnit'
       stage: 'test'
@@ -96,9 +96,8 @@ include:
       tags:
         - saas-linux-large-$RUNNER_ARCH
       image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
-      filter: 'Category!=System & Category!=ManualDbTest & Category!=Integration'
-      coverage_report_pattern: 'artifacts/tests/**/coverage.cobertura.xml'
-      test_report_pattern: 'artifacts/tests/*-test-report.xml'
+      filter: '/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)]'
+      coverage: true
       before_script: [*activate_mise, *update_nuget_source_ro, *install_npm_packages]
       rules: *rules_common
 

@@ -1,8 +1,7 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Blazor.Server.Backend.Services;
 using Core.UiHosting;
 using AwesomeAssertions;
-using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions;
 using Sdk.Client.Modules;
 using Sdk.Modules;
 using TestModule.Client;
@@ -21,8 +20,8 @@ public class UiModuleManagerTests
         var uiModulManager = new UiModuleManager();
         var uiBundles = new List<UiModuleBundle>
         {
-            new(new TestClientModule(), _testModuleClientAssembly.GetAssemblyLocation(), _testModuleClientAssembly),
-            new(new TestBlazorServerClientModule(), _testModuleClientAssembly.GetAssemblyLocation(), _testModuleClientAssembly),
+            new(new TestClientModule(), _testModuleClientAssembly.Location, _testModuleClientAssembly),
+            new(new TestBlazorServerClientModule(), _testModuleClientAssembly.Location, _testModuleClientAssembly),
         };
         _uiModuleBundleCount = uiBundles.Count;
 

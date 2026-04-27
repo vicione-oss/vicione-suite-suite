@@ -32,7 +32,6 @@
         <Copyright>Copyright © $(Company) $(Year)</Copyright>
         <NeutralLanguage>en-US</NeutralLanguage>
         <SatelliteResourceLanguages>en;de</SatelliteResourceLanguages>
-        <RunSettingsFilePath>$(MSBuildThisFileDirectory)tests.runsettings</RunSettingsFilePath>
         <!-- code quality -->
         <WarningsNotAsErrors>612,618</WarningsNotAsErrors>
         <NoWarn Condition="'$(CI)' == ''">$(NoWarn);NU1507</NoWarn>
@@ -56,9 +55,14 @@
     
     <!-- Do not pack or publish test projects -->
     <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
-        <IsPackable>false</IsPackable>
-        <IsPublishable>false</IsPublishable>
         <CompressionEnabled>false</CompressionEnabled>
+        <NoWarn>CS1591</NoWarn>
+        <!-- Suppress documentation of public API -->
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <IsPublishable>true</IsPublishable>
+        <!-- Microsoft Testing Platform command line experience -->
+        <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>        
     </PropertyGroup>
 
     <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('tests'))">
@@ -68,17 +72,8 @@
     <!-- Add Test.SDK/XUnit package references to test projects -->
     <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
         <PackageReference Include="AwesomeAssertions" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" />
-        <PackageReference Include="xunit.v3" />
-        <PackageReference Include="JunitXml.TestLogger" />
-        <PackageReference Include="xunit.runner.visualstudio">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="coverlet.collector">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+        <PackageReference Include="xunit.v3.mtp-v2" />        
+        <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
         <PackageReference Include="NSubstitute" />
         <PackageReference Include="NSubstitute.Analyzers.CSharp">
           <PrivateAssets>all</PrivateAssets>
