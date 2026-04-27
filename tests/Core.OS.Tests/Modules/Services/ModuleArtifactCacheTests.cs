@@ -55,12 +55,12 @@ public class ModuleArtifactCacheTests
         foreach (var artifact in metadataArtifacts)
         {
             // setup queries to get module artifact by dependency package
-            if (ModuleNameVersionRegex.GetVersions(artifact.Name, out var parsed, out var ciVersion))
+            if (ModuleNameVersionRegex.GetVersion(artifact.Name, out var moduleVersion))
             {
                 var moduleDependency = new ModuleDependencyPackage
                 {
                     Name = artifact.Path.Replace("modules/", "", StringComparison.Ordinal),
-                    Version = string.IsNullOrEmpty(ciVersion) ? parsed : $"{parsed}-{ciVersion}"
+                    Version = moduleVersion.ToString()
                 };
 
                 moduleRepository.QueryModuleArtifact(moduleDependency, Arg.Any<CancellationToken>()).Returns(artifact);

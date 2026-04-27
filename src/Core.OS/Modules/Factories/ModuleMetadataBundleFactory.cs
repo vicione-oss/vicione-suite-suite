@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.Module;
 using Core.Module.Extensions;
 using Core.OS.Modules.Contracts;
@@ -60,7 +60,7 @@ internal static class ModuleMetadataBundleFactory
             {
                 Name = result.Name,
                 Title = result.Name,
-                Version = result.Version ?? ModuleConstants.UnresolvedVersionMarker,
+                Version = result.Version?.ToString() ?? ModuleConstants.UnresolvedVersionMarker,
                 Description = "Module can't be loaded - check logs for errors",
                 MinSuiteSdkVersion = minSdkVersion,
             },

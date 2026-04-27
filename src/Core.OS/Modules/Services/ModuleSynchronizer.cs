@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.Module.Exceptions;
 using Core.Module.Utils;
 using Core.OS.Modules.Contracts;
@@ -6,6 +6,7 @@ using Core.OS.Modules.Extensions;
 using Core.Shared.Modules;
 using Sdk.Messaging;
 using Sdk.Modules;
+using Semver;
 
 namespace Core.OS.Modules.Services;
 
@@ -57,7 +58,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
             {
                 result.Incompatible.Add(new ModuleSynchronizationResult(package.Name)
                 {
-                    Version = package.Version,
+                    Version = SemVersion.Parse(package.Version),
                     Error = new ErrorInfo(ModuleErrorCodes.SdkVersionIncompatible, iex.Message)
                 });
 
@@ -68,7 +69,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
             {
                 result.Incompatible.Add(new ModuleSynchronizationResult(package.Name)
                 {
-                    Version = package.Version,
+                    Version = SemVersion.Parse(package.Version),
                     Error = new ErrorInfo(ModuleErrorCodes.UnknownCompatibilityError, ex.Message)
                 });
             }
@@ -128,7 +129,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
             var stillUnresolved = toBeResolved.Where(k => result.Resolved.All(r => r.Name != k.Name))
                 .Select(k => new ModuleSynchronizationResult(k.Name)
                 {
-                    Version = k.Version,
+                    Version = SemVersion.Parse(k.Version),
                     Error = new ErrorInfo(ModuleErrorCodes.ResolveVersionFailed, "Failed to resolve module version")
                 });
 
@@ -161,20 +162,20 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
             // We could download the metadata to get the version or parse it from name like
             // e.g. 0.24.0-win-x64_0.19.0.json or 0.24.0-ci2343243-win-x64_0.19.0.json
-            if (!ModuleNameVersionRegex.GetVersions(metadataArtifact.Name, out var parsedVersion, out var ciVersion))
+            if (!ModuleNameVersionRegex.GetVersion(metadataArtifact.Name, out var moduleVersion))
             {
                 result.Error = new ErrorInfo(ModuleErrorCodes.FoundInvalidVersion, $"Can't determine version of '{package.Name}' for path '{metadataArtifact.Path}'.");
                 return result;
             }
 
-            if (!string.IsNullOrWhiteSpace(ciVersion))
+            if (moduleVersion.IsPrerelease)
             {
-                result.Error = new ErrorInfo(ModuleErrorCodes.FoundCiVersionOnly, $"Skip ci version of '{package.Name}' for path '{metadataArtifact.Path}'.");
+                result.Error = new ErrorInfo(ModuleErrorCodes.FoundCiVersionOnly, $"Skip pre-release version '{moduleVersion}' of '{package.Name}' for path '{metadataArtifact.Path}'.");
                 return result;
             }
 
             // e.g. 0.24.0
-            result.Version = parsedVersion;
+            result.Version = moduleVersion;
         }
         catch (HttpRequestException)
         {
@@ -211,7 +212,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
             var deleted = new ModuleSynchronizationResult(module.Name)
             {
-                Version = module.Version,
+                Version = SemVersion.Parse(module.Version),
                 RelativeFolder = module.RelativePath
             };
             results.Deleted.Add(deleted);
@@ -245,8 +246,8 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
         // These packages were successfully resolved
         var resolvedPackages = result.Resolved
-            .Where(k => k.Error is null && !string.IsNullOrEmpty(k.Version))
-            .Select(x => new ModuleDependencyPackage { Name = x.Name, Version = x.Version! });
+            .Where(k => k.Error is null && k.Version != null)
+            .Select(x => new ModuleDependencyPackage { Name = x.Name, Version = x.Version!.ToString() });
 
         // Add fresh resolved ones to already configured ones
         var packagesToDownload = options.Packages
@@ -258,17 +259,16 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
             return;
 
         var results = await options.ModuleRepository.DownloadAndExtract(options.ModulesPath, packagesToDownload, cancellationToken);
-
         result.Updated.AddRange(results.Where(k => k is { Skipped: false, Error: null })
-            .Select(k => new ModuleSynchronizationResult(k.Module.Name) { Version = k.Module.Version }));
+            .Select(k => new ModuleSynchronizationResult(k.Module.Name) { Version = SemVersion.Parse(k.Module.Version) }));
 
         result.UpdateSkipped.AddRange(results.Where(k => k is { Skipped: true, Error: null })
-            .Select(k => new ModuleSynchronizationResult(k.Module.Name) { Version = k.Module.Version }));
+            .Select(k => new ModuleSynchronizationResult(k.Module.Name) { Version = SemVersion.Parse(k.Module.Version) }));
 
         result.UpdateFailed.AddRange(results.Where(k => k.Error is not null)
             .Select(k => new ModuleSynchronizationResult(k.Module.Name)
             {
-                Version = k.Module.Version,
+                Version = SemVersion.Parse(k.Module.Version),
                 Error = new ErrorInfo(ModuleErrorCodes.DownloadFailed, k.Error!.Message)
             }));
     }

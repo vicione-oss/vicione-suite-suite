@@ -1,9 +1,9 @@
 ﻿using System.IO.Abstractions;
-using Core.Module.Comparer;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Services;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance;
+using Semver;
 
 namespace Core.OS.Hosting.Extensions;
 
@@ -31,7 +31,9 @@ internal static class WebApplicationBuilderExtensions
                 throw new InvalidOperationException($"Empty data version. Try restore to {suiteVersionString}");
             }
 
-            var compareResult = new StringVersionComparer().Compare(suiteVersionString, persistedVersionString);
+            var suiteVersion = SemVersion.Parse(suiteVersionString);
+            var persistedVersion = SemVersion.Parse(persistedVersionString);
+            var compareResult = SemVersion.ComparePrecedence(suiteVersion, persistedVersion);
             if (compareResult == 0)
                 return false;
 
@@ -39,13 +41,13 @@ internal static class WebApplicationBuilderExtensions
             if (compareResult > 0)
             {
                 await fileSystem.WriteDataVersionFile(options, suiteVersionString, cancellationToken);
-                logger.Warning("Updated data version to '{SuiteVersion}'", suiteVersionString);
+                logger.Information("Updated data version to '{SuiteVersion}'", suiteVersionString);
                 return false;
             }
 
             // if we confirm to Semver and do our releases that way we could ensure that patch versions would work
             // because a data migration would lead to a minor version change at least
-            if (SuiteVersionUtils.IsPatchUpdate(suiteVersionString, persistedVersionString))
+            if (SuiteVersionUtils.IsPatchUpdate(suiteVersion, persistedVersion))
             {
                 await fileSystem.WriteDataVersionFile(options, suiteVersionString, cancellationToken);
                 logger.Warning("Downgraded data version to '{SuiteVersion}'", suiteVersionString);
@@ -65,7 +67,7 @@ internal static class WebApplicationBuilderExtensions
             };
 
             // run the host what will stop the program workflow here
-            using var host = DowngradeWebApiHostBuilder.Build(builder, fileSystem, downgradeOptions);
+            await using var host = DowngradeWebApiHostBuilder.Build(builder, fileSystem, downgradeOptions);
             await host.RunAsync(cancellationToken);
         }
         catch (Exception e)

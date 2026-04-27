@@ -1,5 +1,5 @@
-﻿using Core.Module.Comparer;
 using Sdk.Modules;
+using Semver;
 
 namespace Core.OS.Modules.Extensions;
 
@@ -38,10 +38,17 @@ internal static class ModulePackageManifestExtensions
                 var hasMissingDependencies = false;
                 foreach (var missing in dependencyPackage.DependingOn.Where(dependency => !SupportsDependency(manifest, dependency)))
                 {
-                    if (debug.TryGetValue(missing.Name, out var version))
+                    if (!SemVersion.TryParse(missing.Version, out var missingVersion))
+                    {
+                        logger?.Warning("Disable module {Package} because dependency {MissingName} version '{MissingVersion}' is not a valid semver version.",
+                            dependencyPackage.Name, missing.Name, missing.Version);
+                        continue;
+                    }
+
+                    if (debug.TryGetValue(missing.Name, out var versionString) && SemVersion.TryParse(versionString, out var version))
                     {
                         // Check if debug version satisfies required version
-                        hasMissingDependencies = new StringVersionComparer().Compare(version, missing.Version) < 0;
+                        hasMissingDependencies = SemVersion.ComparePrecedence(version, missingVersion) < 0;
                     }
                     else
                     {
@@ -61,19 +68,29 @@ internal static class ModulePackageManifestExtensions
                 if (package is null)
                     return false;
 
+                if (!SemVersion.TryParse(package.Version, out var packageVersion))
+                    return false;
+
+                if (!SemVersion.TryParse(dependency.Version, out var dependencyVersion))
+                    return false;
+
+                // major version difference contains breaking changes
+                if (packageVersion.Major != dependencyVersion.Major)
+                    return false;
+                
                 // check if the package version is equal or higher than the dependency version
-                return new StringVersionComparer().Compare(package.Version, dependency.Version) >= 0;
+                return SemVersion.ComparePrecedence(packageVersion, dependencyVersion) >= 0;
             }
         }
 
-        public List<ModuleDependencyPackage> UpdatePackageVersions(Dictionary<string, string?> packageVersions)
+        public List<ModuleDependencyPackage> UpdatePackageVersions(Dictionary<string, SemVersion?> packageVersions)
         {
             foreach (var package in manifest.Packages)
             {
-                if (!packageVersions.TryGetValue(package.Name, out var version) || string.IsNullOrEmpty(version))
+                if (!packageVersions.TryGetValue(package.Name, out var version) || version is null)
                     continue;
 
-                package.Version = version;
+                package.Version = version.ToString();
 
                 if (package.DependingOn is null)
                     continue;
@@ -81,8 +98,8 @@ internal static class ModulePackageManifestExtensions
                 // also update dependencies to new package version
                 foreach (var dependency in package.DependingOn)
                 {
-                    if (packageVersions.TryGetValue(package.Name, out var dependencyVersion) && !string.IsNullOrEmpty(dependencyVersion))
-                        dependency.Version = dependencyVersion;
+                    if (packageVersions.TryGetValue(package.Name, out var dependencyVersion) && dependencyVersion != null)
+                        dependency.Version = dependencyVersion.ToString();
                 }
             }
 

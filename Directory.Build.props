@@ -1,10 +1,29 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <!-- Versionierung -->
+    <PropertyGroup>
+        <VersionWithSuffix>$([System.IO.File]::ReadAllText('$(MsBuildThisFileDirectory)VERSION').Trim())</VersionWithSuffix>
+        <!-- Version 0.1.0 ist der Standard, wenn gar keine Version gefunden wird -->
+        <VersionPrefix Condition="$(VersionWithSuffix) == ''">0.1.0</VersionPrefix>
+        <VersionPrefix Condition="$(VersionWithSuffix.Contains('-')) == true">$(VersionWithSuffix.Substring(0, $(VersionWithSuffix.IndexOf('-'))))</VersionPrefix>
+        <VersionPrefix Condition="$(VersionWithSuffix.Contains('-')) == false">$(VersionWithSuffix)</VersionPrefix>
+        <!-- Im Standardfall gibt es keinen Suffix, wenn doch wird dieser angegeben -->
+        <VersionSuffix></VersionSuffix>
+        <VersionSuffix Condition="$(VersionWithSuffix.Contains('-')) == true">$(VersionWithSuffix.Substring($(VersionWithSuffix.IndexOf('-'))))</VersionSuffix>
+        <VersionSuffix Condition="$(VersionSuffix.Contains('-')) == true">$(VersionSuffix.Substring(1))</VersionSuffix>
+        <!-- Im Standardfall ist die PackageVersion gleich der normalen "Version" -->
+        <PackageVersion>$(VersionPrefix)</PackageVersion>
+        <PackageVersion Condition="$(VersionSuffix) != ''">$(PackageVersion)-$(VersionSuffix)</PackageVersion>
+        <!-- Wenn ein PackageVersionSuffix gegeben ist, wird dieser statt des normalen VersionPrefix verwendet -->
+        <PackageVersion Condition="$(PackageVersionSuffix) != ''">$(VersionPrefix).$(PackageVersionSuffix)</PackageVersion>
+    </PropertyGroup>
+    
     <!-- Properties for all projects in the repo -->
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+		<RuntimeIdentifiers Condition="$(MSBuildProjectDirectory.Contains('src'))">linux-x64;linux-arm64;win-x64</RuntimeIdentifiers>
         <!-- general information -->
         <Description>-</Description>
         <Product>ViciOne Suite</Product>
