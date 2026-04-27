@@ -27,7 +27,7 @@
     <File Path="NuGet.Config" />
     <File Path="package.json" />
     <File Path="README.md" />
-    <File Path="tests.runsettings" />
+    <File Path="testconfig.json" />
     <File Path="tsconfig.json" />
     <File Path="VERSION" />
     <File Path="VERSION_HOSTMANAGEMENT" />
