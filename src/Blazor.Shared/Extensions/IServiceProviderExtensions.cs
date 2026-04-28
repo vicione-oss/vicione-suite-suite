@@ -1,10 +1,11 @@
-﻿using Blazor.Shared.Connections.Services;
+using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Help.Extensions;
 using Blazor.Shared.Instance.Extensions;
 using Blazor.Shared.Mqtt;
 using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.DateAndTime.Services;
+using Core.Shared.HostManagement.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
 using Sdk.Client.NavTiles.Enums;
@@ -31,6 +32,7 @@ public static class IServiceProviderExtensions
             await services.GetRequiredService<ITimeZoneDescriptorProvider>().GetAll(cancellationToken); // initializes the timezones for the scope 
             await services.GetRequiredService<IClientTimeProvider>().Initialize(cancellationToken);
             await services.GetRequiredService<ISuiteConnectionService>().Initialize(cancellationToken);
+            await services.GetRequiredService<ISystemConfigurationService>().Initialize(cancellationToken);
         }
 
         private void UseMqttViewer()

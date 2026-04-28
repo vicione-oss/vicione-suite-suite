@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Extensions;
+using Blazor.Shared.Extensions;
 using Core.Shared.HostManagement;
 using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Contracts;
@@ -8,7 +8,7 @@ using Sdk.SystemConfiguration.Events;
 
 namespace Blazor.Shared.Services;
 
-public sealed class SystemConfigurationService : ISystemConfigurationService,
+public sealed partial class SystemConfigurationService : ISystemConfigurationService,
     IEventConsumer<SystemConfigurationChanged>,
     IDisposable
 {
@@ -27,7 +27,7 @@ public sealed class SystemConfigurationService : ISystemConfigurationService,
         {
             lock (_lock)
             {
-                return _systemConfiguration ?? throw new InvalidOperationException($"Call {nameof(Initialize)} before accesing the configuration");
+                return _systemConfiguration ?? throw new InvalidOperationException($"Call {nameof(Initialize)} before accessing the configuration");
             }
         }
     }
@@ -44,7 +44,7 @@ public sealed class SystemConfigurationService : ISystemConfigurationService,
     public async Task SetSystemConfiguration(SystemConfiguration newSystemConfiguration)
     {
         var networkInterfaces = newSystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces.Select(k => k.CommonInformation.Name);
-        _logger.LogDebug("SetSystemConfiguration with network {Interfaces}", string.Join(", ", networkInterfaces));
+        LogSetSystemConfiguration(_logger, string.Join(", ", networkInterfaces));
 
         lock (_lock)
         {
@@ -65,7 +65,7 @@ public sealed class SystemConfigurationService : ISystemConfigurationService,
         {
             var response = await _mediator.Request<GetHostMgmtSystemConfiguration, GetHostMgmtSystemConfigurationResponse>(request, cancellationToken);
 
-            _logger.LogDebug("Initialized system configuration - error:{Error}", response.RequestError is not null);
+            LogInitialized(_logger, response.RequestError is not null);
 
             if (response.RequestError is not null)
                 throw new InvalidOperationException($"Requesting system configuration failed - {response.RequestError.Message}");
@@ -92,7 +92,16 @@ public sealed class SystemConfigurationService : ISystemConfigurationService,
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "System configuration changed - reload failed");
+            LogSystemConfigurationChangedReloadFailed(_logger, ex);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "SetSystemConfiguration with network {Interfaces}")]
+    private static partial void LogSetSystemConfiguration(ILogger logger, string interfaces);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Initialized system configuration - error:{Error}")]
+    private static partial void LogInitialized(ILogger logger, bool error);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "System configuration changed - reload failed")]
+    private static partial void LogSystemConfigurationChangedReloadFailed(ILogger logger, Exception exception);
 }
