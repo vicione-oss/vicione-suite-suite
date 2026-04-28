@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -141,5 +141,8 @@ Wenn beide Netzwerkschnittstellen des Systems manuell mit IP-Adressen konfigurie
   </data>
   <data name="LeaseStart" xml:space="preserve">
     <value>Lease-Start</value>
+  </data>
+  <data name="SwitchToManualConfigurationWarningDialogBody" xml:space="preserve">
+    <value>Sie haben keinen DNS-Server konfiguriert. Dadurch könnten einige wichtige Funktionen dieser Anwendung entweder ganz oder teilweise nicht funktionieren. Möchten Sie fortfahren?</value>
   </data>
 </root>
