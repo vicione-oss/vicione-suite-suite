@@ -90,10 +90,10 @@ public class SettingsContainerTests
     }
 
     [Fact]
-    public void ComponentShouldRender()
+    public async Task ComponentShouldRender()
     {
         // Arrange
-        using var ctx = SetupTestContext();
+        await using var ctx = SetupTestContext();
 
         // Act
         var component = ctx.Render<SettingsContainer>();
@@ -103,10 +103,10 @@ public class SettingsContainerTests
     }
 
     [Fact]
-    public void CategoryClickLoadsSubCategories()
+    public async Task CategoryClickLoadsSubCategories()
     {
         // Arrange
-        using var ctx = SetupTestContext();
+        await using var ctx = SetupTestContext();
 
         // Act + Assert
         var component = ctx.Render<SettingsContainer>();
@@ -132,10 +132,10 @@ public class SettingsContainerTests
     }
 
     [Fact]
-    public void SubCategoryClickRendersComponent()
+    public async Task SubCategoryClickRendersComponent()
     {
         // Arrange
-        using var ctx = SetupTestContext();
+        await using var ctx = SetupTestContext();
 
         // Act + Assert
         var component = ctx.Render<SettingsContainer>();
@@ -166,10 +166,10 @@ public class SettingsContainerTests
     }
 
     [Fact]
-    public void SaveAndRevertButtonHiddenOnCleanState()
+    public async Task SaveAndRevertButtonHiddenOnCleanState()
     {
         // Arrange
-        using var ctx = SetupTestContext();
+        await using var ctx = SetupTestContext();
 
         // Act + Assert
         var component = ctx.Render<SettingsContainer>();
