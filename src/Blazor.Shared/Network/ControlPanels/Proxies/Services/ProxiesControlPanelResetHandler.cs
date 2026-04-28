@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.ControlPanels.Proxies.Models;
+using Blazor.Shared.Network.ControlPanels.Proxies.Models;
 using Blazor.Shared.Network.Extensions;
 using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Contracts.Network;
@@ -10,21 +10,29 @@ internal sealed class ProxiesControlPanelResetHandler(ISystemConfigurationServic
 {
     public Task Reset(ProxiesControlPanelState state, CancellationToken cancellationToken)
     {
-        var networkProxySettings = systemConfigurationService.SystemConfiguration.NetworkProxySettings;
-
-        ResetProxySettings(state.HttpProxySettings, networkProxySettings.HTTP);
-        ResetProxySettings(state.HttpsProxySettings, networkProxySettings.HTTPS);
-        ResetProxySettings(state.SocksProxySettings, networkProxySettings.SOCKS);
-        ResetProxySettings(state.FtpProxySettings, networkProxySettings.FTP);
-        ResetProxySettings(state.SftpProxySettings, networkProxySettings.SFTP);
-
-        // do not use proxy settings
+        state.BeginLoading();
+        try
         {
-            state.DoNotProxyListEnabled = networkProxySettings.DoNotProxyListEnabled;
+            var networkProxySettings = systemConfigurationService.SystemConfiguration.NetworkProxySettings;
 
-            state.DoNotProxyDetails = [.. networkProxySettings.DoNotProxyList.Select(d => new DoNotProxyDetail { HostnameOrIp = d }).Distinct()];
+            ResetProxySettings(state.HttpProxySettings, networkProxySettings.HTTP);
+            ResetProxySettings(state.HttpsProxySettings, networkProxySettings.HTTPS);
+            ResetProxySettings(state.SocksProxySettings, networkProxySettings.SOCKS);
+            ResetProxySettings(state.FtpProxySettings, networkProxySettings.FTP);
+            ResetProxySettings(state.SftpProxySettings, networkProxySettings.SFTP);
 
-            state.DoNotProxyDetails.EnsureAtLeastOneItemExists();
+            // do not use proxy settings
+            {
+                state.DoNotProxyListEnabled = networkProxySettings.DoNotProxyListEnabled;
+
+                state.DoNotProxyDetails = [.. networkProxySettings.DoNotProxyList.Select(d => new DoNotProxyDetail { HostnameOrIp = d }).Distinct()];
+
+                state.DoNotProxyDetails.EnsureAtLeastOneItemExists();
+            }
+        }
+        finally
+        {
+            state.EndLoading();
         }
 
         return Task.CompletedTask;

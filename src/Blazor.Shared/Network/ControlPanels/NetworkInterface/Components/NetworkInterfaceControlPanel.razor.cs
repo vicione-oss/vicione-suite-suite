@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
+using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Core.Shared.HostManagement.Requests;
@@ -140,10 +140,6 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         }
     }
 
-    [LoggerMessage(1, LogLevel.Error, "{Call} failed)")]
-    private static partial void GetNetworkStatusInformationRequestFailed(ILogger<NetworkInterfaceControlPanel> logger,
-        Exception exception, string call);
-
     private async Task IpV4ConfigurationModeChanged()
     {
         if (State.IpV4ConfigurationMode == IpConfigurationMode.AutomaticDhcp)
@@ -166,20 +162,22 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     {
         State.DhcpLeaseFetching = true;
 
-        var response = await UiMediator.Request<RenewDHCPLease, RenewDHCPLeaseResponse>(new RenewDHCPLease(State.Name), _cancellationTokenSource.Token);
-
-        if (response.RequestError is not null)
+        try
         {
-            _errorMessage = response.RequestError.ErrorCode switch
+            var response = await UiMediator.Request<RenewDHCPLease, RenewDHCPLeaseResponse>(new RenewDHCPLease(State.Name), _cancellationTokenSource.Token);
+
+            if (response.RequestError is not null)
             {
-                1 or 3 => response.RequestError.Message,
-                _ => null,
-            };
+                _errorMessage = response.RequestError.ErrorCode switch
+                {
+                    1 or 3 => response.RequestError.Message,
+                    _ => null,
+                };
 
-            _showErrorDialog = true;
+                _showErrorDialog = true;
+            }
         }
-
-        if (response.RequestError is not null || response.DHCPLease is null)
+        finally
         {
             await RenderLoadingIndication();
             State.DhcpLeaseFetching = false;
@@ -219,4 +217,8 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
 
     private async Task RenderLoadingIndication()
         => await Task.Delay(1000, _cancellationTokenSource.Token); // allow browser to render loading indication
+
+    [LoggerMessage(1, LogLevel.Error, "{Call} failed)")]
+    private static partial void GetNetworkStatusInformationRequestFailed(ILogger<NetworkInterfaceControlPanel> logger,
+        Exception exception, string call);
 }

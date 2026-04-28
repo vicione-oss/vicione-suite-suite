@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.ControlPanels.Dns.Models;
+using Blazor.Shared.Network.ControlPanels.Dns.Models;
 using Blazor.Shared.Network.Extensions;
 using Core.Shared.HostManagement.Services;
 using Sdk.Client.ControlPanels.Services;
@@ -9,37 +9,45 @@ internal sealed class DnsControlPanelResetHandler(ISystemConfigurationService sy
 {
     public Task Reset(DnsControlPanelState state, CancellationToken cancellationToken)
     {
-        var networkDnsSettings = systemConfigurationService.SystemConfiguration.NetworkDNSSettings;
+        state.BeginLoading();
+        try
+        {
+            var networkDnsSettings = systemConfigurationService.SystemConfiguration.NetworkDNSSettings;
 
-        state.Hostname = networkDnsSettings.Hostname;
-        state.DnsSuffixEnabled = networkDnsSettings.DNSSuffixEnabled;
-        state.DnsSuffix = networkDnsSettings.DNSSuffix;
+            state.Hostname = networkDnsSettings.Hostname;
+            state.DnsSuffixEnabled = networkDnsSettings.DNSSuffixEnabled;
+            state.DnsSuffix = networkDnsSettings.DNSSuffix;
 
-        state.MulticastDnsEnabled = networkDnsSettings.MulticastDNSEnabled;
+            state.MulticastDnsEnabled = networkDnsSettings.MulticastDNSEnabled;
 
-        state.DnsEnabled = networkDnsSettings.NameServersEnabled;
+            state.DnsEnabled = networkDnsSettings.NameServersEnabled;
 
-        state.DnsDetails = [.. networkDnsSettings.NameServers
+            state.DnsDetails = [.. networkDnsSettings.NameServers
             .Select(d => new NetworkInterfaceDnsDetail { IpAddress = d.ToString() })
             .Distinct()];
 
-        state.DnsDetails.EnsureAtLeastOneItemExists();
+            state.DnsDetails.EnsureAtLeastOneItemExists();
 
-        state.SearchDomainsEnabled = networkDnsSettings.SearchDomainsEnabled;
+            state.SearchDomainsEnabled = networkDnsSettings.SearchDomainsEnabled;
 
-        state.SearchDomainDetails = [.. networkDnsSettings.SearchDomains
+            state.SearchDomainDetails = [.. networkDnsSettings.SearchDomains
             .Select(d => new NetworkInterfaceSearchDomainDetail { IpAddress = d })
             .Distinct()];
 
-        state.SearchDomainDetails.EnsureAtLeastOneItemExists();
+            state.SearchDomainDetails.EnsureAtLeastOneItemExists();
 
-        state.StaticHostsEnabled = networkDnsSettings.StaticHostsEnabled;
+            state.StaticHostsEnabled = networkDnsSettings.StaticHostsEnabled;
 
-        state.StaticHostDetails = [.. networkDnsSettings.StaticHosts
+            state.StaticHostDetails = [.. networkDnsSettings.StaticHosts
             .Select(d => new NetworkInterfaceStaticHostDetail { IpAddress = d.IPAddress.ToString(), Hostname = d.Hostname })
             .Distinct()];
 
-        state.StaticHostDetails.EnsureAtLeastOneItemExists();
+            state.StaticHostDetails.EnsureAtLeastOneItemExists();
+        }
+        finally
+        {
+            state.EndLoading();
+        }
 
         return Task.CompletedTask;
     }

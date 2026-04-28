@@ -70,10 +70,6 @@
                 </div>
             </SettingsInformation>
 
-            <SettingsField Label="@CommonVocabulary.State">
-                @(_testConnectionResult is null ? CommonVocabulary.Unknown : _testConnectionResult.State)
-            </SettingsField>
-
             <div class="section" data-expanded="@State.GeneralInformationExpanded">
                 <SettingsField Label="@TechnicalTerms.MacAddress">
                     @GetPhysicalAddress()

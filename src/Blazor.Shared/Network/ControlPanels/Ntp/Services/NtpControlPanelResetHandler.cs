@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.ControlPanels.Ntp.Extensions;
+using Blazor.Shared.Network.ControlPanels.Ntp.Extensions;
 using Core.Shared.HostManagement.Requests;
 using Core.Shared.HostManagement.Services;
 using Sdk.Client.ControlPanels.Services;
@@ -10,11 +10,19 @@ internal sealed class NtpControlPanelResetHandler(ISystemConfigurationService sy
 {
     public async Task Reset(NtpControlPanelState state, CancellationToken cancellationToken)
     {
-        var networkNtpSettings = systemConfigurationService.SystemConfiguration.NetworkNTPSettings;
-        var result = await mediator.Request<GetNTPFallbackInformation, GetNTPFallbackInformationResponse>(new(), cancellationToken);
+        state.BeginLoading();
+        try
+        {
+            var networkNtpSettings = systemConfigurationService.SystemConfiguration.NetworkNTPSettings;
+            var result = await mediator.Request<GetNTPFallbackInformation, GetNTPFallbackInformationResponse>(new(), cancellationToken);
 
-        state.NtpServersEnabled = networkNtpSettings.NTPServersEnabled;
-        state.NtpServerDetails.Reset(networkNtpSettings.NTPServers);
-        state.FallbackNtpServerDetails.Reset(result.FallbackNTPServers ?? []);
+            state.NtpServersEnabled = networkNtpSettings.NTPServersEnabled;
+            state.NtpServerDetails.Reset(networkNtpSettings.NTPServers);
+            state.FallbackNtpServerDetails.Reset(result.FallbackNTPServers ?? []);
+        }
+        finally
+        {
+            state.EndLoading();
+        }
     }
 }

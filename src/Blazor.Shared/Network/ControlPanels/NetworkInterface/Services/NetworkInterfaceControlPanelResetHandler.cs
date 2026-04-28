@@ -1,84 +1,90 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
 using Blazor.Shared.Network.Extensions;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Core.Shared.HostManagement.Requests;
 using Core.Shared.HostManagement.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 
 namespace Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 
-internal sealed class NetworkInterfaceControlPanelResetHandler([FromKeyedServices(Sdk.Constants.ClientTimeProviderServiceKey)] TimeProvider timeProvider, IUiMediator mediator, ISystemConfigurationService systemConfigurationService)
+internal sealed class NetworkInterfaceControlPanelResetHandler(IUiMediator mediator, ISystemConfigurationService systemConfigurationService)
     : IControlPanelResetHandler<NetworkInterfaceControlPanelState>
 {
     public async Task Reset(NetworkInterfaceControlPanelState state, CancellationToken cancellationToken)
     {
-        var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
-            .ElementAtOrDefault(state.NetworkInterfaceIndex);
-
-        var response = await mediator.Request<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>(new GetDHCPLeaseInformation(state.Name), cancellationToken);
-        var originalPhysicalAddressResponse = await mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(new GetOriginalPhysicalAddress(state.Name), cancellationToken);
-
-        List<NetworkInterfaceIPv4Detail> ipV4Details;
-
-        if (networkInterface is not null)
+        state.BeginLoading();
+        try
         {
-            state.Name = networkInterface.CommonInformation.Name;
-            state.Enabled = networkInterface.CommonInformation.Enabled;
-            state.DHCPLease = response.DHCPLease;
+            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
+                .ElementAtOrDefault(state.NetworkInterfaceIndex);
 
-            if (networkInterface.IPv4.DHCPEnabled && state.DHCPLease is not null)
-            {
-                state.IpV4ConfigurationMode = IpConfigurationMode.AutomaticDhcp;
-            }
-            else if (networkInterface.IPv4.DHCPEnabled && state.DHCPLease is null)
-            {
-                state.IpV4ConfigurationMode = IpConfigurationMode.LinkLocal;
-            }
-            else
-            {
-                state.IpV4ConfigurationMode = IpConfigurationMode.Manual;
-            }
+            List<NetworkInterfaceIPv4Detail> ipV4Details;
 
-            ipV4Details = [.. networkInterface.IPv4.IPv4Details
+            if (networkInterface is not null)
+            {
+                state.Name = networkInterface.CommonInformation.Name;
+                state.Enabled = networkInterface.CommonInformation.Enabled;
+
+                var response = await mediator.Request<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>(new GetDHCPLeaseInformation(state.Name), cancellationToken);
+                var originalPhysicalAddressResponse = await mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(new GetOriginalPhysicalAddress(state.Name), cancellationToken);
+
+                state.DHCPLease = response.DHCPLease;
+
+                if (networkInterface.IPv4.DHCPEnabled && state.DHCPLease is not null)
+                {
+                    state.IpV4ConfigurationMode = IpConfigurationMode.AutomaticDhcp;
+                }
+                else if (networkInterface.IPv4.DHCPEnabled && state.DHCPLease is null)
+                {
+                    state.IpV4ConfigurationMode = IpConfigurationMode.LinkLocal;
+                }
+                else
+                {
+                    state.IpV4ConfigurationMode = IpConfigurationMode.Manual;
+                }
+
+                ipV4Details = [.. networkInterface.IPv4.IPv4Details
                     .Select(d => new NetworkInterfaceIPv4Detail { IpAddress = d.IPAddress.ToString(), SubnetMask = d.Netmask.ToString() })
                     .Distinct()];
 
-            state.DefaultGateway = networkInterface.IPv4.Gateway?.ToString();
+                state.DefaultGateway = networkInterface.IPv4.Gateway?.ToString();
 
-            state.MacAddressManually = networkInterface.CommonInformation.PhysicalAddress != originalPhysicalAddressResponse.OriginalPhysicalAddress;
+                state.MacAddressManually = networkInterface.CommonInformation.PhysicalAddress != originalPhysicalAddressResponse.OriginalPhysicalAddress;
 
-            if (state.MacAddressManually)
-                state.MacAddress = networkInterface.CommonInformation.PhysicalAddress;
+                if (state.MacAddressManually)
+                    state.MacAddress = networkInterface.CommonInformation.PhysicalAddress;
+                else
+                    state.MacAddress = string.Empty;
+
+                state.VLanEnabled = networkInterface.IPv4.VLANEnabled;
+                state.VLanId = networkInterface.IPv4.VLANID.ToString(CultureInfo.InvariantCulture);
+            }
             else
+            {
+                state.Name = string.Empty;
+                state.Enabled = false;
+
+                state.IpV4ConfigurationMode = IpConfigurationMode.AutomaticDhcp;
+                ipV4Details = [];
+                state.DefaultGateway = null;
+
+                state.MacAddressManually = false;
                 state.MacAddress = string.Empty;
 
-            state.VLanEnabled = networkInterface.IPv4.VLANEnabled;
-            state.VLanId = networkInterface.IPv4.VLANID.ToString(CultureInfo.InvariantCulture);
+                state.VLanEnabled = false;
+                state.VLanId = string.Empty;
+            }
+
+            ipV4Details.EnsureAtLeastOneItemExists();
+
+            state.FirstIpV4Detail = ipV4Details.First();
+            state.AdditionalIpV4Details = [.. ipV4Details.Skip(1)];
         }
-        else
+        finally
         {
-            state.Name = string.Empty;
-            state.Enabled = false;
-
-            state.IpV4ConfigurationMode = IpConfigurationMode.AutomaticDhcp;
-            ipV4Details = [];
-            state.DefaultGateway = null;
-
-            state.MacAddressManually = false;
-            state.MacAddress = string.Empty;
-
-            state.VLanEnabled = false;
-            state.VLanId = string.Empty;
+            state.EndLoading();
         }
-
-        ipV4Details.EnsureAtLeastOneItemExists();
-
-        state.FirstIpV4Detail = ipV4Details.First();
-        state.AdditionalIpV4Details = [.. ipV4Details.Skip(1)];
-
-        var timeZone = timeProvider.LocalTimeZone;
     }
 }
