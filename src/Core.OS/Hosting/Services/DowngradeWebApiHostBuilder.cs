@@ -28,7 +28,7 @@ internal static class DowngradeWebApiHostBuilder
         // we have a page with to options (links -> reset or exit)
         host.MapGet("/", () => CreateVersionDowngradeDetectedHtml(options.SuiteVersion, options.PersistedVersion));
         host.MapGet("/reset", (HttpContext _) => DowngradeReset(host.Services));
-        host.MapGet("/exit", DowngradeExit);
+        host.MapGet("/exit", (HttpContext _) => DowngradeExit(host.Services));
 
         StopDelay = options.StopApplicationDelayMs;
 
@@ -46,13 +46,14 @@ internal static class DowngradeWebApiHostBuilder
 
             try
             {
-                await Task.Delay(StopDelay);
+                // Get services before delay because we usee scoped http context provider!
+                var pipeClient = services.GetRequiredService<IPipeClient>();
+                var instanceOptions = services.GetRequiredService<IOptions<InstanceOptions>>();
 
+                await Task.Delay(StopDelay);
                 logger.Information("Stop delay passed by. Requesting restart by hostmanagement now...");
 
                 // this will restart the Core.OS immediately
-                var pipeClient = services.GetRequiredService<IPipeClient>();
-                var instanceOptions = services.GetRequiredService<IOptions<InstanceOptions>>();
                 await pipeClient.RestartSuite(instanceOptions.Value);
             }
             catch (Exception ex)
@@ -91,12 +92,12 @@ internal static class DowngradeWebApiHostBuilder
     /// Just stops the application
     /// </summary>
     /// <param name="http"></param>
-    private static IResult DowngradeExit(HttpContext http)
+    private static IResult DowngradeExit(IServiceProvider services)
     {
-        var logger = http.RequestServices.GetRequiredService<Serilog.ILogger>();
+        var logger = services.GetRequiredService<Serilog.ILogger>();
         logger.Information("Suite shutdown requested by user because of detected version downgrade");
 
-        RestartDelayed(http.RequestServices);
+        RestartDelayed(services);
 
         return Results.Redirect("/");
     }
