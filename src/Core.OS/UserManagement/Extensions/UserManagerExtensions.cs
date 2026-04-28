@@ -1,5 +1,6 @@
-﻿using Core.Shared.UserManagement.Contracts;
+using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core.OS.UserManagement.Extensions;
 
@@ -33,5 +34,14 @@ internal static class UserManagerExtensions
 
         public async Task<SuiteUser> GetUserById(string userId)
             => (await userManager.FindByIdAsync(userId) ?? throw new InvalidOperationException("User not found"));
+
+        public async Task<SuiteUser?> FindByNormalizedUser(string? normalizedUserName, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(normalizedUserName))
+                return null;
+
+            return await userManager.Users.AsNoTracking()
+                .SingleOrDefaultAsync(u => u.NormalizedUserName == normalizedUserName, cancellationToken: cancellationToken);
+        }
     }
 }
