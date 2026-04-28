@@ -16,15 +16,18 @@ public sealed class GetUsersConsumer(UserManager<SuiteUser> userManager, ILogger
     {
         if (message.UserName?.Value is not null)
         {
-            var suiteUser = await userManager.FindByNameAsync(message.UserName.Value.Value);
+            var normalizedUserName = userManager.NormalizeName(message.UserName.Value.Value);
+            var suiteUser = await userManager.FindByNormalizedUser(normalizedUserName, cancellationToken);
+
             if (suiteUser is null)
                 return new GetUsersResponse([], new ErrorInfo(UserErrorCodes.NotFound, $"Could not find user '{message.UserName}'"));
+
             var user = await suiteUser.CreateUserProfile(userManager);
             return new GetUsersResponse([user]);
         }
 
         //Get
-        var suiteUsers = await userManager.Users.ToListAsync(cancellationToken);
+        var suiteUsers = await userManager.Users.AsNoTracking().ToListAsync(cancellationToken);
         var users = await Task.WhenAll(suiteUsers.Select(async u => await u.CreateUserProfile(userManager)));
 
         return new GetUsersResponse([.. users]);
