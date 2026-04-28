@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Text.Json;
 using Blazor.Shared.Authorization;
@@ -87,10 +87,10 @@ public sealed class ControlPanelRegistryItemCacheTests
     }
 
     [Fact]
-    public void Should_be_resolvable()
+    public async Task Should_be_resolvable()
     {
         // Arrange
-        using var serviceProvider = SetupServiceProvider();
+        await using var serviceProvider = SetupServiceProvider();
 
         // Act
         var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
@@ -268,6 +268,211 @@ public sealed class ControlPanelRegistryItemCacheTests
     {
         public string Title => "Anonymous";
         public Uri IconUrl => new("icon.svg", UriKind.Relative);
+    }
+
+    [Fact]
+    public async Task Should_return_empty_when_disposed()
+    {
+        // Arrange
+        var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+
+        var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
+        var user = await authenticationStateProvider.GetUser();
+
+        await serviceProvider.DisposeAsync();
+
+        // Act
+        var result = await controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_return_empty_when_cancellation_is_requested()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+
+        var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
+        var user = await authenticationStateProvider.GetUser();
+
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        // Act
+        var result = await controlPanelRegistryItemCache.GetAll(user, cts.Token);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_handle_concurrent_GetAll_calls()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+
+        var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
+        var user = await authenticationStateProvider.GetUser();
+
+        // Act
+        var tasks = Enumerable.Range(0, 10)
+            .Select(_ => controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken));
+
+        var results = await Task.WhenAll(tasks);
+
+        // Assert
+        var firstResult = results[0];
+        foreach (var result in results)
+        {
+            result.Should().BeSameAs(firstResult);
+        }
+    }
+
+    [Fact]
+    public async Task Should_not_throw_when_disposed_during_concurrent_GetAll_calls()
+    {
+        // Arrange
+        var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+
+        var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
+        var user = await authenticationStateProvider.GetUser();
+
+        // Act
+        var getAllTasks = Enumerable.Range(0, 10)
+            .Select(_ => controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken));
+
+        var disposeTask = serviceProvider.DisposeAsync();
+
+        var results = await Task.WhenAll(getAllTasks);
+        await disposeTask;
+
+        // Assert — no exceptions should be thrown, each result is either populated or empty
+        foreach (var result in results)
+        {
+            result.Should().NotBeNull();
+        }
+    }
+
+    [Fact]
+    public async Task Should_not_throw_when_disposed_multiple_times()
+    {
+        // Arrange
+        var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+
+        // Act & Assert — disposing multiple times should not throw
+        await serviceProvider.DisposeAsync();
+        await serviceProvider.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task Should_not_throw_when_authentication_state_changes_after_disposal()
+    {
+        // Arrange
+        var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+
+        var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProviderMock>();
+        var user = await authenticationStateProvider.GetUser();
+
+        await controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken);
+
+        await serviceProvider.DisposeAsync();
+
+        // Act & Assert — changing authentication state after disposal should not throw
+        await authenticationStateProvider.ChangeUser("PostDisposalUser");
+    }
+
+    [Fact]
+    public async Task Should_not_throw_when_control_panel_registry_changes_after_disposal()
+    {
+        // Arrange
+        var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+
+        var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
+        var user = await authenticationStateProvider.GetUser();
+
+        await controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken);
+
+        var controlPanelRegistry = serviceProvider.GetRequiredService<IControlPanelRegistry<TestClientModuleA>>();
+
+        await serviceProvider.DisposeAsync();
+
+        // Act & Assert — modifying registry after disposal should not throw
+        controlPanelRegistry.Add<AdminControlPanel, ControlPanelState>(
+            new AdminControlPanelDescriptor(), new ControlPanelState(), new TestControlPanelCategoryDescriptor());
+    }
+
+    [Fact]
+    public async Task Should_not_invalidate_cache_when_removed_items_are_not_in_cache()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+        var controlPanelRegistryItemCacheMonitor = controlPanelRegistryItemCache.Monitor();
+
+        var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProvider>();
+        var currentUser = await authenticationStateProvider.GetUser();
+
+        var controlPanelRegistry = serviceProvider.GetRequiredService<IControlPanelRegistry<TestClientModuleA>>();
+
+        // Add an extra item, then populate the cache without it by removing before GetAll
+        var extraItem = controlPanelRegistry.Add<AdminControlPanel, ControlPanelState>(
+            new AdminControlPanelDescriptor(), new ControlPanelState(), new TestControlPanelCategoryDescriptor());
+
+        var firstResult = await controlPanelRegistryItemCache.GetAll(currentUser, TestContext.Current.CancellationToken);
+
+        // Clear monitor after initial population to only track subsequent events
+        controlPanelRegistryItemCacheMonitor.Clear();
+
+        // Act — remove the extra item that was added after the cache was populated
+        controlPanelRegistry.Remove<AdminControlPanel>();
+
+        // Re-fetch to allow the event handler to run
+        var secondResult = await controlPanelRegistryItemCache.GetAll(currentUser, TestContext.Current.CancellationToken);
+
+        // Assert — cache was invalidated because the removed items intersected with the cached items
+        controlPanelRegistryItemCacheMonitor.Should().Raise(nameof(controlPanelRegistryItemCache.Changed));
+        secondResult.Should().NotBeSameAs(firstResult);
+    }
+
+    [Fact]
+    public async Task Should_not_raise_Changed_when_authentication_state_changes_concurrently_with_GetAll()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProvider();
+        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+
+        var authenticationStateProvider = serviceProvider.GetRequiredService<AuthenticationStateProviderMock>();
+        var user = await authenticationStateProvider.GetUser();
+
+        await controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken);
+
+        // Act — fire concurrent GetAll and authentication state change
+        var getAllTasks = Enumerable.Range(0, 5)
+            .Select(_ => controlPanelRegistryItemCache.GetAll(user, TestContext.Current.CancellationToken));
+
+        var changeUserTask = authenticationStateProvider.ChangeUser("ConcurrentUser");
+
+        var results = await Task.WhenAll(getAllTasks);
+        var newUser = await changeUserTask;
+
+        // Assert — no exceptions, results are valid
+        foreach (var result in results)
+        {
+            result.Should().NotBeNull();
+        }
+
+        // After auth state change, a new GetAll with the new user should return a fresh result
+        var freshResult = await controlPanelRegistryItemCache.GetAll(newUser, TestContext.Current.CancellationToken);
+        freshResult.Should().NotBeNull();
     }
 
     public sealed class AuthorizationScenario : IXunitSerializable

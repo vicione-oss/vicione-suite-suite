@@ -4,9 +4,10 @@
 
 ### Changed
 
-- Stopped catching `NavigationException`s in `LoginContent.razor.cs`, as ASP.NET uses them to perform the redirection during prerendering
+- Stopped catching `NavigationException` in `LoginContent.razor.cs` as ASP.NET uses them to perform the redirection during prerendering
 - `ConfirmCancelDialog,` adopted `Width` and `Height` from `DataCollectionWizard` (width = 600px, height = 300px)
 - Replaced `DxAccordion` with `ViciOne.Ui.Blazor.Components.Accordion`
+- Improved synchronization in `ControlPanelRegistryItemCache`
 
 ### Updated
 

@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Sdk.Client.ControlPanels.Services;
@@ -6,11 +6,9 @@ using Sdk.Client.Services;
 
 namespace Blazor.Shared.Settings.Services;
 
-internal sealed partial class ControlPanelRegistryItemCache
-    : IControlPanelRegistryItemCache, IDisposable
+internal sealed partial class ControlPanelRegistryItemCache : IControlPanelRegistryItemCache, IAsyncDisposable
 {
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
-
+    private readonly CancellationTokenSource _semaphoreCancellationTokenSource = new();
     private readonly SemaphoreSlim _semaphore = new(1);
 
     private readonly IEnumerable<IControlPanelRegistry> _controlPanelRegistries;
@@ -20,7 +18,9 @@ internal sealed partial class ControlPanelRegistryItemCache
     private ClaimsPrincipal? _user;
     private IEnumerable<IControlPanelRegistryItem>? _controlPanelRegistryItems;
 
-    private CancellationToken CancellationToken => _cancellationTokenSource.Token;
+    private bool _disposedAsync;
+
+    private CancellationToken CancellationToken => _semaphoreCancellationTokenSource.Token;
 
     public event Action? Changed;
 
@@ -38,78 +38,101 @@ internal sealed partial class ControlPanelRegistryItemCache
             r.Changed += ControlPanelRegistryChanged;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        if (Interlocked.CompareExchange(ref _disposedAsync, true, false))
+            return;
+
         foreach (var r in _controlPanelRegistries)
             r.Changed -= ControlPanelRegistryChanged;
 
         _authenticationStateProvider.AuthenticationStateChanged -= AuthenticationStateChanged;
 
-        _cancellationTokenSource.Cancel();
-        _cancellationTokenSource.Dispose();
+        await _semaphoreCancellationTokenSource.CancelAsync();
+        _semaphoreCancellationTokenSource.Dispose();
 
         _semaphore.Dispose();
     }
 
     private async void AuthenticationStateChanged(Task<AuthenticationState> authenticationStateTask)
     {
-        var notifyChanged = false;
+        if (_disposedAsync)
+            return;
 
-        await _semaphore.WaitAsync(CancellationToken);
         try
         {
-            _user = null;
-            _controlPanelRegistryItems = null;
+            var notifyChanged = false;
 
-            notifyChanged = true;
-        }
-        catch (OperationCanceledException)
-        {
-            // nothing to do here, we just return gracefully
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-
-        if (notifyChanged)
-            Changed?.Invoke();
-    }
-
-    private async void ControlPanelRegistryChanged(RegistryChangedEventArgs<IControlPanelRegistryItem> args)
-    {
-        var notifyChanged = false;
-
-        await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
-        try
-        {
-            if (args.ItemsAdded.Any())
+            await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
+            try
             {
+                _user = null;
                 _controlPanelRegistryItems = null;
 
                 notifyChanged = true;
             }
-            else
+            finally
             {
-                if (_controlPanelRegistryItems is not null && _controlPanelRegistryItems.Intersect(args.ItemsRemoved).Any())
+                _semaphore.Release();
+            }
+
+            if (notifyChanged)
+                Changed?.Invoke();
+        }
+        catch (OperationCanceledException)
+        {
+            // Nothing to do here, return gracefully
+        }
+        catch (ObjectDisposedException)
+        {
+            // Semaphore or other object already disposed, nothing we can do, return gracefully
+        }
+    }
+
+    private async void ControlPanelRegistryChanged(RegistryChangedEventArgs<IControlPanelRegistryItem> args)
+    {
+        if (_disposedAsync)
+            return;
+
+        try
+        {
+            var notifyChanged = false;
+
+            await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
+            try
+            {
+                if (args.ItemsAdded.Any())
                 {
                     _controlPanelRegistryItems = null;
 
                     notifyChanged = true;
                 }
+                else
+                {
+                    if (_controlPanelRegistryItems is not null && _controlPanelRegistryItems.Intersect(args.ItemsRemoved).Any())
+                    {
+                        _controlPanelRegistryItems = null;
+
+                        notifyChanged = true;
+                    }
+                }
             }
+            finally
+            {
+                _semaphore.Release();
+            }
+
+            if (notifyChanged)
+                Changed?.Invoke();
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here, return gracefully
         }
-        finally
+        catch (ObjectDisposedException)
         {
-            _semaphore.Release();
+            // Semaphore or other object already disposed, nothing we can do, return gracefully
         }
-
-        if (notifyChanged)
-            Changed?.Invoke();
     }
 
     private async Task<IEnumerable<IControlPanelRegistryItem>> GetControlPanelRegistryItems(ClaimsPrincipal? user,
@@ -133,7 +156,7 @@ internal sealed partial class ControlPanelRegistryItemCache
                     var t = Task.WhenAll(authorizationHandleTasks);
                     try
                     {
-                        await t.WaitAsync(cancellationToken);
+                        await t.WaitAsync(cancellationToken).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -158,27 +181,41 @@ internal sealed partial class ControlPanelRegistryItemCache
 
     public async Task<IEnumerable<IControlPanelRegistryItem>> GetAll(ClaimsPrincipal? user, CancellationToken cancellationToken = default)
     {
-        await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        if (_disposedAsync)
+            return [];
+
         try
         {
-            if (user != _user || _controlPanelRegistryItems is null)
+            using var linkedCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
+
+            await _semaphore.WaitAsync(linkedCancellationTokenSource.Token).ConfigureAwait(false);
+            try
             {
-                _user = user;
+                if (user != _user || _controlPanelRegistryItems is null)
+                {
+                    _user = user;
 
-                _controlPanelRegistryItems = await GetControlPanelRegistryItems(user, cancellationToken);
+                    _controlPanelRegistryItems = await GetControlPanelRegistryItems(user, cancellationToken);
+                }
+
+                return _controlPanelRegistryItems;
             }
-
-            return _controlPanelRegistryItems;
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here, return gracefully
 
             return [];
         }
-        finally
+        catch (ObjectDisposedException)
         {
-            _semaphore.Release();
+            // Semaphore or other object already disposed, nothing we can do, return gracefully
+
+            return [];
         }
     }
 }
