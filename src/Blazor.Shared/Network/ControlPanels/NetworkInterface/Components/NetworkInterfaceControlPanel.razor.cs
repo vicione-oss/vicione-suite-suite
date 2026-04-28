@@ -35,6 +35,8 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     private bool _testConnectionExecutedAtLeastOnce;
     private bool _showErrorDialog;
     private string? _errorMessage;
+    private bool _switchToManualConfigurationWarningDialog;
+    private IpConfigurationMode _ipV4ConfigurationModeBefore;
     private DateTimeOffset? _dhcpLeaseStart;
     private DateTimeOffset? _dhcpLeaseEnd;
     private TimeSpan? _dhcpLeaseDuration;
@@ -51,13 +53,13 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     [Inject]
     private ISystemConfigurationService SystemConfigurationService { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await base.OnInitializedAsync();
+        base.OnInitialized();
 
         SystemConfigurationService.SystemConfigurationChanged += OnSystemConfigurationChanged;
 
-        await SetDhcpLeaseInformation();
+        SetDhcpLeaseInformation();
     }
 
     protected override async ValueTask DisposeAsyncCore()
@@ -125,15 +127,31 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         }
     }
 
-    private async Task IpV4ConfigurationModeChanged()
+    private void IpV4ConfigurationModeChanged()
     {
+        if (State.IpV4ConfigurationMode is IpConfigurationMode.Manual &&
+            SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Count == 0)
+        {
+            _switchToManualConfigurationWarningDialog = true;
+
+            return;
+        }
+
+        _ipV4ConfigurationModeBefore = State.IpV4ConfigurationMode;
+
         if (State.IpV4ConfigurationMode == IpConfigurationMode.AutomaticDhcp)
         {
-            await SetDhcpLeaseInformation();
+            SetDhcpLeaseInformation();
 
             State.DhcpLeaseSettingsGroupExpanded = true;
         }
     }
+
+    private void OnManualConfigConfirm()
+        => _ipV4ConfigurationModeBefore = State.IpV4ConfigurationMode;
+
+    private void OnManualConfigCancel()
+        => State.IpV4ConfigurationMode = _ipV4ConfigurationModeBefore;
 
     private async Task InterfaceEnabledChanged()
     {
@@ -165,6 +183,7 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         finally
         {
             await RenderLoadingIndication();
+
             State.DhcpLeaseFetching = false;
         }
     }
@@ -179,15 +198,13 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
 
     public async Task OnSystemConfigurationChanged()
     {
-        await SetDhcpLeaseInformation();
+        SetDhcpLeaseInformation();
+
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task SetDhcpLeaseInformation()
+    private void SetDhcpLeaseInformation()
     {
-        if (State.DHCPLease is null)
-            State.DhcpLeaseFetching = false;
-
         _dhcpLeaseStart = State.DHCPLease?.LeaseObtained.AdjustToTimeZone(TimeProvider.LocalTimeZone);
         _dhcpLeaseEnd = State.DHCPLease?.LeaseExpires.AdjustToTimeZone(TimeProvider.LocalTimeZone);
 
@@ -196,7 +213,6 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         else
             _dhcpLeaseDuration = null;
 
-        await RenderLoadingIndication();
         State.DhcpLeaseFetching = false;
     }
 

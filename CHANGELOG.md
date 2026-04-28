@@ -10,6 +10,10 @@
 - Improved synchronization in `ControlPanelRegistryItemCache`
 - Improved initialization of system configuration
 
+### Fixed
+
+- First Run Wizard does not show a warning dialog anymore when switching IPv4 configuration to "Manual"
+
 ### Updated
 
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.9.0`

@@ -8,7 +8,7 @@
                           ValueSelector="@(i => i.Value)"
                           TextSelector="@(i => i.Text)"
                           @bind-Value="ConfigurationModeWrapper"
-                          @bind-Value:after="OnValueChanged" />
+                          @bind-Value:after="NotifyConfigurationModeChanged" />
     </Expander>
 
     <ChildContent>
@@ -30,12 +30,3 @@
         }
     </ChildContent>
 </SettingsGroup>
-
-<ConfirmCancelDialog HeaderText="@CommonVocabulary.Warning"
-                     OnConfirm="@OnConfirm"
-                     OnCancel="@OnCancel"
-                     @bind-Visible="_dialogVisible">
-    <Body>
-        @Localization.IpV4SettingsGroup.DialogBody
-    </Body>
-</ConfirmCancelDialog>

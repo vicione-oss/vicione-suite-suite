@@ -1,4 +1,4 @@
-﻿@using Blazor.Shared.Components
+@using Blazor.Shared.Components
 @using Blazor.Shared.Onboarding.Extensions
 @using Blazor.Shared.Onboarding.Services
 @using Blazor.Shared.Settings.NetworkInterface.Components
@@ -99,8 +99,7 @@
                        @bind-IpAddress="State.InternetConnection.IpAddress"
                        @bind-SubnetMask="State.InternetConnection.SubnetMask"
                        @bind-DefaultGateway="State.InternetConnection.DefaultGateway"
-                       Changed="BeginEdit" 
-                       HasManualConfiguredDnsServers="@(!string.IsNullOrEmpty(State.InternetConnection.DnsServer))">
+                       Changed="BeginEdit">
 
         <AdditionalSettingsFields>
 
@@ -116,8 +115,7 @@
                        @bind-IpAddress="State.LocalNetwork.IpAddress"
                        @bind-SubnetMask="State.LocalNetwork.SubnetMask"
                        @bind-DefaultGateway="State.LocalNetwork.DefaultGateway"
-                       Changed="BeginEdit"
-                       HasManualConfiguredDnsServers="@(!string.IsNullOrEmpty(State.LocalNetwork.DnsServer))">
+                       Changed="BeginEdit">
 
         <AdditionalSettingsFields>
 

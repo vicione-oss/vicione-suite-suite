@@ -142,8 +142,7 @@
                            @bind-IpAddress="State.FirstIpV4Detail.IpAddress"
                            @bind-SubnetMask="State.FirstIpV4Detail.SubnetMask"
                            @bind-DefaultGateway="State.DefaultGateway"
-                           Changed="BeginEdit"
-                           HasManualConfiguredDnsServers="@SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Any()">
+                           Changed="BeginEdit">
 
             <AdditionalSettingsFields>
                 <SettingsStepper PlusEnabled="@(State.AdditionalIpV4Details.Count == 0)"
@@ -218,6 +217,15 @@
             </ChildContent>
         </SettingsGroup>
     </SettingsLayout>
+
+    <ConfirmCancelDialog HeaderText="@CommonVocabulary.Warning"
+                         OnConfirm="@OnManualConfigConfirm"
+                         OnCancel="@OnManualConfigCancel"
+                         @bind-Visible="_switchToManualConfigurationWarningDialog">
+        <Body>
+            @Localization.TcpIpControlPanelPage.SwitchToManualConfigurationWarningDialogBody
+        </Body>
+    </ConfirmCancelDialog>
 </ControlPanelPage>
 
 <ControlPanelPage Title="@Localization.HardwareControlPanelPage.Hardware">
