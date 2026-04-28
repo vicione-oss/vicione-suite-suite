@@ -55,24 +55,9 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     {
         await base.OnInitializedAsync();
 
-        try
-        {
-            await SystemConfigurationService.Initialize(_cancellationTokenSource.Token);
+        SystemConfigurationService.SystemConfigurationChanged += OnSystemConfigurationChanged;
 
-            SystemConfigurationService.SystemConfigurationChanged += OnSystemConfigurationChanged;
-
-            await SetDhcpLeaseInformation();
-        }
-        catch (OperationCanceledException)
-        {
-            // Nothing to do here, return gracefully
-            return;
-        }
-        catch (ObjectDisposedException)
-        {
-            // Semaphore or CancellationTokenSource already disposed, nothing we can do, return gracefully
-            return;
-        }
+        await SetDhcpLeaseInformation();
     }
 
     protected override async ValueTask DisposeAsyncCore()

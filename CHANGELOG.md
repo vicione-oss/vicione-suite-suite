@@ -8,6 +8,7 @@
 - `ConfirmCancelDialog,` adopted `Width` and `Height` from `DataCollectionWizard` (width = 600px, height = 300px)
 - Replaced `DxAccordion` with `ViciOne.Ui.Blazor.Components.Accordion`
 - Improved synchronization in `ControlPanelRegistryItemCache`
+- Improved initialization of system configuration
 
 ### Updated
 

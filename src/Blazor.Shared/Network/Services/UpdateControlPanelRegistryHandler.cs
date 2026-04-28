@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.ControlPanels;
+using Blazor.Shared.Network.ControlPanels;
 using Blazor.Shared.Network.ControlPanels.Dns.Components;
 using Blazor.Shared.Network.ControlPanels.Dns.Services;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Components;
@@ -23,8 +23,6 @@ internal sealed class UpdateControlPanelRegistryHandler(IControlPanelRegistry<Sh
 
     public async Task Execute(CancellationToken cancellationToken)
     {
-        await systemConfigurationService.Initialize(cancellationToken);
-
         controlPanelRegistry.BeginUpdate();
         try
         {
