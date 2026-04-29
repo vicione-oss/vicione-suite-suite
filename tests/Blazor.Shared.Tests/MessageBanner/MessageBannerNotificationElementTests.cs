@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.NotificationArea;
 using Blazor.Shared.MessageBanner.Services;
@@ -77,7 +77,7 @@ public sealed class MessageBannerNotificationElementTests
 
 
         var button = notificationElement.Find("button");
-        button.Click();
+        await button.ClickAsync();
 
         notificationElement.Render();
 

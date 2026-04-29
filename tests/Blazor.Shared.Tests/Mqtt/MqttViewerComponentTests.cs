@@ -142,7 +142,7 @@ public class MqttViewerComponentTests
 
             // Act
             var component = ctx.Render<MqttViewerComponent>();
-            FindConnectButton(component).Click();
+            await FindConnectButton(component).ClickAsync();
 
             // Assert
             var service = ctx.Services.GetRequiredService<IMqttService>();
@@ -161,7 +161,7 @@ public class MqttViewerComponentTests
 
             // Act
             var component = ctx.Render<MqttViewerComponent>();
-            FindConnectButton(component).Click();
+            await FindConnectButton(component).ClickAsync();
 
             // Assert
             var mqtt = _localMqttConnection.GetMqttConnection();
@@ -232,11 +232,11 @@ public class MqttViewerComponentTests
 
             // Act
             var component = ctx.Render<MqttViewerComponent>();
-            FindConnectButton(component).Click();
+            await FindConnectButton(component).ClickAsync();
             service.Connected += Raise.Event<Func<Task>>();
             service.IsConnected.Returns(true);
 
-            component.Find(DisconnectButtonSelector).Click();
+            await component.Find(DisconnectButtonSelector).ClickAsync();
             service.Disconnected += Raise.Event<Func<Task>>();
 
             // Assert

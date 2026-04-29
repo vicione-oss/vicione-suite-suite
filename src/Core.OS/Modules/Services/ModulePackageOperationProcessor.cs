@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.OS.Extensions;
 using Core.OS.Instance;
 using Core.OS.Modules.Extensions;
@@ -31,7 +31,7 @@ internal class ModulePackageOperationProcessor
         {
             // First attempt: write sentinel before the destructive workspace cleanup so that a crash
             // here does not cause directories to be wiped a second time on the next startup.
-            fileSystem.File.WriteAllText(sentinelPath, string.Empty);
+            await fileSystem.File.WriteAllTextAsync(sentinelPath, string.Empty, cancellationToken);
             ProcessOperationOptions(operations, fileSystem, options, logger);
         }
         else

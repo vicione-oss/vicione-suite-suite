@@ -1,5 +1,7 @@
 <Solution>
-  <Folder Name="/samples/" />
+  <Folder Name="/samples/">
+    <File Path="samples/.editorconfig" />
+  </Folder>
   <Folder Name="/samples/Burger/">
     <Project Path="samples/Burger.Backend/Burger.Backend.csproj" />
     <Project Path="samples/Burger.Client/Burger.Client.csproj">
@@ -61,6 +63,7 @@
     <File Path="docs/suite-architecture.md" />
   </Folder>
   <Folder Name="/src/">
+    <File Path="src/.editorconfig" />
     <Project Path="src/Blazor.DevAssets/Blazor.DevAssets.csproj" />
     <Project Path="src/Blazor.Server.Backend/Blazor.Server.Backend.csproj" />
     <Project Path="src/Blazor.Shared/Blazor.Shared.csproj">
@@ -74,6 +77,7 @@
     <Project Path="src/Core.UiHosting/Core.UiHosting.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <File Path="tests/.editorconfig" />
     <Project Path="tests/Blazor.DevAssets.Tests/Blazor.DevAssets.Tests.csproj" />
     <Project Path="tests/Blazor.Server.Tests/Blazor.Server.Tests.csproj" />
     <Project Path="tests/Blazor.Shared.Tests/Blazor.Shared.Tests.csproj" />
@@ -95,6 +99,7 @@
     <Project Path="tests/TestUiHost.Backend/TestUiHost.Backend.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <File Path="tools/.editorconfig" />
     <Project Path="tools/Suite.Deps/Suite.Deps.csproj" />
   </Folder>
 </Solution>

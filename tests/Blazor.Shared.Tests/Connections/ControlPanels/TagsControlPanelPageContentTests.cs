@@ -1,4 +1,4 @@
-﻿using AngleSharp.Dom;
+using AngleSharp.Dom;
 using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Connections.ControlPanels;
@@ -135,7 +135,7 @@ public class TagsControlPanelPageContentTests
             var disabledAddButton = addButton.HasAttribute("disabled");
 
             Assert.False(disabledAddButton);
-            addButton.Click();
+            await addButton.ClickAsync();
 
             Assert.NotNull(controlPanelRequest);
             await controlPanelRequest.Received(1)
@@ -178,7 +178,7 @@ public class TagsControlPanelPageContentTests
             var disabledAddButton = editButton.HasAttribute("disabled");
 
             Assert.False(disabledAddButton);
-            editButton.Click();
+            await editButton.ClickAsync();
 
             Assert.NotNull(controlPanelRequest);
             await controlPanelRequest.Received(1).Send<TagControlPanel, TagControlPanelState>(
@@ -255,7 +255,7 @@ public class TagsControlPanelPageContentTests
             var arrowButton = secondRow.QuerySelector(".navigate-button");
 
             Assert.NotNull(arrowButton);
-            arrowButton.Click();
+            await arrowButton.ClickAsync();
 
             await controlPanelRequest!.Received(1).Send<TagControlPanel, TagControlPanelState>(
                 Arg.Any<Action<TagControlPanelState>>());

@@ -117,7 +117,7 @@ public class SettingsContainerTests
             .FirstOrDefault(i => i.Text() == categoryTitle);
 
         Assert.NotNull(networkAccordionItemText);
-        networkAccordionItemText.Click();
+        await networkAccordionItemText.ClickAsync();
 
         var updatedNetworkAccordionItem = component.FindAll(".accordion-item")
             .FirstOrDefault(i => i.Descendants<IHtmlSpanElement>()
@@ -146,7 +146,7 @@ public class SettingsContainerTests
             .FirstOrDefault(i => i.Text() == categoryTitle);
 
         Assert.NotNull(networkAccordionItemText);
-        networkAccordionItemText.Click();
+        await networkAccordionItemText.ClickAsync();
 
         var updatedNetworkAccordionItem = component.FindAll(".accordion-item")
             .FirstOrDefault(i => i.Descendants<IHtmlSpanElement>()
@@ -159,7 +159,7 @@ public class SettingsContainerTests
                 menuEntry.Descendants<IHtmlDivElement>().Any(div => div.Text() == "Cloud"));
 
         Assert.NotNull(cloudMenuItem);
-        cloudMenuItem.Click();
+        await cloudMenuItem.ClickAsync();
 
         Assert.NotNull(component.Find(".control-panel-container"));
         Assert.NotNull(component.FindComponent<DummyClientModule.CloudControlPanel>());

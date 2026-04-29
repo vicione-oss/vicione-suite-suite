@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Text.Json;
 using Sdk.Messaging;
 
@@ -10,14 +10,19 @@ internal static class ZipArchiveEntryExtensions
     {
         public async Task<TItem?> DeserializeEntry<TItem>(CancellationToken cancellationToken = default)
         {
-            await using var stream = entry.Open();
-            return await JsonSerializer.DeserializeAsync<TItem>(stream, DefaultJsonSerializerSettings.Default, cancellationToken: cancellationToken);
+            await using var stream = await entry.OpenAsync(cancellationToken);
+
+            var result = await JsonSerializer.DeserializeAsync<TItem>(stream, DefaultJsonSerializerSettings.Default, cancellationToken: cancellationToken);
+
+            return result;
         }
 
         public async Task<long> SerializeToEntry<TItem>(TItem toBeSerialized, CancellationToken cancellationToken = default)
         {
-            await using var entryStream = entry.Open();
+            await using var entryStream = await entry.OpenAsync(cancellationToken);
+
             await JsonSerializer.SerializeAsync(entryStream, toBeSerialized, DefaultJsonSerializerSettings.Default, cancellationToken);
+
             return entryStream.Position;
         }
     }

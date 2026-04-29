@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Compression;
 using System.IO.Enumeration;
 using Core.Shared.Persistence.Contracts;
@@ -73,7 +73,7 @@ internal partial class BackupBuilder
                             continue;
                         }
 
-                        moduleArchive.CreateEntryFromFile(fullPath, entryName, CompressionLevel.Optimal);
+                        await moduleArchive.CreateEntryFromFileAsync(fullPath, entryName, CompressionLevel.Optimal, cancellationToken);
                     }
                     break;
                 case CreateEntryType.Directory:

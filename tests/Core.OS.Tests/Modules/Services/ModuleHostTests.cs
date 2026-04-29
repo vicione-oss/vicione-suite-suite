@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using Core.Module;
@@ -450,7 +450,7 @@ public class ModuleHostTests
             manager.MoveModuleResources(serviceProvider);
 
             // Assert
-            var targetContent = fileSystem.File.ReadAllText(fileSystem.Path.Combine(targetDirectory, fileName));
+            var targetContent = await fileSystem.File.ReadAllTextAsync(fileSystem.Path.Combine(targetDirectory, fileName), CancellationToken.None);
             targetContent.Should().Be("new content");
         }
 

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Compression;
 using Core.Shared.Persistence.Contracts;
 using Microsoft.Data.Sqlite;
@@ -30,7 +30,7 @@ internal partial class BackupBuilder
             try
             {
                 var newEntry = moduleArchive.CreateEntry(databaseFile.Key);
-                await using var destStream = newEntry.Open();
+                await using var destStream = await newEntry.OpenAsync(cancellationToken);
                 var sourceDbPath = fileSystem.Path.Combine(moduleWorkspace, databaseFile.Value);
 
                 await BackupSqliteDatabase(fileSystem, sourceDbPath, tmpDirectory, destStream, cancellationToken);

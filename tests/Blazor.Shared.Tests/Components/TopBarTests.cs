@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Components;
+using Blazor.Shared.Components;
 using Bunit;
 using Sdk.Testing.Client;
 using Xunit;
@@ -32,6 +32,6 @@ public sealed class TopBarTests
 
         var link1 = component.Find(".top-bar-app-menu");
         Assert.NotNull(link1);
-        link1.Click();
+        await link1.ClickAsync();
     }
 }
