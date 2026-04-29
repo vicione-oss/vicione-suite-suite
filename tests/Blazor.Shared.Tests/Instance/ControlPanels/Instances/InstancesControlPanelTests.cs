@@ -128,7 +128,7 @@ public class InstancesControlPanelTests
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             component.TriggerGridFirstRowSelectionChange(true);
 
-            component.FindGridActionButton(MonochromeIconName.Delete).Click();
+            await component.FindGridActionButton(MonochromeIconName.Delete).ClickAsync();
 
             // Assert
             Assert.NotNull(mediator);
@@ -159,7 +159,7 @@ public class InstancesControlPanelTests
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
             component.TriggerGridFirstRowSelectionChange(true);
 
-            component.FindGridActionButton(MonochromeIconName.Reload).Click();
+            await component.FindGridActionButton(MonochromeIconName.Reload).ClickAsync();
 
             // Assert
             Assert.NotNull(mediator);
@@ -189,7 +189,7 @@ public class InstancesControlPanelTests
 
             // Act
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
-            component.Find(".navigate-button").Click();
+            await component.Find(".navigate-button").ClickAsync();
 
             // Assert
             Assert.NotNull(controlPanelRequest);
@@ -218,7 +218,7 @@ public class InstancesControlPanelTests
 
             // Act
             component.TriggerGridFirstRowSelectionChange(true);
-            component.FindGridActionButton(MonochromeIconName.Delete).Click();
+            await component.FindGridActionButton(MonochromeIconName.Delete).ClickAsync();
             await component.Instance.Consume(clientContext, TestContext.Current.CancellationToken);
 
             // Assert

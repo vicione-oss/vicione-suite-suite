@@ -1,0 +1,2 @@
+[*.cs]
+dotnet_diagnostic.CA1849.severity = warning # Call async methods when in an async method

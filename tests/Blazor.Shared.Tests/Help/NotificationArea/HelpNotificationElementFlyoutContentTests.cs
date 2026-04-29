@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Help.NotificationArea;
+using Blazor.Shared.Help.NotificationArea;
 using Bunit;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Components;
@@ -135,7 +135,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             await textbox.InputAsync(args);
             await textbox.KeyUpAsync(new KeyboardEventArgs());
 
-            component.Find(".home").Click();
+            await component.Find(".home").ClickAsync();
 
             component.Markup.Should().Contain("Help 1");
             component.Markup.Should().Contain("Help 2");

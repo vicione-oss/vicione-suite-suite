@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.IO.Compression;
 
 namespace Core.Shared.Modules;
@@ -10,6 +10,7 @@ public static class ModuleZip
     {
         // create zip file containing assemblies and debug symbols
         using var memoryStream = new MemoryStream();
+
         using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
         {
             foreach (var file in files)
@@ -21,7 +22,8 @@ public static class ModuleZip
                     Share = FileShare.Read,
                     Options = FileOptions.Asynchronous,
                 });
-                await using var entryStream = archive.CreateEntry(file.Key).Open();
+
+                await using var entryStream = await archive.CreateEntry(file.Key).OpenAsync();
 
                 await fileStream.CopyToAsync(entryStream);
             }
@@ -54,8 +56,12 @@ public static class ModuleZip
             }
 
             using var memoryStream = new MemoryStream();
-            await entry.Open().CopyToAsync(memoryStream);
+
+            var entryStream = await entry.OpenAsync();
+            await entryStream.CopyToAsync(memoryStream);
+
             var file = memoryStream.ToArray();
+
             switch (Path.GetExtension(entry.FullName).ToUpperInvariant())
             {
                 case ".DLL":
