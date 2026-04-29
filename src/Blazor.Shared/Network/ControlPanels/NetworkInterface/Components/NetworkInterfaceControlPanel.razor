@@ -76,7 +76,7 @@
                 </SettingsField>
             </div>
 
-            @foreach (var address in State.GetIpv4Addresses(SystemConfigurationService))
+            @foreach (var address in State.IpAddresses)
             {
                 <div class="section" data-expanded="@State.GeneralInformationExpanded">
                     <SettingsField Label="@Localization.GeneralControlPanelPage.Ipv4Configuration">

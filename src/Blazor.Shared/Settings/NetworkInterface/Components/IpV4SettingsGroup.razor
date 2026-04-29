@@ -7,7 +7,7 @@
         <ComboBoxExpander Items="@ConfigurationModeComboBoxItems"
                           ValueSelector="@(i => i.Value)"
                           TextSelector="@(i => i.Text)"
-                          @bind-Value="ConfigurationModeWrapper"
+                          @bind-Value="ConfigurationMode"
                           @bind-Value:after="NotifyConfigurationModeChanged" />
     </Expander>
 

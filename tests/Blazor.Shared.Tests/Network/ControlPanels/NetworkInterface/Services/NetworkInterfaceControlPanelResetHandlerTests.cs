@@ -140,30 +140,6 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
     }
 
     [Fact]
-    public async Task Should_set_ip_configuration_mode_to_link_local_when_dhcp_enabled_and_no_lease()
-    {
-        // Arrange
-        var networkInterface = new NetworkInterfaceDetail
-        {
-            CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true },
-            IPv4 = new IPv4Settings { DHCPEnabled = true }
-        };
-        SetupSystemConfiguration(networkInterface);
-
-        await using var serviceProvider = SetupServiceProvider();
-
-        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0 };
-        var resetHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<NetworkInterfaceControlPanelState>>();
-
-        // Act
-        await resetHandler.Reset(state, TestContext.Current.CancellationToken);
-
-        // Assert
-        state.IpV4ConfigurationMode.Should().Be(IpConfigurationMode.LinkLocal);
-        state.DHCPLease.Should().BeNull();
-    }
-
-    [Fact]
     public async Task Should_set_ip_configuration_mode_to_manual_when_dhcp_disabled()
     {
         // Arrange

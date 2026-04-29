@@ -9,7 +9,6 @@ public sealed partial class IpV4SettingsGroup : ComponentBase
 {
     private static List<ComboBoxItem<IpConfigurationMode, string>> ConfigurationModeComboBoxItems => [..
         Enum.GetValues<IpConfigurationMode>()
-            .Where(mode => mode != IpConfigurationMode.LinkLocal)
             .Select(ipConfigurationMode => new ComboBoxItem<IpConfigurationMode, string>
             {
                 Value = ipConfigurationMode,
@@ -28,13 +27,6 @@ public sealed partial class IpV4SettingsGroup : ComponentBase
     [Parameter] public EventCallback<string?> DefaultGatewayChanged { get; set; }
     [Parameter] public RenderFragment? AdditionalSettingsFields { get; set; }
     [Parameter] public EventCallback Changed { get; set; }
-
-    private IpConfigurationMode ConfigurationModeWrapper
-    {
-        // not allowed to select LinkLocal, because it is only used internally when DHCP is enabled but no lease is available
-        get => ConfigurationMode == IpConfigurationMode.LinkLocal ? IpConfigurationMode.AutomaticDhcp : ConfigurationMode;
-        set => ConfigurationMode = value;
-    }
 
     private async Task NotifyConfigurationModeChanged()
     {
