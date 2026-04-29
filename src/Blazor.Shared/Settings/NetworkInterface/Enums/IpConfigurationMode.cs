@@ -1,8 +1,7 @@
-﻿namespace Blazor.Shared.Settings.NetworkInterface.Enums;
+namespace Blazor.Shared.Settings.NetworkInterface.Enums;
 
 public enum IpConfigurationMode
 {
     AutomaticDhcp,
-    Manual,
-    LinkLocal
+    Manual
 }

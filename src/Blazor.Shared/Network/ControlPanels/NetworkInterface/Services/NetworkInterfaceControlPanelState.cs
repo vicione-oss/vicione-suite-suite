@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
+using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using HostManagement.Shared.Contracts.Network;
 
@@ -12,6 +12,8 @@ public sealed class NetworkInterfaceControlPanelState : NetworkControlPanelState
     internal string Name { get; set; } = string.Empty;
     internal bool Enabled { get; set; }
     internal IpConfigurationMode IpV4ConfigurationMode { get; set; }
+
+    internal List<IpAddressInformation> IpAddresses { get; set; } = [];
 
     internal NetworkInterfaceIPv4Detail FirstIpV4Detail { get; set; } = new();
     internal List<NetworkInterfaceIPv4Detail> AdditionalIpV4Details { get; set; } = [];
