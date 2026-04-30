@@ -1,5 +1,6 @@
 using System.Globalization;
 using Blazor.Shared.Services;
+using Blazor.Shared.UserManagement.ControlPanels.User.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.User.Services;
 using Blazor.Shared.UserManagement.Services;
 using Core.Shared.UserManagement.Contracts;
@@ -30,6 +31,8 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
     [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
     [Inject] private IEnumerable<IModuleFeature> Features { get; set; } = default!;
     [Inject] private IRoleService RoleService { get; set; } = default!;
+    [Inject] private IModuleAuthorizationClaimParser ClaimsParser { get; set; } = default!;
+    [Inject] private IClaimsProvider ClaimsProvider { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -50,13 +53,13 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
         State.AvailableRoles = (await RoleService.GetAvailableRoles()).Select(r => r.Name ?? string.Empty);
 
         State.UpdateAvailableUserRoles();
-        await State.UpdateAvailableClaims();
+        await State.UpdateAvailableClaims(ClaimsParser, ClaimsProvider);
 
         State.RoleToAdd = new(State.AvailableUserRoles?.FirstOrDefault() ?? string.Empty);
 
         State.Features = Features;
 
-        State.UpdateGridItems();
+        State.UpdateGridItems(ClaimsParser);
     }
 
     protected override async ValueTask DisposeAsyncCore()

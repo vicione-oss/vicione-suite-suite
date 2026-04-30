@@ -74,7 +74,7 @@ public class InstancesControlPanelTests
         {
             // Arrange
             using var ctx = SetupTestContext();
-            var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
+            var state = new InstancesControlPanelState();
 
             // Act + Assert
             Assert.NotNull(ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state)));
@@ -89,7 +89,7 @@ public class InstancesControlPanelTests
             {
                 mediator = setup.ClientMediator;
             });
-            var state = new InstancesControlPanelState(mediator!);
+            var state = new InstancesControlPanelState();
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
@@ -119,7 +119,7 @@ public class InstancesControlPanelTests
             {
                 mediator = setup.ClientMediator;
             });
-            var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
+            var state = new InstancesControlPanelState();
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
@@ -150,7 +150,7 @@ public class InstancesControlPanelTests
             {
                 mediator = setup.ClientMediator;
             });
-            var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
+            var state = new InstancesControlPanelState();
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
@@ -182,7 +182,7 @@ public class InstancesControlPanelTests
             {
                 controlPanelRequest = controlPanelRequestSetup;
             });
-            var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
+            var state = new InstancesControlPanelState();
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
@@ -207,7 +207,7 @@ public class InstancesControlPanelTests
             var info = CreateSlaveInstanceInfo();
             var instanceEvent = new ControlInstanceCompleted(info.Id, InstanceCommand.Delete);
             await using var ctx = SetupTestContext([info]);
-            var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
+            var state = new InstancesControlPanelState();
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
@@ -232,7 +232,7 @@ public class InstancesControlPanelTests
             var info = CreateSlaveInstanceInfo();
             var instanceEvent = new ControlInstanceCompleted(info.Id, InstanceCommand.Synchronize);
             await using var ctx = SetupTestContext([info]);
-            var state = new InstancesControlPanelState(ctx.Services.GetRequiredService<IUiMediator>());
+            var state = new InstancesControlPanelState();
 
             var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);

@@ -1,11 +1,9 @@
-﻿using Blazor.Shared.Instance.ControlPanels.Instances.Models;
-using Core.Shared.Instance.Requests;
+using Blazor.Shared.Instance.ControlPanels.Instances.Models;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Client.Infrastructure;
 
 namespace Blazor.Shared.Instance.ControlPanels.Instances.Services;
 
-public sealed class InstancesControlPanelState(IUiMediator mediator) : ControlPanelState
+public sealed class InstancesControlPanelState : ControlPanelState
 {
     private bool _resetSelectedInstances;
     private List<InstanceInformationModel> _instances = [];
@@ -39,11 +37,4 @@ public sealed class InstancesControlPanelState(IUiMediator mediator) : ControlPa
     }
 
     internal List<InstanceInformationModel> DeletingInstances { get; } = [];
-
-    internal async Task ReloadInstances()
-    {
-        var response = await mediator.Request<GetInstances, GetInstancesResponse>(new());
-
-        Instances = [.. response.Instances.Select(k => new InstanceInformationModel(k))];
-    }
 }

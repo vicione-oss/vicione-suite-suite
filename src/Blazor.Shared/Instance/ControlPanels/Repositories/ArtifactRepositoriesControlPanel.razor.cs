@@ -1,3 +1,4 @@
+using Blazor.Shared.Instance.ControlPanels.Repositories.Extensions;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Models;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 using Blazor.Shared.Services;

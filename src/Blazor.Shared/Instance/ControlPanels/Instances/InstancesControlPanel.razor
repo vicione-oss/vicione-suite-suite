@@ -16,7 +16,7 @@
     <Grid Items="_instancesQueryable" Virtualize="true" CssClass="instances-grid">
         <ActionButtons>
             <GridActionButton Enabled="true"
-                              OnClick="State.ReloadInstances"
+                              OnClick="ReloadInstancesClick"
                               Text="@CommonVocabulary.RefreshVerb"
                               IconCssClass="@_refreshIconCssClass"></GridActionButton>
 
@@ -28,7 +28,7 @@
             <EditGridActionButton Enabled="@_isSingleInstanceSelected" OnClick="@EditSelectedInstance" />
 
             <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
-                                    OnClick="@DeleteSelectedInstances" />
+                                    OnClick="@DeleteSelectedInstancesClick" />
         </ActionButtons>
 
         <Filter>

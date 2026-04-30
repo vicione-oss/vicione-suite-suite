@@ -1,3 +1,4 @@
+using Blazor.Shared.UserManagement.ControlPanels.User.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.User.Models;
 using Blazor.Shared.UserManagement.ControlPanels.User.Services;
 using Blazor.Shared.UserManagement.Models;
@@ -20,6 +21,8 @@ public sealed partial class UserPermissionsControlPanelPage : ComponentBase, IAs
 
     [Inject(Key = typeof(UserControlPanelServiceKey))]
     private IGridItemSelection<PermissionGridItemId> PermissionsGridItemSelection { get; set; } = default!;
+
+    [Inject] private IModuleAuthorizationClaimParser ClaimsParser { get; set; } = default!;
 
     protected override void OnInitialized()
     {
@@ -75,4 +78,6 @@ public sealed partial class UserPermissionsControlPanelPage : ComponentBase, IAs
         PermissionsGridItemSelection.Changed -= PermissionsGridItemSelectionChanged;
         return ValueTask.CompletedTask;
     }
+    private void OnAfterFilter()
+        => State.UpdateGridItems(ClaimsParser);
 }

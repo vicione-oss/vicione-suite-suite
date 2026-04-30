@@ -1,5 +1,6 @@
 using AwesomeAssertions;
 using Blazor.Shared.Module.ControlPanels.Services;
+using Blazor.Shared.Module.ControlPanels.Extensions;
 using Blazor.Shared.Module.Models;
 using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Events;

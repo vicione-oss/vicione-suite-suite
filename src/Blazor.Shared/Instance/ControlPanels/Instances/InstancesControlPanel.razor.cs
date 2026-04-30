@@ -1,3 +1,4 @@
+using Blazor.Shared.Instance.ControlPanels.Instances.Extensions;
 using Blazor.Shared.Instance.ControlPanels.Instances.Models;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Core.Shared.Instance.Commands;
@@ -153,7 +154,7 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task DeleteSelectedInstances()
+    private async Task DeleteSelectedInstancesClick()
     {
         InstanceGridItemSelection.BeginUpdate();
 
@@ -171,6 +172,20 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
 
             UpdateInstancesQueryable();
             await BeginEdit();
+        }
+        finally
+        {
+            InstanceGridItemSelection.EndUpdate();
+        }
+    }
+
+    private async Task ReloadInstancesClick()
+    {
+        InstanceGridItemSelection.BeginUpdate();
+
+        try
+        {
+            await State.ReloadInstances(Mediator);
         }
         finally
         {
