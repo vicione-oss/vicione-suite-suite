@@ -227,7 +227,7 @@ internal static class IServiceCollectionExtensions
                             serviceVersion: Assembly.GetExecutingAssembly()
                                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
                                 ?.InformationalVersion,
-                            serviceInstanceId: fileSystem.GetLocalInstanceIdFilePath(instanceOptions),
+                            serviceInstanceId: fileSystem.File.ReadAllText(fileSystem.GetLocalInstanceIdFilePath(instanceOptions)).Trim(),
                             autoGenerateServiceInstanceId: false)
                         .AddAttributes(
                         [
