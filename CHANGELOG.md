@@ -2,11 +2,16 @@
 
 ## 1.2.1 - Unreleased
 
+### Added
+
+- Added dependency to package `ViciOne.Ui.TreeEditor`
+
 ### Changed
 
 - Stopped catching `NavigationException` in `LoginContent.razor.cs` as ASP.NET uses them to perform the redirection during prerendering
 - `ConfirmCancelDialog,` adopted `Width` and `Height` from `DataCollectionWizard` (width = 600px, height = 300px)
 - Replaced `DxAccordion` with `ViciOne.Ui.Blazor.Components.Accordion`
+- Replaced `DxTreeView` with `ViciOne.Ui.TreeEditor`
 - Improved synchronization in `ControlPanelRegistryItemCache`
 - Improved initialization of system configuration
 

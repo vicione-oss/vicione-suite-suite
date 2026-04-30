@@ -47,6 +47,7 @@
     </PackageReference>
     <PackageReference Include="ViciOne.Ui.MonochromeIcons.Components" />
     <PackageReference Include="ViciOne.Ui.Shared.Dx" />
+    <PackageReference Include="ViciOne.Ui.TreeEditor" />
   </ItemGroup>
 
   <ItemGroup>
