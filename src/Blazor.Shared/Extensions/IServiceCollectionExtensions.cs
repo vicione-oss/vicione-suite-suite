@@ -4,6 +4,7 @@ using Blazor.Shared.Dialogs.Extensions;
 using Blazor.Shared.Instance.Extensions;
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.Module.Extensions;
+using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Enums;
 using Blazor.Shared.Mqtt.Services;
 using Blazor.Shared.NavTiles.Extensions;
@@ -25,6 +26,7 @@ using ViciOne.Ui.Blazor.Components.SectionRail.Extensions;
 using ViciOne.Ui.Blazor.Components.Toolbar.Extensions;
 using ViciOne.Ui.Blazor.Components.Tooltip.Extensions;
 using ViciOne.Ui.Shared.Dx.Components.Scrolling.Extensions;
+using ViciOne.Ui.TreeEditor.Builder;
 
 namespace Blazor.Shared.Extensions;
 
@@ -84,6 +86,8 @@ public static class IServiceCollectionExtensions
 
             services.AddScoped<IMqttService, MqttService>();
             services.AddScoped<MqttViewerComponentService>();
+            services.AddKeyedScoped<ITreeBuilder, TreeBuilder>(typeof(MqttTopicTreeServiceKey));
+            services.AddScoped<MqttTopicTreeAdapter>();
 
             return services;
         }

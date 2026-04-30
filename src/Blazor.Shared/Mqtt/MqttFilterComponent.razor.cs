@@ -4,6 +4,7 @@ using Blazor.Shared.Mqtt.Services;
 using Microsoft.AspNetCore.Components;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Extensions;
+using ViciOne.Ui.TreeEditor.Builder;
 
 namespace Blazor.Shared.Mqtt;
 
@@ -23,11 +24,24 @@ public sealed partial class MqttFilterComponent : IDisposable
     [Inject]
     private MqttViewerComponentService ViewerService { get; set; } = default!;
 
+    [Inject(Key = typeof(MqttTopicTreeServiceKey))]
+    private ITreeBuilder TreeBuilder { get; set; } = default!;
+
+    [Inject]
+    private MqttTopicTreeAdapter TreeAdapter { get; set; } = default!;
+
     protected override Task OnInitializedAsync()
     {
         ViewerService.PageRefreshRequested += OnPageRefreshRequested;
+        ViewerService.TopicGroupsChanged += OnTopicGroupsChanged;
+
+        TreeBuilder.SetAdapter(TreeAdapter);
+
         return Task.CompletedTask;
     }
+
+    private void OnTopicGroupsChanged()
+        => TreeBuilder.Notifications.NotifyRootNodesChanged();
 
     private async Task OnPageRefreshRequested()
         => await InvokeAsync(StateHasChanged);
@@ -48,5 +62,10 @@ public sealed partial class MqttFilterComponent : IDisposable
     }
 
     public void Dispose()
-        => ViewerService.PageRefreshRequested -= OnPageRefreshRequested;
+    {
+        ViewerService.PageRefreshRequested -= OnPageRefreshRequested;
+        ViewerService.TopicGroupsChanged -= OnTopicGroupsChanged;
+
+        TreeBuilder.Dispose();
+    }
 }

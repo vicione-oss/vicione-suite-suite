@@ -74,6 +74,8 @@ public class MqttViewerComponentTests
         });
 
         ctx.Services.AddScoped<MqttViewerComponentService>();
+        ctx.Services.AddTransient<ViciOne.Ui.TreeEditor.Builder.ITreeBuilder, ViciOne.Ui.TreeEditor.Builder.TreeBuilder>();
+        ctx.Services.AddScoped<MqttTopicTreeAdapter>();
     }
 
     public class OnInitializedAsync : MqttViewerComponentTests
@@ -325,8 +327,12 @@ public class MqttViewerComponentTests
             service.MessagesDict.Add(message.Topic, message);
             service.MessageReceived += Raise.Event<Func<string, Task>>("house/room/temperature");
             component.Find(ToggleNodeFilterButtonSelector).Click();
-            component.Find(ExpandNodeButtonSelector).Click();
-            component.FindAll(FilterButtonSelector).Last().Click();
+
+            var viewerService = ctx.Services.GetRequiredService<MqttViewerComponentService>();
+            var topicGroup = viewerService.TopicGroups.First();
+            viewerService.SetNodeTopicFilter(topicGroup);
+            component.Render();
+
             component.FindAll("td").First(e => e.InnerHtml.Contains("test", StringComparison.Ordinal)).Click();
 
             // Assert
@@ -391,41 +397,12 @@ public class MqttViewerComponentTests
             service.MessageReceived += Raise.Event<Func<string, Task>>("house/room/temperature");
 
             component.Find(ToggleNodeFilterButtonSelector).Click();
-            component.Find(ExpandNodeButtonSelector).Click();
             component.Render();
 
             // Assert
-            var elements = component.FindAll(".tree-element");
-            elements.Count.Should().Be(2);
-            elements[0].InnerHtml.Should().Contain(MqttViewerConstants.AllTopicText);
-            elements[^1].InnerHtml.Should().Contain("house");
-        }
-
-        [Fact(Skip = SkipFailing)]
-        public void Does_not_expand_on_magnify_click()
-        {
-            // Arrange
-            using var ctx = new BunitContext();
-            ConfigureTestServices(ctx,
-                [
-                    _localMqttConnection,
-                ]);
-
-            // Act
-            var component = ctx.Render<MqttViewerComponent>();
-            FindConnectButton(component).Click();
-
-            var service = ctx.Services.GetRequiredService<IMqttService>();
-            service.MessagesDict.Add("house/room/temperature", new());
-            service.MessageReceived += Raise.Event<Func<string, Task>>("house/room/temperature");
-
-            component.Find(ToggleNodeFilterButtonSelector).Click();
-            component.Find(FilterButtonSelector).Click();
-
-            // Assert
-            var elements = component.FindAll(".tree-element");
-            elements.Count.Should().Be(1);
-            elements[0].InnerHtml.Should().Contain(MqttViewerConstants.AllTopicText);
+            var viewerService = ctx.Services.GetRequiredService<MqttViewerComponentService>();
+            viewerService.TopicGroups.First().SubTopics.Should().HaveCount(1);
+            viewerService.TopicGroups.First().SubTopics[0].Topic.Should().Be("house");
         }
     }
 
@@ -501,17 +478,12 @@ public class MqttViewerComponentTests
             service.MessageReceived += Raise.Event<Func<string, Task>>("room/humidity/value");
 
             component.Find(ToggleNodeFilterButtonSelector).Click();
-            component.Find(ExpandNodeButtonSelector).Click();
             component.Render();
 
             // Assert
-            component.WaitForAssertion(() =>
-            {
-                var elements = component.FindAll(".tree-element");
-                elements.Count.Should().Be(2);
-                elements[0].InnerHtml.Should().Contain(MqttViewerConstants.AllTopicText);
-                elements[^1].InnerHtml.Should().Contain("room");
-            });
+            var viewerService = ctx.Services.GetRequiredService<MqttViewerComponentService>();
+            viewerService.TopicGroups.First().SubTopics.Should().HaveCount(1);
+            viewerService.TopicGroups.First().SubTopics[0].Topic.Should().Be("room");
         }
     }
 }

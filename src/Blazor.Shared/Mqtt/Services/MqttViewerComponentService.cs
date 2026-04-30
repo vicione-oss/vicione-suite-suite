@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Helpers;
-using DevExpress.Blazor;
 using MQTTnet.Protocol;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Extensions;
@@ -13,7 +12,6 @@ namespace Blazor.Shared.Mqtt.Services;
 public sealed class MqttViewerComponentService
 {
     private readonly IMqttService _mqttService;
-    private bool _expandButtonPressed;
     private MessageModel? _selectedMessage;
 
     public bool IsConnected => _mqttService.IsConnected;
@@ -26,6 +24,7 @@ public sealed class MqttViewerComponentService
     internal int? LastReloadInterval { get; set; }
 
     public event Func<Task>? PageRefreshRequested;
+    public event Action? TopicGroupsChanged;
     public event Func<Task>? MqttConnected;
     public event Func<Task>? MqttDisconnected;
 
@@ -46,19 +45,9 @@ public sealed class MqttViewerComponentService
         return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
     }
 
-    public void BeforeExpandAndCollapseTopicGroup(TreeViewNodeCancelEventArgs args)
+    public Task SetNodeTopicFilter(TopicGroup topicGroup)
     {
-        if (_expandButtonPressed)
-        {
-            args.Cancel = true;
-            _expandButtonPressed = false;
-        }
-    }
-
-    public Task SetNodeTopicFilter(ITreeViewNodeInfo group)
-    {
-        _expandButtonPressed = true;
-        NodeTopic = GetTopicSubscription(group);
+        NodeTopic = GetTopicSubscription(topicGroup);
 
         return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
     }
@@ -200,17 +189,17 @@ public sealed class MqttViewerComponentService
         }
     }
 
-    private static string GetTopicSubscription(ITreeViewNodeInfo nodeInfo)
+    private static string GetTopicSubscription(TopicGroup topicGroup)
     {
-        if (nodeInfo.Text == MqttViewerConstants.AllTopicText)
+        if (topicGroup.Topic == MqttViewerConstants.AllTopicText)
             return MqttViewerConstants.AllTopicSubscription;
 
         var topicElements = new List<string>
         {
-            nodeInfo.Text,
+            topicGroup.Topic,
         };
 
-        MqttTopicTreeBuilder.AddParentTopic(nodeInfo.Parent, topicElements);
+        MqttTopicTreeBuilder.AddParentTopic(topicGroup.Parent, topicElements);
 
         return string.Join(MqttViewerConstants.TopicSeparator, [.. topicElements]);
     }
@@ -239,12 +228,16 @@ public sealed class MqttViewerComponentService
 
     private Task OnMessageReceived(string topic)
     {
-        if (MqttTopicTreeBuilder.UpdateTopicGroups(topic, TopicGroups.First().SubTopics))
+        if (AddTopic(topic))
+        {
+            TopicGroupsChanged?.Invoke();
+
             return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+        }
 
         return Task.CompletedTask;
     }
-    
+
     public Task ShowMessageDetails(MessageModel model)
     {
         _selectedMessage = model;
@@ -266,5 +259,14 @@ public sealed class MqttViewerComponentService
     {
         CurrentFilter = CurrentFilter != filter ? filter : MqttFilterTypes.None;
         return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
+    }
+
+    private bool AddTopic(string topic)
+    {
+        var allTopic = TopicGroups.First();
+        if (MqttTopicTreeBuilder.UpdateTopicGroups(topic, allTopic.SubTopics, allTopic))
+            return true;
+
+        return false;
     }
 }

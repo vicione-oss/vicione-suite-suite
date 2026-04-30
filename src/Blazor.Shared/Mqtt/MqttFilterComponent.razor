@@ -1,4 +1,4 @@
-@using DevExpress.Blazor
+@using ViciOne.Ui.TreeEditor
 @using Blazor.Shared.Mqtt.Contracts
 @using Blazor.Shared.Mqtt.Enums
 @using ViciOne.Ui.Blazor.Components.Button
@@ -7,7 +7,6 @@
 @using ViciOne.Ui.Blazor.Components.SectionRail.Components
 @using ViciOne.Ui.Blazor.Components.TextBox
 @using ViciOne.Ui.Localization.Resources
-@using ViciOne.Ui.MonochromeIcons.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 <SectionRail @bind-ActiveSectionId="@_activeSectionId" @bind-ActiveSectionId:after="@ActiveSectionIdChanged">
@@ -37,48 +36,12 @@
                 <Button OnClick="@ViewerService.ClearTopicNodeFilter" Size="ButtonSize.Small" IconCssClass="@_iconCssClass"
                         Enabled="@(!string.IsNullOrEmpty(ViewerService.NodeTopic))" />
             </div>
-            <div class="tree-container">
-                <DxTreeView Data="@ViewerService.TopicGroups"
-                            BeforeCollapse="@ViewerService.BeforeExpandAndCollapseTopicGroup"
-                            BeforeExpand="@ViewerService.BeforeExpandAndCollapseTopicGroup">
-                    <DataMappings>
-                        <DxTreeViewDataMapping Children="@nameof(TopicGroup.SubTopics)" Text="@nameof(TopicGroup.Topic)" />
-                    </DataMappings>
-                    <NodeTemplate>
-                        <div class="node-container">
-                            @if (context.DataItem is TopicGroup topicGroup)
-                            {
-                                @if (context.IsLeaf)
-                                {
-                                    <div class="tree-element">
-                                        @topicGroup.Topic
-                                    </div>
-                                }
-                                else
-                                {
-                                    var expanderIconName = context.Expanded ? MonochromeIconName.ExpanderLightTop : MonochromeIconName.ExpanderLightDown;
 
-                                    <div class="tree-element">
-                                        <MonochromeIcon Name="@expanderIconName" Size="@MonochromeIconSize.SmallMedium" />
-                                        
-                                        <span>
-                                            @topicGroup.Topic
-                                        </span>
-                                    </div>
-                                }
-                            }
-
-                            <div class="set-node-topic-filter-button" @onclick="@(() => ViewerService.SetNodeTopicFilter(context))">
-                                <MonochromeIcon Name="@MonochromeIconName.Search" Size="@MonochromeIconSize.Small" />
-                            </div>
-                        </div>
-                    </NodeTemplate>
-                </DxTreeView>
-            </div>
+            <TreeEditor Builder="@TreeBuilder" />
         </div>
     </Section>
 
-    <Section Id="SectionId.TestTube" Title="@CommonVocabulary.TestTube" IconCssClass="@_testTubeSolidIconCssClass"> 
+    <Section Id="SectionId.TestTube" Title="@CommonVocabulary.TestTube" IconCssClass="@_testTubeSolidIconCssClass">
         <div></div>
     </Section>
 </SectionRail>
