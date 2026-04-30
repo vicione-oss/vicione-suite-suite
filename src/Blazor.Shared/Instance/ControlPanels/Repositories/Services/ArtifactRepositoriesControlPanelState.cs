@@ -52,45 +52,4 @@ public sealed class ArtifactRepositoriesControlPanelState : ControlPanelState
     }
 
     public List<ArtifactRepositoryModel> RepositoriesMarkedForDeletion { get; } = [];
-
-    internal bool UpdateRepository(ArtifactRepository source, CrudAction action)
-    {
-        if (action == CrudAction.Created)
-        {
-            Repositories.Add(new ArtifactRepositoryModel(source));
-            return true;
-        }
-
-        if (action == CrudAction.Updated)
-        {
-            var repositoryToUpdate = Repositories.FirstOrDefault(s => s.Id == source.Id);
-            if (repositoryToUpdate is not null)
-            {
-                repositoryToUpdate.Update(source);
-                return true;
-            }
-        }
-        else if (action == CrudAction.Deleted)
-        {
-            var repositoryToRemove = Repositories.FirstOrDefault(s => s.Id == source.Id);
-            if (repositoryToRemove is not null)
-            {
-                Repositories.Remove(repositoryToRemove);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    internal bool DeleteRepository(Guid repositoryId)
-    {
-        var repository = Repositories.FirstOrDefault(r => r.Id == repositoryId);
-        if (repository is null)
-            return false;
-
-        RepositoriesMarkedForDeletion.Add(repository);
-        Repositories.Remove(repository);
-        return true;
-    }
 }

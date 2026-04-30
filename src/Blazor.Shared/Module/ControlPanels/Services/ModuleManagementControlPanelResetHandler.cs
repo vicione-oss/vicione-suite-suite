@@ -1,3 +1,4 @@
+using Blazor.Shared.Module.ControlPanels.Extensions;
 using Blazor.Shared.Module.Services;
 using Sdk.Client.ControlPanels.Services;
 
@@ -19,7 +20,7 @@ internal sealed class ModuleManagementControlPanelResetHandler(IModuleManagement
 
             // load metadata assets and jsons in one step
             var metadataModels = await moduleManagementService.GetMetadata(false, cancellationToken);
-            state.Initialize(metadataModels);
+            state.UpdateModules(metadataModels);
         }
         finally
         {

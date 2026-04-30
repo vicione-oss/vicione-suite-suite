@@ -1,10 +1,9 @@
-﻿using Blazor.Shared.Instance.ControlPanels.Instances;
+using Blazor.Shared.Instance.ControlPanels.Instances;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Client.Infrastructure;
 using Sdk.Client.Services;
 using Sdk.Instance;
 
@@ -36,7 +35,7 @@ public static class IServiceProviderExtensions
 #if DEBUG
             registry.Add<InstancesControlPanel, InstancesControlPanelState>(
                 new InstancesControlPanelDescriptor(),
-                new InstancesControlPanelState(services.GetRequiredService<IUiMediator>()),
+                new InstancesControlPanelState(),
                 new ControlPanelSystemCategoryDescriptor(),
                 authorizationRequirement: accessLevelAuthorizationRequirement
             );
@@ -46,7 +45,7 @@ public static class IServiceProviderExtensions
         {
             registry.Add<InstancesControlPanel, InstancesControlPanelState>(
                 new InstancesControlPanelDescriptor(),
-                new InstancesControlPanelState(services.GetRequiredService<IUiMediator>()),
+                new InstancesControlPanelState(),
                 new ControlPanelSystemCategoryDescriptor(),
                 authorizationRequirement: accessLevelAuthorizationRequirement
             );

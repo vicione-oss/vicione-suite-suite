@@ -1,5 +1,4 @@
 using Blazor.Shared.Instance.ControlPanels.Repositories.Models;
-using Core.Shared.Instance.Contracts;
 using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Instance.ControlPanels.Repositories.Services;
@@ -24,11 +23,4 @@ public sealed class ArtifactRepositoryControlPanelState : ControlPanelState
     }
 
     public ArtifactRepositoryModel? Repository { get; internal set; }
-
-    public void UpdateRepository(ArtifactRepository source)
-    {
-        ArgumentNullException.ThrowIfNull(Repository);
-
-        Repository.Update(source);
-    }
 }

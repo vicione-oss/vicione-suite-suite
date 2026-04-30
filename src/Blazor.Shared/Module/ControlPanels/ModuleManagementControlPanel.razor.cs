@@ -1,3 +1,4 @@
+using Blazor.Shared.Module.ControlPanels.Extensions;
 using Blazor.Shared.Module.ControlPanels.Services;
 using Blazor.Shared.Module.Models;
 using Blazor.Shared.Module.Services;
@@ -121,7 +122,7 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
             var response = await ManagementService.GetMetadata(forceReload);
 
             // will trigger StateChanged which will update the queryables and clear the selections
-            State.Initialize(response);
+            State.UpdateModules(response);
         }
         catch (Exception ex)
         {

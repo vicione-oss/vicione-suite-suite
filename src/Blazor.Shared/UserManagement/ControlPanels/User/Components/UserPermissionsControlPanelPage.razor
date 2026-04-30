@@ -9,6 +9,6 @@
 
     <PermissionGrid Items="State.FilteredGridItems"
                     @bind-Filter="State.FilterText"
-                    @bind-Filter:after="State.UpdateGridItems"
+                    @bind-Filter:after="@(() => OnAfterFilter())"
                     AccessLevelChanged="@(async (i) => await AccessLevelChangedAsync(i))" />
 </ControlPanelPage>

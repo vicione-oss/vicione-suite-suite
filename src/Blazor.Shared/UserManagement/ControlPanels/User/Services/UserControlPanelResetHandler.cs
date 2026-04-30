@@ -1,11 +1,13 @@
-﻿using System.Globalization;
+using System.Globalization;
+using Blazor.Shared.UserManagement.ControlPanels.User.Extensions;
 using Blazor.Shared.UserManagement.Services;
 using Core.Shared.UserManagement.Contracts;
+using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.UserManagement.ControlPanels.User.Services;
 
-internal sealed class UserControlPanelResetHandler(IUserService userService) : IControlPanelResetHandler<UserControlPanelState>
+internal sealed class UserControlPanelResetHandler(IUserService userService, IModuleAuthorizationClaimParser claimParser, IClaimsProvider claimsProvider) : IControlPanelResetHandler<UserControlPanelState>
 {
     public async Task Reset(UserControlPanelState state, CancellationToken cancellationToken)
     {
@@ -27,10 +29,10 @@ internal sealed class UserControlPanelResetHandler(IUserService userService) : I
         state.RoleToAdd = new(state.AvailableUserRoles?.FirstOrDefault() ?? string.Empty);
     }
 
-    private static async Task UpdatePermissionGridItems(UserControlPanelState state)
+    private async Task UpdatePermissionGridItems(UserControlPanelState state)
     {
-        await state.UpdateAvailableClaims();
-        state.UpdateGridItems();
+        await state.UpdateAvailableClaims(claimParser, claimsProvider);
+        state.UpdateGridItems(claimParser);
     }
 
     private async Task UpdateUserProfile(UserControlPanelState state)
@@ -49,7 +51,6 @@ internal sealed class UserControlPanelResetHandler(IUserService userService) : I
             state.UserProfile = new UserProfile() { UserName = UserName.Empty, };
         }
     }
-
 
     private async Task<UserProfile?> GetUserProfileAsync(UserControlPanelState state)
     {
