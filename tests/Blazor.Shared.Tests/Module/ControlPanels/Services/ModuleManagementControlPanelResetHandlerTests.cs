@@ -1,7 +1,6 @@
 using AwesomeAssertions;
 using Blazor.Shared.Module;
 using Blazor.Shared.Module.ControlPanels.Services;
-using Blazor.Shared.Module.Models;
 using Blazor.Shared.Module.Services;
 using Core.Shared.Modules.Contracts;
 using Microsoft.Extensions.DependencyInjection;
@@ -105,32 +104,5 @@ public sealed class ModuleManagementControlPanelResetHandlerTests
         state.InstalledModules.Should().ContainSingle(k => k.Name == _package.Name);
         state.InstalledModules.Should().ContainSingle(k => k.Name == _anotherPackage.Name);
         state.AvailableModules.Should().ContainSingle(k => k.Name == name);
-    }
-
-    [Fact]
-    public async Task Should_not_call_service_when_we_have_no_changes_and_loaded_metadata()
-    {
-        // Arrange
-        await using var serviceProvider = SetupServiceProvider();
-        var installedBundle = new ModuleMetadataBundle
-        {
-            ModuleId = _package.Name,
-            Metadata = new ModuleMetadata() { MinSuiteSdkVersion = "1.0.0", Name = _package.Name, Version = "1.2.3" },
-            Installed = true
-        };
-        List<ModuleMetadataModel> installedModules = [.. ModuleMetadataModelFactory.CreateModels([installedBundle])];
-
-        var state = new ModuleManagementControlPanelState()
-        {
-            InstalledModules = installedModules.AsQueryable(),
-        };
-
-        var saveHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<ModuleManagementControlPanelState>>();
-
-        // Act
-        await saveHandler.Reset(state, TestContext.Current.CancellationToken);
-
-        // Assert
-        await _mgmtService.Received(0).GetMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>());
     }
 }

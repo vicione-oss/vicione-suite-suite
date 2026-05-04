@@ -54,7 +54,7 @@ public class ArtifactRepositoryChangeConsumerTests
         await tester.TestEvent<ArtifactRepositoryChanged, ArtifactRepositoryChangeConsumer>(@event);
 
         // Assert
-        _artifactsCache.Received(1).Invalidate();
+        await _artifactsCache.Received(1).Invalidate(Arg.Any<CancellationToken>());
         await _optionsCache.Received(1).ReloadOptions(_repositoryStore, Arg.Any<CancellationToken>());
     }
 
@@ -70,7 +70,7 @@ public class ArtifactRepositoryChangeConsumerTests
         await tester.TestEvent<ArtifactRepositoryChanged, ArtifactRepositoryChangeConsumer>(@event);
 
         // Assert
-        _artifactsCache.Received(0).Invalidate();
+        await _artifactsCache.Received(0).Invalidate(Arg.Any<CancellationToken>());
         await _optionsCache.DidNotReceive().ReloadOptions(Arg.Any<IArtifactRepositoryStore>(), Arg.Any<CancellationToken>());
     }
 }

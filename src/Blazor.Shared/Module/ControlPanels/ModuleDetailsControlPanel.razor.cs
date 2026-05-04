@@ -24,8 +24,8 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
 
     protected override async ValueTask DisposeAsyncCore()
     {
-        ManagementService.OptionsChanged -= ManagementService_OptionsChanged;
-        ManagementService.OperationsChanged -= ManagementService_OperationsChanged;
+        ManagementService.OptionsChanged -= ManagementServiceOptionsChanged;
+        ManagementService.OperationsChanged -= ManagementServiceOperationsChanged;
 
         await base.DisposeAsyncCore();
     }
@@ -37,8 +37,8 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
 #if DEBUG
         _isDebug = true;
 #endif
-        ManagementService.OptionsChanged += ManagementService_OptionsChanged;
-        ManagementService.OperationsChanged += ManagementService_OperationsChanged;
+        ManagementService.OptionsChanged += ManagementServiceOptionsChanged;
+        ManagementService.OperationsChanged += ManagementServiceOperationsChanged;
     }
 
     private static string GetUniqueModuleOptionKey(Dictionary<string, ModuleOptionDeclaration> moduleOptionMap)
@@ -137,7 +137,7 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
         }
     }
 
-    private async Task ManagementService_OperationsChanged(ModulePackageOperationsChanged changeEvent, CancellationToken token)
+    private async Task ManagementServiceOperationsChanged(ModulePackageOperationsChanged changeEvent, CancellationToken token)
     {
         if (changeEvent.Error is not null)
         {
@@ -165,7 +165,7 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
         await InvokeAsync(StateHasChanged);
     }
 
-    private Task ManagementService_OptionsChanged(ModuleOptionsChanged changeEvent, CancellationToken token)
+    private Task ManagementServiceOptionsChanged(ModuleOptionsChanged changeEvent, CancellationToken token)
     {
         if (State.ModuleMetadata?.ModuleId != changeEvent.ModuleId)
             return Task.CompletedTask;
