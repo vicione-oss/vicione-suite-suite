@@ -20,7 +20,7 @@ public sealed partial class ProcessComponent : IDisposable
     private float _loadAvg15Value;
     private bool _loadingSpinnerVisible = true;
     private IEnumerable<LinuxProcessInfo> _processes = [];
-    private string _filterText = string.Empty;
+    private string? _filterText;
     private bool _filterApplied;
     private bool _initialized;
 
@@ -98,7 +98,7 @@ public sealed partial class ProcessComponent : IDisposable
         InvokeAsync(StateHasChanged);
     }
 
-    private void ApplyFilter(string filter)
+    private void ApplyFilter(string? filter)
     {
         _filterText = filter;
         _filterApplied = false;

@@ -58,6 +58,7 @@
 - Fixed `SystemMonitoringComponent` chart not rendering due to JS initialization running before the DOM was ready
 - Tags in `ConnectionChanged` event after deleting a connection will now be properly filled
 - Prevented database-related error messages on first startup
+- Fixed `SearchBox` on process overview nullabilitiy error on clear button
 
 ### Updated
 
