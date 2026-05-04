@@ -1,12 +1,17 @@
 using Blazor.Shared.Connections.Contracts;
 using Sdk.Client.Services;
 using Sdk.Connections.Contracts;
+using Sdk.Connections.Events;
 
 namespace Blazor.Shared.Connections.Services;
 
-internal interface ISuiteConnectionService : IConnectionService
+public interface ISuiteConnectionService : IConnectionService
 {
     IReadOnlySet<Tag> Tags { get; }
+
+    event Func<ConnectionChanged, Task>? ConnectionChanged;
+
+    event Func<TagsChanged, Task>? TagsChanged;
 
     Task Initialize(CancellationToken cancellationToken = default);
 

@@ -23,6 +23,10 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
 
     public event Func<IReadOnlyList<Connection>, Task>? ConnectionStateChanged;
 
+    public event Func<ConnectionChanged, Task>? ConnectionChanged;
+
+    public event Func<TagsChanged, Task>? TagsChanged;
+
     public SuiteConnectionService(IUiMediator mediator) : base(mediator)
     {
         Register<ConnectionChanged>();
@@ -93,22 +97,18 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
         if (context.Message.ErrorInfo is not null)
         {
             CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
+
+            await NotifyConnectionChanged(context.Message);
             return;
         }
 
-        var somethingChanged = false;
+        // let awaiting command know that event was processed successfully, so it can complete
+        CompleteWithSuccess(context.Message.CorrelationId);
 
-        try
-        {
-            somethingChanged = ApplyConnectionChange(context.Message);
-        }
-        finally
-        {
-            CompleteWithSuccess(context.Message.CorrelationId);
-        }
-
-        if (somethingChanged)
+        if (ApplyConnectionChange(context.Message))
             await NotifyConnectionStateChanged();
+
+        await NotifyConnectionChanged(context.Message);
     }
 
     private bool ApplyConnectionChange(ConnectionChanged message)
@@ -159,6 +159,18 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
             await ConnectionStateChanged.Invoke(_connections);
     }
 
+    private async Task NotifyConnectionChanged(ConnectionChanged changeEvent)
+    {
+        if (ConnectionChanged is not null)
+            await ConnectionChanged.Invoke(changeEvent);
+    }
+
+    private async Task NotifyTagsChanged(TagsChanged changeEvent)
+    {
+        if (TagsChanged is not null)
+            await TagsChanged.Invoke(changeEvent);
+    }
+
     public async Task<ISuiteConnectionServiceResult> UpsertTag(Tag tag, CancellationToken cancellationToken = default)
     {
         var command = new UpsertTag(tag);
@@ -176,29 +188,24 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
         return await SendAndWaitForCompletion(command, cancellationToken);
     }
 
-    public Task Consume(ClientContext<TagsChanged> context, CancellationToken cancellationToken = default)
+    public async Task Consume(ClientContext<TagsChanged> context, CancellationToken cancellationToken = default)
     {
         if (!_initialized)
-            return Task.CompletedTask;
+            return;
 
         if (context.Message.ErrorInfo is not null)
         {
             CompleteWithError(context.Message.CorrelationId, context.Message.ErrorInfo);
-            return Task.CompletedTask;
+            await NotifyTagsChanged(context.Message);
+            return;
         }
 
-        var connectionChanged = false;
+        CompleteWithSuccess(context.Message.CorrelationId);
 
-        try
-        {
-            connectionChanged = ApplyTagChange(context.Message);
-        }
-        finally
-        {
-            CompleteWithSuccess(context.Message.CorrelationId);
-        }
+        if (ApplyTagChange(context.Message))
+            await NotifyConnectionStateChanged();
 
-        return connectionChanged ? NotifyConnectionStateChanged() : Task.CompletedTask;
+        await NotifyTagsChanged(context.Message);
     }
 
     private bool ApplyTagChange(TagsChanged message)
