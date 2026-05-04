@@ -53,7 +53,10 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     {
         _subscriptionHandles.Dispose();
 
-        ManagementService.OperationsChanged -= ManagementService_OperationsChanged;
+        ManagementService.OperationsChanged -= ManagementServiceOperationsChanged;
+        InstalledModuleSelection.Changed -= InstalledModuleSelectionChanged;
+        AvailableModuleSelection.Changed -= AvailableModuleSelectionChanged;
+
         State.Changed -= StateChanged;
 
         await base.DisposeAsyncCore();
@@ -63,20 +66,17 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     {
         await base.OnInitializedAsync();
 
-        State.Changed += StateChanged;
-
-        ManagementService.OperationsChanged += ManagementService_OperationsChanged;
-
         InstalledModuleSelection.Clear();
-        InstalledModuleSelection.Changed -= InstalledModuleSelectionChanged;
-        InstalledModuleSelection.Changed += InstalledModuleSelectionChanged;
-
         AvailableModuleSelection.Clear();
-        AvailableModuleSelection.Changed -= AvailableModuleSelectionChanged;
+
+        State.Changed += StateChanged;
+        ManagementService.OperationsChanged += ManagementServiceOperationsChanged;
+
+        InstalledModuleSelection.Changed += InstalledModuleSelectionChanged;
         AvailableModuleSelection.Changed += AvailableModuleSelectionChanged;
     }
 
-    private async Task ManagementService_OperationsChanged(ModulePackageOperationsChanged changes, CancellationToken token)
+    private async Task ManagementServiceOperationsChanged(ModulePackageOperationsChanged changes, CancellationToken token)
     {
         var hasChanged = State.ApplyOperationChanges(changes);
         if (hasChanged)

@@ -19,5 +19,5 @@ public interface IModuleArtifactCache
     /// This can be used to proactively refresh the cache when changes to repositories are made, 
     /// instead of waiting for the automatic invalidation to occur.
     /// </summary>
-    void Invalidate();
+    Task Invalidate(CancellationToken cancellationToken = default);
 }

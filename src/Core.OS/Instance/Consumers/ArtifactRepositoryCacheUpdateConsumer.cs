@@ -22,7 +22,7 @@ public sealed partial class ArtifactRepositoryChangeConsumer(
 
         try
         {
-            artifactCache.Invalidate();
+            await artifactCache.Invalidate(cancellationToken);
         }
         catch (Exception ex)
         {
