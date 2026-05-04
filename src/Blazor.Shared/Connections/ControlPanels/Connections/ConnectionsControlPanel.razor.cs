@@ -1,4 +1,5 @@
 using Blazor.Shared.Connections.Contracts;
+using Blazor.Shared.Connections.ControlPanels.Connections.Extensions;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Services;
@@ -40,11 +41,10 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
     {
         await base.OnInitializedAsync();
 
-        ConnectionService.ConnectionStateChanged -= OnConnectionStateChanged;
-        ConnectionService.ConnectionStateChanged += OnConnectionStateChanged;
+        ConnectionService.ConnectionStateChanged += ConnectionServiceConnectionStateChanged;
+        ConnectionService.TagsChanged += ConnectionServiceTagsChanged;
 
         GridItemSelection.Clear();
-        GridItemSelection.Changed -= GridItemSelectionChanged;
         GridItemSelection.Changed += GridItemSelectionChanged;
 
         State.Changed += StateChanged;
@@ -54,6 +54,12 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
         UpdateConnectionsQueryable();
         UpdateGridSelection();
         UpdateStatesDependingOnGridItemSelection();
+    }
+
+    private Task ConnectionServiceTagsChanged(Sdk.Connections.Events.TagsChanged changeEvent)
+    {
+        State.UpdateTags(changeEvent);
+        return Task.CompletedTask;
     }
 
     private async void StateChanged(ControlPanelStateChangedEventArgs obj)
@@ -89,8 +95,9 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
     {
         _connectionsQueryable = Enumerable.Empty<EditConnectionModel>().AsQueryable();
 
+        ConnectionService.ConnectionStateChanged -= ConnectionServiceConnectionStateChanged;
+        ConnectionService.TagsChanged -= ConnectionServiceTagsChanged;
         GridItemSelection.Changed -= GridItemSelectionChanged;
-        ConnectionService.ConnectionStateChanged -= OnConnectionStateChanged;
         State.Changed -= StateChanged;
 
         await base.DisposeAsyncCore();
@@ -194,7 +201,7 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
         _connectionsQueryable = _connectionsQueryable.OrderBy(u => u.Name);
     }
 
-    private async Task OnConnectionStateChanged(IReadOnlyList<Connection> connections)
+    private async Task ConnectionServiceConnectionStateChanged(IReadOnlyList<Connection> connections)
     {
         var editConnections = connections.Select(c => new EditConnectionModel(c, ConnectionTypeRegistry));
 

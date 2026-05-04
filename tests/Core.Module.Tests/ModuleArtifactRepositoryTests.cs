@@ -22,7 +22,7 @@ public class ModuleArtifactRepositoryTests
     private static ServiceProvider CreateServiceProvider()
     {
         var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
-        optionsProvider.GetOptions().Returns(SystemTestSettings.ArtifactApiOptions);
+        optionsProvider.GetOptions().Returns(SystemTestSettings.GetArtifactRepositoryOptions());
 
         return new ServiceCollection()
             .AddSingleton<IFileSystem>(new FileSystem())

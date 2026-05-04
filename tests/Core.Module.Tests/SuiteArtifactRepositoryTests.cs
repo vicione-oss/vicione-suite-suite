@@ -19,7 +19,7 @@ public class SuiteArtifactRepositoryTests
 {
     private static ServiceProvider CreateServiceProvider(ArtifactRepositoryOptions? apiOptions = null)
     {
-        var options = Microsoft.Extensions.Options.Options.Create(apiOptions ?? SystemTestSettings.ArtifactApiOptions);
+        var options = Microsoft.Extensions.Options.Options.Create(apiOptions ?? SystemTestSettings.GetArtifactRepositoryOptions());
         var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
         optionsProvider.GetOptions().Returns(options.Value);
 
@@ -73,7 +73,7 @@ public class SuiteArtifactRepositoryTests
 
         private ArtifactRepositoryOptions CreateOptionsWithKeys()
         {
-            var options = SystemTestSettings.ArtifactApiOptions;
+            var options = SystemTestSettings.GetArtifactRepositoryOptions();
             options.PublicKeys = PublicKeys;
             return options;
         }
@@ -137,7 +137,7 @@ public class SuiteArtifactRepositoryTests
         public async Task Should_throw_when_suite_package_signature_cannot_be_validated_with_keys_from_options()
         {
             // Arrange
-            var options = SystemTestSettings.ArtifactApiOptions;
+            var options = SystemTestSettings.GetArtifactRepositoryOptions();
             options.PublicKeys = [Convert.ToBase64String("INVALID_PUBLIC_KEY"u8.ToArray())];
 
             await using var services = CreateServiceProvider(options);

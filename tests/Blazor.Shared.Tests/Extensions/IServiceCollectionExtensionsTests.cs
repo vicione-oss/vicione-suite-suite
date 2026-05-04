@@ -20,7 +20,7 @@ public sealed class IServiceCollectionExtensionsTests
     public sealed class AddBlazorShared
     {
         [Fact]
-        public void ShouldProvideImplementationsForSdkServices()
+        public void Should_provide_implementations_for_sdk_services()
         {
             // Arrange + Act
             using var services = new ServiceCollection()

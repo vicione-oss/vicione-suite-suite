@@ -1,6 +1,8 @@
 using System.Globalization;
 using Blazor.Shared.Connections.Contracts;
+using Blazor.Shared.Connections.ControlPanels.Connections.Extensions;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
+using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.Connections;
@@ -17,21 +19,37 @@ using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 namespace Blazor.Shared.Connections.ControlPanels.Connections;
 
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
-public sealed partial class ConnectionControlPanel(IUiMediator mediator, IConnectionTypeRegistry connectionTypeRegistry, IConnectionTypeUiRegistry connectionTypeUiRegistry) : ControlPanelBase<ConnectionControlPanelState>, IEventConsumer<ConnectionChanged>
+public sealed partial class ConnectionControlPanel(IConnectionTypeRegistry connectionTypeRegistry, IConnectionTypeUiRegistry connectionTypeUiRegistry, ISuiteConnectionService connectionService)
+    : ControlPanelBase<ConnectionControlPanelState>
 {
     private readonly string _descriptionBannerIconCssClass = MonochromeIconName.Connectivity.GetCssClasses().ToSpaceSeparated();
-    private readonly List<ComboBoxItem<ConnectionType, string>> _connectionTypes = connectionTypeRegistry.GetConnectionTypes().Select(e => new ComboBoxItem<ConnectionType, string>() { Text = connectionTypeUiRegistry.TryGetDisplayName(e, out var displayName) ? displayName : e, Value = new ConnectionType(e) }).ToList();
+    private readonly List<ComboBoxItem<ConnectionType, string>> _connectionTypes = connectionTypeRegistry.GetConnectionTypeComboBoxItems(connectionTypeUiRegistry);
     private readonly Dictionary<string, object> _connectionSettingsComponentParameters = [];
-    private IDisposable? _subscriptionHandle;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        _subscriptionHandle = mediator.Register(this);
+        connectionService.ConnectionChanged += ConnectionServiceConnectionChanged;
 
         _connectionSettingsComponentParameters.Add(nameof(ConnectionSettingsComponentBase<>.Changed),
             EventCallback.Factory.Create(this, ConnectionSettingsChanged));
+    }
+
+    private async Task ConnectionServiceConnectionChanged(ConnectionChanged change)
+    {
+        if (change.Connection.Id != State.EditConnectionModel?.Connection.Id ||
+            change.ErrorInfo is not null)
+        {
+            return;
+        }
+
+        if (change.Action is CrudAction.Created or CrudAction.Updated)
+        {
+            State.ConnectionId = change.Connection.Id;
+            State.EditConnectionModel = new EditConnectionModel(change.Connection, connectionTypeRegistry);
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async Task ConnectionSettingsChanged()
@@ -106,7 +124,7 @@ public sealed partial class ConnectionControlPanel(IUiMediator mediator, IConnec
 
     protected override ValueTask DisposeAsyncCore()
     {
-        _subscriptionHandle?.Dispose();
+        connectionService.ConnectionChanged -= ConnectionServiceConnectionChanged;
 
         return base.DisposeAsyncCore();
     }

@@ -1,5 +1,4 @@
-﻿using AwesomeAssertions;
-using Blazor.Shared.Connections.ControlPanels;
+using AwesomeAssertions;
 using Blazor.Shared.Connections.ControlPanels.Connections;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.Extensions;
@@ -76,8 +75,7 @@ public class ConnectionsControlPanelTests
         {
             // Arrange
             using var ctx = SetupTestContext();
-            var mediator = Substitute.For<IUiMediator>();
-            using var state = new ConnectionsControlPanelState(mediator);
+            var state = new ConnectionsControlPanelState();
             var component = ctx.RenderControlPanelPage<ConnectionsControlPanel, ConnectionsControlPanelState>(state);
 
             // Act
@@ -105,8 +103,7 @@ public class ConnectionsControlPanelTests
                 ConnectionFactory.SQLiteConnection
             };
 
-            var mediator = Substitute.For<IUiMediator>();
-            using var state = new ConnectionsControlPanelState(mediator);
+            var state = new ConnectionsControlPanelState();
             var component = ctx.RenderControlPanelPage<ConnectionsControlPanel, ConnectionsControlPanelState>(state);
 
             _connectionService.ConnectionStateChanged += Raise.Event<Func<IReadOnlyList<Connection>, Task>?>(connections);
@@ -137,8 +134,7 @@ public class ConnectionsControlPanelTests
                 connection
             };
 
-            var mediator = Substitute.For<IUiMediator>();
-            using var state = new ConnectionsControlPanelState(mediator);
+            var state = new ConnectionsControlPanelState();
             var component = ctx.RenderControlPanelPage<ConnectionsControlPanel, ConnectionsControlPanelState>(state);
 
             _connectionService.ConnectionStateChanged += Raise.Event<Func<IReadOnlyList<Connection>, Task>?>(connections);
@@ -167,8 +163,7 @@ public class ConnectionsControlPanelTests
                 ConnectionFactory.HttpConnection,
             };
 
-            var mediator = Substitute.For<IUiMediator>();
-            using var state = new ConnectionsControlPanelState(mediator);
+            var state = new ConnectionsControlPanelState();
             var component = ctx.RenderControlPanelPage<ConnectionsControlPanel, ConnectionsControlPanelState>(state);
 
             // Act

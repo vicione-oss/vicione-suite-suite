@@ -1,18 +1,15 @@
 using AngleSharp.Dom;
 using AwesomeAssertions;
-using Blazor.Shared.Settings.Extensions;
-using Blazor.Shared.Connections.ControlPanels;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.ControlPanels.Tags;
 using Blazor.Shared.Connections.ControlPanels.Tags.Services;
 using Blazor.Shared.Connections.Extensions;
-using Blazor.Shared.Connections.Services;
+using Blazor.Shared.Settings.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Client.Infrastructure;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Client;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
@@ -93,7 +90,7 @@ public class TagsControlPanelPageContentTests
         public void Should_render_component()
         {
             // Arrange
-            using var state = new ConnectionsControlPanelState(Substitute.For<IUiMediator>());
+            var state = new ConnectionsControlPanelState();
             using var ctx = SetupTestContext();
 
             // Act + Assert
@@ -116,7 +113,7 @@ public class TagsControlPanelPageContentTests
 
             await using var ctx = SetupTestContext(setup =>
             {
-                state = new(setup.ClientMediator)
+                state = new()
                 {
                     Tags = tags.ToDictionary(k => k.Id)
                 };
@@ -156,7 +153,7 @@ public class TagsControlPanelPageContentTests
 
             await using var ctx = SetupTestContext(setup =>
             {
-                state = new(setup.ClientMediator)
+                state = new()
                 {
                     Tags = tags.ToDictionary(k => k.Id)
                 };
@@ -196,7 +193,7 @@ public class TagsControlPanelPageContentTests
 
             using var ctx = SetupTestContext(setup =>
             {
-                state = new(setup.ClientMediator)
+                state = new()
                 {
                     Tags = tags.ToDictionary(k => k.Id)
                 };
@@ -233,7 +230,7 @@ public class TagsControlPanelPageContentTests
 
             await using var ctx = SetupTestContext(setup =>
             {
-                state = new(setup.ClientMediator)
+                state = new()
                 {
                     Tags = tags.ToDictionary(k => k.Id)
                 };
@@ -276,7 +273,7 @@ public class TagsControlPanelPageContentTests
 
             using var ctx = SetupTestContext(setup =>
             {
-                state = new(setup.ClientMediator)
+                state = new()
                 {
                     Tags = tags.ToDictionary(k => k.Id)
                 };
@@ -318,7 +315,7 @@ public class TagsControlPanelPageContentTests
 
             using var ctx = SetupTestContext(setup =>
             {
-                state = new(setup.ClientMediator)
+                state = new()
                 {
                     Tags = tags.ToDictionary(k => k.Id)
                 };
