@@ -1,7 +1,8 @@
-﻿using Blazor.Shared.Settings.Services;
+using Blazor.Shared.Settings.Services;
 using DevExpress.Blazor;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
+using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Models;
 using Sdk.Client.Services;
@@ -85,12 +86,15 @@ public sealed partial class SettingsContainerContentHeader : ComponentBase, IDis
     private async Task NavigateBackButtonClick()
         => await NavigateBackRequest.Send();
 
-    private string GetControlPanelTitle()
+    private string GetControlPanelTitle(IControlPanelPage? controlPanelPage)
     {
         var fallbackTitle = CommonVocabulary.Unknown;
 
         try
         {
+            if (!string.IsNullOrWhiteSpace(controlPanelPage?.Title))
+                return controlPanelPage.Title;
+
             return _activeControlPanelRegistryItem?.Descriptor.Title ?? fallbackTitle;
         }
         catch (Exception ex)
