@@ -1,4 +1,4 @@
-﻿@using DevExpress.Blazor
+@using DevExpress.Blazor
 @using ViciOne.Ui.MonochromeIcons.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 
@@ -16,7 +16,7 @@
             .Select(i => i.ControlPanelPage)
             .ToList();
 
-        if (controlPanelPages.Count > 0)
+        if (controlPanelPages.Count > 1)
         {
             var activeControlPanelPage = _activeControlPanelRegistryItem is not null ? ActiveControlPanelPageProvider.GetActiveControlPanelPage(_activeControlPanelRegistryItem) : null;
             var activeControlPanelPageIndex = activeControlPanelPage is not null ? controlPanelPages.IndexOf(activeControlPanelPage) : 0;
@@ -33,7 +33,7 @@
         else
         {
             <div class="control-panel-title">
-                @GetControlPanelTitle()
+                @GetControlPanelTitle(controlPanelPages.FirstOrDefault())
             </div>
         }
     }
