@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -10,7 +10,7 @@ namespace Blazor.Shared.Settings.NotificationArea;
 public sealed partial class SettingsNotificationElementFlyoutContent : ComponentBase, INotificationElementFlyoutContent, IDisposable
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private string _filter = string.Empty;
+    private string? _filter;
 
     [Inject] private IEnumerable<IUpdateControlPanelRegistryHandler> UpdateControlPanelRegistryHandlers { get; set; } = default!;
     [Inject] private ISettingsPopupRequest SettingsPopupRequest { get; set; } = default!;
