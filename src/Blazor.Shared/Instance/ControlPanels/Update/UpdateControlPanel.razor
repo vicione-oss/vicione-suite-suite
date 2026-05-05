@@ -81,11 +81,15 @@
                                              MaximumAllowedSize="@Core.Shared.Constants.DeviceImageMaximumAllowedSize"
                                              OnUploadStart="SwuFileUploadStart"
                                              OnUploadSuccess="SwuFileUploadSuccess"
-                                             OnUploadError="SwuFileUploadError" />
+                                             OnUploadError="SwuFileUploadError"
+                                             OnUploadCancel="SwuFileUploadCancel"/>
                 </SettingsField>
 
                 <InformationBannerSettingsField Text="@Localization.UpdateControlPanel.SwuFilenameChangedBannerContent"
                                                 Visible="@State.SwuFilenameChangedBannerVisible" />
+
+                <InformationBannerSettingsField Text="@State.SwuUploadMessage"
+                                                Visible="@(!string.IsNullOrEmpty(State.SwuUploadMessage))" />
             </ChildContent>
         </SettingsGroup>
     </SettingsLayout>

@@ -1,4 +1,4 @@
-﻿using Core.Shared.HostManagement;
+using Core.Shared.HostManagement;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
@@ -16,6 +16,7 @@ internal sealed partial class UpdateControlPanelResetHandler(IUiMediator mediato
 
         state.FlashDeviceEnabled = false;
         state.SwuFilename = null;
+        state.SwuUploadMessage = null;
         state.SwuFileUploadTicket = null;
         state.SwuFilenameUploaded = null;
         state.SwuFilenameChangedBannerVisible = false;

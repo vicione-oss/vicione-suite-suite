@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -201,5 +201,8 @@ Note: This does not reset the operating system. Files or changes made directly t
   </data>
   <data name="SwuFileUploadPlaceholder" xml:space="preserve">
     <value>Choose a .swu file or drag &amp; drop it here.</value>
+  </data>
+  <data name="FileUploadCancelled" xml:space="preserve">
+    <value>The file upload was cancelled.</value>
   </data>
 </root>
