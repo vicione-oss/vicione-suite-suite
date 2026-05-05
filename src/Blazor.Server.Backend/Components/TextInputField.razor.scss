@@ -84,9 +84,13 @@
         display: flex;
         cursor: pointer;
 
+        &:hover {
+            color: colors-staged.$color-ifm-orange !important;
+        }
+
         &:focus-within {
             outline: none;
-            border-bottom: 1px solid colors-staged.$color-ifm-orange;
+            color: colors-staged.$color-ifm-orange !important;
         }
 
         ::deep .hide-icon {

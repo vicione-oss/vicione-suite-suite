@@ -1,4 +1,6 @@
-﻿@use "../../../shared/styles/colors-staged";
+@use "../Styles/design/colors";
+
+@use 'sass:color';
 
 .navigation-field {
     display: flex;
@@ -8,7 +10,7 @@
     width: max-content;
     cursor: pointer;
     text-decoration: none;
-    color: inherit;
+    color: color.change(colors.$font-light, $alpha: 0.8);
 
     ::deep img {
         width: 16px;
@@ -26,7 +28,7 @@
     }
 
     &:focus-within, &:hover {
-        border-bottom: 1px solid colors-staged.$color-ifm-orange;
+        color: colors.$font-light;
     }
 
     &:focus-visible {

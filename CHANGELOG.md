@@ -15,6 +15,7 @@
 - Improved synchronization in `ControlPanelRegistryItemCache`
 - Improved initialization of system configuration
 - Settings dialog, header does not display tabs anymore when control panel provides only a single control panel page
+- Improved hover and focus effect of elements of login forms
 
 ### Fixed
 
