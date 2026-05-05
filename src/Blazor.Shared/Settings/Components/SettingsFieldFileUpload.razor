@@ -1,4 +1,4 @@
-﻿@using Blazor.Shared.Components.FileDropZone
+@using Blazor.Shared.Components.FileDropZone
 @using Microsoft.AspNetCore.Components.Forms
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Components
@@ -62,9 +62,9 @@
         }
 
         <SettingsFieldButton CssClass="choose-button"
-                             Text="@CommonVocabulary.Choose"
-                             IconCssClass="@_chooseButtonIconCssClasses"
-                             OnClick="ChooseButtonClick" />
+                             Text="@ChooseButtonText"
+                             IconCssClass="@ChooseButtonIcon"
+                             OnClick="FileActionButtonClick" />
 
         @{
             var inputFileAttributes = new Dictionary<string, object> { { "class", "input-file" } };

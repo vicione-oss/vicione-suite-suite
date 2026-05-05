@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Sdk.Client.Extensions;
 using Sdk.Client.Services;
+using ViciOne.Ui.Localization.Resources;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 
@@ -16,6 +17,7 @@ namespace Blazor.Shared.Settings.Components;
 public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDisposable
 {
     private readonly string _chooseButtonIconCssClasses = MonochromeIconName.Folder.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+    private readonly string _cancelButtonIconCssClasses = MonochromeIconName.CloseMedium.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -42,7 +44,14 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
 
     private bool _dropIncoming;
 
+    private string ChooseButtonText => _uploadTicket is not null && _uploadProgress is not null
+        ? CommonVocabulary.Cancel : CommonVocabulary.Choose;
+
+    private string ChooseButtonIcon => _uploadTicket is not null && _uploadProgress is not null
+        ? _cancelButtonIconCssClasses : _chooseButtonIconCssClasses;
+
     [Inject] private IJsInterop JsInterop { get; set; } = default!;
+
     [Inject] private ILogger<FileDropZone> Logger { get; set; } = default!;
 
     /// <summary>
@@ -50,26 +59,39 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
     /// </summary>
     [Parameter]
     public string? Accept { get; set; }
+
     [Parameter]
     public long MaximumAllowedSize { get; set; } = 500 * 1024;
+
     [Parameter]
     public string? Placeholder { get; set; }
+
     [Parameter, EditorRequired]
     public string? Filename { get; set; }
+
     [Parameter]
     public EventCallback<string?> FilenameChanged { get; set; }
+
     [Parameter, EditorRequired]
     public IUploadTicket? UploadTicket { get; set; }
+
     [Parameter, EditorRequired]
     public IStreamUploadHandler UploadHandler { get; set; }
+
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
+
     [Parameter]
     public EventCallback<IUploadTicket> OnUploadStart { get; set; }
+
     [Parameter]
     public EventCallback<StreamUploadSuccessResult> OnUploadSuccess { get; set; }
+
     [Parameter]
     public EventCallback<StreamUploadErrorResult> OnUploadError { get; set; }
+
+    [Parameter]
+    public EventCallback OnUploadCancel { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -188,8 +210,28 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
         return false;
     }
 
-    private async Task ChooseButtonClick()
+    private async Task FileActionButtonClick()
     {
+        // handle cancel upload if in progress, otherwise show file picker
+        if (_uploadTicket is not null && _uploadProgress is not null)
+        {
+            try
+            {
+                _uploadTicket.Cancel();
+                //_uploadTicket = null;
+                _uploadProgress = null;
+                _uploadResult = null;
+                _filename = null;
+                _shouldRender = true;
+            }
+            finally
+            {
+                _uploadTicketSemaphore.Release();
+            }
+            return;
+        }
+
+        // show file picker dialog via JS interop
         if (_jsObjectReference is not null)
         {
             try
@@ -284,7 +326,8 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
         }
         catch (OperationCanceledException)
         {
-            // Nothing to do here, return gracefully
+            if (OnUploadCancel.HasDelegate)
+                await OnUploadCancel.InvokeAsync();
         }
         catch (ObjectDisposedException)
         {
@@ -321,6 +364,7 @@ public sealed partial class SettingsFieldFileUpload : ComponentBase, IAsyncDispo
 
         _jsObjectReference = null;
     }
+
     private async Task UploadHandlerProgress(IStreamUploadProgress progress)
     {
         var uploadProgress = _uploadProgress;

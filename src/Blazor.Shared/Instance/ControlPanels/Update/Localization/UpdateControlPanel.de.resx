@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -201,5 +201,8 @@ Hinweis: Dies setzt das Betriebssystem nicht zurück. Dateien oder Änderungen, 
   </data>
   <data name="SwuFileUploadPlaceholder" xml:space="preserve">
     <value>Wählen Sie eine .swu-Datei aus oder legen Sie diese per Drag &amp; Drop hier ab.</value>
+  </data>
+  <data name="FileUploadCancelled" xml:space="preserve">
+    <value>Der Datei-Upload wurde abgebrochen.</value>
   </data>
 </root>

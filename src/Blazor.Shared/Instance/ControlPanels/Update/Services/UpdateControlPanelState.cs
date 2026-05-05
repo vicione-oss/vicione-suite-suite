@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Settings.Models;
+using Blazor.Shared.Settings.Models;
 using Core.Shared.HostManagement;
 using Sdk.Client.ControlPanels.Services;
 using ViciOne.Ui.Blazor.Components.ComboBox;
@@ -30,6 +30,8 @@ public sealed class UpdateControlPanelState() : ControlPanelState
     internal IUploadTicket? SwuFileUploadTicket { get; set; }
     internal string? SwuFilenameUploaded { get; set; }
     internal bool SwuFilenameChangedBannerVisible { get; set; }
+
+    internal string? SwuUploadMessage { get; set; }
 
     internal void PreselectCurrentVersion()
     {

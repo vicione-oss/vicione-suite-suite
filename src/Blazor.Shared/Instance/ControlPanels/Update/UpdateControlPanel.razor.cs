@@ -267,6 +267,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
 
     private void SwuFileUploadStart(IUploadTicket uploadTicket)
     {
+        State.SwuUploadMessage = null;
         State.SwuFileUploadTicket = uploadTicket;
         State.SwuFilenameUploaded = null;
     }
@@ -280,12 +281,17 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
     }
 
     private void SwuFileUploadError(StreamUploadErrorResult errorResult)
+        => ResetSwuUpload(errorResult.Message);
+
+    private void SwuFileUploadCancel()
+        => ResetSwuUpload(Localization.UpdateControlPanel.FileUploadCancelled);
+
+    private void ResetSwuUpload(string? message = null)
     {
-        State.SwuFilename = errorResult.Message;
+        State.SwuUploadMessage = message;
+        State.SwuFilename = null;
         State.SwuFilenameUploaded = null;
         State.SwuFilenameChangedBannerVisible = false;
-
-        BannerService.ShowMessageBanner(MessageType.Error, errorResult.Message);
     }
 
     private async Task SelectedVersionChanged()

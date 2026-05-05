@@ -68,6 +68,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Instance\ControlPanels\Update\Localization\UpdateControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>UpdateControlPanel.resx</DependentUpon>
+    </Compile>
     <Compile Update="Logging\Localization\LogView.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
