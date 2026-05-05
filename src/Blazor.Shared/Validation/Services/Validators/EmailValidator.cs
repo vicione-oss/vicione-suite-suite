@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using ViciOne.Ui.Localization.Resources;
 
@@ -11,7 +11,11 @@ internal sealed partial class EmailValidator : IEmailValidator
         errorMessage = default;
 
         if (string.IsNullOrEmpty(email))
-            return true;
+        {
+            errorMessage = string.Format(ValidationMessages.Culture, ValidationMessages.FieldMustBeEmailAddress, field);
+
+            return false;
+        }
 
         if (!IsEmail().Match(email).Success)
         {

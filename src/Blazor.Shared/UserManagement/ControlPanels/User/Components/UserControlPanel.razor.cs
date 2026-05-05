@@ -11,6 +11,7 @@ using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.Infrastructure;
+using Sdk.Messaging;
 using Sdk.UserManagement.Events;
 using Sdk.Utils;
 
@@ -73,10 +74,10 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
     }
 
     public async Task Consume(ClientContext<UserCreatedEvent> context, CancellationToken cancellationToken)
-        => await UserCreatedOrUpdated(context.Message.UserProfile);
+        => await UserCreatedOrUpdated(context.Message.UserProfile, context.Message.ErrorInfo);
 
     public async Task Consume(ClientContext<UserUpdatedEvent> context, CancellationToken cancellationToken)
-        => await UserCreatedOrUpdated(context.Message.UserProfile);
+        => await UserCreatedOrUpdated(context.Message.UserProfile, context.Message.ErrorInfo);
 
     public async Task Consume(ClientContext<RoleDeletedEvent> context, CancellationToken cancellationToken)
     {
@@ -96,8 +97,19 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task UserCreatedOrUpdated(UserProfile userProfile)
+    private async Task UserCreatedOrUpdated(UserProfile userProfile, ErrorInfo? errorInfo)
     {
+        if (errorInfo is not null)
+        {
+            // Optional: hook UI error handling here (dialog/toast/banner), then return.
+            // Example (pseudo): State.SetError(userUpdatedEvent.ErrorInfo);
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        if (userProfile.UserName != State.UserName)
+            return;
+
         State.UserName = userProfile.UserName;
 
         if (State.UserProfile is not null)
