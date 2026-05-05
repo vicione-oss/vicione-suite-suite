@@ -1,4 +1,4 @@
-﻿@use "../../Styles/popup-master-detail-layout/variables";
+@use "../../Styles/popup-master-detail-layout/variables";
 @use "./../../../../shared/styles/overflow";
 @use 'sass:color';
 
@@ -10,6 +10,8 @@ $overflow-color: rgba(48, 48, 48); // todo: where to pull this from colors.scss?
     width: 100%;
     height: 40px;
     bottom: 0;
+
+    pointer-events: none; // allow mouse events to pass through to underlying elements
 
     .overflow-area {
         height: inherit;

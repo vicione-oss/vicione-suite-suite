@@ -19,6 +19,7 @@
 ### Fixed
 
 - First Run Wizard does not show a warning dialog anymore when switching IPv4 configuration to "Manual"
+- Popup overflow effect does not block mouse events anymore
 
 ### Updated
 
