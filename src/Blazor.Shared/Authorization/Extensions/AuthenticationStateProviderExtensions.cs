@@ -1,14 +1,24 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Blazor.Shared.Authorization.Extensions;
 
-internal static class AuthenticationStateProviderExtensions
+public static class AuthenticationStateProviderExtensions
 {
-    public static async Task<ClaimsPrincipal?> GetUser(this AuthenticationStateProvider authenticationStateProvider)
+    extension(AuthenticationStateProvider authenticationStateProvider)
     {
-        var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        public async Task<ClaimsPrincipal?> GetUser()
+        {
+            var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
 
-        return authenticationState?.User;
+            return authenticationState?.User;
+        }
+
+        public async Task<string?> GetUserName()
+        {
+            var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
+
+            return authenticationState.GetUserName();
+        }
     }
 }

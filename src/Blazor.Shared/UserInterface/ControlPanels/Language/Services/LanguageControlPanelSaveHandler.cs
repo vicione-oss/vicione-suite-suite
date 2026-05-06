@@ -67,8 +67,7 @@ internal sealed class LanguageControlPanelSaveHandler : ControlPanelSaveHandlerB
 
     private async Task<string?> GetUserLanguage(CancellationToken cancellationToken = default)
     {
-        var user = await _authenticationStateProvider.GetUser();
-        var userName = user?.Identity?.Name;
+        var userName = await _authenticationStateProvider.GetUserName();
         if (string.IsNullOrEmpty(userName))
             return null;
 
