@@ -1,5 +1,8 @@
-﻿using Blazor.Shared.Settings.Services;
+using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
+using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Models;
 
 namespace Blazor.Shared.Settings.Components;
@@ -9,11 +12,15 @@ public sealed partial class SettingsPopup : ComponentBase, IDisposable
     private SettingsContainer? _settingsContainer;
     private bool _showUnsavedChangesPopup;
 
+    [Inject] private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
     [Inject] private ISettingsPopupRequest SettingsPopupRequest { get; set; } = default!;
     [Inject] private ISettingsPopupState SettingsPopupState { get; set; } = default!;
+    [Inject] private SettingsModuleState SettingsModuleState { get; set; } = default!;
+    [Inject] private ILogger<SettingsPopup> Logger { get; set; } = default!;
 
     protected override void OnInitialized()
     {
+        ControlPanelRequest.ControlPanelRequested += ControlPanelRequested;
         SettingsPopupRequest.SettingsPopupRequested += SettingsPopupRequested;
         SettingsPopupState.Changed += SettingsPopupStateChanged;
     }
@@ -22,10 +29,31 @@ public sealed partial class SettingsPopup : ComponentBase, IDisposable
     {
         SettingsPopupState.Changed -= SettingsPopupStateChanged;
         SettingsPopupRequest.SettingsPopupRequested -= SettingsPopupRequested;
+        ControlPanelRequest.ControlPanelRequested -= ControlPanelRequested;
+    }
+
+    private async Task ControlPanelRequested(ControlPanelRequestedEventArgs args)
+    {
+        if (SettingsPopupState.Visible)
+        {
+            // Do nothing as SettingsContainer and ControlPanelCarousel already listen to the request
+        }
+        else
+        {
+            args.ConfigureState?.Invoke();
+
+            SettingsModuleState.AdoptToControlPanelRequest(args, Logger);
+
+            SettingsPopupState.Visible = true;
+        }
     }
 
     private void SettingsPopupRequested()
-        => SettingsPopupState.Visible = true;
+    {
+        SettingsModuleState.PreselectFirstSettingsEntryInFirstSettingsGroup = true;
+
+        SettingsPopupState.Visible = true;
+    }
 
     private void SettingsPopupStateChanged(PropertiesChangedEventArgs args)
     {
