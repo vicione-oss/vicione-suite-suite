@@ -21,6 +21,7 @@
 
 ### Fixed
 
+- Fixed reconnect modal flickering briefly on restart by moving delay and pipe communication to a seperate task
 - First Run Wizard does not show a warning dialog anymore when switching IPv4 configuration to "Manual"
 - Popup overflow effect does not block mouse events anymore
 
