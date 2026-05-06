@@ -1,4 +1,4 @@
-﻿using HostManagement.Shared.Contracts;
+using HostManagement.Shared.Contracts;
 
 namespace Core.Shared.HostManagement.Services;
 
@@ -8,9 +8,9 @@ public interface ISystemConfigurationService
 
     DateTimeOffset? LastDhcpLeaseFetchUtc { get; }
 
-    event Func<Task>? SystemConfigurationChanged;
+    event Func<CancellationToken, Task>? SystemConfigurationChanged;
 
     Task Initialize(CancellationToken cancellationToken);
 
-    Task SetSystemConfiguration(SystemConfiguration newSystemConfiguration);
+    Task SetSystemConfiguration(SystemConfiguration newSystemConfiguration, CancellationToken cancellationToken);
 }

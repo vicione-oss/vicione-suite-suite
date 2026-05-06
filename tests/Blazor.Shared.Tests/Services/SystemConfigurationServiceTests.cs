@@ -132,14 +132,14 @@ public class SystemConfigurationServiceTests
             using var service = CreateService();
             var configuration = new HostManagement.Shared.Contracts.SystemConfiguration();
             var eventRaised = false;
-            service.SystemConfigurationChanged += () =>
+            service.SystemConfigurationChanged += (token) =>
             {
                 eventRaised = true;
                 return Task.CompletedTask;
             };
 
             // Act
-            await service.SetSystemConfiguration(configuration);
+            await service.SetSystemConfiguration(configuration, TestContext.Current.CancellationToken);
 
             // Assert
             eventRaised.Should().BeTrue();
@@ -153,7 +153,7 @@ public class SystemConfigurationServiceTests
             var configuration = new HostManagement.Shared.Contracts.SystemConfiguration();
 
             // Act
-            await service.SetSystemConfiguration(configuration);
+            await service.SetSystemConfiguration(configuration, TestContext.Current.CancellationToken);
 
             // Assert
             service.LastDhcpLeaseFetchUtc.Should().NotBeNull();

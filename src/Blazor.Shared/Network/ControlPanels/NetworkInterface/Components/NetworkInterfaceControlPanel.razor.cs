@@ -2,7 +2,6 @@ using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Core.Shared.HostManagement.Requests;
-using Core.Shared.HostManagement.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.Infrastructure;
@@ -50,14 +49,9 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     [Inject(Key = Sdk.Constants.ClientTimeProviderServiceKey)]
     private TimeProvider TimeProvider { get; set; } = default!;
 
-    [Inject]
-    private ISystemConfigurationService SystemConfigurationService { get; set; } = default!;
-
     protected override void OnInitialized()
     {
         base.OnInitialized();
-
-        SystemConfigurationService.SystemConfigurationChanged += OnSystemConfigurationChanged;
 
         SetDhcpLeaseInformation();
     }
@@ -66,8 +60,6 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     {
         await _cancellationTokenSource.CancelAsync();
         _cancellationTokenSource.Dispose();
-
-        SystemConfigurationService.SystemConfigurationChanged -= OnSystemConfigurationChanged;
 
         await base.DisposeAsyncCore();
     }
@@ -196,7 +188,7 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         await BeginEdit();
     }
 
-    public async Task OnSystemConfigurationChanged()
+    protected override async Task SystemConfigurationChanged(CancellationToken cancellationToken)
     {
         SetDhcpLeaseInformation();
 

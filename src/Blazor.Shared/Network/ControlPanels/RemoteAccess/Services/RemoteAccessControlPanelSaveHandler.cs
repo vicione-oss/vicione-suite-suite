@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.Models;
+using Blazor.Shared.Network.Models;
 using Blazor.Shared.Network.Services;
 using Core.Shared.HostManagement;
 using Core.Shared.HostManagement.Services;
@@ -16,7 +16,7 @@ internal sealed class RemoteAccessControlPanelSaveHandler(
     IUiMediator mediator,
     ISystemConfigurationService systemConfigurationService,
     ILogger<RemoteAccessControlPanelSaveHandler> logger,
-    IOptions<HostManagementOptions> hostMgmtOptions,
+    IOptions<HostManagementOptions> hostManagementOptions,
     IConfiguration config) : NetworkControlPanelSaveHandlerBase<RemoteAccessControlPanelState>(mediator, systemConfigurationService, logger)
 {
     protected override Task<ISaveInternalResult> SaveInternal(RemoteAccessControlPanelState state)
@@ -40,7 +40,7 @@ internal sealed class RemoteAccessControlPanelSaveHandler(
 
     private void SetSshServiceState(RemoteAccessControlPanelState state, List<ServiceDetail> services)
     {
-        var sshServiceName = hostMgmtOptions.Value.SshServiceName;
+        var sshServiceName = hostManagementOptions.Value.SshServiceName;
         ServiceState serviceState;
 
         if (state.Terminal.CanSecureShell)
