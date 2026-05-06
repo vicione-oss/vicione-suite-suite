@@ -29,8 +29,7 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
     {
         await base.OnInitializedAsync();
 
-        var user = await AuthenticationStateProvider.GetUser();
-        var userName = user?.Identity?.Name;
+        var userName = await AuthenticationStateProvider.GetUserName();
 
         var userLanguage = (await UiMediator.Request<GetUsers, GetUsersResponse>(
             new GetUsers(new(userName)))).Users.First().Language;

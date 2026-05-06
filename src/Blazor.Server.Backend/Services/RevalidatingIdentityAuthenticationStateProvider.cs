@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
+using Core.Shared.Authorization.Extensions;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Extensions;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -130,7 +131,9 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
     {
         var authenticationState = await GetAuthenticationStateAsync();
 
-        if (!authenticationState.User?.IsInRole(role.Name ?? string.Empty) ?? false)
+        var claimsPrincipal = authenticationState.User;
+
+        if (!claimsPrincipal?.IsInRole(role.Name ?? string.Empty) ?? false)
             return;
 
         await using var serviceScope = _serviceScopeFactory.CreateAsyncScope();
@@ -138,7 +141,9 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
         var userManager = serviceScope.ServiceProvider.GetRequiredService<UserManager<TUser>>();
         var claimsPrincipalFactory = serviceScope.ServiceProvider.GetRequiredService<IUserClaimsPrincipalFactory<TUser>>();
 
-        var suiteUser = await userManager.FindByNameAsync(authenticationState.User?.Identity?.Name ?? string.Empty);
+        var userName = claimsPrincipal.GetUserName() ?? string.Empty;
+
+        var suiteUser = await userManager.FindByNameAsync(userName);
         if (suiteUser is null)
             return;
 

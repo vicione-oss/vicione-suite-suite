@@ -1,5 +1,6 @@
 using Core.OS.DbContext;
 using Core.OS.UserManagement.Entities;
+using Core.Shared.Authorization.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -114,7 +115,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
     public async Task<string> StoreAsync(AuthenticationTicket ticket)
     {
         var userId = string.Empty;
-        var nameIdentifier = ticket.Principal?.Identity?.Name;
+        var nameIdentifier = ticket.Principal.GetUserName();
 
         if (ticket.AuthenticationScheme == Shared.Constants.AuthenticationSchema)
             userId = nameIdentifier;
