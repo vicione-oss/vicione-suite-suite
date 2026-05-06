@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.Text.Json;
 using Core.OS.DbContext;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Extensions;
@@ -7,7 +6,6 @@ using Core.OS.Instance.Initialization;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
 using MassTransit.Courier.Contracts;
@@ -17,7 +15,6 @@ using Sdk.Backend.Extensions;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Sdk.Messaging;
-using CommunicationJsonContext = HostManagement.Shared.Communication.Contracts.SourceGenerationContext;
 
 namespace Core.OS.Instance.Consumers;
 
@@ -120,33 +117,50 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         await context.Publish(new ControlInstanceCompleted(instanceInfo.Id, InstanceCommand.Delete), context.CancellationToken);
     }
 
-    private async Task HandleRestartInstance(ConsumeContext<ControlInstance> context, InstanceInformation instanceInfo)
+    private Task HandleRestartInstance(ConsumeContext<ControlInstance> context, InstanceInformation instanceInfo)
     {
-        try
+        EnsureSuiteRestartFile();
+
+        var delay = context.Message.Delay ?? TimeSpan.Zero;
+        var instanceId = instanceInfo.Id;
+
+        // Capture a root/long-lived service provider to create a fresh scope after the delay
+        var rootServices = _services.GetRequiredService<IServiceScopeFactory>();
+
+        _ = Task.Run(async () =>
         {
-            EnsureSuiteRestartFile();
+            try
+            {
+                // CancellationToken from the original context is intentionally not passed to Delay or the pipe call
+                // —> the token would be cancelled when the consumer completes
+                if (delay > TimeSpan.Zero)
+                    await Task.Delay(delay);
 
-            // wait till we request restart
-            if (context.Message.Delay.HasValue)
-                await Task.Delay(context.Message.Delay.Value, context.CancellationToken);
+                await using var scope = rootServices.CreateAsyncScope();
+                var pipeClient = scope.ServiceProvider.GetRequiredService<IPipeClient>();
+                var options = scope.ServiceProvider.GetRequiredService<IOptions<InstanceOptions>>();
 
-            var pipeClient = _services.GetRequiredService<IPipeClient>();
-            var options = _services.GetRequiredService<IOptions<InstanceOptions>>();
+                var result = await pipeClient.RestartService(options.Value.ServiceName)
+                    ?? throw new InvalidOperationException("Restart request result from host management is null.");
 
-            // when the command gets processed by host management, the service will be restarted
-            // which will lead to disconnection of the pipe before we can receive the result
-            var result = await pipeClient.RestartService(options.Value.ServiceName, context.CancellationToken)
-                ?? throw new InvalidOperationException("Restart request result from host management is null.");
+                if (result.Status == OperationStatus.Error)
+                    throw new InvalidOperationException(result.Message);
 
-            if (result.Status == OperationStatus.Error)
-                throw new InvalidOperationException(result.Message);
+                // IPublishEndpoint is used instead of ConsumeContext since the consume context won't be valid after the consumer returns
+                var publishEndpoint = scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+                await publishEndpoint.Publish(new ControlInstanceCompleted(instanceId, InstanceCommand.Restart));
+            }
+            catch (OperationCanceledException)
+            {
+                // successful restart leads to service cancellation — expected
+            }
+            catch (Exception e)
+            {
+                LogFailedToProcessCommand(_logger, e, InstanceCommand.Restart, instanceId);
+            }
+        });
 
-            await context.Publish(new ControlInstanceCompleted(instanceInfo.Id, InstanceCommand.Restart), context.CancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            // successfull restart will lead to cancellation of consume so we can ignore this
-        }
+        return Task.CompletedTask;
     }
 
     private void EnsureSuiteRestartFile()
