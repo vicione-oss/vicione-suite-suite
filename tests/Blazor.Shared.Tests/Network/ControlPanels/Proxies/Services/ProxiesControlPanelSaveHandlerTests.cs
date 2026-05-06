@@ -451,38 +451,4 @@ public sealed class ProxiesControlPanelSaveHandlerTests
         // Assert
         captured!.NetworkInterfacesSettings.Should().Be(_systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings);
     }
-
-    [Fact]
-    public async Task Should_call_set_system_configuration_service_on_success()
-    {
-        // Arrange
-        SetupSystemConfiguration();
-        using var handler = CreateHandler();
-        SetupMediatorToFireSuccess(handler);
-
-        var state = CreateValidState();
-
-        // Act
-        await handler.Save(state, TestContext.Current.CancellationToken);
-
-        // Assert
-        await _systemConfigurationService.Received(1).SetSystemConfiguration(Arg.Any<SystemConfiguration>());
-    }
-
-    [Fact]
-    public async Task Should_not_call_set_system_configuration_service_on_error()
-    {
-        // Arrange
-        SetupSystemConfiguration();
-        using var handler = CreateHandler();
-        SetupMediatorToFireError(handler, new ErrorInfo(1, "Error"));
-
-        var state = CreateValidState();
-
-        // Act
-        await handler.Save(state, TestContext.Current.CancellationToken);
-
-        // Assert
-        await _systemConfigurationService.DidNotReceive().SetSystemConfiguration(Arg.Any<SystemConfiguration>());
-    }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using Blazor.Shared.Extensions;
 using Blazor.Shared.Network.ControlPanels;
 using Blazor.Shared.Network.Models;
@@ -58,7 +58,7 @@ internal abstract partial class NetworkControlPanelSaveHandlerBase<TState>
 
     public async Task<ISaveResult> Save(TState state, CancellationToken cancellationToken)
     {
-        SaveInvoked(_logger);
+        LogSaveInvoked(_logger);
 
         var saveInternalResult = await SaveInternal(state);
         if (saveInternalResult is not SystemConfigurationSaveInternalResult systemConfigurationSaveInternalResult)
@@ -86,9 +86,6 @@ internal abstract partial class NetworkControlPanelSaveHandlerBase<TState>
 
             var result = await taskCompletionSource.WaitForCommandCompletion(cancellationToken);
 
-            if (result is SaveSuccessResult && !taskCompletionSource.Task.IsCanceled)
-                await SystemConfigurationService.SetSystemConfiguration(proposedSystemConfiguration);
-
             return result;
         }
         finally
@@ -104,7 +101,7 @@ internal abstract partial class NetworkControlPanelSaveHandlerBase<TState>
         if (_taskCompletionSourceMap.TryRemove(context.Message.CorrelationId, out var taskCompletionSource))
             taskCompletionSource.SetResult(null);
 
-        SetSystemConfigurationSuccess(_logger);
+        LogSetSystemConfigurationSuccess(_logger);
 
         return Task.CompletedTask;
     }
@@ -114,17 +111,17 @@ internal abstract partial class NetworkControlPanelSaveHandlerBase<TState>
         if (_taskCompletionSourceMap.TryRemove(context.Message.CorrelationId, out var taskCompletionSource))
             taskCompletionSource.SetResult(context.Message.Error);
 
-        SetSystemConfigurationFailed(_logger, context.Message.Error);
+        LogSetSystemConfigurationFailed(_logger, context.Message.Error);
 
         return Task.CompletedTask;
     }
 
-    [LoggerMessage(1, LogLevel.Information, "Save invoked")]
-    private static partial void SaveInvoked(ILogger logger);
+    [LoggerMessage(LogLevel.Debug, "Save invoked")]
+    private static partial void LogSaveInvoked(ILogger logger);
 
-    [LoggerMessage(2, LogLevel.Information, "Set system configuration successfully set")]
-    private static partial void SetSystemConfigurationSuccess(ILogger logger);
+    [LoggerMessage(LogLevel.Information, "System configuration changed successfully")]
+    private static partial void LogSetSystemConfigurationSuccess(ILogger logger);
 
-    [LoggerMessage(3, LogLevel.Error, "Set system configuration failed: {error}")]
-    private static partial void SetSystemConfigurationFailed(ILogger logger, ErrorInfo error);
+    [LoggerMessage(LogLevel.Error, "System configuration change failed: {error}")]
+    private static partial void LogSetSystemConfigurationFailed(ILogger logger, ErrorInfo error);
 }

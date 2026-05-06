@@ -32,7 +32,7 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
         }
     }
 
-    public event Func<Task>? SystemConfigurationChanged;
+    public event Func<CancellationToken, Task>? SystemConfigurationChanged;
 
     public SystemConfigurationService(IUiMediator mediator, ILogger<SystemConfigurationService> logger)
     {
@@ -41,7 +41,7 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
         _subscription = mediator.Register(this);
     }
 
-    public async Task SetSystemConfiguration(SystemConfiguration newSystemConfiguration)
+    public async Task SetSystemConfiguration(SystemConfiguration newSystemConfiguration, CancellationToken cancellationToken)
     {
         var networkInterfaces = newSystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces.Select(k => k.CommonInformation.Name);
         LogSetSystemConfiguration(_logger, string.Join(", ", networkInterfaces));
@@ -55,7 +55,7 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
         _lastDhcpLeaseFetchUtc = DateTimeOffset.UtcNow;
 
         if (SystemConfigurationChanged is not null)
-            await SystemConfigurationChanged.Invoke();
+            await SystemConfigurationChanged.Invoke(cancellationToken);
     }
 
     public async Task Initialize(CancellationToken cancellationToken = default)
@@ -73,7 +73,7 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
             if (response.Configuration is null)
                 throw new InvalidOperationException($"Requesting system configuration failed - configuration is not set");
 
-            await SetSystemConfiguration(response.Configuration);
+            await SetSystemConfiguration(response.Configuration, cancellationToken);
         }
         catch (OperationCanceledException)
         {
