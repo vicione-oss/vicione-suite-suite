@@ -323,6 +323,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ErrorMessages.resx</DependentUpon>
     </Compile>
+    <Compile Update="UserManagement\NavTiles\Localization\ManageUsersNavTile.Designer.cs">
+      <DependentUpon>ManageUsersNavTile.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Settings\NetworkInterface\Enums\Localization\IpConfigurationMode.Designer.cs">
       <DependentUpon>IpConfigurationMode.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -684,6 +689,10 @@
     <EmbeddedResource Update="Settings\DateAndTime\Localization\ErrorMessages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\NavTiles\Localization\ManageUsersNavTile.resx">
+      <LastGenOutput>ManageUsersNavTile.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Settings\NetworkInterface\Enums\Localization\IpConfigurationMode.resx">
       <LastGenOutput>IpConfigurationMode.Designer.cs</LastGenOutput>

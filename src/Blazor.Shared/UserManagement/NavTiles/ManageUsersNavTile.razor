@@ -1,0 +1,11 @@
+@using Sdk.Client.NavTiles.Components
+@using ViciOne.Ui.Localization.Resources
+
+@inherits NavTileBase
+
+<NavTileStandardContent Headline="@CommonVocabulary.UserPlural"
+                        Subline="@Localization.ManageUsersNavTile.Subline"
+                        IconUrl="@_iconUrl"
+                        IconAlt="@CommonVocabulary.UserPlural"
+                        OnContentLoading="@ContentLoading"
+                        OnContentReady="@ContentReady" />

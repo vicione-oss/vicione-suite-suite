@@ -9,7 +9,6 @@ using Blazor.Shared.Settings.Models.Actions;
 using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
@@ -111,7 +110,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
             AdoptToCategoryExpand(expandSettingsCategoryAction.SettingsEntriesKey);
 
         else if (deferredAction is SelectSettingsEntryAction selectSettingsEntryAction)
-            SetActiveControlPanel(selectSettingsEntryAction.SettingsEntry.ControlPanelRegistryItem);
+            State.SetActiveControlPanel(selectSettingsEntryAction.SettingsEntry.ControlPanelRegistryItem);
 
         else if (deferredAction is CloseAction)
             await InvokeOnClose();
@@ -154,7 +153,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
             await Update();
     }
 
-    private async Task<IEnumerable<IControlPanelRegistryItem>> GetControlPanelRegistryItem(CancellationToken cancellationToken)
+    private async Task<IEnumerable<IControlPanelRegistryItem>> GetControlPanelRegistryItems(CancellationToken cancellationToken)
     {
         var user = await AuthenticationStateProvider.GetUser();
 
@@ -171,9 +170,9 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         if (CancellationToken.IsCancellationRequested)
             return;
 
-        var controlPanelRegistryItems = (await GetControlPanelRegistryItem(CancellationToken)).ToArray();
+        var controlPanelRegistryItems = (await GetControlPanelRegistryItems(CancellationToken)).ToArray();
 
-        UpdateAccordionData(controlPanelRegistryItems, preselectFirstSettingsEntryInFirstSettingsGroup: true);
+        UpdateAccordionData(controlPanelRegistryItems, State.PreselectFirstSettingsEntryInFirstSettingsGroup);
 
         UpdateActiveControlPanel(controlPanelRegistryItems);
         UpdateActiveSettingsEntry();
@@ -249,7 +248,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
 
         if (activeControlPanelRegistryItem != State.ActiveControlPanelRegistryItem)
         {
-            SetActiveControlPanel(activeControlPanelRegistryItem);
+            State.SetActiveControlPanel(activeControlPanelRegistryItem);
 
             return true;
         }
@@ -291,7 +290,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
 
             try
             {
-                var controlPanelRegistryItems = (await GetControlPanelRegistryItem(CancellationToken)).ToArray();
+                var controlPanelRegistryItems = (await GetControlPanelRegistryItems(CancellationToken)).ToArray();
 
                 UpdateAccordionData(controlPanelRegistryItems);
 
@@ -486,7 +485,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
     {
         if (State.LastActiveControlPanelRegistryItemMap.TryGetValue(settingsEntriesKey, out var lastActiveControlPanelRegistryItem))
         {
-            SetActiveControlPanel(lastActiveControlPanelRegistryItem);
+            State.SetActiveControlPanel(lastActiveControlPanelRegistryItem);
         }
         else
         {
@@ -496,7 +495,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
             {
                 var firstSettingsEntry = settingsEntries.FirstOrDefault();
                 if (firstSettingsEntry is not null)
-                    SetActiveControlPanel(firstSettingsEntry.ControlPanelRegistryItem);
+                    State.SetActiveControlPanel(firstSettingsEntry.ControlPanelRegistryItem);
             }
         }
     }
@@ -522,7 +521,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         }
         else
         {
-            SetActiveControlPanel(settingsEntry.ControlPanelRegistryItem);
+            State.SetActiveControlPanel(settingsEntry.ControlPanelRegistryItem);
         }
     }
 
@@ -545,12 +544,6 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
     {
         if (OnClose.HasDelegate)
             await OnClose.InvokeAsync();
-    }
-
-    private static void ResetActiveControlPanelPage(IControlPanelRegistryItem? controlPanelRegistryItem)
-    {
-        if (controlPanelRegistryItem is not null)
-            controlPanelRegistryItem.State.ActivePageIndex = null;
     }
 
     private async Task<bool> CancelControlPanelEdits()
@@ -618,31 +611,6 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         finally
         {
             State.IsLoadingOverlayVisible = false;
-        }
-    }
-
-    private void SetActiveControlPanel(IControlPanelRegistryItem? controlPanelRegistryItem)
-    {
-        State.BeginUpdate();
-        try
-        {
-            var settingsEntriesKey = GetSettingsEntriesKey(controlPanelRegistryItem);
-
-            ResetActiveControlPanelPage(State.ActiveControlPanelRegistryItem);
-
-            State.ActiveControlPanelRegistryItem = controlPanelRegistryItem;
-
-            State.ClearRequestedControlPanelRegistryItems();
-            if (controlPanelRegistryItem is not null)
-                State.TryPushRequestedControlPanelRegistryItem(controlPanelRegistryItem);
-
-            State.ShowNavigateBackButton = false;
-
-            ResetActiveControlPanelPage(State.ActiveControlPanelRegistryItem);
-        }
-        finally
-        {
-            State.EndUpdate();
         }
     }
 

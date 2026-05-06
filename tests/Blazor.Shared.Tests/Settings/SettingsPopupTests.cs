@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Settings.Components;
+using Blazor.Shared.Settings.Components;
 using Blazor.Shared.Settings.Extensions;
 using Bunit;
 using Xunit;
@@ -12,7 +12,9 @@ public class SettingsPopupTests
     {
         // Arrange
         await using var ctx = new BunitContext();
-        ctx.SetupBlazorSharedSettings(setup => setup.Services.AddSettingsPopup());
+        ctx.SetupBlazorSharedSettings(setup => setup.Services
+            .AddControlPanelInfrastructure()
+            .AddSettingsPopup());
 
         // Act
         var component = ctx.Render<SettingsPopup>();

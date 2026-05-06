@@ -1,6 +1,6 @@
-﻿namespace Blazor.Shared.Settings.Models;
+namespace Blazor.Shared.Settings.Models;
 
-internal sealed class SettingsGroup
+internal sealed record SettingsGroup
 {
     public required int Position { get; init; }
 }

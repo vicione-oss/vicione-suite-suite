@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using Blazor.Shared.Settings.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Interfaces;
@@ -22,6 +22,8 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
 
     private bool _showNavigateBackButton;
     private bool _isLoadingOverlayVisible;
+
+    public bool PreselectFirstSettingsEntryInFirstSettingsGroup { get; set; }
 
     /// <summary>
     /// Expanded settings category

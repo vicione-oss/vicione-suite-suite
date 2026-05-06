@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Settings.Models;
+using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Models;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Services;
 
@@ -8,18 +9,15 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
 {
     public List<SettingsGroup> GetSettingsGroups(IEnumerable<IControlPanelRegistryItem> controlPanelRegistryItems)
     {
-        var groupMap = new Dictionary<int, SettingsGroup>();
+        var settingsGroups = new HashSet<SettingsGroup>();
 
         foreach (var controlPanelRegistryItem in controlPanelRegistryItems.Where(ShowInNavigationPredicate))
         {
-            var groupDescriptor = controlPanelRegistryItem.GroupDescriptor;
-
             try
             {
-                if (groupMap.ContainsKey(groupDescriptor.Position))
-                    continue;
+                var settingsGroup = controlPanelRegistryItem.GroupDescriptor.ToSettingsGroup();
 
-                groupMap.Add(groupDescriptor.Position, new SettingsGroup { Position = groupDescriptor.Position });
+                settingsGroups.Add(settingsGroup);
             }
             catch (Exception ex)
             {
@@ -27,7 +25,7 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
             }
         }
 
-        var result = groupMap.Values.OrderBy(g => g.Position).ToList();
+        var result = settingsGroups.OrderBy(g => g.Position).ToList();
 
         return result;
     }
@@ -48,14 +46,7 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
                     if (categoryMap.ContainsKey(categoryDescriptor.Title))
                         continue;
 
-                    var category = new SettingsCategory
-                    {
-                        Title = categoryDescriptor.Title,
-                        IconCssClass = categoryDescriptor.IconCssClass,
-                        IconUrl = categoryDescriptor.IconUrl,
-                        Position = categoryDescriptor.Position,
-                        GroupPosition = groupPosition
-                    };
+                    var category = categoryDescriptor.ToSettingsCategory(groupPosition);
 
                     categoryMap.Add(categoryDescriptor.Title, category);
                 }
@@ -113,15 +104,15 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
         }
     }
 
-    [LoggerMessage(1, LogLevel.Error, "Predicate to determine whether control panel should be shown in navigation or not has failed")]
+    [LoggerMessage(LogLevel.Error, "Predicate to determine whether control panel should be shown in navigation or not has failed")]
     private static partial void ShowInNavigationPredicateFailed(ILogger<SettingsModuleService> logger, Exception exception);
 
-    [LoggerMessage(2, LogLevel.Error, "Add settings group failed")]
+    [LoggerMessage(LogLevel.Error, "Add settings group failed")]
     private static partial void AddSettingsGroupFailed(ILogger<SettingsModuleService> logger, Exception exception);
 
-    [LoggerMessage(3, LogLevel.Error, "Create settings category failed")]
+    [LoggerMessage(LogLevel.Error, "Create settings category failed")]
     private static partial void CreateSettingsCategoryFailed(ILogger<SettingsModuleService> logger, Exception exception);
 
-    [LoggerMessage(4, LogLevel.Error, "Create settings entry failed")]
+    [LoggerMessage(LogLevel.Error, "Create settings entry failed")]
     private static partial void CreateSettingsEntryFailed(ILogger<SettingsModuleService> logger, Exception exception);
 }

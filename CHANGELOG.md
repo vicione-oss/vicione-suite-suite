@@ -5,6 +5,7 @@
 ### Added
 
 - Added dependency to package `ViciOne.Ui.TreeEditor`
+- Sending `IControlPanelRequest` opens settings dialog when not already visible (limited to control panels configured to be displayed in settings categories for now)
 
 ### Changed
 
