@@ -15,8 +15,7 @@ using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 namespace Blazor.Shared.Instance.ControlPanels.Instances;
 
 public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesControlPanelState>,
-    IEventConsumer<ControlInstanceCompleted>,
-    IEventConsumer<ControlInstanceError>
+    IEventConsumer<ControlInstanceCompleted>
 {
     private readonly string _refreshIconCssClass =
         MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
@@ -43,8 +42,7 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
     {
         await base.OnInitializedAsync();
 
-        _subscriptionHandle.Add(Mediator.Register<ControlInstanceCompleted>(this));
-        _subscriptionHandle.Add(Mediator.Register<ControlInstanceError>(this));
+        _subscriptionHandle.Add(Mediator.Register(this));
 
         InstanceGridItemSelection.Clear();
         InstanceGridItemSelection.Changed += InstanceGridItemSelectionChanged;
@@ -195,6 +193,35 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
 
     public async Task Consume(ClientContext<ControlInstanceCompleted> context, CancellationToken cancellationToken)
     {
+        if (context.Message.Error is not null)
+        {
+            switch (context.Message.Command)
+            {
+                case InstanceCommand.Delete:
+                    var instanceDeleted = State.DeletingInstances.FirstOrDefault(k => k.Id == context.Message.InstanceId);
+                    if (instanceDeleted is null)
+                        return;
+
+                    instanceDeleted.HasFailed = true;
+
+                    UpdateInstancesQueryable();
+                    await InvokeAsync(StateHasChanged);
+
+                    break;
+
+                case InstanceCommand.Synchronize:
+                    var instance = State.Instances.FirstOrDefault(k => k.Id == context.Message.InstanceId);
+                    if (instance is not null)
+                    {
+                        instance.IsSynchronizing = false;
+                        instance.HasFailed = true;
+                        await InvokeAsync(StateHasChanged);
+                    }
+                    break;
+            }
+            return;
+        }
+
         switch (context.Message.Command)
         {
             case InstanceCommand.Delete:
@@ -215,34 +242,6 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
                 {
                     instance.IsSynchronizing = false;
                     instance.HasFailed = false;
-                    await InvokeAsync(StateHasChanged);
-                }
-                break;
-        }
-    }
-
-    public async Task Consume(ClientContext<ControlInstanceError> context, CancellationToken cancellationToken)
-    {
-        switch (context.Message.Command)
-        {
-            case InstanceCommand.Delete:
-                var instanceDeleted = State.DeletingInstances.FirstOrDefault(k => k.Id == context.Message.InstanceId);
-                if (instanceDeleted is null)
-                    return;
-
-                instanceDeleted.HasFailed = true;
-
-                UpdateInstancesQueryable();
-                await InvokeAsync(StateHasChanged);
-
-                break;
-
-            case InstanceCommand.Synchronize:
-                var instance = State.Instances.FirstOrDefault(k => k.Id == context.Message.InstanceId);
-                if (instance is not null)
-                {
-                    instance.IsSynchronizing = false;
-                    instance.HasFailed = true;
                     await InvokeAsync(StateHasChanged);
                 }
                 break;

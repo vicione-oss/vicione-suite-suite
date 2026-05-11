@@ -39,9 +39,9 @@ public sealed partial class ArtifactRepositoryChangeConsumer(
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to invalidate repository options on change={action}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to invalidate repository options on change='{Action}'")]
     private static partial void LogFailedToReloadOptions(ILogger<ArtifactRepositoryChangeConsumer> logger, Exception ex, CrudAction action);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to invalidate artifact cache {action}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to invalidate artifact cache on change='{Action}'")]
     private static partial void LogFailedToInvalidateArtifacts(ILogger<ArtifactRepositoryChangeConsumer> logger, Exception ex, CrudAction action);
 }

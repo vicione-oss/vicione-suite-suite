@@ -10,7 +10,7 @@ using Semver;
 
 namespace Core.OS.Instance.Consumers;
 
-public sealed class GetAvailableSuiteVersionsConsumer(
+public sealed partial class GetAvailableSuiteVersionsConsumer(
     ISuiteArtifactRepository repository,
     IInstanceInformationProvider instanceInformationProvider,
     ILogger<GetAvailableSuiteVersionsConsumer> logger) : RequestConsumer<GetAvailableSuiteVersions, GetAvailableSuiteVersionsResponse>
@@ -23,9 +23,7 @@ public sealed class GetAvailableSuiteVersionsConsumer(
 
         var currentVersion = SemVersion.Parse(instanceInformationProvider.Local.Version);
 
-        logger.LogInformation("Get available suite artifacts for suite-version='{SuiteVersion}', host-management='{HostMgmtVersion}'",
-            currentVersion,
-            hostManagementAssemblyName.Version);
+        LogConsume(logger, currentVersion, hostManagementAssemblyName.Version);
 
         // All suite bundles that are compatible with installed HostManagement
         var suiteBundles = await repository.QuerySuiteArtifactBundles(hostManagementAssemblyName.Version, false, cancellationToken);
@@ -82,4 +80,7 @@ public sealed class GetAvailableSuiteVersionsConsumer(
     public override Task<GetAvailableSuiteVersionsResponse> HandleException(GetAvailableSuiteVersions message,
         Exception e, CancellationToken cancellationToken)
         => Task.FromResult(new GetAvailableSuiteVersionsResponse([]) { RequestError = new ErrorInfo(0, e.Message) });
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Get available suite artifacts for suite='{SuiteVersion}', host-management='{hostManagementVersion}'")]
+    private static partial void LogConsume(ILogger<GetAvailableSuiteVersionsConsumer> logger, SemVersion? suiteVersion, Version? hostManagementVersion);
 }

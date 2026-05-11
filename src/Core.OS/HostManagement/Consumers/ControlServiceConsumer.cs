@@ -13,19 +13,17 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
     public async Task Consume(ConsumeContext<ControlService> context)
     {
         var correlationId = context.Message.CorrelationId;
+        var serviceName = context.Message.ServiceName;
+        var command = context.Message.Command;
 
         try
         {
-            if (correlationId == Guid.Empty)
-                throw new InvalidOperationException("Command can't be correlated.");
-
-            LogControlService(logger, context.Message.ServiceName, context.Message.Command);
-
-            var result = await serviceManagement.TryControlService(context.Message.Command, context.Message.ServiceName, context.CancellationToken);
-
+            var result = await serviceManagement.TryControlService(command, serviceName, context.CancellationToken);
             if (!result.Success)
             {
-                var errorResponse = new ControlServiceCompleted(context.Message.ServiceName, result.State)
+                LogServiceControlNoSuccess(logger, correlationId, serviceName, command);
+
+                var errorResponse = new ControlServiceCompleted(serviceName, result.State)
                 {
                     CorrelationId = correlationId,
                     ErrorInfo = result.Error!
@@ -35,16 +33,18 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
                 return;
             }
 
+            LogServiceControlled(logger, correlationId, serviceName, command);
+
             await context.Publish(new SystemConfigurationChanged { CorrelationId = correlationId }, context.CancellationToken);
 
-            var response = new ControlServiceCompleted(context.Message.ServiceName, result.State) { CorrelationId = correlationId };
+            var response = new ControlServiceCompleted(serviceName, result.State) { CorrelationId = correlationId };
             await context.Publish(response, context.CancellationToken);
         }
         catch (Exception e)
         {
-            LogControlServiceError(logger, e, context.Message.ServiceName);
+            LogUnexpectedError(logger, e, correlationId, serviceName, command);
 
-            var errorResponse = new ControlServiceCompleted(context.Message.ServiceName, ServiceState.Unknown)
+            var errorResponse = new ControlServiceCompleted(serviceName, ServiceState.Unknown)
             {
                 CorrelationId = correlationId,
                 ErrorInfo = new ErrorInfo(ControlServiceErrorCodes.UnknownError, e.Message)
@@ -54,9 +54,15 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Executing {Command} on service '{ServiceName}'")]
-    private static partial void LogControlService(ILogger logger, string serviceName, ServiceCommand command);
+    [LoggerMessage(Level = LogLevel.Error, Message = "Executing command='{Command}' on service='{ServiceName}' correlated by {CorrelationId}")]
+    private static partial void LogConsume(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while executing control service '{ServiceName}'")]
-    private static partial void LogControlServiceError(ILogger logger, Exception exception, string serviceName);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Executed command='{Command}' on service='{ServiceName}' correlated by {CorrelationId} successfully")]
+    private static partial void LogServiceControlled(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Execution command='{Command}' on service '{ServiceName}' correlated by {CorrelationId} was not successfully")]
+    private static partial void LogServiceControlNoSuccess(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while executing command='{Command}' on service '{ServiceName}' correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId, string serviceName, ServiceCommand command);
 }
