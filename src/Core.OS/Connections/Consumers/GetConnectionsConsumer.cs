@@ -8,7 +8,7 @@ using Sdk.Connections.Requests;
 
 namespace Core.OS.Connections.Consumers;
 
-public sealed class GetConnectionsConsumer(IConnectionDbContext dbContext, ILogger<GetConnectionsConsumer> logger) : RequestConsumer<GetConnections, GetConnectionsResponse>
+public sealed partial class GetConnectionsConsumer(IConnectionDbContext dbContext, ILogger<GetConnectionsConsumer> logger) : RequestConsumer<GetConnections, GetConnectionsResponse>
 {
     public override async Task<GetConnectionsResponse> Respond(GetConnections message, CancellationToken cancellationToken)
     {
@@ -56,8 +56,11 @@ public sealed class GetConnectionsConsumer(IConnectionDbContext dbContext, ILogg
 
     public override Task<GetConnectionsResponse> HandleException(GetConnections message, Exception e, CancellationToken cancellationToken)
     {
-        logger.LogError(e, $"Failed to handle {nameof(GetConnections)}");
+        LogError(logger, e);
 
         return Task.FromResult(new GetConnectionsResponse([], new(ConnectionErrorCodes.UnknownError, e.Message)));
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to get connections")]
+    private static partial void LogError(ILogger<GetConnectionsConsumer> logger, Exception ex);
 }

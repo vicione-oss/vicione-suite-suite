@@ -10,7 +10,7 @@ public sealed class TestConnectionService : IEventConsumer<TestConnectionDoneEve
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly IUiMediator _mediator;
-    private readonly Guid _requestId = Guid.NewGuid();
+    private readonly Guid _correlationId = Guid.NewGuid();
     private readonly IDisposable _resultSubscription;
 
     public CancellationToken? Token { get; private set; }
@@ -26,7 +26,7 @@ public sealed class TestConnectionService : IEventConsumer<TestConnectionDoneEve
 
     public Task Consume(ClientContext<TestConnectionDoneEvent> context, CancellationToken cancellationToken)
     {
-        if (_requestId != context.Message.RequestId)
+        if (_correlationId != context.Message.CorrelationId)
             return Task.CompletedTask;
 
         Token = null;
@@ -43,11 +43,13 @@ public sealed class TestConnectionService : IEventConsumer<TestConnectionDoneEve
         if (TestStarted is not null)
             await TestStarted.Invoke(connection.Id);
 
-        await _mediator.Send(new TestConnection(_requestId, connection), Token.Value);
+        await _mediator.Send(new TestConnection(_correlationId, connection), Token.Value);
     }
 
     public void Dispose()
     {
+        Token = null;
+
         _resultSubscription.Dispose();
         _cancellationTokenSource.Dispose();
     }
