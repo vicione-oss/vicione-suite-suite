@@ -22,27 +22,30 @@ namespace Core.OS.Instance.Consumers;
 public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, IConsumer<ControlInstance>
 {
     private readonly IServiceProvider _services;
-    private readonly IApplicationDbContext _applicationDb;
     private readonly ILogger<ControlInstanceConsumer> _logger;
     private readonly IFileSystem _fileSystem;
 
-    public ControlInstanceConsumer(IServiceProvider services, ILogger<ControlInstanceConsumer> logger, IFileSystem fileSystem)
+    public ControlInstanceConsumer(IServiceProvider services, IFileSystem fileSystem, ILogger<ControlInstanceConsumer> logger)
     {
         _services = services;
-        _logger = logger;
         _fileSystem = fileSystem;
-        _applicationDb = _services.GetRequiredService<IApplicationDbContext>();
+        _logger = logger;
     }
 
     public async Task Consume(ConsumeContext<ControlInstance> context)
     {
-        LogConsumingControlInstance(_logger, nameof(ControlInstance), context.Message.Action, context.Message.InstanceId);
+        var correlationId = context.Message.CorrelationId;
+        var instanceId = context.Message.InstanceId;
+
+        LogConsumingControlInstance(_logger, correlationId, context.Message.Action, instanceId);
 
         var localProvider = _services.GetRequiredService<ILocalInstanceInformationProvider>();
-        var targetInstance = await _applicationDb.InstanceInfo.SingleOrDefaultAsync(k => k.Id == context.Message.InstanceId);
+        var applicationDb = _services.GetRequiredService<IApplicationDbContext>();
+
+        var targetInstance = await applicationDb.InstanceInfo.SingleOrDefaultAsync(k => k.Id == instanceId);
         if (targetInstance is null)
         {
-            LogInstanceNotPartOfSystem(_logger, context.Message.InstanceId);
+            LogInstanceNotPartOfSystem(_logger, correlationId, instanceId);
             return;
         }
 
@@ -55,7 +58,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
                     break;
 
                 case InstanceCommand.Delete:
-                    await HandleDeleteInstance(context, localProvider.Local, targetInstance);
+                    await HandleDeleteInstance(context, applicationDb, localProvider.Local, targetInstance);
                     break;
 
                 case InstanceCommand.Restart:
@@ -68,9 +71,14 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         }
         catch (Exception e)
         {
-            LogFailedToProcessCommand(_logger, e, context.Message.Action, context.Message.InstanceId);
+            LogFailedToProcessCommand(_logger, e, correlationId, context.Message.Action, instanceId);
 
-            await context.Publish(new ControlInstanceError(context.Message.InstanceId, context.Message.Action, new(100, e.Message)), context.CancellationToken);
+            var message = new ControlInstanceCompleted(instanceId, context.Message.Action, new ErrorInfo(100, e.Message))
+            {
+                CorrelationId = correlationId
+            };
+
+            await context.Publish(message, context.CancellationToken);
         }
     }
 
@@ -102,7 +110,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         await ExecuteTracked(context, builder);
     }
 
-    private async Task HandleDeleteInstance(ConsumeContext<ControlInstance> context, IInstanceInformation localInstance, InstanceInformation instanceInfo)
+    private async Task HandleDeleteInstance(ConsumeContext<ControlInstance> context, IApplicationDbContext dbContext, IInstanceInformation localInstance, InstanceInformation instanceInfo)
     {
         if (localInstance.Type != InstanceType.Master)
         {
@@ -111,8 +119,8 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         }
 
         // todo: removing an instance from the system can have impact to the cluster. actions need to be defined
-        _applicationDb.InstanceInfo.Remove(instanceInfo);
-        await _applicationDb.SaveChangesAsync(context.CancellationToken);
+        dbContext.InstanceInfo.Remove(instanceInfo);
+        await dbContext.SaveChangesAsync(context.CancellationToken);
 
         await context.Publish(new ControlInstanceCompleted(instanceInfo.Id, InstanceCommand.Delete), context.CancellationToken);
     }
@@ -123,6 +131,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
 
         var delay = context.Message.Delay ?? TimeSpan.Zero;
         var instanceId = instanceInfo.Id;
+        var correlationId = context.Message.CorrelationId;
 
         // Capture a root/long-lived service provider to create a fresh scope after the delay
         var rootServices = _services.GetRequiredService<IServiceScopeFactory>();
@@ -156,7 +165,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
             }
             catch (Exception e)
             {
-                LogFailedToProcessCommand(_logger, e, InstanceCommand.Restart, instanceId);
+                LogFailedToProcessCommand(_logger, e, correlationId, InstanceCommand.Restart, instanceId);
             }
         });
 
@@ -167,7 +176,9 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
     {
         var runtimeDirectory = Environment.GetEnvironmentVariable("RUNTIME_DIRECTORY") ?? "/run/vicione-suite";
         _fileSystem.Directory.CreateDirectory(runtimeDirectory);
+
         var filePath = _fileSystem.Path.Combine(runtimeDirectory, "suite-ui-restart");
+
         if (!_fileSystem.File.Exists(filePath))
             _fileSystem.File.Create(filePath, 0, FileOptions.None).Dispose();
     }
@@ -176,6 +187,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
     {
         var instanceId = context.Message.GetVariable<Guid>(SyncDataHelpers.InstanceIdVariableKey);
         LogInstanceSuccessfullySynchronized(_logger, instanceId);
+
         return context.Publish(new ControlInstanceCompleted(instanceId, InstanceCommand.Synchronize),
             context.CancellationToken);
     }
@@ -185,37 +197,41 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         var instanceId = context.Message.GetVariable<Guid>(SyncDataHelpers.InstanceIdVariableKey);
         var errorList = context.Message.ActivityExceptions.Select(ex => ex.ExceptionInfo.Message).ToList();
         var errors = string.Join(Environment.NewLine, errorList);
+
         LogSynchronizationErrors(_logger, instanceId, Environment.NewLine, errors);
 
-        var message = new ControlInstanceError(instanceId, InstanceCommand.Synchronize, new ErrorInfo(2, errors));
+        var message = new ControlInstanceCompleted(instanceId, InstanceCommand.Synchronize, new ErrorInfo(2, errors))
+        {
+            CorrelationId = context.CorrelationId ?? Guid.NewGuid()
+        };
 
         return context.Publish(message, context.CancellationToken);
     }
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Consume {command} action:{action} for instance {instanceId}")]
-    private static partial void LogConsumingControlInstance(ILogger<ControlInstanceConsumer> logger, string command, InstanceCommand action, Guid instanceId);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Consume control instance='{InstanceId}' command='{Command}' correlated by {CorrelationId}")]
+    private static partial void LogConsumingControlInstance(ILogger<ControlInstanceConsumer> logger, Guid correlationId, InstanceCommand command, Guid instanceId);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Instance {instanceId} is not part of the current system setup")]
-    private static partial void LogInstanceNotPartOfSystem(ILogger<ControlInstanceConsumer> logger, Guid instanceId);
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Instance='{InstanceId}' is not part of the current system setup correlated by {CorrelationId}")]
+    private static partial void LogInstanceNotPartOfSystem(ILogger<ControlInstanceConsumer> logger, Guid correlationId, Guid instanceId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to process '{command}' on instance='{instanceId}'")]
-    private static partial void LogFailedToProcessCommand(ILogger<ControlInstanceConsumer> logger, Exception exception, InstanceCommand command, Guid instanceId);
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to control instance='{InstanceId}' processing '{Command}' correlated by {CorrelationId}")]
+    private static partial void LogFailedToProcessCommand(ILogger<ControlInstanceConsumer> logger, Exception exception, Guid correlationId, InstanceCommand command, Guid instanceId);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Local instance {instanceId} is not a valid synchronization orchestrator (master)")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Local instance {InstanceId} is not a valid synchronization orchestrator (master)")]
     private static partial void LogLocalInstanceNotValidSyncOrchestrator(ILogger<ControlInstanceConsumer> logger, Guid instanceId);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Instance {instanceId} is not a valid target system for synchronization")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Instance {InstanceId} is not a valid target system for synchronization")]
     private static partial void LogInstanceNotValidSyncTarget(ILogger<ControlInstanceConsumer> logger, Guid instanceId);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Added sync activity instanceId:{instanceId} context:{schema} table:{table}")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Added sync activity instanceId='{InstanceId}' context='{Schema}' table='{Table}'")]
     private static partial void LogAddedSyncActivity(ILogger<ControlInstanceConsumer> logger, Guid instanceId, string schema, string table);
 
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Instance {instanceId} can only be removed by master")]
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Instance='{InstanceId}' can only be removed by master")]
     private static partial void LogInstanceCanOnlyBeRemovedByMaster(ILogger<ControlInstanceConsumer> logger, Guid instanceId);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Instance {instanceId} successfully synchronized")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Instance='{InstanceId}' successfully synchronized")]
     private static partial void LogInstanceSuccessfullySynchronized(ILogger<ControlInstanceConsumer> logger, Guid instanceId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "One or more errors occured when synchronizing data for instance {instanceId}:{newLine}{errorList}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "One or more errors occured when synchronizing data for instance='{InstanceId}'.{NewLine}{ErrorList}")]
     private static partial void LogSynchronizationErrors(ILogger<ControlInstanceConsumer> logger, Guid instanceId, string newLine, string errorList);
 }

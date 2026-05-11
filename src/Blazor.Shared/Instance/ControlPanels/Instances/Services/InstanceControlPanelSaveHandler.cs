@@ -5,8 +5,6 @@ using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
-using Sdk.Messaging;
-using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Instance.ControlPanels.Instances.Services;
 
@@ -43,10 +41,9 @@ internal sealed class InstanceControlPanelSaveHandler : ControlPanelSaveHandlerB
 
     public Task Consume(ClientContext<InstanceInformationUpdated> context, CancellationToken cancellationToken)
     {
-        var errorInfo = context.Message.Success ? null : new ErrorInfo(0, $"{CommonPhrases.AnUnexpectedErrorOccurred} {CommonPhrases.SeeLogsForFurtherDetails}");
-        if (errorInfo is not null)
+        if (context.Message.Error is not null)
         {
-            CompleteWithError(context.Message.CorrelationId, errorInfo);
+            CompleteWithError(context.Message.CorrelationId, context.Message.Error);
         }
         else
         {

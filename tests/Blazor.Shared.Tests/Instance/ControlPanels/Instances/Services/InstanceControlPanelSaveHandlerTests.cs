@@ -36,7 +36,7 @@ public class InstanceControlPanelSaveHandlerTests
                     correlationId = command.CorrelationId;
                     var information = command.InstanceInformation;
 
-                    var message = new InstanceInformationUpdated(correlationId, information, true);
+                    var message = new InstanceInformationUpdated(correlationId, information);
                     var context = new ClientContext<InstanceInformationUpdated>(message, Guid.NewGuid());
 
                     await saveHandler.Consume(context, TestContext.Current.CancellationToken);
@@ -71,7 +71,7 @@ public class InstanceControlPanelSaveHandlerTests
                     correlationId = command.CorrelationId;
                     var information = command.InstanceInformation;
 
-                    var message = new InstanceInformationUpdated(correlationId, information, false);
+                    var message = new InstanceInformationUpdated(correlationId, information, new Sdk.Messaging.ErrorInfo(100, "Failure"));
                     var context = new ClientContext<InstanceInformationUpdated>(message, Guid.NewGuid());
 
                     await saveHandler.Consume(context, TestContext.Current.CancellationToken);

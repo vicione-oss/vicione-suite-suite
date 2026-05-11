@@ -1,4 +1,6 @@
-﻿using Core.OS.Instance.Extensions;
+using System.Globalization;
+using System.Text;
+using Core.OS.Instance.Extensions;
 using Core.Shared.Persistence.Commands;
 using Core.Shared.Persistence.Contracts;
 using Core.Shared.Persistence.Events;
@@ -7,70 +9,96 @@ using Sdk.Messaging;
 
 namespace Core.OS.Instance.Consumers;
 
-public sealed class CreateBackupConsumer(IBackupFactory backupFactory, IBackupStore backupStore, ILogger<CreateBackupConsumer> logger) : IConsumer<CreateBackup>
+public sealed partial class CreateBackupConsumer(IBackupFactory backupFactory, IBackupStore backupStore, ILogger<CreateBackupConsumer> logger) : IConsumer<CreateBackup>
 {
     public async Task Consume(ConsumeContext<CreateBackup> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
+        var correlationId = context.Message.CorrelationId;
+
+        LogConsume(logger, correlationId, context.Message.KeepBackupOnError);
 
         try
         {
-            logger.LogInformation("Creating suite backup");
-
             // we write directly to the stream but know of errors only afterwards
             await using var fileStream = backupStore.CreateBackupFile(out var filename);
             var summary = await backupFactory.CreateBackup(fileStream, context.CancellationToken);
-            var errors = summary.GetErrorMessages().ToArray();
 
-            if (!errors.Any())
+            var errors = summary.GetErrorMessages().ToArray();
+            if (errors.Length == 0)
             {
-                LogSummary(summary);
+                LogBackupSummary(correlationId, summary);
                 await context.Publish(new BackupFinished(correlationId, filename, null));
                 return;
             }
 
             if (context.Message.KeepBackupOnError)
             {
-                logger.LogWarning("Backup '{FileName}' created with errors", filename);
+                LogKeepBackupWithErrors(logger, correlationId, filename);
                 return;
             }
 
-            foreach (var error in errors)
-                logger.LogWarning("Backup error: {Error}", error);
+            LogBackupErrors(correlationId, errors);
 
-            logger.LogWarning("Backup '{FileName}' created with errors and will be removed", filename);
             backupStore.DeleteBackupFile(filename);
+
+            LogDeleteFailedBackup(logger, correlationId, filename);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
+            LogUnexpectedError(logger, ex, correlationId);
+
             // cleanup store on failure?
-            await context.Publish(new BackupFinished(correlationId, null, new ErrorInfo(100, e.Message)));
+            await context.Publish(new BackupFinished(correlationId, null, new ErrorInfo(100, ex.Message)));
         }
     }
 
-    private void LogSummary(BackupSummary summary)
+    private void LogBackupSummary(Guid correlationId, BackupSummary summary)
     {
-        logger.LogInformation("Backup created for instance {InstanceId} ({Type}) v{SuiteVersion} (Sdk v{SdkVersion})"
-            , summary.InstanceId, summary.InstanceType, summary.SuiteVersion, summary.SdkVersion);
+        if (!logger.IsEnabled(LogLevel.Information))
+            return;
+
+        var sb = new StringBuilder();
+        sb.AppendLine(CultureInfo.InvariantCulture, $"Backup summary for instance {summary.InstanceId} ({summary.InstanceType}) v{summary.SuiteVersion} (Sdk v{summary.SdkVersion}) correlated by {correlationId}:");
 
         if (summary.Modules.Count > 0)
         {
-            logger.LogInformation("Backup contains modules {Modules}",
-                string.Join(", ", summary.Modules.Select(k => $"{k.Name}:{k.ArchiveLength}bytes")));
+            sb.AppendLine(CultureInfo.InvariantCulture, $"Modules: {string.Join(", ", summary.Modules.Select(k => $"{k.Name}:{k.ArchiveLength} bytes"))}.");
         }
         else
         {
-            logger.LogWarning("Backup contains no module data");
+            sb.AppendLine("Modules: no module data");
         }
 
         if (summary.SystemConfiguration is not null)
         {
-            logger.LogInformation("Backup contains system configuration {Length}bytes.", summary.SystemConfiguration.ArchiveLength);
+            sb.AppendLine(CultureInfo.InvariantCulture, $"System: Backup contains configuration {summary.SystemConfiguration.ArchiveLength} bytes.");
         }
         else
         {
-            logger.LogWarning("Backup contains no system configuration");
+            sb.AppendLine("System: no configuration data");
         }
+
+        logger.LogInformation(sb.ToString());
     }
 
+    private void LogBackupErrors(Guid correlationId, IEnumerable<string> errors)
+    {
+        if (!logger.IsEnabled(LogLevel.Warning))
+            return;
+
+        foreach (var error in errors)
+            logger.LogWarning("Backup error {CorrelationId}: {Error}", correlationId, error);
+    }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Consume create backup correlated by {CorrelationId}. Keep on error={KeepBackupOnError}")]
+    private static partial void LogConsume(ILogger<CreateBackupConsumer> logger, Guid correlationId, bool KeepBackupOnError);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Delete failed backup file='{FileName}' correlated by {CorrelationId}")]
+    private static partial void LogDeleteFailedBackup(ILogger<CreateBackupConsumer> logger, Guid correlationId, string fileName);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Keep backup file='{FileName}' with errors correlated by {CorrelationId} ")]
+    private static partial void LogKeepBackupWithErrors(ILogger<CreateBackupConsumer> logger, Guid correlationId, string fileName);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create backup correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger<CreateBackupConsumer> logger, Exception exception, Guid correlationId);
 }

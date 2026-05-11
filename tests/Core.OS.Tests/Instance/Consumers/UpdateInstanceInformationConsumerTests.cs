@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.Instance;
 using Core.OS.Instance.Consumers;
 using Core.OS.Instance.Services;
@@ -64,7 +64,7 @@ public class UpdateInstanceInformationConsumerTests : TestWithDbContextSqlite<Ap
         Assert.NotNull(triggeredEvent);
         Assert.IsType<InstanceInformationUpdated>(triggeredEvent);
 
-        triggeredEvent.Success.Should().BeTrue();
+        triggeredEvent.Error.Should().BeNull();
         triggeredEvent.InstanceInformation.Id.Should().Be(instance.Id);
         triggeredEvent.InstanceInformation.Name.Should().Be(update.Name);
         triggeredEvent.InstanceInformation.FormattedName.Should().Be(update.FormattedName);
@@ -99,6 +99,6 @@ public class UpdateInstanceInformationConsumerTests : TestWithDbContextSqlite<Ap
         Assert.NotNull(triggeredEvent);
         Assert.IsType<InstanceInformationUpdated>(triggeredEvent);
 
-        triggeredEvent.Success.Should().BeFalse();
+        triggeredEvent.Error.Should().NotBeNull();
     }
 }

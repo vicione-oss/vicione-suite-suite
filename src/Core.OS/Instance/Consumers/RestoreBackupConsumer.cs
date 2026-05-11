@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.Module.Comparer;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Extensions;
@@ -29,6 +29,8 @@ public sealed partial class RestoreBackupConsumer(
 {
     public async Task Consume(ConsumeContext<RestoreBackup> context)
     {
+        var correlationId = context.Message.CorrelationId;
+
         try
         {
             if (instanceInformationProvider.Local.Type != Sdk.Instance.InstanceType.Standalone)
@@ -38,7 +40,7 @@ public sealed partial class RestoreBackupConsumer(
             if (context.Message is { SystemConfiguration: false, SuiteConfiguration: false })
                 return;
 
-            LogPreparingSuiteBackupRestore(logger);
+            LogPreparingSuiteBackupRestore(logger, correlationId, context.Message.SystemConfiguration, context.Message.SuiteConfiguration);
 
             // TODO: user should select a backup from a list of available ones in UI
             // TODO: should we make a backup before we set the restore flags?
@@ -48,7 +50,8 @@ public sealed partial class RestoreBackupConsumer(
 
             // we can't publish the event later because applying the system configuration
             // can lead to immediate restart of the system
-            LogPublishBackupPreparedEvent(logger);
+            LogPublishBackupPreparedEvent(logger, correlationId);
+
             await context.Publish(new RestoreBackupPrepared(context.Message.SuiteConfiguration)).ConfigureAwait(false);
 
             // if we have to apply system configuration restart by HM gets triggered
@@ -70,7 +73,8 @@ public sealed partial class RestoreBackupConsumer(
         }
         catch (Exception ex)
         {
-            LogFailedToProcessBackupRestore(logger, ex);
+            LogUnexpectedError(logger, ex, correlationId);
+
             await context.Publish(new RestoreBackupPrepared(context.Message.SuiteConfiguration, new ErrorInfo(100, ex.Message)));
 
             // something went wrong - don't try to restore suite from backup
@@ -89,7 +93,7 @@ public sealed partial class RestoreBackupConsumer(
             }
             catch (Exception e)
             {
-                LogCallRestoreHandlerFailedOn(logger, e, moduleHandler.GetType().Name);
+                LogCallRestoreHandlerFailedOn(logger, e, context.Message.CorrelationId, moduleHandler.GetType().Name);
             }
         }
     }
@@ -121,7 +125,7 @@ public sealed partial class RestoreBackupConsumer(
             var restoreTask = new RestoreTask(backupPath, context.Message.SuiteConfiguration, context.Message.SystemConfiguration, DateTimeOffset.Now);
             await fileSystem.WriteRestoreTask(options.Value, restoreTask, context.CancellationToken);
 
-            LogPreparedRestoreBackupOnRestart(logger, backupFile);
+            LogPreparedRestoreBackupOnRestart(logger, context.Message.CorrelationId, backupFile);
         }
 
         if (context.Message.SystemConfiguration)
@@ -141,7 +145,7 @@ public sealed partial class RestoreBackupConsumer(
 
         var networkChanges = await HasNetworkChanges(systemConfiguration, context.CancellationToken);
 
-        LogApplySystemConfigurationFromBackup(logger, systemConfiguration.Version, networkChanges);
+        LogApplySystemConfigurationFromBackup(logger, context.Message.CorrelationId, systemConfiguration.Version, networkChanges);
 
         // If we apply configuration from backup and we have network changes
         // a restart of the system/suite will be triggered
@@ -186,22 +190,21 @@ public sealed partial class RestoreBackupConsumer(
     }
 
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Preparing suite backup restore")]
-    private static partial void LogPreparingSuiteBackupRestore(ILogger logger);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Preparing suite backup configuration (system='{RestoreSystem}', suite='{RestoreSuite}') correlated by {CorrelationId}")]
+    private static partial void LogPreparingSuiteBackupRestore(ILogger logger, Guid correlationId, bool restoreSystem, bool restoreSuite);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Publish backup prepared event")]
-    private static partial void LogPublishBackupPreparedEvent(ILogger logger);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Publish backup prepared event correlated by {CorrelationId}")]
+    private static partial void LogPublishBackupPreparedEvent(ILogger logger, Guid correlationId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to process backup restore")]
-    private static partial void LogFailedToProcessBackupRestore(ILogger logger, Exception exception);
+    [LoggerMessage(Level = LogLevel.Error, Message = "Call restore handler failed on {Handler} correlated by {CorrelationId}")]
+    private static partial void LogCallRestoreHandlerFailedOn(ILogger logger, Exception exception, Guid correlationId, string handler);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Call restore handler failed on {Handler}")]
-    private static partial void LogCallRestoreHandlerFailedOn(ILogger logger, Exception exception, string handler);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Prepared restore backup {FileName} on restart correlated by {CorrelationId}")]
+    private static partial void LogPreparedRestoreBackupOnRestart(ILogger logger, Guid correlationId, string fileName);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Prepared restore backup {FileName} on restart.")]
-    private static partial void LogPreparedRestoreBackupOnRestart(ILogger logger, string fileName);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Apply system configuration version='{Version}' from backup archive (network change:{Change}) correlated by {CorrelationId}")]
+    private static partial void LogApplySystemConfigurationFromBackup(ILogger logger, Guid correlationId, int version, bool change);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Apply system configuration {Version} from backup archive (network change:{Change})")]
-    private static partial void LogApplySystemConfigurationFromBackup(ILogger logger, int version, bool change);
-
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to process backup restore correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId);
 }

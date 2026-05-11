@@ -1,6 +1,5 @@
 using Core.OS.Instance.Extensions;
 using Core.Shared.Instance.Commands;
-using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
 using MassTransit;
 using Sdk.Messaging;
@@ -14,42 +13,45 @@ public sealed partial class UpdateArtifactRepositoryConsumer(
 {
     public async Task Consume(ConsumeContext<UpdateArtifactRepository> context)
     {
-        LogConsumeUpdateArtifactRepository(logger, context.Message.CorrelationId, context.Message.Repository.Id);
+        var correlationId = context.Message.CorrelationId;
+        var repository = context.Message.Repository;
 
-        var repo = context.Message.Repository;
+        LogConsume(logger, correlationId, repository.Id);
 
         try
         {
-            await tokenService.UpdateRepositoryToken(repo, context.CancellationToken);
+            await tokenService.UpdateRepositoryToken(repository, context.CancellationToken);
 
-            var result = await repositoryStore.CreateOrUpdate(repo);
+            var result = await repositoryStore.CreateOrUpdate(repository);
 
-            var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Updated)
+            LogRepositoryUpdated(logger, correlationId, repository.Id);
+
+            var changeEvent = new ArtifactRepositoryChanged(repository, CrudAction.Updated)
             {
-                CorrelationId = context.Message.CorrelationId
+                CorrelationId = correlationId
             };
 
             await context.Publish(changeEvent, context.CancellationToken);
         }
         catch (Exception e)
         {
-            LogFailedToUpdateRepository(logger, e, repo.Id);
+            LogUnexpectedError(logger, e, correlationId, repository.Id);
 
-            var changeEvent = new ArtifactRepositoryChanged(repo, CrudAction.Updated, new ErrorInfo(100, e.Message))
+            var changeEvent = new ArtifactRepositoryChanged(repository, CrudAction.Updated, new ErrorInfo(100, e.Message))
             {
-                CorrelationId = context.Message.CorrelationId
+                CorrelationId = correlationId
             };
 
             await context.Publish(changeEvent, context.CancellationToken);
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Consume UpdateArtifactRepositoryConsumer CorrelationId:{correlationId} Repository:{sourceId}")]
-    private static partial void LogConsumeUpdateArtifactRepository(ILogger<UpdateArtifactRepositoryConsumer> logger, Guid correlationId, Guid sourceId);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Consume update artifact repository='{RepositoryId}' correlated by {CorrelationId}")]
+    private static partial void LogConsume(ILogger<UpdateArtifactRepositoryConsumer> logger, Guid correlationId, Guid? repositoryId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update repository {id}")]
-    private static partial void LogFailedToUpdateRepository(ILogger<UpdateArtifactRepositoryConsumer> logger, Exception exception, Guid id);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Update artifact repository='{RepositoryId}' correlated by {CorrelationId}")]
+    private static partial void LogRepositoryUpdated(ILogger<UpdateArtifactRepositoryConsumer> logger, Guid correlationId, Guid repositoryId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to fetch token for repository {id}")]
-    private static partial void LogFailedToGetToken(ILogger<UpdateArtifactRepositoryConsumer> logger, Exception exception, Guid id);
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update artifact repository='{RepositoryId}' correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger<UpdateArtifactRepositoryConsumer> logger, Exception exception, Guid correlationId, Guid repositoryId);
 }
