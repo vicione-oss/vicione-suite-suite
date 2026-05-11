@@ -13,15 +13,20 @@ public sealed partial class DeleteUserConsumer(UserManager<SuiteUser> userManage
     public async Task Consume(ConsumeContext<DeleteUser> context)
     {
         var correlationId = context.Message.CorrelationId;
+        var userProfile = context.Message.UserProfile;
+
+        LogConsume(logger, correlationId, userProfile.UserName.Value);
 
         try
         {
-            var user = await userManager.FindByNameAsync(context.Message.UserProfile.UserName.Value);
+            var user = await userManager.FindByNameAsync(userProfile.UserName.Value);
             if (user is null)
             {
+                LogUserNotFound(logger, correlationId, userProfile.UserName.Value);
+
                 var errorInfo = new ErrorInfo(UserErrorCodes.DeleteFailedNotFound,
-                             $"Could not delete user '{context.Message.UserProfile.UserName}'. No user was found with that name");
-                var errorResponse = new UserDeletedEvent(context.Message.UserProfile)
+                             $"Could not delete user '{userProfile.UserName}'. No user was found with that name");
+                var errorResponse = new UserDeletedEvent(userProfile)
                 {
                     CorrelationId = correlationId,
                     ErrorInfo = errorInfo
@@ -33,6 +38,8 @@ public sealed partial class DeleteUserConsumer(UserManager<SuiteUser> userManage
 
             if (await userManager.IsLastSystemAdministrator(user))
             {
+                LogLastAdministrator(logger, correlationId, userProfile.UserName.Value);
+
                 var errorInfo = new ErrorInfo(UserErrorCodes.SystemAdminLockout,
                              $"Delete user '{context.Message.UserProfile.UserName}' cancelled. Last system administrator can't be deleted");
                 var errorResponse = new UserDeletedEvent(context.Message.UserProfile)
@@ -47,6 +54,8 @@ public sealed partial class DeleteUserConsumer(UserManager<SuiteUser> userManage
 
             await userManager.DeleteAsync(user);
 
+            LogUserDeleted(logger, correlationId, userProfile.UserName.Value);
+
             var response = new UserDeletedEvent(context.Message.UserProfile)
             {
                 CorrelationId = correlationId
@@ -56,11 +65,11 @@ public sealed partial class DeleteUserConsumer(UserManager<SuiteUser> userManage
         }
         catch (Exception ex)
         {
-            LogError(logger, ex, context.Message.UserProfile.UserName.Value, correlationId);
+            LogUnexpectedError(logger, ex, correlationId, userProfile.UserName.Value);
 
             var errorInfo = new ErrorInfo(UserErrorCodes.DeleteFailed,
-                         $"Could not delete user '{context.Message.UserProfile.UserName}'. {ex.Message}.");
-            var errorResponse = new UserDeletedEvent(context.Message.UserProfile)
+                         $"Could not delete user '{userProfile.UserName}'. {ex.Message}.");
+            var errorResponse = new UserDeletedEvent(userProfile)
             {
                 CorrelationId = correlationId,
                 ErrorInfo = errorInfo
@@ -70,6 +79,18 @@ public sealed partial class DeleteUserConsumer(UserManager<SuiteUser> userManage
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete user '{name}' correlated by '{correlationId}'.")]
-    private static partial void LogError(ILogger<DeleteUserConsumer> logger, Exception ex, string name, Guid correlationId);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Deleting user '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogConsume(ILogger<DeleteUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Deleted user '{Name}' correlated by '{CorrelationId}'.")]
+    private static partial void LogUserDeleted(ILogger<DeleteUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete user '{Name}' correlated by '{CorrelationId}' because it was not found.")]
+    private static partial void LogUserNotFound(ILogger<DeleteUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete user '{Name}' correlated by '{CorrelationId}' because it is last administrator.")]
+    private static partial void LogLastAdministrator(ILogger<DeleteUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured deleting user '{Name}' correlated by '{CorrelationId}'.")]
+    private static partial void LogUnexpectedError(ILogger<DeleteUserConsumer> logger, Exception ex, Guid correlationId, string name);
 }

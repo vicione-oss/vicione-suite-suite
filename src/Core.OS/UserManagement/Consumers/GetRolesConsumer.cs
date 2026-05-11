@@ -1,3 +1,4 @@
+using Core.OS.HostManagement.Consumers;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Extensions;
@@ -9,7 +10,7 @@ using Sdk.UserManagement.Requests;
 
 namespace Core.OS.UserManagement.Consumers;
 
-public sealed class GetRolesConsumer(RoleManager<SuiteRole> roleManager, ILogger<GetRolesConsumer> logger) :
+public sealed partial class GetRolesConsumer(RoleManager<SuiteRole> roleManager, ILogger<GetRolesConsumer> logger) :
     RequestConsumer<GetRoles, GetRolesResponse>
 {
     public override async Task<GetRolesResponse> Respond(GetRoles message, CancellationToken cancellationToken)
@@ -31,8 +32,11 @@ public sealed class GetRolesConsumer(RoleManager<SuiteRole> roleManager, ILogger
 
     public override Task<GetRolesResponse> HandleException(GetRoles message, Exception e, CancellationToken cancellationToken)
     {
-        logger.LogError(e, "Consume {Request} failed", nameof(GetRoles));
+        LogRequestError(logger, e);
 
         return Task.FromResult(new GetRolesResponse([], new(UserErrorCodes.UnknownError, e.Message)));
     }
+
+    [LoggerMessage(LogLevel.Error, "Failed to get roles")]
+    private static partial void LogRequestError(ILogger<GetRolesConsumer> logger, Exception exception);
 }
