@@ -120,5 +120,4 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
 
     [LoggerMessage(LogLevel.Error, "An exception was thrown while fetching system configuration from Host Management")]
     private static partial void LogExceptionOccurred(ILogger<GetSystemConfigurationRequestConsumer> logger, Exception exception);
-
 }

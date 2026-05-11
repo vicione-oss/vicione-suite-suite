@@ -18,15 +18,20 @@ public sealed partial class UpdateRoleConsumer(RoleManager<SuiteRole> roleManage
     public async Task Consume(ConsumeContext<UpdateRole> context)
     {
         var correlationId = context.Message.CorrelationId;
+        var role = context.Message.Role;
+
+        LogConsume(logger, correlationId, role.Name);
 
         try
         {
-            var suiteRole = await roleManager.FindByNameAsync(context.Message.Role.Name);
-            if (suiteRole is null)
+            var existingRole = await roleManager.FindByNameAsync(role.Name);
+            if (existingRole is null)
             {
+                LogRoleNotFound(logger, correlationId, role.Name);
+
                 var errorInfo = new ErrorInfo(RoleErrorCodes.UpdateFailedNotFound,
-                            $"Could not update role '{context.Message.Role.Name}'. No role was found with that name");
-                var errorResponse = new RoleUpdatedEvent(context.Message.Role)
+                            $"Could not update role '{role.Name}'. No role was found with that name");
+                var errorResponse = new RoleUpdatedEvent(role)
                 {
                     CorrelationId = correlationId,
                     ErrorInfo = errorInfo
@@ -36,11 +41,13 @@ public sealed partial class UpdateRoleConsumer(RoleManager<SuiteRole> roleManage
                 return;
             }
 
-            if (suiteRole.Managed is true)
+            if (existingRole.Managed is true)
             {
+                LogRoleIsManaged(logger, correlationId, role.Name);
+
                 var errorInfo = new ErrorInfo(RoleErrorCodes.UpdateFailed,
-                            $"Update role '{context.Message.Role.Name}' cancelled. Default roles can't be edited.");
-                var errorResponse = new RoleUpdatedEvent(context.Message.Role)
+                            $"Update role '{role.Name}' cancelled. Default roles can't be edited.");
+                var errorResponse = new RoleUpdatedEvent(role)
                 {
                     CorrelationId = correlationId,
                     ErrorInfo = errorInfo
@@ -50,23 +57,25 @@ public sealed partial class UpdateRoleConsumer(RoleManager<SuiteRole> roleManage
                 return;
             }
 
-            if (suiteRole.Description != context.Message.Role.Description)
-                suiteRole.Description = context.Message.Role.Description;
+            if (existingRole.Description != role.Description)
+                existingRole.Description = role.Description;
 
-            await roleManager.UpdateAsync(suiteRole);
-            await AssignClaims(context.Message.Role.Claims, suiteRole);
+            await roleManager.UpdateAsync(existingRole);
+            await AssignClaims(role.Claims, existingRole);
 
-            var response = new RoleUpdatedEvent(suiteRole.ToRole(context.Message.Role.Claims)) { CorrelationId = correlationId };
+            LogRoleUpdated(logger, correlationId, role.Name);
+
+            var response = new RoleUpdatedEvent(existingRole.ToRole(role.Claims)) { CorrelationId = correlationId };
 
             await context.Publish(response, context.CancellationToken);
         }
         catch (Exception ex)
         {
-            LogError(logger, ex, context.Message.Role.Name, correlationId);
+            LogUnexpectedError(logger, ex, correlationId, role.Name);
 
             var errorInfo = new ErrorInfo(RoleErrorCodes.UpdateFailed,
-                        $"Could not update role '{context.Message.Role.Name}'. {ex.Message}.");
-            var errorResponse = new RoleUpdatedEvent(context.Message.Role)
+                        $"Could not update role '{role.Name}'. {ex.Message}.");
+            var errorResponse = new RoleUpdatedEvent(role)
             {
                 CorrelationId = correlationId,
                 ErrorInfo = errorInfo
@@ -75,7 +84,6 @@ public sealed partial class UpdateRoleConsumer(RoleManager<SuiteRole> roleManage
             await context.Publish(errorResponse, context.CancellationToken);
         }
     }
-
 
     private async Task AssignClaims(IEnumerable<UserManagementClaim> claims, SuiteRole role)
     {
@@ -105,6 +113,18 @@ public sealed partial class UpdateRoleConsumer(RoleManager<SuiteRole> roleManage
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update role '{name}' correlated by '{correlationId}'.")]
-    private static partial void LogError(ILogger<UpdateRoleConsumer> logger, Exception ex, string name, Guid correlationId);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Updating role '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogConsume(ILogger<UpdateRoleConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Updated role '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogRoleUpdated(ILogger<UpdateRoleConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update role '{Name}' correlated by {CorrelationId} because it was not found.")]
+    private static partial void LogRoleNotFound(ILogger<UpdateRoleConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update role '{Name}' correlated by {CorrelationId} because it is marked as managed.")]
+    private static partial void LogRoleIsManaged(ILogger<UpdateRoleConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured on updating role '{Name}' correlated by '{CorrelationId}'.")]
+    private static partial void LogUnexpectedError(ILogger<UpdateRoleConsumer> logger, Exception ex, Guid correlationId, string name);
 }

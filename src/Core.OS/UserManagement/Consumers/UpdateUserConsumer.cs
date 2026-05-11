@@ -22,11 +22,15 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
         var correlationId = context.Message.CorrelationId;
         var desiredProfile = context.Message.UserProfile;
 
+        LogConsume(logger, correlationId, desiredProfile.UserName.Value);
+
         try
         {
             var existingSuiteUser = await userManager.FindByNameAsync(desiredProfile.UserName.Value);
             if (existingSuiteUser is null)
             {
+                LogUserNotFound(logger, correlationId, desiredProfile.UserName.Value);
+
                 var existsError = new ErrorInfo(UserErrorCodes.UpdateFailedNotFound,
                                  $"Could not update user '{desiredProfile.UserName}'. No user was found with that name");
                 var errorResponse = new UserUpdatedEvent(desiredProfile, desiredProfile)
@@ -50,6 +54,8 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
             var errorInfo = await AssignNewPassword(desiredProfile, existingSuiteUser, context.Message.RequestingUserName);
             if (errorInfo is not null)
             {
+                LogFailedPassword(logger, correlationId, desiredProfile.UserName.Value, errorInfo.Message);
+
                 var errorResponse = new UserUpdatedEvent(desiredProfile, profileBefore)
                 {
                     CorrelationId = correlationId,
@@ -60,9 +66,10 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
                 return;
             }
 
-
-            await AssignRoles(desiredProfile, existingSuiteUser);
+            await AssignRoles(desiredProfile, existingSuiteUser, correlationId);
             await AssignClaims(desiredProfile, existingSuiteUser);
+
+            LogUserUpdated(logger, correlationId, desiredProfile.UserName.Value);
 
             var response = new UserUpdatedEvent(desiredProfile, profileBefore)
             {
@@ -73,10 +80,10 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
         }
         catch (Exception ex)
         {
-            LogError(logger, ex, context.Message.UserProfile.UserName.Value, correlationId);
+            LogUnexpectedError(logger, ex, correlationId, desiredProfile.UserName.Value);
 
             var errorInfo = new ErrorInfo(UserErrorCodes.UpdateFailed,
-                         $"Could not update user '{context.Message.UserProfile.UserName}'. {ex.Message}.");
+                         $"Could not update user '{desiredProfile.UserName}'. {ex.Message}.");
             var errorResponse = new UserUpdatedEvent(desiredProfile, desiredProfile)
             {
                 CorrelationId = correlationId,
@@ -111,12 +118,14 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
             var requestingUser = await userManager.FindByNameAsync(requestingUserName);
             if (requestingUser is null)
                 return null;
+
             var sysadminClaim = ModuleAuthorizationClaimFactory.CreateClaim(Constants.SystemModuleId, AccessLevel.Full, ModuleIdResolver.GetModuleName(Constants.SystemModuleId));
             var hasClaim = await HasClaimIncludingRolesAsync(userManager,
                 roleManager,
                 requestingUser,
                 sysadminClaim.Type,
                 sysadminClaim.Value);
+
             if (!hasClaim)
                 return new ErrorInfo(UserErrorCodes.UpdateFailed, "Only administrators may change another user's password.");
 
@@ -127,17 +136,19 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
 
         if (result.Succeeded)
             return null;
+
         return new ErrorInfo(UserErrorCodes.UpdateFailedPassword,
                     $"Could not update user '{desiredProfile.UserName}'. Error: {string.Join(Environment.NewLine, result.Errors.Select(e => e.Description))}");
     }
 
-    private async Task AssignRoles(UserProfile desiredProfile, SuiteUser existingSuiteUser)
+    private async Task AssignRoles(UserProfile desiredProfile, SuiteUser existingSuiteUser, Guid correlationId)
     {
         if (await userManager.IsLastSystemAdministrator(existingSuiteUser)
             && !desiredProfile.Roles.Contains(SeedingExtensions.AdminRoleName))
         {
             desiredProfile.Roles.Add(SeedingExtensions.AdminRoleName);
-            logger.LogWarning("Skipping remove sys admin role from user {User}", existingSuiteUser.UserName);
+
+            LogSysAdminRemoveSkip(logger, correlationId, existingSuiteUser.UserName);
         }
 
         foreach (var suiteRole in roleManager.Roles.Select(r => r.Name!))
@@ -209,6 +220,21 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
         return false;
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update user '{name}' correlated by '{correlationId}'.")]
-    private static partial void LogError(ILogger<UpdateUserConsumer> logger, Exception ex, string name, Guid correlationId);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Updating user '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogConsume(ILogger<UpdateUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Updated user '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogUserUpdated(ILogger<UpdateUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update user '{Name}' correlated by {CorrelationId} because it was not found.")]
+    private static partial void LogUserNotFound(ILogger<UpdateUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update user '{Name}' correlated by {CorrelationId} with {Error}.")]
+    private static partial void LogFailedPassword(ILogger<UpdateUserConsumer> logger, Guid correlationId, string name, string? error);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Update user '{Name}' correlated by {CorrelationId} skip removal of sys admin role.")]
+    private static partial void LogSysAdminRemoveSkip(ILogger<UpdateUserConsumer> logger, Guid correlationId, string? name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured on updating user '{Name}' correlated by '{CorrelationId}'.")]
+    private static partial void LogUnexpectedError(ILogger<UpdateUserConsumer> logger, Exception ex, Guid correlationId, string name);
 }

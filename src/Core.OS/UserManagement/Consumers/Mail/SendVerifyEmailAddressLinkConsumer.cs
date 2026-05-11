@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules.Services;
+using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Extensions;
 using Core.OS.UserManagement.Templates;
 using Core.Shared.Mail;
@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Core.OS.UserManagement.Consumers.Mail;
 
-public sealed class SendVerifyEmailAddressLinkConsumer(
+public sealed partial class SendVerifyEmailAddressLinkConsumer(
     IMailSender mailSender,
     UserManager<SuiteUser> userManager,
     FluidTemplateRenderer templateRenderer,
@@ -19,18 +19,24 @@ public sealed class SendVerifyEmailAddressLinkConsumer(
 {
     public async Task Consume(ConsumeContext<SendVerifyEmailAddressLink> context)
     {
+        var correlationId = context.Message.CorrelationId;
+        var userId = context.Message.UserId;
+
+        LogConsume(logger, correlationId, userId);
+
         try
         {
-            var userId = context.Message.UserId;
             var user = await userManager.GetUserById(userId);
 
             var message = await CreateMessage(context, user);
 
             await mailSender.SendMail(message);
+
+            LogMailSent(logger, correlationId, userId);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to send verify email address link");
+            LogUnexpectedError(logger, e, correlationId, userId);
         }
     }
 
@@ -65,4 +71,13 @@ public sealed class SendVerifyEmailAddressLinkConsumer(
             context.CancellationToken);
         return body;
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Sending verification email to '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogConsume(ILogger<SendVerifyEmailAddressLinkConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Verification email to '{Name}' correlated by {CorrelationId} was sent.")]
+    private static partial void LogMailSent(ILogger<SendVerifyEmailAddressLinkConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured on sending verification email to '{Name}' correlated by '{CorrelationId}'.")]
+    private static partial void LogUnexpectedError(ILogger<SendVerifyEmailAddressLinkConsumer> logger, Exception ex, Guid correlationId, string name);
 }

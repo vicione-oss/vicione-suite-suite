@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules.Services;
+using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Extensions;
 using Core.OS.UserManagement.Templates;
 using Core.Shared.Mail;
@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Core.OS.UserManagement.Consumers.Mail;
 
-public sealed class SendResetPasswordLinkConsumer(
+public sealed partial class SendResetPasswordLinkConsumer(
     IMailSender mailSender,
     UserManager<SuiteUser> userManager,
     FluidTemplateRenderer templateRenderer,
@@ -19,18 +19,24 @@ public sealed class SendResetPasswordLinkConsumer(
 {
     public async Task Consume(ConsumeContext<SendResetPasswordLink> context)
     {
+        var correlationId = context.Message.CorrelationId;
+        var userId = context.Message.UserId;
+
+        LogConsume(logger, correlationId, userId);
+
         try
         {
-            var userId = context.Message.UserId;
             var user = await userManager.GetUserById(userId);
 
             var message = await CreateMessage(context, user);
 
             await mailSender.SendMail(message);
+
+            LogMailSent(logger, correlationId, userId);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to send reset password link");
+            LogUnexpectedError(logger, e, correlationId, userId);
         }
     }
 
@@ -64,4 +70,13 @@ public sealed class SendResetPasswordLinkConsumer(
             context.CancellationToken);
         return emailBody;
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Sending reset email to '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogConsume(ILogger<SendResetPasswordLinkConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Reset email to '{Name}' correlated by {CorrelationId} was sent.")]
+    private static partial void LogMailSent(ILogger<SendResetPasswordLinkConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured on sending reset email to '{Name}' correlated by '{CorrelationId}'.")]
+    private static partial void LogUnexpectedError(ILogger<SendResetPasswordLinkConsumer> logger, Exception ex, Guid correlationId, string name);
 }

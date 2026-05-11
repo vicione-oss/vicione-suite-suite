@@ -9,7 +9,7 @@ using Sdk.Messaging;
 
 namespace Core.OS.UserManagement.Consumers;
 
-public sealed class GetUsersConsumer(UserManager<SuiteUser> userManager, ILogger<GetUsersConsumer> logger)
+public sealed partial class GetUsersConsumer(UserManager<SuiteUser> userManager, ILogger<GetUsersConsumer> logger)
     : RequestConsumer<GetUsers, GetUsersResponse>
 {
     public override async Task<GetUsersResponse> Respond(GetUsers message, CancellationToken cancellationToken)
@@ -35,8 +35,11 @@ public sealed class GetUsersConsumer(UserManager<SuiteUser> userManager, ILogger
 
     public override Task<GetUsersResponse> HandleException(GetUsers message, Exception e, CancellationToken cancellationToken)
     {
-        logger.LogError(e, "Consume {Request} failed", nameof(GetUsers));
+        LogRequestError(logger, e);
 
         return Task.FromResult(new GetUsersResponse([], new ErrorInfo(UserErrorCodes.UnknownError, e.Message)));
     }
+
+    [LoggerMessage(LogLevel.Error, "Failed to get users")]
+    private static partial void LogRequestError(ILogger<GetUsersConsumer> logger, Exception exception);
 }

@@ -14,51 +14,38 @@ public sealed partial class CreateUserConsumer(UserManager<SuiteUser> userManage
     public async Task Consume(ConsumeContext<CreateUser> context)
     {
         var correlationId = context.Message.CorrelationId;
+        var userProfile = context.Message.UserProfile;
+
+        LogConsume(logger, correlationId, userProfile.UserName.Value);
 
         try
         {
-            var user = await userManager.FindByNameAsync(context.Message.UserProfile.UserName.Value);
-            if (user is not null)
+            if (await DoesUserAlreadyExist(context))
             {
-                var errorInfo = new ErrorInfo(UserErrorCodes.CreateFailedAlreadyExists,
-                             $"Could not add user '{context.Message.UserProfile.UserName}'. A user with that name already exists.");
-                var errorResponse = new UserCreatedEvent(context.Message.UserProfile)
-                {
-                    CorrelationId = correlationId,
-                    ErrorInfo = errorInfo
-                };
-
-                await context.Publish(errorResponse, context.CancellationToken);
                 return;
             }
-            if (context.Message.UserProfile.NewPassword is null)
-            {
-                var errorInfo = new ErrorInfo(UserErrorCodes.CreateFailedMissingPw,
-                             $"Could not add user '{context.Message.UserProfile.UserName}'. No password was provided.");
-                var errorResponse = new UserCreatedEvent(context.Message.UserProfile)
-                {
-                    CorrelationId = correlationId,
-                    ErrorInfo = errorInfo
-                };
 
-                await context.Publish(errorResponse, context.CancellationToken);
+            if (await IsNewPasswordEmpty(context))
+            {
                 return;
             }
 
             var suiteUser = new SuiteUser
             {
-                UserName = context.Message.UserProfile.UserName.Value,
-                Email = context.Message.UserProfile.Email,
+                UserName = userProfile.UserName.Value,
+                Email = userProfile.Email,
                 EmailConfirmed = false
             };
-            suiteUser.AssignOptionalData(context.Message.UserProfile);
+            suiteUser.AssignOptionalData(userProfile);
 
-            var result = await userManager.CreateAsync(suiteUser, context.Message.UserProfile.NewPassword);
+            var result = await userManager.CreateAsync(suiteUser, userProfile.NewPassword!);
             if (!result.Succeeded)
             {
+                LogCreateFailed(logger, correlationId, userProfile.UserName.Value);
+
                 var errorInfo = new ErrorInfo(UserErrorCodes.CreateFailed,
-                         $"Could not add user '{context.Message.UserProfile.UserName}'. Error: {string.Join(Environment.NewLine, result.Errors.Select(e => e.Description))}");
-                var errorResponse = new UserCreatedEvent(context.Message.UserProfile)
+                         $"Could not add user '{userProfile.UserName}'. Error: {string.Join(Environment.NewLine, result.Errors.Select(e => e.Description))}");
+                var errorResponse = new UserCreatedEvent(userProfile)
                 {
                     CorrelationId = correlationId,
                     ErrorInfo = errorInfo
@@ -69,10 +56,12 @@ public sealed partial class CreateUserConsumer(UserManager<SuiteUser> userManage
             }
 
             var claims = context.Message.UserProfile.Claims.Select(userProfileClaim => userProfileClaim.ToClaim());
-            await userManager.AddToRolesAsync(suiteUser, context.Message.UserProfile.Roles);
+            await userManager.AddToRolesAsync(suiteUser, userProfile.Roles);
             await userManager.AddClaimsAsync(suiteUser, claims);
 
-            var response = new UserCreatedEvent(context.Message.UserProfile)
+            LogUserCreated(logger, correlationId, userProfile.UserName.Value);
+
+            var response = new UserCreatedEvent(userProfile)
             {
                 CorrelationId = correlationId
             };
@@ -81,11 +70,11 @@ public sealed partial class CreateUserConsumer(UserManager<SuiteUser> userManage
         }
         catch (Exception ex)
         {
-            LogError(logger, ex, context.Message.UserProfile.UserName.Value, correlationId);
+            LogUnexpectedError(logger, ex, correlationId, userProfile.UserName.Value);
 
             var errorInfo = new ErrorInfo(UserErrorCodes.CreateFailed,
-                         $"Could not add user '{context.Message.UserProfile.UserName}'. {ex.Message}.");
-            var errorResponse = new UserCreatedEvent(context.Message.UserProfile)
+                         $"Could not add user '{userProfile.UserName}'. {ex.Message}.");
+            var errorResponse = new UserCreatedEvent(userProfile)
             {
                 CorrelationId = correlationId,
                 ErrorInfo = errorInfo
@@ -95,6 +84,66 @@ public sealed partial class CreateUserConsumer(UserManager<SuiteUser> userManage
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create user '{name}' correlated by '{correlationId}'.")]
-    private static partial void LogError(ILogger<CreateUserConsumer> logger, Exception ex, string name, Guid correlationId);
+    private async Task<bool> DoesUserAlreadyExist(ConsumeContext<CreateUser> context)
+    {
+        var correlationId = context.Message.CorrelationId;
+        var userProfile = context.Message.UserProfile;
+
+        var user = await userManager.FindByNameAsync(userProfile.UserName.Value);
+        if (user is null)
+            return false;
+
+        LogAlreadyExists(logger, correlationId, userProfile.UserName.Value);
+
+        var errorInfo = new ErrorInfo(UserErrorCodes.CreateFailedAlreadyExists,
+                     $"Could not add user '{userProfile.UserName}'. A user with that name already exists.");
+        var errorResponse = new UserCreatedEvent(userProfile)
+        {
+            CorrelationId = correlationId,
+            ErrorInfo = errorInfo
+        };
+
+        await context.Publish(errorResponse, context.CancellationToken);
+        return true;
+    }
+
+    private async Task<bool> IsNewPasswordEmpty(ConsumeContext<CreateUser> context)
+    {
+        var correlationId = context.Message.CorrelationId;
+        var userProfile = context.Message.UserProfile;
+
+        if (!string.IsNullOrEmpty(context.Message.UserProfile.NewPassword))
+            return false;
+
+        LogEmptyNewPassword(logger, correlationId, userProfile.UserName.Value);
+
+        var errorInfo = new ErrorInfo(UserErrorCodes.CreateFailedMissingPw,
+                     $"Could not add user '{userProfile.UserName}'. No password was provided.");
+        var errorResponse = new UserCreatedEvent(userProfile)
+        {
+            CorrelationId = correlationId,
+            ErrorInfo = errorInfo
+        };
+
+        await context.Publish(errorResponse, context.CancellationToken);
+        return true;
+    }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Creating user '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogConsume(ILogger<CreateUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Created user '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogUserCreated(ILogger<CreateUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create user '{Name}' correlated by {CorrelationId} because it already exists.")]
+    private static partial void LogAlreadyExists(ILogger<CreateUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create user '{Name}' correlated by {CorrelationId} because new password is empty.")]
+    private static partial void LogEmptyNewPassword(ILogger<CreateUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create user '{Name}' by manager correlated by {CorrelationId}.")]
+    private static partial void LogCreateFailed(ILogger<CreateUserConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured creating user '{Name}' correlated by {CorrelationId}.")]
+    private static partial void LogUnexpectedError(ILogger<CreateUserConsumer> logger, Exception ex, Guid correlationId, string name);
 }
