@@ -14,7 +14,7 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
 {
     public async Task Consume(ConsumeContext<SetSystemConfiguration> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
+        var correlationId = context.Message.CorrelationId;
 
         try
         {
@@ -48,7 +48,7 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
         }
         catch (Exception ex)
         {
-            LogErrorSettingSystemConfiguration(logger, ex);
+            LogUnexpectedError(logger, ex, correlationId);
 
             await context.Publish(new SetSystemConfigurationError(correlationId, new ErrorInfo(-1, ex.Message)), context.CancellationToken);
         }
@@ -74,6 +74,6 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
     [LoggerMessage(LogLevel.Information, "System configuration changes requires system restart to apply all settings.")]
     private static partial void LogSystemConfigurationRequiresRestart(ILogger<SetSystemConfigurationConsumer> logger);
 
-    [LoggerMessage(LogLevel.Error, "An error occurred while setting the system configuration.")]
-    private static partial void LogErrorSettingSystemConfiguration(ILogger<SetSystemConfigurationConsumer> logger, Exception exception);
+    [LoggerMessage(LogLevel.Error, "An error occurred while setting the system configuration correlated by {CorrelationId}.")]
+    private static partial void LogUnexpectedError(ILogger<SetSystemConfigurationConsumer> logger, Exception exception, Guid correlationId);
 }

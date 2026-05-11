@@ -27,36 +27,24 @@ public sealed partial class ControlSystemConsumer(
 {
     public async Task Consume(ConsumeContext<ControlSystem> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
+        var correlationId = context.Message.CorrelationId;
+        var command = context.Message.Command;
+
+        LogConsume(logger, correlationId, command);
 
         try
         {
-            if (correlationId == Guid.Empty)
-                throw new InvalidOperationException("Command can't be correlated.");
-
-            OperationResult? result = null;
-
-            switch (context.Message.Command)
+            var result = command switch
             {
-                case SystemCommand.Reset:
-                    result = await ProcessResetSystem(context);
-                    break;
-
-                case SystemCommand.Restart:
-                    result = await ProcessRestartSystem(context);
-                    break;
-
-                case SystemCommand.Shutdown:
-                    result = await ProcessShutdownSystem(context);
-                    break;
-
-                default:
-                    throw new UnreachableException();
-            }
+                SystemCommand.Reset => await ProcessResetSystem(context),
+                SystemCommand.Restart => await ProcessRestartSystem(context),
+                SystemCommand.Shutdown => await ProcessShutdownSystem(context),
+                _ => throw new UnreachableException(),
+            };
 
             if (result?.Status != OperationStatus.Success)
             {
-                var errorResponse = new ControlSystemCompleted(context.Message.Command)
+                var errorResponse = new ControlSystemCompleted(command)
                 {
                     CorrelationId = correlationId,
                     ErrorInfo = new ErrorInfo((int?)result?.Status ?? ControlSystemCompleted.UnknownError, result?.Message)
@@ -66,11 +54,11 @@ public sealed partial class ControlSystemConsumer(
                 return;
             }
 
-            var response = new ControlSystemCompleted(context.Message.Command) { CorrelationId = correlationId };
+            var response = new ControlSystemCompleted(command) { CorrelationId = correlationId };
 
             await context.Publish(response, context.CancellationToken);
 
-            if (context.Message.Command == SystemCommand.Reset)
+            if (command == SystemCommand.Reset)
             {
                 var restartResult = await pipeClient.RestartSuite(instanceOptions.Value, context.CancellationToken);
                 if (restartResult.Status == OperationStatus.Error)
@@ -79,9 +67,9 @@ public sealed partial class ControlSystemConsumer(
         }
         catch (Exception e)
         {
-            LogControlSystemError(logger, e, context.Message.Command);
+            LogUnexpectedError(logger, e, correlationId, command);
 
-            var response = new ControlSystemCompleted(context.Message.Command)
+            var response = new ControlSystemCompleted(command)
             {
                 CorrelationId = correlationId,
                 ErrorInfo = new ErrorInfo(ControlServiceErrorCodes.UnknownError, e.Message)
@@ -99,7 +87,7 @@ public sealed partial class ControlSystemConsumer(
             return result;
 
         // HM reset sent successfully so trigger reset on restart for suite
-        LogSuiteResetFlag(logger);
+        LogSuiteResetFlag(logger, context.Message.CorrelationId);
 
         fileSystem.WriteResetFile(instanceOptions.Value);
 
@@ -120,9 +108,12 @@ public sealed partial class ControlSystemConsumer(
     private async Task<OperationResult?> ProcessRestartSystem(ConsumeContext<ControlSystem> context)
         => await pipeClient.RestartSystem(context.CancellationToken);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Set suite reset flag because host management operation succeeded.")]
-    private static partial void LogSuiteResetFlag(ILogger logger);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Executing command='{Command}' on system correlated by {CorrelationId}")]
+    private static partial void LogConsume(ILogger logger, Guid correlationId, SystemCommand command);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while executing control system '{ServiceName}'")]
-    private static partial void LogControlSystemError(ILogger logger, Exception exception, SystemCommand ServiceName);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Set suite reset flag because host management operation succeeded correlated by {CorrelationId}")]
+    private static partial void LogSuiteResetFlag(ILogger logger, Guid correlationId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured while executing command='{Command}' on system correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId, SystemCommand command);
 }

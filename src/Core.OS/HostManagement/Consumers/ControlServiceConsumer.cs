@@ -16,12 +16,14 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
         var serviceName = context.Message.ServiceName;
         var command = context.Message.Command;
 
+        LogConsume(logger, correlationId, serviceName, command);
+
         try
         {
             var result = await serviceManagement.TryControlService(command, serviceName, context.CancellationToken);
             if (!result.Success)
             {
-                LogServiceControlNoSuccess(logger, correlationId, serviceName, command);
+                LogControlNoSuccess(logger, correlationId, serviceName, command);
 
                 var errorResponse = new ControlServiceCompleted(serviceName, result.State)
                 {
@@ -33,7 +35,7 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
                 return;
             }
 
-            LogServiceControlled(logger, correlationId, serviceName, command);
+            LogControlSuccess(logger, correlationId, serviceName, command);
 
             await context.Publish(new SystemConfigurationChanged { CorrelationId = correlationId }, context.CancellationToken);
 
@@ -54,14 +56,14 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Executing command='{Command}' on service='{ServiceName}' correlated by {CorrelationId}")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Executing {Command} on service '{ServiceName}' correlated by {CorrelationId}")]
     private static partial void LogConsume(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Executed command='{Command}' on service='{ServiceName}' correlated by {CorrelationId} successfully")]
-    private static partial void LogServiceControlled(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
+    private static partial void LogControlSuccess(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Execution command='{Command}' on service '{ServiceName}' correlated by {CorrelationId} was not successfully")]
-    private static partial void LogServiceControlNoSuccess(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
+    private static partial void LogControlNoSuccess(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while executing command='{Command}' on service '{ServiceName}' correlated by {CorrelationId}")]
     private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId, string serviceName, ServiceCommand command);

@@ -17,23 +17,19 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
     public async Task Consume(ConsumeContext<UpdateSystem> context)
     {
         var correlationId = context.Message.CorrelationId;
+        var filePath = context.Message.FilePath;
+
+        LogConsume(logger, correlationId, filePath);
 
         try
         {
             await userManager.InvalidateLogins();
 
-            var result = await pipeClient.UpdateSystem(context.Message.FilePath, context.CancellationToken);
-            if (result is not null && result.Status != OperationStatus.Error)
+            var result = await pipeClient.UpdateSystem(filePath, context.CancellationToken);
+            if (result is null || result.Status == OperationStatus.Error)
             {
-                var startedEvent = new UpdateSystemStarted(result.Message, result.Status == OperationStatus.Warning)
-                {
-                    CorrelationId = correlationId
-                };
+                LogUpdateFailed(logger, correlationId, filePath);
 
-                await context.Publish(startedEvent, context.CancellationToken);
-            }
-            else
-            {
                 var errorResponse = new UpdateSystemStarted(null, false)
                 {
                     CorrelationId = correlationId,
@@ -41,11 +37,19 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
                 };
 
                 await context.Publish(errorResponse, context.CancellationToken);
+                return;
             }
+
+            var startedEvent = new UpdateSystemStarted(result.Message, result.Status == OperationStatus.Warning)
+            {
+                CorrelationId = correlationId
+            };
+
+            await context.Publish(startedEvent, context.CancellationToken);
         }
         catch (Exception e)
         {
-            LogUpdateSystemError(logger, e, context.Message.FilePath);
+            LogUnexpectedError(logger, e, correlationId, filePath);
 
             var errorResponse = new UpdateSystemStarted(null, false)
             {
@@ -57,6 +61,12 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while initiating the update from '{FilePath}'")]
-    private static partial void LogUpdateSystemError(ILogger logger, Exception exception, string FilePath);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Updating system from file='{FilePath}' correlated by {CorrelationId}")]
+    private static partial void LogConsume(ILogger logger, Guid correlationId, string filePath);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to update system from file='{FilePath}' correlated by {CorrelationId}")]
+    private static partial void LogUpdateFailed(ILogger logger, Guid correlationId, string filePath);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while initiating the update from '{FilePath}' correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId, string filePath);
 }

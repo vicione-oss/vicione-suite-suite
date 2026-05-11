@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement.Extensions;
+using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Communication.Enums;
 using Sdk.Backend.Messaging;
@@ -37,10 +37,10 @@ public sealed partial class RenewDHCPLeaseConsumer(IPipeClient pipeClient, ILogg
 
     public override Task<RenewDHCPLeaseResponse> HandleException(RenewDHCPLease message, Exception e, CancellationToken cancellationToken)
     {
-        ExceptionOccurred(logger, e);
+        LogExceptionOccurred(logger, e);
 
         if (e.InnerException is not null)
-            ExceptionOccurred(logger, e.InnerException);
+            LogExceptionOccurred(logger, e.InnerException);
 
         return Task.FromResult(new RenewDHCPLeaseResponse { RequestError = new ErrorInfo(4, e.Message) });
     }
@@ -48,13 +48,13 @@ public sealed partial class RenewDHCPLeaseConsumer(IPipeClient pipeClient, ILogg
     [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
     private static partial void LogDeserializeReturnedNull(ILogger<RenewDHCPLeaseConsumer> logger);
 
-    [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({message})")]
+    [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({Message})")]
     private static partial void LogWarningStatusReturned(ILogger<RenewDHCPLeaseConsumer> logger, string? message);
 
-    [LoggerMessage(LogLevel.Error, "Error status returned ({message})")]
+    [LoggerMessage(LogLevel.Error, "Error status returned ({Message})")]
     private static partial void LogErrorStatusReturned(ILogger<RenewDHCPLeaseConsumer> logger, string? message);
 
     [LoggerMessage(LogLevel.Error, "An exception was thrown while renew DHCP lease from Host Management")]
-    private static partial void ExceptionOccurred(ILogger<RenewDHCPLeaseConsumer> logger, Exception exception);
+    private static partial void LogExceptionOccurred(ILogger<RenewDHCPLeaseConsumer> logger, Exception exception);
 }
 
