@@ -210,7 +210,7 @@ internal sealed class ApplicationWorker(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Unexpected error occured while trying to delete orphaned nonces");
+            logger.LogError(e, "Unexpected error occurred while trying to delete orphaned nonces");
         }
     }
 
@@ -240,7 +240,7 @@ internal sealed class ApplicationWorker(
         catch (Exception e)
         {
             activity?.AddException(e);
-            logger.LogError(e, "Unexpected error occured while trying to set culture");
+            logger.LogError(e, "Unexpected error occurred while trying to set culture");
 
             activity?.AddTag("process.runtime.culture", CrossInstanceConfiguration.CultureNameDefault);
             SetCulture(CrossInstanceConfiguration.CultureNameDefault);

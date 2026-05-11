@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Mqtt.Contracts;
+using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Services;
 using AwesomeAssertions;
 using MQTTnet.Protocol;
@@ -27,7 +27,7 @@ public class MqttServiceTests
             };
             var errorMessage = string.Empty;
 
-            service.ErrorOccured += m =>
+            service.ErrorOccurred += m =>
             {
                 errorMessage = m;
                 return Task.CompletedTask;
@@ -55,7 +55,7 @@ public class MqttServiceTests
             };
             var errorMessage = string.Empty;
 
-            service.ErrorOccured += m =>
+            service.ErrorOccurred += m =>
             {
                 errorMessage = m;
                 return Task.CompletedTask;
@@ -81,7 +81,7 @@ public class MqttServiceTests
             };
             var errorMessage = string.Empty;
 
-            service.ErrorOccured += m =>
+            service.ErrorOccurred += m =>
             {
                 errorMessage = m;
                 return Task.CompletedTask;
@@ -107,7 +107,7 @@ public class MqttServiceTests
             };
             var errorMessage = string.Empty;
 
-            service.ErrorOccured += m =>
+            service.ErrorOccurred += m =>
             {
                 errorMessage = m;
                 return Task.CompletedTask;
@@ -170,7 +170,7 @@ public class MqttServiceTests
             await using var service = new MqttService();
             var errorMessage = string.Empty;
 
-            service.ErrorOccured += m =>
+            service.ErrorOccurred += m =>
             {
                 errorMessage = m;
                 return Task.CompletedTask;

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Text;
 using Blazor.Shared.Mqtt.Contracts;
 using Core.Shared.Extensions;
@@ -23,7 +23,7 @@ public sealed class MqttService : IMqttService
     public bool IsConnected => _client?.IsConnected == true;
     public event Func<Task>? Connected;
     public event Func<Task>? Disconnected;
-    public event Func<string, Task>? ErrorOccured;
+    public event Func<string, Task>? ErrorOccurred;
     public event Func<string, Task>? MessageReceived;
 
     private Task HandleApplicationMessageReceived(MqttApplicationMessageReceivedEventArgs arg)
@@ -80,8 +80,8 @@ public sealed class MqttService : IMqttService
         }
         catch (Exception e)
         {
-            if (ErrorOccured != null)
-                await ErrorOccured.Invoke(e.Message);
+            if (ErrorOccurred != null)
+                await ErrorOccurred.Invoke(e.Message);
         }
     }
 
@@ -111,8 +111,8 @@ public sealed class MqttService : IMqttService
         }
         catch (Exception e)
         {
-            if (ErrorOccured != null)
-                await ErrorOccured.Invoke(e.Message);
+            if (ErrorOccurred != null)
+                await ErrorOccurred.Invoke(e.Message);
         }
     }
 

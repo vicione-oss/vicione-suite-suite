@@ -349,6 +349,6 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
     [LoggerMessage(Level = LogLevel.Information, Message = "Instance '{Instance}' fully synchronized")]
     private static partial void LogInstanceFullySynchronized(ILogger<RegisterInstanceConsumer> logger, Guid instance);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "One or more errors occured when synchronizing data for instance {InstanceId}:{NewLine}{ErrorList}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "One or more errors occurred when synchronizing data for instance {InstanceId}:{NewLine}{ErrorList}")]
     private static partial void LogInstanceSynchronizationFailed(ILogger<RegisterInstanceConsumer> logger, Guid instanceId, string newLine, string errorList);
 }

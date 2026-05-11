@@ -461,7 +461,7 @@ public class SuiteConnectionServiceTests
         }
 
         [Fact]
-        public async Task Update_connection_failed_timeout_occured()
+        public async Task Update_connection_failed_timeout_occurred()
         {
             // Arrange
             var databaseConnection = ConnectionFactory.SQLiteConnection;

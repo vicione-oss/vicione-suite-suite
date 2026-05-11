@@ -1,4 +1,4 @@
-﻿using Sdk.Client.ControlPanels.Models;
+using Sdk.Client.ControlPanels.Models;
 using Sdk.Messaging;
 using ViciOne.Ui.Localization.Resources;
 
@@ -11,7 +11,7 @@ public static class TaskCompletionSourceExtensions
         public Task<ISaveResult> WaitForCommandCompletion(CancellationToken cancellationToken = default)
             => taskCompletionSource.WaitForCommandCompletion(errorInfo => new SaveErrorResult(errorInfo.Message ?? CommonPhrases.AnUnexpectedErrorOccurred, errorInfo.ErrorCode), cancellationToken);
 
-        public async Task<ISaveResult> WaitForCommandCompletion(Func<ErrorInfo, ISaveResult> errorOccured,
+        public async Task<ISaveResult> WaitForCommandCompletion(Func<ErrorInfo, ISaveResult> errorOccurred,
             CancellationToken cancellationToken = default)
         {
             try
@@ -22,7 +22,7 @@ public static class TaskCompletionSourceExtensions
                     return new SaveSuccessResult();
 
                 if (errorInfo is not null)
-                    return errorOccured.Invoke(errorInfo);
+                    return errorOccurred.Invoke(errorInfo);
 
                 return new SaveSuccessResult();
             }

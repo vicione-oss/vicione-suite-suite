@@ -69,7 +69,7 @@ public class ControlServiceConsumerTests
         await using var tester = new MassTransitTester(_configureServices);
         var command = new ControlService(ServiceName, ServiceCommand.Start);
         _serviceManagement.TryControlService(command.Command, command.ServiceName, Arg.Any<CancellationToken>())
-            .Returns(new ControlServiceManagementResult(command.ServiceName, ServiceState.Enabled, new ErrorInfo(3, "Error occured")));
+            .Returns(new ControlServiceManagementResult(command.ServiceName, ServiceState.Enabled, new ErrorInfo(3, "Error occurred")));
 
         // Act
         await tester.TestInstanceDependentCommand<ControlService, ControlServiceConsumer>(command);
