@@ -115,7 +115,7 @@ public class LanguageControlPanelSaveHandlerTests
         public async Task Save_Failed()
         {
             // Arrange
-            var errorMessage = "Error occured.";
+            var errorMessage = "Error occurred.";
             await using var context = new BunitContext();
             context.Services.AddSingleton(_clientMediator);
             context.Services.AddScoped<LanguageControlPanelSaveHandler>();

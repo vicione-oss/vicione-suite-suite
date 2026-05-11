@@ -189,7 +189,7 @@ public class MqttViewerComponentTests
 
             var service = ctx.Services.GetRequiredService<IMqttService>();
             service.When(s => s.Connect(Arg.Any<MqttConnection>()))
-                .Do(_ => service.ErrorOccured += Raise.Event<Func<string, Task>>("Test Message"));
+                .Do(_ => service.ErrorOccurred += Raise.Event<Func<string, Task>>("Test Message"));
 
             // Act
             var component = ctx.Render<MqttViewerComponent>();

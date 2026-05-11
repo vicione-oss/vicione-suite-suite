@@ -59,7 +59,7 @@ internal static class SettingsModuleStateExtensions
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occured why trying to adopt to control panel request.");
+                logger.LogError(ex, "An error occurred why trying to adopt to control panel request.");
             }
             finally
             {

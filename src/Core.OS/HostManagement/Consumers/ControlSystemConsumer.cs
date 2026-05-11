@@ -114,6 +114,6 @@ public sealed partial class ControlSystemConsumer(
     [LoggerMessage(Level = LogLevel.Information, Message = "Set suite reset flag because host management operation succeeded correlated by {CorrelationId}")]
     private static partial void LogSuiteResetFlag(ILogger logger, Guid correlationId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured while executing command='{Command}' on system correlated by {CorrelationId}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occurred while executing command='{Command}' on system correlated by {CorrelationId}")]
     private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId, SystemCommand command);
 }

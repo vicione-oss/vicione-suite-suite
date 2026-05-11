@@ -33,7 +33,7 @@ public interface IUiHostModule
     /// Registers the services contributed by each loaded client UI module into the application's
     /// service collection. Modules that fail during configuration are removed from the active module set.
     /// </summary>
-    void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccured = null);
+    void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccurred = null);
 
     /// <summary>
     /// Configures the security middleware pipeline including header forwarding, authentication,

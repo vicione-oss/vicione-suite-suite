@@ -67,6 +67,6 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
     [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to update system from file='{FilePath}' correlated by {CorrelationId}")]
     private static partial void LogUpdateFailed(ILogger logger, Guid correlationId, string filePath);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while initiating the update from '{FilePath}' correlated by {CorrelationId}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error occurred while initiating the update from '{FilePath}' correlated by {CorrelationId}")]
     private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId, string filePath);
 }

@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Mqtt.Contracts;
+using Blazor.Shared.Mqtt.Contracts;
 using MQTTnet.Protocol;
 using Sdk.Connections.Contracts;
 
@@ -12,7 +12,7 @@ public interface IMqttService : IAsyncDisposable
     bool IsConnected { get; }
     event Func<Task>? Connected;
     event Func<Task>? Disconnected;
-    event Func<string, Task>? ErrorOccured;
+    event Func<string, Task>? ErrorOccurred;
     event Func<string, Task>? MessageReceived;
 
     Task Connect(MqttConnection mqttConnection);

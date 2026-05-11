@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -154,7 +154,7 @@
     <value>All Messages</value>
   </data>
   <data name="ErrorHeader" xml:space="preserve">
-    <value>Error occured</value>
+    <value>Error occurred</value>
   </data>
   <data name="FilterByTopic" xml:space="preserve">
     <value>Filter By Topic</value>

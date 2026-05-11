@@ -342,7 +342,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
     }
 
     /// <summary>
-    /// Errors occured on options etc are logged here
+    /// Errors occurred on options etc are logged here
     /// </summary>
     private void LogModuleContexts(SuiteDependencyContext suiteContext)
     {

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -118,11 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ErrorText" xml:space="preserve">
-    <value>An error occured during the current runtime.
+    <value>An error occurred during the current runtime.
 Reload the page and retry your latest action.
 If the error persists, please contact your administrator.</value>
   </data>
   <data name="HeaderText" xml:space="preserve">
-    <value>An error occured!</value>
+    <value>An error occurred!</value>
   </data>
 </root>

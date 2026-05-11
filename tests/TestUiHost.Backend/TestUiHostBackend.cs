@@ -28,7 +28,7 @@ public class TestUiHostBackend : BackendModule, IUiHostModule
     public void ConfigureIdentity(IdentityBuilder builder) =>
         CallReceived?.Invoke(this, nameof(ConfigureIdentity));
 
-    public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccured = null)
+    public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccurred = null)
         => CallReceived?.Invoke(this, nameof(ConfigureUiServices));
 
     public void UseSecurity(IApplicationBuilder app, bool useHeaderForwarding)

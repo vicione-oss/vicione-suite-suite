@@ -85,7 +85,7 @@ public sealed class MqttViewerComponentService
     {
         _mqttService.Connected += OnClientConnected;
         _mqttService.Disconnected += OnClientDisconnected;
-        _mqttService.ErrorOccured += OnErrorOccured;
+        _mqttService.ErrorOccurred += OnErrorOccurred;
         _mqttService.MessageReceived += OnMessageReceived;
     }
 
@@ -105,7 +105,7 @@ public sealed class MqttViewerComponentService
     {
         _mqttService.Connected -= OnClientConnected;
         _mqttService.Disconnected -= OnClientDisconnected;
-        _mqttService.ErrorOccured -= OnErrorOccured;
+        _mqttService.ErrorOccurred -= OnErrorOccurred;
         _mqttService.MessageReceived -= OnMessageReceived;
     }
 
@@ -204,7 +204,7 @@ public sealed class MqttViewerComponentService
         return string.Join(MqttViewerConstants.TopicSeparator, [.. topicElements]);
     }
 
-    private Task OnErrorOccured(string message)
+    private Task OnErrorOccurred(string message)
     {
         DisconnectMqttEvents();
         ErrorMessage = message;

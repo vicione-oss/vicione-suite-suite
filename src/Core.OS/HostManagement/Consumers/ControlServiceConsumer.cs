@@ -65,6 +65,6 @@ public sealed partial class ControlServiceConsumer(IControlServiceManagement ser
     [LoggerMessage(Level = LogLevel.Warning, Message = "Execution command='{Command}' on service '{ServiceName}' correlated by {CorrelationId} was not successfully")]
     private static partial void LogControlNoSuccess(ILogger logger, Guid correlationId, string serviceName, ServiceCommand command);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Error occured while executing command='{Command}' on service '{ServiceName}' correlated by {CorrelationId}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error occurred while executing command='{Command}' on service '{ServiceName}' correlated by {CorrelationId}")]
     private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId, string serviceName, ServiceCommand command);
 }

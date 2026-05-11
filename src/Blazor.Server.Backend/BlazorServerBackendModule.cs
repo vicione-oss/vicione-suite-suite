@@ -87,7 +87,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
     }
 
     /// <inheritdoc/>
-    public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccured = null)
+    public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccurred = null)
     {
         var failedModuleIds = new List<string>();
 
@@ -107,7 +107,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             }
             catch (Exception e)
             {
-                errorOccured?.Invoke(module.ModuleId, e);
+                errorOccurred?.Invoke(module.ModuleId, e);
                 failedModuleIds.Add(module.ModuleId);
             }
         }

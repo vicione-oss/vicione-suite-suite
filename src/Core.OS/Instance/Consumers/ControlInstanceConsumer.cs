@@ -232,6 +232,6 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
     [LoggerMessage(Level = LogLevel.Information, Message = "Instance='{InstanceId}' successfully synchronized")]
     private static partial void LogInstanceSuccessfullySynchronized(ILogger<ControlInstanceConsumer> logger, Guid instanceId);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "One or more errors occured when synchronizing data for instance='{InstanceId}'.{NewLine}{ErrorList}")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "One or more errors occurred when synchronizing data for instance='{InstanceId}'.{NewLine}{ErrorList}")]
     private static partial void LogSynchronizationErrors(ILogger<ControlInstanceConsumer> logger, Guid instanceId, string newLine, string errorList);
 }

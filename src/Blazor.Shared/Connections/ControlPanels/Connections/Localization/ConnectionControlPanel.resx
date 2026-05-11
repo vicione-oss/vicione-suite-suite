@@ -136,7 +136,7 @@
     <value>Edit connection "{0}"</value>
   </data>
   <data name="SaveConnectionErrorFormat" xml:space="preserve">
-    <value>An error occured during the {0} of connection "{1}". Please try again or contact the system administrator.</value>
+    <value>An error occurred during the {0} of connection "{1}". Please try again or contact the system administrator.</value>
   </data>
   <data name="Update" xml:space="preserve">
     <value>update</value>

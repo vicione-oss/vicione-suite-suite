@@ -1,4 +1,4 @@
-﻿using Core.Shared.Persistence.Contracts;
+using Core.Shared.Persistence.Contracts;
 
 namespace Core.OS.Instance.Extensions;
 
@@ -27,7 +27,7 @@ internal static class BackupSummaryExtensions
         if (summary.SystemConfiguration is not null && !string.IsNullOrEmpty(summary.SystemConfiguration.Error))
             errors.Add(summary.SystemConfiguration.Error);
 
-        // errors occured on module backup
+        // errors occurred on module backup
         errors.AddRange(summary.Modules.Where(k => !string.IsNullOrEmpty(k.Error)).Select(k => k.Error!));
 
         errors.AddRange(summary.Modules.SelectMany(k => k.Databases ?? [])

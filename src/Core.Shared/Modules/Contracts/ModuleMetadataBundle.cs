@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Sdk.Messaging;
 using Sdk.Modules;
 
@@ -42,7 +42,7 @@ public sealed class ModuleMetadataBundle
     public ModulePackageOperation? PendingOperation { get; set; }
 
     /// <summary>
-    /// List of errors that occured on init process of the module like missing optios etc.
+    /// List of errors that occurred on init process of the module like missing optios etc.
     /// </summary>
     public List<ErrorInfo> Errors { get; set; } = [];
 
