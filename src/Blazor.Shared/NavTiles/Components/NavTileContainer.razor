@@ -1,5 +1,6 @@
-﻿@using Sdk.Client.Extensions
+@using Sdk.Client.Extensions
 @using Sdk.Client.NavTiles.Components
+@using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
 @using ViciOne.Ui.Blazor.Components.ContentLoadingIndication
 @using ViciOne.Ui.Blazor.Components.ContentLoadingIndication.Enums
 
@@ -40,7 +41,9 @@
                     { nameof(NavTileBase.State), NavTileState }
                 };
             }
-            <DynamicComponent Type="@NavTileComponentType" Parameters="@navTileParameters" @ref="_navTile" />
+            <AdvancedErrorBoundary>
+                <DynamicComponent Type="@NavTileComponentType" Parameters="@navTileParameters" @ref="_navTile" />
+            </AdvancedErrorBoundary>
         </ContentLoadingIndication>
     </a>
 </div>

@@ -19,6 +19,7 @@
 - Improved hover and focus effect of elements of login forms
 - Support cancellation of uploading flash device file (swu) in settings dialog
 - `UpdateControlPanel`, support cancellation of ongoing flash device file (swu) upload
+- Support `AdvancedErrorBoundary` in `NavTileContainer`, `NotificationElementGrid` and `WizardPageContainer`
 
 ### Fixed
 
@@ -29,7 +30,8 @@
 
 ### Updated
 
-- `ViciOne.Ui.Blazor.Components` package, update version to `5.9.0`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.11.0`
+- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.10.0`
 
 ## 1.2.0 - 2026-04-17
 

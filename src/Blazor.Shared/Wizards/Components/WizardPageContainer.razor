@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Components.Sections
 @using Sdk.Client.Wizards.Components
 @using Sdk.Client.Wizards.Services
+@using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
 @using ViciOne.Ui.Blazor.Components.LoadingSpinner.Models
 
 @{
@@ -38,7 +39,9 @@
             <Content>
                 <CascadingValue Value="contentOverlaySectionId">
                     <CascadingValue Value="descriptionBannerSectionId">
-                        <DynamicComponent Type="@WizardPageRegistryItem.ComponentType" Parameters="@_wizardPageParameters" />
+                        <AdvancedErrorBoundary>
+                            <DynamicComponent Type="@WizardPageRegistryItem.ComponentType" Parameters="@_wizardPageParameters" />
+                        </AdvancedErrorBoundary>
                     </CascadingValue>
                 </CascadingValue>
             </Content>
