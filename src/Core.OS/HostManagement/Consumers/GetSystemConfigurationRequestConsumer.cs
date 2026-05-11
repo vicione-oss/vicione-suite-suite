@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement.Extensions;
+using Core.OS.HostManagement.Extensions;
 using Core.OS.HostManagement.Mappers;
 using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Contracts;
@@ -109,16 +109,16 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
         return Task.FromResult(new GetSystemConfigurationResponse { RequestError = new ErrorInfo(4, e.Message) });
     }
 
-    [LoggerMessage(1, LogLevel.Error, "Deserialize() returned null")]
+    [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
     private static partial void LogDeserializeReturnedNull(ILogger<GetSystemConfigurationRequestConsumer> logger);
 
-    [LoggerMessage(2, LogLevel.Warning, "System configuration with warnings returned ({message})")]
+    [LoggerMessage(LogLevel.Warning, "System configuration with warnings returned ({Message})")]
     private static partial void LogWarningStatusReturned(ILogger<GetSystemConfigurationRequestConsumer> logger, string? message);
 
-    [LoggerMessage(3, LogLevel.Error, "Error status returned ({message})")]
+    [LoggerMessage(LogLevel.Error, "Error status returned ({Message})")]
     private static partial void LogErrorStatusReturned(ILogger<GetSystemConfigurationRequestConsumer> logger, string? message);
 
-    [LoggerMessage(4, LogLevel.Error, "An exception was thrown while fetching system configuration from Host Management")]
+    [LoggerMessage(LogLevel.Error, "An exception was thrown while fetching system configuration from Host Management")]
     private static partial void LogExceptionOccurred(ILogger<GetSystemConfigurationRequestConsumer> logger, Exception exception);
 
 }

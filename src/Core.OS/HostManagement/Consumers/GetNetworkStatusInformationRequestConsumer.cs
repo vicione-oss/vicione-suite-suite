@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement.Extensions;
+using Core.OS.HostManagement.Extensions;
 using Core.OS.HostManagement.Mappers;
 using HostManagement.Shared.Communication.Enums;
 using Sdk.Backend.Messaging;
@@ -17,7 +17,7 @@ public sealed partial class GetNetworkStatusInformationRequestConsumer(IPipeClie
         var result = await pipeClient.GetNetworkStatusInformation(message.NetworkInterfaceName, cancellationToken);
         if (result == null)
         {
-            DeserializeReturnedNull(logger);
+            LogDeserializeReturnedNull(logger);
 
             return new GetNetworkStatusInformationResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
         }
@@ -27,13 +27,13 @@ public sealed partial class GetNetworkStatusInformationRequestConsumer(IPipeClie
 
         if (result.Status == OperationStatus.Warning)
         {
-            WarningStatusReturned(logger, result.Message);
+            LogWarningStatusReturned(logger, result.Message);
 
             return new GetNetworkStatusInformationResponse { NetworkStatusInformation = mapper.ToSuiteFormat(result.NetworkStatusInformation) };
         }
 
         // OperationStatus.Error
-        ErrorStatusReturned(logger, result.Message);
+        LogErrorStatusReturned(logger, result.Message);
 
         return new GetNetworkStatusInformationResponse { RequestError = new ErrorInfo(3, result.Message) };
     }
@@ -41,23 +41,23 @@ public sealed partial class GetNetworkStatusInformationRequestConsumer(IPipeClie
     public override Task<GetNetworkStatusInformationResponse> HandleException(GetNetworkStatusInformation message,
         Exception e, CancellationToken cancellationToken)
     {
-        ExceptionOccurred(logger, e);
+        LogExceptionOccurred(logger, e);
 
         if (e.InnerException is not null)
-            ExceptionOccurred(logger, e.InnerException);
+            LogExceptionOccurred(logger, e.InnerException);
 
         return Task.FromResult(new GetNetworkStatusInformationResponse { RequestError = new ErrorInfo(4, e.Message) });
     }
 
-    [LoggerMessage(1, LogLevel.Error, "Deserialize() returned null")]
-    private static partial void DeserializeReturnedNull(ILogger<GetNetworkStatusInformationRequestConsumer> logger);
+    [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
+    private static partial void LogDeserializeReturnedNull(ILogger<GetNetworkStatusInformationRequestConsumer> logger);
 
-    [LoggerMessage(2, LogLevel.Warning, "Network status information with warnings returned ({message})")]
-    private static partial void WarningStatusReturned(ILogger<GetNetworkStatusInformationRequestConsumer> logger, string? message);
+    [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({Message})")]
+    private static partial void LogWarningStatusReturned(ILogger<GetNetworkStatusInformationRequestConsumer> logger, string? message);
 
-    [LoggerMessage(3, LogLevel.Error, "Error status returned ({message})")]
-    private static partial void ErrorStatusReturned(ILogger<GetNetworkStatusInformationRequestConsumer> logger, string? message);
+    [LoggerMessage(LogLevel.Error, "Error status returned ({Message})")]
+    private static partial void LogErrorStatusReturned(ILogger<GetNetworkStatusInformationRequestConsumer> logger, string? message);
 
-    [LoggerMessage(4, LogLevel.Error, "An exception was thrown while fetching network status information from Host Management")]
-    private static partial void ExceptionOccurred(ILogger<GetNetworkStatusInformationRequestConsumer> logger, Exception exception);
+    [LoggerMessage(LogLevel.Error, "An exception was thrown while fetching network status information from Host Management")]
+    private static partial void LogExceptionOccurred(ILogger<GetNetworkStatusInformationRequestConsumer> logger, Exception exception);
 }

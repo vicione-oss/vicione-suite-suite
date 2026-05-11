@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement.Extensions;
+using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Communication.Enums;
 using Sdk.Backend.Messaging;
@@ -51,16 +51,16 @@ public partial class GetOriginalPhysicalAddressConsumer(IPipeClient pipeClient, 
         return Task.FromResult(new GetOriginalPhysicalAddressResponse { RequestError = new ErrorInfo(4, e.Message) });
     }
 
-    [LoggerMessage(LogLevel.Information, "Sending pipe request for network interface '{networkInterfaceName}'")]
+    [LoggerMessage(LogLevel.Information, "Sending pipe request for network interface '{NetworkInterfaceName}'")]
     private static partial void LogPipeRequest(ILogger<GetOriginalPhysicalAddressConsumer> logger, string networkInterfaceName);
 
     [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
     private static partial void LogDeserializeReturnedNull(ILogger<GetOriginalPhysicalAddressConsumer> logger);
 
-    [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({message})")]
+    [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({Message})")]
     private static partial void LogWarningStatusReturned(ILogger<GetOriginalPhysicalAddressConsumer> logger, string? message);
 
-    [LoggerMessage(LogLevel.Error, "Error status returned ({message})")]
+    [LoggerMessage(LogLevel.Error, "Error status returned ({Message})")]
     private static partial void LogErrorStatusReturned(ILogger<GetOriginalPhysicalAddressConsumer> logger, string? message);
 
     [LoggerMessage(LogLevel.Error, "An exception was thrown while renew DHCP lease from Host Management")]

@@ -18,13 +18,15 @@ public sealed partial class InstallSuiteVersionConsumer(IPipeClient pipeClient,
 {
     public async Task Consume(ConsumeContext<InstallSuiteVersion> context)
     {
-        var correlationId = context.CorrelationId ?? Guid.Empty;
+        var correlationId = context.Message.CorrelationId;
+        var packageName = context.Message.PackageName;
+        var signatureName = context.Message.SignatureName;
 
         try
         {
-            LogInstallSuiteVersion(logger, context.Message.PackageName, context.Message.SignatureName);
+            LogInstallSuiteVersion(logger, correlationId, packageName, signatureName);
 
-            var suitePackage = await repository.DownloadAndValidate(workspaceProvider.Cache, context.Message.PackageName, context.Message.SignatureName, context.CancellationToken);
+            var suitePackage = await repository.DownloadAndValidate(workspaceProvider.Cache, packageName, signatureName, context.CancellationToken);
 
             // HM will validate the package again but might have other keys
             // therefore we have to provide both paths
@@ -35,28 +37,32 @@ public sealed partial class InstallSuiteVersionConsumer(IPipeClient pipeClient,
             };
 
             var result = await pipeClient.InstallSignedDebianPackage(signedPackage, context.CancellationToken);
-            if (result is not null && result.Status != OperationStatus.Error)
+            if (result is null || result.Status == OperationStatus.Error)
             {
-                var response = new InstallSuiteVersionStarted(result.Message, result.Status == OperationStatus.Warning)
-                {
-                    CorrelationId = correlationId
-                };
+                LogInstalledSuiteFailed(logger, correlationId, packageName, signatureName);
 
-                await context.Publish(response, context.CancellationToken);
-            }
-            else
-            {
-                var response = new InstallSuiteVersionStarted(result?.Message, result?.Status == OperationStatus.Warning)
+                var errorEvent = new InstallSuiteVersionStarted(result?.Message, result?.Status == OperationStatus.Warning)
                 {
                     CorrelationId = correlationId,
                     ErrorInfo = new ErrorInfo((int?)result?.Status ?? -1, result?.Message)
                 };
-                await context.Publish(response, context.CancellationToken);
+
+                await context.Publish(errorEvent, context.CancellationToken);
+                return;
             }
+
+            LogInstalledSuiteVersion(logger, correlationId, packageName, signatureName);
+
+            var response = new InstallSuiteVersionStarted(result.Message, result.Status == OperationStatus.Warning)
+            {
+                CorrelationId = correlationId
+            };
+
+            await context.Publish(response, context.CancellationToken);
         }
         catch (Exception ex)
         {
-            LogInstallSuiteVersionFailed(logger, ex, context.Message.PackageName, context.Message.SignatureName);
+            LogUnexpectedError(logger, ex, correlationId, packageName, signatureName);
 
             var response = new InstallSuiteVersionStarted(null, false)
             {
@@ -67,9 +73,15 @@ public sealed partial class InstallSuiteVersionConsumer(IPipeClient pipeClient,
         }
     }
 
-    [LoggerMessage(LogLevel.Information, "Installing suite version package='{Package}' with signature='{Signature}'")]
-    private static partial void LogInstallSuiteVersion(ILogger<InstallSuiteVersionConsumer> logger, string package, string signature);
+    [LoggerMessage(LogLevel.Debug, "Installing suite version package='{Package}' with signature='{Signature}' correlated by {CorrelationId}")]
+    private static partial void LogInstallSuiteVersion(ILogger<InstallSuiteVersionConsumer> logger, Guid correlationId, string package, string signature);
 
-    [LoggerMessage(LogLevel.Error, "Failed to install suite version package='{Package}' with signature='{Signature}'")]
-    private static partial void LogInstallSuiteVersionFailed(ILogger<InstallSuiteVersionConsumer> logger, Exception exception, string package, string signature);
+    [LoggerMessage(LogLevel.Information, "Installed suite version package='{Package}' with signature='{Signature}' correlated by {CorrelationId}")]
+    private static partial void LogInstalledSuiteVersion(ILogger<InstallSuiteVersionConsumer> logger, Guid correlationId, string package, string signature);
+
+    [LoggerMessage(LogLevel.Information, "Failed to install suite version package='{Package}' with signature='{Signature}' correlated by {CorrelationId}")]
+    private static partial void LogInstalledSuiteFailed(ILogger<InstallSuiteVersionConsumer> logger, Guid correlationId, string package, string signature);
+
+    [LoggerMessage(LogLevel.Error, "Unexpected error on install suite version package='{Package}' with signature='{Signature}' correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger<InstallSuiteVersionConsumer> logger, Exception exception, Guid correlationId, string package, string signature);
 }

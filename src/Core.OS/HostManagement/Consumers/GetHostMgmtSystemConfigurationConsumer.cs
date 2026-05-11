@@ -1,4 +1,4 @@
-﻿using Core.OS.HostManagement.Extensions;
+using Core.OS.HostManagement.Extensions;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Communication.Enums;
 using Sdk.Backend.Messaging;
