@@ -1,5 +1,6 @@
-﻿@using Sdk.Client.NotificationArea.Components
+@using Sdk.Client.NotificationArea.Components
 @using Sdk.Client.NotificationArea.Services
+@using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
 
 @{
     var cssClasses = new List<string> { "notification-element-grid" };
@@ -15,8 +16,10 @@
             { nameof(NotificationElementBase<INotificationElementState>.State), notificationElementRegistryItem.State }
         };
 
-        <DynamicComponent Type="@notificationElementRegistryItem.ComponentType"
-                            Parameters="@notificationElementParameters"
-                            @key="@notificationElementRegistryItem.Id" />
+        <AdvancedErrorBoundary>
+            <DynamicComponent Type="@notificationElementRegistryItem.ComponentType"
+                              Parameters="@notificationElementParameters"
+                              @key="@notificationElementRegistryItem.Id" />
+        </AdvancedErrorBoundary>
     }
 </div>
