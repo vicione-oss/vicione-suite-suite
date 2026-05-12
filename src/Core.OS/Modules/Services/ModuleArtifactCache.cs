@@ -54,7 +54,7 @@ public sealed partial class ModuleArtifactCache : IDisposable, IModuleArtifactCa
                 var assets = await _moduleRepository.QueryModuleMetadataArtifacts(sdkVersion, null, cancellationToken);
                 if (assets.Count == 0)
                 {
-                    LogWarningNoModulesFound(_logger, sdkVersion);
+                    LogNoModulesFound(_logger, sdkVersion);
                     return _moduleMetadata;
                 }
 
@@ -101,7 +101,7 @@ public sealed partial class ModuleArtifactCache : IDisposable, IModuleArtifactCa
         }
         catch (Exception ex)
         {
-            LogErrorReadingModuleMetadata(logger, ex, asset.Repository, asset.Path, asset.Name);
+            LogReadingModuleMetadata(logger, ex, asset.Repository, asset.Path, asset.Name);
             return null;
         }
     }
@@ -133,8 +133,8 @@ public sealed partial class ModuleArtifactCache : IDisposable, IModuleArtifactCa
     }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "No modules found for Sdk version '{Version}'")]
-    private static partial void LogWarningNoModulesFound(ILogger<ModuleArtifactCache> logger, Version? version);
+    private static partial void LogNoModulesFound(ILogger<ModuleArtifactCache> logger, Version? version);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed read module metadata repo '{Repo}' item '{Path}/{Name}'")]
-    private static partial void LogErrorReadingModuleMetadata(ILogger<ModuleArtifactCache> logger, Exception ex, string repo, string path, string name);
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed reading module metadata repository '{Repo}' item '{Path}/{Name}'")]
+    private static partial void LogReadingModuleMetadata(ILogger<ModuleArtifactCache> logger, Exception ex, string repo, string path, string name);
 }

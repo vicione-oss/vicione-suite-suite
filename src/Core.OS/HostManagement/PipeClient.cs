@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Core.OS.HostManagement;
 
-public sealed class PipeClient(IOptions<HostManagementOptions> options, ILogger<PipeClient> logger, EventCallbackRegistry eventCallbackRegistry) :
+public sealed partial class PipeClient(IOptions<HostManagementOptions> options, ILogger<PipeClient> logger, EventCallbackRegistry eventCallbackRegistry) :
     IPipeClient
 {
     private const int CommunicationDelayMs = 250; //Temporary workaround for HM re-creating the pipe after each call.
@@ -30,7 +30,7 @@ public sealed class PipeClient(IOptions<HostManagementOptions> options, ILogger<
     {
         await PipeClientStream.ConnectAsync(cancellationToken).ConfigureAwait(false);
 
-        logger.LogDebug("Connected to server");
+        LogConnectedToServer(logger);
 
         // Start the processing thread
         _ = PipeMessageProcessor.StartProcessing(cancellationToken);
@@ -61,11 +61,11 @@ public sealed class PipeClient(IOptions<HostManagementOptions> options, ILogger<
             if (_requestLock.CurrentCount < 1)
             {
                 _requestLock.Release();
-                logger.LogDebug("Sent request for topic='{Topic}' and released lock", topic);
+                LogSentRequestReleasedLock(logger, topic);
             }
             else
             {
-                logger.LogDebug("Sent request for topic='{Topic}'", topic);       
+                LogSentRequest(logger, topic);
             }
         }
     }
@@ -82,14 +82,14 @@ public sealed class PipeClient(IOptions<HostManagementOptions> options, ILogger<
 
         try
         {
-            logger.LogDebug("Send hostmanagement request with topic='{Topic}' content.length={Length}", topic, content.Length);
-            logger.LogTrace("Request content: {ConfigJson}", content);
+            LogSendingRequest(logger, topic, content.Length);
+            LogRequestContent(logger, content);
 
             await PipeStreamWrapper.SendMessage(message, cancellationToken);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to send message with topic {Topic}", topic);
+            LogFailedToSendMessage(logger, ex, topic);
             throw;
         }
 
@@ -109,7 +109,7 @@ public sealed class PipeClient(IOptions<HostManagementOptions> options, ILogger<
             ? PipeOptions.Asynchronous
             : _pipeOptions.Value | PipeOptions.Asynchronous;
 
-        logger.LogDebug("Connecting to pipe \'{PipeName}\'", _pipeName);
+        LogConnectingToPipe(logger, _pipeName);
 
         return new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, pipeOptions);
     }
@@ -122,4 +122,25 @@ public sealed class PipeClient(IOptions<HostManagementOptions> options, ILogger<
         _pipeClientStream?.Dispose();
         _requestLock.Dispose();
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Connected to server")]
+    private static partial void LogConnectedToServer(ILogger<PipeClient> logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Sent request for topic='{Topic}' and released lock")]
+    private static partial void LogSentRequestReleasedLock(ILogger<PipeClient> logger, string topic);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Sent request for topic='{Topic}'")]
+    private static partial void LogSentRequest(ILogger<PipeClient> logger, string topic);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Send hostmanagement request with topic='{Topic}' content.length={Length}")]
+    private static partial void LogSendingRequest(ILogger<PipeClient> logger, string topic, int length);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Request content: {ConfigJson}")]
+    private static partial void LogRequestContent(ILogger<PipeClient> logger, string configJson);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to send message with topic {Topic}")]
+    private static partial void LogFailedToSendMessage(ILogger<PipeClient> logger, Exception exception, string topic);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Connecting to pipe '{PipeName}'")]
+    private static partial void LogConnectingToPipe(ILogger<PipeClient> logger, string pipeName);
 }

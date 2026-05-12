@@ -1,3 +1,4 @@
+using Core.OS.Instance.Consumers;
 using Core.OS.Modules.Contracts;
 using Core.Shared.Modules;
 using Core.Shared.Modules.Requests;
@@ -5,7 +6,7 @@ using Sdk.Backend.Messaging;
 
 namespace Core.OS.Modules.Consumers;
 
-public sealed class GetModuleMetadataBundlesConsumer(IModuleMetadataProvider metadataProvider, ILogger<GetModuleMetadataBundlesConsumer> logger)
+public sealed partial class GetModuleMetadataBundlesConsumer(IModuleMetadataProvider metadataProvider, ILogger<GetModuleMetadataBundlesConsumer> logger)
     : RequestConsumer<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>
 {
     public override async Task<GetModuleMetadataBundlesResponse> Respond(GetModuleMetadataBundlesRequest message, CancellationToken cancellationToken)
@@ -19,9 +20,12 @@ public sealed class GetModuleMetadataBundlesConsumer(IModuleMetadataProvider met
 
     public override Task<GetModuleMetadataBundlesResponse> HandleException(GetModuleMetadataBundlesRequest message, Exception e, CancellationToken cancellationToken)
     {
-        logger.LogError(e, $"Failed to handle {nameof(GetModuleMetadataBundlesRequest)}");
+        LogError(logger, e);
 
         // if we failed to request available modules we still can deliver installed ones        
         return Task.FromResult(new GetModuleMetadataBundlesResponse([], new(ModuleErrorCodes.RequestVersionsFailed, e.Message)));
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to get module metadata bundles")]
+    private static partial void LogError(ILogger<GetModuleMetadataBundlesConsumer> logger, Exception exception);
 }

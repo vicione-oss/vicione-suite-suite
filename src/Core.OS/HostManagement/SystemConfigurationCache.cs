@@ -1,4 +1,4 @@
-﻿using Core.Shared.HostManagement;
+using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.Options;
@@ -6,7 +6,7 @@ using Timer = System.Timers.Timer;
 
 namespace Core.OS.HostManagement;
 
-public sealed class SystemConfigurationCache(IOptions<HostManagementOptions> options, ILogger<SystemConfigurationCache> logger) : IDisposable
+public sealed partial class SystemConfigurationCache(IOptions<HostManagementOptions> options, ILogger<SystemConfigurationCache> logger) : IDisposable
 {
     private readonly long _cacheLifetimeMs = options.Value.ConfigurationCacheLifetimeMs;
     private Timer? _cacheInvalidationTimer;
@@ -30,7 +30,7 @@ public sealed class SystemConfigurationCache(IOptions<HostManagementOptions> opt
             _cacheInvalidationTimer.Start();
         }
 
-        logger.LogDebug("Cached system configuration");
+        LogCachedSystemConfiguration(logger);
     }
 
     public SystemConfiguration? Get()
@@ -71,6 +71,12 @@ public sealed class SystemConfigurationCache(IOptions<HostManagementOptions> opt
             _cacheInvalidationTimer = null;
         }
 
-        logger.LogDebug("Cached system configuration invalidated");
+        LogCachedSystemConfigurationInvalidated(logger);
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Cached system configuration")]
+    private static partial void LogCachedSystemConfiguration(ILogger<SystemConfigurationCache> logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Cached system configuration invalidated")]
+    private static partial void LogCachedSystemConfigurationInvalidated(ILogger<SystemConfigurationCache> logger);
 }
