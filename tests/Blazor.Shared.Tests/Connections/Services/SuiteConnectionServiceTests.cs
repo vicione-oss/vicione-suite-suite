@@ -46,7 +46,7 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.UpsertTag(tag, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            suiteConnectionService.Tags.Should().BeEquivalentTo([tag]);
+            suiteConnectionService.CachedTags.Should().BeEquivalentTo([tag]);
 
             await uiMediator.Received(1).Send(Arg.Any<UpsertTag>(), Arg.Any<CancellationToken>());
         }
@@ -78,8 +78,8 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.UpsertTag(tag, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            suiteConnectionService.Tags.Should().BeEquivalentTo([tag]);
-            suiteConnectionService.Tags.First().Text.Should().Be(tag.Text);
+            suiteConnectionService.CachedTags.Should().BeEquivalentTo([tag]);
+            suiteConnectionService.CachedTags.First().Text.Should().Be(tag.Text);
 
             await uiMediator.Received(2).Send(Arg.Any<UpsertTag>(), Arg.Any<CancellationToken>());
         }
@@ -118,7 +118,7 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.DeleteTag(deleteTag, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            suiteConnectionService.Tags.Should().BeEquivalentTo([keepTag]);
+            suiteConnectionService.CachedTags.Should().BeEquivalentTo([keepTag]);
 
             await uiMediator.Received(1).Send(Arg.Any<DeleteTag>(), Arg.Any<CancellationToken>());
         }
@@ -156,7 +156,7 @@ public class SuiteConnectionServiceTests
 
             // Assert
             result.Should().BeOfType<SuiteConnectionServiceErrorResult>().Subject.ErrorMessage.Should().Be(SuiteConnectionServiceLocalization.TagCannotBeDeletedBecauseItIsProtected);
-            suiteConnectionService.Tags.Should().BeEquivalentTo([protectedTag]);
+            suiteConnectionService.CachedTags.Should().BeEquivalentTo([protectedTag]);
 
             await uiMediator.Received(0).Send(Arg.Any<DeleteTag>(), Arg.Any<CancellationToken>());
         }
@@ -292,7 +292,7 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.UpsertConnection(connection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            suiteConnectionService.Tags.Should().BeEquivalentTo([tag]);
+            suiteConnectionService.CachedTags.Should().BeEquivalentTo([tag]);
             suiteConnectionService.Connections.Should().BeEquivalentTo([connection]);
 
             await uiMediator.Received(1).Send(Arg.Any<UpsertConnection>(), Arg.Any<CancellationToken>());
@@ -382,7 +382,7 @@ public class SuiteConnectionServiceTests
             await suiteConnectionService.DeleteConnection(connection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            suiteConnectionService.Tags.Should().BeEquivalentTo([tag]);
+            suiteConnectionService.CachedTags.Should().BeEquivalentTo([tag]);
             suiteConnectionService.Connections.Should().BeEmpty();
 
             await uiMediator.Received(1).Send(Arg.Any<DeleteConnection>(), Arg.Any<CancellationToken>());

@@ -23,8 +23,9 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
-		<RuntimeIdentifiers Condition="$(MSBuildProjectDirectory.Contains('src'))">linux-x64;linux-arm64;win-x64</RuntimeIdentifiers>
-        <!-- general information -->
+        <RuntimeIdentifiers Condition="$(MSBuildProjectDirectory.Contains('src'))">linux-x64;linux-arm64;win-x64</RuntimeIdentifiers>
+
+        <!-- General information -->
         <Description>-</Description>
         <Product>ViciOne Suite</Product>
         <Company>ifm software</Company>
@@ -32,9 +33,11 @@
         <Copyright>Copyright © $(Company) $(Year)</Copyright>
         <NeutralLanguage>en-US</NeutralLanguage>
         <SatelliteResourceLanguages>en;de</SatelliteResourceLanguages>
-        <!-- code quality -->
-        <WarningsNotAsErrors>612,618</WarningsNotAsErrors>
+
+        <!-- Code quality -->
+        <TreatWarningsAsErrors Condition="'$(CI)' != '' Or '$(TREAT_WARNINGS_AS_ERRORS)' == 'true'">true</TreatWarningsAsErrors>
         <NoWarn Condition="'$(CI)' == ''">$(NoWarn);NU1507</NoWarn>
+
         <!-- NuGet security -->
         <NuGetAuditMode>all</NuGetAuditMode>
     </PropertyGroup>

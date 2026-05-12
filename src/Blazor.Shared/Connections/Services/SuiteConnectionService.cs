@@ -17,8 +17,8 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
 {
     private bool _initialized;
     private List<Connection> _connections = [];
-    private readonly HashSet<Tag> _tags = [];
-    public IReadOnlySet<Tag> Tags => _tags;
+    private readonly HashSet<Tag> _cachedTags = [];
+    public IReadOnlySet<Tag> CachedTags => _cachedTags;
     public IReadOnlyList<Connection> Connections => _connections;
 
     public event Func<IReadOnlyList<Connection>, Task>? ConnectionStateChanged;
@@ -39,7 +39,7 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
         {
             _connections = await GetConnections(null, cancellationToken);
             foreach (var tag in await GetTags(cancellationToken))
-                _tags.Add(tag);
+                _cachedTags.Add(tag);
 
             _initialized = true;
         }
@@ -119,7 +119,7 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
         {
             case CrudAction.Created:
                 foreach (var tag in message.AddedTags)
-                    somethingChanged |= _tags.Add(tag);
+                    somethingChanged |= _cachedTags.Add(tag);
 
                 if (!_connections.Any(c => c.Id == message.Connection.Id))
                 {
@@ -132,7 +132,7 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
 
             case CrudAction.Updated:
                 foreach (var tag in message.AddedTags)
-                    somethingChanged |= _tags.Add(tag);
+                    somethingChanged |= _cachedTags.Add(tag);
 
                 var existingConnection = _connections.FirstOrDefault(c => c.Id == message.Connection.Id);
                 if (existingConnection is not null)
@@ -215,14 +215,14 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
         {
             case CrudAction.Created:
                 foreach (var tag in message.Tags)
-                    _tags.Add(tag);
+                    _cachedTags.Add(tag);
 
                 break;
 
             case CrudAction.Updated:
                 foreach (var tag in message.Tags)
                 {
-                    if (_tags.TryGetValue(tag, out var existing))
+                    if (_cachedTags.TryGetValue(tag, out var existing))
                         existing.Text = tag.Text;
 
                     foreach (var connection in _connections.Where(connection => connection.Tags.Contains(tag)))
@@ -237,7 +237,7 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
             case CrudAction.Deleted:
                 foreach (var tag in message.Tags)
                 {
-                    _tags.Remove(tag);
+                    _cachedTags.Remove(tag);
 
                     foreach (var connection in _connections.Where(connection => connection.Tags.Contains(tag)))
                     {
