@@ -1,6 +1,6 @@
+using AwesomeAssertions;
 using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -56,7 +56,8 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
 
         // Assert
         dbContext.Tags.Should().Contain(tag);
-        Assert.False(await tester.Harness.Published.Any<TagsChanged>(TestContext.Current.CancellationToken));
+        Assert.True(await tester.Harness.Published.Any<TagsChanged>(r =>
+            r.Context.Message.ErrorInfo != null, TestContext.Current.CancellationToken));
     }
 
     [Fact]

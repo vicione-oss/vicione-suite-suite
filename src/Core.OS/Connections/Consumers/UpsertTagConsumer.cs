@@ -14,24 +14,29 @@ public sealed partial class UpsertTagConsumer(IConnectionDbContext dbContext, IL
     {
         var correlationId = context.Message.CorrelationId;
         var crudAction = CrudAction.Created;
+        var tag = context.Message.Tag;
+
+        LogConsume(logger, correlationId, tag.Id);
 
         try
         {
-            var existingTag = await dbContext.Tags.FirstOrDefaultAsync(tag => tag.Id == context.Message.Tag.Id);
+            var existingTag = await dbContext.Tags.FirstOrDefaultAsync(tag => tag.Id == tag.Id);
             if (existingTag is null)
             {
-                var tagEntry = dbContext.Tags.Add(context.Message.Tag);
+                var tagEntry = dbContext.Tags.Add(tag);
                 existingTag = tagEntry.Entity;
             }
             else
             {
                 crudAction = CrudAction.Updated;
-                existingTag.Text = context.Message.Tag.Text;
+                existingTag.Text = tag.Text;
 
                 dbContext.Tags.Update(existingTag);
             }
 
             _ = await dbContext.SaveChangesAsync(context.CancellationToken);
+
+            LogUpserted(logger, correlationId, tag.Id, crudAction);
 
             // if we publish the existing tag it's the reference to the real entity
             // therefore we make a copy to avoid event consumer issues!
@@ -52,10 +57,10 @@ public sealed partial class UpsertTagConsumer(IConnectionDbContext dbContext, IL
         }
         catch (Exception e)
         {
-            LogError(logger, e, context.Message.Tag.Id, correlationId);
+            LogUnexpectedError(logger, e, correlationId, tag.Id);
 
             var errorInfo = new ErrorInfo(TagErrorCodes.AddOrUpdateTagFailed, e.Message);
-            var tagToDelete = new Tag { Id = context.Message.Tag.Id };
+            var tagToDelete = new Tag { Id = tag.Id };
             var responseEvent = new TagsChanged(crudAction, [tagToDelete])
             {
                 CorrelationId = correlationId,
@@ -65,6 +70,12 @@ public sealed partial class UpsertTagConsumer(IConnectionDbContext dbContext, IL
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to upsert tag '{tagId}' correlated by '{correlationId}'.")]
-    private static partial void LogError(ILogger<UpsertTagConsumer> logger, Exception ex, Guid? tagId, Guid correlationId);
+    [LoggerMessage(LogLevel.Debug, "Upserting tag='{TagId}' correlated by {CorrelationId}")]
+    private static partial void LogConsume(ILogger<UpsertTagConsumer> logger, Guid correlationId, Guid tagId);
+
+    [LoggerMessage(LogLevel.Information, "{Action} tag='{TagId}' correlated by {CorrelationId}")]
+    private static partial void LogUpserted(ILogger<UpsertTagConsumer> logger, Guid correlationId, Guid tagId, CrudAction action);
+
+    [LoggerMessage(LogLevel.Error, "Unexpected error on upserting tag='{TagId}' correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger<UpsertTagConsumer> logger, Exception exception, Guid correlationId, Guid tagId);
 }

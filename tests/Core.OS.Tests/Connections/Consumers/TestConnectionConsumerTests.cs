@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using Core.Shared.Connections.Commands;
@@ -86,7 +86,7 @@ public sealed class TestConnectionConsumerTests
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
 
         // Assert
-        doneEvent.RequestId.Should().Be(command.RequestId);
+        doneEvent.CorrelationId.Should().Be(command.CorrelationId);
         doneEvent.TestResult.Success.Should().BeFalse();
         doneEvent.TestResult.ErrorInfo.Should().NotBeNull();
     }
@@ -103,7 +103,7 @@ public sealed class TestConnectionConsumerTests
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
 
         // Assert
-        doneEvent.RequestId.Should().Be(command.RequestId);
+        doneEvent.CorrelationId.Should().Be(command.CorrelationId);
         doneEvent.TestResult.Success.Should().BeTrue();
         doneEvent.TestResult.ErrorInfo.Should().BeNull();
         // var mqttConnection = command.Connection.GetMqttConnection() ?? throw new ArgumentException();
@@ -123,7 +123,7 @@ public sealed class TestConnectionConsumerTests
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
 
         // Assert
-        doneEvent.RequestId.Should().Be(command.RequestId);
+        doneEvent.CorrelationId.Should().Be(command.CorrelationId);
         doneEvent.TestResult.Success.Should().BeTrue();
         doneEvent.TestResult.ErrorInfo.Should().BeNull();
 
@@ -144,7 +144,7 @@ public sealed class TestConnectionConsumerTests
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
 
         // Assert
-        doneEvent.RequestId.Should().Be(command.RequestId);
+        doneEvent.CorrelationId.Should().Be(command.CorrelationId);
         doneEvent.TestResult.Success.Should().BeTrue();
         doneEvent.TestResult.ErrorInfo.Should().BeNull();
 
@@ -174,7 +174,7 @@ public sealed class TestConnectionConsumerTests
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
 
         // Assert
-        doneEvent.RequestId.Should().Be(command.RequestId);
+        doneEvent.CorrelationId.Should().Be(command.CorrelationId);
         doneEvent.TestResult.Success.Should().BeFalse();
         doneEvent.TestResult.ErrorInfo.Should().NotBeNull();
     }
@@ -193,7 +193,7 @@ public sealed class TestConnectionConsumerTests
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
 
         // Assert
-        doneEvent.RequestId.Should().Be(command.RequestId);
+        doneEvent.CorrelationId.Should().Be(command.CorrelationId);
         doneEvent.TestResult.Success.Should().BeTrue();
         doneEvent.TestResult.ErrorInfo.Should().BeNull();
     }
@@ -210,7 +210,7 @@ public sealed class TestConnectionConsumerTests
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
 
         // Assert
-        doneEvent.RequestId.Should().Be(command.RequestId);
+        doneEvent.CorrelationId.Should().Be(command.CorrelationId);
         doneEvent.TestResult.Success.Should().BeFalse();
         doneEvent.TestResult.ErrorInfo.Should().NotBeNull();
     }

@@ -13,24 +13,40 @@ public sealed partial class DeleteTagConsumer(IConnectionDbContext dbContext, IL
     public async Task Consume(ConsumeContext<DeleteTag> context)
     {
         var correlationId = context.Message.CorrelationId;
+        var tagId = context.Message.TagId;
+
+        LogConsume(logger, correlationId, tagId);
 
         try
         {
             var tagToDelete = await dbContext.Tags
-            .SingleOrDefaultAsync(tag => tag.Id.Equals(context.Message.TagId), context.CancellationToken);
+                .SingleOrDefaultAsync(tag => tag.Id.Equals(context.Message.TagId), context.CancellationToken);
             if (tagToDelete is null)
-                return;
-
-            if (tagToDelete.Protected && !context.Message.DeleteIfProtected)
             {
-                logger.LogWarning("Attempting to delete protected Tag {Tag}. If this was intended set the '{Force}'-property to true",
-                    tagToDelete, nameof(DeleteTag.DeleteIfProtected));
+                LogTagNotFound(logger, correlationId, tagId);
+
+                var errorInfo = new ErrorInfo(TagErrorCodes.DeleteTagFailed,
+                             $"Could not delete tag with id '{tagId}'. No tag was found with that id.");
+                var errorTag = new Tag { Id = tagId };
+                var errorResponse = new TagsChanged(CrudAction.Deleted, [errorTag])
+                {
+                    CorrelationId = correlationId,
+                    ErrorInfo = errorInfo
+                };
+                await context.Publish(errorResponse, context.CancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            if (await IsTagProtected(context, tagToDelete))
+            {
                 return;
             }
 
             dbContext.Tags.Remove(tagToDelete);
 
             await dbContext.SaveChangesAsync(context.CancellationToken);
+
+            LogDeleted(logger, correlationId, tagId);
 
             // We publish an event also when SaveChangesAsync() does nothing because some services rely on a response
             var responseEvent = new TagsChanged(CrudAction.Deleted, [tagToDelete])
@@ -41,7 +57,7 @@ public sealed partial class DeleteTagConsumer(IConnectionDbContext dbContext, IL
         }
         catch (Exception e)
         {
-            LogError(logger, e, context.Message.TagId, correlationId);
+            LogUnexpectedError(logger, e, context.Message.TagId, correlationId);
 
             var errorInfo = new ErrorInfo(TagErrorCodes.DeleteTagFailed, e.Message);
             var tagToDelete = new Tag { Id = context.Message.TagId };
@@ -54,6 +70,40 @@ public sealed partial class DeleteTagConsumer(IConnectionDbContext dbContext, IL
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete tag '{tagId}' correlated by '{correlationId}'.")]
-    private static partial void LogError(ILogger<DeleteTagConsumer> logger, Exception ex, Guid? tagId, Guid correlationId);
+    public async Task<bool> IsTagProtected(ConsumeContext<DeleteTag> context, Tag tagToDelete)
+    {
+        if (!tagToDelete.Protected || context.Message.DeleteIfProtected)
+            return false;
+
+        var correlationId = context.Message.CorrelationId;
+        var tagId = context.Message.TagId;
+
+        LogTagIsProtected(logger, correlationId, tagId);
+
+        var errorInfo = new ErrorInfo(TagErrorCodes.DeleteTagFailed,
+                     $"Attempting to delete protected tag='{tagId}'. If this was intended set the '{nameof(DeleteTag.DeleteIfProtected)}'-property to true.");
+        var errorTag = new Tag { Id = tagId };
+        var errorResponse = new TagsChanged(CrudAction.Deleted, [errorTag])
+        {
+            CorrelationId = correlationId,
+            ErrorInfo = errorInfo
+        };
+        await context.Publish(errorResponse, context.CancellationToken).ConfigureAwait(false);
+        return true;
+    }
+
+    [LoggerMessage(LogLevel.Debug, "Deleting tag='{TagId}' correlated by {CorrelationId}")]
+    private static partial void LogConsume(ILogger<DeleteTagConsumer> logger, Guid correlationId, Guid tagId);
+
+    [LoggerMessage(LogLevel.Information, "Deleted tag='{TagId}' correlated by {CorrelationId}")]
+    private static partial void LogDeleted(ILogger<DeleteTagConsumer> logger, Guid correlationId, Guid tagId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to delete tag='{TagId}' correlated by {CorrelationId} because it was not found.")]
+    private static partial void LogTagIsProtected(ILogger<DeleteTagConsumer> logger, Guid correlationId, Guid tagId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete tag='{TagId}' correlated by {CorrelationId} because it was protected.")]
+    private static partial void LogTagNotFound(ILogger<DeleteTagConsumer> logger, Guid correlationId, Guid tagId);
+
+    [LoggerMessage(LogLevel.Error, "Unexpected error on deleting tag='{TagId}' correlated by {CorrelationId}")]
+    private static partial void LogUnexpectedError(ILogger<DeleteTagConsumer> logger, Exception exception, Guid correlationId, Guid tagId);
 }
