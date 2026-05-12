@@ -145,4 +145,10 @@ Wenn beide Netzwerkschnittstellen des Systems manuell mit IP-Adressen konfigurie
   <data name="SwitchToManualConfigurationWarningDialogBody" xml:space="preserve">
     <value>Sie haben keinen DNS-Server konfiguriert. Dadurch könnten einige wichtige Funktionen dieser Anwendung entweder ganz oder teilweise nicht funktionieren. Möchten Sie fortfahren?</value>
   </data>
+  <data name="VlanUsageHint" xml:space="preserve">
+    <value>Wird VLAN für eine Netzwerkschnittstelle (lan1 bzw. lan2) aktiviert, wird die IP-Konfiguration ausschließlich der entsprechenden VLAN-Schnittstelle zugeordnet. Die zugrunde liegende Netzwerkschnittstelle erhält keine eigene IP-Adresse mehr und ist nicht separat erreichbar. Ungetaggte Ethernet-Pakete können nicht mehr für diese Netzwerkschnittstelle zur IP-Kommunikation verwendet werden. Die Kommunikation kann ausschließlich über Pakete mit der konfigurierten VLAN-ID erfolgen.</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Hinweis</value>
+  </data>
 </root>
