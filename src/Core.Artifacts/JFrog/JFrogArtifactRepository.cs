@@ -282,7 +282,7 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to create source configuration for endpoint='{Source}'", source.Endpoint);
+                LogFailedToCreateApiConfig(logger, ex, source.Endpoint);
             }
         }
 
@@ -343,23 +343,26 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
     }
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Downloading artifact from '{SourceUri}' to '{TargetFilePath}'")]
-    private static partial void LogDownloadingArtifact(ILogger logger, Uri SourceUri, string TargetFilePath);
+    private static partial void LogDownloadingArtifact(ILogger logger, Uri sourceUri, string targetFilePath);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Downloading artifact from '{SourceUri}' to patch '{TargetFolderPath}'")]
-    private static partial void LogDownloadingArtifactToPatch(ILogger logger, Uri SourceUri, string TargetFolderPath);
+    private static partial void LogDownloadingArtifactToPatch(ILogger logger, Uri sourceUri, string targetFolderPath);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Downloading artifact from '{SourceUri}' to stream")]
-    private static partial void LogDownloadingArtifactToStream(ILogger logger, Uri SourceUri);
+    private static partial void LogDownloadingArtifactToStream(ILogger logger, Uri sourceUri);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Post artifact query: '{Query}'")]
-    private static partial void LogPostArtifactQuery(ILogger logger, string Query);
+    private static partial void LogPostArtifactQuery(ILogger logger, string query);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to query artifacts from repository='{Repository}' source='{Source}'")]
-    private static partial void LogFailedToQueryArtifacts(ILogger logger, Exception exception, string Repository, string Source);
+    private static partial void LogFailedToQueryArtifacts(ILogger logger, Exception exception, string repository, string source);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Post raw artifact query: '{Query}'")]
-    private static partial void LogPostRawArtifactQuery(ILogger logger, string Query);
+    private static partial void LogPostRawArtifactQuery(ILogger logger, string query);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to query raw data from repository='{Repository}' source='{Source}'")]
-    private static partial void LogFailedToQueryRawData(ILogger logger, Exception exception, string Repository, string Source);
+    private static partial void LogFailedToQueryRawData(ILogger logger, Exception exception, string repository, string source);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create source configuration for endpoint='{Endpoint}'")]
+    private static partial void LogFailedToCreateApiConfig(ILogger logger, Exception exception, string endpoint);
 }

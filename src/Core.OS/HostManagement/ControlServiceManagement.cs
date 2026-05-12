@@ -14,7 +14,7 @@ using SdkServiceState = Sdk.SystemConfiguration.Contracts.ServiceState;
 
 namespace Core.OS.HostManagement;
 
-public class ControlServiceManagement(IPipeClient pipeClient, SystemConfigurationCache responseCache, ILogger<ControlServiceManagement> logger) : IControlServiceManagement
+public sealed partial class ControlServiceManagement(IPipeClient pipeClient, SystemConfigurationCache responseCache, ILogger<ControlServiceManagement> logger) : IControlServiceManagement
 {
     public bool IsAvailable => pipeClient is not MockPipeClient;
 
@@ -30,12 +30,14 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
         {
             if (command is ServiceCommand.Enable or ServiceCommand.Disable)
                 return await ChangeServiceConfiguration(command, serviceName, cancellationToken);
+
             return await ChangeServiceState(command, serviceName, cancellationToken);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to {Command} service '{ServiceName}'.", command, serviceName);
+            LogFailedToControlService(logger, e, command, serviceName);
             var errorInfo = new ErrorInfo(ControlServiceErrorCodes.UnknownError, e.Message);
+
             return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
         }
     }
@@ -59,7 +61,8 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
 
         var errorCode = (int?)setResult?.Status ?? ControlServiceErrorCodes.UnknownError;
         var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
-        logger.LogError("{Command} service '{ServiceName}' failed with {ErrorCode}. {Message}", command, serviceName, errorCode, setResult?.Message);
+        LogServiceCommandFailed(logger, command, serviceName, errorCode, setResult?.Message);
+
         return new ControlServiceManagementResult(serviceName, ToSuiteState(command), errorInfo);
     }
 
@@ -130,10 +133,17 @@ public class ControlServiceManagement(IPipeClient pipeClient, SystemConfiguratio
         {
             var errorCode = (int?)setResult?.Status ?? ControlServiceErrorCodes.UnknownError;
             var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
-            logger.LogError("{Command} service '{ServiceName}' failed with {ErrorCode}. {Message}", command, serviceName, errorCode, setResult?.Message);
+            LogServiceCommandFailed(logger, command, serviceName, errorCode, setResult?.Message);
+
             return new ControlServiceManagementResult(serviceName, ToSuiteState(command), errorInfo);
         }
 
         return new ControlServiceManagementResult(serviceName, ToSuiteState(command));
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to {Command} service '{ServiceName}'.")]
+    private static partial void LogFailedToControlService(ILogger<ControlServiceManagement> logger, Exception exception, ServiceCommand command, string serviceName);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "{Command} service '{ServiceName}' failed with {ErrorCode}. {Message}")]
+    private static partial void LogServiceCommandFailed(ILogger<ControlServiceManagement> logger, ServiceCommand command, string serviceName, int errorCode, string? message);
 }

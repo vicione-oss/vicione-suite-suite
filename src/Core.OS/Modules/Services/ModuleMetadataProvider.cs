@@ -9,7 +9,7 @@ using Semver;
 
 namespace Core.OS.Modules.Services;
 
-public sealed class ModuleMetadataProvider : IModuleMetadataProvider
+public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
 {
     private readonly IModuleOptionsStore _optionsStore;
     private readonly IModulePackageOperationStore _packageOperationStore;
@@ -95,7 +95,7 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to enrich metadata options for module '{Module}'", module.Metadata.Name);
+                LogFailedToEnrichOptions(_logger, ex, module.Metadata.Name);
             }
         }
     }
@@ -239,4 +239,7 @@ public sealed class ModuleMetadataProvider : IModuleMetadataProvider
         // fully support SemVer
         return metaVersion.Major == dependencyVersion.Major && metaVersion.Minor == dependencyVersion.Minor;
     }
+    
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to enrich metadata options for module '{Module}'")]
+    private static partial void LogFailedToEnrichOptions(ILogger<ModuleMetadataProvider> logger, Exception ex, string? module);
 }

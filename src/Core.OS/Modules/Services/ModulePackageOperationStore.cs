@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Text.Json;
 using Core.Module;
 using Core.OS.Hosting;
@@ -110,7 +110,6 @@ public partial class ModulePackageOperationStore(
         return new(updatedPackages, changes);
     }
 
-
     private async Task AddPackageOptions(PackageChangeResult changeSet, CancellationToken cancellationToken)
     {
         // When a module gets upgraded we need to check for it's metadata to determine it's migration settings.
@@ -134,7 +133,6 @@ public partial class ModulePackageOperationStore(
             operation.Options = new ModulePackageOperationOptions(metadata.AutonomousMigration, isPatchUpdate);
         }
     }
-
 
     private record PackageChangeResult(List<ModulePackageOperation> Operations, List<ModulePackageChange> Changes);
 
@@ -231,11 +229,11 @@ public partial class ModulePackageOperationStore(
     [LoggerMessage(Level = LogLevel.Debug, Message = "No package updates to queue")]
     private static partial void LogNoPackageUpdatesToQueue(ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "No package operations to queue, deleting existing operations file '{UpdateFile}'")]
-    private static partial void LogNoPendingOperations(ILogger logger, string updateFile);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "No package operations to queue, deleting existing operations file '{OperationsFile}'")]
+    private static partial void LogNoPendingOperations(ILogger logger, string operationsFile);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Enqueued {Count} package operations to '{UpdateFile}'")]
-    private static partial void LogEnqueuedOperations(ILogger logger, int count, string updateFile);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Enqueued {Count} package operations to '{OperationsFile}'")]
+    private static partial void LogEnqueuedOperations(ILogger logger, int count, string operationsFile);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Removing uninstall operation from queue because '{PackageName}' version '{PackageVersion}' it's not installed yet")]
     private static partial void LogRemovingUninstallOperation(ILogger logger, string packageName, string packageVersion);
@@ -252,6 +250,6 @@ public partial class ModulePackageOperationStore(
     [LoggerMessage(Level = LogLevel.Debug, Message = "Cleared enqueued package operations")]
     private static partial void LogClearedOperations(ILogger logger);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete queued package updates file '{OperationsFile}'")]
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete queued package operations file '{OperationsFile}'")]
     private static partial void LogClearOperationsError(ILogger logger, string operationsFile);
 }

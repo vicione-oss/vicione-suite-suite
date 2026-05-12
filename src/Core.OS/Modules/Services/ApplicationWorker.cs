@@ -27,7 +27,7 @@ using Sdk.Instance;
 
 namespace Core.OS.Modules.Services;
 
-internal sealed class ApplicationWorker(
+internal sealed partial class ApplicationWorker(
     IServiceProvider services,
     ILogger<ApplicationWorker> logger) : IHostedLifecycleService
 {
@@ -37,7 +37,7 @@ internal sealed class ApplicationWorker(
     {
         try
         {
-            logger.LogInformation("Starting application initialization");
+            logger.LogStartingApplicationInitialization();
 
             using var scope = services.CreateScope();
             var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
@@ -51,6 +51,7 @@ internal sealed class ApplicationWorker(
             var localInstanceInformationProvider
                 = scope.ServiceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
             InitializeLocalInstanceInformation(scope, localInstanceInformationProvider);
+
             activity?.AddEvent(new ActivityEvent("app.lifecycle.local_instance.initialized"));
             activity?.AddTag("service.instance.id", localInstanceInformationProvider.Local.Id);
             activity?.AddTag("service.instance.type", localInstanceInformationProvider.Local.Type);
@@ -80,13 +81,11 @@ internal sealed class ApplicationWorker(
             await SetCulture(scope, cancellationToken);
 
             activity?.AddEvent(new ActivityEvent("app.lifecycle.started"));
-            logger.LogInformation("Init completed as {InstanceType} ({InstanceId})",
-                localInstanceInformationProvider.Local.Type,
-                localInstanceInformationProvider.Local.Id);
+            logger.LogInitCompleted(localInstanceInformationProvider.Local.Type, localInstanceInformationProvider.Local.Id);
         }
         catch (Exception ex)
         {
-            LogInitFailed(ex);
+            StopApplicationOnFailure(ex);
         }
     }
 
@@ -113,6 +112,7 @@ internal sealed class ApplicationWorker(
                 loadedModules,
                 configuration,
                 cancellationToken);
+
             activity?.AddEvent(new ActivityEvent("app.lifecycle.register_instance.send"));
 
             await StartMessageBusDepot(scope, cancellationToken);
@@ -125,6 +125,7 @@ internal sealed class ApplicationWorker(
                 loadedModules,
                 configuration,
                 cancellationToken);
+
             activity?.AddEvent(new ActivityEvent("app.lifecycle.register_instance.send"));
         }
     }
@@ -133,12 +134,12 @@ internal sealed class ApplicationWorker(
     {
         if (cancellationToken.IsCancellationRequested)
             return;
-        using var activity
-            = CoreActivitySource.Source.StartActivity($"{nameof(ApplicationWorker)}.{nameof(StartAsync)}");
+
+        using var activity = CoreActivitySource.Source.StartActivity($"{nameof(ApplicationWorker)}.{nameof(StartAsync)}");
 
         try
         {
-            logger.LogTrace("Initializing module host");
+            logger.LogInitializingModuleHost();
 
             var moduleHost = services.GetRequiredService<IModuleHost>();
 
@@ -146,12 +147,12 @@ internal sealed class ApplicationWorker(
             await moduleHost.CallOnInitialized(scope, cancellationToken);
             activity?.AddEvent(new ActivityEvent("app.lifecycle.module_host.initialized"));
 
-            logger.LogInformation("Modules are initialized");
+            logger.LogModulesInitialized();
         }
         catch (Exception ex)
         {
             activity?.AddException(ex);
-            LogInitFailed(ex);
+            StopApplicationOnFailure(ex);
         }
     }
 
@@ -183,24 +184,24 @@ internal sealed class ApplicationWorker(
             await Task.Delay(10, cancellationToken);
         }
 
-        logger.LogInformation("Message bus depot started");
+        logger.LogMessageBusDepotStarted();
     }
 
     private void MoveResources(IServiceScope scope)
     {
-        logger.LogTrace("Moving module resources");
+        logger.LogMovingModuleResources();
 
         var moduleHost = scope.ServiceProvider.GetRequiredService<IModuleHost>();
         moduleHost.MoveModuleResources(services);
 
-        logger.LogInformation("Module resources sychronized");
+        logger.LogModuleResourcesSynchronized();
     }
 
     private async Task DeleteOrphanedNonces(INonceStore nonceStore, CancellationToken cancellationToken)
     {
         try
         {
-            logger.LogTrace("Deleting orphaned nonces");
+            logger.LogDeletingOrphanedNonces();
 
             await nonceStore.DeletedOrphaned(cancellationToken);
         }
@@ -210,7 +211,7 @@ internal sealed class ApplicationWorker(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Unexpected error occurred while trying to delete orphaned nonces");
+            logger.LogErrorDeletingOrphanedNonces(e);
         }
     }
 
@@ -240,7 +241,7 @@ internal sealed class ApplicationWorker(
         catch (Exception e)
         {
             activity?.AddException(e);
-            logger.LogError(e, "Unexpected error occurred while trying to set culture");
+            logger.LogErrorSettingCulture(e);
 
             activity?.AddTag("process.runtime.culture", CrossInstanceConfiguration.CultureNameDefault);
             SetCulture(CrossInstanceConfiguration.CultureNameDefault);
@@ -254,7 +255,7 @@ internal sealed class ApplicationWorker(
         CultureInfo.DefaultThreadCurrentCulture = culture;
         CultureInfo.DefaultThreadCurrentUICulture = culture;
 
-        logger.LogInformation("Culture set to {CultureName}", cultureName);
+        logger.LogCultureSet(cultureName);
     }
 
     private async Task MigrateCoreData(IServiceScope scope,
@@ -263,7 +264,7 @@ internal sealed class ApplicationWorker(
         if (cancellationToken.IsCancellationRequested)
             return;
 
-        logger.LogTrace("Migrating application databases");
+        logger.LogMigratingApplicationDatabases();
 
         await scope.ServiceProvider.MigrateContext<IApplicationDbContext>(cancellationToken);
         await scope.ServiceProvider.MigrateContext<UserDbContext>(cancellationToken);
@@ -272,7 +273,7 @@ internal sealed class ApplicationWorker(
         // force regeneration of users security stamps to invalidate current logins
         if (InstanceStartupState.InvalidateLoginsAfterMigration)
         {
-            logger.LogTrace("Invalidating active logins");
+            logger.LogInvalidatingActiveLogins();
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SuiteUser>>();
             await userManager.InvalidateLogins();
@@ -282,7 +283,7 @@ internal sealed class ApplicationWorker(
     private async Task SeedInitialData(IServiceScope scope,
         CancellationToken cancellationToken)
     {
-        logger.LogTrace("Seeding initial data");
+        logger.LogSeedingInitialData();
 
         await scope.ServiceProvider.SeedUsersAndRoles(cancellationToken);
         await scope.ServiceProvider.SeedConnections(cancellationToken);
@@ -308,7 +309,7 @@ internal sealed class ApplicationWorker(
         var moduleHost = scope.ServiceProvider.GetRequiredService<IModuleHost>();
         var instanceId = localInfoProvider.ReadLocalInstanceId();
 
-        logger.LogTrace("Initializing local instance information");
+        logger.LogInitializingLocalInstanceInformation();
 
         // accessing the dbcontext should happen after RegisterInstanceCommand was consumed
         var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
@@ -366,7 +367,7 @@ internal sealed class ApplicationWorker(
         IConfiguration config,
         CancellationToken cancellationToken)
     {
-        logger.LogInformation("Starting registration for instance {InstanceId}", instanceInfo.Id);
+        logger.LogStartingRegistration(instanceInfo.Id);
 
         var sendEndpointProvider = scope.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
 
@@ -390,9 +391,7 @@ internal sealed class ApplicationWorker(
         },
             cancellationToken);
 
-        logger.LogInformation("Published {Command} on {Type} instance",
-            nameof(Instance.Commands.RegisterInstance),
-            instanceInfo.Type);
+        logger.LogPublishedRegisterInstance(nameof(Instance.Commands.RegisterInstance), instanceInfo.Type);
     }
 
     private static bool IsAllowed(KeyValuePair<string, string?> keyValuePair)
@@ -424,9 +423,9 @@ internal sealed class ApplicationWorker(
         return knownKeys.Any(k => keyValuePair.Key.StartsWith(k, StringComparison.Ordinal));
     }
 
-    private void LogInitFailed(Exception ex)
+    private void StopApplicationOnFailure(Exception ex)
     {
-        logger.LogCritical(ex, "Init failed");
+        logger.LogInitFailed(ex);
 
         InitializationErrorMessage = ex.Message;
 

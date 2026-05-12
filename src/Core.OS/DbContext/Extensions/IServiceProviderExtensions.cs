@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Persistence;
 
 namespace Core.OS.DbContext.Extensions;
