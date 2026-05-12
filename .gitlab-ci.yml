@@ -98,7 +98,11 @@ include:
       image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
       filter: '/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)]'
       coverage: true
-      before_script: [*activate_mise, *update_nuget_source_ro, *install_npm_packages]
+      before_script:
+        - *activate_mise
+        - *update_nuget_source_ro
+        - *install_npm_packages
+        - *run_npm_scripts
       rules: *rules_common
 
 
