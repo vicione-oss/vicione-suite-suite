@@ -31,7 +31,7 @@
 
 ### Updated
 
-- `ViciOne.Ui.Blazor.Components` package, update version to `5.11.0`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.12.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.10.0`
 
 ## 1.2.0 - 2026-04-17
