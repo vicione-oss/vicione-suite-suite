@@ -135,11 +135,29 @@ namespace Blazor.Shared.Network.ControlPanels.NetworkInterface.Components.Locali
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Note.
+        /// </summary>
+        internal static string Note {
+            get {
+                return ResourceManager.GetString("Note", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have not configured a DNS server. As a result, some important functions of this application may not work at all or may not work properly. Do you want to continue?.
         /// </summary>
         internal static string SwitchToManualConfigurationWarningDialogBody {
             get {
                 return ResourceManager.GetString("SwitchToManualConfigurationWarningDialogBody", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If VLAN is enabled for a network interface (lan1 or lan2), the IP configuration is assigned exclusively to the corresponding VLAN interface. The underlying network interface no longer receives its own IP address and is no longer separately accessible. Untagged Ethernet packets can no longer be used for IP communication via this network interface. Communication is only possible via packets with the configured VLAN ID..
+        /// </summary>
+        internal static string VlanUsageHint {
+            get {
+                return ResourceManager.GetString("VlanUsageHint", resourceCulture);
             }
         }
     }

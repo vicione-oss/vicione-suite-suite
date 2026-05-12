@@ -211,6 +211,9 @@
             </Expander>
 
             <ChildContent>
+                <SettingsInformation>
+                    <b>@Localization.TcpIpControlPanelPage.Note</b>: @Localization.TcpIpControlPanelPage.VlanUsageHint
+                </SettingsInformation>
                 <SettingsField Label="@Constants.VLanIdLabel">
                     <SettingsFieldTextBox Placeholder="@Constants.VLanIdLabel" Subline="@Localization.GeneralControlPanelPage.VLanIdSettingsFieldSubline" @bind-Value="State.VLanId" @bind-Value:after="BeginEdit" />
                 </SettingsField>
