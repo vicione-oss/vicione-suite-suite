@@ -23,8 +23,6 @@ public class MqttViewerComponentTests
     private const string SkipMessage = "#709 - There some timing issue with the async popup rendering that fails in pipeline";
     private const string SkipFailing = "#80x - These tests need to be refactored because they fail to often";
 
-    private const string FilterButtonSelector = ".monochrome-icon-search";
-    private const string ExpandNodeButtonSelector = ".monochrome-icon-expander-light-down";
     private const string ConnectButtonSelector = ".monochrome-icon-wifi";
     private const string DisconnectButtonSelector = ".monochrome-icon-wifi-off";
     private const string ClearFilterButtonSelector = $"button[id={MqttViewerConstants.ClearFilterButtonId}]";

@@ -17,7 +17,11 @@ namespace Blazor.Shared.Module.ControlPanels;
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
 public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsControlPanelState>
 {
-    private bool _isDebug;
+#if DEBUG
+    private const bool IsDebug = true;
+#else
+    private const bool IsDebug = false;
+#endif
 
     [Inject] internal IModuleManagementService ManagementService { get; set; } = default!;
     [Inject] private IMessageBannerService MessageBannerService { get; set; } = default!;
@@ -34,9 +38,6 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
     {
         base.OnInitialized();
 
-#if DEBUG
-        _isDebug = true;
-#endif
         ManagementService.OptionsChanged += ManagementServiceOptionsChanged;
         ManagementService.OperationsChanged += ManagementServiceOperationsChanged;
     }

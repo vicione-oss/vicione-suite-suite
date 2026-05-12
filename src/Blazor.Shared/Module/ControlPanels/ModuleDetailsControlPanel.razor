@@ -94,7 +94,7 @@
                 }
             </SettingsGroup>
 
-            @if (!State.ModuleMetadata.Installed || _isDebug)
+            @if (!State.ModuleMetadata.Installed || IsDebug)
             {
                 var optionsSettingsGroupSubline = State.ModuleMetadata.OptionsExpanded ? null : Localization.ModuleDetailsControlPanel.ExpandToSeeOptionsProvidedByTheModule;
 

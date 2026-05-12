@@ -10,6 +10,7 @@ Welcome to the readme of ViciOne Suite. Questions and suggestions for improvemen
         * [Linux](#linux)
     * [JFrog credentials](#package-api-credentials)
     * [npm packages](#npm-packages)
+    * [Local development experience](#local-development-experience)
 * [Getting Started](#getting-started)
 * [ViciOne Suite Accounts](#vicione-suite-accounts)
 * [Configuration](#configuration)
@@ -94,6 +95,16 @@ To install the npm packages you have to:
 The installation should now run automatically.
 
 > Note: After executing commands such as git clean, this step likely needs to be repeated.
+
+### Local development experience
+
+Some aspects of the build process differs when running a build in a local developer environment compared to when it would run in CI pipeline.
+
+We provide support for environment variables to customize the local development experience.
+
+Environment Variable | Description | Default Value | Value in CI | Example usage in PowerShell
+-|-|-|-|-
+`TREAT_WARNINGS_AS_ERRORS` | When set to `true`, all compiler warnings are treated as errors. | `false` | `true` | `[Environment]::SetEnvironmentVariable("TREAT_WARNINGS_AS_ERRORS", "true", "User")`
 
 ### Dotnet Build
 

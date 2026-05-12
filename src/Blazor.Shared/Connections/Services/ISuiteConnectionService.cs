@@ -7,7 +7,7 @@ namespace Blazor.Shared.Connections.Services;
 
 public interface ISuiteConnectionService : IConnectionService
 {
-    IReadOnlySet<Tag> Tags { get; }
+    IReadOnlySet<Tag> CachedTags { get; }
 
     event Func<ConnectionChanged, Task>? ConnectionChanged;
 
