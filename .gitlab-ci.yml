@@ -22,14 +22,12 @@ stages:
   - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_JFrog -p $NuGet_PW_JFrog --store-password-in-clear-text
   - dotnet nuget update source JFrogDevExpressProxy --configfile NuGet.Config -u $NuGet_User_JFrog -p $NuGet_PW_JFrog --store-password-in-clear-text
 
-
 # Anchors defined before include section so they can be used in component inputs
 .activate_mise: &activate_mise
   - export MISE_DATA_DIR="${CI_PROJECT_DIR}/.mise-data"
   - export MISE_DOTNET_ROOT="${MISE_DATA_DIR}/installs/dotnet"
   - mise install
   - eval "$(mise env)"
-
 
 .install_npm_packages: &install_npm_packages
   - npm install
@@ -41,10 +39,8 @@ stages:
   - npx eslint .
 
 # Rules anchors (defined here so they can be used in component inputs)
-.rules_tag_manual: &rules_tag_manual
+.rules_tag: &rules_tag
   if: '$CI_COMMIT_TAG'
-  when: manual
-  allow_failure: true
 
 .rules_default_branch: &rules_default_branch
   if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
@@ -54,6 +50,11 @@ stages:
 
 .rules_web: &rules_web
   if: '$CI_PIPELINE_SOURCE == "web"'
+
+.rules_tag_manual: &rules_tag_manual
+  if: '$CI_COMMIT_TAG'
+  when: manual
+  allow_failure: true
 
 .rules_default_branch_manual: &rules_default_branch_manual
   if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
@@ -85,6 +86,19 @@ stages:
   - <<: *rules_web_manual
 
 include:
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/version/version-calc@v1.2.0
+    inputs:
+      rules:
+        - <<: *rules_tag
+        - <<: *rules_default_branch
+        - <<: *rules_merge_request
+        - <<: *rules_web
+      env_file_name: version.env
+      before_script:
+        - echo "APP_PIPELINE=${CI_PIPELINE_ID}" >> version.env
+        - echo "APP_VERSION=$(cat VERSION)" >> version.env
+        - echo "APP_TAG=${CI_COMMIT_TAG}" >> version.env
+
   # xUnit test job (both x64 and arm64 via parallel matrix)
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@2
     inputs:
@@ -104,8 +118,6 @@ include:
         - *install_npm_packages
         - *run_npm_scripts
       rules: *rules_common
-
-
 
   # Cache configuration component
   # Caches: .mise-data/installs/, .nuget/packages/, node_modules/
@@ -285,29 +297,6 @@ variables:
     - <<: *rules_merge_request_manual
     - <<: *rules_web_manual
     - <<: *rules_default_branch_manual
-
-Version:
-  stage: .pre
-  rules:
-    - if: '$CI_COMMIT_TAG'
-    - <<: *rules_default_branch
-    - <<: *rules_merge_request
-    - <<: *rules_web
-  script:
-    - if [[ -f "VERSION" ]]; then VERSION=$(head -n 1 VERSION); fi
-    - if [[ ! -z "${CI_COMMIT_TAG}" ]]; then VERSION=$(echo $CI_COMMIT_TAG | sed 's/v//g'); fi
-    - if [[ -z "${VERSION}" ]]; then VERSION='0.1.0'; fi
-    - if [[ -z "${CI_COMMIT_TAG}" ]]; then VERSION="${VERSION}-ci${CI_PIPELINE_ID}"; fi
-    - echo "Version=${VERSION}" >> version.env
-    - echo "PackageVersion=${VERSION}" >> version.env
-    - echo "APP_PIPELINE=${CI_PIPELINE_ID}" >> version.env
-    - echo "APP_VERSION=$(cat VERSION)" >> version.env
-    - echo "APP_TAG=${CI_COMMIT_TAG}" >> version.env
-    - cat version.env
-  artifacts:
-    reports:
-      dotenv: version.env
-    expire_in: 30 days
 
 Validation:
   extends: .minimal
