@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.2 - Unreleased
+
+### Fixed
+
+- `UserTicketStore`, fixed potential database lock issues by replacing tracked entity operations
+
 ## 1.2.1 - 2026-05-12
 
 ### Added

@@ -14,6 +14,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
 {
     private readonly ILogger<UserTicketStore> _logger = services.GetRequiredService<ILogger<UserTicketStore>>();
 
+    /// <inheritdoc/>
     public async Task RemoveAsync(string key)
     {
         LogMethodWithKey(_logger, nameof(RemoveAsync), key);
@@ -25,14 +26,12 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IUserDbContext>();
 
-        var ticket = await dbContext.Tickets.SingleOrDefaultAsync(x => x.Id == id);
-        if (ticket is null)
-            return;
-
-        dbContext.Tickets.Remove(ticket);
-        await dbContext.SaveChangesAsync();
+        await dbContext.Tickets
+            .Where(t => t.Id == id)
+            .ExecuteDeleteAsync();
     }
 
+    /// <inheritdoc/>
     public async Task RenewAsync(string key, AuthenticationTicket authTicket)
     {
         LogMethodWithKey(_logger, nameof(RenewAsync), key);
@@ -66,11 +65,12 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
         }
     }
 
+    /// <inheritdoc/>
     public async Task<AuthenticationTicket?> RetrieveAsync(string key)
     {
+        // RetrieveAsync is called multiple times per request
         LogMethodWithKey(_logger, nameof(RetrieveAsync), key);
 
-        // this one is called quite often - could be improved by some caching
         if (!Guid.TryParse(key, out var id))
             return null;
 
@@ -78,26 +78,21 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
         var dbContext = scope.ServiceProvider.GetRequiredService<IUserDbContext>();
 
         // check if we have a ticket for the key (browser-session-id)
-        var ticket = await dbContext.Tickets.FindAsync(id);
+        var ticket = await dbContext.Tickets
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == id);
+
         if (ticket is null)
             return null;
-
-        // retrieve gets called multiple times quite fast, therefore we update the
-        // last activity if at least a second elapsed
-        if (ticket.LastActivity.HasValue)
-        {
-            var elapsed = DateTimeOffset.UtcNow - ticket.LastActivity;
-            if (elapsed.Value.TotalSeconds < 1)
-                return TicketSerializer.Default.Deserialize(ticket.Value);
-        }
-
-        ticket.LastActivity = DateTimeOffset.UtcNow;
 
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<UserTicketStore>>();
 
         try
         {
-            await dbContext.SaveChangesAsync();
+            await dbContext.Tickets
+                .Where(t => t.Id == id)
+                .ExecuteUpdateAsync(s => s.SetProperty(t => t.LastActivity, ticket.LastActivity));
+
             LogLastActivityUpdate(logger, ticket.Id);
         }
         catch (DbUpdateException)
@@ -112,6 +107,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
         return TicketSerializer.Default.Deserialize(ticket.Value);
     }
 
+    /// <inheritdoc/>
     public async Task<string> StoreAsync(AuthenticationTicket ticket)
     {
         var userId = string.Empty;
