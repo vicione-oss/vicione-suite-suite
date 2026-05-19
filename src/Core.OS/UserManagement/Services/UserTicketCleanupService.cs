@@ -1,5 +1,6 @@
 using Core.OS.DbContext;
 using Core.OS.UserManagement.Configuration;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Core.OS.UserManagement.Services;
@@ -39,15 +40,28 @@ internal sealed partial class UserTicketCleanupService(IServiceProvider serviceP
     {
         await using var scope = serviceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IUserDbContext>();
-        
-        LogDeletingExpiredTickets(logger);
 
-        foreach (var ticket in dbContext.Tickets.AsEnumerable().Where(k => DateTimeOffset.UtcNow >= k.Expires))
+        // This is a SQLite-specific limitation; on a real SQL Server or PostgreSQL deployment
+        // a single-query ExecuteDeleteAsync with a DateTimeOffset predicate would translate fine.
+        var now = DateTimeOffset.UtcNow;
+        var expiredIds = dbContext.Tickets
+            .AsNoTracking()
+            .AsEnumerable()
+            .Where(k => k.Expires <= now)
+            .Select(k => k.Id)
+            .ToList();
+
+        if (expiredIds.Count == 0)
         {
-            dbContext.Tickets.Remove(ticket);
+            LogDeletedExpiredTickets(logger, 0);
+            return;
         }
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        var deleted = await dbContext.Tickets
+            .Where(k => expiredIds.Contains(k.Id))
+            .ExecuteDeleteAsync(cancellationToken);
+
+        LogDeletedExpiredTickets(logger, deleted);
     }
 
     [LoggerMessage(LogLevel.Debug, "{Service} started with interval {Interval}")]
@@ -59,6 +73,6 @@ internal sealed partial class UserTicketCleanupService(IServiceProvider serviceP
     [LoggerMessage(LogLevel.Debug, "{Service} is stopping.")]
     static partial void LogServiceIsStopping(ILogger<UserTicketCleanupService> logger, string Service);
 
-    [LoggerMessage(LogLevel.Debug, "Deleting expired tickets")]
-    static partial void LogDeletingExpiredTickets(ILogger<UserTicketCleanupService> logger);
+    [LoggerMessage(LogLevel.Debug, "Deleted {Count} expired tickets")]
+    static partial void LogDeletedExpiredTickets(ILogger<UserTicketCleanupService> logger, int count);
 }

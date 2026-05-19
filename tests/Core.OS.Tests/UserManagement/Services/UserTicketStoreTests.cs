@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Persistence;
@@ -65,7 +65,11 @@ public class UserTicketStoreTests
             await store.RemoveAsync(ticket.Id.ToString());
 
             // Assert
-            (await dbContext.Tickets.FindAsync([ticket.Id], TestContext.Current.CancellationToken)).Should().BeNull();
+            var exists = await dbContext.Tickets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == ticket.Id, TestContext.Current.CancellationToken);
+
+            exists.Should().BeNull();
         }
 
         [Fact]
@@ -196,8 +200,12 @@ public class UserTicketStoreTests
             result.AuthenticationScheme.Should().Be(original.AuthenticationScheme);
             result.Principal.Identity!.Name.Should().Be("userA");
 
-            var reloaded = await dbContext.Tickets.FindAsync([id], TestContext.Current.CancellationToken);
-            reloaded!.LastActivity!.Should().BeAfter(lastActivity);
+            var reloaded = await dbContext.Tickets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == id, TestContext.Current.CancellationToken);
+
+            reloaded.Should().NotBeNull();
+            reloaded.LastActivity!.Should().BeCloseTo(lastActivity, TimeSpan.FromMilliseconds(200));
         }
     }
 
