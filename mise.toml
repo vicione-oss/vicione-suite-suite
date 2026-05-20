@@ -9,4 +9,4 @@
 
 [tools]
 node = "24"
-dotnet = "10.0.202"  # Must match global.json requirement
+dotnet = "10.0.300"  # Must match global.json requirement
