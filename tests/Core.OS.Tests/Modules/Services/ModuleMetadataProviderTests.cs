@@ -15,8 +15,10 @@ using Core.Shared.Modules.Requests;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Core.Shared.Modules;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Sdk.Messaging;
 using Sdk.Modules;
 using TestModule.Backend;
 using Xunit;
@@ -545,6 +547,80 @@ public class ModuleMetadataProviderTests
                 .AvailableVersions
                 .Should()
                 .Contain(lowerCiVersion);
+        }
+
+        [Fact]
+        public async Task Should_set_pending_install_operation_if_found_no_version_error_is_present_and_version_is_unresolved()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
+            var module = metadata.First();
+            var latestVersion = "1.2.3";
+
+            var installed = new List<ModuleMetadataBundle>
+            {
+                new()
+                {
+                    ModuleId = module.Name,
+                    Metadata = new ModuleMetadata { Name = module.Name, Version = ModuleConstants.UnresolvedVersionMarker, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+                    Installed = true,
+                    Errors = [new ErrorInfo(ModuleErrorCodes.FoundNoVersion, "No version found")]
+                }
+            };
+            var available = new List<ModuleMetadata>
+            {
+                new() { Name = module.Name, Version = latestVersion, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+            };
+
+            _moduleManager.GetManifestModules().Returns(installed);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
+
+            // Assert
+            var bundle = result.First(k => k.ModuleId == module.Name);
+            bundle.PendingOperation.Should().NotBeNull();
+            bundle.PendingOperation!.OperationKind.Should().Be(ModulePackageOperationKind.Install);
+            bundle.PendingOperation.Package.Version.Should().Be(latestVersion);
+            bundle.Errors.Should().NotContain(k => k.ErrorCode == ModuleErrorCodes.FoundNoVersion, "the error should be removed after resolving");
+        }
+
+        [Fact]
+        public async Task Should_not_set_pending_install_operation_if_found_no_version_error_is_absent()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
+            var module = metadata.First();
+            var latestVersion = "1.2.3";
+
+            var installed = new List<ModuleMetadataBundle>
+            {
+                new()
+                {
+                    ModuleId = module.Name,
+                    Metadata = new ModuleMetadata { Name = module.Name, Version = ModuleConstants.UnresolvedVersionMarker, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+                    Installed = true,
+                }
+            };
+            var available = new List<ModuleMetadata>
+            {
+                new() { Name = module.Name, Version = latestVersion, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+            };
+
+            _moduleManager.GetManifestModules().Returns(installed);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
+
+            // Assert
+            var bundle = result.First(k => k.ModuleId == module.Name);
+            bundle.PendingOperation.Should().BeNull("no FoundNoVersion error was present");
         }
 
         [Fact]

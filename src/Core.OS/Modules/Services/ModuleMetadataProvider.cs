@@ -2,6 +2,7 @@ using Core.Module.Options;
 using Core.Module.Utils;
 using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
+using Core.Shared.Modules;
 using Core.Shared.Modules.Contracts;
 using Microsoft.Extensions.Options;
 using Sdk.Modules;
@@ -54,8 +55,15 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
         // we merge the versions of the metadata to bundles and order them by the published date from metadata
         var bundles = CreateBundles(installedBundles ?? [], availableMetadata?.OrderByDescending(k => k.Published).ToList() ?? []);
 
+        // evaluate the versions and update the bundle states accordingly (can update, errors etc.)
+        ApplyVersionEvaluation(bundles);
+
+        // we need to apply the pending operations before enriching the options
+        // because they might change the options (e.g. pending uninstall should not allow modification)
         await ApplyEnqueuedPackageOperations(bundles, cancellationToken);
 
+        // apply the options from the environment and stored options - this will enrich the metadata with the current values
+        // and also set the flags for secrets/env vars so that the UI can handle them accordingly       
         await ApplyEnvironmentOptions(bundles, cancellationToken);
 
         return bundles;
@@ -156,7 +164,12 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
             existing.AvailableVersions.Add(metadata.Version);
         }
 
-        foreach (var bundle in result)
+        return result;
+    }
+
+    private static void ApplyVersionEvaluation(List<ModuleMetadataBundle> bundles)
+    {
+        foreach (var bundle in bundles)
         {
             if (bundle.AvailableVersions.Count == 0)
             {
@@ -178,12 +191,24 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
 
             var latest = bundle.AvailableVersions.First();
 
+            // if new artifact source was added but initial resolve has failed
+            // we want to display that it will be installed after next restart
+            var removedError = bundle.Errors.RemoveAll(k => k.ErrorCode == ModuleErrorCodes.FoundNoVersion);
+            if (removedError > 0 && bundle.Metadata.Version == ModuleConstants.UnresolvedVersionMarker)
+            {
+                var dependency = new ModuleDependencyPackage
+                {
+                    Name = bundle.Metadata.Name,
+                    Version = latest
+                };
+                bundle.PendingOperation = new ModulePackageOperation(dependency, ModulePackageOperationKind.Install);
+                continue;
+            }
+
             // if we have a newer version available and the module is not marked as unresolvable, we can update
             bundle.CanUpdate = bundle.Metadata.Version != ModuleConstants.UnresolvedVersionMarker
                 && bundle.Metadata.Version != latest;
         }
-
-        return result;
     }
 
     public static void UpdateMissingDependencies(ModuleMetadataBundle model, IReadOnlyCollection<ModuleMetadataBundle> installed)
@@ -239,7 +264,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
         // fully support SemVer
         return metaVersion.Major == dependencyVersion.Major && metaVersion.Minor == dependencyVersion.Minor;
     }
-    
+
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to enrich metadata options for module '{Module}'")]
     private static partial void LogFailedToEnrichOptions(ILogger<ModuleMetadataProvider> logger, Exception ex, string? module);
 }
