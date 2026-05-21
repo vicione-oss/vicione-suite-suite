@@ -1,3 +1,5 @@
+@use "../../Styles/design/colors";
+
 .message-banner-dialog {
     bottom: 40px;
     position: absolute;
@@ -53,7 +55,7 @@
 }
 
 .error {
-    background: #E34B35;
+    background: colors.$error;
 }
 
 .message-banner-dialog:hover {
