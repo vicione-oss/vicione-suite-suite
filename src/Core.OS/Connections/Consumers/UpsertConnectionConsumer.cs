@@ -24,7 +24,7 @@ public sealed partial class UpsertConnectionConsumer(IConnectionDbContext dbCont
         {
             var existingConnection = await dbContext.Connections
                 .Include(c => c.Tags)
-                .FirstOrDefaultAsync(conn => conn.Id == connection.Id);
+                .FirstOrDefaultAsync(conn => conn.Id == connection.Id, context.CancellationToken);
 
             var addedTags = new List<Tag>();
             var changedTags = new List<Tag>();

@@ -1,4 +1,4 @@
-﻿using Core.OS.Connections.Consumers;
+using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using AwesomeAssertions;
 using MassTransit;
@@ -74,5 +74,36 @@ public class UpsertTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
 
         events.Last().Action.Should().Be(CrudAction.Updated);
         events.Last().Tags[0].Text.Should().Be("Updated");
+    }
+
+    [Fact]
+    public async Task Updates_only_tag_with_given_id()
+    {
+        // Arrange
+        await using var tester = new MassTransitTester(_configureServices);
+
+        var dbContext = tester.Services.GetRequiredService<IConnectionDbContext>();
+
+        var tagAGuid = Guid.NewGuid();
+        var tagBGuid = Guid.NewGuid();
+
+        dbContext.Tags.Add(new Tag("TagA", tagAGuid));
+        dbContext.Tags.Add(new Tag("TagB", tagBGuid));
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var commands = new UpsertTag[]
+        {
+            new(new Tag("Updated", tagBGuid))
+        };
+
+        // Act
+        var events = await tester.TestCommands<UpsertTag, UpsertTagConsumer, TagsChanged>(commands);
+
+        // Assert
+        events.Should().HaveCount(1);
+        events.Last().Action.Should().Be(CrudAction.Updated);
+        events.Last().Tags[0].Text.Should().Be("Updated");
+
+        dbContext.Tags.FirstOrDefault(t => t.Id == tagAGuid)?.Text.Should().Be("TagA");
     }
 }
