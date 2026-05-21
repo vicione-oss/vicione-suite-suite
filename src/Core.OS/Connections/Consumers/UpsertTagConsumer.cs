@@ -20,7 +20,7 @@ public sealed partial class UpsertTagConsumer(IConnectionDbContext dbContext, IL
 
         try
         {
-            var existingTag = await dbContext.Tags.FirstOrDefaultAsync(tag => tag.Id == tag.Id);
+            var existingTag = await dbContext.Tags.FirstOrDefaultAsync(t => t.Id == tag.Id, context.CancellationToken);
             if (existingTag is null)
             {
                 var tagEntry = dbContext.Tags.Add(tag);
