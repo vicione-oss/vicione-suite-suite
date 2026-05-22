@@ -86,11 +86,11 @@
                     <SettingsField Label="@Localization.GeneralControlPanelPage.Ipv4Address">
                         @address.Address
                     </SettingsField>
-                
+
                     <SettingsField Label="@Localization.GeneralControlPanelPage.Ipv4SubnetMask">
                         @address.Subnet
                     </SettingsField>
-                
+
                     <SettingsField Label="@Localization.GeneralControlPanelPage.Ipv4DefaultGateway">
                         @address.Gateway
                     </SettingsField>
@@ -200,7 +200,7 @@
                 </SettingsField>
 
                 <SettingsField Label="@string.Format(UserActions.RenewSomething, TechnicalTerms.DhcpLease)" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
-                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.Renew" OnClick="@RenewDhcpLease" />
+                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.Renew" OnClick="@RenewDhcpLease" Enabled="@CanRenewDhcpLease()" />
                 </SettingsField>
             </SettingsGroup>
         }

@@ -1,6 +1,6 @@
 using Blazor.Shared.Network.ControlPanels.RemoteAccess.Services;
+using Blazor.Shared.Services;
 using Core.Shared.HostManagement;
-using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;

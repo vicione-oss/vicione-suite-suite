@@ -10,6 +10,9 @@
 
 - `UserTicketStore`, fixed potential database lock issues by replacing tracked entity operations
 - `ModuleManagementControlPanel`, fixed module status display after changes of artifactory sources
+- `NetworkControlPanel`, 
+    - fixed display of DHCP lease information after manual renew button click
+    - only reload DHCP lease information when DHCP is enabled on reset
 - Artifact repository sources are now cleared on reset
 
 ### Updated

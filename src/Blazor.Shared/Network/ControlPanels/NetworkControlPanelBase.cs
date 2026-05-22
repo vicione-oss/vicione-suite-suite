@@ -1,4 +1,4 @@
-using Core.Shared.HostManagement.Services;
+using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.ControlPanels.Components;
 
@@ -10,8 +10,13 @@ public class NetworkControlPanelBase<TState> : ControlPanelBase<TState>
     [Inject]
     protected ISystemConfigurationService SystemConfigurationService { get; set; } = default!;
 
+
     protected override void OnInitialized()
-        => SystemConfigurationService.SystemConfigurationChanged += SystemConfigurationChanged;
+    {
+        base.OnInitialized();
+
+        SystemConfigurationService.SystemConfigurationChanged += SystemConfigurationChanged;
+    }
 
     protected override ValueTask DisposeAsyncCore()
     {

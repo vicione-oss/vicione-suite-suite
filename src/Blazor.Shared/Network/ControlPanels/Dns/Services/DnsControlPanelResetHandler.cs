@@ -1,5 +1,5 @@
 using Blazor.Shared.Network.ControlPanels.Dns.Extensions;
-using Core.Shared.HostManagement.Services;
+using Blazor.Shared.Services;
 using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Network.ControlPanels.Dns.Services;

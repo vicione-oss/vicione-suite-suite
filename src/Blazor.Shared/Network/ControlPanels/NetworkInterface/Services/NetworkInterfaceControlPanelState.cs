@@ -56,5 +56,7 @@ public sealed class NetworkInterfaceControlPanelState : NetworkControlPanelState
         }
     }
 
+    internal bool HasUnsavedChanges { get; set; }
+
     internal bool GeneralInformationExpanded { get; set; } = true;
 }

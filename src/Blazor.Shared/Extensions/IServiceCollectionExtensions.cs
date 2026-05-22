@@ -18,7 +18,6 @@ using Blazor.Shared.SystemInformation.Extensions;
 using Blazor.Shared.UserInterface.Extensions;
 using Blazor.Shared.UserManagement.Extensions;
 using Blazor.Shared.Wizards.Extensions;
-using Core.Shared.HostManagement.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.NotificationArea.Extensions;
 using Sdk.Client.Services;

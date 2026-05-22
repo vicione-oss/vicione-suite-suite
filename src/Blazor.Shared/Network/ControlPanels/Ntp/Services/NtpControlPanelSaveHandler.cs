@@ -1,7 +1,7 @@
-﻿using Blazor.Shared.Network.ControlPanels.Ntp.Extensions;
+using Blazor.Shared.Network.ControlPanels.Ntp.Extensions;
 using Blazor.Shared.Network.Models;
 using Blazor.Shared.Network.Services;
-using Core.Shared.HostManagement.Services;
+using Blazor.Shared.Services;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.Logging;

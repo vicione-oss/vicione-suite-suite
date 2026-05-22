@@ -1,6 +1,6 @@
 using Blazor.Shared.Network.ControlPanels.RemoteAccess.Extensions;
+using Blazor.Shared.Services;
 using Core.Shared.HostManagement;
-using Core.Shared.HostManagement.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Sdk.Client.ControlPanels.Services;

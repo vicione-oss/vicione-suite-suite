@@ -1,8 +1,7 @@
-﻿using Core.OS.HostManagement;
+using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement;
-using Core.Shared.HostManagement.Services;
 using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,7 +22,6 @@ public class GetHostMgmtSystemConfigurationConsumerTests
             cfg.AddConsumer<GetHostMgmtSystemConfigurationConsumer>();
             cfg.AddSingleton<SystemConfigurationCache>();
             cfg.AddSingleton(Substitute.For<ILogger<SystemConfigurationCache>>());
-            cfg.AddSingleton(Substitute.For<ISystemConfigurationService>());
             cfg.AddMockPipeClientSystemConfiguration();
         });
 
@@ -48,7 +46,6 @@ public class GetHostMgmtSystemConfigurationConsumerTests
             cfg.AddSingleton<SystemConfigurationCache>();
             cfg.AddSingleton(Substitute.For<ILogger<SystemConfigurationCache>>());
             cfg.AddSingleton(Substitute.For<IPipeClient>());
-            cfg.AddSingleton(Substitute.For<ISystemConfigurationService>());
         });
 
         var request = new GetHostMgmtSystemConfiguration();

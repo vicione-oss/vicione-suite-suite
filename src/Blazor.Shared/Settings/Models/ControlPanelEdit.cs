@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
@@ -69,7 +69,7 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
                 }
                 catch (Exception e)
                 {
-                    UnexpectedErrorWhileRequestingCancellation(_logger, e);
+                    LogUnexpectedErrorWhileRequestingCancellation(_logger, e);
                 }
 
                 _handlerMethodInvocationCancellationTokenSource.Dispose();
@@ -93,7 +93,9 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
         {
             var cancellationToken = await GetCancellationTokenForHandlerMethodInvocation(_semaphoreCancellationTokenSource.Token);
 
+            LogResetHandlerInvoking(_logger, typeof(TControlPanelState).Name);
             await resetHandler.Reset(_controlPanelState, cancellationToken);
+            LogResetHandlerInvoked(_logger, typeof(TControlPanelState).Name);
 
             IsRunning = false;
 
@@ -127,7 +129,9 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
         {
             var cancellationToken = await GetCancellationTokenForHandlerMethodInvocation(_semaphoreCancellationTokenSource.Token);
 
+            LogSaveHandlerInvoking(_logger, typeof(TControlPanelState).Name);
             var saveResult = await saveHandler.Save(_controlPanelState, cancellationToken);
+            LogSaveHandlerInvoked(_logger, typeof(TControlPanelState).Name);
 
             if (saveResult is SaveSuccessResult)
                 IsRunning = false;
@@ -169,7 +173,9 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
         {
             var cancellationToken = await GetCancellationTokenForHandlerMethodInvocation(_semaphoreCancellationTokenSource.Token);
 
+            LogCancelHandlerInvoking(_logger, typeof(TControlPanelState).Name);
             await cancelHandler.Cancel(_controlPanelState, cancellationToken);
+            LogCancelHandlerInvoked(_logger, typeof(TControlPanelState).Name);
 
             IsRunning = false;
 
@@ -209,7 +215,25 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
         }
     }
 
-    [LoggerMessage(1, LogLevel.Warning, "Unexpected error while requesting cancellation of possible ongoing handler execution")]
-    internal static partial void UnexpectedErrorWhileRequestingCancellation(ILogger<ControlPanelEdit<TControlPanelState>> logger,
+    [LoggerMessage(LogLevel.Warning, "Unexpected error while requesting cancellation of possible ongoing handler execution")]
+    internal static partial void LogUnexpectedErrorWhileRequestingCancellation(ILogger<ControlPanelEdit<TControlPanelState>> logger,
         Exception exception);
+
+    [LoggerMessage(LogLevel.Debug, "Invoking reset handler for state '{StateType}'")]
+    internal static partial void LogResetHandlerInvoking(ILogger<ControlPanelEdit<TControlPanelState>> logger, string stateType);
+
+    [LoggerMessage(LogLevel.Debug, "Reset handler invoked for state '{StateType}'")]
+    internal static partial void LogResetHandlerInvoked(ILogger<ControlPanelEdit<TControlPanelState>> logger, string stateType);
+
+    [LoggerMessage(LogLevel.Debug, "Invoking save handler for state '{StateType}'")]
+    internal static partial void LogSaveHandlerInvoking(ILogger<ControlPanelEdit<TControlPanelState>> logger, string stateType);
+
+    [LoggerMessage(LogLevel.Debug, "Save handler invoked for state '{StateType}'")]
+    internal static partial void LogSaveHandlerInvoked(ILogger<ControlPanelEdit<TControlPanelState>> logger, string stateType);
+
+    [LoggerMessage(LogLevel.Debug, "Invoking cancel handler for state '{StateType}'")]
+    internal static partial void LogCancelHandlerInvoking(ILogger<ControlPanelEdit<TControlPanelState>> logger, string stateType);
+
+    [LoggerMessage(LogLevel.Debug, "Cancel handler invoked for state '{StateType}'")]
+    internal static partial void LogCancelHandlerInvoked(ILogger<ControlPanelEdit<TControlPanelState>> logger, string stateType);
 }

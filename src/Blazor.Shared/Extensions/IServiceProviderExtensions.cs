@@ -6,7 +6,6 @@ using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.DateAndTime.Services;
 using Blazor.Shared.UserManagement.Extensions;
-using Core.Shared.HostManagement.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Blazor.Shared.Extensions;

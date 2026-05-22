@@ -1,6 +1,6 @@
 using AwesomeAssertions;
 using Blazor.Shared.Network.ControlPanels.Proxies.Services;
-using Core.Shared.HostManagement.Services;
+using Blazor.Shared.Services;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.DependencyInjection;

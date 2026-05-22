@@ -1,8 +1,8 @@
 using AwesomeAssertions;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
+using Blazor.Shared.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Core.Shared.HostManagement.Requests;
-using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.DependencyInjection;
@@ -152,7 +152,7 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
 
         await using var serviceProvider = SetupServiceProvider();
 
-        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0 };
+        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0, DHCPLease = DHCPLease.Empty };
         var resetHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<NetworkInterfaceControlPanelState>>();
 
         // Act
@@ -160,6 +160,7 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
 
         // Assert
         state.IpV4ConfigurationMode.Should().Be(IpConfigurationMode.Manual);
+        state.DHCPLease.Should().BeNull();
     }
 
     [Fact]

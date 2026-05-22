@@ -1,7 +1,7 @@
 using Blazor.Shared.Network.Models;
 using Blazor.Shared.Network.Services;
+using Blazor.Shared.Services;
 using Core.Shared.HostManagement;
-using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Service;
 using HostManagement.Shared.Enums;
