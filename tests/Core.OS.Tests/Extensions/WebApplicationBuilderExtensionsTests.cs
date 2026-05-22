@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using Core.OS.Extensions;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
@@ -95,13 +95,15 @@ public class WebApplicationBuilderExtensionsTests
         }
 
         [Fact]
-        public async Task Should_clear_instance_directories_if_reset_file_exists_and_folder_exists()
+        public async Task Should_clear_instance_directories_and_artifact_sources_if_reset_file_exists_and_folder_exists()
         {
             // Arrange
             var builder = WebApplication.CreateBuilder();
             var homeDirectory = _fileSystem.GetRootedHomeDirectory(_instanceOptions);
             var backupDirectory = _fileSystem.GetRootedBackupDirectory(_instanceOptions);
+            var reposSourceFile = _fileSystem.Path.Combine(homeDirectory, "repo-sources.json");
 
+            _fileSystem.AddEmptyFile(reposSourceFile);
             SetupTestFiles(_fileSystem, homeDirectory);
             SetupTestFiles(_fileSystem, backupDirectory);
 
@@ -113,6 +115,8 @@ public class WebApplicationBuilderExtensionsTests
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();
             _fileSystem.Directory.GetFiles(backupDirectory).Should().BeEmpty();
+            _fileSystem.File.Exists(reposSourceFile).Should().BeFalse();
+
             _fileSystem.ResetFileExists(_instanceOptions).Should().BeFalse();
             _fileSystem.File.Exists(_fileSystem.GetLocalInstanceIdFilePath(_instanceOptions)).Should().BeTrue();
         }

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.OS.Hosting.Extensions;
 using Core.OS.Hosting.Services;
 using Core.OS.Instance;
@@ -7,6 +7,7 @@ using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
 using Core.OS.Logging;
 using Core.OS.Modules.Extensions;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Core.OS.Extensions;
@@ -20,7 +21,7 @@ internal static class WebApplicationBuilderExtensions
         DeleteDeviceImageFile(fileSystem, instanceOptions, logger);
 
         // reset clears home, cache and backup folders if file flag is set
-        ResetDependingOnFileFlag(fileSystem, instanceOptions, logger);
+        await ResetDependingOnFileFlag(fileSystem, instanceOptions, logger, cancellationToken);
 
         // import a backup if the task is set
         await RestoreDependingOnFileFlag(fileSystem, instanceOptions, logger, cancellationToken);
@@ -87,7 +88,7 @@ internal static class WebApplicationBuilderExtensions
     /// - Home|Cache: remove all subdirectories and their contents. Keep instance file
     /// - Backup: remove all files
     /// </summary>
-    private static void ResetDependingOnFileFlag(IFileSystem fileSystem, InstanceOptions options, Serilog.ILogger logger)
+    private static async Task ResetDependingOnFileFlag(IFileSystem fileSystem, InstanceOptions options, Serilog.ILogger logger, CancellationToken cancellationToken)
     {
         if (!fileSystem.ResetFileExists(options))
             return;
@@ -98,7 +99,7 @@ internal static class WebApplicationBuilderExtensions
             logger.Debug("Clearing workspace cache");
             fileSystem.DeleteCacheDirectories(options, logger);
 
-            // actually use has no way to only restore some modules we'll remove everything
+            // actually user has no way to only restore some modules - we'll remove everything
             logger.Debug("Clearing workspace home");
             fileSystem.DeleteHomeDirectories(options, logger);
 
@@ -112,6 +113,10 @@ internal static class WebApplicationBuilderExtensions
             logger.Debug("Reset data version info");
             var dataVersionPath = fileSystem.GetLocalDataVersionFilePath(options);
             fileSystem.File.Delete(dataVersionPath);
+
+            logger.Debug("Clear artifact sources");
+            using var repoStore = new ArtifactRepositoryStore(fileSystem, Options.Create(options));
+            await repoStore.Clear(cancellationToken);
         }
         catch (Exception e)
         {

@@ -24,6 +24,11 @@ public interface IArtifactRepositoryStore
     Task<List<ArtifactRepository>> GetRepositories(IReadOnlyCollection<Guid>? repositoryIds, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Removes all persisted repositories, effectively resetting the store to an empty state.
+    /// </summary>
+    Task Clear(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Creates a new repository or updates an existing one matched by <see cref="ArtifactRepository.Id"/>.
     /// </summary>    
     Task<CrudAction> CreateOrUpdate(ArtifactRepository source, CancellationToken cancellationToken = default);

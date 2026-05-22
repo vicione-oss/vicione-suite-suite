@@ -6,6 +6,7 @@
 
 - `UserTicketStore`, fixed potential database lock issues by replacing tracked entity operations
 - `ModuleManagementControlPanel`, fixed module status display after changes of artifactory sources
+- Artifact repository sources are now cleared on reset
 
 ### Updated
 
