@@ -1,4 +1,3 @@
-using Core.OS.Instance.Consumers;
 using Core.OS.Modules.Contracts;
 using Core.Shared.Modules;
 using Core.Shared.Modules.Requests;

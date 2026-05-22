@@ -14,14 +14,11 @@ internal sealed class ModuleManagementControlPanelSaveHandler(IModuleManagementS
             return new SaveSuccessResult();
 
         // pending changes
-        var operations = state.InstallOperations.Concat(state.UninstallOperations).ToList();
-
-        var result = await mgmtService.UpdateOperations(operations, cancellationToken);
+        var result = await mgmtService.UpdateOperations([.. state.EnqueuedOperations], cancellationToken);
         if (result is ModuleManagementServiceErrorResult error)
             return new SaveErrorResult(error.ErrorMessage, error.ErrorCode);
 
-        state.InstallOperations.Clear();
-        state.UninstallOperations.Clear();
+        state.EnqueuedOperations.Clear();
 
         return new SaveSuccessResult();
     }

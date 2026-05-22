@@ -1,4 +1,4 @@
-﻿using Sdk.Modules;
+using Sdk.Modules;
 
 namespace Core.OS.Modules.Extensions;
 
@@ -12,7 +12,7 @@ internal static class IModuleOptionsStoreExtensions
             // for now we only take options that are defined within metadata but custom ones need to be added soon
             if (metadata.Options is null || metadata.Options.Count == 0)
                 return;
-            
+
             // json options - we expect it exists
             var options = await optionsStore.LoadJsonDictionary(metadata.Name, cancellationToken);
 

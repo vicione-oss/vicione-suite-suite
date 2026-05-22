@@ -11,8 +11,7 @@ internal static class ModuleManagementControlPanelStateExtensions
     {
         internal void UpdateModules(List<ModuleMetadataModel> models)
         {
-            state.UninstallOperations.Clear();
-            state.InstallOperations.Clear();
+            state.EnqueuedOperations.Clear();
 
             // no module allows modification so installation is not allowed
             state.AllowInstallation = models.Any(k => k.CanBeModified);
@@ -34,27 +33,15 @@ internal static class ModuleManagementControlPanelStateExtensions
             }
         }
 
-        internal void UpdateInstallOperations(List<ModulePackageOperation> operations)
+        internal void EnqueueOperations(List<ModulePackageOperation> operations)
         {
             foreach (var operation in operations)
             {
-                var exists = state.InstallOperations.FirstOrDefault(k => k.Package.Name == operation.Package.Name && k.OperationKind == operation.OperationKind);
+                var exists = state.EnqueuedOperations.FirstOrDefault(k => k.Package.Name == operation.Package.Name && k.OperationKind == operation.OperationKind);
                 if (exists is not null)
-                    state.InstallOperations.Remove(operation);
+                    state.EnqueuedOperations.Remove(operation);
 
-                state.InstallOperations.Add(operation);
-            }
-        }
-
-        internal void UpdateUninstallOperations(List<ModulePackageOperation> operations)
-        {
-            foreach (var operation in operations)
-            {
-                var exists = state.UninstallOperations.FirstOrDefault(k => k.Package.Name == operation.Package.Name && k.OperationKind == operation.OperationKind);
-                if (exists is not null)
-                    state.UninstallOperations.Remove(operation);
-
-                state.UninstallOperations.Add(operation);
+                state.EnqueuedOperations.Add(operation);
             }
         }
 
@@ -94,10 +81,10 @@ internal static class ModuleManagementControlPanelStateExtensions
                     return null;
                 }
 
-                return change.Operation;
+                return change.Action != Sdk.Messaging.CrudAction.Deleted ? change.Operation : null;
             }
         }
 
-        internal bool HasPendingChanges() => state.InstallOperations.Count > 0 || state.UninstallOperations.Count > 0;
+        internal bool HasPendingChanges() => state.EnqueuedOperations.Count > 0;
     }
 }

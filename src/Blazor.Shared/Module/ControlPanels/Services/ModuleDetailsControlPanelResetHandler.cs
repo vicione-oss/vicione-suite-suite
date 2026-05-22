@@ -2,7 +2,7 @@ using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Module.ControlPanels.Services;
 
-public sealed class ModuleDetailsControlPanelResetHandler : IControlPanelResetHandler<ModuleDetailsControlPanelState>
+internal sealed class ModuleDetailsControlPanelResetHandler : IControlPanelResetHandler<ModuleDetailsControlPanelState>
 {
     public Task Reset(ModuleDetailsControlPanelState state, CancellationToken cancellationToken)
     {

@@ -101,6 +101,11 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
                 // !! options might change between requests so we need to enrich them again
                 await _optionsStore.ApplyStoredOptions(module.Metadata, _environmentConfig, cancellationToken);
             }
+            catch (OperationCanceledException)
+            {
+                // we can ignore this but stop the loop
+                break;
+            }
             catch (Exception ex)
             {
                 LogFailedToEnrichOptions(_logger, ex, module.Metadata.Name);
