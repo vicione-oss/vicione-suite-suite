@@ -1,9 +1,9 @@
 using AwesomeAssertions;
 using Blazor.Shared.Network.ControlPanels.RemoteAccess.Services;
+using Blazor.Shared.Services;
 using Core.Shared.HostManagement;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
-using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using HostManagement.Shared.Contracts.Service;

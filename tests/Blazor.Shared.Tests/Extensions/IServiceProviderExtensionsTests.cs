@@ -2,7 +2,6 @@ using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Extensions;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.DateAndTime.Services;
-using Core.Shared.HostManagement.Services;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Xunit;

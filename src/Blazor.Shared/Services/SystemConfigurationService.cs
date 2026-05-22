@@ -1,6 +1,5 @@
 using Blazor.Shared.Extensions;
 using Core.Shared.HostManagement;
-using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Contracts;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.Infrastructure;
@@ -63,10 +62,9 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
         var request = new GetHostMgmtSystemConfiguration();
         try
         {
+            LogInitializing(_logger);
+
             var response = await _mediator.Request<GetHostMgmtSystemConfiguration, GetHostMgmtSystemConfigurationResponse>(request, cancellationToken);
-
-            LogInitialized(_logger, response.RequestError is not null);
-
             if (response.RequestError is not null)
                 throw new InvalidOperationException($"Requesting system configuration failed - {response.RequestError.Message}");
 
@@ -99,8 +97,8 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
     [LoggerMessage(Level = LogLevel.Debug, Message = "SetSystemConfiguration with network {Interfaces}")]
     private static partial void LogSetSystemConfiguration(ILogger logger, string interfaces);
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Initialized system configuration - error:{Error}")]
-    private static partial void LogInitialized(ILogger logger, bool error);
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Initializing system configuration")]
+    private static partial void LogInitializing(ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "System configuration changed - reload failed")]
     private static partial void LogSystemConfigurationChangedReloadFailed(ILogger logger, Exception exception);

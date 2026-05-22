@@ -9,7 +9,7 @@ using Blazor.Shared.Network.ControlPanels.Proxies.Components;
 using Blazor.Shared.Network.ControlPanels.Proxies.Services;
 using Blazor.Shared.Network.ControlPanels.RemoteAccess.Components;
 using Blazor.Shared.Network.ControlPanels.RemoteAccess.Services;
-using Core.Shared.HostManagement.Services;
+using Blazor.Shared.Services;
 using HostManagement.Shared.Contracts;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Services;

@@ -1,7 +1,7 @@
 using Blazor.Shared.Network.ControlPanels.Proxies.Models;
 using Blazor.Shared.Network.ControlPanels.Proxies.Services;
 using Blazor.Shared.Network.Extensions;
-using Core.Shared.HostManagement.Services;
+using Blazor.Shared.Services;
 using HostManagement.Shared.Contracts.Network;
 
 namespace Blazor.Shared.Network.ControlPanels.Proxies.Extensions;

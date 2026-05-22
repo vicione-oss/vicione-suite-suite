@@ -1,8 +1,8 @@
-﻿using System.Net;
+using System.Net;
 using Blazor.Shared.Network.Extensions;
 using Blazor.Shared.Network.Models;
 using Blazor.Shared.Network.Services;
-using Core.Shared.HostManagement.Services;
+using Blazor.Shared.Services;
 using HostManagement.Shared.Contracts;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.Infrastructure;

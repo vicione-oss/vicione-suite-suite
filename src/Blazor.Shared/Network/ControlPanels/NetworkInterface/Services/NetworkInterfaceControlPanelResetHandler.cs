@@ -1,6 +1,6 @@
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions;
+using Blazor.Shared.Services;
 using Core.Shared.HostManagement.Requests;
-using Core.Shared.HostManagement.Services;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 
@@ -26,13 +26,21 @@ internal sealed class NetworkInterfaceControlPanelResetHandler(IUiMediator media
             state.Name = networkInterface.CommonInformation.Name;
             state.Enabled = networkInterface.CommonInformation.Enabled;
 
-            var getDHCPLeaseResponse = await mediator.Request<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>(
+            if (networkInterface.IPv4.DHCPEnabled)
+            {
+                var getDHCPLeaseResponse = await mediator.Request<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>(
                     new GetDHCPLeaseInformation(state.Name), cancellationToken);
+
+                state.DHCPLease = getDHCPLeaseResponse.DHCPLease;
+            }
+            else
+            {
+                state.DHCPLease = null;
+            }
 
             var getOriginalPhysicalAddressResponse = await mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
                 new GetOriginalPhysicalAddress(state.Name), cancellationToken);
 
-            state.DHCPLease = getDHCPLeaseResponse.DHCPLease;
             state.IpAddresses = [];
 
             state.UpdateIPv4Mode(networkInterface);
@@ -40,6 +48,8 @@ internal sealed class NetworkInterfaceControlPanelResetHandler(IUiMediator media
             state.UpdateIPv4Details(networkInterface);
 
             state.UpdateMacAddress(networkInterface, getOriginalPhysicalAddressResponse.OriginalPhysicalAddress);
+
+            state.HasUnsavedChanges = false;
         }
         finally
         {

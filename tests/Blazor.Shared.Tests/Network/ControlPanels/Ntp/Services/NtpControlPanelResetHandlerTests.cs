@@ -1,7 +1,7 @@
 using AwesomeAssertions;
 using Blazor.Shared.Network.ControlPanels.Ntp.Services;
+using Blazor.Shared.Services;
 using Core.Shared.HostManagement.Requests;
-using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.DependencyInjection;

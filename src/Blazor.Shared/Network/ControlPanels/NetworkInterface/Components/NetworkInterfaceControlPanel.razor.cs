@@ -64,6 +64,20 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         await base.DisposeAsyncCore();
     }
 
+    protected override async Task BeginEdit()
+    {
+        await base.BeginEdit();
+
+        State.HasUnsavedChanges = true;
+    }
+
+    protected override async Task CancelEdit()
+    {
+        await base.CancelEdit();
+
+        State.HasUnsavedChanges = false;
+    }
+
     private string GetPhysicalAddress()
     {
         var networkInterface = SystemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
@@ -108,7 +122,7 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         }
         catch (Exception exception)
         {
-            GetNetworkStatusInformationRequestFailed(Logger, exception, nameof(UiMediator.Request));
+            LogGetNetworkStatusInformationRequestFailed(Logger, exception, nameof(UiMediator.Request));
         }
         finally
         {
@@ -125,7 +139,6 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
             SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Count == 0)
         {
             _switchToManualConfigurationWarningDialog = true;
-
             return;
         }
 
@@ -153,6 +166,8 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         await BeginEdit();
     }
 
+    private bool CanRenewDhcpLease() => !State.DhcpLeaseFetching && !State.HasUnsavedChanges;
+
     private async Task RenewDhcpLease()
     {
         State.DhcpLeaseFetching = true;
@@ -170,7 +185,12 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
                 };
 
                 _showErrorDialog = true;
+                return;
             }
+
+            State.DHCPLease = response.DHCPLease;
+
+            SetDhcpLeaseInformation();
         }
         finally
         {
@@ -211,7 +231,6 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     private async Task RenderLoadingIndication()
         => await Task.Delay(1000, _cancellationTokenSource.Token); // allow browser to render loading indication
 
-    [LoggerMessage(1, LogLevel.Error, "{Call} failed)")]
-    private static partial void GetNetworkStatusInformationRequestFailed(ILogger<NetworkInterfaceControlPanel> logger,
-        Exception exception, string call);
+    [LoggerMessage(LogLevel.Error, "{Call} failed")]
+    private static partial void LogGetNetworkStatusInformationRequestFailed(ILogger<NetworkInterfaceControlPanel> logger, Exception exception, string call);
 }

@@ -16,6 +16,8 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
     {
         var correlationId = context.Message.CorrelationId;
 
+        LogConsume(logger, correlationId);
+
         try
         {
             // try to get previous config from cache
@@ -70,6 +72,9 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
 
         return false;
     }
+
+    [LoggerMessage(LogLevel.Debug, "Consuming set system configuration command correlated by {CorrelationId}.")]
+    private static partial void LogConsume(ILogger<SetSystemConfigurationConsumer> logger, Guid correlationId);
 
     [LoggerMessage(LogLevel.Information, "System configuration changes requires system restart to apply all settings.")]
     private static partial void LogSystemConfigurationRequiresRestart(ILogger<SetSystemConfigurationConsumer> logger);

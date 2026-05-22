@@ -1,5 +1,5 @@
 using Blazor.Shared.Network.ControlPanels.Ntp.Extensions;
-using Core.Shared.HostManagement.Services;
+using Blazor.Shared.Services;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 

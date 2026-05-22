@@ -1,6 +1,8 @@
 using HostManagement.Shared.Contracts;
+using Sdk.Client.Infrastructure;
+using Sdk.SystemConfiguration.Events;
 
-namespace Core.Shared.HostManagement.Services;
+namespace Blazor.Shared.Services;
 
 public interface ISystemConfigurationService
 {

@@ -3,8 +3,8 @@ using System.Net;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Network.Extensions;
+using Blazor.Shared.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
-using Core.Shared.HostManagement.Services;
 using HostManagement.Shared.Contracts.Network;
 using ViciOne.Ui.Localization.Resources;
 

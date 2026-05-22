@@ -1,6 +1,6 @@
 using Blazor.Shared.Network.ControlPanels.Ntp.Services;
+using Blazor.Shared.Services;
 using Core.Shared.HostManagement.Requests;
-using Core.Shared.HostManagement.Services;
 using Sdk.Client.Infrastructure;
 
 namespace Blazor.Shared.Network.ControlPanels.Ntp.Extensions;
