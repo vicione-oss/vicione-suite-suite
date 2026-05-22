@@ -56,7 +56,7 @@ public sealed class ModuleManagementControlPanelSaveHandlerTests
         await using var serviceProvider = SetupServiceProvider();
         var operation = new ModulePackageOperation(_package, ModulePackageOperationKind.Uninstall);
         var state = new ModuleManagementControlPanelState();
-        state.UninstallOperations.Add(operation);
+        state.EnqueuedOperations.Add(operation);
 
         var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ModuleManagementControlPanelState>>();
 
@@ -79,7 +79,7 @@ public sealed class ModuleManagementControlPanelSaveHandlerTests
         await using var serviceProvider = SetupServiceProvider();
         var uninstallOperation = new ModulePackageOperation(_package, ModulePackageOperationKind.Uninstall);
         var state = new ModuleManagementControlPanelState();
-        state.UninstallOperations.Add(uninstallOperation);
+        state.EnqueuedOperations.Add(uninstallOperation);
 
         var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ModuleManagementControlPanelState>>();
 
@@ -90,7 +90,7 @@ public sealed class ModuleManagementControlPanelSaveHandlerTests
         result.Should().BeOfType<SaveSuccessResult>();
         await _mgmtService.Received(1).UpdateOperations(Arg.Is<List<ModulePackageOperation>>(
             k => k.Count == 1 && k.Any(op => op == uninstallOperation)), Arg.Any<CancellationToken>());
-        state.UninstallOperations.Should().BeEmpty();
+        state.EnqueuedOperations.Should().BeEmpty();
     }
 
     [Fact]
@@ -110,8 +110,8 @@ public sealed class ModuleManagementControlPanelSaveHandlerTests
         var uninstallOperation = new ModulePackageOperation(uninstallPackage, ModulePackageOperationKind.Uninstall);
         var installOperation = new ModulePackageOperation(_package, ModulePackageOperationKind.Install);
         var state = new ModuleManagementControlPanelState();
-        state.InstallOperations.Add(installOperation);
-        state.UninstallOperations.Add(uninstallOperation);
+        state.EnqueuedOperations.Add(installOperation);
+        state.EnqueuedOperations.Add(uninstallOperation);
 
         var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ModuleManagementControlPanelState>>();
 
@@ -120,8 +120,7 @@ public sealed class ModuleManagementControlPanelSaveHandlerTests
 
         // Assert
         result.Should().BeOfType<SaveSuccessResult>();
-        state.InstallOperations.Should().BeEmpty();
-        state.UninstallOperations.Should().BeEmpty();
+        state.EnqueuedOperations.Should().BeEmpty();
     }
 
     [Fact]

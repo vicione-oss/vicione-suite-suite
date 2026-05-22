@@ -42,8 +42,8 @@ public sealed class ModuleManagementControlPanelResetHandlerTests
         // Arrange
         await using var serviceProvider = SetupServiceProvider();
         var state = new ModuleManagementControlPanelState();
-        state.InstallOperations.Add(new ModulePackageOperation(_package, ModulePackageOperationKind.Install));
-        state.UninstallOperations.Add(new ModulePackageOperation(_anotherPackage, ModulePackageOperationKind.Uninstall));
+        state.EnqueuedOperations.Add(new ModulePackageOperation(_package, ModulePackageOperationKind.Install));
+        state.EnqueuedOperations.Add(new ModulePackageOperation(_anotherPackage, ModulePackageOperationKind.Uninstall));
 
         _mgmtService.GetMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>())
             .Returns([]);
@@ -54,8 +54,7 @@ public sealed class ModuleManagementControlPanelResetHandlerTests
         await saveHandler.Reset(state, TestContext.Current.CancellationToken);
 
         // Assert
-        state.InstallOperations.Should().BeEmpty();
-        state.UninstallOperations.Should().BeEmpty();
+        state.EnqueuedOperations.Should().BeEmpty();
     }
 
     [Fact]

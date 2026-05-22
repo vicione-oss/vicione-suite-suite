@@ -26,9 +26,14 @@
                                       Enabled="@CanUninstallSelectedModules()" />
                     
                     <GridActionButton Text="@CommonVocabulary.ResetVerb"
-                                      OnClick="@(async () => await ResetInstalledSelectedModules())"
+                                      OnClick="@(async () => await RevertInstalledSelectedModules())"
                                       IconCssClass="@_uninstallIconCssClasses"
-                                      Enabled="@CanResetInstalledSelectedModules()" />
+                                      Enabled="@CanRevertInstalledSelectedModules()" />
+
+                    <GridActionButton Text="@CommonVocabulary.UpdateVerb"
+                                      OnClick="@UpdateInstalledSelectedModules"
+                                      IconCssClass="@_updateIconCssClasses"
+                                      Enabled="@CanUpdateInstalledSelectedModules()" />
 
                     <GridActionButton Text="@CommonVocabulary.Restart"
                                       OnClick="@(() => _dialogVisible = true)"
@@ -125,7 +130,7 @@
                                           Enabled="@CanInstallSelectedAvailableModules()" />
 
                         <GridActionButton Text="@CommonVocabulary.ResetVerb"
-                                          OnClick="@(async () => await ResetAvailableSelectedModules())"
+                                          OnClick="@(async () => await RevertAvailableSelectedModules())"
                                           IconCssClass="@_uninstallIconCssClasses"
                                           Enabled="@CanResetAvailableSelectedModules()" />
 

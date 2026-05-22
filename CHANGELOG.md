@@ -2,6 +2,10 @@
 
 ## 1.2.2 - Unreleased
 
+### Added
+
+- `ModuleManagementControlPanel`, added button to update selected modules to their latest available version
+
 ### Fixed
 
 - `UserTicketStore`, fixed potential database lock issues by replacing tracked entity operations

@@ -67,7 +67,5 @@ public sealed class ModuleManagementControlPanelState : ControlPanelState
 
     internal bool AllowInstallation { get; set; }
 
-    internal List<ModulePackageOperation> InstallOperations { get; } = [];
-
-    internal List<ModulePackageOperation> UninstallOperations { get; } = [];
+    internal List<ModulePackageOperation> EnqueuedOperations { get; } = [];
 }

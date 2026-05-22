@@ -11,7 +11,6 @@ using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Modules;
 using Sdk.Utils;
 using ViciOne.Ui.Blazor.Components.Grid.Services;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
@@ -27,6 +26,7 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     private readonly string _reloadIconCssClasses = MonochromeIconName.Reload.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
     private readonly string _installIconCssClasses = MonochromeIconName.Import.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
     private readonly string _uninstallIconCssClasses = MonochromeIconName.UninstallLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+    private readonly string _updateIconCssClasses = @MonochromeIconName.InstallPendingLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
 
     private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
     private bool _dialogVisible;
@@ -53,11 +53,11 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     {
         _subscriptionHandles.Dispose();
 
+        State.Changed -= StateChanged;
         ManagementService.OperationsChanged -= ManagementServiceOperationsChanged;
+
         InstalledModuleSelection.Changed -= InstalledModuleSelectionChanged;
         AvailableModuleSelection.Changed -= AvailableModuleSelectionChanged;
-
-        State.Changed -= StateChanged;
 
         await base.DisposeAsyncCore();
     }
@@ -166,16 +166,10 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     private async Task UninstallSelectedModules()
     {
         var operations = InstalledModuleSelection
-            .Distinct()
-            .Select(item => new ModulePackageOperation(new ModuleDependencyPackage
-            {
-                Name = item.Name,
-                Version = item.Version,
-            },
-            ModulePackageOperationKind.Uninstall))
+            .GetUninstallOperations()
             .ToList();
 
-        State.UpdateUninstallOperations(operations);
+        State.EnqueueOperations(operations);
 
         if (State.HasPendingChanges())
         {
@@ -183,24 +177,33 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         }
     }
 
-    private bool CanResetInstalledSelectedModules()
+    private bool CanRevertInstalledSelectedModules()
         => InstalledModuleSelection.Count != 0
-        && InstalledModuleSelection.All(k => k.PendingOperation?.OperationKind == ModulePackageOperationKind.Uninstall);
+        && InstalledModuleSelection.All(k => k.PendingOperation != null);
 
-    private async Task ResetInstalledSelectedModules()
+    private async Task RevertInstalledSelectedModules()
     {
         var operations = InstalledModuleSelection
-            .Where(k => k.PendingOperation != null && k.PendingOperation.OperationKind == ModulePackageOperationKind.Uninstall)
-            .Distinct()
-            .Select(item => new ModulePackageOperation(new ModuleDependencyPackage
-            {
-                Name = item.Name,
-                Version = item.PendingOperation!.Package.Version,
-            },
-            ModulePackageOperationKind.Install))
+            .GetRevertOperations()
             .ToList();
 
-        State.UpdateUninstallOperations(operations);
+        State.EnqueueOperations(operations);
+
+        if (State.HasPendingChanges() || operations.Count > 0)
+            await BeginEdit();
+    }
+
+    private bool CanUpdateInstalledSelectedModules()
+        => InstalledModuleSelection.Count != 0
+        && InstalledModuleSelection.All(i => i.CanUpdate && !i.Bundle.IsDebugSource && i.Bundle.PendingOperation == null);
+
+    private async Task UpdateInstalledSelectedModules()
+    {
+        var operations = InstalledModuleSelection
+            .GetUpdateOperations()
+            .ToList();
+
+        State.EnqueueOperations(operations);
 
         if (State.HasPendingChanges())
         {
@@ -215,16 +218,10 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     private async Task InstallSelectedAvailableModules()
     {
         var operations = AvailableModuleSelection
-            .Distinct()
-            .Select(item => new ModulePackageOperation(new ModuleDependencyPackage
-            {
-                Name = item.Name,
-                Version = item.Version,
-            },
-            ModulePackageOperationKind.Install))
+            .GetInstallOperations()
             .ToList();
 
-        State.UpdateInstallOperations(operations);
+        State.EnqueueOperations(operations);
 
         if (State.HasPendingChanges())
         {
@@ -236,20 +233,13 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         => AvailableModuleSelection.Count != 0
         && AvailableModuleSelection.All(k => k.PendingOperation?.OperationKind == ModulePackageOperationKind.Install);
 
-    private async Task ResetAvailableSelectedModules()
+    private async Task RevertAvailableSelectedModules()
     {
         var operations = AvailableModuleSelection
-            .Where(k => k.PendingOperation != null && k.PendingOperation.OperationKind == ModulePackageOperationKind.Install)
-            .Distinct()
-            .Select(item => new ModulePackageOperation(new ModuleDependencyPackage
-            {
-                Name = item.Name,
-                Version = item.PendingOperation!.Package.Version,
-            },
-            ModulePackageOperationKind.Uninstall))
+            .GetRevertOperations()
             .ToList();
 
-        State.UpdateUninstallOperations(operations);
+        State.EnqueueOperations(operations);
 
         if (State.HasPendingChanges())
         {
