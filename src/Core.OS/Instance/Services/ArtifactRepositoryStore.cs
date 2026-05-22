@@ -185,4 +185,14 @@ public class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<InstanceOp
 
     public Task Store(List<ArtifactRepository> repositories, CancellationToken cancellationToken = default)
         => SerializeToFile(repositories, fileSystem, instanceOptions.Value, cancellationToken);
+
+    public Task Clear(CancellationToken cancellationToken = default)
+    {
+        var updateFile = GetRepositoriesFilePath(fileSystem, instanceOptions.Value);
+        if (!fileSystem.File.Exists(updateFile))
+            return Task.CompletedTask;
+
+        fileSystem.File.Delete(updateFile);
+        return Task.CompletedTask;
+    }
 }

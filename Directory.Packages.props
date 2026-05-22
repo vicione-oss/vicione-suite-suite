@@ -67,6 +67,7 @@
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Components" Version="$(ViciOneUiMonochromeIconsVersion)" />
     <PackageVersion Include="ViciOne.Ui.Shared.Dx" Version="0.19.1" />
     <PackageVersion Include="ViciOne.Ui.Shared.Extreme" Version="0.19.1" />
+    <PackageVersion Include="ViciOne.Ui.TreeEditor" Version="2.0.1" />
     <!--Used for tests only:-->
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
@@ -77,7 +78,6 @@
     <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.7.0" />
     <PackageVersion Include="NSubstitute" Version="5.3.0" />
     <PackageVersion Include="System.IO.Abstractions.TestingHelpers" Version="22.1.1" />
-    <PackageVersion Include="ViciOne.Ui.TreeEditor" Version="2.0.1" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Testing" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Ui.Blazor.Components.TestingHelpers" Version="$(ViciOneUiBlazorComponentsVersion)" />
