@@ -1,7 +1,7 @@
 ﻿namespace Core.Shared.Instance.Models;
 
 /// <inheritdoc cref="IStreamUploadResult"/>
-/// <param name="message">Success message</param>
+/// <param name="destinationFile">Success message</param>
 public class StreamUploadSuccessResult(string destinationFile) : IStreamUploadResult
 {
     /// <summary>

@@ -4,7 +4,6 @@ using System.Runtime.Loader;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
-using Sdk.Extensions;
 using Sdk.Messaging;
 
 namespace Core.OS.Modules.Controllers;

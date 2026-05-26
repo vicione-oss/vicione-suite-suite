@@ -8,7 +8,7 @@ using Sdk.Messaging;
 namespace Core.Artifacts.JFrog;
 
 /// <inheritdoc />
-internal class JFrogArtifactQueryBuilder() : IArtifactQueryBuilder
+internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
 {
     public const string RepositoryPlaceholder = "__repository__";
 

@@ -60,7 +60,7 @@ internal sealed class UpdateControlPanelRegistryHandler(IControlPanelRegistry<Sh
         {
             if (existingControlPanelRegistryItemMap.TryGetValue(networkInterfaceDescriptor.Index, out var existingControlPanelRegistryItem))
             {
-                if (existingControlPanelRegistryItem.State is NetworkInterfaceControlPanelState state)
+                if (existingControlPanelRegistryItem.State is NetworkInterfaceControlPanelState)
                     existingControlPanelRegistryItemMap.Remove(networkInterfaceDescriptor.Index);
             }
             else

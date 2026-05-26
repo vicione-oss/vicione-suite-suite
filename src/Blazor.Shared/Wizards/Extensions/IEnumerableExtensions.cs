@@ -15,7 +15,6 @@ internal static class IEnumerableExtensions
     /// </summary>
     /// <remarks>
     /// Example: (1), 2, 3, 4, [5], 6, 7, 8, 9, 10, 11, (12) is reduced to (1), 4, [5], 6, 7, (12)</remarks>
-    /// <param name="start">Item where the reduce operation should start from</param>
     /// <returns>Reduced items</returns>
     /// <exception cref="ArgumentException"/>
     public static HashSet<T> Reduce<T>(this IEnumerable<T> items, T start, int maximumItems)

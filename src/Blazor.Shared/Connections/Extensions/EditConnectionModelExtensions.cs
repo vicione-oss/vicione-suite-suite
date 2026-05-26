@@ -18,7 +18,7 @@ internal static class EditConnectionModelExtensions
         var validationErrors = itemValidator.Validate(model.TypedConnection)
             .ToDictionary(k => new FieldIdentifier(model.TypedConnection, k.Key), k => k.Value);
 
-        if (validationErrors is not null && validationErrors.Count > 0)
+        if (validationErrors.Count > 0)
         {
             // we can't display more errors actually so take the first we have
             var firstError = validationErrors.First();

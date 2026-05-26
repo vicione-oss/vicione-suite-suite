@@ -26,7 +26,7 @@ public sealed partial class CreateArtifactRepositoryConsumer(
 
             LogRepositoryCreated(logger, correlationId, repository.Id);
 
-            var changeEvent = new ArtifactRepositoryChanged(repository, CrudAction.Created)
+            var changeEvent = new ArtifactRepositoryChanged(repository, result)
             {
                 CorrelationId = correlationId
             };

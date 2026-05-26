@@ -1,6 +1,5 @@
 ﻿using Core.Shared.Instance.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -46,9 +45,9 @@ public sealed partial class UpdateLanguageCookieController(INonceStore nonceStor
         return LocalRedirect(returnRoute ?? Url.Content("~/"));
     }
 
-    [LoggerMessage(1, LogLevel.Information, "Language cookie updated with language '{Language}'")]
-    private static partial void LanguageCookieUpdated(ILogger<UpdateLanguageCookieController> logger, string Language);
+    [LoggerMessage(LogLevel.Information, "Language cookie updated with language '{Language}'")]
+    private static partial void LanguageCookieUpdated(ILogger<UpdateLanguageCookieController> logger, string language);
 
-    [LoggerMessage(2, LogLevel.Information, "Language cookie removed")]
+    [LoggerMessage(LogLevel.Information, "Language cookie removed")]
     private static partial void LanguageCookieRemoved(ILogger<UpdateLanguageCookieController> logger);
 }

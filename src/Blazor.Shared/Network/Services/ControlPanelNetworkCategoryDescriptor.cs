@@ -9,6 +9,6 @@ internal sealed class ControlPanelNetworkCategoryDescriptor : IControlPanelCateg
 {
     public string Title => CommonVocabulary.Network;
     public string? IconCssClass => null;
-    public Uri? IconUrl => SvgIcon.HostConfig.GetPath();
+    public Uri IconUrl => SvgIcon.HostConfig.GetPath();
     public int? Position => null;
 }

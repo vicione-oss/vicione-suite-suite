@@ -11,7 +11,7 @@ namespace Blazor.Shared.Logging;
 
 public sealed partial class JournalListView : ComponentBase, IDisposable
 {
-    private bool _isRunningOnLinux = false;
+    private bool _isRunningOnLinux;
 
     [Inject(Key = Sdk.Constants.ClientTimeProviderServiceKey)] private TimeProvider TimeProvider { get; set; } = default!;
     [Inject] private IJsInterop JsInterop { get; set; } = default!;

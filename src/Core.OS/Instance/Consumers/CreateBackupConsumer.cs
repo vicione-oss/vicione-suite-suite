@@ -27,7 +27,7 @@ public sealed partial class CreateBackupConsumer(IBackupFactory backupFactory, I
             if (errors.Length == 0)
             {
                 LogBackupSummary(correlationId, summary);
-                await context.Publish(new BackupFinished(correlationId, filename, null));
+                await context.Publish(new BackupFinished(correlationId, filename));
                 return;
             }
 
@@ -91,7 +91,7 @@ public sealed partial class CreateBackupConsumer(IBackupFactory backupFactory, I
     }
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Consume create backup correlated by {CorrelationId}. Keep on error={KeepBackupOnError}")]
-    private static partial void LogConsume(ILogger<CreateBackupConsumer> logger, Guid correlationId, bool KeepBackupOnError);
+    private static partial void LogConsume(ILogger<CreateBackupConsumer> logger, Guid correlationId, bool keepBackupOnError);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Delete failed backup file='{FileName}' correlated by {CorrelationId}")]
     private static partial void LogDeleteFailedBackup(ILogger<CreateBackupConsumer> logger, Guid correlationId, string fileName);

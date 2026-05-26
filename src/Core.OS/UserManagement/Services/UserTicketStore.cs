@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
-namespace Core.OS.Persistence;
+namespace Core.OS.UserManagement.Services;
 
 /// <summary>
 /// Uses <see cref="IUserDbContext"/> to manage user session in <see cref="IUserDbContext.Tickets"/> table.

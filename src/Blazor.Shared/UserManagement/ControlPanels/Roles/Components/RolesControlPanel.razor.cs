@@ -117,7 +117,7 @@ public sealed partial class RolesControlPanel : ControlPanelBase<RolesControlPan
             try
             {
                 foreach (var user in State.DeletingRoles)
-                    RoleGridItemSelection.Add(user.Name ?? string.Empty);
+                    RoleGridItemSelection.Add(user.Name);
             }
             finally
             {
@@ -160,13 +160,15 @@ public sealed partial class RolesControlPanel : ControlPanelBase<RolesControlPan
         {
             foreach (var selectedRoleName in RoleGridItemSelection)
             {
-                var roles = State.Roles.Where(r => r.Name == selectedRoleName && !r.Managed);
+                var roles = State.Roles
+                    .Where(r => r.Name == selectedRoleName && !r.Managed)
+                    .ToArray();
 
                 if (!roles.Any())
                     continue;
 
                 State.DeletingRoles.AddRange(roles);
-                RoleGridItemSelection.Remove(roles.First().Name ?? string.Empty);
+                RoleGridItemSelection.Remove(roles.First().Name);
                 State.Roles.Remove(roles.First());
             }
         }

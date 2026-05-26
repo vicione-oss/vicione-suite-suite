@@ -51,7 +51,7 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
         if (State.UserProfile?.PasswordExpirationDate is not null)
             State.PasswordExpirationDateString = State.UserProfile.PasswordExpirationDate.Value.ToString(User.Localization.Constants.UniversalDateFormat, CultureInfo.CurrentCulture);
 
-        State.AvailableRoles = (await RoleService.GetAvailableRoles()).Select(r => r.Name ?? string.Empty);
+        State.AvailableRoles = (await RoleService.GetAvailableRoles()).Select(r => r.Name);
 
         State.UpdateAvailableUserRoles();
         await State.UpdateAvailableClaims(ClaimsParser, ClaimsProvider);

@@ -36,7 +36,7 @@ internal static class ModuleMetadataModelFactory
                 }
             }
 
-            return bundle.Metadata.Options.OrderBy(k => k.Key).ToDictionary(o => o.Key) ?? [];
+            return bundle.Metadata.Options.OrderBy(k => k.Key).ToDictionary(o => o.Key);
         }
     }
 }

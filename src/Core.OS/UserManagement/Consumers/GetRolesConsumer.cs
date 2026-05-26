@@ -1,4 +1,3 @@
-using Core.OS.HostManagement.Consumers;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Extensions;
@@ -22,7 +21,8 @@ public sealed partial class GetRolesConsumer(RoleManager<SuiteRole> roleManager,
 
         foreach (var role in roles)
         {
-            var claims = new List<UserManagementClaim>((await roleManager.GetClaimsAsync(role)).Select(c => c.ToUserManagementClaim()));
+            var roleClaims = await roleManager.GetClaimsAsync(role);
+            var claims = new List<UserManagementClaim>(roleClaims.Select(c => c.ToUserManagementClaim()));
 
             availableRoles.Add(role.ToRole(claims));
         }

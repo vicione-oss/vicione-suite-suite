@@ -26,8 +26,7 @@ public sealed class HttpConnectionTest : IConnectionTest
             return ConnectionTestResultFactory.CreateFailureResult($"HTTP connection test failed: {e.Message}");
         }
 
-        if (checkingResponse is not null &&
-            !checkingResponse.IsSuccessStatusCode)
+        if (!checkingResponse.IsSuccessStatusCode)
         {
             return new ConnectionTestResult(false, new((int)checkingResponse.StatusCode, checkingResponse.ReasonPhrase));
         }

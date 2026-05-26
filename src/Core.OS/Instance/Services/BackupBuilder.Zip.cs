@@ -16,7 +16,7 @@ internal partial class BackupBuilder
 
     private static FileSystemEnumerable<(string, CreateEntryType)> CreateEnumerableForCreate(string directoryFullPath)
         => new(directoryFullPath,
-            static (ref FileSystemEntry entry) => (entry.ToFullPath(), entry.IsDirectory ? CreateEntryType.Directory : CreateEntryType.File),
+            static (ref entry) => (entry.ToFullPath(), entry.IsDirectory ? CreateEntryType.Directory : CreateEntryType.File),
             new EnumerationOptions
             {
                 RecurseSubdirectories = true,
@@ -50,7 +50,7 @@ internal partial class BackupBuilder
 
         var fse = CreateEnumerableForCreate(di.FullName);
 
-        foreach ((var fullPath, var type) in fse)
+        foreach (var (fullPath, type) in fse)
         {
             directoryIsEmpty = false;
 

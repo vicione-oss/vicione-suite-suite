@@ -13,7 +13,7 @@ public interface IStreamUploadHandler // Maybe this could be in SDK with separat
     Func<IStreamUploadProgress, Task>? OnProgress { get; set; }
 
     /// <summary>
-    /// Uploads the given <paramref name="stream"/> to a file named <paramref name="fileName"/>
+    /// Uploads the given <paramref name="stream"/> to a file named <paramref name="filename"/>
     /// </summary>
     /// <param name="stream">Stream to upload</param>
     /// <param name="filename">Name of the file resulting from the upload</param>

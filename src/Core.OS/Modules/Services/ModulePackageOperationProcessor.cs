@@ -85,14 +85,16 @@ internal class ModulePackageOperationProcessor
 
     private static List<ModuleDependencyPackage> DeterminePackageChanges(ModulePackageManifest packagesManifest, IEnumerable<ModulePackageOperation> operations)
     {
+        var operationsArray = operations.ToArray();
+        
         // Get the packages to be removed
-        var packagesToRemove = operations
+        var packagesToRemove = operationsArray
             .Where(k => k.OperationKind == ModulePackageOperationKind.Uninstall)
             .Select(k => k.Package.Name)
             .ToHashSet();
 
         // Overwrite already queued packages with new versions
-        var updatedPackages = operations
+        var updatedPackages = operationsArray
             .Where(k => k.OperationKind == ModulePackageOperationKind.Install)
             .Select(k => k.Package)
             .UnionBy(packagesManifest.Packages, cp => cp.Name)

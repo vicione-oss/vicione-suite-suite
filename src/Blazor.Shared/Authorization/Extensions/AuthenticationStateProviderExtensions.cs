@@ -11,7 +11,7 @@ public static class AuthenticationStateProviderExtensions
         {
             var authenticationState = await authenticationStateProvider.GetAuthenticationStateAsync();
 
-            return authenticationState?.User;
+            return authenticationState.User;
         }
 
         public async Task<string?> GetUserName()

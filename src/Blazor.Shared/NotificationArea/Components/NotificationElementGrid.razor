@@ -11,7 +11,7 @@
 <div class="@string.Join(" ", cssClasses)">
     @foreach (var notificationElementRegistryItem in _notificationElementRegistryItems)
     {
-        var notificationElementParameters = new Dictionary<string, object?>
+        var notificationElementParameters = new Dictionary<string, object>
         {
             { nameof(NotificationElementBase<INotificationElementState>.State), notificationElementRegistryItem.State }
         };

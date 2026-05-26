@@ -80,7 +80,7 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
     private static partial void LogControlSystemCompleted(ILogger logger, SystemCommand command);
 
     [LoggerMessage(2, LogLevel.Error, "{Command} system failed with error code {ErrorCode} and message {Message}")]
-    private static partial void LogControlSystemFailed(ILogger logger, SystemCommand command, int ErrorCode, string? Message);
+    private static partial void LogControlSystemFailed(ILogger logger, SystemCommand command, int errorCode, string? message);
 
     public void Dispose()
         => _subscriptionHandles.Dispose();
