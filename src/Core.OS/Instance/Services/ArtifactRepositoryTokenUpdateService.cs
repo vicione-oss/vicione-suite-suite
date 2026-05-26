@@ -79,7 +79,7 @@ public partial class ArtifactRepositoryTokenUpdateService(IServiceProvider servi
     }
 
     [LoggerMessage(LogLevel.Error, "Failed to get token for repository {Name} from '{Endpoint}'")]
-    static partial void LogFailedToGetToken(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex, string? Name, string? Endpoint);
+    static partial void LogFailedToGetToken(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex, string? name, string? endpoint);
 
     [LoggerMessage(LogLevel.Error, "Failed to update repository tokens")]
     static partial void LogFailedToUpdateRepositoryTokens(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex);
@@ -88,10 +88,10 @@ public partial class ArtifactRepositoryTokenUpdateService(IServiceProvider servi
     static partial void LogSkipUpdateRepositoryTokens(ILogger<ArtifactRepositoryTokenUpdateService> logger);
 
     [LoggerMessage(LogLevel.Debug, "{Service} started with interval {Interval}")]
-    static partial void LogServiceStartedWithIntervalInterval(ILogger<ArtifactRepositoryTokenUpdateService> logger, string Service, TimeSpan Interval);
+    static partial void LogServiceStartedWithIntervalInterval(ILogger<ArtifactRepositoryTokenUpdateService> logger, string service, TimeSpan interval);
 
     [LoggerMessage(LogLevel.Information, "Service {Service} is stopping")]
-    static partial void LogServiceIsStopping(ILogger<ArtifactRepositoryTokenUpdateService> logger, string Service);
+    static partial void LogServiceIsStopping(ILogger<ArtifactRepositoryTokenUpdateService> logger, string service);
 
     [LoggerMessage(LogLevel.Error, "Unhandled exception on updating repository tokens")]
     static partial void LogUnhandledExceptionOnUpatingRepositoryTokens(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex);

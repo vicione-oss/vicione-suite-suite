@@ -1,18 +1,13 @@
 using Blazor.Server.Backend.Services;
 using Blazor.Shared;
-using Blazor.Shared.Components;
 using Blazor.Shared.Connections.Components;
 using Blazor.Shared.Connections.Validators;
 using Blazor.Shared.Extensions;
 using Blazor.Shared.Module.Services;
 using Blazor.Shared.Services;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Authorization;
 using Sdk.Authorization.Extensions;
 using Sdk.Client.Connections;
@@ -64,7 +59,7 @@ internal static class IServiceCollectionExtensions
 
             services.AddModuleFeature(_ => new ModuleFeature(Core.Shared.Constants.SystemModuleId, Constants.LogViewFeature, "Controls access to the 'Log viewer'-feature"));
 
-            services.AddSingleton<IConnectionTypeUiRegistry, ConnectionTypeUiRegistry>(s =>
+            services.AddSingleton<IConnectionTypeUiRegistry, ConnectionTypeUiRegistry>(_ =>
             {
                 ConnectionTypeUiRegistry registry = new();
 

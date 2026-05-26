@@ -1,6 +1,5 @@
 ﻿using Core.Shared.Connections.Contracts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Sdk.Backend.Extensions;
 using Sdk.Backend.Persistence;
 using Sdk.Connections.Contracts;

@@ -5,7 +5,7 @@ using ViciOne.Ui.Blazor.Components.ComboBox;
 
 namespace Blazor.Shared.Instance.ControlPanels.Update.Services;
 
-public sealed class UpdateControlPanelState() : ControlPanelState
+public sealed class UpdateControlPanelState : ControlPanelState
 {
     internal List<SuiteVersionPackage>? SuiteVersions { get; set; }
 
@@ -14,7 +14,7 @@ public sealed class UpdateControlPanelState() : ControlPanelState
         {
             Value = v.Version,
             Text = v.Version
-        })?.ToList();
+        }).ToList();
 
     internal string? FetchAvailableVersionsError { get; set; }
 

@@ -53,7 +53,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
         }
 
         // we merge the versions of the metadata to bundles and order them by the published date from metadata
-        var bundles = CreateBundles(installedBundles ?? [], availableMetadata?.OrderByDescending(k => k.Published).ToList() ?? []);
+        var bundles = CreateBundles(installedBundles, availableMetadata?.OrderByDescending(k => k.Published).ToList() ?? []);
 
         // evaluate the versions and update the bundle states accordingly (can update, errors etc.)
         ApplyVersionEvaluation(bundles);

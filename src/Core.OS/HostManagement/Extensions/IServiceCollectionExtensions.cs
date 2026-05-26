@@ -37,7 +37,7 @@ internal static class IServiceCollectionExtensions
         {
             if (options.MockClient is not null && options.MockClient.Enabled)
             {
-                services.AddSingleton(x => Options.Create(options.MockClient));
+                services.AddSingleton(_ => Options.Create(options.MockClient));
                 services.AddSingleton<IPipeClient, MockPipeClient>();
             }
             else

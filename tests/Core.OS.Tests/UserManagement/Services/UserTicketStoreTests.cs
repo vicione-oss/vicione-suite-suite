@@ -3,6 +3,7 @@ using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Persistence;
 using Core.OS.UserManagement.Entities;
+using Core.OS.UserManagement.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

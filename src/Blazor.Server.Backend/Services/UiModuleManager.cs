@@ -14,7 +14,7 @@ public sealed class UiModuleManager : IUiModuleManager
     public IEnumerable<Assembly> UiModuleAssemblies
         => _clientBundles.Where(k => k.Assembly is not null)
             .Select(k => k.Assembly!)
-            .DistinctBy(k => k.GetName()?.FullName);
+            .DistinctBy(k => k.GetName().FullName);
 
     public void AddModuleBundle(IUiModuleBundle moduleBundle)
         => _clientBundles.Add(moduleBundle);

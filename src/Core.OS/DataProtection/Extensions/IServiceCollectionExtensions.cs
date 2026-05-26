@@ -9,9 +9,9 @@ namespace Core.OS.DataProtection.Extensions;
 public static class IServiceCollectionExtensions
 {
     internal static IServiceCollection ConfigureDataProtection(this IServiceCollection services)
-        => services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(services =>
+        => services.AddSingleton<IConfigureOptions<KeyManagementOptions>>(serviceProvider =>
         {
-            var loggerFactory = services.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
             return new ConfigureOptions<KeyManagementOptions>(options =>
             {
                 options.XmlRepository = new SafeXmlRepository(new FileSystem(),

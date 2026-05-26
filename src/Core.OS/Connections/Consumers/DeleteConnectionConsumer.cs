@@ -62,7 +62,8 @@ public sealed partial class DeleteConnectionConsumer(IConnectionDbContext dbCont
             var errorConn = new Connection { Id = connectionId };
             var response = new ConnectionChanged(CrudAction.Deleted, errorConn, [], [])
             {
-                CorrelationId = correlationId
+                CorrelationId = correlationId,
+                ErrorInfo = errorInfo
             };
 
             await context.Publish(response, context.CancellationToken).ConfigureAwait(false);

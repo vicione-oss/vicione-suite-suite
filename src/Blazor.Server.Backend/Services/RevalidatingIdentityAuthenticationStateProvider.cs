@@ -133,7 +133,7 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
 
         var claimsPrincipal = authenticationState.User;
 
-        if (!claimsPrincipal?.IsInRole(role.Name ?? string.Empty) ?? false)
+        if (!claimsPrincipal.IsInRole(role.Name))
             return;
 
         await using var serviceScope = _serviceScopeFactory.CreateAsyncScope();

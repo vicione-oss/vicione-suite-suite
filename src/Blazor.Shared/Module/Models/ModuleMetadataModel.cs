@@ -35,7 +35,7 @@ public sealed class ModuleMetadataModel
 
     public List<ModuleDependencyPackage> Dependencies => Bundle.Metadata.Dependencies ?? [];
 
-    public List<ModuleDependencyPackage> MissingDependencies => Bundle.MissingDependencies ?? [];
+    public List<ModuleDependencyPackage> MissingDependencies => Bundle.MissingDependencies;
 
     public string? SelectedVersion { get; set; }
 

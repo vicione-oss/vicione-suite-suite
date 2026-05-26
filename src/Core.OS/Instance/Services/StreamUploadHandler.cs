@@ -84,15 +84,15 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
     }
 
     [LoggerMessage(1, LogLevel.Information, "Upload successful ({@LastProgress})")]
-    private static partial void UploadSuccessful(ILogger<StreamUploadHandler<TModule, TContext>> logger, IStreamUploadProgress LastProgress);
+    private static partial void UploadSuccessful(ILogger<StreamUploadHandler<TModule, TContext>> logger, IStreamUploadProgress lastProgress);
 
     [LoggerMessage(2, LogLevel.Error, "Upload failed ({@LastProgress})")]
     private static partial void UploadFailed(ILogger<StreamUploadHandler<TModule, TContext>> logger, Exception exception,
-        IStreamUploadProgress LastProgress);
+        IStreamUploadProgress lastProgress);
 
     [LoggerMessage(3, LogLevel.Information, "Upload canceled ({@LastProgress})")]
-    private static partial void UploadCanceled(ILogger<StreamUploadHandler<TModule, TContext>> logger, IStreamUploadProgress LastProgress);
+    private static partial void UploadCanceled(ILogger<StreamUploadHandler<TModule, TContext>> logger, IStreamUploadProgress lastProgress);
 
     [LoggerMessage(4, LogLevel.Error, "Delete {Filename} failed")]
-    private static partial void DeleteFailed(ILogger<StreamUploadHandler<TModule, TContext>> logger, Exception exception, string Filename);
+    private static partial void DeleteFailed(ILogger<StreamUploadHandler<TModule, TContext>> logger, Exception exception, string filename);
 }

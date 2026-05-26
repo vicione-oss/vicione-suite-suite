@@ -112,7 +112,7 @@ public sealed partial class UsersControlPanel : ControlPanelBase<UsersControlPan
         {
             foreach (var userName in UserGridItemSelection)
             {
-                var users = State.Users.Where(u => u.UserName == userName && u.UserName.Value != _identityName);
+                var users = State.Users.Where(u => u.UserName == userName && u.UserName.Value != _identityName).ToArray();
 
                 if (!users.Any())
                     continue;

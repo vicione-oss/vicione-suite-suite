@@ -71,15 +71,15 @@ internal static class WebApplicationBuilderExtensions
         try
         {
             fileSystem.File.Delete(deviceImageFilePath);
-            logger?.Information("Delete leftover device image file.");
+            logger.Information("Delete leftover device image file.");
         }
         catch (UnauthorizedAccessException ue)
         {
-            logger?.Error(ue, "Insufficient permissions to delete leftover device image file");
+            logger.Error(ue, "Insufficient permissions to delete leftover device image file");
         }
         catch (Exception e)
         {
-            logger?.Error(e, "Failed to delete leftover device image file.");
+            logger.Error(e, "Failed to delete leftover device image file.");
         }
     }
 

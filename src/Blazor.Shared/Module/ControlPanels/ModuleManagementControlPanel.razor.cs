@@ -249,7 +249,7 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
 
     private async Task ShowDetailsAsync(ModuleMetadataModel model)
     {
-        var result = await ControlPanelRequest.Send<ModuleDetailsControlPanel, ModuleDetailsControlPanelState>(s =>
+        var _ = await ControlPanelRequest.Send<ModuleDetailsControlPanel, ModuleDetailsControlPanelState>(s =>
         {
             s.ModuleMetadata = model;
         });

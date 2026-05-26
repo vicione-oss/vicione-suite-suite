@@ -18,7 +18,7 @@ This is why we need to submit the form in `OnClick`.
             CssClass="add-external-login-button"
             Text="@Labels.AddExternalLogin"
             OnClick="@OnExternalLoginSubmitAsync"/>
-<form @ref="form" action="/account/manage/linkExternalLogin" method="post">
+<form @ref="_form" action="/account/manage/linkExternalLogin" method="post">
     <AntiforgeryToken />
     <input type="hidden" name="provider" value="OpenIdConnect"/>
 </form>

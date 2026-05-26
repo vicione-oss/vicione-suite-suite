@@ -5,7 +5,7 @@ namespace Core.OS.Modules.Services;
 
 public sealed class FluidTemplateRenderer
 {
-    private readonly FluidParser fluidParser = new();
+    private readonly FluidParser _fluidParser = new();
 
     public async Task<string> RenderFromTemplateFile(IFileInfo templateFile,
         Action<TemplateContext> contextAction,
@@ -17,7 +17,7 @@ public sealed class FluidTemplateRenderer
 
     private async Task<string> RenderTemplate(string templateFileContents, Action<TemplateContext> contextAction)
     {
-        var template = fluidParser.Parse(
+        var template = _fluidParser.Parse(
             templateFileContents);
 
         var templateContext = new TemplateContext();

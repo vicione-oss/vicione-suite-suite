@@ -59,7 +59,7 @@ public sealed partial class UserRolesControlPanelPage : ComponentBase, IAsyncDis
             return;
 
         foreach (var role in RolesGridItemSelection)
-            State.UserProfile?.Roles.Remove(role ?? string.Empty);
+            State.UserProfile?.Roles.Remove(role);
 
         State.UpdateAvailableUserRoles();
 

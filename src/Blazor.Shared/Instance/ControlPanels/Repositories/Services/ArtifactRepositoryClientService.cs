@@ -10,8 +10,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 
 internal sealed class ArtifactRepositoryClientService : CompletionSourceHandlerBase<IArtifactRepositoryServiceResult>,
     IArtifactRepositoryClientService,
-    IEventConsumer<ArtifactRepositoryChanged>,
-    IDisposable
+    IEventConsumer<ArtifactRepositoryChanged>
 {
     public event Func<ArtifactRepository, CrudAction, Task>? RepositoryChanged;
 

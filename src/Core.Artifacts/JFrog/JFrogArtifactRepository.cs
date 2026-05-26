@@ -215,7 +215,6 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
         return new Uri(sourceConfig.BaseAddress, relativePath);
     }
 
-    /// <inheritdoc />
     public IArtifact CreateArtifact(string path, string name, long? size = null, DateTimeOffset? modified = null, ArtifactKind artifactKind = ArtifactKind.File)
     {
         var sourceConfig = GetSourceConfig(string.Empty);

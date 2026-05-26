@@ -9,7 +9,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Update.Services;
 internal sealed class ControlPanelUpdateAndRestoreCategoryDescriptor : IControlPanelCategoryDescriptor
 {
     public string Title => string.Format(CultureInfo.CurrentCulture, CommonPatterns.ThisAndThat, TechnicalTerms.Update, TechnicalTerms.Restore);
-    public string? IconCssClass => MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
+    public string IconCssClass => MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
     public Uri? IconUrl => null;
     public int? Position => null;
 }

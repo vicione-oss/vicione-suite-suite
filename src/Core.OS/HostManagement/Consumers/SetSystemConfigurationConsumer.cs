@@ -61,16 +61,11 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
         if (previous is null)
             return false;
 
-        if (applied.NetworkProxySettings is not null && previous.NetworkProxySettings is not null)
-        {
-            // Should we evaluate the other proxy settings as well?
-            return !applied.NetworkProxySettings.HTTP.Equals(previous.NetworkProxySettings.HTTP)
-                || !applied.NetworkProxySettings.HTTPS.Equals(previous.NetworkProxySettings.HTTPS)
-                || !applied.NetworkProxySettings.FTP.Equals(previous.NetworkProxySettings.FTP)
-                || !applied.NetworkProxySettings.SFTP.Equals(previous.NetworkProxySettings.SFTP);
-        }
-
-        return false;
+        // Should we evaluate the other proxy settings as well?
+        return !applied.NetworkProxySettings.HTTP.Equals(previous.NetworkProxySettings.HTTP)
+               || !applied.NetworkProxySettings.HTTPS.Equals(previous.NetworkProxySettings.HTTPS)
+               || !applied.NetworkProxySettings.FTP.Equals(previous.NetworkProxySettings.FTP)
+               || !applied.NetworkProxySettings.SFTP.Equals(previous.NetworkProxySettings.SFTP);
     }
 
     [LoggerMessage(LogLevel.Debug, "Consuming set system configuration command correlated by {CorrelationId}.")]

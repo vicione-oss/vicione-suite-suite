@@ -7,10 +7,12 @@ namespace Blazor.Shared.Logging;
 
 internal partial class JournalEntryParser
 {
+    /// <summary>
+    /// Journal fields could be retrieved from journal service. Default field names can be find here.
+    /// <see href="https://github.com/systemd/systemd/blob/1f5d8a6132f12574f524cef72dbda0f7408c4217/man/systemd.journal-fields.xml"/>
+    /// </summary>
     internal static bool TryParseEntry(IReadOnlyDictionary<string, string> data, [NotNullWhen(true)] out JournalEntry? entry)
     {
-        /// Journal fields could be retrieved from journal service. Default field names can be find here.
-        /// <see href="https://github.com/systemd/systemd/blob/1f5d8a6132f12574f524cef72dbda0f7408c4217/man/systemd.journal-fields.xml"/>
         if (data.TryGetValue("REALTIME_TIMESTAMP", out var timestamp) &&
             data.TryGetValue("_HOSTNAME", out var hostname) &&
             data.TryGetValue("SYSLOG_IDENTIFIER", out var syslogId) &&

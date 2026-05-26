@@ -30,7 +30,8 @@ internal sealed class ActiveControlPanelPageProvider : IActiveControlPanelPagePr
 
     private void RecordActiveControlPanelPageAndObserve(IEnumerable<IControlPanelRegistryItem> controlPanelRegistryItems)
     {
-        var staleControlPanelRegistryItems = _activeControlPanelPageMap.Keys.Except(controlPanelRegistryItems);
+        var registryItems = controlPanelRegistryItems.ToArray();
+        var staleControlPanelRegistryItems = _activeControlPanelPageMap.Keys.Except(registryItems);
 
         foreach (var staleControlPanelRegistryItem in staleControlPanelRegistryItems)
         {
@@ -39,7 +40,7 @@ internal sealed class ActiveControlPanelPageProvider : IActiveControlPanelPagePr
             StopListenForControlPanelStateChanged(staleControlPanelRegistryItem);
         }
 
-        foreach (var controlPanelRegistryItem in controlPanelRegistryItems)
+        foreach (var controlPanelRegistryItem in registryItems)
         {
             UpdateActiveControlPanelPage(controlPanelRegistryItem);
             StartListenForControlPanelStateChanged(controlPanelRegistryItem);

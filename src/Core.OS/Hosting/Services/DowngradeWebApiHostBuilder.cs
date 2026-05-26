@@ -65,7 +65,7 @@ internal static class DowngradeWebApiHostBuilder
     /// <summary>
     /// Sets the reset file and stops the application
     /// </summary>
-    /// <param name="http"></param>
+    /// <param name="services"></param>
     private static IResult DowngradeReset(IServiceProvider services)
     {
         var logger = services.GetRequiredService<Serilog.ILogger>();
@@ -91,7 +91,7 @@ internal static class DowngradeWebApiHostBuilder
     /// <summary>
     /// Just stops the application
     /// </summary>
-    /// <param name="http"></param>
+    /// <param name="services"></param>
     private static IResult DowngradeExit(IServiceProvider services)
     {
         var logger = services.GetRequiredService<Serilog.ILogger>();

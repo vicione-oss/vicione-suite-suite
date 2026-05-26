@@ -1,7 +1,5 @@
 using Blazor.Shared.Instance.ControlPanels.Repositories.Models;
-using Core.Shared.Instance.Contracts;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Messaging;
 
 namespace Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 

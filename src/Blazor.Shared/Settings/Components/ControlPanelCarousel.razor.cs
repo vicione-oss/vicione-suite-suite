@@ -22,7 +22,7 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
 
     private sealed class ItemAnimation
     {
-        public required IControlPanelRegistryItem? Item { get; init; }
+        public required IControlPanelRegistryItem? RegistryItem { get; init; }
         public required AnimationKind Kind { get; init; }
         public int DurationMs { get; private set; } = 200;
     }
@@ -152,7 +152,7 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
                 From = activeControlPanel,
                 To = requestedControlPanel,
                 Direction = ItemTransitionDirection.Next,
-                Animation = new ItemAnimation { Item = activeControlPanel, Kind = AnimationKind.SlideLeft }
+                Animation = new ItemAnimation { RegistryItem = activeControlPanel, Kind = AnimationKind.SlideLeft }
             };
 
             _itemTransitions.Enqueue(itemTransition);
@@ -197,7 +197,7 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
                 From = activeControlPanel,
                 To = requestedControlPanel,
                 Direction = ItemTransitionDirection.Previous,
-                Animation = new ItemAnimation { Item = requestedControlPanel, Kind = AnimationKind.SlideRight }
+                Animation = new ItemAnimation { RegistryItem = requestedControlPanel, Kind = AnimationKind.SlideRight }
             };
 
             _itemTransitions.Enqueue(itemTransition);

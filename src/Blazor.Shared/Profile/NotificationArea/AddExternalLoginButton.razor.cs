@@ -8,13 +8,13 @@ public partial class AddExternalLoginButton(
     IJSRuntime jsRuntime,
     ILogger<AddExternalLoginButton> logger) : ComponentBase
 {
-    private ElementReference form;
+    private ElementReference _form;
 
     private async Task OnExternalLoginSubmitAsync()
     {
         try
         {
-            await jsRuntime.InvokeVoidAsync("ViciOne.Interop.submitExistingForm", form);
+            await jsRuntime.InvokeVoidAsync("ViciOne.Interop.submitExistingForm", _form);
         }
         catch (Exception e)
         {

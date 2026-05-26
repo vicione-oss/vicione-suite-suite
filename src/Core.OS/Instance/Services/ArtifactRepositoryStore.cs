@@ -4,7 +4,6 @@ using Core.Artifacts;
 using Core.Module.Options;
 using Core.OS.Instance.Extensions;
 using Core.Shared.Instance.Contracts;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Options;
 using Sdk.Messaging;
 

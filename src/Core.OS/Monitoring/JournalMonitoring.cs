@@ -11,6 +11,6 @@ public class JournalMonitoring : IJournalMonitoring
 
     public void AddFilterEntry(string name, string displayName, string filter, int index)
         => _targets.AddOrUpdate(name,
-            name => new(displayName, filter, index),
+            _ => new(displayName, filter, index),
             (_, _) => new(displayName, filter, index));
 }

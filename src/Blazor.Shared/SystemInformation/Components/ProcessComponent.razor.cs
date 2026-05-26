@@ -34,8 +34,7 @@ public sealed partial class ProcessComponent : IDisposable
     {
         LayoutService.TitleBarAppName = Localization.ProcessComponent.ProcessOverview;
 
-        if (MonitoringService.CurrentProcessList != null)
-            OnProcessListChanged(MonitoringService.CurrentProcessList);
+        OnProcessListChanged(MonitoringService.CurrentProcessList);
 
         MonitoringService.MetricChanged += OnMetricChanged;
         MonitoringService.ProcessListChanged += OnProcessListChanged;
@@ -67,8 +66,6 @@ public sealed partial class ProcessComponent : IDisposable
                 break;
             case MetricType.LoadAvg15:
                 _loadAvg15Value = (float)Math.Round(MonitoringService.CurrentLoadAvg15Value, 2);
-                break;
-            default:
                 break;
         }
     }
