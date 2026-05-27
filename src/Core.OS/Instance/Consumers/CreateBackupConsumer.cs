@@ -37,8 +37,6 @@ public sealed partial class CreateBackupConsumer(IBackupFactory backupFactory, I
                 return;
             }
 
-            LogBackupErrors(correlationId, errors);
-
             backupStore.DeleteBackupFile(filename);
 
             LogDeleteFailedBackup(logger, correlationId, filename);
@@ -78,16 +76,7 @@ public sealed partial class CreateBackupConsumer(IBackupFactory backupFactory, I
             sb.AppendLine("System: no configuration data");
         }
 
-        logger.LogInformation(sb.ToString());
-    }
-
-    private void LogBackupErrors(Guid correlationId, IEnumerable<string> errors)
-    {
-        if (!logger.IsEnabled(LogLevel.Warning))
-            return;
-
-        foreach (var error in errors)
-            logger.LogWarning("Backup error {CorrelationId}: {Error}", correlationId, error);
+        logger.LogInformation("{BackupSummary}", sb.ToString());
     }
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Consume create backup correlated by {CorrelationId}. Keep on error={KeepBackupOnError}")]

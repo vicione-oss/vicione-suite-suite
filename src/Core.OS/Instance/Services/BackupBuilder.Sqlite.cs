@@ -7,7 +7,7 @@ namespace Core.OS.Instance.Services;
 
 internal partial class BackupBuilder
 {
-    public static async Task<List<BackupEntrySummary>?> BackupSqliteDatabases(ZipArchive moduleArchive, IFileSystem fileSystem, string moduleWorkspace, Dictionary<string, string> databaseFiles, CancellationToken cancellationToken = default)
+    private static async Task<List<BackupEntrySummary>?> BackupSqliteDatabases(ZipArchive moduleArchive, IFileSystem fileSystem, Dictionary<string, string> databaseFiles, ILogger logger, CancellationToken cancellationToken = default)
     {
         if (databaseFiles.Count == 0)
             return null;
@@ -19,39 +19,50 @@ internal partial class BackupBuilder
         // Therefore we need to backup databases to new temporary files and add them to the archive instead.
         var tmpDirectory = fileSystem.Directory.CreateTempSubdirectory();
 
-        foreach (var databaseFile in databaseFiles)
-        {
-            var dbSummary = new BackupEntrySummary
-            {
-                Name = databaseFile.Key,
-                EntryName = databaseFile.Key,
-            };
-
-            try
-            {
-                var newEntry = moduleArchive.CreateEntry(databaseFile.Key);
-                await using var destStream = await newEntry.OpenAsync(cancellationToken);
-                var sourceDbPath = fileSystem.Path.Combine(moduleWorkspace, databaseFile.Value);
-
-                await BackupSqliteDatabase(fileSystem, sourceDbPath, tmpDirectory, destStream, cancellationToken);
-                dbSummary.ArchiveLength = destStream.Position;
-            }
-            catch (Exception e)
-            {
-                // todo log things
-                dbSummary.Error = e.Message;
-            }
-
-            result.Add(dbSummary);
-        }
-
-        // clear the temporary ones
         try
         {
-            fileSystem.Directory.Delete(tmpDirectory.FullName, true);
+            foreach (var databaseFile in databaseFiles)
+            {
+                var dbSummary = new BackupEntrySummary
+                {
+                    Name = databaseFile.Key,
+                    EntryName = databaseFile.Key,
+                };
+
+                try
+                {
+                    LogCreatingDatabaseEntry(logger, databaseFile.Key);
+
+                    var newEntry = moduleArchive.CreateEntry(databaseFile.Key);
+                    await using var destStream = await newEntry.OpenAsync(cancellationToken);
+                    var sourceDbPath = databaseFile.Value; // contains the full path to the database file
+
+                    await BackupSqliteDatabase(fileSystem, sourceDbPath, tmpDirectory, destStream, cancellationToken);
+                    dbSummary.ArchiveLength = destStream.Position;
+
+                    LogCreatedDatabaseEntry(logger, databaseFile.Key, destStream.Position);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;  // exit loop on cancellation without logging an error
+                }
+                catch (Exception e)
+                {
+                    LogFailedToCreateDatabaseEntry(logger, e, databaseFile.Key);
+
+                    dbSummary.Error = e.Message;
+                }
+
+                result.Add(dbSummary);
+            }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            LogUnexpectedBackupSqliteError(logger, ex);
+        }
+        finally
+        {
+            fileSystem.Directory.Delete(tmpDirectory.FullName, true);
         }
 
         return result;
@@ -75,9 +86,13 @@ internal partial class BackupBuilder
             DataSource = destinationDbPath,
         };
 
-        await using (var source = new SqliteConnection(sourceOptions.ConnectionString))
+        var source = new SqliteConnection(sourceOptions.ConnectionString);
+        var destination = new SqliteConnection(destinationOptions.ConnectionString);
+
+        await using (source)
+        await using (destination)
         {
-            await using var destination = new SqliteConnection(destinationOptions.ConnectionString);
+            //await using var destination = new SqliteConnection(destinationOptions.ConnectionString);
             await source.OpenAsync(cancellationToken);
             await destination.OpenAsync(cancellationToken);
 
@@ -87,11 +102,24 @@ internal partial class BackupBuilder
         }
 
         // we need to clear the connection cache to release the file locks from our temporary databases
-        SqliteConnection.ClearAllPools();
+        // !! resets ALL pools application-wide
+        SqliteConnection.ClearPool(source);
+        SqliteConnection.ClearPool(destination);
 
         // Copy the temporary backup to stream
         await using var stream = fileSystem.FileStream.New(destinationDbPath, FileMode.Open, FileAccess.Read, FileShare.None);
         await stream.CopyToAsync(destinationStream, cancellationToken);
-        stream.Close();
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Creating sqlite backup for entry='{EntryKey}'")]
+    private static partial void LogCreatingDatabaseEntry(ILogger logger, string entryKey);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Created sqlite backup for entry='{EntryKey}' position={Bytes}")]
+    private static partial void LogCreatedDatabaseEntry(ILogger logger, string entryKey, long bytes);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create sqlite backup for entry='{EntryKey}'")]
+    private static partial void LogFailedToCreateDatabaseEntry(ILogger logger, Exception ex, string entryKey);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error creating sqlite backups")]
+    private static partial void LogUnexpectedBackupSqliteError(ILogger logger, Exception ex);
 }
