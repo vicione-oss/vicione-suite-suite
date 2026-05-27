@@ -110,7 +110,7 @@
                 <SettingsFieldButton Text="@CommonVocabulary.ExportVerb"
                                      IconCssClass="@_exportIconCssClasses"
                                      OnClick="OnExportButtonClick"
-                                     Enabled="@(!_isRestoreInProgress && !_isExportInProgress)" />
+                                     Enabled="@CanExecuteExportButton()" />
             </SettingsField>
 
             <SettingsFieldSeparator />
@@ -129,7 +129,7 @@
                 <div class="input">
                     <InputFile id="item-upload"
                                accept="@(Core.Shared.Constants.BackupFileExtension)"
-                               OnChange="OnRestoreFileChange" disabled="@_isRestoreInProgress" />
+                               OnChange="OnRestoreFileChange" disabled="@CanExecuteRestore()" />
                 </div>
             </SettingsField>
 

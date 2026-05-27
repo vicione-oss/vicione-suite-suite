@@ -87,6 +87,9 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
         await base.DisposeAsyncCore();
     }
 
+    private bool CanExecuteRestore()
+        => !_isRestoreInProgress && !_isExportInProgress;
+
     private async Task OnRestoreFileChange(InputFileChangeEventArgs args)
     {
         try
@@ -162,6 +165,9 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
         _showResetConfirmSection = false;
     }
 
+    private bool CanExecuteExportButton()
+        => !_isRestoreInProgress && !_isExportInProgress;
+
     private async Task OnExportButtonClick()
     {
         try
@@ -233,6 +239,8 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
 
         if (context.Message.ErrorInfo is not null)
         {
+            _exportCorrelationId = null;
+            _isExportInProgress = false;
             BannerService.ShowMessageBanner(MessageType.Error, context.Message.ErrorInfo.Message);
             return;
         }

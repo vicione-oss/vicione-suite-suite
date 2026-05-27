@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
 using Core.OS.Instance;
@@ -8,6 +8,7 @@ using Core.OS.Modules;
 using Core.OS.Modules.Contracts;
 using Core.OS.Tests.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
@@ -19,6 +20,9 @@ public class BackupBuilderTests
 {
     private readonly string _appDataPath = "\\path\\to\\backup";
     private readonly string _destinationPath = "\\path\\to\\destination";
+
+    private readonly IFileSystem _fileSystem = Substitute.For<IFileSystem>();
+    private readonly ILogger<BackupBuilder> _logger = Substitute.For<ILogger<BackupBuilder>>();
 
     private static ServiceProvider SetupServiceProvider(Action<IServiceCollection>? configure = null)
     {
@@ -40,41 +44,15 @@ public class BackupBuilderTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
-            await using var memoryStream = new MemoryStream();
-            var localInstance = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>().Local;
-
-            var builder = new BackupBuilder();
+            var instanceInformationProvider = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
+            var builder = new BackupBuilder(_fileSystem, instanceInformationProvider, _logger);
 
             // Act
-            var result = await builder.BuildBackup(serviceProvider, memoryStream, TestContext.Current.CancellationToken);
-
-            // Assert
-            result.ShouldContainInstanceInfos(localInstance);
-        }
-    }
-
-    public class UseSystemModuleBackup : BackupBuilderTests
-    {
-        [Trait(Traits.Category, Traits.System)]
-        [Fact]
-        public async Task Should_add_system_module_to_archive()
-        {
-            // Arrange
-            await using var serviceProvider = SetupServiceProvider(configure =>
-            {
-                configure.SetupSuiteModuleBackup(_appDataPath);
-            });
-
             await using var memoryStream = new MemoryStream();
-            var builder = new BackupBuilder()
-                .UseSystemModuleBackup();
-
-            // Act
-            var result = await builder.BuildBackup(serviceProvider, memoryStream, TestContext.Current.CancellationToken);
+            var result = await builder.BuildBackup(memoryStream, TestContext.Current.CancellationToken);
 
             // Assert
-            result.SystemModule.Should().NotBeNull();
-            result.SystemModule!.Error.Should().BeNull();
+            result.ShouldContainInstanceInfos(instanceInformationProvider.Local);
         }
     }
 
@@ -90,15 +68,19 @@ public class BackupBuilderTests
                 configure.SetupSuiteModuleBackup(_appDataPath);
             });
 
-            await using var memoryStream = new MemoryStream();
-            var builder = new BackupBuilder()
-                .UseModuleBackup();
+            var instanceInformationProvider = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
+            var metadataProvider = serviceProvider.GetRequiredService<IModuleMetadataProvider>();
+            var workspaceManagement = serviceProvider.GetRequiredService<IWorkspaceManagement>();
 
-            var installedModules = await serviceProvider.GetRequiredService<IModuleMetadataProvider>()
+            await using var memoryStream = new MemoryStream();
+            var builder = new BackupBuilder(_fileSystem, instanceInformationProvider, _logger)
+                .UseModuleBackup(metadataProvider, workspaceManagement);
+
+            var installedModules = await metadataProvider
                 .GetModuleMetadata(new GetModuleMetadataOptions(true, false), TestContext.Current.CancellationToken);
 
             // Act
-            var result = await builder.BuildBackup(serviceProvider, memoryStream, TestContext.Current.CancellationToken);
+            var result = await builder.BuildBackup(memoryStream, TestContext.Current.CancellationToken);
 
             // Assert
             result.SystemModule.Should().NotBeNull();
@@ -119,11 +101,14 @@ public class BackupBuilderTests
             {
                 configure.SetupSystemConfiguration();
             });
-            var builder = new BackupBuilder()
-                .UseSystemConfigurationBackup();
+
+            var instanceInformationProvider = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
+
+            var builder = new BackupBuilder(_fileSystem, instanceInformationProvider, _logger)
+                .UseSystemConfigurationBackup(serviceProvider);
 
             // Act
-            var result = await builder.BuildBackup(serviceProvider, _destinationPath, TestContext.Current.CancellationToken);
+            var result = await builder.BuildBackup(_destinationPath, TestContext.Current.CancellationToken);
 
             // Assert
             result.SystemConfiguration.Should().NotBeNull();
@@ -138,12 +123,15 @@ public class BackupBuilderTests
             {
                 configure.SetupSystemConfiguration();
             });
-            await using var memoryStream = new MemoryStream();
-            var builder = new BackupBuilder()
-                .UseSystemConfigurationBackup();
+
+            var instanceInformationProvider = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
+
+            var builder = new BackupBuilder(_fileSystem, instanceInformationProvider, _logger)
+                .UseSystemConfigurationBackup(serviceProvider);
 
             // Act
-            var result = await builder.BuildBackup(serviceProvider, memoryStream, TestContext.Current.CancellationToken);
+            await using var memoryStream = new MemoryStream();
+            var result = await builder.BuildBackup(memoryStream, TestContext.Current.CancellationToken);
 
             // Assert
             result.SystemConfiguration.Should().NotBeNull();
@@ -161,12 +149,15 @@ public class BackupBuilderTests
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider(SetupBackupFile);
-            var builder = new BackupBuilder()
+            var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
+            var instanceInformationProvider = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
+
+            var builder = new BackupBuilder(fileSystem, instanceInformationProvider, _logger)
                 .UseBackupFileName(BackupFileName)
                 .UseOverrideExistingBackup();
 
             // Act
-            var result = await builder.BuildBackup(serviceProvider, BackupPath, TestContext.Current.CancellationToken);
+            var result = await builder.BuildBackup(BackupPath, TestContext.Current.CancellationToken);
 
             // Assert
             result.InstanceId.Should().NotBeEmpty();
@@ -181,11 +172,13 @@ public class BackupBuilderTests
         {
             // Arrange
             var services = SetupServiceProvider(SetupBackupFile);
-            var builder = new BackupBuilder()
+            var fileSystem = services.GetRequiredService<IFileSystem>();
+            var instanceInformationProvider = services.GetRequiredService<ILocalInstanceInformationProvider>();
+            var builder = new BackupBuilder(fileSystem, instanceInformationProvider, _logger)
                 .UseBackupFileName(BackupFileName);
 
             // Act
-            var action = FluentActions.Awaiting(() => builder.BuildBackup(services, BackupPath, TestContext.Current.CancellationToken));
+            var action = FluentActions.Awaiting(() => builder.BuildBackup(BackupPath, TestContext.Current.CancellationToken));
 
             // Assert
             await action.Should().ThrowAsync<InvalidOperationException>().WithMessage(@"*already exists*");
@@ -219,18 +212,22 @@ public class BackupBuilderTests
                     .SetupSystemConfiguration();
             });
 
+
             var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
             var instanceIdInfo = fileSystem.Path.Combine(_appDataPath, IFileSystemExtensions.InstanceIdFileName);
             var instanceId = Guid.Parse(await fileSystem.File.ReadAllTextAsync(instanceIdInfo, TestContext.Current.CancellationToken));
             informationProvider.SetupGetInstanceInformation(instanceId, InstanceType.Standalone);
+            var localInformationProvider = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
+            var metadataProvider = serviceProvider.GetRequiredService<IModuleMetadataProvider>();
+            var workspaceManagement = serviceProvider.GetRequiredService<IWorkspaceManagement>();
 
-            var builder = new BackupBuilder()
-                .UseModuleBackup()
-                .UseSystemConfigurationBackup()
+            var builder = new BackupBuilder(fileSystem, localInformationProvider, _logger)
+                .UseModuleBackup(metadataProvider, workspaceManagement)
+                .UseSystemConfigurationBackup(serviceProvider)
                 .UseOverrideExistingBackup();
 
             // Act
-            var result = await builder.BuildBackup(serviceProvider, _destinationPath, TestContext.Current.CancellationToken);
+            var result = await builder.BuildBackup(_destinationPath, TestContext.Current.CancellationToken);
 
             // Assert
             var local = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>().Local;

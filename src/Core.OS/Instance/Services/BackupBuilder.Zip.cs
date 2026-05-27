@@ -34,7 +34,7 @@ internal partial class BackupBuilder
     /// <param name="summary"></param>
     /// <param name="cancellationToken"></param>
     /// <exception cref="IOException"></exception>
-    private static async Task AddModuleDirectoryToArchive(IFileSystem fileSystem, ZipArchive moduleArchive, string sourceDirectory, BackupModuleSummary summary, CancellationToken cancellationToken)
+    private static async Task AddModuleDirectoryToArchive(IFileSystem fileSystem, ZipArchive moduleArchive, string sourceDirectory, BackupModuleSummary summary, ILogger logger, CancellationToken cancellationToken)
     {
         string[] ignoreExtensions = [".db-wal", ".db-shm"];
         var directoryIsEmpty = true;
@@ -93,8 +93,7 @@ internal partial class BackupBuilder
         }
 
         // backup database files
-        summary.Databases = await BackupSqliteDatabases(moduleArchive, fileSystem, sourceDirectory, databaseFiles, cancellationToken);
-        //summary.ArchiveLength = entryStream.Position;
+        summary.Databases = await BackupSqliteDatabases(moduleArchive, fileSystem, databaseFiles, logger, cancellationToken);
 
         // If no entries create an empty root directory entry:
         if (directoryIsEmpty)
@@ -106,7 +105,7 @@ internal partial class BackupBuilder
 
     private static string CreateEntryName(IFileSystem fileSystem, string sourceDirectory, string filePath)
         => fileSystem.Path.GetRelativePath(sourceDirectory, filePath)
-            .Replace("\\", "/");// for cross-platform compatibility
+            .Replace("\\", "/", StringComparison.Ordinal); // for cross-platform compatibility
 
     private static bool IsDirEmpty(string directoryFullName)
     {
