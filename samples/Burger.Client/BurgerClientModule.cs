@@ -1,4 +1,5 @@
-﻿using Burger.Client.Connections;
+using Burger.Client.Connections;
+using Burger.Client.ControlPanels.Extensions;
 using Burger.Client.Localization;
 using Burger.Client.Services;
 using Burger.Internal;
@@ -21,6 +22,7 @@ public sealed class BurgerClientModule : ClientModule
 
         services.AddLocalization<BurgerClientModule, Localizer>();
         services.AddNavTiles<BurgerClientModule>();
+        services.AddControlPanels();
     };
 
     public override Func<IServiceProvider, Task>? InitializeServices => (services) =>

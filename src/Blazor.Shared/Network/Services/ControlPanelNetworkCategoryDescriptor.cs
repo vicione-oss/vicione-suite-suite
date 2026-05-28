@@ -1,11 +1,11 @@
-﻿using Blazor.Shared.Enums;
+using Blazor.Shared.Enums;
 using Blazor.Shared.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Network.Services;
 
-internal sealed class ControlPanelNetworkCategoryDescriptor : IControlPanelCategoryDescriptor
+internal sealed class ControlPanelNetworkCategoryDescriptor : IControlPanelNetworkCategoryDescriptor
 {
     public string Title => CommonVocabulary.Network;
     public string? IconCssClass => null;

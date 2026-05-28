@@ -1,0 +1,18 @@
+@using Burger.Client.ControlPanels.Services
+@using Sdk.Client.Components.Settings
+@using Sdk.Client.ControlPanels.Components
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<BurgerControlPanelState>
+
+<DescriptionBanner Title="@Burger.Client.Localization.Common.ModuleTitle" IconUrl="@(ModuleAssetHelper.GetModuleIconUrl<BurgerClientModule>("burger.svg"))">
+    Burger stuff
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@TechnicalTerms.PropertyPlural">
+        <SettingsField Label="@CommonVocabulary.Description">
+            <SettingsFieldTextBox Enabled="false" @bind-Value="@State.Description" @bind-Value:after="BeginEdit" />
+        </SettingsField>
+    </SettingsGroup>
+</SettingsLayout>

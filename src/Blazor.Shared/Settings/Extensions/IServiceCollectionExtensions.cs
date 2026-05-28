@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
+using Blazor.Shared.Network.Services;
 using Blazor.Shared.Popup.Extensions;
 using Blazor.Shared.Settings.Factories;
 using Blazor.Shared.Settings.Services;
@@ -43,6 +44,7 @@ internal static class IServiceCollectionExtensions
             services.AddScoped<IControlPanelRequest, ControlPanelRequest>();
             services.AddScoped<IControlPanelRegistryItemCache, ControlPanelRegistryItemCache>();
             services.AddScoped<IDefaultControlPanelGroupDescriptor, DefaultControlPanelGroupDescriptor>();
+            services.AddScoped<IControlPanelNetworkCategoryDescriptor, ControlPanelNetworkCategoryDescriptor>();
             services.AddScoped<IControlPanelRegistryFactory, ControlPanelRegistryFactory>();
             services.AddScoped<IControlPanelPageRegistry, ControlPanelPageRegistry>();
             services.AddControlPanelEditRegistry();
