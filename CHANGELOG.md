@@ -25,7 +25,7 @@
 - `MailKit` packages, update to version `4.16.0`
 - `Microsoft` packages, update to version `10.0.8`
 - `ViciOne.Suite.Sdk` packages, update to version `2.1.0-ci2556125403`
-- `ViciOne.Ui.Blazor.Components` package, update to version `5.13.0`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.13.0`
 - `ViciOne.Ui.Design` package, update version to `2.1.0`
 
 ## 1.2.1 - 2026-05-12

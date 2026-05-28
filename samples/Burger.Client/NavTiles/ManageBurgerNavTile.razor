@@ -1,0 +1,11 @@
+@using Sdk.Client.NavTiles.Components
+@using ViciOne.Ui.Localization.Resources
+
+@inherits NavTileBase
+
+<NavTileStandardContent Headline="@Burger.Client.Localization.Common.ModuleTitle"
+                        Subline="@CommonVocabulary.Management"
+                        IconUrl="@_iconUrl"
+                        IconAlt="@Burger.Client.Localization.Common.ModuleTitle"
+                        OnContentLoading="@ContentLoading"
+                        OnContentReady="@ContentReady" />
