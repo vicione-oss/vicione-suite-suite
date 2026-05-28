@@ -13,7 +13,13 @@ public static partial class ModuleNameVersionRegex
 
     private static partial Regex Matcher();
 
-    public static bool GetVersion(string moduleName, [NotNullWhen(true)] out SemVersion? parsed)
+    /// <summary>
+    /// https://regex101.com/r/gldEOw/2
+    /// </summary>    
+    [GeneratedRegex(@"^(?<version>\d+\.\d+\.\d+(\-(\d+|\w+))*)-(?<arch>(arm64|amd64|win-x64)+)_(?'sdkversion'\d+\.\d+\.\d+)\.json$", RegexOptions.CultureInvariant)]
+    private static partial Regex MetaMatcher();
+
+    public static bool GetModuleVersion(string moduleName, [NotNullWhen(true)] out SemVersion? parsed)
     {
         parsed = null;
 
@@ -32,5 +38,31 @@ public static partial class ModuleNameVersionRegex
         }
 
         return SemVersion.TryParse($"{match.Groups["version"].Value}-{match.Groups["civersion"].Value}", out parsed);
+    }
+
+    public static bool TryParse(string moduleName,
+        [NotNullWhen(true)] out SemVersion? moduleVersion,
+        [NotNullWhen(true)] out string? architecture,
+        [NotNullWhen(true)] out SemVersion? sdkVersion)
+    {
+        moduleVersion = sdkVersion = null;
+        architecture = null;
+
+        // e.g. 1.0.4[-ci24343243]_arm64_1.0.1.json
+        var match = MetaMatcher().Match(moduleName);
+
+        // Actually we only support arm64, amd64 and win-x64 and so other architectures don't get accepted
+        if (!match.Success)
+            return false;
+
+        if (!SemVersion.TryParse(match.Groups["version"].Value, out moduleVersion))
+            return false;
+
+        if (!SemVersion.TryParse(match.Groups["sdkversion"].Value, out sdkVersion))
+            return false;
+
+        architecture = match.Groups["arch"].Value;
+
+        return !string.IsNullOrEmpty(architecture);
     }
 }
