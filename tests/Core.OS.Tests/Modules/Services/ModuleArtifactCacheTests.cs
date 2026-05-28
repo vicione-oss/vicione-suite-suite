@@ -55,7 +55,7 @@ public class ModuleArtifactCacheTests
         foreach (var artifact in metadataArtifacts)
         {
             // setup queries to get module artifact by dependency package
-            if (ModuleNameVersionRegex.GetVersion(artifact.Name, out var moduleVersion))
+            if (ModuleNameVersionRegex.GetModuleVersion(artifact.Name, out var moduleVersion))
             {
                 var moduleDependency = new ModuleDependencyPackage
                 {

@@ -1,4 +1,4 @@
-﻿using Core.Module.Exceptions;
+using Core.Module.Exceptions;
 using Core.Module.Utils;
 using AwesomeAssertions;
 using Xunit;
@@ -10,45 +10,39 @@ public class ModuleVersionValidatorTests
 {
     public sealed class ValidateSdkCompatibility_with_Version_and_string
     {
-        [Fact]
-        public void Should_throw_if_module_sdk_version_is_invalid()
+        [Theory]
+        [InlineData("1.3.5", "2.0.1")]
+        [InlineData("1.3.5", "1.3.6")]
+        [InlineData("1.3.5", "1.5.0")]
+        [InlineData("1.3.5", "abc")]
+        [InlineData("1.3.5", "1.ab.15")]
+        [InlineData("1.3.5", "1.0.0~rc")]
+        public void Should_throw_if_module_sdk_version_is_invalid(string sdkVersion, string moduleSdkVersion)
         {
             // Arrange
-            var sdkVersion = new SemVersion(1, 2);
-            var invalidModuleVersion = "abc";
+            var version = SemVersion.Parse(sdkVersion);
 
             // Act
-            var act = () => ModuleVersionValidator.ValidateSdkCompatibility(sdkVersion, invalidModuleVersion);
+            var act = () => ModuleVersionValidator.ValidateSdkCompatibility(sdkVersion, moduleSdkVersion);
 
             // Assert
-            act.Should().Throw<SdkIncompatibilityException>()
-               .WithMessage("Invalid module SDK version abc reference.");
+            act.Should().Throw<SdkIncompatibilityException>();
         }
 
-        [Fact]
-        public void Should_throw_if_major_or_minor_versions_do_not_match()
+        [Theory]
+        [InlineData("1.3.5", "1.3.5")]
+        [InlineData("1.3.5", "1.3.3")]
+        [InlineData("1.3.5", "1.2.15")]
+        [InlineData("1.3.5", "1.0.0")]
+        [InlineData("1.3.5", "1.3.5-ci231323")]
+        [InlineData("1.3.5", "1.0.1-ci234343")]
+        public void Should_not_throw_if_versions_are_compatible(string sdkVersion, string moduleSdkVersion)
         {
             // Arrange
-            var sdkVersion = new SemVersion(2, 5);
-            var moduleVersion = "3.5.0";
+            var suiteVersion = SemVersion.Parse(sdkVersion);
 
             // Act
-            var act = () => ModuleVersionValidator.ValidateSdkCompatibility(sdkVersion, moduleVersion);
-
-            // Assert
-            act.Should().Throw<SdkIncompatibilityException>()
-               .WithMessage("Update ViciOne.Suite.Sdk at least to version 2.5.x.");
-        }
-
-        [Fact]
-        public void Should_not_throw_if_major_and_minor_versions_match()
-        {
-            // Arrange
-            var sdkVersion = new SemVersion(1, 2);
-            var moduleVersion = "1.2.9";
-
-            // Act
-            var act = () => ModuleVersionValidator.ValidateSdkCompatibility(sdkVersion, moduleVersion);
+            var act = () => ModuleVersionValidator.ValidateSdkCompatibility(suiteVersion, moduleSdkVersion);
 
             // Assert
             act.Should().NotThrow();
@@ -69,11 +63,26 @@ public class ModuleVersionValidatorTests
 
             // Assert
             act.Should().Throw<SdkIncompatibilityException>()
-               .WithMessage("Invalid SDK version bad");
+               .WithMessage("Invalid ViciOne.Suite.Sdk version bad");
         }
 
         [Fact]
-        public void Should_throw_if_module_version_is_incompatible()
+        public void Should_throw_with_module_upgrade_hint_if_sdk_major_is_higher_than_module_major()
+        {
+            // Arrange
+            var sdkVersionString = "3.0.0";
+            var moduleVersionString = "2.0.0";
+
+            // Act
+            var act = () => ModuleVersionValidator.ValidateSdkCompatibility(sdkVersionString, moduleVersionString);
+
+            // Assert
+            act.Should().Throw<SdkIncompatibilityException>()
+               .WithMessage("Upgrade module ViciOne.Suite.Sdk to at least 3.0.x.");
+        }
+
+        [Fact]
+        public void Should_throw_with_module_downgrade_hint_if_module_major_is_higher_than_sdk_major()
         {
             // Arrange
             var sdkVersionString = "2.0.0";
@@ -84,23 +93,38 @@ public class ModuleVersionValidatorTests
 
             // Assert
             act.Should().Throw<SdkIncompatibilityException>()
-               .WithMessage("Update ViciOne.Suite.Sdk at least to version 2.0.x.");
+               .WithMessage("Downgrade module ViciOne.Suite.Sdk to 3.0.x.");
         }
 
         [Fact]
-        public void Should_not_throw_if_versions_are_compatible()
+        public void Should_throw_with_module_downgrade_hint_if_module_minor_is_higher_than_sdk_minor()
         {
             // Arrange
-            var sdkVersionString = "1.3.0";
-            var moduleVersionString = "1.3.5";
+            var sdkVersionString = "2.3.0";
+            var moduleVersionString = "2.5.0";
 
             // Act
             var act = () => ModuleVersionValidator.ValidateSdkCompatibility(sdkVersionString, moduleVersionString);
+
+            // Assert
+            act.Should().Throw<SdkIncompatibilityException>()
+               .WithMessage("Downgrade module ViciOne.Suite.Sdk to 2.3.0 or lower.");
+        }
+
+        [Theory]
+        [InlineData("1.3.5", "1.3.5")]
+        [InlineData("1.3.5", "1.3.3")]
+        [InlineData("1.3.5", "1.2.15")]
+        [InlineData("1.3.5", "1.0.0")]
+        [InlineData("1.3.5", "1.3.5-ci231323")]
+        [InlineData("1.3.5", "1.0.1-ci234343")]
+        public void Should_not_throw_if_versions_are_compatible(string sdkVersion, string moduleSdkVersion)
+        {
+            // Act
+            var act = () => ModuleVersionValidator.ValidateSdkCompatibility(sdkVersion, moduleSdkVersion);
 
             // Assert
             act.Should().NotThrow();
         }
     }
 }
-
-

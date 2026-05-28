@@ -1,4 +1,4 @@
-﻿using Core.Module.Utils;
+using Core.Module.Utils;
 using Sdk.Modules;
 using Semver;
 
@@ -61,9 +61,6 @@ public static partial class SuiteDependencyContextExtensions
             {
                 try
                 {
-                    // todo - if could be sure that only major version changes include breaking changes
-                    // we could assume that 0.17.1 sdk fits to module requirement 0.17.0 for example
-                    // todo - we could also use the metadata if it's available for all modules
                     ModuleVersionValidator.ValidateSdkCompatibility(sdkVersion, moduleContext.GetSdkVersion());
                 }
                 catch (Exception ex)

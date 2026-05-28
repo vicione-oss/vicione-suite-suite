@@ -5,6 +5,7 @@ using Core.Module.Extensions;
 using Core.Module.Utils;
 using Sdk.Backend.Artifacts;
 using Sdk.Modules;
+using Semver;
 
 namespace Core.Module;
 
@@ -108,7 +109,7 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
     {
         var queryBuilder = artifactRepository.CreateQueryBuilder()
             .AndPathMatches($"{ModulesBaseFolder}/*")
-            .AndNameMatches($"{CreateNameMatchFilter(sdkVersion)}.json")
+            .AndNameMatches(GetMetadataNameFilter(sdkVersion))
             .OrderByDescending("path", "name");
 
         if (modifiedAfter is not null)
@@ -118,7 +119,13 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
         var aqlQuery = queryBuilder.Build();
         var result = await artifactRepository.Query(aqlQuery, cancellationToken);
 
-        return [.. result.Artifacts];
+        // our major version matches already by name filter
+        if (sdkVersion is null)
+            return [.. result.Artifacts];
+
+        var sdkSemVersion = SemVersion.FromVersion(sdkVersion);
+
+        return [.. result.FilterCompatibleModuleArtifactsBySdkVersion(sdkSemVersion)];
     }
 
     public async Task<IArtifact?> QueryModuleArtifact(ModuleDependencyPackage package,
@@ -141,7 +148,7 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
     {
         var queryBuilder = artifactRepository.CreateQueryBuilder()
             .AndPathMatches($"{ModulesBaseFolder}/{packageName}")
-            .AndNameMatches($"{CreateNameMatchFilter(sdkVersion)}.json")
+            .AndNameMatches(GetMetadataNameFilter(sdkVersion))
             .OrderByDescending("name");
 
         var aqlQuery = queryBuilder.Build();
@@ -151,13 +158,13 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
             .FirstOrDefault();
     }
 
-    private static string CreateNameMatchFilter(Version? sdkVersion)
+    private static string GetMetadataNameFilter(Version? sdkVersion)
     {
         if (sdkVersion is null)
-            return $"*{RuntimeInformation.RuntimeIdentifier}*";
+            return $"*{RuntimeInformation.RuntimeIdentifier}*.json";
 
         // We limit to major.minor version and allow different patch versions
-        return $"*{RuntimeInformation.RuntimeIdentifier}*_{sdkVersion.Major}.{sdkVersion.Minor}.*";
+        return $"*{RuntimeInformation.RuntimeIdentifier}*_{sdkVersion.Major}.*.json";
     }
 
     private bool ModuleVersionExists(string modulePath)

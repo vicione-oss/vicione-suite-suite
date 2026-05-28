@@ -2,6 +2,7 @@ using AwesomeAssertions;
 using Core.Module.Extensions;
 using NSubstitute;
 using Sdk.Backend.Artifacts;
+using Semver;
 using Xunit;
 
 namespace Core.Module.Tests.Extensions;
@@ -156,6 +157,135 @@ public class IArtifactQueryResultExtensionsTests
             ordered[0].Name.Should().Be("0.28.1-rc1-linux-arm64_0.25.0.json");
             ordered[1].Name.Should().Be("0.28.1-ci1523472-linux-arm64_0.25.0.json");
             ordered[2].Name.Should().Be("0.28.0-linux-arm64_0.25.0.json");
+        }
+    }
+
+    public class FilterCompatibleModuleArtifactsBySdkVersion : IArtifactQueryResultExtensionsTests
+    {
+        [Fact]
+        public void Should_return_empty_when_no_artifacts()
+        {
+            // Arrange
+            var queryResult = CreateQueryResult();
+
+            // Act
+            var filtered = queryResult.FilterCompatibleModuleArtifactsBySdkVersion(new SemVersion(1, 0, 0));
+
+            // Assert
+            filtered.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Should_exclude_artifacts_with_unparseable_names()
+        {
+            // Arrange
+            var queryResult = CreateQueryResult(
+                "not-a-valid-name.json",
+                "another-invalid.zip"
+            );
+
+            // Act
+            var filtered = queryResult.FilterCompatibleModuleArtifactsBySdkVersion(new SemVersion(1, 0, 0));
+
+            // Assert
+            filtered.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Should_include_artifact_whose_sdk_version_is_compatible()
+        {
+            // Arrange
+            var queryResult = CreateQueryResult(
+                "0.29.0-arm64_1.2.0.json",
+                "0.28.0-arm64_1.1.0.json"
+            );
+
+            // Act
+            var filtered = queryResult.FilterCompatibleModuleArtifactsBySdkVersion(new SemVersion(1, 2, 0)).ToList();
+
+            // Assert
+            filtered.Should().HaveCount(2);
+            filtered[0].Name.Should().Be("0.29.0-arm64_1.2.0.json");
+            filtered[1].Name.Should().Be("0.28.0-arm64_1.1.0.json");
+        }
+
+
+
+        [Fact]
+        public void Should_include_artifact_whose_sdk_version_is_good()
+        {
+            // Arrange
+            var queryResult = CreateQueryResult(
+                "2.1.2-ci2546490531-win-x64_2.0.0.json",
+                "1.0.0-ci2510650262-win-x64_2.0.1.json"
+            );
+
+            // Act
+            var filtered = queryResult.FilterCompatibleModuleArtifactsBySdkVersion(new SemVersion(2, 1, 0)).ToList();
+
+            // Assert
+            filtered.Should().HaveCount(2);
+            filtered[0].Name.Should().Be("2.1.2-ci2546490531-win-x64_2.0.0.json");
+            filtered[1].Name.Should().Be("1.0.0-ci2510650262-win-x64_2.0.1.json");
+        }
+
+
+        [Fact]
+        public void Should_exclude_artifact_whose_sdk_version_is_not_compatible()
+        {
+            // Arrange
+            var queryResult = CreateQueryResult(
+                "0.28.0-arm64_2.0.0.json",
+                "0.28.0-arm64_1.3.0.json"
+            );
+
+            // Act
+            var filtered = queryResult.FilterCompatibleModuleArtifactsBySdkVersion(new SemVersion(1, 2, 0));
+
+            // Assert
+            filtered.Should().BeEmpty();
+        }
+
+        [Fact]
+        public void Should_return_only_compatible_artifacts_from_mixed_list()
+        {
+            // Arrange
+            var queryResult = CreateQueryResult(
+                "0.28.0-arm64_1.1.0.json",  // compatible: sdk 1.1 <= loaded 1.2
+                "0.29.0-arm64_1.2.0.json",  // compatible: sdk 1.2 == loaded 1.2
+                "0.30.0-arm64_1.3.0.json"   // incompatible: sdk 1.3 > loaded 1.2
+            );
+
+            // Act
+            var filtered = queryResult.FilterCompatibleModuleArtifactsBySdkVersion(new SemVersion(1, 2, 0)).ToList();
+
+            // Assert
+            filtered.Should().HaveCount(2);
+            filtered.Select(a => a.Name).Should().Equal(
+                "0.29.0-arm64_1.2.0.json",
+                "0.28.0-arm64_1.1.0.json"
+            );
+        }
+
+        [Fact]
+        public void Should_order_compatible_artifacts_by_module_version_descending()
+        {
+            // Arrange
+            var queryResult = CreateQueryResult(
+                "0.27.0-arm64_1.0.0.json",
+                "0.29.0-arm64_1.2.0.json",
+                "0.28.0-arm64_1.1.0.json"
+            );
+
+            // Act
+            var filtered = queryResult.FilterCompatibleModuleArtifactsBySdkVersion(new SemVersion(1, 2, 0)).ToList();
+
+            // Assert
+            filtered.Select(a => a.Name).Should().Equal(
+                "0.29.0-arm64_1.2.0.json",
+                "0.28.0-arm64_1.1.0.json",
+                "0.27.0-arm64_1.0.0.json"
+            );
         }
     }
 }

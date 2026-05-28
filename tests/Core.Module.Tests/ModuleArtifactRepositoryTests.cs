@@ -15,7 +15,7 @@ namespace Core.Module.Tests;
 
 public class ModuleArtifactRepositoryTests
 {
-    private readonly Version _sdkVersion = new(1, 0, 0);
+    private readonly Version _sdkVersion = new(2, 1, 0);
     private readonly string _packageName = "ViciOne.Suite.ClusterManagement";
     private readonly string _packageVersion = "1.2.7";
 
@@ -224,7 +224,7 @@ public class ModuleArtifactRepositoryTests
 
             // Assert
             assets.Should().NotBeEmpty();
-            assets.Should().AllSatisfy(k => k.Name.Should().Contain($"_{_sdkVersion.Major}.{_sdkVersion.Minor}."));
+            assets.Should().AllSatisfy(k => k.Name.Should().Contain($"_{_sdkVersion.Major}."));
         }
 
         [Fact]

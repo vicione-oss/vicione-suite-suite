@@ -162,7 +162,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
             // We could download the metadata to get the version or parse it from name like
             // e.g. 0.24.0-win-x64_0.19.0.json or 0.24.0-ci2343243-win-x64_0.19.0.json
-            if (!ModuleNameVersionRegex.GetVersion(metadataArtifact.Name, out var moduleVersion))
+            if (!ModuleNameVersionRegex.GetModuleVersion(metadataArtifact.Name, out var moduleVersion))
             {
                 result.Error = new ErrorInfo(ModuleErrorCodes.FoundInvalidVersion, $"Can't determine version of '{package.Name}' for path '{metadataArtifact.Path}'.");
                 return result;
