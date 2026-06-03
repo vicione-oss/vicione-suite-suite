@@ -23,7 +23,7 @@ namespace Blazor.Shared.UserManagement.ControlPanels.User.Components;
 public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanelState>,
     IEventConsumer<UserCreatedEvent>, IEventConsumer<UserUpdatedEvent>, IEventConsumer<RoleDeletedEvent>
 {
-    private bool _twoFactorAuthenticationEnabled;
+    // private bool _twoFactorAuthenticationEnabled;
     private readonly AutoDisposeList<IDisposable> _subscriptionHandle = [];
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private bool _selfEdit;

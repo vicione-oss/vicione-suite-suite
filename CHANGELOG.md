@@ -9,15 +9,19 @@
 ### Changed
 
 - Sdk version compatibility check is now based on semver instead of major.minor version match, allowing more flexibility in module updates
+- Several not (yet) implemented elements were removed from the UI
 
 ### Fixed
 
 - `UserTicketStore`, fixed potential database lock issues by replacing tracked entity operations
+- `BackEndMediator`, local `RequestConsumer<,>` / `InstanceDependentRequestConsumer<,>` invocations now run in a fresh DI scope (matching MassTransit's `UseMessageScope`). Previously the consumer and its scoped dependencies (`DbContext`, `RoleManager`, `UserManager`, ...) were resolved from the caller's scope, which in Blazor Server is the long-lived circuit scope. EF Core's identity map then returned stale entities for reads performed after writes that had gone through the bus (e.g. updated role descriptions appearing unchanged in `GetRolesConsumer`). The exception handler on that short-circuit path is now actually `await`ed, so faulted consumer tasks correctly fall through to `HandleException`.
 - `ModuleManagementControlPanel`, fixed module status display after changes of artifactory sources
 - `NetworkControlPanel`, 
     - fixed display of DHCP lease information after manual renew button click
     - only reload DHCP lease information when DHCP is enabled on reset
 - Artifact repository sources are now cleared on reset
+- Fixed extraction of initials when the user entered first and last name with leading whitespaces in user profile
+- Fixed a caching issue when editing the description of a role
 
 ### Updated
 

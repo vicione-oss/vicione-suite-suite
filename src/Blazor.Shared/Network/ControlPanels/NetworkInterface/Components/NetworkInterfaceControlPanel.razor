@@ -20,7 +20,7 @@
     <SettingsLayout>
         <SettingsGroup Title="@Localization.GeneralControlPanelPage.InterfaceNameSettingsGroupTitle">
             <SettingsField Label="@Localization.GeneralControlPanelPage.InterfaceName">
-                <SettingsFieldTextBox Enabled="false" Value="@State.Name" />
+                @State.Name
             </SettingsField>
         </SettingsGroup>
 
@@ -56,10 +56,11 @@
                         @_testConnectionResult.State
                     </SettingsField>
                 }
-
+                @*
                 <SettingsField Label="@Localization.GeneralControlPanelPage.ResetThisInterfaceToFactoryDefault">
                     <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.ResetVerb" Enabled="false" />
                 </SettingsField>
+                *@
             </ChildContent>
         </SettingsGroup>
 

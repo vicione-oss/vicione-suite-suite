@@ -29,6 +29,7 @@ public class InstanceControlPanelTests
                 .Returns(new GetInstancesResponse([]));
         });
         ctx.Services.AddSingleton(Substitute.For<IBackendLogService>());
+        ctx.Services.AddSingleton(Substitute.For<IClientTimeProvider>());
 
         ctx.SetupControlPanelServices();
         ctx.Services.AddControlPanelInfrastructure();
@@ -56,6 +57,7 @@ public class InstanceControlPanelTests
             mediator = setup.ClientMediator;
         });
         ctx.Services.AddSingleton(Substitute.For<IBackendLogService>());
+        ctx.Services.AddSingleton(Substitute.For<IClientTimeProvider>());
 
         var state = new InstanceControlPanelState() { InstanceId = Guid.NewGuid() };
 

@@ -66,7 +66,7 @@
                     <SettingsFieldTextBox Placeholder="@Labels.RepeatNewPassword" Password="true" @bind-Value="@State.RepeatNewPassword" @bind-Value:after="BeginEdit" />
                 </SettingsField>
             </SettingsGroup>
-
+            @*
             <SettingsGroup Title="@Localization.UserControlPanel.ActiveTwoFactorAuthentification" Expanded="@_twoFactorAuthenticationEnabled">
                 <Expander>
                     <SwitchExpander Enabled="false" @bind-Value="@_twoFactorAuthenticationEnabled" @bind-Value:after="BeginEdit" />
@@ -75,7 +75,7 @@
                 <ChildContent>
                 </ChildContent>
             </SettingsGroup>
-
+            *@
             <SettingsGroup Title="@CommonVocabulary.Company" @bind-Expanded="@State.CompanySettingsGroupExpanded">
                 @*
                 <SettingsField Label="@CommonVocabulary.Company">

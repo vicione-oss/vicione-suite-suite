@@ -1,8 +1,12 @@
 @using Blazor.Shared.Instance.ControlPanels.Instances.Services
+@using Blazor.Shared.Services
 @using Microsoft.Extensions.Logging
+@using ViciOne.Ui.Localization.Extensions
 @using ViciOne.Ui.Localization.Resources
 
 @inherits ControlPanelBase<InstanceControlPanelState>
+
+@inject IClientTimeProvider TimeProvider
 
 <DescriptionBanner Title="@Localization.InstanceControlPanel.DescriptionBannerTitle">
     @Localization.InstanceControlPanel.DescriptionBannerContent
@@ -33,27 +37,27 @@
 
         <SettingsGroup Title="@CommonVocabulary.Information" @bind-Expanded="@State.CommonSettingsGroupExpanded">
             <SettingsField Label="Id">
-                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.Id.ToString()" />
+                @State.InstanceInformation.Id
             </SettingsField>
 
             <SettingsField Label="@TechnicalTerms.SerialNumber">
-                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.SerialNumber" />
+                @State.InstanceInformation.SerialNumber
             </SettingsField>
             
             <SettingsField Label="@TechnicalTerms.SystemType">
-                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.SystemType" />
+                @State.InstanceInformation.SystemType
             </SettingsField>
 
             <SettingsField Label="@TechnicalTerms.Type">
-                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.Type.ToString()" />
+                @State.InstanceInformation.Type
             </SettingsField>
 
             <SettingsField Label="@TechnicalTerms.Version">
-                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.Version" />
+                @State.InstanceInformation.Version
             </SettingsField>
 
             <SettingsField Label="@TechnicalAcronyms.Sdk">
-                <SettingsFieldTextBox Enabled="false" Value="@State.InstanceInformation.SdkVersion" />
+                @State.InstanceInformation.SdkVersion
             </SettingsField>
 
             <SettingsField Label="@Localization.InstanceControlPanel.LogLevel">
@@ -67,36 +71,32 @@
         {
             <SettingsGroup Title="@CommonVocabulary.Status" @bind-Expanded="@State.StatusSettingsGroupExpanded">
                 <SettingsField Label="@Localization.InstanceControlPanel.FirstTimeRegistered">
-                    <SettingsFieldTextBox Enabled="false"
-                                          Value="@State.InstanceInformation.FirstTimeRegistered.ToString()" />
+                    @State.InstanceInformation.FirstTimeRegistered.AdjustToTimeZone(TimeProvider.LocalTimeZone)
                 </SettingsField>
 
                 <SettingsField Label="@Localization.InstanceControlPanel.LastTimeRegistered">
-                    <SettingsFieldTextBox Enabled="false"
-                                          Value="@State.InstanceInformation.LastRegistered.ToString()" />
+                    @State.InstanceInformation.LastRegistered.AdjustToTimeZone(TimeProvider.LocalTimeZone)
                 </SettingsField>
 
                 <SettingsField Label="@CommonVocabulary.Status">
                     @if (State.InstanceInformation.HealthStatus is null)
                     {
-                        <div>@CommonVocabulary.Unknown</div>
+                        @CommonVocabulary.Unknown
                     }
                     else
                     {
-                        <SettingsFieldTextBox Enabled="false"
-                                              Value="@State.InstanceInformation.HealthStatus.ToString()" />
+                        @State.InstanceInformation.HealthStatus
                     }
                 </SettingsField>
 
                 <SettingsField Label="@Localization.InstanceControlPanel.LastHealthCheck">
                     @if (State.InstanceInformation.LastSent is null)
                     {
-                        <div>@CommonVocabulary.Pending</div>
+                        @CommonVocabulary.Pending
                     }
                     else
                     {
-                        <SettingsFieldTextBox Enabled="false"
-                                              Value="@State.InstanceInformation.LastSent.ToString()" />
+                        @State.InstanceInformation.LastSent.AdjustToTimeZone(TimeProvider.LocalTimeZone)
                     }
                 </SettingsField>
             </SettingsGroup>
