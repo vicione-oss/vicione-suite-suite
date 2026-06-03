@@ -15,12 +15,16 @@ internal static class IUserProfileExtensions
 
         public string GetInitialLetters()
         {
-            var initialLetters = $"{userProfile.Firstname?.FirstOrDefault(' ')}{userProfile.Lastname?.FirstOrDefault(' ')}";
+            var initials = string.Concat(
+                new[] { userProfile.Firstname ?? "", userProfile.Lastname ?? "" }
+                    .Select(n => n.TrimStart())
+                    .Where(n => n.Length > 0)
+                    .Select(n => n[0]));
 
-            if (string.IsNullOrWhiteSpace(initialLetters))
-                initialLetters = userProfile.UserName.Value.FirstOrDefault().ToString();
+            if (string.IsNullOrEmpty(initials))
+                initials = userProfile.UserName.Value.TrimStart().FirstOrDefault().ToString();
 
-            return initialLetters.ToUpper(CultureInfo.CurrentUICulture);
+            return initials.ToUpper(CultureInfo.CurrentUICulture);
         }
     }
 }

@@ -64,7 +64,7 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
         where TResponse : class, IResponse
         => HandleInstanceRequest<TRequest, TResponse>(request, instanceId, timeOut, cancellationToken);
 
-    private Task<TResponse> HandleInstanceRequest<TRequest, TResponse>(TRequest request,
+    private async Task<TResponse> HandleInstanceRequest<TRequest, TResponse>(TRequest request,
         Guid instanceId,
         TimeSpan? timeOut,
         CancellationToken cancellationToken = default)
@@ -74,44 +74,78 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
         var localInstanceId = services.GetRequiredService<IInstanceInformationProvider>().Local.Id;
         if (instanceId == localInstanceId)
         {
-            var consumer = services.GetService<InstanceDependentRequestConsumer<TRequest, TResponse>>();
-            if (consumer is not null)
-            {
-                try
-                {
-                    return consumer.Respond(request, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    return consumer.HandleException(request, e, cancellationToken);
-                }
-            }
+            var localResponse = await TryInvokeInScopeAsync<InstanceDependentRequestConsumer<TRequest, TResponse>, TResponse>(
+                (c, ct) => c.Respond(request, ct),
+                (c, ex, ct) => c.HandleException(request, ex, ct),
+                cancellationToken);
+            if (localResponse is not null)
+                return localResponse;
         }
+
         var handle = GetRequestHandle<TRequest, TResponse>(request, instanceId, timeOut, cancellationToken);
-        return GetInstanceResponse<TRequest, TResponse>(handle);
+        return await GetInstanceResponse<TRequest, TResponse>(handle);
     }
-    
-    private Task<TResponse> HandleLocalRequest<TRequest, TResponse>(TRequest request,
+
+    private async Task<TResponse> HandleLocalRequest<TRequest, TResponse>(TRequest request,
         TimeSpan? timeOut,
         CancellationToken cancellationToken = default)
         where TRequest : class, IRequest<TResponse>
         where TResponse : class, IResponse
     {
-        var consumer = services.GetService<RequestConsumer<TRequest, TResponse>>();
-        if (consumer is not null)
-        {
-            try
-            {
-                return consumer.Respond(request, cancellationToken);
-            }
-            catch (Exception e)
-            {
-                
-                return consumer.HandleException(request, e, cancellationToken);
-            }
-        }
+        var localResponse = await TryInvokeInScopeAsync<RequestConsumer<TRequest, TResponse>, TResponse>(
+            (c, ct) => c.Respond(request, ct),
+            (c, ex, ct) => c.HandleException(request, ex, ct),
+            cancellationToken);
+        if (localResponse is not null)
+            return localResponse;
+
         var handle = GetRequestHandle<TRequest, TResponse>(request, timeOut, cancellationToken);
-        return GetResponse<TRequest, TResponse>(handle);
+        return await GetResponse<TRequest, TResponse>(handle);
+    }
+
+    /// <summary>
+    /// Resolves a locally registered consumer of type <typeparamref name="TConsumer"/> from a
+    /// freshly created DI scope and invokes it. Returns <c>null</c> when no such consumer is
+    /// registered (caller should then fall back to the message bus).
+    /// </summary>
+    /// <remarks>
+    /// A new scope is mandatory here: the local request short-circuit (see
+    /// <see cref="HandleLocalRequest{TRequest,TResponse}"/> /
+    /// <see cref="HandleInstanceRequest{TRequest,TResponse}"/>) would otherwise resolve the consumer
+    /// and all of its scoped dependencies (<c>DbContext</c>, <c>RoleManager</c>, <c>UserManager</c>, ...)
+    /// from the caller's scope. In Blazor Server that scope is the long-lived circuit scope, so the
+    /// same <c>DbContext</c> instance would be reused for every request in the user's session.
+    /// <para>
+    /// EF Core's default <c>QueryTrackingBehavior.TrackAll</c> performs identity resolution:
+    /// when a query returns a row whose key is already in the <c>ChangeTracker</c>, the existing
+    /// tracked CLR instance is returned and the freshly read column values are discarded. Combined
+    /// with writes performed by command consumers (which DO run in fresh MassTransit-managed scopes
+    /// via <c>UseMessageScope</c>), this causes the well-known "DB has the new value but the read
+    /// still returns the old one" symptom. Creating a per-call scope here guarantees a fresh
+    /// <c>DbContext</c> and brings the in-process path to parity with the bus-based path.
+    /// </para>
+    /// </remarks>
+    private async Task<TResponse?> TryInvokeInScopeAsync<TConsumer, TResponse>(
+        Func<TConsumer, CancellationToken, Task<TResponse>> respond,
+        Func<TConsumer, Exception, CancellationToken, Task<TResponse>> handleException,
+        CancellationToken cancellationToken)
+        where TConsumer : class
+        where TResponse : class
+    {
+        await using var scope = services.CreateAsyncScope();
+
+        var consumer = scope.ServiceProvider.GetService<TConsumer>();
+        if (consumer is null)
+            return null;
+
+        try
+        {
+            return await respond(consumer, cancellationToken);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            return await handleException(consumer, e, cancellationToken);
+        }
     }
     
     private RequestHandle<TRequest> GetRequestHandle<TRequest, TResponse>(TRequest request,
