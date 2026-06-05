@@ -10,6 +10,7 @@
 
 - Sdk version compatibility check is now based on semver instead of major.minor version match, allowing more flexibility in module updates
 - Several not (yet) implemented elements were removed from the UI
+- Removed the shutdown button from UI as the feature was not supported by the edge S hardware
 
 ### Fixed
 
