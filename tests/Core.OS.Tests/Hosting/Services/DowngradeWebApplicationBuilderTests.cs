@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Services;
@@ -45,8 +45,7 @@ public sealed class DowngradeWebApplicationBuilderTests
             Instance = _options,
             HostManagement = _hostManagementOptions,
             Logger = _logger,
-            SuiteVersion = "1.23.3",
-            PersistedVersion = "1.22.19",
+            DowngradeInformation = new VersionDowngradeInformation("1.23.3", "1.22.19"),
             StopApplicationDelayMs = 5000,
         };
     }
@@ -81,7 +80,7 @@ public sealed class DowngradeWebApplicationBuilderTests
 
         var uri = new Uri($"{host.Urls.First()}");
         var htmlResponse = await client.GetStringAsync(uri, tokenSource.Token);
-        htmlResponse.Should().ContainAll([downgradeOptions.SuiteVersion, downgradeOptions.PersistedVersion]);
+        htmlResponse.Should().ContainAll([downgradeOptions.DowngradeInformation.CurrentVersion, downgradeOptions.DowngradeInformation.DataVersion]);
 
         thread.Join();
         await tokenSource.CancelAsync();

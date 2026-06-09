@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
-using Core.OS;
 using Core.OS.Extensions;
+using Core.OS.Hosting;
+using Core.OS.Hosting.Extensions;
 using Core.OS.Instance.Extensions;
 using Core.OS.Logging;
 using Core.OS.Modules.Extensions;
@@ -16,31 +17,35 @@ builder.Services.Configure<HostOptions>(c =>
 });
 
 builder.Services.ConfigureLogging(builder.Configuration);
+var fileSystem = new FileSystem();
+var instanceOptions = builder.Configuration.GetInstanceOptions();
 
 // on preparation we access http api, load modules etc.
-await CancelableAppPreparation.Execute(async (cancellationToken) =>
-{
-    var instanceOptions = builder.Configuration.GetInstanceOptions();
-    var fileSystem = new FileSystem();
-
-    if (!await builder.PrepareSuite(fileSystem, instanceOptions, Log.Logger, cancellationToken))
+var result = await new SuitePreparationPipeline()
+    // filesystem / workspace preparation
+    .UseInstanceId(fileSystem, instanceOptions)
+    .UseDeviceImageCleanup(fileSystem, instanceOptions, Log.Logger)
+    .UseResetFile(fileSystem, instanceOptions, Log.Logger)
+    .UseRestore(fileSystem, instanceOptions, Log.Logger)
+    .UseVersionDowngradeCheck(fileSystem, instanceOptions, Log.Logger)
+    .UseRecoveryMode(builder, fileSystem, instanceOptions, Log.Logger)
+    // host / DI setup — only reached when all previous preparation steps succeed
+    .Use(async ct =>
     {
-        // if preparation fails suite startup ends here    
-        return;
-    }
+        builder.Host.UseSerilog();
 
-    builder.Host.UseSerilog();
+        // validate appsettings, env vars etc.
+        builder.Services.ConfigureAndValidateOptions(instanceOptions);
 
-    // validate appsettings, env vars etc.
-    builder.Services.ConfigureAndValidateOptions(instanceOptions);
+        builder.Services.AddSuiteOpenTelemetry(builder.Configuration, instanceOptions, fileSystem);
 
-    builder.Services.AddSuiteOpenTelemetry(builder.Configuration, instanceOptions, fileSystem);
+        // modules need to be (down-)loaded before server starts
+        var moduleHost = await builder.AddModuleHost(fileSystem, instanceOptions, ct);
 
-    // modules need to be (down-)loaded before server starts
-    var moduleHost = await builder.AddModuleHost(fileSystem, instanceOptions, cancellationToken);
+        builder.Services.AddServices(fileSystem, builder.Configuration, moduleHost);
+    })
+    .RunWithProcessSignalsAsync();
 
-    builder.Services.AddServices(fileSystem, builder.Configuration, moduleHost);
-});
 
 // build host and validate options
-await builder.TryRunCoreOs(args);
+await builder.TryRunCoreOs(fileSystem, result, args);
