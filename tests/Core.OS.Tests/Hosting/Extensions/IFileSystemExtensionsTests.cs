@@ -1,23 +1,23 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
 using Core.OS.Hosting;
+using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Extensions;
 using Core.OS.Instance;
-using Microsoft.AspNetCore.Builder;
 using NSubstitute;
 using Sdk.Instance;
 using Xunit;
 
 namespace Core.OS.Tests.Hosting.Extensions;
 
-public class WebApplicationBuilderExtensionsTests
+public class IFileSystemExtensionsTests
 {
     private readonly MockFileSystem _fileSystem = new();
     private readonly Serilog.ILogger _logger = Substitute.For<Serilog.ILogger>();
     private readonly InstanceOptions _instanceOptions;
 
-    public WebApplicationBuilderExtensionsTests()
+    public IFileSystemExtensionsTests()
     {
         _instanceOptions = new InstanceOptions
         {
@@ -31,19 +31,16 @@ public class WebApplicationBuilderExtensionsTests
         _fileSystem.AddDirectory(_instanceOptions.HomeDirectory);
     }
 
-    public class DetectVersionDowngrade : WebApplicationBuilderExtensionsTests
+    public class DetectVersionDowngrade : IFileSystemExtensionsTests
     {
         [Fact]
         public async Task Should_ensure_data_version_gets_persisted()
         {
-            // Arrange
-            var builder = WebApplication.CreateBuilder();
-
-            // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            // Arrange / Act
+            var result = await _fileSystem.DetectVersionDowngrade(_instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            detected.Should().BeFalse();
+            result.Should().BeNull();
 
             var dataVersionFilePath = _fileSystem.GetLocalDataVersionFilePath(_instanceOptions);
             _fileSystem.File.Exists(dataVersionFilePath).Should().BeTrue();
@@ -51,88 +48,84 @@ public class WebApplicationBuilderExtensionsTests
         }
 
         [Fact]
-        public async Task Should_return_false_for_matching_versions()
+        public async Task Should_return_null_for_matching_versions()
         {
             // Arrange
-            var builder = WebApplication.CreateBuilder();
             var version = GetSuiteVersionIncrement();
             await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
 
             // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            var result = await _fileSystem.DetectVersionDowngrade(_instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            detected.Should().BeFalse();
+            result.Should().BeNull();
             _fileSystem.File.Exists(_fileSystem.GetLocalDataVersionFilePath(_instanceOptions)).Should().BeTrue();
         }
 
         [Fact]
-        public async Task Should_return_false_for_older_versions()
+        public async Task Should_return_null_for_suite_version_higher_than_persisted()
         {
             // Arrange
-            var builder = WebApplication.CreateBuilder();
             var version = GetSuiteVersionIncrement(incrementMinor: -1);
             await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
 
             // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            var result = await _fileSystem.DetectVersionDowngrade(_instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            detected.Should().BeFalse();
-            _fileSystem.File.Exists(_fileSystem.GetLocalDataVersionFilePath(_instanceOptions)).Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task Should_return_true_if_dataversion_is_lower_than_suite_version()
-        {
-            // Arrange
-            var builder = WebApplication.CreateBuilder();
-            var version = GetSuiteVersionIncrement(incrementMinor: -1);
-            await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
-
-            // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
-
-            // Assert
-            detected.Should().BeFalse();
+            result.Should().BeNull();
             var dataVersionFilePath = _fileSystem.GetLocalDataVersionFilePath(_instanceOptions);
             _fileSystem.File.Exists(dataVersionFilePath).Should().BeTrue();
             (await _fileSystem.File.ReadAllTextAsync(dataVersionFilePath, TestContext.Current.CancellationToken)).Should().Be(SuiteVersionUtils.GetSuiteVersion());
         }
 
         [Fact]
-        public async Task Should_return_false_on_empty_dataversion_and_log_error()
+        public async Task Should_return_null_for_patch_downgrade()
         {
             // Arrange
-            var builder = WebApplication.CreateBuilder();
+            var version = GetSuiteVersionIncrement(incrementPatch: 1);
+            await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
+
+            // Act
+            var result = await _fileSystem.DetectVersionDowngrade(_instanceOptions, _logger, TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().BeNull();
+            var dataVersionFilePath = _fileSystem.GetLocalDataVersionFilePath(_instanceOptions);
+            _fileSystem.File.Exists(dataVersionFilePath).Should().BeTrue();
+            (await _fileSystem.File.ReadAllTextAsync(dataVersionFilePath, TestContext.Current.CancellationToken)).Should().Be(SuiteVersionUtils.GetSuiteVersion());
+        }
+
+        [Fact]
+        public async Task Should_throw_on_empty_data_version_and_restore_current_version()
+        {
+            // Arrange
             await _fileSystem.WriteDataVersionFile(_instanceOptions, string.Empty, TestContext.Current.CancellationToken);
 
             // Act
-            await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            var act = () => _fileSystem.DetectVersionDowngrade(_instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            var dataVersionFilePath = _fileSystem.GetLocalDataVersionFilePath(_instanceOptions);
-            _fileSystem.File.Exists(dataVersionFilePath).Should().BeTrue();
-            (await _fileSystem.File.ReadAllTextAsync(dataVersionFilePath, TestContext.Current.CancellationToken)).Should().Be(SuiteVersionUtils.GetSuiteVersion());
+            await act.Should().ThrowAsync<InvalidOperationException>();
 
-            _logger.Received().Error(Arg.Any<InvalidOperationException>(), "Error on detecting downgrade");
+            var dataVersionFilePath = _fileSystem.GetLocalDataVersionFilePath(_instanceOptions);
+            (await _fileSystem.File.ReadAllTextAsync(dataVersionFilePath, TestContext.Current.CancellationToken)).Should().Be(SuiteVersionUtils.GetSuiteVersion());
         }
 
-
         [Fact]
-        public async Task Should_run_minimal_host_on_downgrade_detected()
+        public async Task Should_return_downgrade_information_when_persisted_version_is_higher()
         {
             // Arrange
-            var builder = WebApplication.CreateBuilder();
             var version = GetSuiteVersionIncrement(incrementMinor: 1);
             await _fileSystem.WriteDataVersionFile(_instanceOptions, version, TestContext.Current.CancellationToken);
-            using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
             // Act
-            var detected = await builder.DetectVersionDowngrade(_fileSystem, _instanceOptions, _logger, cancel.Token);
+            var result = await _fileSystem.DetectVersionDowngrade(_instanceOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            detected.Should().BeTrue();
+            result.Should().BeOfType<VersionDowngradeInformation>();
+            result!.CurrentVersion.Should().Be(SuiteVersionUtils.GetSuiteVersion());
+            result.DataVersion.Should().Be(version);
             _fileSystem.File.Exists(_fileSystem.GetLocalDataVersionFilePath(_instanceOptions)).Should().BeTrue();
         }
 

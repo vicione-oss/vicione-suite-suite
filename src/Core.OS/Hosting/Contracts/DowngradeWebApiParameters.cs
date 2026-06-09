@@ -1,4 +1,4 @@
-﻿using Core.OS.Instance;
+using Core.OS.Instance;
 using Core.Shared.HostManagement;
 
 namespace Core.OS.Hosting.Contracts;
@@ -11,9 +11,7 @@ internal record DowngradeWebApiParameters
 
     public required Serilog.ILogger Logger { get; init; }
 
-    public string SuiteVersion { get; init; } = string.Empty;
-
-    public string PersistedVersion { get; init; } = string.Empty;
+    public required VersionDowngradeInformation DowngradeInformation { get; init; }
 
     public int StopApplicationDelayMs { get; init; } = 2000;
 }

@@ -26,13 +26,12 @@ internal static class DowngradeWebApiHostBuilder
         host.UseHttpsRedirection();
 
         // we have a page with to options (links -> reset or exit)
-        host.MapGet("/", () => CreateVersionDowngradeDetectedHtml(options.SuiteVersion, options.PersistedVersion));
+        host.MapGet("/", () => CreateVersionDowngradeDetectedHtml(options.DowngradeInformation.CurrentVersion, options.DowngradeInformation.DataVersion));
         host.MapGet("/reset", (HttpContext _) => DowngradeReset(host.Services));
         host.MapGet("/exit", (HttpContext _) => DowngradeExit(host.Services));
 
         StopDelay = options.StopApplicationDelayMs;
 
-        // run the host what will stop the program workflow here
         return host;
     }
 
