@@ -158,6 +158,9 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
             .FirstOrDefault();
     }
 
+    public IReadOnlyCollection<string> GetSourceKeys()
+        => [.. artifactRepository.GetSourceKeys()];
+
     private static string GetMetadataNameFilter(Version? sdkVersion)
     {
         if (sdkVersion is null)

@@ -1,5 +1,4 @@
 using Core.Module.Options;
-using Core.Module.Utils;
 using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
 using Core.Shared.Modules;
@@ -47,9 +46,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
 
         if (options.IncludeAvailable)
         {
-            var sdkVersion = ModuleHelpers.GetSdkAssemblyVersion();
-
-            availableMetadata = await _metadataCache.GetAvailableModuleMetadata(sdkVersion, options.ForceRefresh, cancellationToken);
+            availableMetadata = await _metadataCache.GetAvailableModuleMetadata(options.ForceRefresh, cancellationToken);
         }
 
         // we merge the versions of the metadata to bundles and order them by the published date from metadata

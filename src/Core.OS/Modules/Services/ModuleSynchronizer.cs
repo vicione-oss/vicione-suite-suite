@@ -100,9 +100,6 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
         if (metadata is null)
             throw new InvalidOperationException($"Can't find module metadata for '{package.Name}' version '{package.Version}'");
 
-        // todo - if could be sure that only major version changes include breaking changes
-        // we could assume that 0.17.1 sdk fits to module requirement 0.17.0 for example
-        // todo - we could also use the metadata if it's available for all modules
         ModuleVersionValidator.ValidateSdkCompatibility(options.SdkVersion, metadata.MinSuiteSdkVersion);
     }
 

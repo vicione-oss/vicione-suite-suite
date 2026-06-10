@@ -7,6 +7,16 @@ public static class ModuleVersionValidator
 {
     private const string Sdk = "ViciOne.Suite.Sdk";
 
+    /// <summary>
+    /// Validates that a module's SDK version reference is compatible with the running SDK version.
+    /// Compatibility requires the same major version and the module must not reference a newer minor or patch version.
+    /// </summary>
+    /// <param name="sdkVersion">The version of the running SDK.</param>
+    /// <param name="moduleSdkVersionString">The SDK version string declared by the module.</param>
+    /// <exception cref="SdkIncompatibilityException">
+    /// Thrown when <paramref name="moduleSdkVersionString"/> is not a valid semantic version string,
+    /// when the major versions differ, or when the module targets a newer SDK than the one running.
+    /// </exception>
     public static void ValidateSdkCompatibility(SemVersion sdkVersion, string moduleSdkVersionString)
     {
         if (!SemVersion.TryParse(moduleSdkVersionString, out var moduleSdkVersion))
@@ -22,6 +32,16 @@ public static class ModuleVersionValidator
             throw new SdkIncompatibilityException($"Downgrade module {Sdk} to {sdkVersion.Major}.{sdkVersion.Minor}.0 or lower.");
     }
 
+    /// <summary>
+    /// Validates that a module's SDK version reference is compatible with the running SDK version.
+    /// Compatibility requires the same major version and the module must not reference a newer minor or patch version.
+    /// </summary>
+    /// <param name="sdkVersionString">The version string of the running SDK.</param>
+    /// <param name="moduleSdkVersionString">The SDK version string declared by the module.</param>
+    /// <exception cref="SdkIncompatibilityException">
+    /// Thrown when either version string is not a valid semantic version string,
+    /// when the major versions differ, or when the module targets a newer SDK than the one running.
+    /// </exception>
     public static void ValidateSdkCompatibility(string sdkVersionString, string moduleSdkVersionString)
     {
         if (!SemVersion.TryParse(sdkVersionString, out var sdkVersion))
