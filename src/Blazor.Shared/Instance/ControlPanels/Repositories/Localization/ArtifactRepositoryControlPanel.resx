@@ -123,9 +123,6 @@
   <data name="DescriptionBannerContent" xml:space="preserve">
     <value>Details of the update source you are currently editing. If you change one of the editable values you need to confirm or cancel your changes to apply it to the system.</value>
   </data>
-  <data name="Endpoint" xml:space="preserve">
-    <value>Endpoint</value>
-  </data>
   <data name="TokenEndpoint" xml:space="preserve">
     <value>Token Endpoint</value>
   </data>
@@ -134,9 +131,6 @@
   </data>
   <data name="RefreshToken" xml:space="preserve">
     <value>Refresh Token</value>
-  </data>
-  <data name="Active" xml:space="preserve">
-    <value>Active</value>
   </data>
   <data name="EndpointRequired" xml:space="preserve">
     <value>Repository endpoint is required</value>
@@ -149,8 +143,5 @@
   </data>
   <data name="TokenEndpointMustBeAbsoluteUri" xml:space="preserve">
     <value>Token endpoint must be an absolute URI</value>
-  </data>
-  <data name="Source" xml:space="preserve">
-    <value>Source</value>
   </data>
 </root>

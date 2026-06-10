@@ -148,7 +148,4 @@ If both of the system’s network interfaces are manually configured with IP add
   <data name="VlanUsageHint" xml:space="preserve">
     <value>If VLAN is enabled for a network interface (lan1 or lan2), the IP configuration is assigned exclusively to the corresponding VLAN interface. The underlying network interface no longer receives its own IP address and is no longer separately accessible. Untagged Ethernet packets can no longer be used for IP communication via this network interface. Communication is only possible via packets with the configured VLAN ID.</value>
   </data>
-  <data name="Note" xml:space="preserve">
-    <value>Note</value>
-  </data>
 </root>

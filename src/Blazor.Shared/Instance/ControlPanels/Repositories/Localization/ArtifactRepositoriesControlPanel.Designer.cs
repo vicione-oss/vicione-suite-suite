@@ -80,29 +80,11 @@ namespace Blazor.Shared.Instance.ControlPanels.Repositories.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Endpoint.
-        /// </summary>
-        internal static string Endpoint {
-            get {
-                return ResourceManager.GetString("Endpoint", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Source is active.
         /// </summary>
         internal static string SourceEnabled {
             get {
                 return ResourceManager.GetString("SourceEnabled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Sources.
-        /// </summary>
-        internal static string SourcePlural {
-            get {
-                return ResourceManager.GetString("SourcePlural", resourceCulture);
             }
         }
         

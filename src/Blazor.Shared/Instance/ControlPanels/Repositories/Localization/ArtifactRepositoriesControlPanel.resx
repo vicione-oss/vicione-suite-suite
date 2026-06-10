@@ -123,16 +123,10 @@
   <data name="DescriptionBannerContent" xml:space="preserve">
     <value>View and manage all update sources configured on the system used for artifact downloads.</value>
   </data>
-  <data name="Endpoint" xml:space="preserve">
-    <value>Endpoint</value>
-  </data>
   <data name="SourceEnabled" xml:space="preserve">
     <value>Source is active</value>
   </data>
   <data name="TokenInvalid" xml:space="preserve">
     <value>The API token no longer valid and must be updated</value>
-  </data>
-  <data name="SourcePlural" xml:space="preserve">
-    <value>Sources</value>
   </data>
 </root>

@@ -123,16 +123,10 @@
   <data name="DescriptionBannerContent" xml:space="preserve">
     <value>Anzeigen und Verwalten aller auf dem System konfigurierten Update-Quellen, die für Artefakt-Downloads verwendet werden.</value>
   </data>
-  <data name="Endpoint" xml:space="preserve">
-    <value>Endpunkt</value>
-  </data>
   <data name="SourceEnabled" xml:space="preserve">
     <value>Quelle ist aktiviert</value>
   </data>
   <data name="TokenInvalid" xml:space="preserve">
     <value>Das Sicherheitstoken ist nicht mehr gültig und muss erneuert werden</value>
-  </data>
-  <data name="SourcePlural" xml:space="preserve">
-    <value>Quellen</value>
   </data>
 </root>

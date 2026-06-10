@@ -1,8 +1,7 @@
-@using ViciOne.Ui.Blazor.Components.Dialog.Components
 @using ViciOne.Ui.Localization.Resources
 
 <OkDialog CssClass="error-dialog"
-          HeaderText="@Localization.ErrorDialog.HeaderText"
+          HeaderText="@CommonPhrases.AnErrorOccurred"
           OnConfirm="@OnConfirm"
           @bind-Visible="@Visible"
           @bind-Visible:after="OkDialogChanged">

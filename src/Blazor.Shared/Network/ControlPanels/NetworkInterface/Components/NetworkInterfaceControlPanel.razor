@@ -213,7 +213,7 @@
 
             <ChildContent>
                 <SettingsInformation>
-                    <b>@Localization.TcpIpControlPanelPage.Note</b>: @Localization.TcpIpControlPanelPage.VlanUsageHint
+                    <b>@CommonVocabulary.Hint</b>: @Localization.TcpIpControlPanelPage.VlanUsageHint
                 </SettingsInformation>
                 <SettingsField Label="@Constants.VLanIdLabel">
                     <SettingsFieldTextBox Placeholder="@Constants.VLanIdLabel" Subline="@Localization.GeneralControlPanelPage.VLanIdSettingsFieldSubline" @bind-Value="State.VLanId" @bind-Value:after="BeginEdit" />
@@ -232,7 +232,7 @@
     </ConfirmCancelDialog>
 </ControlPanelPage>
 
-<ControlPanelPage Title="@Localization.HardwareControlPanelPage.Hardware">
+<ControlPanelPage Title="@TechnicalTerms.Hardware">
     <DescriptionBanner Title="@Localization.HardwareControlPanelPage.DescriptionBannerTitle"
                        IconCssClass="@_cluster1IconCssClasses">
 

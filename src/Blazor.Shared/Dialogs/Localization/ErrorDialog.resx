@@ -122,7 +122,4 @@
 Reload the page and retry your latest action.
 If the error persists, please contact your administrator.</value>
   </data>
-  <data name="HeaderText" xml:space="preserve">
-    <value>An error occurred!</value>
-  </data>
 </root>
