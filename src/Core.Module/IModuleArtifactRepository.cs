@@ -101,4 +101,10 @@ public interface IModuleArtifactRepository
         Version sdkVersion,
         string packageName,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Returns the keys identifying the currently configured artifact sources. A change in the returned set
+    /// indicates that sources were added or removed and any cached artifacts should be invalidated.
+    /// </summary>
+    IReadOnlyCollection<string> GetSourceKeys();
 }

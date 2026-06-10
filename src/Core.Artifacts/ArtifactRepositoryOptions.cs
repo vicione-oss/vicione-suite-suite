@@ -23,13 +23,6 @@ public class ArtifactRepositoryOptions
     public List<string> PublicKeys { get; set; } = [];
 
     /// <summary>
-    /// Gets or sets the lifetime of the artifact package cache, in milliseconds.
-    /// After this period, the cache is considered invalid and will be refreshed upon the next request.
-    /// </summary>
-    /// <remarks>Default is 600,000 ms (10 minutes).</remarks>
-    public long PackageCacheLifetimeMs { get; set; } = 600_000;
-
-    /// <summary>
     /// Gets or set the interval in days for refreshing the source tokens. 
     /// After this period, the tokens will be refreshed upon the next request.
     /// </summary>

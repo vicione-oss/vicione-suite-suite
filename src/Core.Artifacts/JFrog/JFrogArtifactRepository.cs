@@ -321,7 +321,7 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
             BaseAddress = uriBuilder.Uri;
 
             // Host:Port is not enough we need to take the whole uri + port to have a difference
-            SourceKey = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{uriBuilder.Uri.AbsoluteUri}:{uriBuilder.Port}"));
+            SourceKey = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{uriBuilder.Uri.AbsoluteUri}:{uriBuilder.Port}:{RepositoryKey}"));
         }
     }
 

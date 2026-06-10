@@ -88,8 +88,7 @@ public class ArtifactRepositoryStoreTests
             {
                 { "ModuleApi:Endpoint", "https://system.update.ifm/" },
                 { "ModuleApi:UserName", "wildman" },
-                { "ModuleApi:Password", "pa$$w0rd" },
-                { "ModuleApi:PackageCacheLifetimeMs", "3000" }
+                { "ModuleApi:Password", "pa$$w0rd" }
             });
 
             // Act
@@ -119,7 +118,6 @@ public class ArtifactRepositoryStoreTests
                 { "ModuleApi:Endpoint", migrateEndpoint },
                 { "ModuleApi:UserName", "wildman" },
                 { "ModuleApi:Password", "pa$$w0rd" },
-                { "ModuleApi:PackageCacheLifetimeMs", "3000" },
 
                 // compatibility v1.1.0
                 { "ArtifactRepository:Sources:0:Endpoint", currentEndpoint },

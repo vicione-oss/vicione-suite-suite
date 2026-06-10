@@ -175,8 +175,6 @@ public class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<InstanceOp
                     Password = obsoleteOptions.Password,
                 });
             }
-
-            options.PackageCacheLifetimeMs = obsoleteOptions.PackageCacheLifetimeMs;
         }
 
         return options;

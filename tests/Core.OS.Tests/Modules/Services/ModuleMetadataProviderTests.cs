@@ -77,7 +77,7 @@ public class ModuleMetadataProviderTests
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var getOptions = new GetModuleMetadataOptions(false, true);
-            _artifactCache.GetAvailableModuleMetadata(null, false, Arg.Any<CancellationToken>()).Returns([]);
+            _artifactCache.GetAvailableModuleMetadata(false, Arg.Any<CancellationToken>()).Returns([]);
 
             var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
 
@@ -101,7 +101,7 @@ public class ModuleMetadataProviderTests
             var metadata = await cache.GetModuleMetadata(getOptions, TestContext.Current.CancellationToken);
 
             // Assert
-            await _artifactCache.Received(1).GetAvailableModuleMetadata(Arg.Any<Version>(), getOptions.ForceRefresh, Arg.Any<CancellationToken>());
+            await _artifactCache.Received(1).GetAvailableModuleMetadata(getOptions.ForceRefresh, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -245,7 +245,7 @@ public class ModuleMetadataProviderTests
             };
 
             _moduleManager.GetManifestModules().Returns(installed);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
 
             // Act        
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
@@ -296,7 +296,7 @@ public class ModuleMetadataProviderTests
             };
 
             _moduleManager.GetManifestModules().Returns(installed);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
 
             // Act        
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
@@ -347,7 +347,7 @@ public class ModuleMetadataProviderTests
             };
 
             _moduleManager.GetManifestModules().Returns(installed);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
 
             // Act        
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
@@ -392,7 +392,7 @@ public class ModuleMetadataProviderTests
                 },
             };
 
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
             _moduleManager.GetManifestModules().Returns(installed);
 
             // Act        
@@ -431,7 +431,7 @@ public class ModuleMetadataProviderTests
             await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
 
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns([]);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns([]);
 
             // Act
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, false), TestContext.Current.CancellationToken);
@@ -448,7 +448,7 @@ public class ModuleMetadataProviderTests
             var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
             var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
 
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
 
             // Act        
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(false, true), TestContext.Current.CancellationToken);
@@ -470,7 +470,7 @@ public class ModuleMetadataProviderTests
             var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
 
             _moduleManager.GetManifestModules().Returns([]);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
 
             // Act        
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
@@ -498,7 +498,7 @@ public class ModuleMetadataProviderTests
                 .First();
 
             _moduleManager.GetManifestModules().Returns([installed]);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
 
             // Act        
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
@@ -536,7 +536,7 @@ public class ModuleMetadataProviderTests
             };
 
             _moduleManager.GetManifestModules().Returns(installed);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
 
             // Act
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
@@ -575,7 +575,7 @@ public class ModuleMetadataProviderTests
             };
 
             _moduleManager.GetManifestModules().Returns(installed);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
 
             // Act
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
@@ -613,7 +613,7 @@ public class ModuleMetadataProviderTests
             };
 
             _moduleManager.GetManifestModules().Returns(installed);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
 
             // Act
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
@@ -651,7 +651,7 @@ public class ModuleMetadataProviderTests
             };
 
             _moduleManager.GetManifestModules().Returns(installed);
-            _artifactCache.GetAvailableModuleMetadata(Arg.Any<Version>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
 
             // Act
             var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
