@@ -123,9 +123,6 @@
   <data name="DescriptionBannerContent" xml:space="preserve">
     <value>Details der aktuell bearbeiteten Quelle. Änderungen an editierbaren Werten müssen bestätigt werden, um sie auf das System anzuwenden.</value>
   </data>
-  <data name="Endpoint" xml:space="preserve">
-    <value>Endpunkt</value>
-  </data>
   <data name="TokenEndpoint" xml:space="preserve">
     <value>Token-Endpunkt</value>
   </data>
@@ -134,9 +131,6 @@
   </data>
   <data name="RefreshToken" xml:space="preserve">
     <value>Token erneuern</value>
-  </data>
-  <data name="Active" xml:space="preserve">
-    <value>Aktiv</value>
   </data>
   <data name="EndpointRequired" xml:space="preserve">
     <value>Endpunkt ist erforderlich</value>
@@ -149,8 +143,5 @@
   </data>
   <data name="TokenEndpointMustBeAbsoluteUri" xml:space="preserve">
     <value>Token-Endpunkt muss eine absolute URI sein</value>
-  </data>
-  <data name="Source" xml:space="preserve">
-    <value>Quelle</value>
   </data>
 </root>

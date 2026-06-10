@@ -1,5 +1,4 @@
 @using Blazor.Shared.Instance.ControlPanels.Repositories.Services
-@using Blazor.Shared.Settings.Components
 @using ViciOne.Ui.Localization.Resources
 
 @inherits ControlPanelBase<ArtifactRepositoryControlPanelState>
@@ -18,13 +17,13 @@
                                       @bind-Value:after="BeginEdit" />
             </SettingsField>
 
-            <SettingsField Label="@Localization.ArtifactRepositoryControlPanel.Active">
+            <SettingsField Label="@CommonVocabulary.Active">
                 <SettingsFieldSwitch @bind-Value="@State.Repository.Enabled"
                                      @bind-Value:after="BeginEdit" />
             </SettingsField>
 
-            <SettingsField Label="@Localization.ArtifactRepositoryControlPanel.Endpoint">
-                <SettingsFieldTextBox Placeholder="@Localization.ArtifactRepositoryControlPanel.Endpoint"
+            <SettingsField Label="@TechnicalTerms.Endpoint">
+                <SettingsFieldTextBox Placeholder="@TechnicalTerms.Endpoint"
                                       @bind-Value="@State.Repository.Endpoint"
                                       @bind-Value:after="BeginEdit" />
             </SettingsField>

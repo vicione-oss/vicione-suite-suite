@@ -135,15 +135,6 @@ namespace Blazor.Shared.Network.ControlPanels.NetworkInterface.Components.Locali
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Note.
-        /// </summary>
-        internal static string Note {
-            get {
-                return ResourceManager.GetString("Note", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to You have not configured a DNS server. As a result, some important functions of this application may not work at all or may not work properly. Do you want to continue?.
         /// </summary>
         internal static string SwitchToManualConfigurationWarningDialogBody {

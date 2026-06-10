@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -121,8 +121,5 @@
     <value>Ein Fehler ist aufgetreten.
 Laden Sie die Seite erneut und versuchen Sie Ihre letze Aktion zu wiederholen.
 Sollte der Fehler weiterhin bestehen kontaktieren Sie bitte Ihren Administrator.</value>
-  </data>
-  <data name="HeaderText" xml:space="preserve">
-    <value>Ein Fehler ist aufgetreten!</value>
   </data>
 </root>
