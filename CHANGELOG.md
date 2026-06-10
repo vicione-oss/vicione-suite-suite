@@ -11,6 +11,7 @@
 - Sdk version compatibility check is now based on semver instead of major.minor version match, allowing more flexibility in module updates
 - Several not (yet) implemented elements were removed from the UI
 - Removed the shutdown button from UI as the feature was not supported by the edge S hardware
+- Replaced `DxTagBox` with `ViciOne.Ui.Blazor.Components.TagBox`
 
 ### Fixed
 
@@ -34,6 +35,7 @@
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.14.0`
 - `ViciOne.Ui.Design` package, update version to `2.1.0`
 - `ViciOne.Ui.Localization` packages, update to version `3.4.0`
+- `ViciOne.Ui.MonochromeIcons` packages, update version to `4.11.0`
 
 ## 1.2.1 - 2026-05-12
 

@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Connections.Contracts;
+using Blazor.Shared.Connections.Contracts;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 
@@ -34,7 +34,6 @@ public sealed class ConnectionControlPanelState : ControlPanelState
     internal IEnumerable<string> EditModelTagTexts { get; set; } = [];
 
     internal List<string> AvailableTagTexts { get; set; } = [];
-    internal List<string> TagValues { get; set; } = [];
 
     internal List<Tag> AvailableTags { get; set; } = [];
 }

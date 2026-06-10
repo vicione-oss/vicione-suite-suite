@@ -1,7 +1,6 @@
-@using Blazor.Shared.Connections.Services
 @using Blazor.Shared.Connections.ControlPanels.Connections.Services
-﻿@using DevExpress.Blazor
 @using Sdk.Client.Connections
+@using ViciOne.Ui.Blazor.Components.TagBox
 @using ViciOne.Ui.Localization.Resources
 @using Blazor.Shared.Connections.Components
 @using Sdk.Client.Components.Settings.Expanders
@@ -32,15 +31,12 @@
 
             <SettingsField Label="@TechnicalTerms.TagPlural">
                 <div class="suite-tag-edit-box">
-                    <DxTagBox AllowCustomTags="true"
-                              Data="@State.AvailableTagTexts"
-                              Values="@State.TagValues"
-                              Tags="@State.EditModelTagTexts"
-                              TagsExpression="@(() => State.EditModelTagTexts)"
-                              TagsChanged="@TagsChanged"
-                              HideSelectedItems="false"
-                              Enabled="@(!State.EditConnectionModel.Connection.Managed)"
-                              DropDownWidthMode="DropDownWidthMode.EditorWidth" />
+                    <TagBox AllowCustomTags="true"
+                            AvailableTags="@State.AvailableTagTexts"
+                            Tags="@State.EditModelTagTexts"
+                            TagsChanged="@TagsChanged"
+                            HideSelectedItems="false"
+                            Enabled="@(!State.EditConnectionModel.Connection.Managed)" />
                 </div>
             </SettingsField>
             

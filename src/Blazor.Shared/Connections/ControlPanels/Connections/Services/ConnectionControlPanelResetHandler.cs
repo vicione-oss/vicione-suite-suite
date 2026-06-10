@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Connections.Contracts;
+using Blazor.Shared.Connections.Contracts;
 using Blazor.Shared.Connections.Factories;
 using Blazor.Shared.Connections.Services;
 using Sdk.Client.ControlPanels.Services;
@@ -26,10 +26,10 @@ internal sealed class ConnectionControlPanelResetHandler(ISuiteConnectionService
                 state.EditConnectionModel = EditConnectionModelFactory.CreateNew(connectionTypeRegistry);
             }
 
-            state.TagValues = [.. state.EditConnectionModel.Tags.Select(t => t.Text)];
-
             state.AvailableTags = await suiteConnectionService.GetTags(cancellationToken);
             state.AvailableTagTexts = [.. state.AvailableTags.Select(t => t.Text)];
+
+            state.EditModelTagTexts = state.EditConnectionModel.Tags.Select(t => t.Text);
         }
         finally
         {
