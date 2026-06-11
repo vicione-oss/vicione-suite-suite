@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Compression;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
@@ -39,18 +39,18 @@ public static class BackupReader
     public static ZipArchiveEntry GetSystemModuleEntry(ZipArchive archive)
         => archive.Entries.First(k => k.Name == Shared.Constants.SystemModuleId);
 
-    public static void ExtractSystemModuleTo(IFileSystem fileSystem, string backupFilePath, string destinationPath)
+    public static async Task ExtractSystemModuleTo(IFileSystem fileSystem, string backupFilePath, string destinationPath, CancellationToken cancellationToken)
     {
         using var archiveStream = fileSystem.FileStream.New(backupFilePath, FileMode.Open, FileAccess.Read);
 
-        ExtractSystemModuleTo(archiveStream, destinationPath);
+        await ExtractSystemModuleTo(archiveStream, destinationPath, cancellationToken);
     }
 
-    public static void ExtractSystemModuleTo(Stream archiveStream, string destinationPath)
+    public static async Task ExtractSystemModuleTo(Stream archiveStream, string destinationPath, CancellationToken cancellationToken)
     {
         using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read, true);
 
-        ExtractSystemModuleTo(archive, destinationPath);
+        await ExtractSystemModuleTo(archive, destinationPath, cancellationToken);
     }
 
     /// <summary>
@@ -60,12 +60,12 @@ public static class BackupReader
     /// </summary>
     /// <param name="archive"></param>
     /// <param name="destinationPath"></param>
-    public static void ExtractSystemModuleTo(ZipArchive archive, string destinationPath)
+    public static async Task ExtractSystemModuleTo(ZipArchive archive, string destinationPath, CancellationToken cancellationToken)
     {
         var moduleEntry = GetSystemModuleEntry(archive);
 
-        using var entryStream = moduleEntry.Open();
-        ZipFile.ExtractToDirectory(entryStream, destinationPath);
+        using var entryStream = await moduleEntry.OpenAsync(cancellationToken);
+        await ZipFile.ExtractToDirectoryAsync(entryStream, destinationPath, cancellationToken);
     }
 
     public static async Task<SystemConfiguration?> GetSystemConfiguration(IFileSystem fileSystem, string backupFilePath, CancellationToken cancellationToken = default)
@@ -105,18 +105,18 @@ public static class BackupReader
     public static IEnumerable<ZipArchiveEntry> GetModuleEntries(ZipArchive archive)
         => archive.Entries.Where(k => k.Name.StartsWith(BackupBuilder.ModuleEntryPrefix, StringComparison.Ordinal));
 
-    public static void ExtractModulesTo(IFileSystem fileSystem, string backupFilePath, string destinationPath, IReadOnlyCollection<string>? moduleNames = null)
+    public static async Task ExtractModulesTo(IFileSystem fileSystem, string backupFilePath, string destinationPath, IReadOnlyCollection<string>? moduleNames = null, CancellationToken cancellationToken = default)
     {
         using var archiveStream = fileSystem.FileStream.New(backupFilePath, FileMode.Open, FileAccess.Read);
 
-        ExtractModulesTo(archiveStream, destinationPath, moduleNames);
+        await ExtractModulesTo(archiveStream, destinationPath, moduleNames, cancellationToken);
     }
 
-    public static void ExtractModulesTo(Stream archiveStream, string destinationPath, IReadOnlyCollection<string>? moduleNames = null)
+    public static async Task ExtractModulesTo(Stream archiveStream, string destinationPath, IReadOnlyCollection<string>? moduleNames = null, CancellationToken cancellationToken = default)
     {
         using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read, true);
 
-        ExtractModulesTo(archive, destinationPath, moduleNames);
+        await ExtractModulesTo(archive, destinationPath, moduleNames, cancellationToken);
     }
 
     /// <summary>
@@ -127,7 +127,7 @@ public static class BackupReader
     /// <param name="archive"></param>
     /// <param name="destinationPath"></param>
     /// <param name="moduleNames"></param>
-    private static void ExtractModulesTo(ZipArchive archive, string destinationPath, IReadOnlyCollection<string>? moduleNames = null)
+    private static async Task ExtractModulesTo(ZipArchive archive, string destinationPath, IReadOnlyCollection<string>? moduleNames = null, CancellationToken cancellationToken = default)
     {
         var moduleEntries = GetModuleEntries(archive);
 
@@ -137,8 +137,8 @@ public static class BackupReader
             if (moduleNames?.Contains(moduleEntry.Name) == true)
                 continue;
 
-            using var entryStream = moduleEntry.Open();
-            ZipFile.ExtractToDirectory(entryStream, destinationPath);
+            using var entryStream = await moduleEntry.OpenAsync(cancellationToken);
+            await ZipFile.ExtractToDirectoryAsync(entryStream, destinationPath, cancellationToken);
         }
     }
 }
