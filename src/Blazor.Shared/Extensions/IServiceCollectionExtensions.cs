@@ -14,6 +14,7 @@ using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Profile.Extensions;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Profile.Extensions;
 using Blazor.Shared.SystemInformation.Extensions;
 using Blazor.Shared.UserInterface.Extensions;
 using Blazor.Shared.UserManagement.Extensions;
@@ -49,7 +50,8 @@ public static class IServiceCollectionExtensions
                 .AddInstanceManagement()
                 .AddModuleManagement()
                 .AddUserManagement()
-                .AddUserInterfaceControlPanels();
+                .AddUserInterfaceControlPanels()
+                .AddProfileManagement();
 
             services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
 

@@ -59,7 +59,7 @@ public class SendResetPasswordLinkConsumerTest
     }
 
     [Fact]
-    public async Task Should_handle_exceptions_and_not_rethrow_them()
+    public async Task Should_fault_when_user_not_found()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -67,10 +67,9 @@ public class SendResetPasswordLinkConsumerTest
         await scope.ServiceProvider.SeedUsersAndRoles(TestContext.Current.CancellationToken);
         await scope.ServiceProvider.SeedTestRole();
 
-        // Act
+        // Act & Assert — ADR-002: exceptions propagate; consumer throws InvalidOperationException for unknown user.
         var command = new SendResetPasswordLink("some non existent id", "callbackLink");
-
-        // Assert
-        await tester.TestCommand<SendResetPasswordLink, SendResetPasswordLinkConsumer>(command);
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => tester.TestCommandFault<SendResetPasswordLink, SendResetPasswordLinkConsumer>(command));
     }
 }

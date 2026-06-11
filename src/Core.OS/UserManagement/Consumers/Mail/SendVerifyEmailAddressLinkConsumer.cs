@@ -24,20 +24,15 @@ public sealed partial class SendVerifyEmailAddressLinkConsumer(
 
         LogConsume(logger, correlationId, userId);
 
-        try
-        {
-            var user = await userManager.GetUserById(userId);
+        // ADR-002: do not swallow exceptions; let MassTransit retry then dead-letter.
+        // Duplicate-email risk on redelivery is acceptable — recipient uses the first valid link.
+        var user = await userManager.GetUserById(userId);
 
-            var message = await CreateMessage(context, user);
+        var message = await CreateMessage(context, user);
 
-            await mailSender.SendMail(message);
+        await mailSender.SendMail(message);
 
-            LogMailSent(logger, correlationId, userId);
-        }
-        catch (Exception e)
-        {
-            LogUnexpectedError(logger, e, correlationId, userId);
-        }
+        LogMailSent(logger, correlationId, userId);
     }
 
     private async Task<Message> CreateMessage(ConsumeContext<SendVerifyEmailAddressLink> context, SuiteUser user)
@@ -77,7 +72,4 @@ public sealed partial class SendVerifyEmailAddressLinkConsumer(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Verification email to '{Name}' correlated by {CorrelationId} was sent.")]
     private static partial void LogMailSent(ILogger<SendVerifyEmailAddressLinkConsumer> logger, Guid correlationId, string name);
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occured on sending verification email to '{Name}' correlated by '{CorrelationId}'.")]
-    private static partial void LogUnexpectedError(ILogger<SendVerifyEmailAddressLinkConsumer> logger, Exception ex, Guid correlationId, string name);
 }

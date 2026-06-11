@@ -1,0 +1,82 @@
+﻿using AwesomeAssertions;
+using Core.Shared.Passkeys.Contracts;
+using Blazor.Shared.Profile.ControlPanels.Passkeys;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.JSInterop;
+using NSubstitute;
+using Xunit;
+using PasskeyConstants = Core.Shared.Passkeys.Constants;
+
+namespace Blazor.Shared.Tests.Settings.Profile.ControlPanels.Passkeys;
+
+public class AddPasskeyControlPanelSaveHandlerTest
+{
+    [Fact]
+    public async Task Should_validate_that_name_is_not_null()
+    {
+        // Arrange
+        var sut = CreateSut();
+
+        // Act
+        var result = await sut.Save(new AddPasskeysControlPanelState()
+            {
+                Name = string.Empty,
+            },
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Message.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task Should_validate_that_name_is_unique()
+    {
+        // Arrange
+        var sut = CreateSut();
+
+        // Act
+        var result = await sut.Save(new AddPasskeysControlPanelState()
+            {
+                ExistingUserPasskeys =
+                [
+                    new PasskeyInfo("id-1", "test")
+                ],
+                Name = "TesT",
+            },
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Message.Should().NotBeNullOrEmpty()
+            .And.ContainEquivalentOf("name");
+    }
+
+    [Fact]
+    public async Task Should_validate_that_name_does_not_exceed_max_length()
+    {
+        // Arrange
+        var sut = CreateSut();
+
+        // Act
+        var result = await sut.Save(new AddPasskeysControlPanelState()
+            {
+                Name = new string('a', PasskeyConstants.MaxPasskeyNameLength + 1),
+            },
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Message.Should().NotBeNullOrEmpty()
+            .And.ContainEquivalentOf("name");
+    }
+
+    private static AddPasskeyControlPanelSaveHandler CreateSut()
+        => new(
+            Substitute.For<AntiforgeryStateProvider>(),
+            Substitute.For<IOptions<AntiforgeryOptions>>(),
+            Substitute.For<IJSRuntime>(),
+            Substitute.For<ILogger<AddPasskeyControlPanelSaveHandler>>()
+        );
+}

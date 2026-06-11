@@ -16,8 +16,8 @@ internal sealed partial class PasswordValidator(IRequiredValidator requiredValid
         public const string SpecialCharacters = "special_characters";
     };
 
-    // https://regex101.com/r/dHwiSq/2
-    [GeneratedRegex(@"(?'" + CaptureGroupNames.UppercaseLetters + "'[A-Z]+)|(?'" + CaptureGroupNames.LowercaseLetters + "'[a-z]+)|(?'" + CaptureGroupNames.Digits + "'[0-9]+)|(?'" + CaptureGroupNames.SpecialCharacters + "'[\\W]+)",
+    // https://regex101.com/r/dHwiSq/3
+    [GeneratedRegex(@"(?'" + CaptureGroupNames.UppercaseLetters + "'[A-Z]+)|(?'" + CaptureGroupNames.LowercaseLetters + "'[a-z]+)|(?'" + CaptureGroupNames.Digits + "'[0-9]+)|(?'" + CaptureGroupNames.SpecialCharacters + "'[\\W_]+)",
         RegexOptions.CultureInvariant)]
 
     private partial Regex Matcher();

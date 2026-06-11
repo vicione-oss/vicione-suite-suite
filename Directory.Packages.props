@@ -35,6 +35,8 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Localization" Version="$(DotNetVersion)" />
+    <PackageVersion Include="Microsoft.FeatureManagement" Version="4.5.0" />
+    <PackageVersion Include="Microsoft.FeatureManagement.AspNetCore" Version="4.5.0" />
     <PackageVersion Include="Microsoft.TypeScript.MSBuild" Version="5.9.3" />
     <PackageVersion Include="minisign-net" Version="1.0.0" />
     <PackageVersion Include="MQTTnet" Version="5.1.0.1559" />

@@ -1,8 +1,16 @@
 ﻿using Core.OS.DbContext;
+using Core.OS.Instance;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Consumers;
+using Core.OS.Instance.Contracts;
+using Core.OS.Instance.Services;
+using Core.OS.Persistence;
+using Core.Shared.Instance.Requests;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Sdk.Backend.Messaging;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
@@ -15,13 +23,24 @@ public class RegisterInstanceConsumerTests : TestWithDbContextSqlite<Application
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
     public RegisterInstanceConsumerTests()
-        => _configureServices = services =>
+    {
+        var mediator = Substitute.For<ISuiteMediator>();
+        mediator.Request<GetInstances, GetInstancesResponse>(Arg.Any<GetInstances>(), Arg.Any<CancellationToken>())
+            .Returns(new GetInstancesResponse([]));
+
+        _configureServices = services =>
         {
             services.AddConsumer<RegisterInstanceConsumer>();
             services.AddSingleton<IApplicationDbContext>(_ => TestDbContext);
             services.AddSingleton(new ModuleContextTypeInformation(Shared.Constants.SystemModuleId, typeof(ApplicationDbContext), typeof(ApplicationDbContext).AssemblyQualifiedName!));
             services.AddRoutingSlipBuilderFactory();
+            services.AddSingleton(Substitute.For<ILocalInstanceInformationProvider>());
+            services.AddSingleton(new InMemoryClusterInformationProvider(Substitute.For<ILogger<InMemoryClusterInformationProvider>>()));
+            services.AddSingleton(mediator);
+            services.AddSingleton(Substitute.For<IInstanceConfigurationRepository>());
+            services.AddSingleton(new SynchronizationState());
         };
+    }
 
     [Fact]
     public async Task Register_standalone_should_be_consumed()

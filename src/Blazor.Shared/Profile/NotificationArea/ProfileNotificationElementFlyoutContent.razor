@@ -1,4 +1,4 @@
-@using Blazor.Shared.Profile.Components
+﻿@using Blazor.Shared.Profile.Components
 @using Blazor.Shared.Profile.Extensions
 @using Blazor.Shared.Profile.NotificationArea.Enums
 @using Blazor.Shared.Profile.NotificationArea.Extensions
@@ -95,7 +95,7 @@
                                           @bind-Value:after="CultureChanged"/>
 
                                 <label class="label">@CommonVocabulary.TimeZone</label>
-                                
+
                                 <ContentLoadingIndication Visible="@_availableTimeZonesLoading" Kind="@LoadingIndicationKind.SpinnerLeft">
                                     <ComboBox CssClass="combo-box"
                                               Items="@_availableTimeZones"
@@ -147,17 +147,15 @@
                                            ThisWeek=@TicketCenterThisWeekProvider.GetThisWeek()
                                            Soon=@TicketCenterSoonProvider.GetSoon() />
                 </div>
-
+                
                 <div class="overflow-area"></div>
             </div>
             <div class="bottom">
-                <div class="add-external-login">
-                    @if (ShowAddExternalLogin)
-                    {
-                        <AddExternalLoginButton ExternalIdProvider="OpenIdConnect" />
-                    }
-                </div>
                 <div class="change-password">
+                    @*
+                    TODO https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2692 
+                    If the user does not have a password yet, they must be able to set one.
+                    *@
                     <LinkButton IconName="@MonochromeIconName.LockActive"
                                 CssClass="change-password-button"
                                 Text="@Localization.ProfileNotificationElementFlyoutContent.ChangePassword"

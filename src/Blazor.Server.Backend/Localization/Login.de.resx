@@ -150,4 +150,16 @@
   <data name="LoginUsingExternalProvider" xml:space="preserve">
     <value>Anmelden mittels</value>
   </data>
+  <data name="LoginWithPasskey" xml:space="preserve">
+    <value>Mit Passkey anmelden</value>
+  </data>
+  <data name="PasskeyLoginFailed" xml:space="preserve">
+    <value>Passkey Anmeldung fehlgeschlagen</value>
+  </data>
+  <data name="ExternalUserCreationFailed" xml:space="preserve">
+    <value>Registrierung fehlgeschlagen. Das Konto existiert bereits oder erfüllt die Systemanforderungen nicht.</value>
+  </data>
+  <data name="ExternalLoginAlreadyInUse" xml:space="preserve">
+    <value>Der externe Zugang ist bereits mit einem lokalen Benutzer verknüpft.</value>
+  </data>
 </root>

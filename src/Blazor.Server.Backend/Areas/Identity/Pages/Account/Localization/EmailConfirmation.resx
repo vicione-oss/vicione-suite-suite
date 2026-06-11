@@ -120,10 +120,10 @@
   <data name="ClickHere" xml:space="preserve">
     <value>If you didn't click here.</value>
   </data>
-  <data name="ConfirmEmail" xml:space="preserve">
+  <data name="ConfirmationIsRequiredText" xml:space="preserve">
     <value>You need to confirm your email address before you can log in.</value>
   </data>
-  <data name="RecievedConfirmationEmail" xml:space="preserve">
+  <data name="HowToConfirmText" xml:space="preserve">
     <value>You should have received an email with a confirmation link when your account was first created.</value>
   </data>
   <data name="Title" xml:space="preserve">

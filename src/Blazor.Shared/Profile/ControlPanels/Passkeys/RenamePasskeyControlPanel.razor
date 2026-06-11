@@ -1,0 +1,26 @@
+@using Blazor.Shared.Services
+@using Blazor.Shared.Profile.Localization
+@using Sdk.Authorization
+@using Sdk.Client.ControlPanels.Attributes
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<RenamePasskeyControlPanelState>
+
+@attribute [ControlPanelCategory<ProfileCategoryDescriptor>]
+@attribute [ControlPanelGroup<SecondaryControlPanelGroupDescriptor>]
+@attribute [ModuleAuthorize(SharedClientModule.ModuleId)]
+
+<DescriptionBanner Title="@RenamePasskey.RenamePasskeyTitle">
+    @RenamePasskey.Description
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@CommonVocabulary.Common">
+        <SettingsField Label="@CommonVocabulary.Name">
+            <SettingsFieldTextBox
+                Placeholder="@CommonVocabulary.Name"
+                @bind-Value="@State.NewName"
+                @bind-Value:after="BeginEdit"/>
+        </SettingsField>
+    </SettingsGroup>
+</SettingsLayout>

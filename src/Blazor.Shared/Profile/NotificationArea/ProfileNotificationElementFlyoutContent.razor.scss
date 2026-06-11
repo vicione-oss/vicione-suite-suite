@@ -9,7 +9,7 @@
 .content-layout {
     display: grid;
     height: 100%;
-    grid-template-rows: 290px auto 105px;
+    grid-template-rows: 290px auto 85px;
     position: absolute;
     width: 100%;
     overflow: hidden;
@@ -277,16 +277,15 @@
     }
 
     .bottom {
+        height: 85px;
+
         div {
             padding-left: 24px;
             margin-bottom: 16px;
         }
-        
-        .add-external-login {
-            height: 23px;
-            
-            button {
-            }
+
+        .change-password {
+            margin-top: 19px;
         }
     }
 }

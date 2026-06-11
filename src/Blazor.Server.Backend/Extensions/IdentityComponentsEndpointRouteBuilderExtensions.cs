@@ -1,47 +1,131 @@
-using Core.Shared.Extensions;
-using Core.Shared.Security;
+using Blazor.Server.Backend.Endpoints;
+using Blazor.Shared;
+using Blazor.Shared.Profile.Models;
 using Core.Shared.UserManagement.Contracts;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.Logging;
+using Microsoft.FeatureManagement.AspNetCore;
 
 namespace Blazor.Server.Backend.Extensions;
 
 internal static class IdentityComponentsEndpointRouteBuilderExtensions
 {
-    public static IEndpointConventionBuilder MapAdditionalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
+    extension(IEndpointRouteBuilder endpoints)
     {
-        var accountGroup = endpoints.MapGroup("/account");
-
-        accountGroup.MapPost("/logout", async (
-                [FromServices] SignInManager<SuiteUser> signInManager) =>
+        public IEndpointRouteBuilder MapPasskeyEndpoints()
         {
-            await signInManager.SignOutAsync();
-            return Results.LocalRedirect(IdentityConstants.LoginRoute);
-        });
+            var accountGroup = endpoints.MapGroup("/account");
 
-        return accountGroup;
-    }
+            accountGroup.MapPost("/passkey-creation-options",
+                    async (
+                        HttpContext context,
+                        [FromServices] UserManager<SuiteUser> userManager,
+                        [FromServices] SignInManager<SuiteUser> signInManager,
+                        [FromServices] IAntiforgery antiforgery) =>
+                    {
+                        await antiforgery.ValidateRequestAsync(context);
 
+                        var user = await userManager.GetUserAsync(context.User);
+                        if (user is null)
+                        {
+                            return Results.NotFound("Unable to load user");
+                        }
 
-    public static IEndpointRouteBuilder MapExternalIdentityEndpoints(this IEndpointRouteBuilder endpoints)
-    {
-        var config = endpoints.ServiceProvider
-            .GetRequiredService<IConfiguration>()
-            .GetExternalIdProviderOptions();
-        if (config == null)
+                        var userId = await userManager.GetUserIdAsync(user);
+                        var userName = await userManager.GetUserNameAsync(user) ?? "User";
+                        var optionsJson = await signInManager.MakePasskeyCreationOptionsAsync(new()
+                        {
+                            Id = userId,
+                            Name = userName,
+                            DisplayName = userName
+                        });
+                        return TypedResults.Content(optionsJson, contentType: "application/json");
+                    })
+                .RequireAuthorization()
+                .WithFeatureGate(Core.Shared.Features.Constants.PasskeyFeatureName);
+
+            accountGroup.MapPost("/passkey-request-options",
+                    async (
+                        HttpContext context,
+                        [FromServices] UserManager<SuiteUser> userManager,
+                        [FromServices] SignInManager<SuiteUser> signInManager,
+                        [FromServices] IAntiforgery antiforgery,
+                        [FromQuery] string? username) =>
+                    {
+                        await antiforgery.ValidateRequestAsync(context);
+
+                        var user = string.IsNullOrEmpty(username) ? null : await userManager.FindByNameAsync(username);
+                        var optionsJson = await signInManager.MakePasskeyRequestOptionsAsync(user);
+                        return TypedResults.Content(optionsJson, contentType: "application/json");
+                    })
+                .WithFeatureGate(Core.Shared.Features.Constants.PasskeyFeatureName);
+
+            accountGroup.MapPost("/add-passkey",
+                    async (HttpContext context,
+                        [FromServices] UserManager<SuiteUser> userManager,
+                        [FromServices] SignInManager<SuiteUser> signInManager,
+                        [FromServices] IAntiforgery antiforgery,
+                        [FromServices] ILogger<BlazorServerBackendModule> logger,
+                        [FromForm] PasskeyInputModel Input) =>
+                    {
+                        await antiforgery.ValidateRequestAsync(context);
+
+                        var user = await userManager.GetUserAsync(context.User);
+                        if (user is null)
+                        {
+                            return Results.NotFound();
+                        }
+
+                        if (string.IsNullOrEmpty(Input.CredentialJson))
+                        {
+                            return Results.BadRequest();
+                        }
+
+                        var passkeys = await userManager.GetPasskeysAsync(user);
+                        if (passkeys.Count >= Core.Shared.Passkeys.Constants.MaxPasskeyCount)
+                        {
+                            return Results.BadRequest();
+                        }
+
+                        var attestationResult
+                            = await signInManager.PerformPasskeyAttestationAsync(Input.CredentialJson);
+                        if (!attestationResult.Succeeded)
+                        {
+                            logger.LogError("Passkey attestation failed: {Error}", attestationResult.Failure.Message);
+                            return Results.BadRequest(attestationResult.Failure.Message);
+                        }
+
+                        attestationResult.Passkey.Name = Input.Name;
+                        var addPasskeyResult
+                            = await userManager.AddOrUpdatePasskeyAsync(user, attestationResult.Passkey);
+
+                        if (addPasskeyResult.Succeeded)
+                            return Results.NoContent();
+
+                        foreach (var identityError in addPasskeyResult.Errors)
+                        {
+                            logger.LogError("Passkey addition failed: {Code} {Description}",
+                                identityError.Code,
+                                identityError.Description);
+                        }
+
+                        return Results.BadRequest();
+                    })
+                .RequireAuthorization()
+                .WithFeatureGate(Core.Shared.Features.Constants.PasskeyFeatureName);
+
             return endpoints;
+        }
 
-        var accountGroup = endpoints.MapGroup("/account");
+
+    public IEndpointRouteBuilder MapExternalIdentityEndpoints()
+    {
+        var accountGroup = endpoints.MapGroup(ExternalLogin.BaseRoute);
 
         MapLoginWithExternalProviderEndpoints(accountGroup);
 
@@ -52,121 +136,37 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         return accountGroup;
     }
 
+    public IEndpointConventionBuilder MapAdditionalIdentityEndpoints()
+    {
+            var accountGroup = endpoints.MapGroup("/account");
+
+            accountGroup.MapPost("/logout",
+                async (
+                    [FromServices] SignInManager<SuiteUser> signInManager) =>
+                {
+                    await signInManager.SignOutAsync();
+                    return Results.LocalRedirect(IdentityRoutes.LoginRoute);
+                });
+
+            return accountGroup;
+        }
+    }
+
     private static void MapAddingOfExternalLoginsEndpoints(RouteGroupBuilder manageGroup)
     {
-        manageGroup.MapPost("/linkExternalLogin",
-            [Authorize] async (
-                HttpContext context,
-                [FromServices] SignInManager<SuiteUser> signInManager,
-                [FromForm] string provider) =>
-            {
-                // Clear the existing external cookie to ensure a clean login process
-                await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
+        manageGroup.MapPost(ExternalLogin.LinkingFlow.InitiateLinkRoute,
+            ManageExternalLogins.LinkExternalLoginHandler).RequireAuthorization();
 
-                var redirectUrl = UriHelper.BuildRelative(
-                    context.Request.PathBase,
-                    "/account/manage/externalLogins");
-
-                var userId = signInManager.UserManager.GetUserId(context.User);
-                var properties = signInManager.ConfigureExternalAuthenticationProperties(provider,
-                    redirectUrl,
-                    userId);
-                return TypedResults.Challenge(properties, [provider]);
-            });
-
-        manageGroup.MapGet("/ExternalLogins",
-            async (HttpContext context,
-                ITempDataDictionaryFactory tempDataFactory,
-                [FromServices] UserManager<SuiteUser> userManager,
-                [FromServices] SignInManager<SuiteUser> signInManager) =>
-            {
-                var info = await signInManager.GetExternalLoginInfoAsync();
-                var tempData = tempDataFactory.GetTempData(context);
-
-                if (info == null)
-                {
-                    tempData["ExternalError"] = ExternalLoginError.LoginFailed;
-                    tempData.Save();
-                    return Results.LocalRedirect(IdentityConstants.LoginRoute);
-                }
-
-                var user = await userManager.GetUserAsync(context.User);
-                if (user is null)
-                {
-                    tempData["ExternalError"] = ExternalLoginError.LoginFailed;
-                    tempData.Save();
-                    return Results.LocalRedirect("/");
-                }
-
-                var result = await userManager.AddLoginAsync(user, info);
-                if (!result.Succeeded)
-                    return Results.LocalRedirect(IdentityConstants.LoginRoute);
-
-                // Clear the existing external cookie to ensure a clean login process
-                await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
-
-                return Results.LocalRedirect("/");
-            });
+        manageGroup.MapGet(ExternalLogin.LinkingFlow.LinkCallbackRoute,
+            ManageExternalLogins.HandleLinkCallback).RequireAuthorization();
     }
 
     private static void MapLoginWithExternalProviderEndpoints(RouteGroupBuilder accountGroup)
     {
-        accountGroup.MapPost("/performExternalLogin",
-            (
-                HttpContext context,
-                [FromServices] SignInManager<SuiteUser> signInManager,
-                [FromForm] string provider,
-                [FromForm] string returnUrl = "/") =>
-            {
-                IEnumerable<KeyValuePair<string, StringValues>> query =
-                [
-                    new("ReturnUrl", returnUrl)
-                ];
+        accountGroup.MapPost(ExternalLogin.LoginFlow.InitiateLoginRoute,
+            ExternalLogin.InitiateExternalLogin);
 
-                var redirectUrl = UriHelper.BuildRelative(
-                    context.Request.PathBase,
-                    "/account/externalLogin",
-                    QueryString.Create(query));
-
-                var properties = signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-                return TypedResults.Challenge(properties, [provider]);
-            });
-
-        accountGroup.MapGet("/externalLogin",
-            async (HttpContext context,
-                ITempDataDictionaryFactory tempDataFactory,
-                [FromServices] UserManager<SuiteUser> userManager,
-                [FromServices] SignInManager<SuiteUser> signInManager,
-                [FromQuery] string returnUrl) =>
-            {
-                var tempData = tempDataFactory.GetTempData(context);
-                var info = await signInManager.GetExternalLoginInfoAsync();
-                if (info == null)
-                {
-                    return Results.LocalRedirect(IdentityConstants.LoginRoute);
-                }
-
-                var signInResult = await signInManager.ExternalLoginSignInAsync(
-                    info.LoginProvider,
-                    info.ProviderKey,
-                    isPersistent: false,
-                    bypassTwoFactor: true
-                );
-
-                if (signInResult.Succeeded)
-                {
-                    await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
-                    return Results.LocalRedirect(returnUrl);
-                }
-
-                if (signInResult.IsLockedOut)
-                {
-                    return Results.LocalRedirect(IdentityConstants.LoginRoute);
-                }
-
-                tempData["ExternalError"] = ExternalLoginError.UnknownExternalUser;
-                tempData.Save();
-                return Results.LocalRedirect(IdentityConstants.LoginRoute);
-            });
+        accountGroup.MapGet(ExternalLogin.LoginFlow.LoginCallbackRoute,
+            ExternalLogin.HandleLoginCallback);
     }
 }

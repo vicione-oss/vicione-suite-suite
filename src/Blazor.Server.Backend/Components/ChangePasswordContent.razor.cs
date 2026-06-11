@@ -1,6 +1,7 @@
 using System.Globalization;
 using Blazor.Server.Backend.Areas.Identity.Pages.Models;
 using Blazor.Server.Backend.Localization;
+using Blazor.Shared;
 using Blazor.Shared.Services;
 using Core.Shared.Instance.Services;
 using Core.Shared.UserManagement.Contracts;
@@ -87,7 +88,7 @@ public sealed partial class ChangePasswordContent
             await SignInManager.SignOutAsync();
 
             NavigationService.RedirectTo(
-                IdentityConstants.ChangePasswordRoute,
+                IdentityRoutes.ChangePasswordRoute,
                 new Dictionary<string, object?>()
                 {
                     { nameof(User), Input.Username },
@@ -129,6 +130,14 @@ public sealed partial class ChangePasswordContent
             return;
         }
 
+        if (await UserManager.IsLockedOutAsync(user))
+        {
+            // Same generic message as the login flow so a locked account is indistinguishable
+            // from a wrong current password.
+            messageStore?.Add(() => Input.Password, Login.UserOrPasswordIsIncorrect);
+            return;
+        }
+
         // This will only be updated in the database, when the password is verified within the ChangePasswordAsync method below.
         if (user.PasswordExpirationDate <= DateTimeOffset.UtcNow)
             user.PasswordExpirationDate = null;
@@ -142,6 +151,7 @@ public sealed partial class ChangePasswordContent
                 switch (error.Code)
                 {
                     case nameof(IdentityErrorDescriber.PasswordMismatch):
+                        await UserManager.AccessFailedAsync(user);
                         messageStore?.Add(() => Input.Password, error.Description);
                         break;
                     case nameof(IdentityErrorDescriber.PasswordRequiresDigit):
@@ -167,7 +177,7 @@ public sealed partial class ChangePasswordContent
         if (!_passwordExpired)
             await SignInManager.RefreshSignInAsync(user);
         else
-            await SignInManager.PasswordSignInAsync(Input.Username, Input.NewPassword, IsPersistent, false);
+            await SignInManager.PasswordSignInAsync(Input.Username, Input.NewPassword, IsPersistent, lockoutOnFailure: true);
 
         NavigationService.RedirectTo(ReturnRoute);
     }

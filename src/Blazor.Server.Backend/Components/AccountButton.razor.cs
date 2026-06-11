@@ -15,5 +15,8 @@ public partial class AccountButton
     public string Form { get; set; } = string.Empty;
 
     [Parameter]
+    public string? Name { get; set; } = null!;
+
+    [Parameter]
     public bool Disabled { get; set; }
 }

@@ -21,17 +21,15 @@ public sealed partial class DeleteRoleConsumer(RoleManager<SuiteRole> roleManage
             var existingRole = await roleManager.FindByNameAsync(role.Name);
             if (existingRole is null)
             {
-                LogRoleNotFound(logger, correlationId, role.Name);
+                // ADR-002: redelivery after successful delete must still complete the orchestration.
+                LogRoleAlreadyDeleted(logger, correlationId, role.Name);
 
-                var errorInfo = new ErrorInfo(RoleErrorCodes.DeleteFailedNotFound,
-                        $"Could not delete role '{role.Name}'. No role was found with that name");
-                var errorResponse = new RoleDeletedEvent(role)
+                var idempotentResponse = new RoleDeletedEvent(role)
                 {
-                    CorrelationId = correlationId,
-                    ErrorInfo = errorInfo
+                    CorrelationId = correlationId
                 };
 
-                await context.Publish(errorResponse, context.CancellationToken);
+                await context.Publish(idempotentResponse, context.CancellationToken);
                 return;
             }
 
@@ -66,7 +64,7 @@ public sealed partial class DeleteRoleConsumer(RoleManager<SuiteRole> roleManage
         {
             LogUnexpectedError(logger, ex, correlationId, role.Name);
 
-            var errorInfo = new ErrorInfo(RoleErrorCodes.CreateFailed,
+            var errorInfo = new ErrorInfo(RoleErrorCodes.DeleteFailed,
                         $"Could not delete role '{role.Name}'. {ex.Message}.");
             var errorResponse = new RoleDeletedEvent(role)
             {
@@ -84,8 +82,8 @@ public sealed partial class DeleteRoleConsumer(RoleManager<SuiteRole> roleManage
     [LoggerMessage(Level = LogLevel.Information, Message = "Deleted role '{Name}' correlated by {CorrelationId}.")]
     private static partial void LogRoleDeleted(ILogger<DeleteRoleConsumer> logger, Guid correlationId, string name);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete role '{Name}' correlated by {CorrelationId} because it was not found.")]
-    private static partial void LogRoleNotFound(ILogger<DeleteRoleConsumer> logger, Guid correlationId, string name);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Role '{Name}' correlated by {CorrelationId} was already deleted; publishing completion event idempotently.")]
+    private static partial void LogRoleAlreadyDeleted(ILogger<DeleteRoleConsumer> logger, Guid correlationId, string name);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete role '{Name}' correlated by {CorrelationId} because it is marked as managed.")]
     private static partial void LogRoleIsManaged(ILogger<DeleteRoleConsumer> logger, Guid correlationId, string name);

@@ -83,6 +83,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
         catch (Exception e)
         {
             LogUnexpectedError(logger, e, correlationId, instanceId);
+            throw;
         }
     }
 

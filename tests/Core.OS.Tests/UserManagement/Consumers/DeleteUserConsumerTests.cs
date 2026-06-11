@@ -63,7 +63,7 @@ public class DeleteUserConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_user_error_event()
+    public async Task Consume_should_publish_idempotent_success_when_user_already_deleted()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -77,10 +77,9 @@ public class DeleteUserConsumerTests
         };
         var command = new DeleteUser(user);
 
-        // Act/Assert
+        // Act/Assert — ADR-002: redelivery after successful delete must publish completion without error.
         var response = await tester.TestCommand<DeleteUser, DeleteUserConsumer, UserDeletedEvent>(command);
-        response.ErrorInfo.Should().NotBeNull();
-        response.ErrorInfo.ErrorCode.Should().Be(UserErrorCodes.DeleteFailedNotFound);
+        response.ErrorInfo.Should().BeNull();
         response.UserProfile.UserName.Should().Be(user.UserName);
     }
 

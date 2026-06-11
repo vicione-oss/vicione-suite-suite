@@ -18,7 +18,7 @@ namespace Core.OS.Migrations.ApplicationDbContext.Postgres
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("app")
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -127,6 +127,32 @@ namespace Core.OS.Migrations.ApplicationDbContext.Postgres
                     b.HasKey("InstanceId");
 
                     b.ToTable("OnboardingStates", "app");
+                });
+
+            modelBuilder.Entity("Core.Shared.UserManagement.Contracts.ExternalIdProvider", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Authority")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClientSecret")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExternalIdProviders", "app");
                 });
 #pragma warning restore 612, 618
         }

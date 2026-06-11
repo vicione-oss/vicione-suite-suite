@@ -2,8 +2,11 @@
 using Core.OS.DbContext;
 using Core.OS.Modules;
 using Core.Shared.UserManagement.Contracts;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Sdk.Authorization;
@@ -46,16 +49,29 @@ internal static class TestManagerUtils
 
         public IServiceCollection AddUserDbContextsInMemory(bool autoMigrate = true)
         {
-            services.AddIdentityCore<SuiteUser>()
+            services.AddIdentityCore<SuiteUser>(options =>
+                {
+                    options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+                })
                 .AddRoles<SuiteRole>()
                 .AddEntityFrameworkStores<UserDbContext>();
 
-            services.AddSingleton<UserDbContext>(_ =>
+            services.AddSingleton<UserDbContext>(serviceProvider =>
             {
                 var connection = new SqliteConnection($"DataSource={TestDbContextFactory.DataSourceInMemory}");
                 connection.Open();
 
-                return TestDbContextFactory.CreateSqliteContext<UserDbContextSqlite>(connection, autoMigrate);
+                return TestDbContextFactory.CreateSqliteContext<UserDbContextSqlite>(connection,
+                    autoMigrate, optionsBuilder =>
+                    {
+                        optionsBuilder.UseApplicationServiceProvider(serviceProvider);
+
+                        // ignoring these warnings is currently the only way to avoid the ApplicationWorkerTest
+                        // from failing sporadically, see:
+                        // TODO https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2695
+                        optionsBuilder.ConfigureWarnings(warnings
+                            => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+                    });
             });
             services.AddTransient<IUserDbContext>(s => s.GetRequiredService<UserDbContext>());
 

@@ -61,6 +61,8 @@
     <File Path="docs/security-and-identity.md" />
     <File Path="docs/target-platforms.md" />
     <File Path="docs/suite-architecture.md" />
+    <File Path="docs\passkeys.md" />
+    <File Path="docs\oidc.md" />
   </Folder>
   <Folder Name="/src/">
     <File Path="src/.editorconfig" />

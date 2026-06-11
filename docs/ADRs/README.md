@@ -1,0 +1,18 @@
+# Architecture Decision Records — ViciOne Suite
+
+This directory contains Architecture Decision Records (ADRs) for the ViciOne Suite runtime.
+
+## Format & Conventions
+
+See [`suite-sdk/docs/ADRs/ADR-001-adr-conventions.md`](https://gitlab.com/vicione-oss/vicione/suite/suite-sdk/-/blob/master/docs/ADRs/ADR-001-adr-conventions.md) for the canonical ADR template, lifecycle rules, and authoring guidelines.
+
+## Numbering
+
+Suite ADRs are numbered independently from `suite-sdk`. Both sequences start at ADR-001.
+
+## Index
+
+| # | Title | Status | Date |
+|---|-------|--------|------|
+| ADR-001 | [ADR Conventions](../../suite-sdk/docs/ADRs/ADR-001-adr-conventions.md) | Accepted | 2026-05-27 |
+| ADR-002 | [Consumer Idempotency Strategy](ADR-002-consumer-idempotency-strategy.md) | Accepted | 2026-05-27 |

@@ -1,5 +1,6 @@
 using Blazor.Server.Backend.Areas.Identity.Pages.Models;
 using Blazor.Server.Backend.Security;
+using Blazor.Shared;
 using Blazor.Shared.Services;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
@@ -32,16 +33,16 @@ public sealed partial class ForgotPasswordContent
         if (user == null || !await UserManager.IsEmailConfirmedAsync(user))
         {
             // Don't reveal that the user does not exist or is not confirmed
-            NavigationService.RedirectTo(IdentityConstants.ForgotPasswordRoute);
+            NavigationService.RedirectTo(IdentityRoutes.ForgotPasswordRoute);
             return;
         }
 
         var code = await UserManager.GeneratePasswordResetTokenAsync(user);
-        var callbackLink = NavigationService.CreateCallbackLink(IdentityConstants.ResetPasswordRoute, user.Id, code);
+        var callbackLink = NavigationService.CreateCallbackLink(IdentityRoutes.ResetPasswordRoute, user.Id, code);
 
         await Mediator.Send(new SendResetPasswordLink(user.Id, callbackLink));
 
-        NavigationService.RedirectTo(IdentityConstants.ForgotPasswordRoute);
+        NavigationService.RedirectTo(IdentityRoutes.ForgotPasswordRoute);
     }
 
     protected override void OnInitialized() => Input ??= new();

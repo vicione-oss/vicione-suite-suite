@@ -73,6 +73,8 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddAuthorization();
         builder.Services.AddSingleton<IAuthorizationHandler, ModuleAccessLevelHandler>();
 
+        services.AddTransient<ExternalLoginService>();
+
         // The ITicketStore is implemented in Core.OS because it needs to access db context or other core parts
         services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>>(
             sp => new CookieAuthConfigurator(sp.GetRequiredService<ITicketStore>()));
@@ -157,7 +159,12 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
     {
         if (useHeaderForwarding)
         {
-            var forwardedHeaderOptions = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto };
+            var forwardedHeaderOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                                   | ForwardedHeaders.XForwardedProto
+                                   | ForwardedHeaders.XForwardedHost
+            };
             forwardedHeaderOptions.KnownIPNetworks.Clear();
             forwardedHeaderOptions.KnownProxies.Clear();
 
@@ -189,6 +196,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
         endpoints.MapExternalIdentityEndpoints();
         endpoints.MapAdditionalIdentityEndpoints();
+        endpoints.MapPasskeyEndpoints();
 
         // add authentication pages /Account/*
         endpoints.MapRazorPages();

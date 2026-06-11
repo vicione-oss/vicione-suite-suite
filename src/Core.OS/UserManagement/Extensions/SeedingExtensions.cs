@@ -1,5 +1,6 @@
 ﻿using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Configuration;
+using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -9,7 +10,6 @@ namespace Core.OS.UserManagement.Extensions;
 
 public static partial class SeedingExtensions
 {
-    internal const string AdminRoleName = "Administrator";
     //Users
     internal static SeedUser Eddy => new()
     {
@@ -82,7 +82,7 @@ public static partial class SeedingExtensions
             var roleManager = scopedServices.GetRequiredService<RoleManager<SuiteRole>>();
             var moduleAuthorizationClaimParser = scopedServices.GetRequiredService<IModuleAuthorizationClaimParser>();
             var features = scopedServices.GetServices<IModuleFeature>();
-            var adminRole = await roleManager.FindByNameAsync(AdminRoleName).ConfigureAwait(false);
+            var adminRole = await roleManager.FindByNameAsync(AuthorizationConstants.AdminRoleName).ConfigureAwait(false);
 
             if (adminRole is null)
             {
@@ -90,14 +90,14 @@ public static partial class SeedingExtensions
                 foreach (var existingRole in roleManager.Roles)
                     await roleManager.DeleteAsync(existingRole).ConfigureAwait(false);
 
-                adminRole = new SuiteRole(AdminRoleName)
+                adminRole = new SuiteRole(AuthorizationConstants.AdminRoleName)
                 {
                     Description = "The system administrator role with full access to all features.",
                     Managed = true
                 };
                 var resultRole = await roleManager.CreateAsync(adminRole).ConfigureAwait(false);
                 if(!resultRole.Succeeded)
-                    throw new InvalidOperationException($"Failed to create role '{AdminRoleName}': " + resultRole.Errors.First().Description);
+                    throw new InvalidOperationException($"Failed to create role '{AuthorizationConstants.AdminRoleName}': " + resultRole.Errors.First().Description);
             }
 
             foreach (var feature in features)
@@ -113,7 +113,7 @@ public static partial class SeedingExtensions
                     var newClaim = ModuleAuthorizationClaimFactory.CreateClaim(feature.ModuleId, AccessLevel.Full, feature.Name);
                     var resultAddClaim = await roleManager.AddClaimAsync(adminRole, newClaim);
                     if(!resultAddClaim.Succeeded)
-                        throw new InvalidOperationException($"Failed to add claim {newClaim} to role '{AdminRoleName}': " + resultAddClaim.Errors.First().Description);
+                        throw new InvalidOperationException($"Failed to add claim {newClaim} to role '{AuthorizationConstants.AdminRoleName}': " + resultAddClaim.Errors.First().Description);
                 }
             }
         }
@@ -145,12 +145,12 @@ public static partial class SeedingExtensions
 
                 LogAddingFullAccessForUserToModule(logger, suiteUser.UserName, Shared.Constants.SystemModuleId);
 
-                if (await userManager.IsInRoleAsync(suiteUser, AdminRoleName))
+                if (await userManager.IsInRoleAsync(suiteUser, AuthorizationConstants.AdminRoleName))
                     continue;
 
-                var resultAddToRole = await userManager.AddToRoleAsync(suiteUser, AdminRoleName);
+                var resultAddToRole = await userManager.AddToRoleAsync(suiteUser, AuthorizationConstants.AdminRoleName);
                 if (!resultAddToRole.Succeeded)
-                    throw new InvalidOperationException($"Failed to add {suiteUser.UserName} to {AdminRoleName}: {resultAddToRole.Errors.First().Description}");
+                    throw new InvalidOperationException($"Failed to add {suiteUser.UserName} to {AuthorizationConstants.AdminRoleName}: {resultAddToRole.Errors.First().Description}");
             }
         }
 
@@ -185,14 +185,14 @@ public static partial class SeedingExtensions
             }
 
             // Administrator User shall always have full access to all Modules
-            if (await userManager.IsInRoleAsync(suiteUser, AdminRoleName))
+            if (await userManager.IsInRoleAsync(suiteUser, AuthorizationConstants.AdminRoleName))
                 return;
 
-            LogAddingFullAccessForUserToRole(logger, suiteUser.UserName, AdminRoleName);
-            var resultAddToRole = await userManager.AddToRoleAsync(suiteUser, AdminRoleName);
+            LogAddingFullAccessForUserToRole(logger, suiteUser.UserName, AuthorizationConstants.AdminRoleName);
+            var resultAddToRole = await userManager.AddToRoleAsync(suiteUser, AuthorizationConstants.AdminRoleName);
             if (!resultAddToRole.Succeeded)
                 throw new InvalidOperationException(
-                    $"Failed to add {suiteUser.UserName} to {AdminRoleName}: {resultAddToRole.Errors.First().Description}");
+                    $"Failed to add {suiteUser.UserName} to {AuthorizationConstants.AdminRoleName}: {resultAddToRole.Errors.First().Description}");
         }
     }
 

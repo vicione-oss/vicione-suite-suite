@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared;
+using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Commands;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
@@ -144,11 +145,10 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
     private async Task AssignRoles(UserProfile desiredProfile, SuiteUser existingSuiteUser, Guid correlationId)
     {
         if (await userManager.IsLastSystemAdministrator(existingSuiteUser)
-            && !desiredProfile.Roles.Contains(SeedingExtensions.AdminRoleName))
+            && !desiredProfile.Roles.Contains(AuthorizationConstants.AdminRoleName))
         {
-            desiredProfile.Roles.Add(SeedingExtensions.AdminRoleName);
-
             LogSysAdminRemoveSkip(logger, correlationId, existingSuiteUser.UserName);
+            desiredProfile.Roles.Add(AuthorizationConstants.AdminRoleName);
         }
 
         foreach (var suiteRole in roleManager.Roles.Select(r => r.Name!))

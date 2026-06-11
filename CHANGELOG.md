@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.3.0 - Unreleased
+
+### Added
+
+- Support for passkey authentication, allowing users with an existing local account to register and use passkeys for authentication
+- Support for renaming passkeys from the profile settings
+- Ability to remove the link between a local user and an external identity provider account from the external ID providers settings
+- `Microsoft.FeatureManagement` package
+- Account lockout after 5 failed sign-in or current-password attempts; locked accounts auto-unlock after 5 minutes. Lockout is surfaced as the same generic credentials error as a wrong password to avoid disclosing account state.
+
+### Fixed
+
+- Consumer idempotency (ADR-002): all delete and replication consumers now handle message redelivery safely
+  - `DbChangeSetConsumer`, upsert semantics ensure redelivered messages no longer cause silent data loss
+  - `ControlInstanceConsumer`, delete redelivery publishes completion event to unblock orchestrators
+  - `DeleteUserConsumer` and `DeleteRoleConsumer`, delete redelivery publishes success instead of spurious error
+  - `DeleteArtifactRepositoryConsumer`, delete redelivery publishes success-shaped event when repository already gone
+  - `DeleteConnectionConsumer` and `DeleteTagConsumer`, delete redelivery publishes success-shaped event when entity already gone
+  - `RegisterInstanceConsumer`, `SendResetPasswordLinkConsumer`, and `SendVerifyEmailAddressLinkConsumer`, exceptions are no longer swallowed; failures propagate to the MassTransit retry and dead-letter pipeline
+- `ResendEmailConfirmationContent`, the resend confirmation email was sent to already-confirmed accounts instead of unconfirmed ones, and used a password reset link instead of an email verification link
+- `PasswordValidator`, underscore (`_`) is now recognized as a special character
+- Password complexity requirements (digit, lowercase letter, uppercase letter, special character) are now explicitly enforced in ASP.NET Identity configuration, closing the gap between the custom `PasswordValidator` and Identity's built-in password validation
+
 ## 1.2.2 - 2026-06-11
 
 ### Added
@@ -66,6 +89,7 @@
 - Support cancellation of uploading flash device file (swu) in settings dialog
 - `UpdateControlPanel`, support cancellation of ongoing flash device file (swu) upload
 - Support `AdvancedErrorBoundary` in `NavTileContainer`, `NotificationElementGrid` and `WizardPageContainer`
+- Stopped catching `NavigationException`s in `LoginContent.razor.cs`, as ASP.NET uses them to perform the redirection during prerendering
 
 ### Fixed
 
@@ -78,6 +102,7 @@
 
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.12.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.10.0`
+
 
 ## 1.2.0 - 2026-04-17
 

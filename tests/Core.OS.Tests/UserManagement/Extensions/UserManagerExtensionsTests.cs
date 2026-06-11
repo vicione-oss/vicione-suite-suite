@@ -1,5 +1,6 @@
 ﻿using AwesomeAssertions;
 using Core.OS.UserManagement.Extensions;
+using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using NSubstitute;
@@ -59,8 +60,8 @@ public class UserManagerExtensionsTests
             var user = new SuiteUser { UserName = "admin" };
             using var userManager = CreateFakeUserManager();
 
-            userManager.GetRolesAsync(user).Returns(new List<string> { SeedingExtensions.AdminRoleName });
-            userManager.GetUsersInRoleAsync(SeedingExtensions.AdminRoleName).Returns(new List<SuiteUser> { user });
+            userManager.GetRolesAsync(user).Returns(new List<string> { AuthorizationConstants.AdminRoleName });
+            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns(new List<SuiteUser> { user });
 
             // Act
             var result = await userManager.IsLastSystemAdministrator(user);
@@ -77,8 +78,8 @@ public class UserManagerExtensionsTests
             var other = new SuiteUser { UserName = "admin2" };
             using var userManager = CreateFakeUserManager();
             
-            userManager.GetRolesAsync(user).Returns(new List<string> { SeedingExtensions.AdminRoleName });
-            userManager.GetUsersInRoleAsync(SeedingExtensions.AdminRoleName).Returns(new List<SuiteUser> { user, other });
+            userManager.GetRolesAsync(user).Returns(new List<string> { AuthorizationConstants.AdminRoleName });
+            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns(new List<SuiteUser> { user, other });
 
             // Act
             var result = await userManager.IsLastSystemAdministrator(user);
@@ -94,8 +95,8 @@ public class UserManagerExtensionsTests
             var user = new SuiteUser { UserName = "admin" };
             using var userManager = CreateFakeUserManager();
 
-            userManager.GetRolesAsync(user).Returns(new List<string> { SeedingExtensions.AdminRoleName });
-            userManager.GetUsersInRoleAsync(SeedingExtensions.AdminRoleName).Returns(new List<SuiteUser>());
+            userManager.GetRolesAsync(user).Returns(new List<string> { AuthorizationConstants.AdminRoleName });
+            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns(new List<SuiteUser>());
 
             // Act
             var act = async () => await userManager.IsLastSystemAdministrator(user);

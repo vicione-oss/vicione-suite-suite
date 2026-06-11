@@ -150,4 +150,16 @@
   <data name="LoginUsingExternalProvider" xml:space="preserve">
     <value>Login using</value>
   </data>
+  <data name="LoginWithPasskey" xml:space="preserve">
+    <value>Login with passkey</value>
+  </data>
+  <data name="PasskeyLoginFailed" xml:space="preserve">
+    <value>Passkey login failed</value>
+  </data>
+  <data name="ExternalUserCreationFailed" xml:space="preserve">
+    <value>This account cannot be registered. It may already be in use or doesn't meet system requirements.</value>
+  </data>
+  <data name="ExternalLoginAlreadyInUse" xml:space="preserve">
+    <value>The external account is already associated with a local user.</value>
+  </data>
 </root>

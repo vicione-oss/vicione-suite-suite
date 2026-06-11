@@ -18,26 +18,21 @@ using Core.OS.Monitoring.Extensions;
 using Core.OS.Persistence;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Extensions;
-using Core.OS.UserManagement.Security;
-using Core.Shared;
-using Core.Shared.Extensions;
 using Core.Shared.HostManagement;
 using Core.Shared.Logging;
-using Core.Shared.Security;
 using Core.Shared.UserManagement.Configuration;
-using Core.Shared.UserManagement.Contracts;
 using MassTransit.Logging;
 using Sdk.Backend.Persistence;
 using MassTransit.Monitoring;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Core.Artifacts;
+using Microsoft.FeatureManagement;
+using Constants = Core.Shared.Constants;
 
 namespace Core.OS.Extensions;
 
@@ -101,28 +96,7 @@ internal static class IServiceCollectionExtensions
                 .AddInstanceServices(instanceOptions, messageBusOptions.UseInMemoryBus)
                 .AddConnectionServices();
 
-            var userManagementOptions = config.GetUserManagementOptions();
-            var smtpOptions = config.GetSmtpOptions();
-            // ui host might not know identity or suite user
-            moduleHost.AddUiHostServices(services,
-                (svc) =>
-                {
-                    var identityBuilder = svc
-                        .AddIdentity<SuiteUser, SuiteRole>(options =>
-                        {
-                            options.SignIn.RequireConfirmedAccount
-                                = userManagementOptions.RequireAccountVerificationToLogIn && smtpOptions is not null;
-                            options.Password.RequiredLength = Constants.MinimumPasswordLength;
-
-                            options.User.RequireUniqueEmail = true;
-                        })
-                        .AddEntityFrameworkStores<UserDbContext>()
-                        .AddDefaultTokenProviders();
-                    services.AddTransient<IExternalAuthenticationSettings, ExternalAuthenticationSettings>();
-
-                    services.AddExternalAuthentication(config);
-                    return identityBuilder;
-                });
+            services.AddIdentityAndExternalAuth(config, moduleHost);
 
             // here we should have a valid configuration and loaded assemblies
             moduleHost.AddModuleServices(services);
@@ -152,41 +126,9 @@ internal static class IServiceCollectionExtensions
 
             services.AddMemoryCache();
 
+            services.AddFeatureManagement();
+
             return services;
-        }
-
-        private void AddExternalAuthentication(IConfiguration config)
-        {
-            var externalIdProvider = config.GetExternalIdProviderOptions()?.Providers.FirstOrDefault();
-
-            if (externalIdProvider is null)
-                return;
-
-            services.AddAuthentication()
-                .AddOpenIdConnect(connectOptions =>
-                {
-                    connectOptions.Authority = externalIdProvider.Authority;
-                    connectOptions.ClientId = externalIdProvider.ClientId;
-                    connectOptions.ClientSecret = externalIdProvider.ClientSecret;
-                    connectOptions.UsePkce = true;
-
-                    connectOptions.ResponseType = OpenIdConnectResponseType.Code;
-                    connectOptions.SaveTokens = true;
-
-                    // IMPORTANT: Set to false ONLY for local HTTP development. MUST be true in production.
-                    connectOptions.RequireHttpsMetadata = true;
-
-                    connectOptions.Scope.Clear();
-                    connectOptions.Scope.Add(OpenIdConnectScope.OpenId); // Required for OIDC
-                    connectOptions.Scope.Add(OpenIdConnectScope.Profile); // Request basic user profile claims
-                    connectOptions.Scope.Add(OpenIdConnectScope.Email); // Request email claim
-
-                    connectOptions.CallbackPath = "/signin-oidc";
-                    connectOptions.SignedOutCallbackPath = "/signout-callback-oidc";
-
-                    connectOptions.GetClaimsFromUserInfoEndpoint = false;
-                    connectOptions.MapInboundClaims = true;
-                });
         }
 
         private IServiceCollection AddCoreDbContexts()

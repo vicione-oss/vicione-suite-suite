@@ -28,15 +28,13 @@ public sealed partial class DeleteConnectionConsumer(IConnectionDbContext dbCont
             {
                 LogConnectionNotFound(logger, correlationId, connectionId);
 
-                var errorInfo = new ErrorInfo(ConnectionErrorCodes.DeleteConnectionFailed,
-                             $"Could not delete connection with id '{connectionId}'. No connection was found with that id.");
-                var errorConn = new Connection { Id = connectionId };
-                var errorResponse = new ConnectionChanged(CrudAction.Deleted, errorConn, [], [])
+                // ADR-002: publish success-shaped completion when already deleted (idempotent redelivery)
+                var alreadyDeletedConn = new Connection { Id = connectionId };
+                var alreadyDeletedEvent = new ConnectionChanged(CrudAction.Deleted, alreadyDeletedConn, [], [])
                 {
-                    CorrelationId = correlationId,
-                    ErrorInfo = errorInfo
+                    CorrelationId = correlationId
                 };
-                await context.Publish(errorResponse, context.CancellationToken).ConfigureAwait(false);
+                await context.Publish(alreadyDeletedEvent, context.CancellationToken).ConfigureAwait(false);
                 return;
             }
 
