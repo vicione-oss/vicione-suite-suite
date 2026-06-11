@@ -22,17 +22,15 @@ public sealed partial class DeleteUserConsumer(UserManager<SuiteUser> userManage
             var user = await userManager.FindByNameAsync(userProfile.UserName.Value);
             if (user is null)
             {
-                LogUserNotFound(logger, correlationId, userProfile.UserName.Value);
+                // ADR-002: redelivery after successful delete must still complete the orchestration.
+                LogUserAlreadyDeleted(logger, correlationId, userProfile.UserName.Value);
 
-                var errorInfo = new ErrorInfo(UserErrorCodes.DeleteFailedNotFound,
-                             $"Could not delete user '{userProfile.UserName}'. No user was found with that name");
-                var errorResponse = new UserDeletedEvent(userProfile)
+                var idempotentResponse = new UserDeletedEvent(userProfile)
                 {
-                    CorrelationId = correlationId,
-                    ErrorInfo = errorInfo
+                    CorrelationId = correlationId
                 };
 
-                await context.Publish(errorResponse, context.CancellationToken);
+                await context.Publish(idempotentResponse, context.CancellationToken);
                 return;
             }
 
@@ -85,8 +83,8 @@ public sealed partial class DeleteUserConsumer(UserManager<SuiteUser> userManage
     [LoggerMessage(Level = LogLevel.Information, Message = "Deleted user '{Name}' correlated by '{CorrelationId}'.")]
     private static partial void LogUserDeleted(ILogger<DeleteUserConsumer> logger, Guid correlationId, string name);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete user '{Name}' correlated by '{CorrelationId}' because it was not found.")]
-    private static partial void LogUserNotFound(ILogger<DeleteUserConsumer> logger, Guid correlationId, string name);
+    [LoggerMessage(Level = LogLevel.Information, Message = "User '{Name}' correlated by '{CorrelationId}' was already deleted; publishing completion event idempotently.")]
+    private static partial void LogUserAlreadyDeleted(ILogger<DeleteUserConsumer> logger, Guid correlationId, string name);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete user '{Name}' correlated by '{CorrelationId}' because it is last administrator.")]
     private static partial void LogLastAdministrator(ILogger<DeleteUserConsumer> logger, Guid correlationId, string name);

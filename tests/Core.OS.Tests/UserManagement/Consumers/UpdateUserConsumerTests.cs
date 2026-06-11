@@ -3,6 +3,7 @@ using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
 using Core.OS.UserManagement.Extensions;
+using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Commands;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
@@ -110,7 +111,7 @@ public class UpdateUserConsumerTests
 
         // Act/Assert
         var response = await tester.TestCommand<UpdateUser, UpdateUserConsumer, UserUpdatedEvent>(command);
-        response.UserProfile.Roles.Should().ContainSingle(k => k == SeedingExtensions.AdminRoleName);
+        response.UserProfile.Roles.Should().ContainSingle(k => k == AuthorizationConstants.AdminRoleName);
     }
 
     [Fact]

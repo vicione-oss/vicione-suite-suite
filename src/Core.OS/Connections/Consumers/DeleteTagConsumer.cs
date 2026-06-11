@@ -25,15 +25,13 @@ public sealed partial class DeleteTagConsumer(IConnectionDbContext dbContext, IL
             {
                 LogTagNotFound(logger, correlationId, tagId);
 
-                var errorInfo = new ErrorInfo(TagErrorCodes.DeleteTagFailed,
-                             $"Could not delete tag with id '{tagId}'. No tag was found with that id.");
-                var errorTag = new Tag { Id = tagId };
-                var errorResponse = new TagsChanged(CrudAction.Deleted, [errorTag])
+                // ADR-002: publish success-shaped completion when already deleted (idempotent redelivery)
+                var alreadyDeletedTag = new Tag { Id = tagId };
+                var alreadyDeletedEvent = new TagsChanged(CrudAction.Deleted, [alreadyDeletedTag])
                 {
-                    CorrelationId = correlationId,
-                    ErrorInfo = errorInfo
+                    CorrelationId = correlationId
                 };
-                await context.Publish(errorResponse, context.CancellationToken).ConfigureAwait(false);
+                await context.Publish(alreadyDeletedEvent, context.CancellationToken).ConfigureAwait(false);
                 return;
             }
 

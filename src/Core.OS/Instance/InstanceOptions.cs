@@ -36,8 +36,6 @@ public sealed class InstanceOptions
 
     public string? FormattedName { get; set; }
 
-    public bool UseExternalSecurity { get; set; }
-
     public bool UseHeaderForwarding { get; set; }
 
     public string ServiceName { get; set; } = "vicione-suite.service";

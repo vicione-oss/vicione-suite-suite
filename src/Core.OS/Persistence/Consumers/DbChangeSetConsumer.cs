@@ -21,75 +21,80 @@ public sealed class DbChangeSetConsumerDefinition : ConsumerDefinition<DbChangeS
     }
 }
 
-public sealed class DbChangeSetConsumer(IServiceProvider services, ILogger<DbChangeSetConsumer> logger) : IConsumer<DbChangeSet>
+public sealed partial class DbChangeSetConsumer(IServiceProvider services, ILogger<DbChangeSetConsumer> logger) : IConsumer<DbChangeSet>
 {
-    private readonly IServiceProvider _services = services;
-    private readonly ILogger<DbChangeSetConsumer> _logger = logger;
-
     public async Task Consume(ConsumeContext<DbChangeSet> context)
     {
         var dbContext = GetChangeSetDbContext(context.Message.ContextType);
         if (dbContext is null)
             return;
 
+        foreach (var change in context.Message.Changes)
+        {
+            if (change.Entity is null)
+                throw new NoNullAllowedException("Must be prevented during publish!");
+
+            var entityType = EntityTypeCache.GetOrAdd(change.EntityTypeFullName, change.AssemblyFullName);
+            var entity = JsonSerializer.Deserialize(change.Entity, entityType, DefaultJsonSerializerSettings.Default);
+            if (entity is null)
+                continue;
+
+            switch (change.State)
+            {
+                case EntityState.Detached:
+                case EntityState.Unchanged:
+                    break;
+
+                case EntityState.Deleted:
+                {
+                    var existing = await dbContext.FindAsync(entityType, GetPrimaryKeyValues(dbContext, entity, entityType), context.CancellationToken);
+                    if (existing is not null)
+                        dbContext.Remove(existing);
+                    break;
+                }
+
+                case EntityState.Modified:
+                case EntityState.Added:
+                {
+                    var existing = await dbContext.FindAsync(entityType, GetPrimaryKeyValues(dbContext, entity, entityType), context.CancellationToken);
+                    if (existing is not null)
+                        dbContext.Entry(existing).CurrentValues.SetValues(entity);
+                    else
+                        dbContext.Add(entity);
+                    FixConnectionRelation(dbContext);
+                    break;
+                }
+
+                default:
+                    throw new InvalidEnumArgumentException(nameof(change.State), (int)change.State, typeof(EntityState));
+            }
+        }
+
         try
         {
-            foreach (var change in context.Message.Changes)
-            {
-                if (change.Entity is null)
-                    throw new NoNullAllowedException("Must be prevented during publish!");
-
-                var entityType = EntityTypeCache.GetOrAdd(change.EntityTypeFullName, change.AssemblyFullName);
-                var entity = JsonSerializer.Deserialize(change.Entity, entityType, DefaultJsonSerializerSettings.Default);
-                if (entity is null)
-                    continue;
-
-                switch (change.State)
-                {
-                    case EntityState.Detached:
-                    case EntityState.Unchanged:
-                        break;
-
-                    case EntityState.Deleted:
-                        dbContext.Remove(entity);
-                        break;
-
-                    case EntityState.Modified:
-                        dbContext.Update(entity);
-                        FixConnectionRelation(dbContext);
-                        break;
-
-                    case EntityState.Added:
-                        dbContext.Add(entity);
-                        FixConnectionRelation(dbContext);
-                        break;
-
-                    default:
-                        throw new InvalidEnumArgumentException(nameof(change.State), (int)change.State, typeof(EntityState));
-                }
-            }
-
-            // todo: issue #466
             await dbContext.SaveChangesAsync(context.CancellationToken);
         }
-        catch (DbUpdateException e)// skip retry in that case
+        catch (DbUpdateException e)
         {
-            _logger.LogError(e,
-                "Failed to apply {MessageCount} changes to {ContextType}",
-                context.Message.Changes.Count,
-                context.Message.ContextType);
-
-            LogChangeErrors(context.Message.ContextType, context.Message.Changes);
+            LogApplyChangesFailed(logger, e, context.Message.Changes.Count, context.Message.ContextType);
+            throw;
         }
-        catch (InvalidOperationException e)// skip retry in that case
-        {
-            _logger.LogError(e,
-                "Invalid operation applying {MessageCount} changes to {ContextType}",
-                context.Message.Changes.Count,
-                context.Message.ContextType);
+    }
 
-            LogChangeErrors(context.Message.ContextType, context.Message.Changes);
-        }
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to apply {MessageCount} changes to {ContextType}")]
+    private static partial void LogApplyChangesFailed(ILogger logger, Exception ex, int messageCount, string contextType);
+
+    private static object?[] GetPrimaryKeyValues(Microsoft.EntityFrameworkCore.DbContext dbContext, object entity, Type entityType)
+    {
+        var efEntityType = dbContext.Model.FindEntityType(entityType)
+            ?? throw new InvalidOperationException($"Entity type '{entityType.FullName}' is not part of the model for context '{dbContext.GetType().Name}'");
+
+        var primaryKey = efEntityType.FindPrimaryKey()
+            ?? throw new InvalidOperationException($"Entity type '{entityType.FullName}' has no primary key defined");
+
+        return primaryKey.Properties
+            .Select(p => p.PropertyInfo?.GetValue(entity) ?? p.FieldInfo?.GetValue(entity))
+            .ToArray();
     }
 
     private static void FixConnectionRelation(Microsoft.EntityFrameworkCore.DbContext dbContext)
@@ -98,29 +103,29 @@ public sealed class DbChangeSetConsumer(IServiceProvider services, ILogger<DbCha
         // after connection got added change tracker has 3 changes already:
         // [0] connection added
         // [1] tag added    (ALREADY EXISTS!)
-        // [2] connectiontag added
+        // [2] connection tag added
 
-        // if adding a entity that's already tracked needs special treatment 
-        var tagsAdded = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Added && e.Entity is Tag);
+        // if adding an entity that's already tracked needs special treatment 
+        var tagsAdded = dbContext.ChangeTracker.Entries().Where(e => e is { State: EntityState.Added, Entity: Tag });
         foreach (var entry in tagsAdded)
         {
             if (entry.Entity is not Tag tag)
                 continue;
 
             // ensure that already existing tags don't get added again
-            if (dbContext.Find(typeof(Tag), tag.Id) is not null)
+            if (dbContext.Find<Tag>(tag.Id) is not null)
                 entry.State = EntityState.Unchanged;
         }
 
         // dbContext.Find<ConnectionTag>(connectionTag.ConnectionId, connectionTag.TagId)
-        // should return null if the connection tag does not exist but it returns an entity
+        // should return null if the connection tag does not exist, but it returns an entity
         // with state unchanged that does not exist in the database.
         // to ensure we really get the existing item dbset is used with SingleOrDefault
         var connectionTagSet = dbContext.Set<ConnectionTag>();
         var cleanedUp = false;
 
         // modification of a connection triggers relation change - skip if existing                
-        var connectionTagsAdded = dbContext.ChangeTracker.Entries().Where(e => e.State == EntityState.Added && e.Entity is ConnectionTag);
+        var connectionTagsAdded = dbContext.ChangeTracker.Entries().Where(e => e is { State: EntityState.Added, Entity: ConnectionTag });
         foreach (var entry in connectionTagsAdded)
         {
             if (entry.Entity is not ConnectionTag connectionTag)
@@ -151,7 +156,7 @@ public sealed class DbChangeSetConsumer(IServiceProvider services, ILogger<DbCha
         IEnumerable<ModuleContextTypeInformation> allContextTypeInfos;
         try
         {
-            allContextTypeInfos = _services.GetServices<ModuleContextTypeInformation>();
+            allContextTypeInfos = services.GetServices<ModuleContextTypeInformation>();
         }
         catch (InvalidOperationException)
         {
@@ -163,15 +168,6 @@ public sealed class DbChangeSetConsumer(IServiceProvider services, ILogger<DbCha
         if (ctxType is null)
             return null;
 
-        return _services.GetService(ctxType) is not Microsoft.EntityFrameworkCore.DbContext dbContext ? null : dbContext;
-    }
-
-    private void LogChangeErrors(string contextType, IEnumerable<ChangedEntity> changes)
-    {
-        foreach (var change in changes)
-            _logger.LogError("{ContextType}[{State}]: Failed on entity {Entity}",
-                contextType,
-                change.State,
-                change.Entity);
+        return services.GetService(ctxType) as Microsoft.EntityFrameworkCore.DbContext;
     }
 }

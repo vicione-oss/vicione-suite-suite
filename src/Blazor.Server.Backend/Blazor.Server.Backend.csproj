@@ -22,6 +22,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App.Internal.Assets" PrivateAssets="all" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
     <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" />
     <PackageReference Include="System.IO.Abstractions" />
     <PackageReference Include="ViciOne.Ui.Design" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
@@ -160,6 +161,9 @@
     <EmbeddedResource Update="Areas\Identity\Pages\Models\Localization\ModelValidation.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ModelValidation.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\Login.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
   </ItemGroup>
 

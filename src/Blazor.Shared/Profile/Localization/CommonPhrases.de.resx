@@ -1,0 +1,20 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PasskeysDescription" xml:space="preserve">
+    <value>Verwalten Sie hier Ihre Passkeys, um Ihren Account-Zugriff per Biometrie oder Bildschirmsperre zu vereinfachen. Passkeys sind eine sicherere Alternative zu Passwörtern und schützen Sie effektiv vor Phishing und Datenlecks. In dieser Liste können Sie festlegen, welche Geräte für den sofortigen Login autorisiert sind. Bitte beachten Sie, dass das Löschen eines Passkeys in ViciOne lediglich dessen Zugriffsberechtigung entzieht und den Eintrag nicht aus Ihrem persönlichen Authenticator oder Passwort-Manager entfernt.</value>
+  </data>
+  <data name="Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+</root>

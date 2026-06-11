@@ -86,6 +86,9 @@ stages:
   - <<: *rules_web_manual
 
 include:
+  # External-service integration tests (SMTP/mail, ...) — see docs/integration-testing.md
+  - local: '.gitlab/ci/integration-tests.yml'
+
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/version/version-calc@v1.2.0
     inputs:
       rules:

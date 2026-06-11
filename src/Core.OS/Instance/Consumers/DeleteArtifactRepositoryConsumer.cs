@@ -21,7 +21,18 @@ public sealed partial class DeleteArtifactRepositoryConsumer(
         {
             var deleted = await repositoryStore.Delete([repositoryId], context.CancellationToken);
             if (deleted is null || !deleted.Any(k => k.Id == repositoryId))
-                throw new InvalidOperationException($"Repository with id {repositoryId} not found");
+            {
+                // Repository already gone — publish success-shaped event for idempotent redelivery (ADR-002)
+                LogRepositoryAlreadyDeleted(logger, correlationId, repositoryId);
+
+                var alreadyDeletedEvent = new ArtifactRepositoryChanged(new ArtifactRepository { Id = repositoryId, Endpoint = string.Empty }, CrudAction.Deleted)
+                {
+                    CorrelationId = correlationId
+                };
+
+                await context.Publish(alreadyDeletedEvent, context.CancellationToken);
+                return;
+            }
 
             LogRepositoryDeleted(logger, correlationId, repositoryId);
 
@@ -51,6 +62,9 @@ public sealed partial class DeleteArtifactRepositoryConsumer(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Deleted artifact repository='{RepositoryId}' correlated by {CorrelationId}")]
     private static partial void LogRepositoryDeleted(ILogger<DeleteArtifactRepositoryConsumer> logger, Guid correlationId, Guid repositoryId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Artifact repository='{RepositoryId}' already deleted, publishing completion correlated by {CorrelationId}")]
+    private static partial void LogRepositoryAlreadyDeleted(ILogger<DeleteArtifactRepositoryConsumer> logger, Guid correlationId, Guid repositoryId);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to delete artifact repository='{RepositoryId}' correlated by {CorrelationId}")]
     private static partial void LogUnexpectedError(ILogger<DeleteArtifactRepositoryConsumer> logger, Exception exception, Guid correlationId, Guid repositoryId);

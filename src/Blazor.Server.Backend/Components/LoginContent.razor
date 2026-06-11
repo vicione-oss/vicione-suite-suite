@@ -1,5 +1,7 @@
 @using Blazor.Server.Backend.Enums
 @using Blazor.Server.Backend.Localization
+@using Blazor.Shared.Profile.Models
+@using Blazor.Shared.Profile.ControlPanels
 @using ViciOne.Ui.Blazor.Components.CheckBox
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Components
@@ -7,7 +9,7 @@
 
 @if (IsExternalIdProviderConfigured)
 {
-    <form @formname="@_formId" id="@_formId" method="post" action="/account/performExternalLogin">
+    <form @formname="@_formId" id="@_formId" method="post" action="/account/perform-external-login">
         <AntiforgeryToken />
         <input type="hidden" name="provider" value="@_externalProviderName" />
         <input type="hidden" name="returnUrl" value="@(ReturnUrl ?? "/")" />
@@ -41,7 +43,7 @@
 
         @if (SenderStatus.IsConfigured() && !BuildingLayout)
         {
-            <NavigationField Route="@IdentityConstants.ForgotPasswordRoute">
+            <NavigationField Route="@IdentityRoutes.ForgotPasswordRoute">
                 <Content>
                     @Login.ForgotPassword
                 </Content>
@@ -59,12 +61,22 @@
                            Form="@_formId"
                            ButtonType="@(BuildingLayout? AccountButtonType.Outline : AccountButtonType.Default)" />
         }
+
+        @if (IsPasskeySignInEnabled)
+        {
+            <hr />
+            <PasskeySubmit Operation="PasskeyOperation.Request"
+                           Name="Input.Passkey"
+                           EmailName="Input.Email"
+                           Text="@Login.LoginWithPasskey" />
+            <ValidationMessage For="() => Input.Passkey" />
+        }
     </div>
 
     @if (SenderStatus.IsConfigured() && BuildingLayout)
     {
         <div class="forgot-password">
-            <NavigationField Route="@IdentityConstants.ForgotPasswordRoute">
+            <NavigationField Route="@IdentityRoutes.ForgotPasswordRoute">
                 <Content>
                     <MonochromeIcon Name="MonochromeIconName.LockActive" Size="MonochromeIconSize.Small" />
 

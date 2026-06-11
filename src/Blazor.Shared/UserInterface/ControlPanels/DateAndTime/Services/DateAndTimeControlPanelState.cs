@@ -1,4 +1,4 @@
-﻿using Sdk.Client.ControlPanels.Services;
+using Sdk.Client.ControlPanels.Services;
 using SettingsConstants = Blazor.Shared.Settings.DateAndTime.Constants;
 
 namespace Blazor.Shared.UserInterface.ControlPanels.DateAndTime.Services;

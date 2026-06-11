@@ -1,0 +1,41 @@
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Externe ID-Anbieter</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Verknüpfen Sie ein Konto eines externen Identitätsanbieters mit Ihrem lokalen Benutzer, um sich über diesen Anbieter anzumelden, oder lösen Sie eine bestehende Verknüpfung wieder auf.</value>
+  </data>
+  <data name="NoProviderConfigured" xml:space="preserve">
+    <value>Für diese Instanz ist kein externer Identitätsanbieter konfiguriert.</value>
+  </data>
+  <data name="NoLinkedAccount" xml:space="preserve">
+    <value>Mit Ihrem Benutzer ist derzeit kein externes Konto verknüpft.</value>
+  </data>
+  <data name="LinkedAccount" xml:space="preserve">
+    <value>Verknüpftes Konto</value>
+  </data>
+  <data name="UnlinkAccount" xml:space="preserve">
+    <value>Verknüpfung aufheben</value>
+  </data>
+  <data name="UnlinkConfirmationBody" xml:space="preserve">
+    <value>Wenn Sie die Verknüpfung entfernen, können Sie sich nicht mehr über den externen Anbieter anmelden. Aus Sicherheitsgründen werden Sie abgemeldet und müssen sich erneut anmelden. Fortfahren?</value>
+  </data>
+  <data name="UnlinkFailedLastCredential" xml:space="preserve">
+    <value>Dies ist Ihre einzige Anmeldemethode. Legen Sie ein Passwort fest oder fügen Sie einen Passkey hinzu, bevor Sie die Verknüpfung entfernen.</value>
+  </data>
+  <data name="UnlinkFailed" xml:space="preserve">
+    <value>Die Verknüpfung des externen Kontos konnte nicht entfernt werden.</value>
+  </data>
+</root>

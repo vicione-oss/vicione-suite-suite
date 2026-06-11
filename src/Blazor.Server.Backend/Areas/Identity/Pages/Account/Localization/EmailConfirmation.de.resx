@@ -120,10 +120,10 @@
   <data name="ClickHere" xml:space="preserve">
     <value>Wenn nicht, klicken Sie hier.</value>
   </data>
-  <data name="ConfirmEmail" xml:space="preserve">
+  <data name="ConfirmationIsRequiredText" xml:space="preserve">
     <value>Sie müssen Ihre E-Mail-Adresse bestätigen, bevor Sie sich anmelden können.</value>
   </data>
-  <data name="RecievedConfirmationEmail" xml:space="preserve">
+  <data name="HowToConfirmText" xml:space="preserve">
     <value>Sie sollten bei der erstmaligen Erstellung Ihres Kontos eine E-Mail mit einem Bestätigungslink erhalten haben.</value>
   </data>
   <data name="Title" xml:space="preserve">

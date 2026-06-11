@@ -28,6 +28,7 @@
     <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
     <PackageReference Include="DevExpress.Blazor" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -487,6 +488,36 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>TagsControlPanelPageContent.resx</DependentUpon>
     </Compile>
+    <Compile Update="Profile\Localization\Passkey.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Passkey.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Profile\Localization\CommonPhrases.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CommonPhrases.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Profile\Localization\AddPasskey.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AddPasskey.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Profile\Localization\RenamePasskey.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RenamePasskey.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Profile\Localization\ValidationMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ValidationMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Profile\Localization\ExternalIdProviders.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ExternalIdProviders.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -830,6 +861,30 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TagsControlPanelPageContent.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Profile\Localization\Passkey.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Passkey.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Profile\Localization\CommonPhrases.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonPhrases.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Profile\Localization\AddPasskey.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AddPasskey.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Profile\Localization\RenamePasskey.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>RenamePasskey.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Profile\Localization\ValidationMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ValidationMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Profile\Localization\ExternalIdProviders.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ExternalIdProviders.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Target Name="ConfigureMonochromeIcons" BeforeTargets="BeforeMonochromeIconTargets">
@@ -847,6 +902,7 @@
       <MonochromeIcon Include="connectivity" Size="24;32" />
       <MonochromeIcon Include="dataflow-solid" Size="32" />
       <MonochromeIcon Include="duplicate" Size="16" />
+      <MonochromeIcon Include="delete" Size="16" />
       <MonochromeIcon Include="edit" Size="16;24" />
       <MonochromeIcon Include="edit-host" Size="32" />
       <MonochromeIcon Include="email" Size="24" />

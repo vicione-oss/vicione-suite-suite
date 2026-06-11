@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ErrorSavingPasskey" xml:space="preserve">
+    <value>Error saving passkey</value>
+  </data>
+  <data name="UserIsNotSet" xml:space="preserve">
+    <value>No user is logged in</value>
+  </data>
+  <data name="UnknownErrorDuringDeletion" xml:space="preserve">
+    <value>Unknown error while deleting passkeys</value>
+  </data>
+  <data name="PasskeyUserNotFound" xml:space="preserve">
+    <value>User not found</value>
+  </data>
+  <data name="PasskeyNotFound" xml:space="preserve">
+    <value>Passkey not found</value>
+  </data>
+  <data name="PasskeyNameInvalid" xml:space="preserve">
+    <value>The new name is invalid or exceeds the maximum length</value>
+  </data>
+  <data name="PasskeyNameAlreadyInUse" xml:space="preserve">
+    <value>The name is already in use by another passkey</value>
+  </data>
+  <data name="PasskeyRenameFailed" xml:space="preserve">
+    <value>Renaming the passkey failed</value>
+  </data>
+</root>

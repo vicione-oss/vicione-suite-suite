@@ -912,6 +912,24 @@ There, a module can register its services and UI component, e.g.:
 - **Notification elements:** a notification element with support for an icon, optional badge, and flyout
 - **Control panels:** components that enable configuration of the modules configuration or other data
 
+## Authentication
+
+ViciOne Suite requires users to be logged in to access the application.
+ASP.NET Core default functionality is used for authentication and authorization.
+It makes sure that password data is protected at rest in the local database and in transit by hashing and salting.
+
+### Authentication methods
+
+ViciOne Suite supports multiple authentication methods, including:
+- **Password:** users can log in with their local credentials. For this a password policy is enforced to ensure strong passwords.
+- **Single Sign-On (SSO):** users with an existing local account can log in using their existing credentials from other systems, e.g., OpenID Connect
+- **Passkey:** users with an existing local account can register and use passkeys for authentication
+
+### Synchronization in master/slave mode
+
+As with all data stored on master, the authentication data is synchronized to all slaves.
+This ensures that users can log in to any slave and have the same access rights as on the master.
+
 
 ## Role-based-security: Authorization in ViciOne Suite
 
@@ -1115,7 +1133,9 @@ Instance IDs can be preloaded via the `Instance` configuration section:
 
 #### 1. Context
 
-The application is an ASP.NET web application that requires **high availability and operability** even when deployed in environments with **limited or zero internet connectivity** (offline/air-gapped scenarios). Current industry best practice favors **external identity providers (IdPs)** using protocols like OpenID Connect (OIDC). However, relying solely on an external IdP introduces an **availability risk** where a loss of internet access prevents user authentication and subsequent application use.
+The application is an ASP.NET web application that requires **high availability and operability** even when deployed in environments with **limited or zero internet connectivity** (offline/air-gapped scenarios).
+Current industry best practice favors **external identity providers (IdPs)** using protocols like OpenID Connect (OIDC). 
+However, relying solely on an external IdP introduces an **availability risk** where a loss of internet access prevents user authentication and subsequent application use.
 
 * **Problem:** Exclusive reliance on OIDC/external IdPs breaks application availability in offline deployment scenarios.
 * **Requirement:** The application must maintain core user authentication functionality regardless of external network connectivity.

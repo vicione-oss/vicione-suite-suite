@@ -17,7 +17,7 @@ namespace Core.OS.Migrations.ApplicationDbContext.Sqlite
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("app")
-                .HasAnnotation("ProductVersion", "10.0.2");
+                .HasAnnotation("ProductVersion", "10.0.4");
 
             modelBuilder.Entity("Core.Shared.Instance.Contracts.CrossInstanceConfiguration", b =>
                 {
@@ -124,6 +124,32 @@ namespace Core.OS.Migrations.ApplicationDbContext.Sqlite
                     b.HasKey("InstanceId");
 
                     b.ToTable("OnboardingStates", "app");
+                });
+
+            modelBuilder.Entity("Core.Shared.UserManagement.Contracts.ExternalIdProvider", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Authority")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ClientSecret")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExternalIdProviders", "app");
                 });
 #pragma warning restore 612, 618
         }

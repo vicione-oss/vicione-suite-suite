@@ -1,4 +1,5 @@
 using System.Text;
+using Blazor.Shared;
 using Blazor.Shared.Services;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components;
@@ -27,7 +28,7 @@ public sealed partial class ConfirmEmail
     {
         if (string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Code))
         {
-            NavigationService.RedirectTo(IdentityConstants.LoginRoute);
+            NavigationService.RedirectTo(IdentityRoutes.LoginRoute);
             return;
         }
         var user = await UserManager.FindByIdAsync(UserId);

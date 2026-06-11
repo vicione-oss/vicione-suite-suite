@@ -1,4 +1,4 @@
-@attribute [Route(IdentityConstants.ConfirmMailRoute)]
+@attribute [Route(IdentityRoutes.ConfirmMailRoute)]
 
 
 @*
@@ -28,7 +28,7 @@ able to complete the login process.
             else if (_wasSuccessful is true)
             {
                 <label>@Localization.ConfirmEmail.VerificationSuccessful</label>
-                <NavigationField Route="@IdentityConstants.LoginRoute">
+                <NavigationField Route="@IdentityRoutes.LoginRoute">
                     <Content>
                         <MonochromeIcon Name="MonochromeIconName.ArrowNavigationLightLeft" Size="MonochromeIconSize.Small" />
 

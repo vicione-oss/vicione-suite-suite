@@ -3,6 +3,7 @@ using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
 using Core.OS.UserManagement.Extensions;
+using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Contracts;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
@@ -75,7 +76,7 @@ public class UpdateRoleConsumerTests
         await using var scope = tester.Services.CreateAsyncScope();
         await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
 
-        var role = new Role() { Name = SeedingExtensions.AdminRoleName };
+        var role = new Role() { Name = AuthorizationConstants.AdminRoleName };
         var command = new UpdateRole(role);
 
         // Act
@@ -84,7 +85,7 @@ public class UpdateRoleConsumerTests
         // Assert
         response.ErrorInfo.Should().NotBeNull();
         response.ErrorInfo.ErrorCode.Should().Be(RoleErrorCodes.UpdateFailed);
-        response.Role.Name.Should().Be(SeedingExtensions.AdminRoleName);
+        response.Role.Name.Should().Be(AuthorizationConstants.AdminRoleName);
     }
 
     [Fact]

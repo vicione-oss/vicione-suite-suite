@@ -59,7 +59,7 @@ public sealed class DeleteConnectionConsumerTests : TestWithDbContextSqlite<Conn
     }
 
     [Fact]
-    public async Task Remove_unknown_connection_should_publish_change_event_with_error_info()
+    public async Task Remove_unknown_connection_should_publish_success_event_for_idempotent_redelivery()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -71,7 +71,7 @@ public sealed class DeleteConnectionConsumerTests : TestWithDbContextSqlite<Conn
         // Assert
         Assert.True(await tester.Harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == CrudAction.Deleted &&
-            r.Context.Message.ErrorInfo != null &&
+            r.Context.Message.ErrorInfo == null &&
             r.Context.Message.Connection.Id == command.ConnectionId, TestContext.Current.CancellationToken));
     }
 }

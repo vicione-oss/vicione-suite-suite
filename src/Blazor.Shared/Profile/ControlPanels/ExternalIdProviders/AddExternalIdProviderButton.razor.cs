@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 
-namespace Blazor.Shared.Profile.NotificationArea;
+namespace Blazor.Shared.Profile.ControlPanels.ExternalIdProviders;
 
-public partial class AddExternalLoginButton(
+public partial class AddExternalIdProviderButton(
     IJSRuntime jsRuntime,
-    ILogger<AddExternalLoginButton> logger) : ComponentBase
+    ILogger<AddExternalIdProviderButton> logger) : ComponentBase
 {
     private ElementReference _form;
 
@@ -22,4 +22,3 @@ public partial class AddExternalLoginButton(
         }
     }
 }
-

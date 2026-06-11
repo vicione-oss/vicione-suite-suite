@@ -264,10 +264,9 @@ internal sealed partial class ApplicationWorker(
         if (cancellationToken.IsCancellationRequested)
             return;
 
-        logger.LogMigratingApplicationDatabases();
-
-        await scope.ServiceProvider.MigrateContext<IApplicationDbContext>(cancellationToken);
+        logger.LogTrace("Migrating application databases");
         await scope.ServiceProvider.MigrateContext<UserDbContext>(cancellationToken);
+        await scope.ServiceProvider.MigrateContext<IApplicationDbContext>(cancellationToken);
         await scope.ServiceProvider.MigrateContext<IConnectionDbContext>(cancellationToken);
 
         // force regeneration of users security stamps to invalidate current logins

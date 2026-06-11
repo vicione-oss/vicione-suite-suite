@@ -1,0 +1,56 @@
+# Integration tests that need external services (currently SMTP/mail via a mailpit service).
+# Manual job, triggered on demand and separate from the automatic unit-test run.
+#
+# Shared snippets use `!reference`: YAML anchors (&/*) are file-local and don't cross `include`.
+"Integration tests":
+  stage: test
+  needs: []
+  interruptible: true
+  timeout: 20m
+  tags:
+    - saas-linux-medium-amd64
+  services:
+    - name: axllent/mailpit:v1.30.1
+      alias: mailpit
+  variables:
+    RUNNER_ARCH: amd64
+    # Share a network with the service so the job can reach it by alias.
+    FF_NETWORK_PER_BUILD: "true"
+    MAILPIT_SMTP_HOST: mailpit
+    MAILPIT_SMTP_PORT: "1025"
+    MAILPIT_API_URL: http://mailpit:8025
+    MAILPIT_SMTP_USERNAME: smtp-tester
+    MAILPIT_SMTP_PASSWORD: MailpitTest123!
+    # Passed into the mailpit service container to configure it (sans: = self-signed cert).
+    MP_SMTP_AUTH: "$MAILPIT_SMTP_USERNAME:$MAILPIT_SMTP_PASSWORD"
+    MP_SMTP_REQUIRE_STARTTLS: "true"
+    MP_SMTP_TLS_CERT: sans:mailpit
+    MP_SMTP_TLS_KEY: sans:mailpit
+  cache:
+    # Pull-only: reuse the caches the automatic unit-test job seeds.
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      policy: pull
+    - key:
+        prefix: nuget-${RUNNER_ARCH}-v2
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
+      paths:
+        - .nuget/packages/
+        - ./**/obj/
+      policy: pull
+  before_script:
+    - !reference [.activate_mise]
+    - !reference [.update_nuget_source_ro]
+    - !reference [.install_npm_packages]
+    - !reference [.run_npm_scripts]
+  script:
+    - dotnet test tests/Core.OS.Tests/Core.OS.Tests.csproj --filter-query "/[Category=Integration]"
+  rules: !reference [.rules_common_manual]

@@ -59,7 +59,7 @@ public class SendVerifyEmailAddressLinkConsumerTest
     }
 
     [Fact]
-    public async Task Should_handle_exceptions_and_not_rethrow_them()
+    public async Task Should_fault_when_user_not_found()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -67,10 +67,9 @@ public class SendVerifyEmailAddressLinkConsumerTest
         await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
         await scope.ServiceProvider.SeedTestRole();
 
-        // Act
+        // Act & Assert — ADR-002: exceptions propagate; consumer throws InvalidOperationException for unknown user.
         var command = new SendVerifyEmailAddressLink("some non existent id", "callbackLink");
-
-        // Assert
-        await tester.TestCommand<SendVerifyEmailAddressLink, SendVerifyEmailAddressLinkConsumer>(command);
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => tester.TestCommandFault<SendVerifyEmailAddressLink, SendVerifyEmailAddressLinkConsumer>(command));
     }
 }

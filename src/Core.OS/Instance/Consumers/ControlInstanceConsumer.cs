@@ -46,6 +46,11 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         if (targetInstance is null)
         {
             LogInstanceNotPartOfSystem(_logger, correlationId, instanceId);
+
+            // Publish completion for Delete to unblock orchestrators waiting on the event
+            if (context.Message.Action == InstanceCommand.Delete)
+                await context.Publish(new ControlInstanceCompleted(instanceId, InstanceCommand.Delete), context.CancellationToken);
+
             return;
         }
 

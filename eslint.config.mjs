@@ -10,6 +10,8 @@ export default [
             '**/wwwroot/js/*.js',
             '**/bin',
             'src/Blazor.Shared/Scripts/*.js',
+            'src/Blazor.Server.Backend/**/*Passkey*.razor.js',
+            'src/Blazor.Shared/**/*Passkey*.razor.js',
             'tests/**/*.js',
             '**/*.d.ts',
             '.nuget/**' // Ignore NuGet package cache (contains vendor JS files after caching implementation)

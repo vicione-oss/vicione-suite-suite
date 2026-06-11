@@ -2,6 +2,7 @@
 using Core.OS.Mail;
 using Core.OS.Mail.MailKit;
 using Core.Shared.Mail;
+using Core.Tests.Tools;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -11,25 +12,51 @@ namespace Core.OS.Tests.Mail;
 
 public class MailingTests
 {
-    private const string ExistingUser = "Eddy";
-    private const string CorrectPassword = "Up2noGood!!!";
-    private const string TestServer = "mailpit.infra.ifm-sw.net";
-    private const int ServerPort = 1025;
+    // Credentials and SMTP target are resolved from the environment so CI can run the
+    // tests against the mailpit instance it provides. The defaults match a mailpit
+    // started locally (see docs/integration-testing.md).
+    private static readonly string ExistingUser
+        = IntegrationServiceSettings.GetValue("MAILPIT_SMTP_USERNAME", "smtp-tester");
+
+    private static readonly string CorrectPassword
+        = IntegrationServiceSettings.GetValue("MAILPIT_SMTP_PASSWORD", "MailpitTest123!");
+
+    // Deliberately wrong: appending guarantees a mismatch regardless of the configured password.
+    private static readonly string IncorrectPassword = $"{CorrectPassword}-invalid";
+
+    private static readonly string TestServer = IntegrationServiceSettings.GetHost("MAILPIT_SMTP_HOST");
+    private static readonly int ServerPort = IntegrationServiceSettings.GetPort("MAILPIT_SMTP_PORT", 1025);
+
+    // mailpit HTTP API, used to verify the delivered message. Defaults to the local web UI port.
+    private static readonly string MailpitApiUrl
+        = IntegrationServiceSettings.GetValue("MAILPIT_API_URL", "http://localhost:8025");
 
     [Fact]
     [Trait("Category", Traits.Integration)]
     public async Task Sending_mail_with_correct_password_works_as_expected()
     {
         // Arrange
-        var sender = CreateMailkitMailSender(CorrectPassword);
-        var email = CreateMessage(to: "mail-alert@localhost",
-            subject: "Test",
-            message: $"""
-                      <html><div>This message was sent by test <em>{nameof(Sending_mail_with_correct_password_works_as_expected)}</em></div></html>
-                      """);
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var mailpit = new MailpitClient(new Uri(MailpitApiUrl));
 
-        // Act + Assert
-        await sender.SendMail(email, TestContext.Current.CancellationToken);
+        var sender = CreateMailkitMailSender(CorrectPassword);
+        const string recipient = "mail-alert@localhost";
+        const string subject = "Test";
+        var uniqueMessageIdentifier = Guid.NewGuid().ToString();
+        var body = $"""
+                    <html><div>This message was sent by test <em>{uniqueMessageIdentifier}</em></div></html>
+                    """;
+        var email = CreateMessage(to: recipient, subject: subject, message: body);
+
+        // Act
+        await sender.SendMail(email, cancellationToken);
+
+        // Assert: mailpit received exactly the message we sent, located by its unique identifier.
+        var matches = await mailpit.SearchMessages(uniqueMessageIdentifier, cancellationToken);
+        var received = Assert.Single(matches);
+        Assert.Equal(subject, received.Subject);
+        Assert.Equal(recipient, received.To.Single().Address);
+        Assert.Equal("Integration@localhost", received.From?.Address);
     }
 
     [Fact]
@@ -37,13 +64,14 @@ public class MailingTests
     public async Task Sending_mail_with_incorrect_password_fails_as_expected()
     {
         // Arrange
-        var sender = CreateMailkitMailSender(CorrectPassword.ToUpperInvariant());
+        var sender = CreateMailkitMailSender(IncorrectPassword);
         var email = CreateMessage(to: "admin@localhost",
             subject: "Test",
             message: "This message should never be sent, as authentication is supposed to fail.");
 
         // Act + Assert
-        await Assert.ThrowsAnyAsync<AuthenticationException>(() => sender.SendMail(email, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAnyAsync<AuthenticationException>(()
+            => sender.SendMail(email, TestContext.Current.CancellationToken));
     }
 
     private static MailkitMailSender CreateMailkitMailSender(string password)
@@ -56,14 +84,14 @@ public class MailingTests
 
     private static SmtpMailOptions CreateSmtpOptions(string fromUserName,
         string password,
-        string serverAddress = TestServer)
+        string? serverAddress = null)
     {
         var smtpMailOptions = new SmtpMailOptions
         {
             FromAddress = "Integration@localhost",
             FromUserName = fromUserName,
             Password = password,
-            ServerAddress = serverAddress,
+            ServerAddress = serverAddress ?? TestServer,
             ServerPort = ServerPort
         };
         return smtpMailOptions;

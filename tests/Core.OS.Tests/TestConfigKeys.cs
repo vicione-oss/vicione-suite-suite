@@ -16,7 +16,6 @@ internal static class TestConfigKeys
         public const string IdPreload = $"{InstanceOptions.ConfigSection}:{nameof(InstanceOptions.IdPreload)}";
         public const string NamePreload = $"{InstanceOptions.ConfigSection}:{nameof(InstanceOptions.NamePreload)}";
         public const string DescriptionPreload = $"{InstanceOptions.ConfigSection}:{nameof(InstanceOptions.DescriptionPreload)}";
-        public const string UseExternalSecurity = $"{InstanceOptions.ConfigSection}:{nameof(InstanceOptions.UseExternalSecurity)}";
     }
 
     public static class Logging

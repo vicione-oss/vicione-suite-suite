@@ -1,3 +1,4 @@
+﻿using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,10 +23,10 @@ internal static class UserManagerExtensions
             var userRoles = (await userManager.GetRolesAsync(user)).Select(r => new SuiteRole(r));
 
             // is it an sys admin at all?
-            if (userRoles.All(r => r.Name != SeedingExtensions.AdminRoleName))
+            if (userRoles.All(r => r.Name != AuthorizationConstants.AdminRoleName))
                 return false;
 
-            var sysAdmins = await userManager.GetUsersInRoleAsync(SeedingExtensions.AdminRoleName);
+            var sysAdmins = await userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName);
             if (sysAdmins.Count == 0)
                 throw new InvalidOperationException("No System Administrator left");
 

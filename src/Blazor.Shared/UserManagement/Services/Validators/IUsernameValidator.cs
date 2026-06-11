@@ -2,7 +2,7 @@
 
 namespace Blazor.Shared.UserManagement.Services.Validators;
 
-internal interface IUsernameValidator
+public interface IUsernameValidator
 {
     bool Validate(string username, [MaybeNullWhen(true)] out string errorMessage);
 }

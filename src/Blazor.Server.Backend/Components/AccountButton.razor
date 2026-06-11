@@ -9,4 +9,10 @@
     }
 }
 
-<button class="account-button @(ButtonType.ToString().ToHyphenSeparated())" type="submit" disabled="@Disabled" @attributes="additionalAttributes">@Text</button>
+<button class="account-button @(ButtonType.ToString().ToHyphenSeparated())"
+        type="submit"
+        disabled="@Disabled"
+        name="@Name"
+        @attributes="additionalAttributes">
+    @Text
+</button>

@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using Blazor.Server.Backend.Areas.Identity.Pages.Models;
 using Blazor.Server.Backend.Localization;
+using Blazor.Shared;
 using Blazor.Shared.Services;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components;
@@ -57,7 +58,7 @@ public sealed partial class ResetPasswordContent
         if (user == null || !await UserManager.IsEmailConfirmedAsync(user) || string.IsNullOrEmpty(_code))
         {
             // Don't reveal that the user does not exist
-            NavigationService.RedirectTo(IdentityConstants.ResetPasswordConfirmationRoute);
+            NavigationService.RedirectTo(IdentityRoutes.ResetPasswordConfirmationRoute);
             return;
         }
 
@@ -72,7 +73,7 @@ public sealed partial class ResetPasswordContent
         var result = await UserManager.ResetPasswordAsync(user, _code, Input.NewPassword);
         if (result.Succeeded)
         {
-            NavigationService.RedirectTo(IdentityConstants.ResetPasswordConfirmationRoute);
+            NavigationService.RedirectTo(IdentityRoutes.ResetPasswordConfirmationRoute);
             return;
         }
 

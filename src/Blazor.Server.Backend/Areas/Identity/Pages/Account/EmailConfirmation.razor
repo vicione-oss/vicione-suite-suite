@@ -1,4 +1,4 @@
-@attribute [Route(IdentityConstants.EmailConfirmationRoute)]
+@attribute [Route(IdentityRoutes.EmailConfirmationRoute)]
 @attribute [AllowAnonymous]
 
 @using Blazor.Server.Backend.Components
@@ -10,10 +10,10 @@
     <Heading>@Localization.EmailConfirmation.Title</Heading>
     <LeftSideContent>
         <div>
-            <label>@Localization.EmailConfirmation.ConfirmEmail</label>
-            <label>@Localization.EmailConfirmation.RecievedConfirmationEmail</label>
+            <label>@Localization.EmailConfirmation.ConfirmationIsRequiredText</label>
+            <label>@Localization.EmailConfirmation.HowToConfirmText</label>
 
-            <NavigationField Route="@IdentityConstants.ResendEmailConfirmationRoute">
+            <NavigationField Route="@IdentityRoutes.ResendEmailConfirmationRoute">
                 <Content>
                     @Localization.EmailConfirmation.ClickHere
                 </Content>

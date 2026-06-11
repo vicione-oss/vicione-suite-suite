@@ -1,0 +1,39 @@
+﻿@using Blazor.Server.Backend.Enums
+@using Blazor.Shared.Profile.Models
+@using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.DependencyInjection
+@inject IServiceProvider Services
+
+<script src="./_content/Blazor.Server.Backend/Components/PasskeySubmit.razor.js"></script>
+
+<AccountButton name="__passkeySubmit" Text="@Text" ButtonType="AccountButtonType.Default" />
+<passkey-submit
+    operation="@Operation"
+    name="@Name"
+    email-name="@EmailName"
+    request-token-name="@tokens?.HeaderName"
+    request-token-value="@tokens?.RequestToken">
+</passkey-submit>
+
+@code {
+    private AntiforgeryTokenSet? tokens;
+
+    [CascadingParameter] private HttpContext HttpContext { get; set; } = default!;
+
+    [Parameter] [EditorRequired] public PasskeyOperation Operation { get; set; }
+
+    [Parameter] [EditorRequired] public string Name { get; set; } = default!;
+
+    [Parameter] public string? EmailName { get; set; }
+
+    [Parameter] public string Text { get; set; } = null!;
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IDictionary<string, object>? AdditionalAttributes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        tokens = Services.GetService<IAntiforgery>()?.GetTokens(HttpContext);
+    }
+}

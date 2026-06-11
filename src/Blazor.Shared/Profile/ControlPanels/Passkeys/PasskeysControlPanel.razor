@@ -1,0 +1,44 @@
+@using Blazor.Shared.Services
+@using Blazor.Shared.Profile.Localization
+@using Core.Shared.UserManagement.Contracts
+@using Microsoft.AspNetCore.Identity
+@using Sdk.Authorization
+@using Sdk.Client.ControlPanels.Attributes
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+@using CommonPhrases = Blazor.Shared.Profile.Localization.CommonPhrases
+
+@inherits ControlPanelBase<PasskeysControlPanelState>
+
+@attribute [ControlPanelCategory<ProfileCategoryDescriptor>]
+@attribute [ControlPanelGroup<SecondaryControlPanelGroupDescriptor>]
+@attribute [ModuleAuthorize(SharedClientModule.ModuleId)]
+
+@inject UserManager<SuiteUser> UserManager
+
+<ControlPanelPage Title="@Passkey.PasskeyTermPlural">
+    <DescriptionBanner Title="@Passkey.SettingsTitle">
+        @CommonPhrases.PasskeysDescription
+    </DescriptionBanner>
+    <Grid Items="Passkeys">
+        <ActionButtons>
+            <AddGridActionButton OnClick="@ShowAddPasskey"></AddGridActionButton>
+            <EditGridActionButton Enabled="@IsSinglePasskeySelected" OnClick="@ShowRenamePasskey"></EditGridActionButton>
+            <DeleteGridActionButton OnClick="@MarkPasskeysForDeletion"></DeleteGridActionButton>
+        </ActionButtons>
+
+        <ChildContent>
+            <ItemSelectColumn KeySelector="item => item.Id"
+                              Selection="@SelectedPasskeys"/>
+
+            <PropertyColumn Title="@CommonVocabulary.Name" Property="item => item.Name"/>
+        </ChildContent>
+
+        <Footer>
+            <SelectionFooter GridSelection="SelectedPasskeys"/>
+        </Footer>
+    </Grid>
+</ControlPanelPage>

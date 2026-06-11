@@ -1,4 +1,5 @@
 ﻿using Core.Shared.Instance.Contracts;
+using Core.Shared.UserManagement.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Persistence;
 
@@ -10,4 +11,5 @@ public interface IApplicationDbContext : IModuleDbContext
     DbSet<CrossInstanceConfiguration> CrossInstanceConfiguration { get; }
     DbSet<Nonce> Nonces { get; }
     DbSet<OnboardingState> OnboardingStates { get; }
+    DbSet<ExternalIdProvider> ExternalIdProviders { get; }
 }
