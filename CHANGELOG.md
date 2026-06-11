@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.2 - Unreleased
+## 1.2.2 - 2026-06-11
 
 ### Added
 
@@ -43,6 +43,7 @@
 - `ViciOne.Ui.Design` package, update version to `2.1.0`
 - `ViciOne.Ui.Localization` packages, update to version `3.4.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update version to `4.11.0`
+- `ViciOne.Ui.TreeEditor` packages, update to version `2.0.1`
 
 ## 1.2.1 - 2026-05-12
 
