@@ -1,10 +1,11 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
 using HostManagement.Shared.Contracts;
+using HostManagement.Shared.Contracts.Network;
 using HostManagement.Shared.Contracts.Service;
 using HostManagement.Shared.Enums;
 using MassTransit;
@@ -119,6 +120,83 @@ public sealed class SetSystemConfigurationConsumerTests
             ]
         };
         var command = new SetSystemConfiguration(config);
+
+        // Act
+        await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(command);
+
+        // Assert
+        (await tester.Harness.Published.Any<SystemRestartRequired>(TestContext.Current.CancellationToken)).Should().BeFalse();
+        (await tester.Harness.Published.Any<SystemConfigurationChanged>(TestContext.Current.CancellationToken)).Should().BeTrue();
+    }
+
+    [Theory]
+    [InlineData("http")]
+    [InlineData("https")]
+    [InlineData("ftp")]
+    [InlineData("sftp")]
+    public async Task Should_publish_restart_required_when_proxy_settings_changed(string protocol)
+    {
+        // Arrange
+        var pipeClient = Substitute.For<IPipeClient>();
+        var oldProxy = new NetworkProxyDetail { Enabled = true, Server = "old.proxy.com", Port = 8080 };
+        var newProxy = new NetworkProxyDetail { Enabled = true, Server = "new.proxy.com", Port = 9090 };
+
+        var previousProxySettings = new NetworkProxySettings();
+        var appliedProxySettings = new NetworkProxySettings();
+        switch (protocol)
+        {
+            case "http":
+                previousProxySettings.HTTP = oldProxy;
+                appliedProxySettings.HTTP = newProxy;
+                break;
+            case "https":
+                previousProxySettings.HTTPS = oldProxy;
+                appliedProxySettings.HTTPS = newProxy;
+                break;
+            case "ftp":
+                previousProxySettings.FTP = oldProxy;
+                appliedProxySettings.FTP = newProxy;
+                break;
+            case "sftp":
+                previousProxySettings.SFTP = oldProxy;
+                appliedProxySettings.SFTP = newProxy;
+                break;
+        }
+
+        pipeClient.SetupGetSystemConfigurationResult(OperationStatus.Success, new SystemConfiguration { NetworkProxySettings = previousProxySettings });
+        pipeClient.SetupSetSystemConfigurationResult(OperationStatus.Success);
+
+        await using var tester = new MassTransitTester(cfg => ConfigureServices(cfg, pipeClient));
+        var command = new SetSystemConfiguration(new SystemConfiguration { NetworkProxySettings = appliedProxySettings });
+
+        // Act
+        await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(command);
+
+        // Assert
+        (await tester.Harness.Published.Any<SystemRestartRequired>(TestContext.Current.CancellationToken)).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_not_publish_restart_required_when_proxy_settings_are_unchanged()
+    {
+        // Arrange
+        var pipeClient = Substitute.For<IPipeClient>();
+        var proxyDetail = new NetworkProxyDetail { Enabled = true, Server = "proxy.com", Port = 8080 };
+
+        pipeClient.SetupGetSystemConfigurationResult(OperationStatus.Success, new SystemConfiguration
+        {
+            NetworkProxySettings = new NetworkProxySettings { HTTP = proxyDetail }
+        });
+        pipeClient.SetupSetSystemConfigurationResult(OperationStatus.Success);
+
+        await using var tester = new MassTransitTester(cfg => ConfigureServices(cfg, pipeClient));
+        var command = new SetSystemConfiguration(new SystemConfiguration
+        {
+            NetworkProxySettings = new NetworkProxySettings
+            {
+                HTTP = new NetworkProxyDetail { Enabled = true, Server = "proxy.com", Port = 8080 }
+            }
+        });
 
         // Act
         await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(command);

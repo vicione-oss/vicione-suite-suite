@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Core.OS.HostManagement;
 using HostManagement.Shared.Communication;
+using HostManagement.Shared.Contracts;
 using NSubstitute;
 using CommunicationJsonContext = HostManagement.Shared.Communication.Contracts.SourceGenerationContext;
 using CommunicationEnums = HostManagement.Shared.Communication.Enums;
@@ -19,6 +20,19 @@ internal static class IPipeClientExtensions
                 Status = status,
                 Message = message,
                 Configuration = TestPipeClient.GetEmbeddedSystemConfiguration()
+            };
+
+            pipeClient.SendRequest(Topics.GetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.GetSystemConfigurationResult));
+        }
+
+        public void SetupGetSystemConfigurationResult(CommunicationEnums.OperationStatus status, SystemConfiguration configuration, string message = "OK")
+        {
+            var result = new CommunicationContracts.GetSystemConfigurationResult
+            {
+                Status = status,
+                Message = message,
+                Configuration = configuration
             };
 
             pipeClient.SendRequest(Topics.GetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())

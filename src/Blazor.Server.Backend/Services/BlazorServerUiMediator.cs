@@ -73,6 +73,6 @@ public sealed partial class BlazorServerUiMediator(ISuiteMediator suiteMediator,
         _scopeIdentity = httpContext?.User.Identity!;
     }
 
-    [LoggerMessage(1, LogLevel.Debug, "UI register consumer={Consumer} event={Event} user={User}")]
+    [LoggerMessage(LogLevel.Trace, "UI register consumer={Consumer} event={Event} user={User}")]
     private static partial void LogRegisterEvent(ILogger<BlazorServerUiMediator> logger, string? Consumer, string? Event, string? User);
 }
