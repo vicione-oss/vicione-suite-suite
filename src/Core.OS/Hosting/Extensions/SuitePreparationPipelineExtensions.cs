@@ -186,8 +186,8 @@ internal static class SuitePreparationPipelineExtensions
             // now we restore all modules from backup archive to home directory
             var homeDirectory = fileSystem.GetRootedHomeDirectory(options);
             logger.Debug("Restoring home workspaces in '{Home}'", homeDirectory);
-            BackupReader.ExtractSystemModuleTo(archiveStream, homeDirectory);
-            BackupReader.ExtractModulesTo(archiveStream, homeDirectory);
+            await BackupReader.ExtractSystemModuleTo(archiveStream, homeDirectory, cancellationToken);
+            await BackupReader.ExtractModulesTo(archiveStream, homeDirectory, null, cancellationToken);
 
             InstanceStartupState.InvalidateLoginsAfterMigration = true;
         }

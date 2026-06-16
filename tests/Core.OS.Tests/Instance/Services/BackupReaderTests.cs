@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using Core.OS.Instance.Services;
@@ -172,14 +172,14 @@ public class BackupReaderTests
 
         [Trait(Traits.Category, Traits.System)]
         [Fact]
-        public void Should_extract_all_modules_from_backup_to_destination()
+        public async Task Should_extract_all_modules_from_backup_to_destination()
         {
             // Arrange
             using var services = CreateServices();
             var fileSystem = services.GetRequiredService<IFileSystem>();
 
             // Act
-            BackupReader.ExtractModulesTo(fileSystem, TestResources.BackupZip, _destinationPath);
+            await BackupReader.ExtractModulesTo(fileSystem, TestResources.BackupZip, _destinationPath, cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
             Directory.Exists(_destinationPath);
@@ -192,14 +192,14 @@ public class BackupReaderTests
 
         [Trait(Traits.Category, Traits.System)]
         [Fact]
-        public void Should_extract_system_module_from_backup_to_destination()
+        public async Task Should_extract_system_module_from_backup_to_destination()
         {
             // Arrange
             using var services = CreateServices();
             var fileSystem = services.GetRequiredService<IFileSystem>();
 
             // Act
-            BackupReader.ExtractSystemModuleTo(fileSystem, TestResources.BackupZip, _destinationPath);
+            await BackupReader.ExtractSystemModuleTo(fileSystem, TestResources.BackupZip, _destinationPath, cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
             Directory.Exists(_destinationPath);
