@@ -3,7 +3,6 @@ using Core.OS.Connections.Extensions;
 using Core.OS.Connections.Mqtt;
 using Core.OS.DbContext;
 using Core.OS.Instance.Commands;
-using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Initialization;
 using Core.OS.Instance.Services;
 using Core.OS.MessageBus.Extensions;
@@ -39,7 +38,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
 
             LogRegisteringInstance(logger, correlationId, isNewInstance ? "Registering" : "Updating registration of", context.Message.Type, instanceId);
 
-            // Attention: for slave synchronisation we have to ensure that db changes are only triggered after routing slip has completed
+            // Attention: for slave synchronization we have to ensure that db changes are only triggered after routing slip has completed
             // otherwise we'll run into concurrency issues (modify not existing rows etc.)
             // In this case the db updates will be done on RoutingSlipCompleted
             if (context.Message.Type == InstanceType.Slave)
@@ -53,6 +52,8 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
                     instanceId,
                     context.Message.InstalledModules,
                     isNewInstance,
+                    context.Message.ForceSync,
+                    context.Message.LastAppliedSequences,
                     config,
                     context.CancellationToken);
 
@@ -163,6 +164,8 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
         Guid instanceId,
         IEnumerable<string> installedModules,
         bool isNewInstance,
+        bool forceSync,
+        Dictionary<string, long> lastAppliedSequences,
         IConfiguration configuration,
         CancellationToken cancellation)
     {
@@ -170,9 +173,17 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
             .SingleOrDefaultAsync(i => i.Id == instanceId, cancellation))?.LastRegistered;
         var queueLifetime = configuration.GetMessageBusOptions().QueueLifetimeInDays;
 
-        var isOutOfSync = lastRegistered?.AddDays(queueLifetime) < DateTimeOffset.Now;
+        // Use <= to cover the exact boundary: at exactly QueueLifetimeInDays, RabbitMQ may
+        // have already deleted the queue (race with broker GC). Better to resync than miss messages.
+        var isOutOfSync = lastRegistered?.AddDays(queueLifetime) <= DateTimeOffset.Now;
 
-        if (isNewInstance || isOutOfSync)
+        // ADR-003 Gap 4: Detect sequence mismatch caused by master restart or broker data loss.
+        // If the slave reports sequences higher than the master's current counter (master restarted
+        // with counter reset), or the master's counter is significantly ahead of the slave's
+        // reported position (slave missed messages), trigger full-sync.
+        var hasSequenceMismatch = DetectSequenceMismatch(lastAppliedSequences);
+
+        if (isNewInstance || isOutOfSync || forceSync || hasSequenceMismatch)
         {
             var arguments = await SyncDataHelpers.CreateSyncDataArgumentsPg(services, installedModules, cancellation);
             foreach (var argument in arguments)
@@ -181,6 +192,37 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
                 LogAddSyncActivity(logger, instanceId, argument.DbContextTypeName, argument.Table);
             }
         }
+    }
+
+    /// <summary>
+    ///     Detects sequence number mismatches between a slave's reported last-applied sequences
+    ///     and the master's current counter state (ADR-003 Gap 4).
+    /// </summary>
+    private bool DetectSequenceMismatch(Dictionary<string, long> slaveSequences)
+    {
+        if (slaveSequences.Count == 0)
+            return false; // Fresh slave or first startup — handled by isNewInstance
+
+        var masterCounter = services.GetRequiredService<ReplicationSequenceCounter>();
+
+        foreach (var (contextType, slaveLastApplied) in slaveSequences)
+        {
+            var masterCurrent = masterCounter.Current(contextType);
+
+            // Slave reports a higher sequence than master knows about → master restarted
+            // and its counter wasn't fully restored (defense-in-depth).
+            if (slaveLastApplied > masterCurrent)
+            {
+                LogSequenceMismatchDetected(logger, contextType, slaveLastApplied, masterCurrent, "slave ahead of master");
+                return true;
+            }
+
+            // "Master ahead of slave" is intentionally not checked here — handled by the
+            // queue TTL expiry (isOutOfSync) and the ReplicationSequenceTracker's buffer
+            // timeout on the slave side. See ADR-003, Gap 4 sequence exchange table.
+        }
+
+        return false;
     }
 
     private async Task<IConfiguration> HandleSlaveInstanceConfiguration(Guid correlationId, Guid instanceId, List<KeyValuePair<string, string?>> configuration)
@@ -352,4 +394,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
 
     [LoggerMessage(Level = LogLevel.Error, Message = "One or more errors occurred when synchronizing data for instance {InstanceId}:{NewLine}{ErrorList}")]
     private static partial void LogInstanceSynchronizationFailed(ILogger<RegisterInstanceConsumer> logger, Guid instanceId, string newLine, string errorList);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Sequence mismatch detected for context '{ContextType}': slave reports {SlaveSequence}, master has {MasterSequence} ({Reason}). Triggering full-sync.")]
+    private static partial void LogSequenceMismatchDetected(ILogger<RegisterInstanceConsumer> logger, string contextType, long slaveSequence, long masterSequence, string reason);
 }

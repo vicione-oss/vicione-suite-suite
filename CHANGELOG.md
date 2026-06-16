@@ -4,6 +4,9 @@
 
 ### Added
 
+- MassTransit EF Core Bus Outbox for master-side replication publishing. `ChangeTrackingInterceptor` now publishes during `SavingChangesAsync` instead of after commit, eliminating silent data loss when the broker is unreachable.
+- Replication sequence numbers with in-memory reorder buffer. Monotonically increasing sequence numbers per context type enable gap detection on slaves. A reorder buffer absorbs brief out-of-order delivery from the Bus Outbox; persistent gaps trigger a forced full-sync.
+- `RegisterInstance.ForceSync` flag to force full data synchronization regardless of queue TTL, used by the gap-triggered resync path.
 - Support for passkey authentication, allowing users with an existing local account to register and use passkeys for authentication
 - Support for renaming passkeys from the profile settings
 - Ability to remove the link between a local user and an external identity provider account from the external ID providers settings
@@ -12,7 +15,7 @@
 
 ### Fixed
 
-- Consumer idempotency (ADR-002): all delete and replication consumers now handle message redelivery safely
+- Consumer idempotency: all delete and replication consumers now handle message redelivery safely
   - `DbChangeSetConsumer`, upsert semantics ensure redelivered messages no longer cause silent data loss
   - `ControlInstanceConsumer`, delete redelivery publishes completion event to unblock orchestrators
   - `DeleteUserConsumer` and `DeleteRoleConsumer`, delete redelivery publishes success instead of spurious error

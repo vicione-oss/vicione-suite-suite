@@ -5,6 +5,7 @@ using Core.OS.HostManagement;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
+using Core.OS.Instance.Services;
 using Core.OS.Logging;
 using Core.OS.Modules;
 using Core.OS.Persistence;

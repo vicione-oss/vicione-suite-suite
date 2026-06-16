@@ -1,5 +1,7 @@
 using System.Text;
 using Core.OS.Instance.Contracts;
+using Core.OS.Instance.Services;
+using Core.OS.Persistence;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Persistence;
@@ -16,6 +18,8 @@ public sealed class SyncDataActivity(IServiceProvider services, ILogger<SyncData
         if (context.Arguments.SyncCompleted)
         {
             _logger.LogDebug("Initial Sync finished. Allowing regular message processing");
+            _services.GetRequiredService<ReplicationSequenceTracker>().Reset();
+            _services.GetRequiredService<SyncRetryState>().Reset();
             _services.GetRequiredService<SynchronizationState>().CompleteSynchronization();
             return context.Completed();
         }

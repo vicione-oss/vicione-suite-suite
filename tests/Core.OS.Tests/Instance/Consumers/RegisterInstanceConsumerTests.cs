@@ -2,7 +2,6 @@
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Consumers;
-using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Services;
 using Core.OS.Persistence;
 using Core.Shared.Instance.Requests;
@@ -18,7 +17,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class RegisterInstanceConsumerTests : TestWithDbContextSqlite<ApplicationDbContextSqlite>
+public partial class RegisterInstanceConsumerTests : TestWithDbContextSqlite<ApplicationDbContextSqlite>
 {
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 

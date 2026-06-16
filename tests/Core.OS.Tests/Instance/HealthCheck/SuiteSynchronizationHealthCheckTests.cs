@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.HealthCheck;
+using Core.OS.Instance.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
