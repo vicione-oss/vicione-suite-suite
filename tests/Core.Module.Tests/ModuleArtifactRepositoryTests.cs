@@ -10,6 +10,7 @@ using Sdk.Testing;
 using Xunit;
 using Core.Artifacts;
 using Core.Artifacts.Extensions;
+using Core.Module.Utils;
 
 namespace Core.Module.Tests;
 
@@ -17,7 +18,7 @@ public class ModuleArtifactRepositoryTests
 {
     private readonly Version _sdkVersion = new(2, 1, 0);
     private readonly string _packageName = "ViciOne.Suite.ClusterManagement";
-    private readonly string _packageVersion = "1.2.7";
+    private readonly string _packageVersion = "2.1.0";
 
     private static ServiceProvider CreateServiceProvider()
     {
@@ -255,10 +256,61 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var assets = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, _packageName, TestContext.Current.CancellationToken);
+            var asset = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, _packageName, null, null, TestContext.Current.CancellationToken);
 
             // Assert
-            assets.Should().NotBeNull();
+            asset.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task Should_return_latest_module_metadata_asset_with_fixed_major_version()
+        {
+            // Arrange
+            await using var services = CreateServiceProvider();
+            var repository = services.GetRequiredService<ModuleArtifactRepository>();
+            var major = 2;
+
+            // Act
+            var asset = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, _packageName, major, null, TestContext.Current.CancellationToken);
+
+            // Assert
+            asset.Should().NotBeNull();
+            ModuleNameVersionRegex.GetModuleVersion(asset.Name, out var moduleVersion).Should().BeTrue();
+            moduleVersion!.Major.Should().Be(major);
+        }
+
+        [Fact]
+        public async Task Should_return_latest_module_metadata_asset_with_fixed_major_and_minor_version()
+        {
+            // Arrange
+            await using var services = CreateServiceProvider();
+            var repository = services.GetRequiredService<ModuleArtifactRepository>();
+            var major = 2;
+            var minor = 1;
+
+            // Act
+            var asset = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, _packageName, major, minor, TestContext.Current.CancellationToken);
+
+            // Assert
+            asset.Should().NotBeNull();
+            ModuleNameVersionRegex.GetModuleVersion(asset.Name, out var moduleVersion).Should().BeTrue();
+            moduleVersion!.Major.Should().Be(major);
+            moduleVersion!.Minor.Should().Be(minor);
+        }
+
+        [Fact]
+        public async Task Should_return_null_if_no_latest_version_is_available()
+        {
+            // Arrange
+            await using var services = CreateServiceProvider();
+            var repository = services.GetRequiredService<ModuleArtifactRepository>();
+            var major = 200;
+
+            // Act
+            var asset = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, _packageName, major, 1, TestContext.Current.CancellationToken);
+
+            // Assert
+            asset.Should().BeNull();
         }
 
         [Fact]
@@ -269,7 +321,7 @@ public class ModuleArtifactRepositoryTests
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
 
             // Act
-            var result = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, "Unknown.Package", TestContext.Current.CancellationToken);
+            var result = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, "Unknown.Package", null, null, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeNull();

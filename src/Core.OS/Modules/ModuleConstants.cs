@@ -1,4 +1,4 @@
-﻿namespace Core.OS.Modules;
+namespace Core.OS.Modules;
 
 internal static class ModuleConstants
 {
@@ -14,6 +14,8 @@ internal static class ModuleConstants
     /// where suite should resolve latest version.
     /// </summary>
     public const string LatestVersionKey = "latest";
+
+    public const string LatestVersionLimitIndicator = ".*";
 
     public const string UnresolvedVersionMarker = "n/a";
 

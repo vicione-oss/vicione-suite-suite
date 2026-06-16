@@ -143,9 +143,12 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
     }
 
     public async Task<IArtifact?> QueryLatestModuleMetadataArtifact(Version sdkVersion,
-        string packageName,
+        string packageName, int? major = null, int? minor = null,
         CancellationToken cancellationToken = default)
     {
+        if (minor != null && major is null)
+            throw new InvalidOperationException("Invalid filter combination: minor cannot be set without major.");
+
         var queryBuilder = artifactRepository.CreateQueryBuilder()
             .AndPathMatches($"{ModulesBaseFolder}/{packageName}")
             .AndNameMatches(GetMetadataNameFilter(sdkVersion))
@@ -154,7 +157,9 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
         var aqlQuery = queryBuilder.Build();
         var result = await artifactRepository.Query(aqlQuery, cancellationToken);
 
-        return result.OrderModuleArtifactsByVersionDesc(k => !k.IsPrerelease)
+        return result.OrderModuleArtifactsByVersionDesc(k => !k.IsPrerelease &&
+            (major is null || major == k.Major) &&
+            (minor is null || minor == k.Minor))
             .FirstOrDefault();
     }
 

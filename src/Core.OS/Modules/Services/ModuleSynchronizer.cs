@@ -13,7 +13,27 @@ namespace Core.OS.Modules.Services;
 internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 {
     private static IEnumerable<ModuleDependencyPackage> GetUnresolvedPackages(IEnumerable<ModuleDependencyPackage>? packages)
-        => packages?.Where(k => k.Version == ModuleConstants.LatestVersionKey) ?? [];
+        => packages?.Where(k => k.Version == ModuleConstants.LatestVersionKey || k.Version.EndsWith(ModuleConstants.LatestVersionLimitIndicator, StringComparison.Ordinal))
+        ?? [];
+
+    private static void ParseVersionLimit(string version, out int? major, out int? minor)
+    {
+        major = null;
+        minor = null;
+
+        if (version == ModuleConstants.LatestVersionKey)
+            return;
+
+        // Strip trailing ".*" then split: "1.*" -> "1", "1.2.*" -> "1.2"
+        var withoutSuffix = version[..^ModuleConstants.LatestVersionLimitIndicator.Length];
+        var parts = withoutSuffix.Split('.');
+
+        if (parts.Length >= 1 && int.TryParse(parts[0], out var majorPart))
+            major = majorPart;
+
+        if (parts.Length >= 2 && int.TryParse(parts[1], out var minorPart))
+            minor = minorPart;
+    }
 
     public async Task<ModuleSynchronizationResults> ProcessSynchronization(CancellationToken cancellationToken = default)
     {
@@ -105,13 +125,14 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
     private static async Task ResolveModuleVersions(ModuleSynchronizationResults result, SynchronizationOptions options, CancellationToken cancellationToken)
     {
+        // packages with version=='latest' or version ending with '.*' need to be resolved
         var toBeResolved = GetUnresolvedPackages(options.Packages).ToList();
         if (toBeResolved.Count == 0)
             return;
 
         try
         {
-            // We try to resolve enabled packages with version=='latest' to an available version for current sdk
+            // We try to resolve these packages to an available version for current sdk
             foreach (var package in toBeResolved)
             {
                 result.Resolved.Add(await ResolveLatestVersion(package, options, cancellationToken));
@@ -150,7 +171,12 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
         try
         {
-            var metadataArtifact = await options.ModuleRepository.QueryLatestModuleMetadataArtifact(options.SdkVersion.ToVersion(), package.Name, cancellationToken);
+            // latest -> current implementation
+            // x.* -> get the latest version for fixed major
+            // x.x.* -> get the latest version for fixed major and minor
+            ParseVersionLimit(package.Version, out var major, out var minor);
+
+            var metadataArtifact = await options.ModuleRepository.QueryLatestModuleMetadataArtifact(options.SdkVersion.ToVersion(), package.Name, major, minor, cancellationToken);
             if (metadataArtifact is null)
             {
                 result.Error = new ErrorInfo(ModuleErrorCodes.FoundNoVersion, $"No compatible version of {package.Name} for ViciOne.Suite.Sdk '{ModuleHelpers.GetNormalizedVersion(options.SdkVersion)}' found.");
