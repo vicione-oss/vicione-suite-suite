@@ -36,7 +36,7 @@ For every `.cs` and `.razor` file changed on the branch, check:
 **Naming conventions**
 - Public members: `PascalCase`
 - Private fields: `_camelCase`
-- Test methods: `snake_case`
+- Test methods: `[MethodName]_should_[tested_behaviour]` — capital first letter, snake_case rest (e.g. `SavingChangesAsync_should_publish_added_entity`)
 
 **Constructor style**
 - Prefer primary constructors over explicit constructors with `private readonly` field assignments

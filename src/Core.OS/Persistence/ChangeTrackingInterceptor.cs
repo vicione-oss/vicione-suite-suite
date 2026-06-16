@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -11,17 +10,18 @@ using Sdk.Messaging;
 
 namespace Core.OS.Persistence;
 
-public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator) : ISaveChangesInterceptor
+public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator, ReplicationSequenceCounter sequenceCounter, TimeProvider timeProvider) : ISaveChangesInterceptor
 {
-    private readonly ConcurrentQueue<List<ChangedEntity>> _stagedChanges = new();
+    public ChangeTrackingInterceptor(ISuiteMediator mediator, ReplicationSequenceCounter sequenceCounter)
+        : this(mediator, sequenceCounter, TimeProvider.System) { }
 
-    public ValueTask<InterceptionResult<int>> SavingChangesAsync(
+    public async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
         if (eventData.Context is not IModuleDbContext context)
-            return new ValueTask<InterceptionResult<int>>(result);
+            return result;
 
         var ignoredEntries = new List<EntityEntry>();
         var entities = context.ChangeTracker.Entries().ToArray();
@@ -37,35 +37,16 @@ public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator) : ISaveCh
                               entityType.Assembly.FullName,
                               entityEntry.State)).ToList();
 
-        _stagedChanges.Enqueue(changeList);
-
-        return new ValueTask<InterceptionResult<int>>(result);
-    }
-
-    public async ValueTask<int> SavedChangesAsync(
-        SaveChangesCompletedEventData eventData,
-        int result,
-        CancellationToken cancellationToken = default)
-    {
-        if (result <= 0)
+        var publishableChanges = changeList.Where(c => c.Entity is not null).ToList();
+        if (publishableChanges.Count == 0)
             return result;
-
-        if (eventData.Context is not IModuleDbContext)
-            return result;
-
-        if (!_stagedChanges.TryDequeue(out var changes))
-            throw new DbUpdateException("Db was changed, but no changes were staged for distribution");
-
-        if (changes.Count != result)
-            throw new DbUpdateException(
-                $"{result} changes were saved, but {changes.Count} changes were staged for distribution");
 
         Type? contextType = null;
         foreach (var interfaceType in eventData.Context.GetType().GetInterfaces())
         {
             var innerInterface = interfaceType.GetInterfaces();
             if (innerInterface.Contains(typeof(IModuleDbContext))
-                && !innerInterface.Contains(typeof(ISqliteDbContext)) // for convenience
+                && !innerInterface.Contains(typeof(ISqliteDbContext))
                 && !innerInterface.Contains(typeof(IPostgresDbContext)))
             {
                 contextType = interfaceType;
@@ -73,31 +54,62 @@ public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator) : ISaveCh
             }
         }
 
-        if (contextType is null || !changes.Any(c => c.Entity is not null))
+        if (contextType is null)
             return result;
 
-        var message = new DbChangeSet(changes.Where(c => c.Entity is not null).ToList(), contextType.FullName ?? contextType.Name);
+        // Publish within SavingChangesAsync so the Bus Outbox captures the message
+        // atomically. When the Bus Outbox is active (master + RabbitMQ), the message
+        // is written to the outbox table and delivered asynchronously by the delivery
+        // service. When using in-memory bus (standalone), the publish goes directly.
+        var contextTypeName = contextType.FullName ?? contextType.Name;
+        var sequenceNumber = sequenceCounter.Next(contextTypeName);
+
+        // Persist counter to outbox schema BEFORE publishing. This ensures the counter
+        // is always >= any delivered sequence number, even after master crash (ADR-003 Gap 4).
+        // If the subsequent business transaction fails, the counter is ahead by 1 (harmless —
+        // slaves handle gaps via the reorder buffer and timeout-triggered resync).
+        await PersistSequenceNumber(eventData.Context, contextTypeName, sequenceNumber, cancellationToken);
+
+        var message = new DbChangeSet(publishableChanges, contextTypeName, sequenceNumber, timeProvider.GetUtcNow());
         await mediator.Publish(message, cancellationToken);
 
         return result;
     }
 
-    public Task SaveChangesFailedAsync(DbContextErrorEventData eventData, CancellationToken cancellationToken = default)
+    private static async Task PersistSequenceNumber(
+        Microsoft.EntityFrameworkCore.DbContext dbContext,
+        string contextType,
+        long sequenceNumber,
+        CancellationToken cancellationToken)
     {
-        _stagedChanges.TryDequeue(out _);
-        return Task.CompletedTask;
+        // Only persist on PostgreSQL (master). Only module DbContexts implementing IPostgresDbContext
+        // are synchronized, and those run on PostgreSQL on the master.
+        if (dbContext is not IPostgresDbContext)
+            return;
+
+        // Uses the same database connection as the module's DbContext. Executes in auto-commit
+        // mode (outside the business transaction). On PostgreSQL, this is an atomic upsert.
+        await dbContext.Database.ExecuteSqlRawAsync("""
+            INSERT INTO outbox."ReplicationSequenceState" ("ContextType", "LastSequenceNumber")
+            VALUES ({0}, {1})
+            ON CONFLICT ("ContextType") DO UPDATE SET "LastSequenceNumber" = {1}
+            """, [contextType, sequenceNumber], cancellationToken);
     }
+
+    public ValueTask<int> SavedChangesAsync(
+        SaveChangesCompletedEventData eventData,
+        int result,
+        CancellationToken cancellationToken = default)
+        => new(result);
+
+    public Task SaveChangesFailedAsync(DbContextErrorEventData eventData, CancellationToken cancellationToken = default)
+        => Task.CompletedTask;
 
     public Task SaveChangesCanceledAsync(DbContextEventData eventData, CancellationToken cancellationToken = default)
-    {
-        _stagedChanges.TryDequeue(out _);
-        return Task.CompletedTask;
-    }
+        => Task.CompletedTask;
 
     public InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
-    {
-        throw new InvalidOperationException("Do not save changes synchronously. Use 'SaveChangesAsync' instead!");
-    }
+        => throw new InvalidOperationException("Do not save changes synchronously. Use 'SaveChangesAsync' instead!");
 
     // Filters out all EntityEntries that are either blacklisted by the context, or relations of other EntityEntries
     private static void GetIgnoredEntities(IEnumerable<EntityEntry> entries, ICollection<EntityEntry> ignoredEntities, IModuleDbContext dbContext, bool isRelation, HashSet<string>? processedNavigations)

@@ -1,4 +1,5 @@
 ﻿using Core.OS.Instance.Contracts;
+using Core.OS.Instance.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Core.OS.Instance.HealthCheck;

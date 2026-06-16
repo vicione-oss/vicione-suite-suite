@@ -10,10 +10,12 @@ using Core.OS.Diagnostics;
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Contracts;
+using Core.OS.Instance.Services;
 using Core.OS.Logging;
 using Core.OS.MessageBus.MassTransit;
 using Core.OS.MessageBus.MassTransit.Configuration;
 using Core.OS.Modules.Extensions;
+using Core.OS.Persistence;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Services;
@@ -269,6 +271,23 @@ internal sealed partial class ApplicationWorker(
         await scope.ServiceProvider.MigrateContext<IApplicationDbContext>(cancellationToken);
         await scope.ServiceProvider.MigrateContext<IConnectionDbContext>(cancellationToken);
 
+        // Migrate outbox tables (master only, registered only when Bus Outbox is configured)
+        var outboxDbContext = scope.ServiceProvider.GetService<OutboxDbContext>();
+        if (outboxDbContext is not null)
+        {
+            await outboxDbContext.Database.MigrateAsync(cancellationToken);
+
+            // Seed the replication sequence counter from persisted state (ADR-003 Gap 4).
+            // Ensures the counter survives master restarts without re-issuing sequence numbers.
+            var sequenceCounter = scope.ServiceProvider.GetService<ReplicationSequenceCounter>();
+            if (sequenceCounter is not null)
+            {
+                var states = await outboxDbContext.ReplicationSequenceStates.ToListAsync(cancellationToken);
+                foreach (var state in states)
+                    sequenceCounter.Seed(state.ContextType, state.LastSequenceNumber);
+            }
+        }
+
         // force regeneration of users security stamps to invalidate current logins
         if (InstanceStartupState.InvalidateLoginsAfterMigration)
         {
@@ -370,6 +389,13 @@ internal sealed partial class ApplicationWorker(
 
         var sendEndpointProvider = scope.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
 
+        // Collect last-applied sequence numbers from the replication tracker (slave only).
+        // On a fresh slave or first startup, the tracker is empty → empty dictionary.
+        // The master uses this to detect sequence gaps (ADR-003 Gap 4).
+        var sequenceTracker = scope.ServiceProvider.GetService<ReplicationSequenceTracker>();
+        var lastAppliedSequences = sequenceTracker?.GetAllLastApplied()
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value) ?? [];
+
         // needs to be sent that way, because the bus is blocked to prevent messages being processed before sync is done
         var endPoint = await sendEndpointProvider.GetSendEndpoint(
             MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
@@ -386,7 +412,8 @@ internal sealed partial class ApplicationWorker(
             SdkVersion = instanceInfo.SdkVersion,
             Configuration = config.AsEnumerable().Where(IsAllowed).ToList(),
             Version = instanceInfo.Version,
-            BranchName = instanceInfo.BranchName
+            BranchName = instanceInfo.BranchName,
+            LastAppliedSequences = lastAppliedSequences
         },
             cancellationToken);
 

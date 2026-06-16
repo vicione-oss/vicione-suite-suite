@@ -26,6 +26,7 @@ internal static class IServiceCollectionExtensions
                 services
                     .AddTransient<IMasterDbConnectionStringProvider, MasterDbConnectionStringProvider>()
                     .AddTransient<IInstanceConfigurationRepository, InstanceConfigurationRepository>()
+                    .AddSingleton<ReplicationSequenceCounter>()
                     .AddScoped<ISaveChangesInterceptor, ChangeTrackingInterceptor>();
             }
 
@@ -72,6 +73,9 @@ internal static class IServiceCollectionExtensions
                 .AddSingleton<InMemoryClusterInformationProvider>()
                 .AddSingleton<IClusterInformationProvider, InMemoryClusterInformationProvider>(p => p.GetRequiredService<InMemoryClusterInformationProvider>())
                 .AddSingleton<SynchronizationState>()
+                .AddSingleton<SyncRetryState>()
+                .AddSingleton<ReplicationSequenceTracker>()
+                .AddSingleton<ReplicationLagTracker>()
                 .AddScoped<ILoginDesignService, LoginDesignService>()
                 .AddScoped<INonceStore, NonceStore>()
                 .AddScoped<IOnboardingStateStore, OnboardingStateStore>()

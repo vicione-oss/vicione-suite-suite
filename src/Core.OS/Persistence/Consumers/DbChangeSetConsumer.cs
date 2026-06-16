@@ -1,9 +1,14 @@
 ﻿using System.ComponentModel;
 using System.Data;
 using System.Text.Json;
+using Core.OS.Instance;
+using Core.OS.Instance.Commands;
+using Core.OS.Instance.Contracts;
+using Core.OS.Instance.Services;
 using MassTransit;
 using MassTransit.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Sdk.Backend.Messaging;
 using Sdk.Backend.Persistence;
 using Sdk.Connections.Contracts;
 using Sdk.Messaging;
@@ -21,68 +26,121 @@ public sealed class DbChangeSetConsumerDefinition : ConsumerDefinition<DbChangeS
     }
 }
 
-public sealed partial class DbChangeSetConsumer(IServiceProvider services, ILogger<DbChangeSetConsumer> logger) : IConsumer<DbChangeSet>
+public sealed partial class DbChangeSetConsumer(
+    IServiceProvider services,
+    ILogger<DbChangeSetConsumer> logger,
+    ReplicationSequenceTracker sequenceTracker,
+    ReplicationLagTracker lagTracker,
+    ILocalInstanceInformationProvider localInstanceInfo,
+    SynchronizationState synchronizationState) : IConsumer<DbChangeSet>
 {
     public async Task Consume(ConsumeContext<DbChangeSet> context)
     {
-        var dbContext = GetChangeSetDbContext(context.Message.ContextType);
+        await synchronizationState.Ready;
+
+        var message = context.Message;
+        var result = sequenceTracker.Submit(message.ContextType, message.SequenceNumber, message);
+
+        foreach (var changeSet in result.MessagesToApply)
+        {
+            await ApplyChangeSet(changeSet, context.CancellationToken);
+            lagTracker.Record(changeSet.ContextType, changeSet.PublishedAt);
+        }
+
+        if (result.RequiresFullSync)
+        {
+            LogBufferFlushed(logger, message.ContextType, result.MessagesToApply.Count);
+            await TriggerFullSync(context);
+        }
+    }
+
+    private async Task ApplyChangeSet(DbChangeSet changeSet, CancellationToken cancellationToken)
+    {
+        var dbContext = GetChangeSetDbContext(changeSet.ContextType);
         if (dbContext is null)
             return;
 
-        foreach (var change in context.Message.Changes)
+        var appliedCount = 0;
+        Exception? lastEntityException = null;
+
+        foreach (var change in changeSet.Changes)
         {
-            if (change.Entity is null)
-                throw new NoNullAllowedException("Must be prevented during publish!");
-
-            var entityType = EntityTypeCache.GetOrAdd(change.EntityTypeFullName, change.AssemblyFullName);
-            var entity = JsonSerializer.Deserialize(change.Entity, entityType, DefaultJsonSerializerSettings.Default);
-            if (entity is null)
-                continue;
-
-            switch (change.State)
+            try
             {
-                case EntityState.Detached:
-                case EntityState.Unchanged:
-                    break;
-
-                case EntityState.Deleted:
-                {
-                    var existing = await dbContext.FindAsync(entityType, GetPrimaryKeyValues(dbContext, entity, entityType), context.CancellationToken);
-                    if (existing is not null)
-                        dbContext.Remove(existing);
-                    break;
-                }
-
-                case EntityState.Modified:
-                case EntityState.Added:
-                {
-                    var existing = await dbContext.FindAsync(entityType, GetPrimaryKeyValues(dbContext, entity, entityType), context.CancellationToken);
-                    if (existing is not null)
-                        dbContext.Entry(existing).CurrentValues.SetValues(entity);
-                    else
-                        dbContext.Add(entity);
-                    FixConnectionRelation(dbContext);
-                    break;
-                }
-
-                default:
-                    throw new InvalidEnumArgumentException(nameof(change.State), (int)change.State, typeof(EntityState));
+                ApplyEntity(dbContext, change);
+                appliedCount++;
+            }
+            catch (Exception ex)
+            {
+                lastEntityException = ex;
+                LogEntityApplyFailed(logger, ex, change.EntityTypeFullName, change.State.ToString(), changeSet.ContextType);
             }
         }
 
+        if (appliedCount == 0 && lastEntityException is not null)
+            throw new InvalidOperationException(
+                $"All {changeSet.Changes.Count} entities in batch for '{changeSet.ContextType}' failed to apply. See previous log entries for details.",
+                lastEntityException);
+
+        if (appliedCount == 0)
+            return;
+
         try
         {
-            await dbContext.SaveChangesAsync(context.CancellationToken);
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateException e)
         {
-            LogApplyChangesFailed(logger, e, context.Message.Changes.Count, context.Message.ContextType);
+            LogApplyChangesFailed(logger, e, changeSet.Changes.Count, changeSet.ContextType);
             throw;
+        }
+    }
+
+    private static void ApplyEntity(Microsoft.EntityFrameworkCore.DbContext dbContext, ChangedEntity change)
+    {
+        if (change.Entity is null)
+            throw new NoNullAllowedException("Must be prevented during publish!");
+
+        var entityType = EntityTypeCache.GetOrAdd(change.EntityTypeFullName, change.AssemblyFullName);
+        var entity = JsonSerializer.Deserialize(change.Entity, entityType, DefaultJsonSerializerSettings.Default)
+            ?? throw new InvalidOperationException($"Deserialization of '{change.EntityTypeFullName}' returned null.");
+
+        switch (change.State)
+        {
+            case EntityState.Detached:
+            case EntityState.Unchanged:
+                break;
+
+            case EntityState.Deleted:
+            {
+                var existing = dbContext.Find(entityType, GetPrimaryKeyValues(dbContext, entity, entityType));
+                if (existing is not null)
+                    dbContext.Remove(existing);
+                break;
+            }
+
+            case EntityState.Modified:
+            case EntityState.Added:
+            {
+                var existing = dbContext.Find(entityType, GetPrimaryKeyValues(dbContext, entity, entityType));
+                if (existing is not null)
+                    dbContext.Entry(existing).CurrentValues.SetValues(entity);
+                else
+                    dbContext.Add(entity);
+                FixConnectionRelation(dbContext);
+                break;
+            }
+
+            default:
+                throw new InvalidEnumArgumentException(nameof(change.State), (int)change.State, typeof(EntityState));
         }
     }
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to apply {MessageCount} changes to {ContextType}")]
     private static partial void LogApplyChangesFailed(ILogger logger, Exception ex, int messageCount, string contextType);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Replication entity skipped: failed to apply entity '{EntityType}' (state: {EntityState}) in context '{ContextType}'. This entity will remain divergent until a full-sync is triggered.")]
+    private static partial void LogEntityApplyFailed(ILogger logger, Exception ex, string entityType, string entityState, string contextType);
 
     private static object?[] GetPrimaryKeyValues(Microsoft.EntityFrameworkCore.DbContext dbContext, object entity, Type entityType)
     {
@@ -170,4 +228,35 @@ public sealed partial class DbChangeSetConsumer(IServiceProvider services, ILogg
 
         return services.GetService(ctxType) as Microsoft.EntityFrameworkCore.DbContext;
     }
+
+    private async Task TriggerFullSync(ConsumeContext<DbChangeSet> context)
+    {
+        // Close the gate — block subsequent messages until full-sync completes
+        synchronizationState.Reset();
+
+        var instanceInfo = localInstanceInfo.Local;
+        var endPoint = await context.GetSendEndpoint(MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
+        await endPoint.Send(new RegisterInstance
+        {
+            InstanceId = instanceInfo.Id,
+            InstalledModules = [.. localInstanceInfo.LoadedModules],
+            Type = instanceInfo.Type,
+            Name = instanceInfo.Name,
+            Description = instanceInfo.Description,
+            SerialNumber = instanceInfo.SerialNumber,
+            SystemType = instanceInfo.SystemType,
+            SdkVersion = instanceInfo.SdkVersion,
+            Version = instanceInfo.Version,
+            BranchName = instanceInfo.BranchName,
+            ForceSync = true,
+            LastAppliedSequences = sequenceTracker.GetAllLastApplied()
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+        }, context.CancellationToken);
+
+        // Reset tracker so the next message after full-sync completes is accepted
+        sequenceTracker.Reset();
+    }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Replication buffer timed out for {ContextType}: flushing {Count} buffered messages and triggering full-sync.")]
+    private static partial void LogBufferFlushed(ILogger logger, string contextType, int count);
 }

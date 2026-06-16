@@ -2,19 +2,24 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Core.Module;
+using Core.OS.DbContext;
 using Core.OS.Diagnostics.MassTransit;
 using Core.OS.Instance;
+using Core.OS.Instance.Consumers;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Initialization;
+using Core.OS.Instance.Services;
 using Core.OS.MessageBus.Extensions;
 using Core.OS.Persistence.Consumers;
 using MassTransit;
 using MassTransit.Internals;
 using MassTransit.Metadata;
 using MassTransit.Util;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Sdk.Backend.Messaging;
+using Sdk.Backend.Persistence;
 using Sdk.Instance;
 using Sdk.Messaging;
 using Sdk.Modules;
@@ -68,10 +73,14 @@ internal static class MassTransitConfiguration
                     if (instanceOptions.Type != InstanceType.Slave)
                         return;
                     var namingHelper = provider.GetRequiredService<IEndpointNameFormatter>();
-                    if (!string.Equals(queueName,
+                    if (string.Equals(queueName,
                             namingHelper.ExecuteActivity<SyncDataActivity, SyncDataArguments>(),
+                            StringComparison.Ordinal)
+                        || string.Equals(queueName,
+                            namingHelper.Consumer<SyncRoutingSlipFaultedConsumer>(),
                             StringComparison.Ordinal))
-                        configurator.AddDependency(provider.GetRequiredService<SynchronizationState>());
+                        return;
+                    configurator.AddDependency(provider.GetRequiredService<SynchronizationState>());
                 });
 
                 busConfig.AddBusObserver<BusObserver>();
@@ -88,6 +97,19 @@ internal static class MassTransitConfiguration
                 }
                 else
                 {
+                    // Configure Bus Outbox on master to guarantee atomic publish (ADR-003 Gap 1)
+                    if (instanceOptions.Type == InstanceType.Master)
+                    {
+                        services.AddDbContext<OutboxDbContext>((sp, o) =>
+                            o.UseNpgsql(sp.GetRequiredService<IMasterDbConnectionStringProvider>().ConnectionString));
+
+                        busConfig.AddEntityFrameworkOutbox<OutboxDbContext>(o =>
+                        {
+                            o.UsePostgres();
+                            o.UseBusOutbox();
+                        });
+                    }
+
                     // ensure we can wait till bus got started
                     busConfig.AddOptions<MassTransitHostOptions>()
                         .Configure(options =>
