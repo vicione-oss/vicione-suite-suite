@@ -23,6 +23,13 @@
 - `PasswordValidator`, underscore (`_`) is now recognized as a special character
 - Password complexity requirements (digit, lowercase letter, uppercase letter, special character) are now explicitly enforced in ASP.NET Identity configuration, closing the gap between the custom `PasswordValidator` and Identity's built-in password validation
 
+### Updated
+
+- `AspNetCore.SassCompiler` packages, update to version `1.101.0`
+- `MailKit` packages, update to version `4.17.0`
+- `Microsoft` packages, update to version `10.0.9`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.15.0`
+
 ## 1.2.2 - 2026-06-11
 
 ### Added
