@@ -96,10 +96,14 @@ public interface IModuleArtifactRepository
     /// </summary>
     /// <param name="sdkVersion">The SDK version to match against.</param>
     /// <param name="packageName">The name of the module package.</param>
+    /// <param name="major">If not <see langword="null"/> it filters result to matching major versions.</param>
+    /// <param name="minor">If not <see langword="null"/> it filters result to matching minor versions.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     Task<IArtifact?> QueryLatestModuleMetadataArtifact(
         Version sdkVersion,
         string packageName,
+        int? major,
+        int? minor,
         CancellationToken cancellationToken);
 
     /// <summary>

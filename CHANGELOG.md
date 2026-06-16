@@ -12,6 +12,7 @@
 - Ability to remove the link between a local user and an external identity provider account from the external ID providers settings
 - `Microsoft.FeatureManagement` package
 - Account lockout after 5 failed sign-in or current-password attempts; locked accounts auto-unlock after 5 minutes. Lockout is surfaced as the same generic credentials error as a wrong password to avoid disclosing account state.
+- Auto resolving module versions allows now fixed version parts (e.g. `1.*` or `1.2.*`) in addition to the `latest` keyword
 
 ### Fixed
 

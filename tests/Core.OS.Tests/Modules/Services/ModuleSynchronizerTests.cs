@@ -153,7 +153,7 @@ public class ModuleSynchronizerTests
             response.Path.Returns($"modules/{_moduleC}/");
             response.Repository.Returns("vicione-suite");
 
-            _moduleRepository.QueryLatestModuleMetadataArtifact(Arg.Any<Version>(), _moduleC.Name, Arg.Any<CancellationToken>())
+            _moduleRepository.QueryLatestModuleMetadataArtifact(Arg.Any<Version>(), _moduleC.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(response);
 
             // Act
@@ -180,7 +180,7 @@ public class ModuleSynchronizerTests
             response.Path.Returns($"modules/{_moduleA.Name}/");
             response.Repository.Returns("vicione-suite");
 
-            _moduleRepository.QueryLatestModuleMetadataArtifact(Arg.Any<Version>(), _moduleA.Name, Arg.Any<CancellationToken>())
+            _moduleRepository.QueryLatestModuleMetadataArtifact(Arg.Any<Version>(), _moduleA.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(response);
 
             // Act
@@ -325,7 +325,7 @@ public class ModuleSynchronizerTests
                 .Returns(moduleMetadata);
 
             // Ensure we won't find metadata for moduleB
-            _moduleRepository.QueryLatestModuleMetadataArtifact(Arg.Any<Version>(), _moduleB.Name, Arg.Any<CancellationToken>())
+            _moduleRepository.QueryLatestModuleMetadataArtifact(Arg.Any<Version>(), _moduleB.Name, null, null, Arg.Any<CancellationToken>())
                 .ReturnsNull();
 
             using var synchronizer = new ModuleSynchronizer(_fileSystem);
@@ -356,7 +356,7 @@ public class ModuleSynchronizerTests
             moduleArtifact.Repository.Returns("vicione-suite");
 
             var matchVersion = Arg.Is<Version>(k => k.Major == _sdkVersion.Major && k.Minor == _sdkVersion.Minor);
-            _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, Arg.Any<CancellationToken>())
+            _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(moduleArtifact);
 
             using var synchronizer = new ModuleSynchronizer(_fileSystem);
@@ -384,7 +384,7 @@ public class ModuleSynchronizerTests
             moduleArtifact.Repository.Returns("vicione-suite");
 
             var matchVersion = Arg.Is<Version>(k => k.Major == _sdkVersion.Major && k.Minor == _sdkVersion.Minor);
-            _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, Arg.Any<CancellationToken>())
+            _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(moduleArtifact);
 
             using var synchronizer = new ModuleSynchronizer(_fileSystem);
