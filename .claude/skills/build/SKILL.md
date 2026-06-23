@@ -11,4 +11,4 @@ Run a full build of the ViciOne Suite solution.
 dotnet build vicione-suite.slnx
 ```
 
-Note: If TypeScript was changed or the repo was fully reset (e.g. `git clean -xfd`), run `npm install && npm run build` first.
+Note: If the repo was fully reset (e.g. `git clean -xfd`) or files in `src/Blazor.Shared/Scripts` where changed, run `npm ci && npm run build` first.

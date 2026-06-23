@@ -67,7 +67,7 @@ dotnet run --project src/Core.OS
 dotnet test vicione-suite.slnx
 ```
 
-Note: After a full repo reset (e.g. `git clean -xfd`) or TypeScript changes, run `npm install && npm run build` first.
+Note: If the repo was fully reset (e.g. `git clean -xfd`) or files in `src/Blazor.Shared/Scripts` where changed, run `npm ci && npm run build` first.
 
 **Target framework:** net10.0
 **Runtime identifiers:** linux-x64, linux-arm64, win-x64
