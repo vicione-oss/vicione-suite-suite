@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Tests.Connections.Extensions;
@@ -9,7 +9,7 @@ using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 using Xunit;
 
-namespace Blazor.Shared.Tests.Connections.Services;
+namespace Blazor.Shared.Tests.Connections.ControlPanels.Services;
 
 public sealed class ConnectionControlPanelResetHandlerTests
 {

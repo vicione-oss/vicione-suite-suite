@@ -56,6 +56,18 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
         UpdateStatesDependingOnGridItemSelection();
     }
 
+    protected override async ValueTask DisposeAsyncCore()
+    {
+        _connectionsQueryable = Enumerable.Empty<EditConnectionModel>().AsQueryable();
+
+        ConnectionService.ConnectionStateChanged -= ConnectionServiceConnectionStateChanged;
+        ConnectionService.TagsChanged -= ConnectionServiceTagsChanged;
+        GridItemSelection.Changed -= GridItemSelectionChanged;
+        State.Changed -= StateChanged;
+
+        await base.DisposeAsyncCore();
+    }
+
     private Task ConnectionServiceTagsChanged(Sdk.Connections.Events.TagsChanged changeEvent)
     {
         State.UpdateTags(changeEvent);
@@ -89,18 +101,6 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
 
         if (stateHasChanged)
             await InvokeAsync(StateHasChanged);
-    }
-
-    protected override async ValueTask DisposeAsyncCore()
-    {
-        _connectionsQueryable = Enumerable.Empty<EditConnectionModel>().AsQueryable();
-
-        ConnectionService.ConnectionStateChanged -= ConnectionServiceConnectionStateChanged;
-        ConnectionService.TagsChanged -= ConnectionServiceTagsChanged;
-        GridItemSelection.Changed -= GridItemSelectionChanged;
-        State.Changed -= StateChanged;
-
-        await base.DisposeAsyncCore();
     }
 
     private void ApplyFilter()

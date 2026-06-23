@@ -8,38 +8,40 @@ internal static class ISuiteConnectionServiceExtensions
 {
     public static async Task<ISuiteConnectionServiceResult> UpsertConnectionAndTags(this ISuiteConnectionService service, EditConnectionModel model, List<Tag> availableTags, IEnumerable<string> tags, CancellationToken cancellationToken = default)
     {
-        UpdateConnectionTags(model.Connection, availableTags, tags);
+        var connectionCopy = new Connection()
+        {
+            Json = model.Connection.Json,
+            Description = model.Connection.Description,
+            Id = model.Connection.Id,
+            Name = model.Connection.Name,
+            Type = model.Connection.Type,
+            Managed = model.Connection.Managed,
+            Tags = BuildConnectionTags(availableTags, tags),
+            Metadata = new Dictionary<string, string?>(model.Connection.Metadata)
+        };
 
-        return await service.UpsertConnection(model.Connection, cancellationToken);
+        // Will trigger ConnectionChanged event and on consume the changes will get applied to the model
+        return await service.UpsertConnection(connectionCopy, cancellationToken);
     }
 
-    private static void UpdateConnectionTags(Connection connection, List<Tag> availableTags, IEnumerable<string> tags)
+    private static HashSet<Tag> BuildConnectionTags(List<Tag> availableTags, IEnumerable<string> tags)
     {
-        var previousTags = connection.Tags.ToList();
+        var result = new HashSet<Tag>();
+
         foreach (var tag in tags)
         {
-            var existingTag = previousTags.FirstOrDefault(t => t.Text == tag);
-            if (existingTag is not null)
-            {
-                previousTags.Remove(existingTag);
-                continue;
-            }
-
             var selectedTag = availableTags.FirstOrDefault(t => t.Text == tag);
             if (selectedTag is not null)
             {
-                connection.Tags.Add(selectedTag);
+                result.Add(selectedTag);
                 continue;
             }
 
             var newTag = new Tag(tag);
-            connection.Tags.Add(newTag);
+            result.Add(newTag);
         }
 
-        foreach (var deletedTag in previousTags)
-        {
-            connection.Tags.Remove(deletedTag);
-        }
+        return result;
     }
 
     /// <summary>
