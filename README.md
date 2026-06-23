@@ -89,7 +89,7 @@ All npm packages need to be installed before starting the application.
 
 To install the npm packages you have to:
 1. Open a PowerShell and move into the `.../suite` directory (or run it from there)
-1. Run the command `npm install`
+1. Run the command `npm ci`
 1. Run the command `npm run build`
 
 The installation should now run automatically.

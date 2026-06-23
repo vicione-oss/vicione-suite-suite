@@ -9,7 +9,7 @@
       "Bash(dotnet test*)",
       "Bash(dotnet format*)",
       "Bash(npm run*)",
-      "Bash(npm install)",
+      "Bash(npm ci)",
       "Bash(git status)",
       "Bash(git diff*)",
       "Bash(git log*)"
