@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
 using AwesomeAssertions;
@@ -104,7 +104,7 @@ public class IFileSystemExtensionsTests
         };
 
         [Fact]
-        public async Task Should_return_false_if_recovery_options_are_not_set()
+        public async Task Should_return_continue_if_recovery_options_are_not_set()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -114,11 +114,11 @@ public class IFileSystemExtensionsTests
             var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            result.Should().BeFalse();
+            result.Should().Be(RecoveryDecision.Continue);
         }
 
         [Fact]
-        public async Task Should_return_false_on_first_startup()
+        public async Task Should_return_continue_on_first_startup()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -132,11 +132,11 @@ public class IFileSystemExtensionsTests
             var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            result.Should().BeFalse();
+            result.Should().Be(RecoveryDecision.Continue);
         }
 
         [Fact]
-        public async Task Should_return_false_last_restart_is_outdated()
+        public async Task Should_return_continue_when_last_restart_is_outdated()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -153,11 +153,11 @@ public class IFileSystemExtensionsTests
             var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            result.Should().BeFalse();
+            result.Should().Be(RecoveryDecision.Continue);
         }
 
         [Fact]
-        public async Task Should_return_false_if_max_attempts_not_reached()
+        public async Task Should_return_continue_if_max_attempts_not_reached()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -173,11 +173,11 @@ public class IFileSystemExtensionsTests
             var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            result.Should().BeFalse();
+            result.Should().Be(RecoveryDecision.Continue);
         }
 
         [Fact]
-        public async Task Should_return_true_if_max_attempts_reached_within_configured_timespan()
+        public async Task Should_return_apply_recovery_if_max_attempts_reached_within_configured_timespan()
         {
             // Arrange
             var fileSystem = new MockFileSystem();
@@ -194,7 +194,79 @@ public class IFileSystemExtensionsTests
             var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
 
             // Assert
-            result.Should().BeTrue();
+            result.Should().Be(RecoveryDecision.ApplyRecovery);
+        }
+
+        [Fact]
+        public async Task Should_mark_recovery_applied_in_state_file_when_recovery_triggers()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var lastStartup = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromMinutes(_recoveryOptions.Recovery!.TimespanMinutes - 2));
+            var recoveryState = new RecoveryState
+            {
+                LastStartup = lastStartup,
+                Startups = _recoveryOptions.Recovery!.MaxStartupAttempts + 1
+            };
+
+            SetupRecoveryStateFile(fileSystem, _recoveryOptions, recoveryState);
+
+            // Act
+            await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
+
+            // Assert
+            var recoveryFilePath = fileSystem.GetLocalRecoveryFilePath(_recoveryOptions);
+            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
+            state.Should().NotBeNull();
+            state!.RecoveryApplied.Should().BeTrue();
+            state.Startups.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task Should_return_recovery_exhausted_when_recovery_was_already_applied_and_threshold_reached_again()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var lastStartup = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromMinutes(_recoveryOptions.Recovery!.TimespanMinutes - 2));
+            var recoveryState = new RecoveryState
+            {
+                LastStartup = lastStartup,
+                Startups = _recoveryOptions.Recovery!.MaxStartupAttempts + 1,
+                RecoveryApplied = true
+            };
+
+            SetupRecoveryStateFile(fileSystem, _recoveryOptions, recoveryState);
+
+            // Act
+            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().Be(RecoveryDecision.RecoveryExhausted);
+        }
+
+        [Fact]
+        public async Task Should_reset_recovery_applied_flag_when_timespan_elapses()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var lastStartup = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromMinutes(_recoveryOptions.Recovery!.TimespanMinutes + 2));
+            var recoveryState = new RecoveryState
+            {
+                LastStartup = lastStartup,
+                Startups = 2,
+                RecoveryApplied = true
+            };
+
+            SetupRecoveryStateFile(fileSystem, _recoveryOptions, recoveryState);
+
+            // Act
+            var result = await fileSystem.UseRecoveryMode(_recoveryOptions, _logger, TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().Be(RecoveryDecision.Continue);
+            var recoveryFilePath = fileSystem.GetLocalRecoveryFilePath(_recoveryOptions);
+            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
+            state!.RecoveryApplied.Should().BeFalse();
         }
     }
 
@@ -249,13 +321,14 @@ public class IFileSystemExtensionsTests
             SetupRecoveryStateFolder(fileSystem, recoveryFilePath);
 
             // Act
-            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, TestContext.Current.CancellationToken);
+            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists(recoveryFilePath).Should().BeTrue();
             var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
             Assert.NotNull(state);
             state.Startups.Should().Be(1);
+            state.RecoveryApplied.Should().BeFalse();
         }
 
         [Fact]
@@ -273,13 +346,32 @@ public class IFileSystemExtensionsTests
             SetupRecoveryStateFile(fileSystem, _instanceOptions, recoveryState);
 
             // Act
-            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, TestContext.Current.CancellationToken);
+            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
             fileSystem.File.Exists(recoveryFilePath).Should().BeTrue();
             var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
             Assert.NotNull(state);
             state.Startups.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task Should_preserve_recovery_applied_flag_when_specified()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var recoveryFilePath = fileSystem.GetLocalRecoveryFilePath(_instanceOptions);
+
+            SetupRecoveryStateFolder(fileSystem, recoveryFilePath);
+
+            // Act
+            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, recoveryApplied: true, cancellationToken: TestContext.Current.CancellationToken);
+
+            // Assert
+            var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
+            Assert.NotNull(state);
+            state.Startups.Should().Be(1);
+            state.RecoveryApplied.Should().BeTrue();
         }
     }
 

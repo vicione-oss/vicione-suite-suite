@@ -6,3 +6,8 @@ internal record VersionDowngradePreparationResult(VersionDowngradeInformation Do
 {
     public string Reason => $"Downgrade detected from version '{DowngradeInformation.DataVersion}' to '{DowngradeInformation.CurrentVersion}'";
 }
+
+internal record RecoveryExhaustedPreparationResult : IPreparationAbortResult
+{
+    public string Reason => "Recovery mode was already activated, but the suite continues to crash. No further self-healing possible — manual intervention required.";
+}

@@ -53,3 +53,20 @@ flowchart TD
     Skip([End])
     Continue([Continue])
 ```
+
+## Automatic Recovery
+
+If the suite fails on startup x times within a configurable time frame, a backup of the current module configuration is created and all modules are disabled for the next startup attempt. If the suite still can't start up successfully, it enters a terminal degraded state by starting a fallback host with an error message.
+
+```mermaid
+flowchart TD
+    A["Startup"] --> B{"Recovery file exists?"}
+    B -- No --> C["Write state (Startups=1)"] --> Z["Continue"]
+    B -- Yes --> D{"Time elapsed > threshold?"}
+    D -- Yes --> E["Reset state (RecoveryApplied=false)"] --> Z
+    D -- No --> F{"Startups <= MaxAttempts?"}
+    F -- Yes --> G["Increment counter"] --> Z
+    F -- No --> H{"RecoveryApplied == true?"}
+    H -- No --> I["Reset state (RecoveryApplied=true)"] --> J["ApplyRecovery"]
+    H -- Yes --> K["RecoveryExhausted - terminal state"]
+```
