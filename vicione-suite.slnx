@@ -59,6 +59,7 @@
     <File Path="docs/mail.md" />
     <File Path="docs/modules.md" />
     <File Path="docs/security-and-identity.md" />
+    <File Path="docs/suite-startup.md" />
     <File Path="docs/target-platforms.md" />
     <File Path="docs/suite-architecture.md" />
     <File Path="docs\passkeys.md" />
