@@ -26,6 +26,7 @@
 - `ResendEmailConfirmationContent`, the resend confirmation email was sent to already-confirmed accounts instead of unconfirmed ones, and used a password reset link instead of an email verification link
 - `PasswordValidator`, underscore (`_`) is now recognized as a special character
 - Password complexity requirements (digit, lowercase letter, uppercase letter, special character) are now explicitly enforced in ASP.NET Identity configuration, closing the gap between the custom `PasswordValidator` and Identity's built-in password validation
+- `ConnectionControlPanel`, fixed double display of tags after storing a connection with added tags
 
 ### Updated
 

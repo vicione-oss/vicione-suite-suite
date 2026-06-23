@@ -56,11 +56,17 @@ public sealed partial class UpsertConnectionConsumer(IConnectionDbContext dbCont
             LogUpserted(logger, correlationId, connection.Id, action);
 
             // We publish events also when SaveChangesAsync() does nothing because some services rely on a response
-            var createdTagsEvent = new TagsChanged(CrudAction.Created, addedTags) { CorrelationId = correlationId };
-            await context.Publish(createdTagsEvent, context.CancellationToken).ConfigureAwait(false);
+            if (addedTags.Count > 0)
+            {
+                var createdTagsEvent = new TagsChanged(CrudAction.Created, addedTags) { CorrelationId = correlationId };
+                await context.Publish(createdTagsEvent, context.CancellationToken).ConfigureAwait(false);
+            }
 
-            var updatedTagsEvent = new TagsChanged(CrudAction.Updated, changedTags) { CorrelationId = correlationId };
-            await context.Publish(updatedTagsEvent, context.CancellationToken).ConfigureAwait(false);
+            if (changedTags.Count > 0)
+            {
+                var updatedTagsEvent = new TagsChanged(CrudAction.Updated, changedTags) { CorrelationId = correlationId };
+                await context.Publish(updatedTagsEvent, context.CancellationToken).ConfigureAwait(false);
+            }
 
             var changedEvent = new ConnectionChanged(action, existingConnection, addedTags, removedTags) { CorrelationId = correlationId };
             await context.Publish(changedEvent, context.CancellationToken).ConfigureAwait(false);
