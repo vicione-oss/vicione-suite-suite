@@ -7,9 +7,13 @@ using Core.OS.Instance.Services;
 using Core.OS.Tests.Persistence;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Builder;
+using Core.OS.Hosting.Contracts;
+using System.Globalization;
 using NSubstitute;
 using Sdk.Instance;
 using Xunit;
+using Core.OS.Hosting.Extensions;
+using Core.OS.Hosting;
 
 namespace Core.OS.Tests.Extensions;
 
@@ -48,6 +52,31 @@ public class WebApplicationBuilderExtensionsTests
 
             // Assert
             _fileSystem.File.Exists(_fileSystem.GetLocalInstanceIdFilePath(_instanceOptions)).Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task Should_return_downgrade_preparation_result_when_persisted_version_is_higher()
+        {
+            // Arrange
+            var builder = WebApplication.CreateBuilder();
+
+            // persist a higher version than running suite to simulate downgrade
+            var parts = SuiteVersionUtils.GetSuiteVersion().Split('.');
+            var major = int.Parse(parts[0], CultureInfo.InvariantCulture);
+            var minor = int.Parse(parts[1], CultureInfo.InvariantCulture) + 1;
+            var patch = int.Parse(parts[2], CultureInfo.InvariantCulture);
+            var higherVersion = $"{major}.{minor}.{patch}";
+
+            await _fileSystem.WriteDataVersionFile(_instanceOptions, higherVersion, TestContext.Current.CancellationToken);
+
+            // Act
+            var result = await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().BeOfType<VersionDowngradePreparationResult>();
+            var downgrade = (VersionDowngradePreparationResult)result!;
+            downgrade.DowngradeInformation.DataVersion.Should().Be(higherVersion);
+            downgrade.DowngradeInformation.CurrentVersion.Should().Be(SuiteVersionUtils.GetSuiteVersion());
         }
 
         [Fact]
