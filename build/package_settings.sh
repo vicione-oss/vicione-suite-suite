@@ -67,7 +67,6 @@ MqttClient__WebSocketClient__TopicFilter='data'
 MqttClient__ServiceClient__Endpoint='${HOST_IP_PARAM}'
 MqttClient__ServiceClient__UserName='${MQTT_USER}'
 MqttClient__ServiceClient__Password='${MQTT_PASSWORD}'
-ViciOneSuiteClusterManagement__HideClusterEditorNavTile='true'
 EOF
     # The 'MINIMAL' deployment sets a base configuration for the debian package and should not contain any modules.
   fi
