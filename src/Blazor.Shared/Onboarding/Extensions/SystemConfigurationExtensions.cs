@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Blazor.Shared.Onboarding.Models;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using HostManagement.Shared.Contracts;
@@ -31,16 +31,26 @@ internal static partial class SystemConfigurationExtensions
             networkInterface.IPv4.DHCPEnabled = true;
 
             networkInterface.IPv4.Gateway = null;
-
-            target.NetworkDNSSettings.NameServersEnabled = false;
         }
         else
         {
             networkInterface.IPv4.DHCPEnabled = false;
 
-            networkInterface.IPv4.IPv4Details.Clear();
-            networkInterface.IPv4.IPv4Details.Add(
-                new IPv4Detail { IPAddress = IPAddress.Parse(source.IpAddress), Netmask = IPAddress.Parse(source.SubnetMask) });
+            //  IPv4Details and NameServers are only cleared/rebuilt when their content actually differs from the proposed values.
+            //  Since IPv4Settings is a sealed record whose synthesized equality compares List<T> by reference, unnecessary list
+            //  mutations caused false inequality even when values matched. Can be removed once this is fixed in Hostmangement.Shared
+
+            var proposedIp = IPAddress.Parse(source.IpAddress);
+            var proposedNetmask = IPAddress.Parse(source.SubnetMask);
+            var ipv4Details = networkInterface.IPv4.IPv4Details;
+
+            if (ipv4Details.Count != 1
+                || !ipv4Details[0].IPAddress.Equals(proposedIp)
+                || !ipv4Details[0].Netmask.Equals(proposedNetmask))
+            {
+                ipv4Details.Clear();
+                ipv4Details.Add(new IPv4Detail { IPAddress = proposedIp, Netmask = proposedNetmask });
+            }
 
             if (string.IsNullOrWhiteSpace(source.DefaultGateway))
                 networkInterface.IPv4.Gateway = null;
@@ -57,8 +67,14 @@ internal static partial class SystemConfigurationExtensions
             {
                 networkDnsSettings.NameServersEnabled = true;
 
-                networkDnsSettings.NameServers.Clear();
-                networkDnsSettings.NameServers.Add(IPAddress.Parse(source.DnsServer));
+                var proposedDns = IPAddress.Parse(source.DnsServer);
+
+                if (networkDnsSettings.NameServers.Count != 1
+                    || !networkDnsSettings.NameServers[0].Equals(proposedDns))
+                {
+                    networkDnsSettings.NameServers.Clear();
+                    networkDnsSettings.NameServers.Add(proposedDns);
+                }
             }
         }
     }
