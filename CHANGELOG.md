@@ -16,6 +16,7 @@
 
 ### Fixed
 
+- First run wizards does not indicate a system restart when simply stepping through steps
 - Recovery mode no longer loops indefinitely when the crash cause is unrelated to modules; after a failed recovery attempt the suite enters a terminal degraded state (serving HTTP 503)
 - Consumer idempotency: all delete and replication consumers now handle message redelivery safely
   - `DbChangeSetConsumer`, upsert semantics ensure redelivered messages no longer cause silent data loss
