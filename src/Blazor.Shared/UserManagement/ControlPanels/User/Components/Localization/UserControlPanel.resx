@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -167,9 +167,6 @@
   </data>
   <data name="DescriptionBannerContentOnEdit" xml:space="preserve">
     <value>Here, you can edit the data of the user. Change the current input and hit confirm to apply your changes to the user.</value>
-  </data>
-  <data name="DescriptionBannerTitleOnEdit" xml:space="preserve">
-    <value>Edit user</value>
   </data>
   <data name="DevicesDescriptionBannerContent" xml:space="preserve">
     <value>Dolor sit amet</value>

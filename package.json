@@ -15,7 +15,7 @@
     "copy:fixed-mixins-1": "copyfiles-fixed -f ./node_modules_fixed/@fontsource/noto-sans/scss/mixins.scss ./node_modules/@fontsource/noto-sans/scss",
     "copy:fixed-mixins-2": "copyfiles-fixed -f ./node_modules_fixed/@fontsource/roboto/scss/mixins.scss ./node_modules/@fontsource/roboto/scss",
     "copy:fixed-mixins-3": "copyfiles-fixed -f ./node_modules_fixed/@fontsource-utils/scss/src/mixins.scss ./node_modules/@fontsource-utils/scss/src",
-    "copy:fixed-mixins" : "npm run copy:fixed-mixins-1 && npm run copy:fixed-mixins-2 && npm run copy:fixed-mixins-3",
+    "copy:fixed-mixins": "npm run copy:fixed-mixins-1 && npm run copy:fixed-mixins-2 && npm run copy:fixed-mixins-3",
     "js:minify:client": "uglifyjs ./src/Blazor.Shared/Scripts/* -o ./src/Blazor.Shared/wwwroot/js/suite.js",
     "lint": "eslint .",
     "lint-with-fix": "eslint . --fix"

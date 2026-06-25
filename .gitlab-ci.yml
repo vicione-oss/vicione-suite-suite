@@ -30,7 +30,7 @@ stages:
   - eval "$(mise env)"
 
 .install_npm_packages: &install_npm_packages
-  - npm install
+  - npm ci
 
 .run_npm_scripts: &run_npm_scripts
   - npm run build
