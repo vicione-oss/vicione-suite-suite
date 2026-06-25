@@ -7,7 +7,7 @@
 @inherits ControlPanelBase<UserControlPanelState>
 
 <ControlPanelPage Title="@Localization.UserControlPanel.Info">
-    <DescriptionBanner Title="@GetDescriptionBannerTitle()">
+    <DescriptionBanner Title="@GetDescriptionBannerTitle(State.UserProfile?.UserName.Value)">
         @GetDescriptionBannerContent()
     </DescriptionBanner>
 

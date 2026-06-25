@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reflection;
 using Core.Module.Options;
 using Core.Module.Utils;
@@ -75,7 +75,6 @@ public static class IFileSystemExtensions
                 throw new InvalidOperationException("Modules directory is not configured");
 
             var moduleDirectory = fileSystem.GetRootedPath(searchPath);
-
     #if DEBUG
             if (!fileSystem.Directory.Exists(moduleDirectory))
                 fileSystem.Directory.CreateDirectory(moduleDirectory);

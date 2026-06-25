@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -157,7 +157,7 @@
     <value>Benutzerrechte bearbeiten: {0}</value>
   </data>
   <data name="TimeDescriptionBannerContent" xml:space="preserve">
-    <value>Dolor sit amet</value>
+    <value>Wählen Sie die korrekte Zeitzone aus.</value>
   </data>
   <data name="TimeDescriptionBannerTitle" xml:space="preserve">
     <value>Zeiteinstellungen</value>
@@ -170,9 +170,6 @@
   </data>
   <data name="DescriptionBannerContentOnEdit" xml:space="preserve">
     <value>Hier können Sie die Daten des Benutzers bearbeiten. Ändern Sie dazu die bisherigen Eingaben und bestätigen Sie anschließend Ihre Änderungen um diese für den Benutzer zu übernehmen.</value>
-  </data>
-  <data name="DescriptionBannerTitleOnEdit" xml:space="preserve">
-    <value>Benutzer bearbeiten</value>
   </data>
   <data name="NoUserNameGiven" xml:space="preserve">
     <value>Es wurde kein Benutzername vorgegeben.</value>

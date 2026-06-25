@@ -16,12 +16,12 @@ internal static partial class WebApplicationBuilderExtensions
     public static async Task<IPreparationResult> PrepareSuite(this WebApplicationBuilder builder, IFileSystem fileSystem, InstanceOptions instanceOptions, Serilog.ILogger logger, CancellationToken cancellationToken = default)
     {
         var preparation = new SuitePreparationPipeline()
-        .UseInstanceId(fileSystem, instanceOptions)
-        .UseDeviceImageCleanup(fileSystem, instanceOptions, logger)
-        .UseResetFile(fileSystem, instanceOptions, logger)
-        .UseRestore(fileSystem, instanceOptions, logger)
-        .UseVersionDowngradeCheck(fileSystem, instanceOptions, logger)
-        .UseRecoveryMode(builder, fileSystem, instanceOptions, logger);
+            .UseInstanceId(fileSystem, instanceOptions)
+            .UseDeviceImageCleanup(fileSystem, instanceOptions, logger)
+            .UseResetFile(fileSystem, instanceOptions, logger)
+            .UseRestore(fileSystem, instanceOptions, logger)
+            .UseVersionDowngradeCheck(fileSystem, instanceOptions, logger)
+            .UseRecoveryMode(builder, fileSystem, instanceOptions, logger);
 
         return await preparation.RunAsync(cancellationToken);
     }
@@ -50,6 +50,21 @@ internal static partial class WebApplicationBuilderExtensions
                 return;
             }
 
+            // Recovery was already attempted but the suite keeps crashing — stay alive in a terminal error state
+            // so the service manager does not trigger another restart loop.
+            if (preparationResult is RecoveryExhaustedPreparationResult exhaustedResult)
+            {
+                var fallbackHost = FallbackHostBuilder.Build(args, new FallbackHostOptions
+                {
+                    Status = FallbackHostStatus.RecoveryExhausted,
+                    Messages = [exhaustedResult.Reason],
+                    HttpStatusCode = 503,
+                    LogLevel = Serilog.Events.LogEventLevel.Fatal,
+                });
+                await fallbackHost.RunAsync();
+                return;
+            }
+
             if (preparationResult is IPreparationAbortResult failure)
             {
                 Log.Warning("Suite preparation did not complete: {Reason}. Startup aborted.", failure.Reason);
@@ -62,7 +77,12 @@ internal static partial class WebApplicationBuilderExtensions
             var failures = host.GetInvalidOptions();
             if (failures is not null)
             {
-                var fallbackHost = InvalidOptionsHostBuilder.Build(args, [.. failures]);
+                var fallbackHost = FallbackHostBuilder.Build(args, new FallbackHostOptions
+                {
+                    Status = FallbackHostStatus.InvalidOptions,
+                    Messages = [.. failures],
+                    HttpStatusCode = 500,
+                });
                 await fallbackHost.RunAsync();
             }
             else

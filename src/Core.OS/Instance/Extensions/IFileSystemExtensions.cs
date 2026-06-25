@@ -40,27 +40,27 @@ internal static class IFileSystemExtensions
             fileSystem.File.WriteAllText(localInfoFilePath, id.ToString());
         }
 
-        internal async Task<bool> UseRecoveryMode(InstanceOptions instanceOptions, Serilog.ILogger logger, CancellationToken cancellationToken = default)
+        internal async Task<RecoveryDecision> UseRecoveryMode(InstanceOptions instanceOptions, Serilog.ILogger logger, CancellationToken cancellationToken = default)
         {
             if (instanceOptions.Recovery is null || instanceOptions.Recovery.TimespanMinutes <= 0)
             {
                 logger.Information("Recovery mode is disabled by configuration");
-                return false;
+                return RecoveryDecision.Continue;
             }
 
             var recoveryFilePath = fileSystem.GetLocalRecoveryFilePath(instanceOptions);
             if (!fileSystem.File.Exists(recoveryFilePath))
             {
                 // file did not exist so we start the counter...
-                await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken);
-                return false;
+                await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken: cancellationToken);
+                return RecoveryDecision.Continue;
             }
 
             var existingState = await fileSystem.ReadRecoveryState(recoveryFilePath, logger, cancellationToken);
             if (existingState is null)
             {
                 logger.Warning("Failed to restore recovery state");
-                return false;
+                return RecoveryDecision.Continue;
             }
 
             var timeElapsed = DateTimeOffset.UtcNow.Subtract(existingState.LastStartup);
@@ -69,8 +69,8 @@ internal static class IFileSystemExtensions
             // the last startup is long time ago...reset
             if (timeElapsed > checkTimespan)
             {
-                await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken);
-                return false;
+                await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken: cancellationToken);
+                return RecoveryDecision.Continue;
             }
 
             // we fail but we can try again once again...
@@ -79,13 +79,23 @@ internal static class IFileSystemExtensions
                 existingState.Startups++;
                 await fileSystem.WriteRecoveryState(recoveryFilePath, existingState, cancellationToken);
                 logger.Information("Startup counter increased to {Count}", existingState.Startups);
-                return false;
+                return RecoveryDecision.Continue;
             }
 
-            // now it's bad - we failed x times within z minutes! RESET MODULES
-            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken);
+            // Recovery was already applied but the suite still crashes — escalate to terminal state
+            if (existingState.RecoveryApplied)
+            {
+                logger.Fatal(
+                    "Recovery mode was already applied but the suite crashed {Startups} more times within {Minutes} minutes. Entering terminal failed state",
+                    existingState.Startups,
+                    instanceOptions.Recovery.TimespanMinutes);
+                return RecoveryDecision.RecoveryExhausted;
+            }
+
+            // First time hitting threshold — apply recovery and mark it
+            await fileSystem.WriteRecoveryStateReset(recoveryFilePath, recoveryApplied: true, cancellationToken: cancellationToken);
             logger.Warning("Fallback to recovery mode after {Startups} startups", existingState.Startups);
-            return true;
+            return RecoveryDecision.ApplyRecovery;
         }
 
         internal string GetRootedHomeDirectory(InstanceOptions instanceOptions)
@@ -147,8 +157,8 @@ internal static class IFileSystemExtensions
             return null;
         }
 
-        internal Task WriteRecoveryStateReset(string recoveryFilePath, CancellationToken cancellationToken = default)
-            => fileSystem.WriteRecoveryState(recoveryFilePath, new RecoveryState { LastStartup = DateTimeOffset.UtcNow, Startups = 1 }, cancellationToken);
+        internal Task WriteRecoveryStateReset(string recoveryFilePath, bool recoveryApplied = false, CancellationToken cancellationToken = default)
+            => fileSystem.WriteRecoveryState(recoveryFilePath, new RecoveryState { LastStartup = DateTimeOffset.UtcNow, Startups = 1, RecoveryApplied = recoveryApplied }, cancellationToken);
 
         private async Task WriteRecoveryState(string recoveryFilePath, RecoveryState state, CancellationToken cancellationToken = default)
         {

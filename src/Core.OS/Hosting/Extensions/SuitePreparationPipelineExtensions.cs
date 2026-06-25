@@ -42,21 +42,32 @@ internal static class SuitePreparationPipelineExtensions
         InstanceOptions options, Serilog.ILogger logger)
         => pipeline.Use(async ct =>
         {
-            if (await fileSystem.UseRecoveryMode(options, logger, ct))
-            {
-                var modulesFilePath = fileSystem.GetModuleVersionsFilePath(options);
-                var backupFilePath = fileSystem.GetModuleVersionsBackupFilePath(options);
+            var decision = await fileSystem.UseRecoveryMode(options, logger, ct);
 
-                fileSystem.File.Copy(modulesFilePath, backupFilePath);
-                await fileSystem.CopyInitialModuleManifestTo(modulesFilePath, ct);
-
-                LocalInstanceInformationProvider.RunningInRecoveryMode = true;
-                logger.Warning("Recovery mode - all modules disabled. Previous configuration stored within '{Path}'", backupFilePath);
-            }
-            else
+            switch (decision)
             {
-                var loaderOptions = builder.Configuration.GetModuleLoaderOptions();
-                await fileSystem.EnsureModuleVersionsFile(options, loaderOptions.ManifestSeedPath, logger, ct);
+                case RecoveryDecision.ApplyRecovery:
+                {
+                    var modulesFilePath = fileSystem.GetModuleVersionsFilePath(options);
+                    var backupFilePath = fileSystem.GetModuleVersionsBackupFilePath(options);
+
+                    fileSystem.File.Copy(modulesFilePath, backupFilePath);
+                    await fileSystem.CopyInitialModuleManifestTo(modulesFilePath, ct);
+
+                    LocalInstanceInformationProvider.RunningInRecoveryMode = true;
+                    logger.Warning("Recovery mode - all modules disabled. Previous configuration stored within '{Path}'", backupFilePath);
+                    break;
+                }
+
+                case RecoveryDecision.RecoveryExhausted:
+                    return new RecoveryExhaustedPreparationResult();
+
+                default:
+                {
+                    var loaderOptions = builder.Configuration.GetModuleLoaderOptions();
+                    await fileSystem.EnsureModuleVersionsFile(options, loaderOptions.ManifestSeedPath, logger, ct);
+                    break;
+                }
             }
 
             return PreparationResult.Success;
@@ -186,8 +197,8 @@ internal static class SuitePreparationPipelineExtensions
             // now we restore all modules from backup archive to home directory
             var homeDirectory = fileSystem.GetRootedHomeDirectory(options);
             logger.Debug("Restoring home workspaces in '{Home}'", homeDirectory);
-            BackupReader.ExtractSystemModuleTo(archiveStream, homeDirectory);
-            BackupReader.ExtractModulesTo(archiveStream, homeDirectory);
+            await BackupReader.ExtractSystemModuleTo(archiveStream, homeDirectory, cancellationToken);
+            await BackupReader.ExtractModulesTo(archiveStream, homeDirectory, null, cancellationToken);
 
             InstanceStartupState.InvalidateLoginsAfterMigration = true;
         }

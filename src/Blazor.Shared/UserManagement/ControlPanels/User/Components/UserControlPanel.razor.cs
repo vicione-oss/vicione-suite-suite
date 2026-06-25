@@ -130,12 +130,12 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
         await BeginEdit();
     }
 
-    private string GetDescriptionBannerTitle()
+    private string GetDescriptionBannerTitle(string? username)
     {
         var culture = Localization.UserControlPanel.Culture;
         return string.Format(culture, State.IsEditMode()
-            ? Localization.UserControlPanel.DescriptionBannerTitleOnEdit
-            : Localization.UserControlPanel.DescriptionBannerTitleOnAdd);
+            ? ViciOne.Ui.Localization.Resources.UserActions.EditSomething
+            : Localization.UserControlPanel.DescriptionBannerTitleOnAdd, username);
     }
 
     private string GetDescriptionBannerContent()

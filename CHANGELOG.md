@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.3 - Unreleased
+
+### Fixed
+
+- First run wizards does not indicate a system restart when simply stepping through steps
+- Recovery mode no longer loops indefinitely when the crash cause is unrelated to modules; after a failed recovery attempt the suite enters a terminal degraded state (serving HTTP 503)
+- `ConnectionControlPanel`, fixed double display of tags after storing a connection with added tags
+
+### Updated
+
+- `AspNetCore.SassCompiler` packages, update to version `1.101.0`
+- `MailKit` packages, update to version `4.17.0`
+- `Microsoft` packages, update to version `10.0.9`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.15.0`
+
 ## 1.2.2 - 2026-06-11
 
 ### Added
