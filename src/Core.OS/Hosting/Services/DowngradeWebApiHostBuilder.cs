@@ -19,6 +19,7 @@ internal static class DowngradeWebApiHostBuilder
         builder.Services.AddSingleton(fileSystem);
         builder.Services.AddSingleton(options.Logger);
         builder.Services.AddSingleton(Options.Create(options.Instance));
+        builder.Services.AddSingleton<EventCallbackRegistry>();
         builder.Services.AddPipeClient(options.HostManagement);
 
         // create the simplest host possible to display the errors

@@ -2,6 +2,7 @@ using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Services;
+using Core.OS.HostManagement;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.Shared.HostManagement;
@@ -154,6 +155,8 @@ public sealed class DowngradeWebApplicationBuilderTests
         var response = await client.GetAsync($"{host.Urls.First()}/reset", tokenSource.Token);
 
         // Assert
+        host.Services.GetService<EventCallbackRegistry>().Should().NotBeNull();
+
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
         _fileSystem.ResetFileExists(_options).Should().BeTrue();
 
