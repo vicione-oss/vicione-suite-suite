@@ -14,6 +14,10 @@
 - Account lockout after 5 failed sign-in or current-password attempts; locked accounts auto-unlock after 5 minutes. Lockout is surfaced as the same generic credentials error as a wrong password to avoid disclosing account state.
 - Auto resolving module versions allows now fixed version parts (e.g. `1.*` or `1.2.*`) in addition to the `latest` keyword
 
+### Changed
+
+- Replaced `DxTabs` with `ViciOne.Ui.Blazor.Components.TabStrip`
+
 ### Fixed
 
 - First run wizards does not indicate a system restart when simply stepping through steps
@@ -35,7 +39,7 @@
 - `AspNetCore.SassCompiler` packages, update to version `1.101.0`
 - `MailKit` packages, update to version `4.17.0`
 - `Microsoft` packages, update to version `10.0.9`
-- `ViciOne.Ui.Blazor.Components` package, update version to `5.15.0`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.16.0`
 
 ## 1.2.2 - 2026-06-11
 

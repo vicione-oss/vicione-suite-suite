@@ -1,11 +1,11 @@
 using Blazor.Shared.Settings.Services;
-using DevExpress.Blazor;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Models;
 using Sdk.Client.Services;
+using ViciOne.Ui.Blazor.Components.TabStrip.Models;
 using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Settings.Components;
@@ -43,11 +43,9 @@ public sealed partial class SettingsContainerContentHeader : ComponentBase, IDis
     private void ControlPanelPageRegistryChanged(RegistryChangedEventArgs<IControlPanelPageRegistryItem> _)
         => StateHasChanged();
 
-    private void ControlPanelPageTabClick(TabClickEventArgs args)
-    {
-        if (_activeControlPanelRegistryItem is not null)
-            _activeControlPanelRegistryItem.State.ActivePageIndex = args.TabIndex;
-    }
+    private void ControlPanelPageTabSelected(TabSelectedEventArgs args)
+        => _activeControlPanelRegistryItem?.State.ActivePageIndex = args.TabIndex;
+
     private async void SettingsModuleStateChanged(PropertiesChangedEventArgs args)
     {
         var shouldRender = false;

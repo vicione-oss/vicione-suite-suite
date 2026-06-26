@@ -20,6 +20,7 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
     private bool _restartSystemDialogVisible;
     private bool _restartDialogVisible;
     private bool _shutdownDialogVisible;
+    private int _activeTabIndex;
     private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
 
     private string? SysAdminPolicy { get; }

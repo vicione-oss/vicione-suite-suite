@@ -1,5 +1,4 @@
-﻿@use "./../../Styles/typography/fonts/noto-sans/variables" as noto-sans;
-@use "./../../Styles/tabs/mixins" as tabs;
+@use "./../../Styles/typography/fonts/noto-sans/variables" as noto-sans;
 @use "./../../Styles/buttons/mixins" as buttons;
 
 .settings-container-content-header {
@@ -26,8 +25,6 @@
 
     .tab-control-container {
         grid-area: control-panel-title-or-tabs;
-
-        @include tabs.styles($tab-size: "large");
     }
 
     .control-panel-title {
