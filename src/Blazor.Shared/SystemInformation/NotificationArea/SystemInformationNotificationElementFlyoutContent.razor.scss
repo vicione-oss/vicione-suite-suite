@@ -1,6 +1,5 @@
-﻿@use "./../../../../shared/styles/typography";
+@use "./../../../../shared/styles/typography";
 @use "./../../../../shared/styles/overflow";
-@use "../../Styles/tabs/mixins" as tabs;
 
 $color-cpu: rgb(103, 183, 76);
 $color-ram: rgb(255, 206, 0);
@@ -11,7 +10,6 @@ $color-net: rgb(255, 150, 0);
     margin-bottom: 56px;
 
     .systeminfo-tabs {
-        @include tabs.styles($tab-size: "small");
         overflow-x: visible;
     }
 

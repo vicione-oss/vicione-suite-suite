@@ -1,4 +1,5 @@
-@using DevExpress.Blazor
+@using ViciOne.Ui.Blazor.Components.TabStrip.Components
+@using ViciOne.Ui.Blazor.Components.TabStrip.Enums
 @using ViciOne.Ui.MonochromeIcons.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 
@@ -22,12 +23,12 @@
             var activeControlPanelPageIndex = activeControlPanelPage is not null ? controlPanelPages.IndexOf(activeControlPanelPage) : 0;
 
             <div class="tab-control-container">
-                <DxTabs ActiveTabIndex="activeControlPanelPageIndex" ScrollMode="TabsScrollMode.NavButtons">
+                <TabStrip ActiveTabIndex="activeControlPanelPageIndex" TabSize="TabSize.Large">
                     @foreach (var controlPanelPage in controlPanelPages)
                     {
-                        <DxTab CssClass="control-panel-page-tab" Text="@controlPanelPage.Title" Click="@ControlPanelPageTabClick"></DxTab>
+                        <Tab Text="@controlPanelPage.Title" OnSelected="@ControlPanelPageTabSelected" />
                     }
-                </DxTabs>
+                </TabStrip>
             </div>
         }
         else
