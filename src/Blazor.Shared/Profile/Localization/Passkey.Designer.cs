@@ -62,5 +62,11 @@ namespace Blazor.Shared.Profile.Localization {
                 return ResourceManager.GetString("SettingsTitle", resourceCulture);
             }
         }
+
+        internal static string FeatureNotAvailable {
+            get {
+                return ResourceManager.GetString("FeatureNotAvailable", resourceCulture);
+            }
+        }
     }
 }

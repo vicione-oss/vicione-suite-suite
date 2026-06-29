@@ -27,4 +27,7 @@
   <data name="SettingsTitle" xml:space="preserve">
     <value>Passkey settings</value>
   </data>
+  <data name="FeatureNotAvailable" xml:space="preserve">
+    <value>Passkey sign-in is currently not available.</value>
+  </data>
 </root>

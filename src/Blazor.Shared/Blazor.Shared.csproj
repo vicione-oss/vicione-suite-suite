@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.FeatureManagement" />
     <PackageReference Include="DevExpress.Blazor" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />

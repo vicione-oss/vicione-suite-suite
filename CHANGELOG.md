@@ -7,7 +7,7 @@
 - MassTransit EF Core Bus Outbox for master-side replication publishing. `ChangeTrackingInterceptor` now publishes during `SavingChangesAsync` instead of after commit, eliminating silent data loss when the broker is unreachable.
 - Replication sequence numbers with in-memory reorder buffer. Monotonically increasing sequence numbers per context type enable gap detection on slaves. A reorder buffer absorbs brief out-of-order delivery from the Bus Outbox; persistent gaps trigger a forced full-sync.
 - `RegisterInstance.ForceSync` flag to force full data synchronization regardless of queue TTL, used by the gap-triggered resync path.
-- Support for passkey authentication, allowing users with an existing local account to register and use passkeys for authentication
+- Support for passkey authentication, allowing users with an existing local account to register and use passkeys for authentication. Passkey management in the profile settings is gated behind the `Passkeys` feature flag; when it is disabled the add button is hidden and a "not available" notice is shown
 - Support for renaming passkeys from the profile settings
 - Ability to remove the link between a local user and an external identity provider account from the external ID providers settings
 - `Microsoft.FeatureManagement` package
@@ -33,6 +33,7 @@
 - `PasswordValidator`, underscore (`_`) is now recognized as a special character
 - Password complexity requirements (digit, lowercase letter, uppercase letter, special character) are now explicitly enforced in ASP.NET Identity configuration, closing the gap between the custom `PasswordValidator` and Identity's built-in password validation
 - `ConnectionControlPanel`, fixed double display of tags after storing a connection with added tags
+- `LoginContent` / `JsInterop`, spurious errors are no longer logged during login: the brief `HttpContext`-null re-render while navigating away after sign-in no longer throws `ArgumentNullException`, and the expected circuit-teardown cancellation is logged at Debug instead of Error
 
 ### Updated
 

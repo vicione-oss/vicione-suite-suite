@@ -20,4 +20,7 @@
   <data name="SettingsTitle" xml:space="preserve">
     <value>Passkey Verwaltung</value>
   </data>
+  <data name="FeatureNotAvailable" xml:space="preserve">
+    <value>Passkey-Anmeldung ist derzeit nicht verfügbar.</value>
+  </data>
 </root>

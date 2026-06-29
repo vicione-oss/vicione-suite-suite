@@ -23,22 +23,38 @@
     <DescriptionBanner Title="@Passkey.SettingsTitle">
         @CommonPhrases.PasskeysDescription
     </DescriptionBanner>
-    <Grid Items="Passkeys">
-        <ActionButtons>
-            <AddGridActionButton OnClick="@ShowAddPasskey"></AddGridActionButton>
-            <EditGridActionButton Enabled="@IsSinglePasskeySelected" OnClick="@ShowRenamePasskey"></EditGridActionButton>
-            <DeleteGridActionButton OnClick="@MarkPasskeysForDeletion"></DeleteGridActionButton>
-        </ActionButtons>
+    @if (ShowUnavailableNotice)
+    {
+        <SettingsLayout>
+            <SettingsGroup Title="@CommonVocabulary.Common">
+                <SettingsField Label="@CommonVocabulary.Status">
+                    <span>@Passkey.FeatureNotAvailable</span>
+                </SettingsField>
+            </SettingsGroup>
+        </SettingsLayout>
+    }
+    else
+    {
+        <Grid Items="Passkeys">
+            <ActionButtons>
+                @if (IsAddPasskeyAllowed)
+                {
+                    <AddGridActionButton OnClick="@ShowAddPasskey"></AddGridActionButton>
+                }
+                <EditGridActionButton Enabled="@IsSinglePasskeySelected" OnClick="@ShowRenamePasskey"></EditGridActionButton>
+                <DeleteGridActionButton OnClick="@MarkPasskeysForDeletion"></DeleteGridActionButton>
+            </ActionButtons>
 
-        <ChildContent>
-            <ItemSelectColumn KeySelector="item => item.Id"
-                              Selection="@SelectedPasskeys"/>
+            <ChildContent>
+                <ItemSelectColumn KeySelector="item => item.Id"
+                                  Selection="@SelectedPasskeys"/>
 
-            <PropertyColumn Title="@CommonVocabulary.Name" Property="item => item.Name"/>
-        </ChildContent>
+                <PropertyColumn Title="@CommonVocabulary.Name" Property="item => item.Name"/>
+            </ChildContent>
 
-        <Footer>
-            <SelectionFooter GridSelection="SelectedPasskeys"/>
-        </Footer>
-    </Grid>
+            <Footer>
+                <SelectionFooter GridSelection="SelectedPasskeys"/>
+            </Footer>
+        </Grid>
+    }
 </ControlPanelPage>
