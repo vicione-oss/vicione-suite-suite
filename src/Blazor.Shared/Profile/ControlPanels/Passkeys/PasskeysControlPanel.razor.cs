@@ -3,6 +3,7 @@ using Core.Shared.Passkeys.Requests;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.FeatureManagement;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using ViciOne.Ui.Blazor.Components.Grid.Services;
@@ -22,13 +23,21 @@ public partial class PasskeysControlPanel
     [Inject]
     private IUiMediator Mediator { get; set; } = default!;
 
+    [Inject]
+    private IFeatureManager FeatureManager { get; set; } = default!;
+
     public IQueryable<PasskeyInfo> Passkeys { get; private set; } = Enumerable.Empty<PasskeyInfo>().AsQueryable();
 
     private bool IsSinglePasskeySelected => SelectedPasskeys.Count == 1;
+    private bool IsAddPasskeyAllowed { get; set; }
+
+    private bool ShowUnavailableNotice => !IsAddPasskeyAllowed && !Passkeys.Any();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        IsAddPasskeyAllowed = await FeatureManager.IsEnabledAsync(Core.Shared.Features.Constants.PasskeyFeatureName);
 
         SelectedPasskeys.Clear();
 

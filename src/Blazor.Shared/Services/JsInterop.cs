@@ -192,7 +192,13 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         {
             await jsRuntime.InvokeVoidAsync(
                 "ViciOne.Interop.submitForm",
+                token,
                 path, fields);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException or JSDisconnectedException)
+        {
+            // The full-page form submit tears down the circuit, cancelling this in-flight interop call.
+            logger.LogDebug(ex, nameof(SubmitForm));
         }
         catch (Exception ex)
         {

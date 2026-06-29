@@ -1,9 +1,15 @@
-﻿const browserSupportsPasskeys =
+﻿// Adapted from the standard Blazor "Individual Authentication" template
+// (dotnet new blazor -au Individual, .NET 10), which ships passkey support.
+// Kept intentionally close to the original — treat as generated; see docs/passkeys.md.
+// MS guidance: https://learn.microsoft.com/en-us/aspnet/core/security/authentication/passkeys/blazor
+const browserSupportsPasskeys =
     typeof navigator.credentials !== 'undefined' &&
     typeof window.PublicKeyCredential !== 'undefined' &&
     typeof window.PublicKeyCredential.parseCreationOptionsFromJSON === 'function' &&
     typeof window.PublicKeyCredential.parseRequestOptionsFromJSON === 'function';
 
+// Passkey helpers below are intentionally duplicated with AddPasskeyControlPanel.razor.js;
+// see docs/passkeys.md. Keep both copies in sync when fixing.
 async function fetchWithErrorHandling(url, options = {}) {
     const response = await fetch(url, {
         credentials: 'include',
@@ -93,7 +99,29 @@ customElements.define('passkey-submit', class extends HTMLElement {
         const formData = new FormData();
         try {
             const credential = await this.obtainCredential(useConditionalMediation, signal);
-            const credentialJson = JSON.stringify(credential);
+            // Some password managers (1Password, Microsoft Authenticator) don't implement
+            // PublicKeyCredential.toJSON correctly, so JSON.stringify(credential) drops
+            // clientExtensionResults (required by the server) or throws. Serialize manually instead.
+            // Revisit when these tools conform — tracked in
+            // https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2817
+            const credentialJson = JSON.stringify({
+                authenticatorAttachment: credential.authenticatorAttachment,
+                clientExtensionResults: credential.getClientExtensionResults(),
+                id: credential.id,
+                rawId: this.convertToBase64(credential.rawId),
+                response: {
+                    attestationObject: this.convertToBase64(credential.response.attestationObject),
+                    authenticatorData: this.convertToBase64(credential.response.authenticatorData ??
+                        credential.response.getAuthenticatorData?.() ?? undefined),
+                    clientDataJSON: this.convertToBase64(credential.response.clientDataJSON),
+                    publicKey: this.convertToBase64(credential.response.getPublicKey?.() ?? undefined),
+                    publicKeyAlgorithm: credential.response.getPublicKeyAlgorithm?.() ?? undefined,
+                    transports: credential.response.getTransports?.() ?? undefined,
+                    signature: this.convertToBase64(credential.response.signature),
+                    userHandle: this.convertToBase64(credential.response.userHandle),
+                },
+                type: credential.type,
+            });
             formData.append(`${this.attrs.name}.CredentialJson`, credentialJson);
         } catch (error) {
             if (error.name === 'AbortError') {
@@ -119,5 +147,41 @@ customElements.define('passkey-submit', class extends HTMLElement {
         if (browserSupportsPasskeys && this.attrs.operation === 'Request' && await PublicKeyCredential.isConditionalMediationAvailable?.()) {
             await this.obtainAndSubmitCredential(/* useConditionalMediation */ true);
         }
+    }
+
+    // Encodes a credential field (byte array/ArrayBuffer/Uint8Array/string) as a base64url
+    // string. Part of the manual PublicKeyCredential serialization that mitigates the
+    // "TypeError: Illegal invocation" thrown by some password managers; see:
+    // https://github.com/dotnet/AspNetCore.Docs/blob/main/aspnetcore/security/authentication/passkeys/index.md#mitigate-publickeycredentialtojson-error-typeerror-illegal-invocation
+    convertToBase64(o) {
+        if (!o) {
+            return undefined;
+        }
+
+        if (Array.isArray(o)) {
+            o = Uint8Array.from(o);
+        }
+
+        if (o instanceof ArrayBuffer) {
+            o = new Uint8Array(o);
+        }
+
+        if (o instanceof Uint8Array) {
+            let str = '';
+            for (let i = 0; i < o.byteLength; i++) {
+                str += String.fromCharCode(o[i]);
+            }
+            o = window.btoa(str);
+        }
+
+        if (typeof o !== 'string') {
+            throw new Error("Could not convert to base64 string");
+        }
+
+        // Convert standard base64 to base64url: '+' -> '-', '/' -> '_', and strip '=' padding.
+        // e.g. "ab+/c==" -> "ab-_c"
+        o = o.replace(/\+/g, "-").replace(/\//g, "_").replace(/=*$/g, "");
+
+        return o;
     }
 });

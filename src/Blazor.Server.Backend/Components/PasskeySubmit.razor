@@ -5,7 +5,7 @@
 @using Microsoft.Extensions.DependencyInjection
 @inject IServiceProvider Services
 
-<script src="./_content/Blazor.Server.Backend/Components/PasskeySubmit.razor.js"></script>
+<script src="@Assets["js/passkey-submit.js"]"></script>
 
 <AccountButton name="__passkeySubmit" Text="@Text" ButtonType="AccountButtonType.Default" />
 <passkey-submit

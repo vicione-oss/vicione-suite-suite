@@ -90,6 +90,13 @@ public sealed partial class LoginContent
         IsPasskeySignInEnabled = await FeatureManager.IsEnabledAsync(Core.Shared.Features.Constants.PasskeyFeatureName);
 
         await InitializeExternalIdProvider();
+
+        // HttpContext is only present during static server rendering. It is null in the
+        // brief interactive re-render that occurs while navigating away after sign-in,
+        // where TempData and external sign-out are neither available nor needed.
+        if (HttpContext is null)
+            return;
+
         ReadExternalErrorFromTempData();
 
         if (ExternalErrorTyped > ExternalLoginError.None)
