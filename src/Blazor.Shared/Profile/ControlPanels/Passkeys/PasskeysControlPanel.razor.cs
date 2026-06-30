@@ -1,3 +1,5 @@
+using Blazor.Shared.Profile.Localization;
+using Core.Shared.Passkeys;
 using Core.Shared.Passkeys.Contracts;
 using Core.Shared.Passkeys.Requests;
 using Core.Shared.UserManagement.Contracts;
@@ -26,18 +28,29 @@ public partial class PasskeysControlPanel
     [Inject]
     private IFeatureManager FeatureManager { get; set; } = default!;
 
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    private IPasskeyHostSupport PasskeyHostSupport { get; set; } = default!;
+
     public IQueryable<PasskeyInfo> Passkeys { get; private set; } = Enumerable.Empty<PasskeyInfo>().AsQueryable();
 
     private bool IsSinglePasskeySelected => SelectedPasskeys.Count == 1;
     private bool IsAddPasskeyAllowed { get; set; }
 
+    private bool IsPasskeyHostSupported { get; set; }
+
     private bool ShowUnavailableNotice => !IsAddPasskeyAllowed && !Passkeys.Any();
+
+    private string? AddPasskeyTitle => IsPasskeyHostSupported ? null : Passkey.RequiresDnsHost;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
         IsAddPasskeyAllowed = await FeatureManager.IsEnabledAsync(Core.Shared.Features.Constants.PasskeyFeatureName);
+        IsPasskeyHostSupported = PasskeyHostSupport.IsPasskeyCapableHost(new Uri(NavigationManager.BaseUri).Host);
 
         SelectedPasskeys.Clear();
 

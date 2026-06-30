@@ -123,6 +123,12 @@ namespace Blazor.Server.Backend.Localization {
             }
         }
 
+        public static string PasskeyRequiresDnsHost {
+            get {
+                return ResourceManager.GetString("PasskeyRequiresDnsHost", resourceCulture);
+            }
+        }
+
         public static string ExternalUserCreationFailed {
             get {
                 return ResourceManager.GetString("ExternalUserCreationFailed", resourceCulture);

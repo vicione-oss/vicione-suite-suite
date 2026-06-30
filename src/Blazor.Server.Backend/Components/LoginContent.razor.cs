@@ -4,8 +4,8 @@ using Blazor.Server.Backend.Localization;
 using Blazor.Server.Backend.Security;
 using Blazor.Shared;
 using Blazor.Shared.Services;
-using Core.Shared.Features;
 using Core.Shared.Mail;
+using Core.Shared.Passkeys;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Configuration;
 using Core.Shared.UserManagement.Contracts;
@@ -59,6 +59,9 @@ public sealed partial class LoginContent
     public IFeatureManager FeatureManager { get; set; } = default!;
 
     [Inject]
+    private IPasskeyHostSupport PasskeyHostSupport { get; set; } = default!;
+
+    [Inject]
     public ITempDataDictionaryFactory TempDataFactory { get; set; } = default!;
 
     [Parameter]
@@ -80,6 +83,8 @@ public sealed partial class LoginContent
 
     private bool IsPasskeySignInEnabled { get; set; }
 
+    private bool IsPasskeyHostSupported { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         Input ??= new();
@@ -88,6 +93,7 @@ public sealed partial class LoginContent
         messageStore = new(editContext);
 
         IsPasskeySignInEnabled = await FeatureManager.IsEnabledAsync(Core.Shared.Features.Constants.PasskeyFeatureName);
+        IsPasskeyHostSupported = PasskeyHostSupport.IsPasskeyCapableHost(HttpContext?.Request.Host.Host);
 
         await InitializeExternalIdProvider();
 

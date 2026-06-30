@@ -23,4 +23,7 @@
   <data name="FeatureNotAvailable" xml:space="preserve">
     <value>Passkey-Anmeldung ist derzeit nicht verfügbar.</value>
   </data>
+  <data name="RequiresDnsHost" xml:space="preserve">
+    <value>Passkeys erfordern den Zugriff über einen DNS-Hostnamen und sind über eine IP-Adresse nicht verfügbar.</value>
+  </data>
 </root>

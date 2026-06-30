@@ -39,7 +39,9 @@
             <ActionButtons>
                 @if (IsAddPasskeyAllowed)
                 {
-                    <AddGridActionButton OnClick="@ShowAddPasskey"></AddGridActionButton>
+                    <AddGridActionButton OnClick="@ShowAddPasskey"
+                                         Enabled="@IsPasskeyHostSupported"
+                                         Title="@AddPasskeyTitle"></AddGridActionButton>
                 }
                 <EditGridActionButton Enabled="@IsSinglePasskeySelected" OnClick="@ShowRenamePasskey"></EditGridActionButton>
                 <DeleteGridActionButton OnClick="@MarkPasskeysForDeletion"></DeleteGridActionButton>

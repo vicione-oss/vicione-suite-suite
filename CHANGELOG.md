@@ -9,6 +9,7 @@
 - `RegisterInstance.ForceSync` flag to force full data synchronization regardless of queue TTL, used by the gap-triggered resync path.
 - Support for passkey authentication, allowing users with an existing local account to register and use passkeys for authentication. Passkey management in the profile settings is gated behind the `Passkeys` feature flag; when it is disabled the add button is hidden and a "not available" notice is shown
 - Support for renaming passkeys from the profile settings
+- Passkey sign-in and registration are grayed out, with an explanatory tooltip, when the Suite is reached over a raw IP address instead of a DNS hostname (WebAuthn does not work over IP literals)
 - Ability to remove the link between a local user and an external identity provider account from the external ID providers settings
 - `Microsoft.FeatureManagement` package
 - Account lockout after 5 failed sign-in or current-password attempts; locked accounts auto-unlock after 5 minutes. Lockout is surfaced as the same generic credentials error as a wrong password to avoid disclosing account state.
@@ -16,6 +17,7 @@
 
 ### Changed
 
+- `Passkeys` feature flag is now enabled by default; the flag remains available to disable it via configuration
 - Replaced `DxTabs` with `ViciOne.Ui.Blazor.Components.TabStrip`
 
 ### Fixed

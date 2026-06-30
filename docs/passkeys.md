@@ -19,6 +19,23 @@ Passkeys require a DNS name to be used when [creating the credentials](https://w
 
 In practice this means the suite must be reached over a DNS name: accessed by raw IP the effective domain is an IP rather than a domain, which the browser rejects — so the passkey ceremony fails.
 
+To degrade gracefully instead of failing cryptically, the two passkey-**creation** surfaces are grayed out (with an explanatory tooltip) when the host is an IP literal: the sign-in button on the login page and the **Add** button in the profile passkey settings.
+Listing, renaming and deleting are unaffected — they touch no authenticator (see [Managing passkeys](#managing-passkeys-list--rename--delete)) and work over IP.
+The rule is "**host is an IP literal**", not "strict FQDN": `localhost` and other single-label DNS names stay enabled, because WebAuthn accepts them and they are needed for local development.
+The check lives in `Core.Shared.Passkeys.IPasskeyHostSupport` (`IsPasskeyCapableHost`).
+
+**Detecting the host differs per surface, because they run in separate render contexts (see below):**
+
+- **Login** is static-SSR, so `HttpContext` is available — it reads `HttpContext.Request.Host.Host`.
+- **Settings** is interactive Blazor with no reliable `HttpContext`, so it reads the browser origin via `NavigationManager.BaseUri`.
+
+> **Reverse-proxy caveat (edge S / nginx).** The login-side check is only correct if `Request.Host` reflects the *client's* host, not an upstream one. There are two ways a proxy can convey the client host, and the app must end up with one of them:
+>
+> - **Preserve the `Host` header** — the deployed nginx sets `proxy_set_header Host $host;`, so `Request.Host` is already the client host. This is what the edge S setup relies on, and it works regardless of forwarded-headers handling.
+> - **Forward it in `X-Forwarded-Host`** — if a proxy instead overwrites `Host` with the upstream and puts the original host in `X-Forwarded-Host`, the app only picks it up when forwarded-headers handling is enabled: `BlazorServerBackendModule.UseSecurity(app, useHeaderForwarding)` calls `UseForwardedHeaders` with `ForwardedHeaders.XForwardedHost`, gated on `InstanceOptions.UseHeaderForwarding`.
+>
+> If neither holds — `Host` rewritten to the upstream **and** `X-Forwarded-Host` not honoured — `Request.Host` is the upstream host and login-side detection is wrong. The settings surface reads the browser origin and is unaffected.
+
 ### Relationship to the Microsoft Blazor template
 
 The passkey code is adapted from the standard Blazor template scaffolded with Individual Authentication (`dotnet new blazor -au Individual`), which includes passkey support as of .NET 10. As we understand that template:

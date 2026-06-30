@@ -19,4 +19,7 @@ public partial class AccountButton
 
     [Parameter]
     public bool Disabled { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
 }
