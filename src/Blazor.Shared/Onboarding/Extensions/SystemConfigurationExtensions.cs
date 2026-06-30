@@ -20,7 +20,6 @@ internal static partial class SystemConfigurationExtensions
     public static void UpdateFrom(this SystemConfiguration target, INetworkInterfaceConfiguration source)
     {
         var networkInterfaces = target.NetworkInterfacesSettings.NetworkInterfaces;
-
         var networkInterfaceName = source.GetName();
 
         var networkInterface = networkInterfaces.FirstOrDefault(i => i.CommonInformation.Name == networkInterfaceName)
@@ -28,29 +27,26 @@ internal static partial class SystemConfigurationExtensions
 
         if (source.ConfigurationMode == IpConfigurationMode.AutomaticDhcp)
         {
-            networkInterface.IPv4.DHCPEnabled = true;
+            //  Only normalize the static IPv4 configuration when actually switching to DHCP. While the interface is
+            //  already in DHCP mode, the address and gateway are managed by DHCP and reported back by the host, so they
+            //  must be left untouched - otherwise an unchanged interface would appear modified when compared against the
+            //  current (DHCP-assigned) configuration.
 
-            networkInterface.IPv4.Gateway = null;
+            if (!networkInterface.IPv4.DHCPEnabled)
+            {
+                networkInterface.IPv4.DHCPEnabled = true;
+
+                networkInterface.IPv4.Gateway = null;
+                networkInterface.IPv4.IPv4Details.Clear();
+            }
         }
         else
         {
             networkInterface.IPv4.DHCPEnabled = false;
 
-            //  IPv4Details and NameServers are only cleared/rebuilt when their content actually differs from the proposed values.
-            //  Since IPv4Settings is a sealed record whose synthesized equality compares List<T> by reference, unnecessary list
-            //  mutations caused false inequality even when values matched. Can be removed once this is fixed in Hostmangement.Shared
-
-            var proposedIp = IPAddress.Parse(source.IpAddress);
-            var proposedNetmask = IPAddress.Parse(source.SubnetMask);
-            var ipv4Details = networkInterface.IPv4.IPv4Details;
-
-            if (ipv4Details.Count != 1
-                || !ipv4Details[0].IPAddress.Equals(proposedIp)
-                || !ipv4Details[0].Netmask.Equals(proposedNetmask))
-            {
-                ipv4Details.Clear();
-                ipv4Details.Add(new IPv4Detail { IPAddress = proposedIp, Netmask = proposedNetmask });
-            }
+            networkInterface.IPv4.IPv4Details.Clear();
+            networkInterface.IPv4.IPv4Details.Add(
+                new IPv4Detail { IPAddress = IPAddress.Parse(source.IpAddress), Netmask = IPAddress.Parse(source.SubnetMask) });
 
             if (string.IsNullOrWhiteSpace(source.DefaultGateway))
                 networkInterface.IPv4.Gateway = null;
@@ -67,14 +63,8 @@ internal static partial class SystemConfigurationExtensions
             {
                 networkDnsSettings.NameServersEnabled = true;
 
-                var proposedDns = IPAddress.Parse(source.DnsServer);
-
-                if (networkDnsSettings.NameServers.Count != 1
-                    || !networkDnsSettings.NameServers[0].Equals(proposedDns))
-                {
-                    networkDnsSettings.NameServers.Clear();
-                    networkDnsSettings.NameServers.Add(proposedDns);
-                }
+                networkDnsSettings.NameServers.Clear();
+                networkDnsSettings.NameServers.Add(IPAddress.Parse(source.DnsServer));
             }
         }
     }

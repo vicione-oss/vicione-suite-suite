@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Onboarding.Models;
+using Blazor.Shared.Onboarding.Models;
 using HostManagement.Shared.Contracts;
 using Sdk.Client.Wizards.Services;
 
@@ -26,6 +26,6 @@ public sealed class SummaryWizardPageState : WizardPageState
 
     internal SystemConfiguration? NewSystemConfiguration { get; set; }
 
-    internal bool AutomaticRestartAnticipated => NewSystemConfiguration is not null;
+    internal bool AutomaticRestartAnticipated => false; // Feature is actually not used
     internal bool AutomaticRestartExpanded { get; set; } = true;
 }
