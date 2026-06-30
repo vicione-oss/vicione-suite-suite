@@ -68,7 +68,9 @@
             <PasskeySubmit Operation="PasskeyOperation.Request"
                            Name="Input.Passkey"
                            EmailName="Input.Email"
-                           Text="@Login.LoginWithPasskey" />
+                           Text="@Login.LoginWithPasskey"
+                           Disabled="@(!IsPasskeyHostSupported)"
+                           DisabledTitle="@Login.PasskeyRequiresDnsHost" />
             <ValidationMessage For="() => Input.Passkey" />
         }
     </div>

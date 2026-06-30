@@ -5,16 +5,24 @@
 @using Microsoft.Extensions.DependencyInjection
 @inject IServiceProvider Services
 
-<script src="@Assets["js/passkey-submit.js"]"></script>
+@if (Disabled)
+{
+    <AccountButton name="__passkeySubmit" Text="@Text" ButtonType="AccountButtonType.Default"
+                   Disabled="true" Title="@DisabledTitle" />
+}
+else
+{
+    <script src="@Assets["js/passkey-submit.js"]"></script>
 
-<AccountButton name="__passkeySubmit" Text="@Text" ButtonType="AccountButtonType.Default" />
-<passkey-submit
-    operation="@Operation"
-    name="@Name"
-    email-name="@EmailName"
-    request-token-name="@tokens?.HeaderName"
-    request-token-value="@tokens?.RequestToken">
-</passkey-submit>
+    <AccountButton name="__passkeySubmit" Text="@Text" ButtonType="AccountButtonType.Default" />
+    <passkey-submit
+        operation="@Operation"
+        name="@Name"
+        email-name="@EmailName"
+        request-token-name="@tokens?.HeaderName"
+        request-token-value="@tokens?.RequestToken">
+    </passkey-submit>
+}
 
 @code {
     private AntiforgeryTokenSet? tokens;
@@ -28,6 +36,10 @@
     [Parameter] public string? EmailName { get; set; }
 
     [Parameter] public string Text { get; set; } = null!;
+
+    [Parameter] public bool Disabled { get; set; }
+
+    [Parameter] public string? DisabledTitle { get; set; }
 
     [Parameter(CaptureUnmatchedValues = true)]
     public IDictionary<string, object>? AdditionalAttributes { get; set; }

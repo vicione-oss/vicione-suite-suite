@@ -30,4 +30,7 @@
   <data name="FeatureNotAvailable" xml:space="preserve">
     <value>Passkey sign-in is currently not available.</value>
   </data>
+  <data name="RequiresDnsHost" xml:space="preserve">
+    <value>Passkeys require access via a DNS hostname and are not available over an IP address.</value>
+  </data>
 </root>

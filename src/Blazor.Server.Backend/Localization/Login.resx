@@ -156,6 +156,9 @@
   <data name="PasskeyLoginFailed" xml:space="preserve">
     <value>Passkey login failed</value>
   </data>
+  <data name="PasskeyRequiresDnsHost" xml:space="preserve">
+    <value>Passkeys require access via a DNS hostname and are not available over an IP address.</value>
+  </data>
   <data name="ExternalUserCreationFailed" xml:space="preserve">
     <value>This account cannot be registered. It may already be in use or doesn't meet system requirements.</value>
   </data>

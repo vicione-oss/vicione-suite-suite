@@ -68,5 +68,11 @@ namespace Blazor.Shared.Profile.Localization {
                 return ResourceManager.GetString("FeatureNotAvailable", resourceCulture);
             }
         }
+
+        internal static string RequiresDnsHost {
+            get {
+                return ResourceManager.GetString("RequiresDnsHost", resourceCulture);
+            }
+        }
     }
 }

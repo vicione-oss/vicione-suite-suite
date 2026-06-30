@@ -1,6 +1,8 @@
 ﻿using Blazor.Shared.Profile.ControlPanels.ExternalIdProviders;
 using Blazor.Shared.Profile.ControlPanels.Passkeys;
+using Core.Shared.Passkeys;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Client.ControlPanels.Extensions;
 using ViciOne.Ui.Blazor.Components.Grid.Extensions;
 using ExternalIdProvidersControlPanel = Blazor.Shared.Profile.ControlPanels.ExternalIdProviders.ExternalIdProvidersControlPanel;
@@ -31,6 +33,8 @@ public static class IServiceCollectionExtensions
 
         services.AddGridItemSelectColumn()
             .AddGridItemSelection<string>(typeof(PasskeyControlPanelServiceKey));
+
+        services.AddSingleton<IPasskeyHostSupport, PasskeyHostSupport>();
 
         return services;
     }
