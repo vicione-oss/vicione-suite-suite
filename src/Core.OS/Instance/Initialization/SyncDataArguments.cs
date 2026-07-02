@@ -1,9 +1,10 @@
-﻿using Sdk.Messaging;
+﻿using Sdk.Backend.Messaging;
+using Sdk.Messaging;
 
 namespace Core.OS.Instance.Initialization;
 
 [MessageEndpoint("InitialSync")]
-public sealed record SyncDataArguments : IActivityArgument
+public sealed record SyncDataArguments : IInstanceDependentActivityArgument
 {
     public string ModuleId { get; init; } = string.Empty;
     public string DbContextTypeName { get; init; } = string.Empty;
