@@ -36,6 +36,7 @@
 - Password complexity requirements (digit, lowercase letter, uppercase letter, special character) are now explicitly enforced in ASP.NET Identity configuration, closing the gap between the custom `PasswordValidator` and Identity's built-in password validation
 - `ConnectionControlPanel`, fixed double display of tags after storing a connection with added tags
 - `LoginContent` / `JsInterop`, spurious errors are no longer logged during login: the brief `HttpContext`-null re-render while navigating away after sign-in no longer throws `ArgumentNullException`, and the expected circuit-teardown cancellation is logged at Debug instead of Error
+- Antiforgery cookie (`.AspNetCore.Antiforgery.*`) is now marked `Secure` (`SecurePolicy = Always`), matching the auth cookie and clearing the OWASP ZAP finding on the login page
 
 ### Updated
 
