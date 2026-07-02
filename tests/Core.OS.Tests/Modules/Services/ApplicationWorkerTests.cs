@@ -35,7 +35,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
 {
     private readonly ISuiteMediator _mediatorMock = Substitute.For<ISuiteMediator>();
     private readonly IBusDepot _busDepot = Substitute.For<IBusDepot>();
-    private readonly ISendEndpointProvider _sendEndpointProvider = Substitute.For<ISendEndpointProvider>();
+    private readonly IBus _bus = Substitute.For<IBus>();
     private readonly ILocalInstanceInformationProvider _localInstanceInformationMock =
         Substitute.For<ILocalInstanceInformationProvider>();
     private readonly ILogger<ApplicationWorker> _loggerMock = Substitute.For<ILogger<ApplicationWorker>>();
@@ -53,7 +53,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
                     .AddSingleton<IFileSystem, MockFileSystem>()
                     .AddSingleton(_localInstanceInformationMock)
                     .AddSingleton(_mediatorMock)
-                    .AddSingleton(_sendEndpointProvider)
+                    .AddSingleton(_bus)
                     .AddSingleton(new InMemoryClusterInformationProvider(Substitute.For<ILogger<InMemoryClusterInformationProvider>>()))
                     .AddModuleManagerWithTestModule()
                     .AddApplicationDbContextsInMemory(false)
@@ -85,7 +85,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         _localInstanceInformationMock.SetupLocalInstanceInformation(InstanceType.Slave);
         var commandUri = MessagingHelper.GetCommandEndpointAddress<RegisterInstance>();
         var endPoint = Substitute.For<ISendEndpoint>();
-        _sendEndpointProvider.GetSendEndpoint(commandUri).Returns(endPoint);
+        _bus.GetSendEndpoint(commandUri).Returns(endPoint);
 
         var applicationWorker = CreateApplicationWorker();
 

@@ -387,7 +387,10 @@ internal sealed partial class ApplicationWorker(
     {
         logger.LogStartingRegistration(instanceInfo.Id);
 
-        var sendEndpointProvider = scope.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
+        // Resolve IBus (direct send) instead of the scoped, outbox-aware ISendEndpointProvider.
+        // On master the Bus Outbox would otherwise buffer this bootstrap registration until a
+        // SaveChanges that never happens here, so synchronization would never complete.
+        var bus = scope.ServiceProvider.GetRequiredService<IBus>();
 
         // Collect last-applied sequence numbers from the replication tracker (slave only).
         // On a fresh slave or first startup, the tracker is empty → empty dictionary.
@@ -397,7 +400,7 @@ internal sealed partial class ApplicationWorker(
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value) ?? [];
 
         // needs to be sent that way, because the bus is blocked to prevent messages being processed before sync is done
-        var endPoint = await sendEndpointProvider.GetSendEndpoint(
+        var endPoint = await bus.GetSendEndpoint(
             MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
         await endPoint.Send(new RegisterInstance
         {
