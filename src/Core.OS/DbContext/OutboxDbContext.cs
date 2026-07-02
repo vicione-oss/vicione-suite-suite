@@ -26,6 +26,7 @@ public sealed class OutboxDbContext(DbContextOptions<OutboxDbContext> options) :
 
         modelBuilder.Entity<ReplicationSequenceState>(entity =>
         {
+            entity.ToTable("ReplicationSequenceState");
             entity.HasKey(e => e.ContextType);
             entity.Property(e => e.ContextType).HasMaxLength(512);
         });
