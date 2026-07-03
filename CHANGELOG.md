@@ -2,9 +2,13 @@
 
 ## 1.2.3 - Unreleased
 
+### Added
+
+- First run wizard, network page, added DNS server settings group
+
 ### Fixed
 
-- First run wizards does not indicate a system restart when simply stepping through steps
+- First run wizard does not indicate a system restart when simply stepping through steps
 - Recovery mode no longer loops indefinitely when the crash cause is unrelated to modules; after a failed recovery attempt the suite enters a terminal degraded state (serving HTTP 503)
 - `ConnectionControlPanel`, fixed double display of tags after storing a connection with added tags
 

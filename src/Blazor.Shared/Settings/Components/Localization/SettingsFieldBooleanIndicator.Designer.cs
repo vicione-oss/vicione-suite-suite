@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Blazor.Shared.Onboarding.Components.WizardPages.Localization {
+namespace Blazor.Shared.Settings.Components.Localization {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Blazor.Shared.Onboarding.Components.WizardPages.Localization {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class SummaryWizardPage {
+    internal class SettingsFieldBooleanIndicator {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal SummaryWizardPage() {
+        internal SettingsFieldBooleanIndicator() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Blazor.Shared.Onboarding.Components.WizardPages.Localization {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Shared.Onboarding.Components.WizardPages.Localization.SummaryWizardPage", typeof(SummaryWizardPage).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Blazor.Shared.Settings.Components.Localization.SettingsFieldBooleanIndicator", typeof(SettingsFieldBooleanIndicator).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,38 +61,11 @@ namespace Blazor.Shared.Onboarding.Components.WizardPages.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The system will restart after finishing this wizard..
+        ///   Looks up a localized string similar to Inactive.
         /// </summary>
-        internal static string AutomaticRestartDescription {
+        internal static string Inactive {
             get {
-                return ResourceManager.GetString("AutomaticRestartDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Automatic restart.
-        /// </summary>
-        internal static string AutomaticRestartTitle {
-            get {
-                return ResourceManager.GetString("AutomaticRestartTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Please review the summary of your configuration before proceeding. If you need to modify any configurations later, all settings can be accessed and updated in the settings dialog..
-        /// </summary>
-        internal static string DescriptionBannerContent {
-            get {
-                return ResourceManager.GetString("DescriptionBannerContent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Configuration summary.
-        /// </summary>
-        internal static string DescriptionBannerTitle {
-            get {
-                return ResourceManager.GetString("DescriptionBannerTitle", resourceCulture);
+                return ResourceManager.GetString("Inactive", resourceCulture);
             }
         }
     }

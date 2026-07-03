@@ -1,0 +1,11 @@
+@{
+    var cssClasses = new List<string> { "state-text" };
+
+    if (!string.IsNullOrWhiteSpace(CssClass))
+        cssClasses.AddRange(CssClass.Split(" "));
+}
+
+<div class="wrapper">
+    <span class="@string.Join(" ", cssClasses)">@(State ? TrueText : FalseText)</span>
+    <span class="circle @(State ? "active" : "inactive")"></span>
+</div>

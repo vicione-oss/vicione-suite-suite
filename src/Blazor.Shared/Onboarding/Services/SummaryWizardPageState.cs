@@ -8,6 +8,7 @@ public sealed class SummaryWizardPageState : WizardPageState
 {
     private readonly NetworkInterfaceConfiguration _localNetwork = new(Constants.LocalNetworkInterfaceNameNumber);
     private readonly NetworkInterfaceConfiguration _internetConnection = new(Constants.InternetNetworkInterfaceNameNumber);
+    private readonly DnsConfiguration _dns = new();
 
     internal bool DeviceExpanded { get; set; } = true;
     internal string? Hostname { get; set; }
@@ -23,6 +24,9 @@ public sealed class SummaryWizardPageState : WizardPageState
 
     internal bool InternetConnectionExpanded { get; set; } = true;
     internal INetworkInterfaceConfiguration InternetConnection => _internetConnection;
+
+    internal bool DnsExpanded { get; set; } = true;
+    internal IDnsConfiguration Dns => _dns;
 
     internal SystemConfiguration? NewSystemConfiguration { get; set; }
 

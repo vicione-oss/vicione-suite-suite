@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Onboarding.Extensions;
+using Blazor.Shared.Network.Extensions;
+using Blazor.Shared.Onboarding.Extensions;
 using Sdk.Client.Wizards.Models;
 using Sdk.Client.Wizards.Services;
 
@@ -16,9 +17,12 @@ internal sealed partial class NetworkWizardPageResetHandler(ITargetConfiguration
 
             targetConfiguration.LocalNetwork.ApplyTo(state.LocalNetwork);
             targetConfiguration.InternetConnection.ApplyTo(state.InternetConnection);
+
+            targetConfiguration.Dns.ApplyTo(state.Dns);
         }
         finally
         {
+            state.Dns.Details.EnsureAtLeastOneItemExists();
             state.EndOperation();
         }
     }

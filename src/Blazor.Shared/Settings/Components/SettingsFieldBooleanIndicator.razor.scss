@@ -1,0 +1,29 @@
+@use "../../Styles/design/colors";
+
+.wrapper {
+    display: grid;
+    grid-template-columns: auto min-content;
+    grid-auto-rows: min-content;
+    align-items: center;
+
+    .state-text {
+        text-transform: capitalize;
+    }
+
+    .circle {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-left: 8px;
+    }
+
+    .circle.active {
+        background-color: #47AB65;
+        opacity: 1;
+    }
+
+    .circle.inactive {
+        background-color: colors.$theme-inverted;
+        opacity: 0.2;
+    }
+}

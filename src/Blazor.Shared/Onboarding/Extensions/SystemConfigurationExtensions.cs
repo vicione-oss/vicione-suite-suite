@@ -52,20 +52,16 @@ internal static partial class SystemConfigurationExtensions
                 networkInterface.IPv4.Gateway = null;
             else
                 networkInterface.IPv4.Gateway = IPAddress.Parse(source.DefaultGateway);
-
-            var networkDnsSettings = target.NetworkDNSSettings;
-
-            if (string.IsNullOrWhiteSpace(source.DnsServer))
-            {
-                networkDnsSettings.NameServersEnabled = false;
-            }
-            else
-            {
-                networkDnsSettings.NameServersEnabled = true;
-
-                networkDnsSettings.NameServers.Clear();
-                networkDnsSettings.NameServers.Add(IPAddress.Parse(source.DnsServer));
-            }
         }
+    }
+
+    public static void UpdateFrom(this SystemConfiguration target, IDnsConfiguration source)
+    {
+        var networkDnsSettings = target.NetworkDNSSettings;
+
+        networkDnsSettings.NameServersEnabled = source.Enabled;
+
+        networkDnsSettings.NameServers.Clear();
+        networkDnsSettings.NameServers.AddRange(source.Details.Select(d => IPAddress.Parse(d.IpAddress)));
     }
 }

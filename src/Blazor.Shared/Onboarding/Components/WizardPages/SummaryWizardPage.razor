@@ -1,5 +1,6 @@
-﻿@using Blazor.Shared.Onboarding.Extensions
+@using Blazor.Shared.Onboarding.Extensions
 @using Blazor.Shared.Onboarding.Services
+@using Blazor.Shared.Settings.Components
 @using Sdk.Client.Wizards.Components
 @using ViciOne.Ui.Localization.Resources
 
@@ -72,6 +73,29 @@
 
                 <div class="right">
                     <SummaryNetworkInterfaceDetails NetworkInterfaceConfiguration="@State.LocalNetwork" />
+                </div>
+            </div>
+        </SettingsInformation>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@TechnicalTerms.DnsServer" @bind-Expanded="State.DnsExpanded">
+        <SettingsInformation>
+            <div class="settings-information-layout">
+                <div class="left">
+                    <img src="@_dnsImageSrc" alt="@TechnicalTerms.DnsServer" />
+                </div>
+
+                <div class="right">
+                    <div>@CommonVocabulary.State</div>
+                    <div>
+                        <SettingsFieldBooleanIndicator State="@State.Dns.Enabled" />
+                    </div>                    
+                    
+                    @foreach (var dnsDetail in State.Dns.Details)
+                    {
+                        <div>@TechnicalTerms.IpAddress</div>
+                        <div>@dnsDetail.IpAddress</div>
+                    }
                 </div>
             </div>
         </SettingsInformation>

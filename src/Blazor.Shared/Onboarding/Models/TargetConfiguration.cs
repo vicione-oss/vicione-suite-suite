@@ -1,4 +1,4 @@
-﻿using DateAndTimeConstants = Blazor.Shared.Settings.DateAndTime.Constants;
+using DateAndTimeConstants = Blazor.Shared.Settings.DateAndTime.Constants;
 
 namespace Blazor.Shared.Onboarding.Models;
 
@@ -12,4 +12,5 @@ internal sealed class TargetConfiguration : ITargetConfiguration
 
     public INetworkInterfaceConfiguration LocalNetwork { get; } = new NetworkInterfaceConfiguration(Constants.LocalNetworkInterfaceNameNumber);
     public INetworkInterfaceConfiguration InternetConnection { get; } = new NetworkInterfaceConfiguration(Constants.InternetNetworkInterfaceNameNumber);
+    public IDnsConfiguration Dns { get; } = new DnsConfiguration();
 }

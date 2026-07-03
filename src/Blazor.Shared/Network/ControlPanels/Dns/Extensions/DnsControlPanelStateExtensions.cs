@@ -19,11 +19,11 @@ internal static class DnsControlPanelStateExtensions
 
         state.DnsEnabled = networkDnsSettings.NameServersEnabled;
 
-        state.DnsDetails = [.. networkDnsSettings.NameServers
+        state.Details = [.. networkDnsSettings.NameServers
             .Select(d => new NetworkInterfaceDnsDetail { IpAddress = d.ToString() })
             .Distinct()];
 
-        state.DnsDetails.EnsureAtLeastOneItemExists();
+        state.Details.EnsureAtLeastOneItemExists();
 
         state.SearchDomainsEnabled = networkDnsSettings.SearchDomainsEnabled;
 

@@ -77,4 +77,5 @@ public sealed class SummaryWizardPageResetHandlerTests
         await _mediator.Received(1).Request<GetHostMgmtSystemConfiguration, GetHostMgmtSystemConfigurationResponse>(
             Arg.Any<GetHostMgmtSystemConfiguration>(), Arg.Any<CancellationToken>());
     }
+
 }

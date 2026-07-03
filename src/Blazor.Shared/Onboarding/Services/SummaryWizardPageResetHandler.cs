@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Onboarding.Extensions;
+using Blazor.Shared.Onboarding.Extensions;
 using Core.Shared.HostManagement;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.Wizards.Models;
@@ -30,6 +30,7 @@ internal sealed partial class SummaryWizardPageResetHandler(ITargetConfiguration
 
             targetConfiguration.LocalNetwork.ApplyTo(state.LocalNetwork);
             targetConfiguration.InternetConnection.ApplyTo(state.InternetConnection);
+            targetConfiguration.Dns.ApplyTo(state.Dns);
 
             state.BeginOperation(new WizardOperation { Description = Localization.SummaryWizardPageResetHandler.DetectingAutomaticRestart, EstimatedDurationMs = 3000 });
             try
@@ -44,6 +45,7 @@ internal sealed partial class SummaryWizardPageResetHandler(ITargetConfiguration
 
                 proposedSystemConfiguration.UpdateFrom(targetConfiguration.LocalNetwork);
                 proposedSystemConfiguration.UpdateFrom(targetConfiguration.InternetConnection);
+                proposedSystemConfiguration.UpdateFrom(targetConfiguration.Dns);
 
                 proposedSystemConfiguration.NetworkDNSSettings.Hostname = targetConfiguration.Hostname;
 
