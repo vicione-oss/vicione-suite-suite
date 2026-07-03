@@ -1,4 +1,4 @@
-﻿namespace Blazor.Shared.Onboarding.Models;
+namespace Blazor.Shared.Onboarding.Models;
 
 internal interface ITargetConfiguration
 {
@@ -10,4 +10,5 @@ internal interface ITargetConfiguration
 
     INetworkInterfaceConfiguration LocalNetwork { get; }
     INetworkInterfaceConfiguration InternetConnection { get; }
+    IDnsConfiguration Dns { get; }
 }

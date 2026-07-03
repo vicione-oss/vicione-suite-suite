@@ -98,9 +98,9 @@ public sealed class DnsControlPanelResetHandlerTests
         await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
         // Assert
-        state.DnsDetails.Should().HaveCount(2);
-        state.DnsDetails[0].IpAddress.Should().Be("8.8.8.8");
-        state.DnsDetails[1].IpAddress.Should().Be("1.1.1.1");
+        state.Details.Should().HaveCount(2);
+        state.Details[0].IpAddress.Should().Be("8.8.8.8");
+        state.Details[1].IpAddress.Should().Be("1.1.1.1");
     }
 
     [Fact]
@@ -117,8 +117,8 @@ public sealed class DnsControlPanelResetHandlerTests
         await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
         // Assert
-        state.DnsDetails.Should().HaveCount(1);
-        state.DnsDetails[0].IpAddress.Should().BeEmpty();
+        state.Details.Should().HaveCount(1);
+        state.Details[0].IpAddress.Should().BeEmpty();
     }
 
     [Fact]

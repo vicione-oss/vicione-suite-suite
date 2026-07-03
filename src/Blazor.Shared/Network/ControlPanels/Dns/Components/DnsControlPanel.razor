@@ -1,5 +1,6 @@
-﻿@using Blazor.Shared.Network.ControlPanels.Dns.Models
+@using Blazor.Shared.Network.ControlPanels.Dns.Models
 @using Blazor.Shared.Network.ControlPanels.Dns.Services
+@using Blazor.Shared.Settings.NetworkInterface.Components
 @using Sdk.Client.Components.Settings.Expanders
 @using ViciOne.Ui.Localization.Resources
 
@@ -36,24 +37,7 @@
         </Expander>
     </SettingsGroup>
 
-    <SettingsGroup Title="@TechnicalTerms.DnsServer" Expanded="@State.DnsEnabled">
-        <Expander>
-            <SwitchExpander @bind-Value="@State.DnsEnabled" @bind-Value:after="BeginEdit" />
-        </Expander>
-
-        <ChildContent>
-            @foreach (var a in State.DnsDetails.Select((dnsDetail, index) => new { DnsDetail = dnsDetail, Index = index }))
-            {
-                var ipAddressLabel = TechnicalTerms.IpAddress;
-
-                <SettingsField Label="@ipAddressLabel" @key="a.Index">
-                    <SettingsFieldTextBox Placeholder="@ipAddressLabel" @bind-Value="a.DnsDetail.IpAddress" @bind-Value:after="BeginEdit" />
-                </SettingsField>
-            }
-
-            <SettingsStepper MinusEnabled="@(State.DnsDetails.Count > 1)" OnPlus="@AddDnsDetail" OnMinus="@RemoveDnsDetail" OnPlusMinus="BeginEdit" />
-        </ChildContent>
-    </SettingsGroup>
+    <DnsServerSettingsGroup @bind-Expanded="State.DnsEnabled" Details="State.Details" Changed="BeginEdit" />
 
     <SettingsGroup Title="@TechnicalTerms.SearchDomainPlural" Expanded="@State.SearchDomainsEnabled">
         <Expander>

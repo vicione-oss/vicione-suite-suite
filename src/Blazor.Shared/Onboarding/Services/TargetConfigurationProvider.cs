@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Onboarding.Extensions;
+using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Onboarding.Models;
 using Core.Shared.HostManagement;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,8 +26,10 @@ internal sealed class TargetConfigurationProvider(IUiMediator mediator, [FromKey
         {
             result.Hostname = systemConfiguration.NetworkDNSSettings.Hostname;
 
-            result.LocalNetwork.ApplyTo(systemConfiguration);
-            result.InternetConnection.ApplyTo(systemConfiguration);
+            result.LocalNetwork.UpdateFrom(systemConfiguration);
+            result.InternetConnection.UpdateFrom(systemConfiguration);
+
+            result.Dns.UpdateFrom(systemConfiguration.NetworkDNSSettings);
         }
 
         result.TimeZone = timeProvider.LocalTimeZone;

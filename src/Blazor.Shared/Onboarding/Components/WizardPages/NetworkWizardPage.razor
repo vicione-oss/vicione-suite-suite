@@ -49,6 +49,17 @@
 
                 <ul>
                     <li>
+                        <strong>@Localization.NetworkWizardPage.Rule4</strong>
+
+                        <ul>
+                            <li>@Localization.NetworkWizardPage.Rule4a</li>
+                            <li>@Localization.NetworkWizardPage.Rule4b</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li>
                         <strong>@Localization.NetworkWizardPage.TermsExplained</strong>
 
                         <ul>
@@ -83,6 +94,17 @@
                                 </ul>
                             </li>
                         </ul>
+
+                        <ul>
+                            <li>
+                                @TechnicalTerms.DnsServer
+
+                                <ul>
+                                    <li>@Localization.NetworkWizardPage.DnsServerExplanation</li>
+                                    <li>@(CommonVocabulary.Example): 8.8.8.8</li>
+                                </ul>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
 
@@ -96,30 +118,16 @@
                        @bind-IpAddress="State.InternetConnection.IpAddress"
                        @bind-SubnetMask="State.InternetConnection.SubnetMask"
                        @bind-DefaultGateway="State.InternetConnection.DefaultGateway"
-                       Changed="BeginEdit">
-
-        <AdditionalSettingsFields>
-
-            <SettingsField Label="@TechnicalTerms.DnsServer">
-                <SettingsFieldTextBox Placeholder="@TechnicalTerms.DnsServer" @bind-Value="State.InternetConnection.DnsServer" @bind-Value:after="BeginEdit" />
-            </SettingsField>
-
-        </AdditionalSettingsFields>
-    </IpV4SettingsGroup>
+                       Changed="BeginEdit" />
 
     <IpV4SettingsGroup Title="@State.LocalNetwork.GetFriendlyNameVerbose()"
                        @bind-ConfigurationMode="State.LocalNetwork.ConfigurationMode"
                        @bind-IpAddress="State.LocalNetwork.IpAddress"
                        @bind-SubnetMask="State.LocalNetwork.SubnetMask"
                        @bind-DefaultGateway="State.LocalNetwork.DefaultGateway"
-                       Changed="BeginEdit">
+                       Changed="BeginEdit" />
 
-        <AdditionalSettingsFields>
-
-            <SettingsField Label="@TechnicalTerms.DnsServer">
-                <SettingsFieldTextBox Placeholder="@TechnicalTerms.DnsServer" @bind-Value="State.LocalNetwork.DnsServer" @bind-Value:after="BeginEdit" />
-            </SettingsField>
-
-        </AdditionalSettingsFields>
-    </IpV4SettingsGroup>
+    <DnsServerSettingsGroup @bind-Expanded="State.Dns.Enabled"
+                            Details="State.Dns.Details"
+                            Changed="BeginEdit" />
 </SettingsLayout>

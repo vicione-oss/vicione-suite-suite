@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Onboarding.Models;
+using Blazor.Shared.Onboarding.Models;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using HostManagement.Shared.Contracts;
 using Riok.Mapperly.Abstractions;
@@ -13,7 +13,7 @@ internal static partial class INetworkInterfaceConfigurationExtensions
 
 internal static partial class INetworkInterfaceConfigurationExtensions
 {
-    public static void ApplyTo(this INetworkInterfaceConfiguration target, SystemConfiguration source)
+    public static void UpdateFrom(this INetworkInterfaceConfiguration target, SystemConfiguration source)
     {
         var networkInterfaces = source.NetworkInterfacesSettings.NetworkInterfaces;
 
@@ -33,11 +33,5 @@ internal static partial class INetworkInterfaceConfigurationExtensions
         target.IpAddress = ipV4Detail?.IPAddress.ToString() ?? string.Empty;
         target.SubnetMask = ipV4Detail?.Netmask.ToString() ?? string.Empty;
         target.DefaultGateway = networkInterface.IPv4.Gateway?.ToString();
-
-        var networkDnsSettings = source.NetworkDNSSettings;
-        if (networkDnsSettings.NameServersEnabled)
-            target.DnsServer = networkDnsSettings.NameServers.FirstOrDefault()?.ToString();
-        else
-            target.DnsServer = null;
     }
 }

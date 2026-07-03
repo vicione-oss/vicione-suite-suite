@@ -313,6 +313,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>SettingsContainer.resx</DependentUpon>
     </Compile>
+    <Compile Update="Settings\Components\Localization\SettingsFieldBooleanIndicator.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SettingsFieldBooleanIndicator.resx</DependentUpon>
+    </Compile>
     <Compile Update="Settings\DateAndTime\Components\Localization\TimeZoneSettingsGroup.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -673,6 +678,10 @@
     <EmbeddedResource Update="Profile\NotificationArea\Localization\ProfileNotificationElementFlyoutContent.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ProfileNotificationElementFlyoutContent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Settings\Components\Localization\SettingsFieldBooleanIndicator.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SettingsFieldBooleanIndicator.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Settings\DateAndTime\Components\Localization\TimeZoneSettingsGroup.resx">
       <Generator>ResXFileCodeGenerator</Generator>

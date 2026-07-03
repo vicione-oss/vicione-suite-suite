@@ -16,17 +16,11 @@ public sealed partial class DnsControlPanel : NetworkControlPanelBase<DnsControl
         return InvokeAsync(StateHasChanged);
     }
 
-    private void AddDnsDetail()
-        => State.DnsDetails.Add(new NetworkInterfaceDnsDetail());
-
-    private void RemoveDnsDetail()
-        => State.DnsDetails.RemoveAt(State.DnsDetails.Count - 1);
-
     private void AddSearchDomainDetail()
         => State.SearchDomainDetails.Add(new NetworkInterfaceSearchDomainDetail());
 
     private void RemoveSearchDomainDetail()
-        => State.SearchDomainDetails.RemoveAt(State.DnsDetails.Count - 1);
+        => State.SearchDomainDetails.RemoveAt(State.Details.Count - 1);
 
     private void AddStaticHostDetail()
         => State.StaticHostDetails.Add(new NetworkInterfaceStaticHostDetail());

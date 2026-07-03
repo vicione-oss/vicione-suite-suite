@@ -244,7 +244,6 @@ public sealed class SystemConfigurationTests
                 IpAddress = "192.168.1.100",
                 SubnetMask = "255.255.255.0",
                 DefaultGateway = "192.168.1.1",
-                DnsServer = "8.8.8.8"
             };
 
             var targetInternetConnection = new NetworkInterfaceConfiguration(1)
@@ -332,7 +331,6 @@ public sealed class SystemConfigurationTests
                 IpAddress = "192.168.1.50",
                 SubnetMask = "255.255.255.0",
                 DefaultGateway = "192.168.1.1",
-                DnsServer = "8.8.8.8"
             };
 
             var targetInternetConnection = new NetworkInterfaceConfiguration(1)

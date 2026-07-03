@@ -84,7 +84,7 @@ public sealed class DnsControlPanelSaveHandlerTests
         DnsEnabled = false,
         SearchDomainsEnabled = false,
         StaticHostsEnabled = false,
-        DnsDetails = [new NetworkInterfaceDnsDetail { IpAddress = string.Empty }],
+        Details = [new NetworkInterfaceDnsDetail { IpAddress = string.Empty }],
         SearchDomainDetails = [new NetworkInterfaceSearchDomainDetail { IpAddress = string.Empty }],
         StaticHostDetails = [new NetworkInterfaceStaticHostDetail { IpAddress = string.Empty, Hostname = string.Empty }]
     };
@@ -195,7 +195,7 @@ public sealed class DnsControlPanelSaveHandlerTests
 
         var state = CreateValidState();
         state.DnsEnabled = true;
-        state.DnsDetails =
+        state.Details =
         [
             new NetworkInterfaceDnsDetail { IpAddress = "8.8.8.8" },
             new NetworkInterfaceDnsDetail { IpAddress = "8.8.4.4" }
@@ -223,7 +223,7 @@ public sealed class DnsControlPanelSaveHandlerTests
 
         var state = CreateValidState();
         state.DnsEnabled = true;
-        state.DnsDetails =
+        state.Details =
         [
             new NetworkInterfaceDnsDetail { IpAddress = "8.8.8.8" },
             new NetworkInterfaceDnsDetail { IpAddress = string.Empty }

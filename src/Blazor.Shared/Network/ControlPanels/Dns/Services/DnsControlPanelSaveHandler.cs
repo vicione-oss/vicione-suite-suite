@@ -28,13 +28,12 @@ internal sealed class DnsControlPanelSaveHandler(IUiMediator mediator, ISystemCo
         {
             networkDnsSettings.NameServersEnabled = state.DnsEnabled;
 
-            // filter out fieldsets not filled and remove duplicates
-            state.DnsDetails = [.. state.DnsDetails.Where(d => !string.IsNullOrWhiteSpace(d.IpAddress)).Distinct()];
+            state.Details.RemoveEmptyAndDuplicateItems();
 
             networkDnsSettings.NameServers.Clear();
-            networkDnsSettings.NameServers.AddRange(state.DnsDetails.Select(d => IPAddress.Parse(d.IpAddress)));
+            networkDnsSettings.NameServers.AddRange(state.Details.Select(d => IPAddress.Parse(d.IpAddress)));
 
-            state.DnsDetails.EnsureAtLeastOneItemExists();
+            state.Details.EnsureAtLeastOneItemExists();
         }
 
         // search domains

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
+using Blazor.Shared.Network.Extensions;
 using Blazor.Shared.Network.Services.Validators;
 using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Onboarding.Models;
@@ -19,12 +20,20 @@ internal sealed class NetworkWizardPageSaveHandler(IUiMediator mediator, IRequir
 {
     public async Task<ISaveResult> Save(NetworkWizardPageState state, CancellationToken cancellationToken)
     {
+        // Sanitize
+        state.Dns.Details.RemoveEmptyAndDuplicateItems();
+
+        // Validate
         if (!ValidateNetworkInterfaceConfiguration(state.LocalNetwork, out var errorMessage))
             return new SaveErrorResult(errorMessage);
 
         if (!ValidateNetworkInterfaceConfiguration(state.InternetConnection, out errorMessage))
             return new SaveErrorResult(errorMessage);
 
+        if (!ValidateDnsConfiguration(state.Dns, out errorMessage))
+            return new SaveErrorResult(errorMessage);
+
+        // Apply
         state.BeginOperation(new WizardOperation { Description = Localization.NetworkWizardPageSaveHandler.ValidatingAggregatedSystemConfiguration, EstimatedDurationMs = 3000 });
         try
         {
@@ -39,6 +48,7 @@ internal sealed class NetworkWizardPageSaveHandler(IUiMediator mediator, IRequir
 
             proposedSystemConfiguration.UpdateFrom(state.LocalNetwork);
             proposedSystemConfiguration.UpdateFrom(state.InternetConnection);
+            proposedSystemConfiguration.UpdateFrom(state.Dns);
 
             var validateResult = await new SystemConfigurationValidator().ValidateAsync(proposedSystemConfiguration, cancellationToken);
             if (!validateResult.IsValid)
@@ -47,9 +57,12 @@ internal sealed class NetworkWizardPageSaveHandler(IUiMediator mediator, IRequir
             var targetConfiguration = await targetConfigurationProvider.GetTargetConfiguration(cancellationToken);
             state.LocalNetwork.ApplyTo(targetConfiguration.LocalNetwork);
             state.InternetConnection.ApplyTo(targetConfiguration.InternetConnection);
+            state.Dns.ApplyTo(targetConfiguration.Dns);
         }
         finally
         {
+            state.Dns.Details.EnsureAtLeastOneItemExists();
+
             state.EndOperation();
         }
 
@@ -89,15 +102,21 @@ internal sealed class NetworkWizardPageSaveHandler(IUiMediator mediator, IRequir
                 if (!ipAddressValidator.Validate(networkInterfaceConfiguration.DefaultGateway, field, out errorMessage))
                     return false;
             }
+        }
 
-            // Dns server
-            if (!string.IsNullOrWhiteSpace(networkInterfaceConfiguration.DnsServer))
-            {
-                field = $"{fieldPrefix} {TechnicalTerms.DnsServer}";
+        errorMessage = null;
 
-                if (!ipAddressValidator.Validate(networkInterfaceConfiguration.DnsServer, field, out errorMessage))
-                    return false;
-            }
+        return true;
+    }
+
+    private bool ValidateDnsConfiguration(IDnsConfiguration dnsConfiguration, [MaybeNullWhen(true)] out string errorMessage)
+    {
+        var field = TechnicalTerms.DnsServer;
+
+        foreach (var detail in dnsConfiguration.Details)
+        {
+            if (!requiredValidator.Validate(detail.IpAddress, field, out errorMessage))
+                return false;
         }
 
         errorMessage = null;

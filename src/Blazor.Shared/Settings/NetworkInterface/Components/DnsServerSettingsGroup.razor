@@ -1,0 +1,21 @@
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Localization.Resources
+
+<SettingsGroup Title="@TechnicalTerms.DnsServer" Expanded="@Expanded">
+    <Expander>
+        <SwitchExpander @bind-Value="@Expanded" @bind-Value:after="NotifyExpandedChanged" />
+    </Expander>
+
+    <ChildContent>
+        @foreach (var detail in Details.Select((dnsDetail, index) => new { DnsDetail = dnsDetail, Index = index }))
+        {
+            var ipAddressLabel = TechnicalTerms.IpAddress;
+
+            <SettingsField Label="@ipAddressLabel" @key="detail.Index">
+                <SettingsFieldTextBox Placeholder="@ipAddressLabel" @bind-Value="detail.DnsDetail.IpAddress" @bind-Value:after="NotifyChanged" />
+            </SettingsField>
+        }
+
+        <SettingsStepper MinusEnabled="@(Details.Count > 1)" OnPlus="@AddDnsDetail" OnMinus="@RemoveDnsDetail" OnPlusMinus="NotifyChanged" />
+    </ChildContent>
+</SettingsGroup>

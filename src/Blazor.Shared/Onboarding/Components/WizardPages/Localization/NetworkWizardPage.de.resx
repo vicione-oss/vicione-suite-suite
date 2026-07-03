@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -158,10 +158,22 @@ Die korrekte Netzwerkkonfiguration stellt sicher, dass das Gerät effektiv in lo
     <value>Es ist nur ein Standard-Gateway zulässig, um Routing-Konflikte zu vermeiden und eine ordnungsgemäße Netzwerkkommunikation zu gewährleisten.</value>
   </data>
   <data name="Rule3b" xml:space="preserve">
-    <value>DNS-Server können als mehrere, durch Semikolon getrennte Adressen angegeben werden (z. B. 8.8.8.8; 8.8.4.4).</value>
+    <value>Für Redundanz können mehrere DNS-Server-Adressen hinzugefügt werden.</value>
+  </data>
+  <data name="Rule4" xml:space="preserve">
+    <value>DNS-Konfiguration</value>
+  </data>
+  <data name="Rule4a" xml:space="preserve">
+    <value>DNS (Domain Name System) übersetzt Domänennamen in IP-Adressen und ermöglicht dem Gerät die Auflösung von Netzwerkadressen.</value>
+  </data>
+  <data name="Rule4b" xml:space="preserve">
+    <value>Wenn aktiviert, geben Sie mindestens eine DNS-Server-Adresse an. Ohne konfigurierte DNS-Server funktioniert die Namensauflösung möglicherweise nicht.</value>
   </data>
   <data name="RulesAndGuidelinesTitle" xml:space="preserve">
     <value>Regeln und Richtlinien für die Konfiguration Ihres Netzwerks</value>
+  </data>
+  <data name="DnsServerExplanation" xml:space="preserve">
+    <value>Ein Server, der menschenlesbare Domänennamen (z. B. www.example.com) in IP-Adressen auflöst.</value>
   </data>
   <data name="SubnetMaskExplanation" xml:space="preserve">
     <value>Eine 32-Bit-Adresse, die dazu dient, eine IP-Adresse in einen Netzwerk- und einen Host-Teil zu unterteilen.</value>
