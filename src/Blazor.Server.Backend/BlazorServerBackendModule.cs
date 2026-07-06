@@ -68,8 +68,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             .AddInteractiveServerComponents()
             .AddHubOptions(opt => opt.MaximumReceiveMessageSize = options.MaximumReceiveMessageSize);
 
-        services.AddAntiforgery(antiforgery => antiforgery.Cookie.SecurePolicy = CookieSecurePolicy.Always);
-
         services.AddCascadingAuthenticationState();
 
         services.AddAuthorization();
