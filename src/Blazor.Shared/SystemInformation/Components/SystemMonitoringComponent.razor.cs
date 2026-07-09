@@ -1,5 +1,6 @@
 using Blazor.Shared.SystemInformation.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Sdk.Client.Extensions;
@@ -34,34 +35,45 @@ public sealed partial class SystemMonitoringComponent : IAsyncDisposable
         if (!firstRender)
             return;
 
-        await _semaphore.WaitAsync();
-
         try
         {
-            _jsModuleReference = await JsInterop.IncludeModuleScript<SharedClientModule>("system-monitoring-component.js");
-            if (_jsModuleReference is not null)
+            await _semaphore.WaitAsync();
+
+            try
             {
-                _monitoring = await _jsModuleReference.InvokeConstructorAsync("Monitoring", _canvasRef, TimeProvider.LocalTimeZone.GetUtcOffset(DateTimeOffset.UtcNow).TotalMinutes, TimeSpanHours);
-
-                if (_monitoring is null)
-                    return;
-
-                if (OperatingSystem.IsLinux())
+                _jsModuleReference = await JsInterop.IncludeModuleScript<SharedClientModule>("system-monitoring-component.js");
+                if (_jsModuleReference is not null)
                 {
-                    await SetMetrics();
+                    _monitoring = await _jsModuleReference.InvokeConstructorAsync("Monitoring", _canvasRef, TimeProvider.LocalTimeZone.GetUtcOffset(DateTimeOffset.UtcNow).TotalMinutes, TimeSpanHours);
 
-                    MonitoringService.GraphValuesChanged += SetMetrics;
+                    if (_monitoring is null)
+                        return;
 
-                    return;
+                    if (OperatingSystem.IsLinux())
+                    {
+                        await SetMetrics();
+
+                        MonitoringService.GraphValuesChanged += SetMetrics;
+
+                        return;
+                    }
+
+                    await _monitoring.InvokeVoidAsync("generateTestData");
+                    await _monitoring.InvokeVoidAsync("render");
                 }
-
-                await _monitoring.InvokeVoidAsync("generateTestData");
-                await _monitoring.InvokeVoidAsync("render");
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
-        finally
+        catch (OperationCanceledException)
         {
-            _semaphore.Release();
+            // Nothing to do here, we return gracefully
+        }
+        catch (ObjectDisposedException)
+        {
+            // Semaphore or other object already disposed, nothing we can do, return gracefully
         }
     }
 
