@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Blazor.Shared.Authorization.Extensions;
 using Blazor.Shared.MessageBanner.NotificationArea;
 using Blazor.Shared.Profile.NotificationArea;
@@ -79,34 +79,41 @@ public sealed partial class NotificationElementGrid : ComponentBase, IDisposable
     {
         var notifyStateHasChanged = false;
 
-        await _semaphore.WaitAsync(CancellationToken);
         try
         {
-            var user = await AuthenticationStateProvider.GetUser();
-
-            foreach (var itemAdded in args.ItemsAdded)
+            await _semaphore.WaitAsync(CancellationToken);
+            try
             {
-                if (await IsAuthorized(itemAdded, user))
-                    AddNotificationElement(itemAdded);
-            }
+                var user = await AuthenticationStateProvider.GetUser();
 
-            foreach (var itemRemoved in args.ItemsRemoved)
+                foreach (var itemAdded in args.ItemsAdded)
+                {
+                    if (await IsAuthorized(itemAdded, user))
+                        AddNotificationElement(itemAdded);
+                }
+
+                foreach (var itemRemoved in args.ItemsRemoved)
+                {
+                    ActiveNotificationElementPolicy.Exclude(itemRemoved.State);
+                    _notificationElementRegistryItems.Remove(itemRemoved);
+                }
+
+                _notificationElementRegistryItems.Sort(new NotificationElementRegistryItemComparer());
+
+                notifyStateHasChanged = true;
+            }
+            finally
             {
-                ActiveNotificationElementPolicy.Exclude(itemRemoved.State);
-                _notificationElementRegistryItems.Remove(itemRemoved);
+                _semaphore.Release();
             }
-
-            _notificationElementRegistryItems.Sort(new NotificationElementRegistryItemComparer());
-
-            notifyStateHasChanged = true;
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here, we return gracefully
         }
-        finally
+        catch (ObjectDisposedException)
         {
-            _semaphore.Release();
+            // Semaphore or other object already disposed, nothing we can do, return gracefully
         }
 
         if (notifyStateHasChanged)
@@ -117,22 +124,29 @@ public sealed partial class NotificationElementGrid : ComponentBase, IDisposable
     {
         var notifyStateHasChanged = false;
 
-        await _semaphore.WaitAsync(CancellationToken);
         try
         {
-            var authenticationState = await authenticationStateTask.WaitAsync(CancellationToken);
+            await _semaphore.WaitAsync(CancellationToken);
+            try
+            {
+                var authenticationState = await authenticationStateTask.WaitAsync(CancellationToken);
 
-            await UpdateNotificationElements(authenticationState.User);
+                await UpdateNotificationElements(authenticationState.User);
 
-            notifyStateHasChanged = true;
+                notifyStateHasChanged = true;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here, we return gracefully
         }
-        finally
+        catch (ObjectDisposedException)
         {
-            _semaphore.Release();
+            // Semaphore or other object already disposed, nothing we can do, return gracefully
         }
 
         if (notifyStateHasChanged)

@@ -75,22 +75,29 @@ public sealed partial class NavTilePanel : ComponentBase, IDisposable
     {
         var notifyStateHasChanged = false;
 
-        await _semaphore.WaitAsync(CancellationToken);
         try
         {
-            var user = await AuthenticationStateProvider.GetUser();
+            await _semaphore.WaitAsync(CancellationToken);
+            try
+            {
+                var user = await AuthenticationStateProvider.GetUser();
 
-            await UpdateNavTiles(user);
+                await UpdateNavTiles(user);
 
-            notifyStateHasChanged = true;
+                notifyStateHasChanged = true;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here, we return gracefully
         }
-        finally
+        catch (ObjectDisposedException)
         {
-            _semaphore.Release();
+            // Semaphore or other object already disposed, nothing we can do, return gracefully
         }
 
         if (notifyStateHasChanged)
@@ -101,22 +108,29 @@ public sealed partial class NavTilePanel : ComponentBase, IDisposable
     {
         var notifyStateHasChanged = false;
 
-        await _semaphore.WaitAsync(CancellationToken);
         try
         {
-            var authenticationState = await authenticationStateTask.WaitAsync(CancellationToken);
+            await _semaphore.WaitAsync(CancellationToken);
+            try
+            {
+                var authenticationState = await authenticationStateTask.WaitAsync(CancellationToken);
 
-            await UpdateNavTiles(authenticationState.User);
+                await UpdateNavTiles(authenticationState.User);
 
-            notifyStateHasChanged = true;
+                notifyStateHasChanged = true;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here, we return gracefully
         }
-        finally
+        catch (ObjectDisposedException)
         {
-            _semaphore.Release();
+            // Semaphore or other object already disposed, nothing we can do, return gracefully
         }
 
         if (notifyStateHasChanged)
