@@ -2,19 +2,19 @@
 
 ## Available Edge-s Installations
 
-Several Edge-s systems are available in our network for testing purposes:
+Several Edge-s systems are available in the internet for testing purposes:
 
-| IP             | Instance   |
-| -------------- | ---------- |
-| `10.45.24.220` | Standalone |
-| `10.45.24.221` | Standalone |
-| `10.45.24.222` | Standalone |
-| `10.45.24.223` | Standalone |
-| `10.45.24.224` | Standalone |
-| `10.45.24.225` | Standalone |
-| `10.45.24.226` | Standalone |
-| `10.45.24.227` | Standalone |
-| `10.45.24.228` | Standalone |
+| IP                         | Instance   |
+| -------------------------- | ---------- |
+| `edge-801.tdl.vicione.dev` | Standalone |
+| `edge-802.tdl.vicione.dev` | Standalone |
+| `edge-803.tdl.vicione.dev` | Standalone |
+| `edge-804.tdl.vicione.dev` | Standalone |
+| `edge-805.tdl.vicione.dev` | Standalone |
+| `edge-806.tdl.vicione.dev` | Standalone |
+| `edge-807.tdl.vicione.dev` | Standalone |
+| `edge-808.tdl.vicione.dev` | Standalone |
+| `edge-809.tdl.vicione.dev` | Standalone |
 
 ## SSH (WSL)
 
@@ -23,6 +23,10 @@ To log in to the system via SSH, use the *production* user account with the foll
 ```bash
 ssh <edge-s-ip> -l production
 ```
+
+## Access
+
+If you are a member of the GitLab vicione team, you can access an instance directly using SSO
 
 ## First Login After Reset
 
@@ -69,12 +73,13 @@ sudo -u vicione-suite cat /etc/version
 
 ## Filesystem
 
-Many paths used by the suite installation can be modified through environment variables. Default settings are:
+The suite installation is located under '/lib/vicione-suite/'. Many paths used within suite can be modified through environment variables. Important default settings are:
 
 ```bash
 Instance__BackupDirectory='/var/lib/vicione-suite/Backup/'
 Instance__CacheDirectory='/var/lib/vicione-suite/Cache/'
 Instance__HomeDirectory='/mnt/persistent/vicione-suite/AppData'
+ModuleLoader__ModulesPath='/var/lib/vicione-suite/Modules'
 ```
 
 ## Logs
