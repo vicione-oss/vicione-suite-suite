@@ -1,4 +1,5 @@
-﻿using Core.OS.DbContext;
+using AwesomeAssertions;
+using Core.OS.DbContext;
 using Core.OS.Modules;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared.UserManagement.Contracts;
@@ -27,7 +28,7 @@ public class SeedingExtensionsTests : TestWithDbContextSqlite<UserDbContextSqlit
     }
 
     [Fact]
-    public async Task SeedUsersAndRoles_should_seed_data()
+    public async Task Should_seed_data()
     {
         // Arrange
         await using var serviceProvider = CreateServiceProvider();
@@ -37,7 +38,7 @@ public class SeedingExtensionsTests : TestWithDbContextSqlite<UserDbContextSqlit
 
         // Assert
         var context = serviceProvider.GetRequiredService<UserDbContext>();
-        Assert.True(context.Users.Any());
-        Assert.True(context.UserRoles.Any());
+        context.Users.Any().Should().BeTrue();
+        context.UserRoles.Any().Should().BeTrue();
     }
 }

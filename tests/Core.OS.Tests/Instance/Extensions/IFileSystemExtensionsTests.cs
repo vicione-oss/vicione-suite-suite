@@ -326,8 +326,8 @@ public class IFileSystemExtensionsTests
             // Assert
             fileSystem.File.Exists(recoveryFilePath).Should().BeTrue();
             var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
-            Assert.NotNull(state);
-            state.Startups.Should().Be(1);
+            state.Should().NotBeNull();
+            state!.Startups.Should().Be(1);
             state.RecoveryApplied.Should().BeFalse();
         }
 
@@ -351,8 +351,8 @@ public class IFileSystemExtensionsTests
             // Assert
             fileSystem.File.Exists(recoveryFilePath).Should().BeTrue();
             var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
-            Assert.NotNull(state);
-            state.Startups.Should().Be(1);
+            state.Should().NotBeNull();
+            state!.Startups.Should().Be(1);
         }
 
         [Fact]
@@ -369,8 +369,8 @@ public class IFileSystemExtensionsTests
 
             // Assert
             var state = await fileSystem.ReadRecoveryState(recoveryFilePath, _logger, TestContext.Current.CancellationToken);
-            Assert.NotNull(state);
-            state.Startups.Should().Be(1);
+            state.Should().NotBeNull();
+            state!.Startups.Should().Be(1);
             state.RecoveryApplied.Should().BeTrue();
         }
     }

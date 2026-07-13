@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Connections.Extensions;
 using Core.OS.Connections.Mqtt;
 using Sdk.Connections;
@@ -10,7 +10,7 @@ namespace Core.OS.Tests.Connections;
 
 public class SuiteConnectionFactoryTests
 {
-    public sealed class CreateDefaultMqttServiceConnection
+    public sealed class CreateDefaultMqttServiceConnection : SuiteConnectionFactoryTests
     {
         [Fact]
         public void Should_return_null_when_endpoint_is_missing()
@@ -44,7 +44,7 @@ public class SuiteConnectionFactoryTests
         }
     }
 
-    public sealed class CreateDefaultMqttWebsocketConnection
+    public sealed class CreateDefaultMqttWebsocketConnection : SuiteConnectionFactoryTests
     {
         [Fact]
         public void Should_return_null_when_endpoint_is_missing()
@@ -78,7 +78,7 @@ public class SuiteConnectionFactoryTests
         }
     }
 
-    public sealed class CreateInstanceMqttConnection
+    public sealed class CreateInstanceMqttConnection : SuiteConnectionFactoryTests
     {
         [Fact]
         public void Should_create_connection_with_given_properties_and_mqtt_values()
@@ -108,7 +108,7 @@ public class SuiteConnectionFactoryTests
         }
     }
 
-    public sealed class CreateMqttServiceConnection
+    public sealed class CreateMqttServiceConnection : SuiteConnectionFactoryTests
     {
         [Fact]
         public void Should_return_null_if_endpoint_is_empty()
@@ -139,7 +139,7 @@ public class SuiteConnectionFactoryTests
         }
     }
 
-    public sealed class CreateMqttWebsocketConnection
+    public sealed class CreateMqttWebsocketConnection : SuiteConnectionFactoryTests
     {
         [Fact]
         public void Should_use_default_port_9001_when_not_specified()

@@ -32,7 +32,7 @@ public class UpdateUserConsumerTests
         };
 
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_be_consumed()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -50,7 +50,7 @@ public class UpdateUserConsumerTests
     }
 
     [Fact]
-    public async Task Command_should_publish_user_changed_event()
+    public async Task Should_publish_user_changed_event()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -115,7 +115,7 @@ public class UpdateUserConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_user_error_event_for_unknown_user()
+    public async Task Should_publish_user_error_event_for_unknown_user()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -136,7 +136,7 @@ public class UpdateUserConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_user_error_event_for_invalid_password_change()
+    public async Task Should_publish_user_error_event_for_invalid_password_change()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -155,7 +155,7 @@ public class UpdateUserConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_user_error_event_for_incorrect_password()
+    public async Task Should_publish_user_error_event_for_incorrect_password()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

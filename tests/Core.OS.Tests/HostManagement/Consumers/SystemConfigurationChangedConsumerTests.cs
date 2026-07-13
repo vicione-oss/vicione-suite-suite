@@ -12,7 +12,7 @@ namespace Core.OS.Tests.HostManagement.Consumers;
 public sealed class SystemConfigurationChangedConsumerTests
 {
     [Fact]
-    public async Task Event_should_be_consumed()
+    public async Task Should_consume_event()
     {
         // Arrange
         await using var tester = new MassTransitTester(cfg =>

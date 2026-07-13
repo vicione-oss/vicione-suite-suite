@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using Core.OS.Tests.Extensions;
@@ -17,17 +18,14 @@ public sealed class DeleteConnectionConsumerTests : TestWithDbContextSqlite<Conn
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
     public DeleteConnectionConsumerTests()
-    {
-        _configureServices = cfg =>
+        => _configureServices = cfg =>
         {
-            // consumer needs
             cfg.AddConsumer<DeleteConnectionConsumer>();
             cfg.AddSingleton<IConnectionDbContext>(_ => TestDbContext);
         };
-    }
 
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_consume_command()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -38,7 +36,7 @@ public sealed class DeleteConnectionConsumerTests : TestWithDbContextSqlite<Conn
     }
 
     [Fact]
-    public async Task Remove_existing_connection_should_publish_changed_event()
+    public async Task Should_publish_changed_event_when_removing_existing_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -50,16 +48,16 @@ public sealed class DeleteConnectionConsumerTests : TestWithDbContextSqlite<Conn
         await tester.TestCommand<DeleteConnection, DeleteConnectionConsumer>(command);
 
         // Assert
-        Assert.True(await tester.Harness.Published.Any<ConnectionChanged>(r =>
+        (await tester.Harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == CrudAction.Deleted &&
             r.Context.Message.ErrorInfo == null &&
-            r.Context.Message.Connection.Id == connection.Id, TestContext.Current.CancellationToken));
+            r.Context.Message.Connection.Id == connection.Id, TestContext.Current.CancellationToken)).Should().BeTrue();
 
-        Assert.False(await dbContext.Connections.AnyAsync(c => c.Id == connection.Id, cancellationToken: TestContext.Current.CancellationToken));
+        (await dbContext.Connections.AnyAsync(c => c.Id == connection.Id, cancellationToken: TestContext.Current.CancellationToken)).Should().BeFalse();
     }
 
     [Fact]
-    public async Task Remove_unknown_connection_should_publish_success_event_for_idempotent_redelivery()
+    public async Task Should_publish_success_event_for_unknown_connection_to_ensure_idempotency()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -69,9 +67,9 @@ public sealed class DeleteConnectionConsumerTests : TestWithDbContextSqlite<Conn
         await tester.TestCommand<DeleteConnection, DeleteConnectionConsumer>(command);
 
         // Assert
-        Assert.True(await tester.Harness.Published.Any<ConnectionChanged>(r =>
+        (await tester.Harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == CrudAction.Deleted &&
             r.Context.Message.ErrorInfo == null &&
-            r.Context.Message.Connection.Id == command.ConnectionId, TestContext.Current.CancellationToken));
+            r.Context.Message.Connection.Id == command.ConnectionId, TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 }

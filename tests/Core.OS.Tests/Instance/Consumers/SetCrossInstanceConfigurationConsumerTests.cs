@@ -17,7 +17,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class SetCrossInstanceConfigurationConsumerTests : TestWithDbContextSqlite<ApplicationDbContextSqlite>
+public sealed class SetCrossInstanceConfigurationConsumerTests : TestWithDbContextSqlite<ApplicationDbContextSqlite>
 {
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
     private readonly IModuleHost _moduleHost = Substitute.For<IModuleHost>();

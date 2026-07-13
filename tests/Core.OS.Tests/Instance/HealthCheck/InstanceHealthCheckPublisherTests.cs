@@ -1,4 +1,4 @@
-﻿using Core.OS.Instance;
+using Core.OS.Instance;
 using Core.OS.Instance.HealthCheck;
 using Core.Shared.Instance.HealthCheck;
 using AwesomeAssertions;
@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.HealthCheck;
 
-public class InstanceHealthCheckPublisherTests
+public sealed class InstanceHealthCheckPublisherTests
 {
     private readonly ILocalInstanceInformationProvider _instanceInformationMock = Substitute.For<ILocalInstanceInformationProvider>();
     private readonly ILogger<InstanceHealthCheckPublisher> _loggerMock = Substitute.For<ILogger<InstanceHealthCheckPublisher>>();
@@ -28,7 +28,7 @@ public class InstanceHealthCheckPublisherTests
             .BuildServiceProvider();
 
     [Fact]
-    public async Task PublishInstanceHealthInfoAndHealthChangedEvent()
+    public async Task Should_publish_instance_health_info_and_health_changed_event()
     {
         // Arrange
         var instanceId = Guid.NewGuid();
@@ -55,7 +55,7 @@ public class InstanceHealthCheckPublisherTests
     }
 
     [Fact]
-    public async Task PublishInstanceHealthInfoOnlyIfNoChange()
+    public async Task Should_publish_instance_health_info_only_when_no_status_change()
     {
         // Arrange
         var instanceId = Guid.NewGuid();

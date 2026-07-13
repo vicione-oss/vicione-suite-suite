@@ -9,7 +9,7 @@ namespace Core.OS.Tests.Persistence;
 public sealed class ReplicationLagHealthCheckTests
 {
     [Fact]
-    public async Task CheckHealthAsync_should_report_healthy_when_no_data_received()
+    public async Task Should_report_healthy_when_no_data_received()
     {
         // Arrange
         var lagTracker = new ReplicationLagTracker();
@@ -23,7 +23,7 @@ public sealed class ReplicationLagHealthCheckTests
     }
 
     [Fact]
-    public async Task CheckHealthAsync_should_report_healthy_when_lag_below_degraded_threshold()
+    public async Task Should_report_healthy_when_lag_below_degraded_threshold()
     {
         // Arrange
         var lagTracker = new ReplicationLagTracker();
@@ -38,7 +38,7 @@ public sealed class ReplicationLagHealthCheckTests
     }
 
     [Fact]
-    public async Task CheckHealthAsync_should_report_degraded_when_lag_exceeds_30_seconds()
+    public async Task Should_report_degraded_when_lag_exceeds_30_seconds()
     {
         // Arrange
         var lagTracker = new ReplicationLagTracker();
@@ -53,7 +53,7 @@ public sealed class ReplicationLagHealthCheckTests
     }
 
     [Fact]
-    public async Task CheckHealthAsync_should_report_unhealthy_when_lag_exceeds_5_minutes()
+    public async Task Should_report_unhealthy_when_lag_exceeds_5_minutes()
     {
         // Arrange
         var lagTracker = new ReplicationLagTracker();
@@ -68,7 +68,7 @@ public sealed class ReplicationLagHealthCheckTests
     }
 
     [Fact]
-    public async Task CheckHealthAsync_should_report_based_on_worst_context_lag()
+    public async Task Should_report_based_on_worst_context_lag()
     {
         // Arrange
         var lagTracker = new ReplicationLagTracker();
@@ -84,7 +84,7 @@ public sealed class ReplicationLagHealthCheckTests
     }
 
     [Fact]
-    public async Task CheckHealthAsync_should_include_lag_data_per_context()
+    public async Task Should_include_lag_data_per_context()
     {
         // Arrange
         var lagTracker = new ReplicationLagTracker();

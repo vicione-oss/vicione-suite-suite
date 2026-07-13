@@ -197,10 +197,10 @@ public sealed class IConfigurationExtensionsTests
             var configOptions = config.BindModuleSection<TestOptions>(TestBackendModule.Id);
 
             // Assert
-            Assert.NotNull(configOptions);
-            Assert.Equal(customOptions.Flag, configOptions.Flag);
-            Assert.Equal(customOptions.StringValue, configOptions.StringValue);
-            Assert.Equal(customOptions.IntValue, configOptions.IntValue);
+            configOptions.Should().NotBeNull();
+            configOptions.Flag.Should().Be(customOptions.Flag);
+            configOptions.StringValue.Should().Be(customOptions.StringValue);
+            configOptions.IntValue.Should().Be(customOptions.IntValue);
         }
 
         [Fact]
@@ -223,10 +223,10 @@ public sealed class IConfigurationExtensionsTests
             var serviceOptions = serviceProvider.GetRequiredService<IOptions<TestOptions>>().Value;
 
             // Assert
-            Assert.NotNull(serviceOptions);
-            Assert.Equal(customOptions.Flag, serviceOptions.Flag);
-            Assert.Equal(customOptions.StringValue, serviceOptions.StringValue);
-            Assert.Equal(customOptions.IntValue, serviceOptions.IntValue);
+            serviceOptions.Should().NotBeNull();
+            serviceOptions.Flag.Should().Be(customOptions.Flag);
+            serviceOptions.StringValue.Should().Be(customOptions.StringValue);
+            serviceOptions.IntValue.Should().Be(customOptions.IntValue);
         }
     }
 

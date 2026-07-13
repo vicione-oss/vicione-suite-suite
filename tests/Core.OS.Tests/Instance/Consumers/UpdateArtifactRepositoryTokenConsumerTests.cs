@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class UpdateArtifactRepositoryTokenConsumerTests
+public sealed class UpdateArtifactRepositoryTokenConsumerTests
 {
     private readonly IArtifactRepositoryStore _repositoryStore = Substitute.For<IArtifactRepositoryStore>();
     private readonly IArtifactRepositoryTokenService _tokenService = Substitute.For<IArtifactRepositoryTokenService>();
@@ -32,7 +32,7 @@ public class UpdateArtifactRepositoryTokenConsumerTests
         };
 
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_consume_command()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1", TokenEndpoint = "https://token.example.com" };
@@ -48,7 +48,7 @@ public class UpdateArtifactRepositoryTokenConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_ArtifactRepositoryUpdated_with_updated_token_on_success()
+    public async Task Should_publish_change_event_with_updated_token_on_success()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1", TokenEndpoint = "https://token.example.com" };
@@ -75,7 +75,7 @@ public class UpdateArtifactRepositoryTokenConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_ArtifactRepositoryUpdated_with_error_when_token_endpoint_is_missing()
+    public async Task Should_publish_change_event_with_error_when_token_endpoint_is_missing()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
@@ -94,7 +94,7 @@ public class UpdateArtifactRepositoryTokenConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_ArtifactRepositoryUpdated_with_error_when_token_service_throws()
+    public async Task Should_publish_change_event_with_error_when_token_service_throws()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1", TokenEndpoint = "https://token.example.com" };

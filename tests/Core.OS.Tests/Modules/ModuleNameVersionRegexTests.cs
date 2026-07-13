@@ -19,7 +19,7 @@ public class ModuleNameVersionRegexTests
             var match = ModuleNameVersionRegex.GetModuleVersion(path, out var moduleVersion);
 
             // Assert
-            Assert.True(match);
+            match.Should().BeTrue();
             moduleVersion.Should().BeEquivalentTo(new SemVersion(0, 24, 0));
         }
 
@@ -33,7 +33,7 @@ public class ModuleNameVersionRegexTests
             var match = ModuleNameVersionRegex.GetModuleVersion(path, out var moduleVersion);
 
             // Assert
-            Assert.True(match);
+            match.Should().BeTrue();
             moduleVersion.Should().BeEquivalentTo(new SemVersion(0, 24, 0, ["ci8423423"]));
         }
 
@@ -47,7 +47,7 @@ public class ModuleNameVersionRegexTests
             var match = ModuleNameVersionRegex.GetModuleVersion(path, out var moduleVersion);
 
             // Assert
-            Assert.False(match);
+            match.Should().BeFalse();
             moduleVersion.Should().BeNull();
         }
     }
@@ -66,7 +66,7 @@ public class ModuleNameVersionRegexTests
             var match = ModuleNameVersionRegex.TryParse(name, out var moduleVersion, out var architecture, out var sdkVersion);
 
             // Assert
-            Assert.True(match);
+            match.Should().BeTrue();
             moduleVersion.Should().BeEquivalentTo(SemVersion.Parse(expectedVersion));
             architecture.Should().Be(expectedArchitecture);
             sdkVersion.Should().BeEquivalentTo(SemVersion.Parse(expectedSdkVersion));
@@ -82,7 +82,7 @@ public class ModuleNameVersionRegexTests
             var match = ModuleNameVersionRegex.TryParse(name, out var moduleVersion, out var architecture, out var sdkVersion);
 
             // Assert
-            Assert.True(match);
+            match.Should().BeTrue();
             moduleVersion.Should().BeEquivalentTo(new SemVersion(0, 24, 0, ["ci8423423"]));
             architecture.Should().Be("arm64");
             sdkVersion.Should().BeEquivalentTo(new SemVersion(0, 19, 0));
@@ -98,7 +98,7 @@ public class ModuleNameVersionRegexTests
             var match = ModuleNameVersionRegex.TryParse(name, out var moduleVersion, out var architecture, out var sdkVersion);
 
             // Assert
-            Assert.False(match);
+            match.Should().BeFalse();
             moduleVersion.Should().BeNull();
             architecture.Should().BeNull();
             sdkVersion.Should().BeNull();

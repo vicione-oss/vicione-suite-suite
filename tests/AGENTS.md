@@ -3,7 +3,7 @@
 Shared test infrastructure and all test projects for ViciOne Suite.
 
 ## Conventions
-- Test method names: `[MethodName]_should_[tested_behaviour]` in `snake_case` (e.g. `SavingChangesAsync_should_publish_added_entity`, `GetLag_should_return_null_for_unknown_context`). The method name prefix is mandatory — never omit it.
+- Test method names: `Should_[tested_behaviour]` in `snake_case` (e.g. `Should_publish_change_event_for_new_connection`). The method name is reflected by the inner test class
 - All tests structured with `// Arrange`, `// Act`, `// Assert` comments
 - Frameworks: xUnit, NSubstitute, AwesomeAssertions, bUnit
 

@@ -1,5 +1,6 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reflection;
+using AwesomeAssertions;
 using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Templates;
 using Xunit;
@@ -32,7 +33,7 @@ public class FluidTemplateRendererTest
             new FileSystem().FileInfo.New(templateFile), _ => { }, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.NotEmpty(result);
+        result.Should().NotBeEmpty();
     }
 
     public static TheoryData<string> GetUserManagementTemplates()

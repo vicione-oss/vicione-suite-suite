@@ -74,7 +74,7 @@ public sealed class TestConnectionConsumerTests
     }
 
     [Fact]
-    public async Task Empty_mqtt_connection_should_publish_error()
+    public async Task Should_publish_error_for_empty_mqtt_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -92,7 +92,7 @@ public sealed class TestConnectionConsumerTests
     }
 
     [Fact]
-    public async Task Mqtt_tcp_connection_should_publish_event_on_success()
+    public async Task Should_publish_success_event_for_mqtt_tcp_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -111,7 +111,7 @@ public sealed class TestConnectionConsumerTests
     }
 
     [Fact]
-    public async Task Mqtt_tcp_with_tls_connection_should_publish_event_on_success()
+    public async Task Should_publish_success_event_for_mqtt_tcp_with_tls_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -132,7 +132,7 @@ public sealed class TestConnectionConsumerTests
     }
 
     [Fact]
-    public async Task Mqtt_websocket_connection_should_publish_event_on_success()
+    public async Task Should_publish_success_event_for_mqtt_websocket_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -163,7 +163,7 @@ public sealed class TestConnectionConsumerTests
     }
 
     [Fact]
-    public async Task Empty_database_connection_should_publish_error()
+    public async Task Should_publish_error_for_empty_database_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -180,12 +180,11 @@ public sealed class TestConnectionConsumerTests
     }
 
     [Fact]
-    public async Task Sqlite_database_connection_should_publish_event_on_success()
+    public async Task Should_publish_success_event_for_sqlite_database_connection()
     {
+        // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var context = TestDbContextFactory.CreateSqliteContext<ConnectionDbContextSqlite>();
-
-        // Arrange
         var command = SetupCommandWithSqliteDatabase();
         SetupTestServiceForSuccess(command.Connection.Id);
 
@@ -199,7 +198,7 @@ public sealed class TestConnectionConsumerTests
     }
 
     [Fact]
-    public async Task Sqlite_database_connection_should_publish_error_on_failure()
+    public async Task Should_publish_error_for_sqlite_database_connection_on_failure()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

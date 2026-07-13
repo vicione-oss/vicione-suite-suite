@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class DeleteArtifactRepositoryConsumerTests
+public sealed class DeleteArtifactRepositoryConsumerTests
 {
     private readonly IArtifactRepositoryStore _repositoryStore = Substitute.For<IArtifactRepositoryStore>();
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
@@ -29,7 +29,7 @@ public class DeleteArtifactRepositoryConsumerTests
         };
 
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_consume_command()
     {
         // Arrange
         var repoId = Guid.NewGuid();
@@ -44,7 +44,7 @@ public class DeleteArtifactRepositoryConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_deleted_event_for_deleted_repository()
+    public async Task Should_publish_deleted_event_for_deleted_repository()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
@@ -64,7 +64,7 @@ public class DeleteArtifactRepositoryConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_deleted_event_with_error_on_failure()
+    public async Task Should_publish_deleted_event_with_error_on_failure()
     {
         // Arrange
         var repoId = Guid.NewGuid();

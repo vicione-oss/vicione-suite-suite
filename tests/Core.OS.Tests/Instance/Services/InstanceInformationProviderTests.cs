@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
+using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
@@ -17,7 +18,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 
-public class InstanceInformationProviderTests : IClassFixture<TestApplicationFactory<EmptyTestStartup>>
+public sealed class InstanceInformationProviderTests : IClassFixture<TestApplicationFactory<EmptyTestStartup>>
 {
     private readonly IConfiguration _config;
     private readonly MockFileSystem _fileSystem = new();
@@ -51,7 +52,7 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
     }
 
     [Fact]
-    public async Task MasterInstanceIdGetsCreatedOnFirstGet()
+    public async Task Should_create_master_instance_id_on_first_get()
     {
         // Arrange
         _localInstanceInformationMock.SetupLocalInstanceInformation(InstanceType.Master);
@@ -62,11 +63,11 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
         var id = provider.Local.Id;
 
         // Assert
-        Assert.Equal(Constants.MasterInstanceGuid, id);
+        id.Should().Be(Constants.MasterInstanceGuid);
     }
 
     [Fact]
-    public async Task MasterInstanceOnlyOneCanExist()
+    public async Task Should_have_only_one_master_instance_exist()
     {
         // Arrange
         _localInstanceInformationMock.SetupLocalInstanceInformation(InstanceType.Master);
@@ -79,11 +80,11 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
         var id2 = provider2.Local.Id;
 
         // Assert
-        Assert.Equal(id1, id2);
+        id1.Should().Be(id2);
     }
 
     [Fact]
-    public async Task StandaloneInstanceIdGetsCreatedOnFirstGet()
+    public async Task Should_create_standalone_instance_id_on_first_get()
     {
         // Arrange
         _localInstanceInformationMock.SetupLocalInstanceInformation();
@@ -94,11 +95,11 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
         var id = provider.Local.Id;
 
         // Assert
-        Assert.True(id != Guid.Empty);
+        id.Should().NotBe(Guid.Empty);
     }
 
     [Fact]
-    public async Task StandaloneInstanceIdSetByConfig()
+    public async Task Should_set_standalone_instance_id_by_config()
     {
         // Arrange
         var preloadId = Guid.NewGuid();
@@ -110,7 +111,7 @@ public class InstanceInformationProviderTests : IClassFixture<TestApplicationFac
         var id = provider.Local.Id;
 
         // Assert
-        Assert.Equal(preloadId, id);
+        id.Should().Be(preloadId);
     }
 
     private async Task<InstanceInformationProvider> CreateInstanceInformationProvider(IConfiguration config, CancellationToken cancellationToken)

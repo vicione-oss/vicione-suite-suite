@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.Instance.Consumers;
 using Core.OS.Tests.Extensions;
 using Core.Shared.Instance.Requests;
@@ -12,9 +12,9 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class GetInstancesConsumerTests : TestWithDbContextSqlite<ApplicationDbContextSqlite>
+public sealed class GetInstancesConsumerTests : TestWithDbContextSqlite<ApplicationDbContextSqlite>
 {
-    private Action<IBusRegistrationConfigurator> _configureServices;
+    private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
     public GetInstancesConsumerTests()
         => _configureServices = cfg =>
@@ -25,7 +25,7 @@ public class GetInstancesConsumerTests : TestWithDbContextSqlite<ApplicationDbCo
         };
 
     [Fact]
-    public async Task Request_should_be_consumed()
+    public async Task Should_return_empty_list_when_no_instances()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -40,7 +40,7 @@ public class GetInstancesConsumerTests : TestWithDbContextSqlite<ApplicationDbCo
     }
 
     [Fact]
-    public async Task Request_should_return_instances_information()
+    public async Task Should_return_instances_information()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -56,7 +56,7 @@ public class GetInstancesConsumerTests : TestWithDbContextSqlite<ApplicationDbCo
     }
 
     [Fact]
-    public async Task Request_with_id_should_return_instance_information()
+    public async Task Should_return_matching_instance_when_filtered_by_id()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -73,15 +73,15 @@ public class GetInstancesConsumerTests : TestWithDbContextSqlite<ApplicationDbCo
     }
 
     [Fact]
-    public async Task Consume_should_publish_response_on_failure()
+    public async Task Should_return_error_response_on_failure()
     {
         // Arrange
         var dbContextMock = Substitute.For<IApplicationDbContext>();
         dbContextMock.InstanceInfo.Throws(new ArgumentException("test"));
 
-        _configureServices += cfg => cfg.AddSingleton(dbContextMock);
+        Action<IBusRegistrationConfigurator> configureServices = _configureServices + (cfg => cfg.AddSingleton(dbContextMock));
 
-        await using var tester = new MassTransitTester(_configureServices);
+        await using var tester = new MassTransitTester(configureServices);
         var request = new GetInstances(new());
 
         // Act

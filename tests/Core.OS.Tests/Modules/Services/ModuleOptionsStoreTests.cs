@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Core.OS.Modules.Extensions;
@@ -114,7 +114,7 @@ public class ModuleOptionsStoreTests
             var configuration = await optionStore.LoadJsonConfiguration(ModuleIdResolver.ResolveId<TestBackendModule>(), TestContext.Current.CancellationToken);
 
             // Assert
-            Assert.NotNull(configuration);
+            configuration.Should().NotBeNull();
         }
 
         [Fact]
@@ -129,7 +129,7 @@ public class ModuleOptionsStoreTests
             var configuration = await optionStore.LoadJsonConfiguration(ModuleIdResolver.ResolveId<TestBackendModule>(), TestContext.Current.CancellationToken);
 
             // Assert
-            Assert.NotNull(configuration);
+            configuration.Should().NotBeNull();
             configuration.GetValue<bool>(_boolOption.GetOptionKey(ModuleIdResolver.ResolveId<TestBackendModule>())).Should().Be(_boolValue);
             configuration.GetValue<double>(_numberOption.GetOptionKey(ModuleIdResolver.ResolveId<TestBackendModule>())).Should().Be(_numberValue);
             configuration.GetValue<string>(_textOption.GetOptionKey(ModuleIdResolver.ResolveId<TestBackendModule>())).Should().Be(_textValue);

@@ -70,7 +70,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
         };
     }
 
-    public class Delete : ControlInstanceConsumerTests
+    public sealed class Delete : ControlInstanceConsumerTests
     {
         [Fact]
         public async Task Should_consume_command()
@@ -88,7 +88,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
         }
     }
 
-    public class Restart : ControlInstanceConsumerTests
+    public sealed class Restart : ControlInstanceConsumerTests
     {
 
         [Fact]
@@ -159,7 +159,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
         }
     }
 
-    public class Synchronize : ControlInstanceConsumerTests
+    public sealed class Synchronize : ControlInstanceConsumerTests
     {
         [Fact]
         public async Task Should_consume_command()

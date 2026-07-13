@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using AwesomeAssertions;
 using Core.OS.Logging;
 using Core.OS.Tests.Extensions;
 using Core.Shared;
@@ -15,98 +16,109 @@ namespace Core.OS.Tests.Logging;
 
 public class LoggingConfigurationTests
 {
-    [Fact]
-    public void Setup_static_startup_logger_should_create_log_instance()
+    public sealed class SetupStaticStartupLogger : LoggingConfigurationTests
     {
-        // Arrange
-        var config = new TestConfig()
-            .ConfigureLogging(s =>
-            {
-                s.LogPath = "AppData";
-                s.LogTargets = ["Console"];
-            })
-            .BuildConfiguration();
+        [Fact]
+        public void Should_create_log_instance()
+        {
+            // Arrange
+            var config = new TestConfig()
+                .ConfigureLogging(s =>
+                {
+                    s.LogPath = "AppData";
+                    s.LogTargets = ["Console"];
+                })
+                .BuildConfiguration();
 
-        // Act
-        LoggingConfiguration.SetupStaticStartupLogger(config);
+            // Act
+            LoggingConfiguration.SetupStaticStartupLogger(config);
 
-        // Assert
-        Assert.NotNull(Log.Logger);
+            // Assert
+            Log.Logger.Should().NotBeNull();
+        }
     }
 
-    [Fact]
-    public void Get_module_settings_should_throw_on_missing_section()
+    public sealed class GetLoggingSettings : LoggingConfigurationTests
     {
-        // Arrange
-        var config = new TestConfig(false).BuildConfiguration();
+        [Fact]
+        public void Should_throw_on_missing_section()
+        {
+            // Arrange
+            var config = new TestConfig(false).BuildConfiguration();
 
-        // Act + Assert
-        Assert.Throws<ConfigurationException>(config.GetLoggingSettings);
+            // Act + Assert
+            var act = config.GetLoggingSettings;
+            act.Should().Throw<ConfigurationException>();
+        }
+
+        [Fact]
+        public void Should_configure_settings()
+        {
+            // Arrange
+            var config = new TestConfig()
+                .ConfigureLogging(s =>
+                {
+                    s.LogPath = "AppData";
+                    s.LogTargets = ["Console", "Logfile", "Journal"];
+                    s.LogLevel = new LoggingLogLevelOptions
+                    {
+                        Default = LogLevel.Debug,
+                        Microsoft = LogLevel.Debug
+                    };
+                    if (s.Resources?.Memory is not null)
+                    {
+                        s.Resources.Memory.LimitInMb = 400;
+                        s.Resources.Memory.LimitInPercent = 80;
+                    }
+                })
+                .BuildConfiguration();
+
+            // Act
+            var settings = config.GetLoggingSettings();
+
+            // Assert
+            settings.Should().NotBeNull();
+            settings.LogPath.Should().Be("AppData");
+            settings.LogTargets.Should().HaveCount(3);
+            settings.LogLevel!.Default.Should().Be(LogLevel.Debug);
+            settings.Resources!.Memory!.LimitInMb.Should().Be(400);
+            settings.Resources!.Memory!.LimitInPercent.Should().Be(80);
+        }
     }
 
-    [Fact]
-    public void Add_logging_settings_should_configure_settings()
+    public sealed class ConfigureLogging : LoggingConfigurationTests
     {
-        // Arrange
-        var config = new TestConfig()
-            .ConfigureLogging(s =>
+        [Fact]
+        public void Should_setup_serilog_settings_and_services()
+        {
+            // Arrange
+            var builder = Host.CreateDefaultBuilder();
+
+            builder.ConfigureAppConfiguration(config =>
             {
-                s.LogPath = "AppData";
-                s.LogTargets = ["Console", "Logfile", "Journal"];
-                s.LogLevel = new LoggingLogLevelOptions
+                var settings = new Dictionary<string, string>();
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    Default = LogLevel.Debug,
-                    Microsoft = LogLevel.Debug
-                };
-                if (s.Resources?.Memory is not null)
-                {
-                    s.Resources.Memory.LimitInMb = 400;
-                    s.Resources.Memory.LimitInPercent = 80;
+                    settings["Logging:LogTargets:0"] = "Journal";
                 }
-            })
-            .BuildConfiguration();
+                else
+                {
+                    settings["Logging:LogTargets:0"] = "Console"; // Fallback
+                }
+                config.AddInMemoryCollection(settings!);
+            });
 
-        // Act
-        var settings = config.GetLoggingSettings();
-
-        // Assert
-        Assert.NotNull(settings);
-        Assert.Equal("AppData", settings.LogPath);
-        Assert.Equal(3, settings.LogTargets?.Length);
-        Assert.Equal(LogLevel.Debug, settings.LogLevel!.Default);
-        Assert.Equal(400, settings.Resources!.Memory!.LimitInMb);
-        Assert.Equal(80, settings.Resources!.Memory!.LimitInPercent);
-    }
-
-    [Fact]
-    public void Configure_logging_should_setup_serilog_settings_and_services()
-    {
-        // Act
-        var builder = Host.CreateDefaultBuilder();
-
-        builder.ConfigureAppConfiguration(config =>
-        {
-            var settings = new Dictionary<string, string>();
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            // Act
+            var host = builder.ConfigureServices((context, services) =>
             {
-                settings["Logging:LogTargets:0"] = "Journal";
-            }
-            else
-            {
-                settings["Logging:LogTargets:0"] = "Console"; // Fallback
-            }
-            config.AddInMemoryCollection(settings!);
-        });
+                services.ConfigureLogging(context.Configuration);
+            }).Build();
 
-        var host = builder.ConfigureServices((context, services) =>
-        {
-            services.ConfigureLogging(context.Configuration);
-        }).Build();
-
-        // Assert
-        Assert.NotNull(host.Services.GetService<ILogLevelSwitch>());
-        Assert.NotNull(host.Services.GetService<ILoggerFactory>());
-        Assert.NotNull(host.Services.GetService<ILogger<LoggingConfigurationTests>>());
+            // Assert
+            host.Services.GetService<ILogLevelSwitch>().Should().NotBeNull();
+            host.Services.GetService<ILoggerFactory>().Should().NotBeNull();
+            host.Services.GetService<ILogger<LoggingConfigurationTests>>().Should().NotBeNull();
+        }
     }
 }

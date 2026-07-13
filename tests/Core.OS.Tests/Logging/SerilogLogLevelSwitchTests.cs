@@ -1,4 +1,5 @@
-﻿using Core.OS.Logging;
+using AwesomeAssertions;
+using Core.OS.Logging;
 using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog.Events;
@@ -15,16 +16,17 @@ public class SerilogLogLevelSwitchTests
     [InlineData(LogEventLevel.Warning, LogLevel.Warning)]
     [InlineData(LogEventLevel.Error, LogLevel.Error)]
     [InlineData(LogEventLevel.Fatal, LogLevel.Critical)]
-    public void Tests_should_cover_all_log_level_switch_things(LogEventLevel level, LogLevel mapped)
+    public void Should_map_log_levels_bidirectionally(LogEventLevel level, LogLevel mapped)
     {
         // Arrange
         var logLevelSwitch = new SerilogLogLevelSwitch(new LoggingLevelSwitch(level));
 
-        // Act + Assert
-        Assert.Equal(mapped, logLevelSwitch.LogLevel);
-
+        // Act
+        var mappedLogLevel = logLevelSwitch.LogLevel;
         logLevelSwitch.LogLevel = mapped;
 
-        Assert.Equal(level, logLevelSwitch.WrappedBaseLoggingLevelSwitch.MinimumLevel);
+        // Assert
+        mappedLogLevel.Should().Be(mapped);
+        logLevelSwitch.WrappedBaseLoggingLevelSwitch.MinimumLevel.Should().Be(level);
     }
 }

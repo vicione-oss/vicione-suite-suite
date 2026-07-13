@@ -1,4 +1,4 @@
-﻿using Core.OS.Instance;
+using Core.OS.Instance;
 using Core.OS.Instance.HealthCheck;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.HealthCheck;
@@ -22,10 +22,10 @@ public class MasterHealthServiceTests
     private readonly IOptions<InstanceOptions> _options = Substitute.For<IOptions<InstanceOptions>>();
     private readonly ILogger<MasterHealthService> _logger = Substitute.For<ILogger<MasterHealthService>>();
 
-    public class CheckHealthStatus : MasterHealthServiceTests
+    public sealed class CheckHealthStatus : MasterHealthServiceTests
     {
         [Fact]
-        public async Task Sets_correct_status_when_health_check_received()
+        public async Task Should_set_master_reachable_when_health_check_received()
         {
             // Arrange
             var masterId = Guid.NewGuid();
@@ -71,7 +71,7 @@ public class MasterHealthServiceTests
         }
 
         [Fact]
-        public async Task Sets_correct_status_when_health_check_not_received()
+        public async Task Should_set_master_unreachable_when_health_check_not_received()
         {
             // Arrange
             var info = new MasterHealthInfo();

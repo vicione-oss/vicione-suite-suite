@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Security;
@@ -26,7 +26,7 @@ public sealed class ExternalAuthenticationSettingsTest : IAsyncDisposable
         var result = await sut.IsExternalAuthenticationProviderConfigured();
 
         // Assert
-        Assert.False(result);
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public sealed class ExternalAuthenticationSettingsTest : IAsyncDisposable
         var result = await sut.IsExternalAuthenticationProviderConfigured();
 
         // Assert
-        Assert.False(result);
+        result.Should().BeFalse();
     }
 
     [Fact]
@@ -78,7 +78,7 @@ public sealed class ExternalAuthenticationSettingsTest : IAsyncDisposable
         var result = await sut.IsExternalAuthenticationProviderConfigured();
 
         // Assert
-        Assert.True(result);
+        result.Should().BeTrue();
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public sealed class ExternalAuthenticationSettingsTest : IAsyncDisposable
         var result = await sut.IsExternalAuthenticationProviderConfigured();
 
         // Assert
-        Assert.True(result);
+        result.Should().BeTrue();
     }
 
     [Fact]

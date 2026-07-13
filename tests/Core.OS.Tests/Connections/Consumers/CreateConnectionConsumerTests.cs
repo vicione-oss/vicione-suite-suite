@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using MassTransit;
@@ -30,9 +31,8 @@ public sealed class CreateConnectionConsumerTests : TestWithDbContextSqlite<Conn
             cfg.AddSingleton<IConnectionDbContext>(_ => TestDbContext);
         };
 
-
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_consume_command()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -43,7 +43,7 @@ public sealed class CreateConnectionConsumerTests : TestWithDbContextSqlite<Conn
     }
 
     [Fact]
-    public async Task Create_new_connection_should_publish_change_event()
+    public async Task Should_publish_change_event_for_new_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -55,16 +55,16 @@ public sealed class CreateConnectionConsumerTests : TestWithDbContextSqlite<Conn
         await tester.TestCommand<CreateConnection, CreateConnectionConsumer>(command);
 
         // Assert
-        Assert.True(await tester.Harness.Published.Any<ConnectionChanged>(r =>
+        (await tester.Harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == CrudAction.Created &&
             r.Context.Message.ErrorInfo == null &&
-            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken));
+            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken)).Should().BeTrue();
 
-        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, cancellationToken: TestContext.Current.CancellationToken));
+        (await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, cancellationToken: TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
-    public async Task Create_existing_connection_should_not_publish_change_event()
+    public async Task Should_not_publish_change_event_for_existing_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -79,11 +79,11 @@ public sealed class CreateConnectionConsumerTests : TestWithDbContextSqlite<Conn
         await tester.TestCommand<CreateConnection, CreateConnectionConsumer>(command);
 
         // Assert
-        Assert.False(await tester.Harness.Published.Any<ConnectionChanged>(r =>
+        (await tester.Harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == CrudAction.Created &&
             r.Context.Message.ErrorInfo == null &&
-            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken));
+            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken)).Should().BeFalse();
 
-        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, cancellationToken: TestContext.Current.CancellationToken));
+        (await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, cancellationToken: TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 }

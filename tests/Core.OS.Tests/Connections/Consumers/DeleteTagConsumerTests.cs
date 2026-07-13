@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Connections.Consumers;
 
-public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContextSqlite>
+public sealed class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContextSqlite>
 {
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
@@ -26,7 +26,7 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
         };
 
     [Fact]
-    public async Task Command_gets_consumed()
+    public async Task Should_consume_command()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -36,7 +36,7 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
     }
 
     [Fact]
-    public async Task Does_not_remove_tag_if_protected()
+    public async Task Should_not_remove_protected_tag()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -61,7 +61,7 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
     }
 
     [Fact]
-    public async Task Removes_protected_tag_if_delete_if_protected_is_true()
+    public async Task Should_remove_protected_tag_when_delete_if_protected_flag_is_set()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -85,7 +85,7 @@ public class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
     }
 
     [Fact]
-    public async Task Removes_tag()
+    public async Task Should_remove_tag()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

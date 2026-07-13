@@ -17,7 +17,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class UpdateInstanceInformationConsumerTests : TestWithDbContextSqlite<ApplicationDbContextSqlite>
+public sealed class UpdateInstanceInformationConsumerTests : TestWithDbContextSqlite<ApplicationDbContextSqlite>
 {
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
     private readonly InMemoryClusterInformationProvider _informationProvider = new(Substitute.For<ILogger<InMemoryClusterInformationProvider>>());
@@ -61,8 +61,7 @@ public class UpdateInstanceInformationConsumerTests : TestWithDbContextSqlite<Ap
         var triggeredEvent = await tester.TestCommand<UpdateInstanceInformation, UpdateInstanceInformationConsumer, InstanceInformationUpdated>(command);
 
         // Assert
-        Assert.NotNull(triggeredEvent);
-        Assert.IsType<InstanceInformationUpdated>(triggeredEvent);
+        triggeredEvent.Should().NotBeNull();
 
         triggeredEvent.Error.Should().BeNull();
         triggeredEvent.InstanceInformation.Id.Should().Be(instance.Id);
@@ -96,8 +95,7 @@ public class UpdateInstanceInformationConsumerTests : TestWithDbContextSqlite<Ap
         var triggeredEvent = await tester.TestCommand<UpdateInstanceInformation, UpdateInstanceInformationConsumer, InstanceInformationUpdated>(command);
 
         // Assert
-        Assert.NotNull(triggeredEvent);
-        Assert.IsType<InstanceInformationUpdated>(triggeredEvent);
+        triggeredEvent.Should().NotBeNull();
 
         triggeredEvent.Error.Should().NotBeNull();
     }

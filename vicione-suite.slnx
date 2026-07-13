@@ -81,6 +81,7 @@
   </Folder>
   <Folder Name="/tests/">
     <File Path="tests/.editorconfig" />
+    <File Path="tests/AGENTS.md" />
     <Project Path="tests/Blazor.DevAssets.Tests/Blazor.DevAssets.Tests.csproj" />
     <Project Path="tests/Blazor.Server.Tests/Blazor.Server.Tests.csproj" />
     <Project Path="tests/Blazor.Shared.Tests/Blazor.Shared.Tests.csproj" />

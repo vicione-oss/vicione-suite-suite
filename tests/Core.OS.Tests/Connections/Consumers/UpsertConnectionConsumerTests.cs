@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using Core.OS.Tests.Extensions;
@@ -33,9 +34,8 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
             cfg.AddSingleton<IConnectionDbContext>(_ => TestDbContext);
         };
 
-
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_consume_command()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -46,7 +46,7 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
     }
 
     [Fact]
-    public async Task Create_new_connection_should_publish_change_event()
+    public async Task Should_publish_change_event_for_new_connection()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -61,7 +61,7 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
     }
 
     [Fact]
-    public async Task Update_existing_element_should_publish_change_event()
+    public async Task Should_publish_change_event_for_existing_element()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -77,7 +77,7 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
     }
 
     [Fact]
-    public async Task Create_connection_with_tags_should_use_existing_tags()
+    public async Task Should_use_existing_tags_when_creating_connection_with_tags()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -98,7 +98,7 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
     }
 
     [Fact]
-    public async Task Update_existing_element_should_add_missing_tags()
+    public async Task Should_add_missing_tags_for_existing_element()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -116,13 +116,13 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
 
         // Assert
         await AssertUpsertConnectionConsumed(tester.Harness, dbContext, command, CrudAction.Updated);
-        Assert.True(await tester.Harness.Published.Any<TagsChanged>(r =>
+        (await tester.Harness.Published.Any<TagsChanged>(r =>
             r.Context.Message.Action == CrudAction.Created &&
-            Equals(r.Context.Message.Tags[0], TestTag), TestContext.Current.CancellationToken));
+            Equals(r.Context.Message.Tags[0], TestTag), TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     [Fact]
-    public async Task Update_existing_element_should_update_changed_tags()
+    public async Task Should_update_changed_tags_for_existing_element()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -143,18 +143,18 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
 
         // Assert
         await AssertUpsertConnectionConsumed(tester.Harness, dbContext, command, CrudAction.Updated);
-        Assert.True(await tester.Harness.Published.Any<TagsChanged>(r =>
+        (await tester.Harness.Published.Any<TagsChanged>(r =>
             r.Context.Message.Action == CrudAction.Updated &&
-            Equals(r.Context.Message.Tags[0], modifiedTag), TestContext.Current.CancellationToken));
+            Equals(r.Context.Message.Tags[0], modifiedTag), TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 
     private static async Task AssertUpsertConnectionConsumed(ITestHarness harness, IConnectionDbContext dbContext, UpsertConnection command, CrudAction action)
     {
-        Assert.True(await harness.Published.Any<ConnectionChanged>(r =>
+        (await harness.Published.Any<ConnectionChanged>(r =>
             r.Context.Message.Action == action &&
             r.Context.Message.ErrorInfo == null &&
-            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken));
+            Equals(r.Context.Message.Connection.Id, command.Connection.Id), TestContext.Current.CancellationToken)).Should().BeTrue();
 
-        Assert.True(await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, TestContext.Current.CancellationToken));
+        (await dbContext.Connections.AnyAsync(c => c.Id == command.Connection.Id, TestContext.Current.CancellationToken)).Should().BeTrue();
     }
 }

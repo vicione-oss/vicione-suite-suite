@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.HealthCheck;
@@ -15,7 +15,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Extensions;
 
-public class IServiceCollectionExtensionsTests
+public sealed class IServiceCollectionExtensionsTests
 {
     public sealed class AddInstanceServices
     {

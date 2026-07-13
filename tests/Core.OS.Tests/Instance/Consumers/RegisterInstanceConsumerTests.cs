@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Consumers;
@@ -42,7 +42,7 @@ public partial class RegisterInstanceConsumerTests : TestWithDbContextSqlite<App
     }
 
     [Fact]
-    public async Task Register_standalone_should_be_consumed()
+    public async Task Should_consume_command_for_standalone_instance()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -58,7 +58,7 @@ public partial class RegisterInstanceConsumerTests : TestWithDbContextSqlite<App
     }
 
     [Fact]
-    public async Task Register_new_slave_instance_should_trigger_synchronisation()
+    public async Task Should_trigger_synchronisation_for_new_slave_instance()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -76,7 +76,7 @@ public partial class RegisterInstanceConsumerTests : TestWithDbContextSqlite<App
     }
 
     [Fact]
-    public async Task Register_slave_should_be_consumed()
+    public async Task Should_consume_command_for_slave_instance()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

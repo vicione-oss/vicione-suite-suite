@@ -4,10 +4,10 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 
-public class SyncRetryStateTests
+public sealed class SyncRetryStateTests
 {
     [Fact]
-    public void RecordFailure_should_return_true_when_retries_available()
+    public void Should_return_true_when_retries_available_on_record_failure()
     {
         // Arrange
         var state = new SyncRetryState();
@@ -22,7 +22,7 @@ public class SyncRetryStateTests
     }
 
     [Fact]
-    public void RecordFailure_should_return_false_when_retries_exhausted()
+    public void Should_return_false_when_retries_exhausted_on_record_failure()
     {
         // Arrange
         var state = new SyncRetryState();
@@ -39,7 +39,7 @@ public class SyncRetryStateTests
     }
 
     [Fact]
-    public void Reset_should_clear_attempt_count_and_degraded_flag()
+    public void Should_clear_attempt_count_and_degraded_flag_on_reset()
     {
         // Arrange
         var state = new SyncRetryState();
@@ -56,7 +56,7 @@ public class SyncRetryStateTests
     }
 
     [Fact]
-    public void RecordFailure_should_respect_custom_max_retries()
+    public void Should_respect_custom_max_retries_on_record_failure()
     {
         // Arrange
         var state = new SyncRetryState { MaxRetries = 1 };

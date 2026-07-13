@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Instance.Services;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Requests;
@@ -11,15 +11,15 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 
-public class InMemoryClusterInformationProviderTests
+public sealed class InMemoryClusterInformationProviderTests
 {
     private static InMemoryClusterInformationProvider InitProvider()
         => new(Substitute.For<ILogger<InMemoryClusterInformationProvider>>());
 
-    public class Initialize
+    public sealed class Initialize
     {
         [Fact]
-        public async Task Adds_instances()
+        public async Task Should_add_instances()
         {
             var guid = Guid.NewGuid();
             var mediator = Substitute.For<ISuiteMediator>();
@@ -47,10 +47,10 @@ public class InMemoryClusterInformationProviderTests
         }
     }
 
-    public class GetHealthStatus
+    public sealed class GetHealthStatus
     {
         [Fact]
-        public async Task Returns_correct_health_status()
+        public async Task Should_return_correct_health_status()
         {
             var guid = Guid.NewGuid();
             var mediator = Substitute.For<ISuiteMediator>();
@@ -75,10 +75,10 @@ public class InMemoryClusterInformationProviderTests
         }
     }
 
-    public class GetInstancesInCluster
+    public sealed class GetInstancesInCluster
     {
         [Fact]
-        public async Task Returns_correct_list()
+        public async Task Should_return_correct_list()
         {
             var master = new InstanceInformation()
             {
@@ -109,7 +109,7 @@ public class InMemoryClusterInformationProviderTests
         }
 
         [Fact]
-        public async Task Returns_empty_list()
+        public async Task Should_return_empty_list()
         {
             var clusterInformationProvider = InitProvider();
 
@@ -119,7 +119,7 @@ public class InMemoryClusterInformationProviderTests
         }
     }
 
-    public class IsClusterHealthy
+    public sealed class IsClusterHealthy
     {
         [Theory]
         [InlineData(HealthStatus.Healthy, HealthStatus.Healthy, true)]
@@ -127,7 +127,7 @@ public class InMemoryClusterInformationProviderTests
         [InlineData(HealthStatus.Unhealthy, HealthStatus.Unhealthy, false)]
         [InlineData(HealthStatus.Healthy, null, false)]
         [InlineData(null, null, false)]
-        public async Task Returns_correct_value(HealthStatus? masterHealthStatus, HealthStatus? slaveHealthStatus, bool expected)
+        public async Task Should_return_correct_value(HealthStatus? masterHealthStatus, HealthStatus? slaveHealthStatus, bool expected)
         {
             var guidMaster = Guid.NewGuid();
             var guidSlave = Guid.NewGuid();
@@ -165,10 +165,10 @@ public class InMemoryClusterInformationProviderTests
         }
     }
 
-    public class AddNewInstance
+    public sealed class AddNewInstance
     {
         [Fact]
-        public async Task Adds_new_instance()
+        public async Task Should_add_new_instance()
         {
             var master = new InstanceInformation()
             {
@@ -208,7 +208,7 @@ public class InMemoryClusterInformationProviderTests
         }
 
         [Fact]
-        public async Task Does_nothing_when_instance_already_exists()
+        public async Task Should_do_nothing_when_instance_already_exists()
         {
             var master = new InstanceInformation()
             {
@@ -237,10 +237,10 @@ public class InMemoryClusterInformationProviderTests
         }
     }
 
-    public class ChangeHealthInfo
+    public sealed class ChangeHealthInfo
     {
         [Fact]
-        public async Task Changes_health_status()
+        public async Task Should_change_health_status()
         {
             var guid = Guid.NewGuid();
             var called = false;
@@ -271,7 +271,7 @@ public class InMemoryClusterInformationProviderTests
         }
 
         [Fact]
-        public async Task Does_nothing_when_instance_does_not_exist()
+        public async Task Should_do_nothing_when_instance_does_not_exist()
         {
             var called = false;
             var mediator = Substitute.For<ISuiteMediator>();

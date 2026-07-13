@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules;
+using Core.OS.Modules;
 using Core.OS.UserManagement.Consumers;
 using Core.OS.UserManagement.Extensions;
 using MassTransit;
@@ -24,7 +24,7 @@ public class GetRolesConsumerTests
         };
 
     [Fact]
-    public async Task Request_should_be_consumed()
+    public async Task Should_be_consumed()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -37,7 +37,7 @@ public class GetRolesConsumerTests
     }
 
     [Fact]
-    public async Task Request_should_return_correct_get_roles_response_with_all_roles()
+    public async Task Should_return_correct_get_roles_response_with_all_roles()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

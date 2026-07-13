@@ -1,4 +1,5 @@
-﻿using System.Security.Authentication;
+using System.Security.Authentication;
+using AwesomeAssertions;
 using Core.OS.Mail;
 using Core.OS.Mail.MailKit;
 using Core.Shared.Mail;
@@ -31,47 +32,50 @@ public class MailingTests
     private static readonly string MailpitApiUrl
         = IntegrationServiceSettings.GetValue("MAILPIT_API_URL", "http://localhost:8025");
 
-    [Fact]
-    [Trait("Category", Traits.Integration)]
-    public async Task Sending_mail_with_correct_password_works_as_expected()
+    public sealed class SendMail : MailingTests
     {
-        // Arrange
-        var cancellationToken = TestContext.Current.CancellationToken;
-        var mailpit = new MailpitClient(new Uri(MailpitApiUrl));
+        [Fact]
+        [Trait("Category", Traits.Integration)]
+        public async Task Should_deliver_mail_when_password_is_correct()
+        {
+            // Arrange
+            var cancellationToken = TestContext.Current.CancellationToken;
+            var mailpit = new MailpitClient(new Uri(MailpitApiUrl));
 
-        var sender = CreateMailkitMailSender(CorrectPassword);
-        const string recipient = "mail-alert@localhost";
-        const string subject = "Test";
-        var uniqueMessageIdentifier = Guid.NewGuid().ToString();
-        var body = $"""
-                    <html><div>This message was sent by test <em>{uniqueMessageIdentifier}</em></div></html>
-                    """;
-        var email = CreateMessage(to: recipient, subject: subject, message: body);
+            var sender = CreateMailkitMailSender(CorrectPassword);
+            const string recipient = "mail-alert@localhost";
+            const string subject = "Test";
+            var uniqueMessageIdentifier = Guid.NewGuid().ToString();
+            var body = $"""
+                        <html><div>This message was sent by test <em>{uniqueMessageIdentifier}</em></div></html>
+                        """;
+            var email = CreateMessage(to: recipient, subject: subject, message: body);
 
-        // Act
-        await sender.SendMail(email, cancellationToken);
+            // Act
+            await sender.SendMail(email, cancellationToken);
 
-        // Assert: mailpit received exactly the message we sent, located by its unique identifier.
-        var matches = await mailpit.SearchMessages(uniqueMessageIdentifier, cancellationToken);
-        var received = Assert.Single(matches);
-        Assert.Equal(subject, received.Subject);
-        Assert.Equal(recipient, received.To.Single().Address);
-        Assert.Equal("Integration@localhost", received.From?.Address);
-    }
+            // Assert - mailpit received exactly the message we sent, located by its unique identifier.
+            var matches = await mailpit.SearchMessages(uniqueMessageIdentifier, cancellationToken);
+            var received = matches.Should().ContainSingle().Subject;
+            received.Subject.Should().Be(subject);
+            received.To.Should().ContainSingle().Which.Address.Should().Be(recipient);
+            received.From?.Address.Should().Be("Integration@localhost");
+        }
 
-    [Fact]
-    [Trait("Category", Traits.Integration)]
-    public async Task Sending_mail_with_incorrect_password_fails_as_expected()
-    {
-        // Arrange
-        var sender = CreateMailkitMailSender(IncorrectPassword);
-        var email = CreateMessage(to: "admin@localhost",
-            subject: "Test",
-            message: "This message should never be sent, as authentication is supposed to fail.");
+        [Fact]
+        [Trait("Category", Traits.Integration)]
+        public async Task Should_throw_when_password_is_incorrect()
+        {
+            // Arrange
+            var sender = CreateMailkitMailSender(IncorrectPassword);
+            var email = CreateMessage(to: "admin@localhost",
+                subject: "Test",
+                message: "This message should never be sent, as authentication is supposed to fail.");
 
-        // Act + Assert
-        await Assert.ThrowsAnyAsync<AuthenticationException>(()
-            => sender.SendMail(email, TestContext.Current.CancellationToken));
+            // Act + Assert
+            var act = () => sender.SendMail(email, TestContext.Current.CancellationToken);
+            await act.Should().ThrowAsync<AuthenticationException>();
+        }
     }
 
     private static MailkitMailSender CreateMailkitMailSender(string password)

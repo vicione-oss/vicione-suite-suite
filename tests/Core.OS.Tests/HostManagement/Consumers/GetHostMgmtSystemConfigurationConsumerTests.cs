@@ -14,7 +14,7 @@ namespace Core.OS.Tests.HostManagement.Consumers;
 public class GetHostMgmtSystemConfigurationConsumerTests
 {
     [Fact]
-    public async Task ShouldReturnSystemConfiguration()
+    public async Task Should_return_system_configuration()
     {
         // Arrange
         await using var tester = new MassTransitTester(cfg =>
@@ -37,7 +37,7 @@ public class GetHostMgmtSystemConfigurationConsumerTests
     }
 
     [Fact]
-    public async Task ShouldReturnResponseWithErrorInfoOnException()
+    public async Task Should_return_response_with_error_info_on_exception()
     {
         // Arrange
         await using var tester = new MassTransitTester(cfg =>

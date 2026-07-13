@@ -41,7 +41,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_buffer_out_of_order_message_without_triggering_sync()
+        public async Task Should_buffer_out_of_order_message_without_triggering_sync()
         {
             // Arrange
             var consumer = new DbChangeSetConsumer(_services, NullLogger<DbChangeSetConsumer>.Instance, _tracker, new ReplicationLagTracker(), _localInstanceInfo, _synchronizationState);
@@ -57,7 +57,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_apply_buffered_when_gap_filled()
+        public async Task Should_apply_buffered_when_gap_filled()
         {
             // Arrange
             var consumer = new DbChangeSetConsumer(_services, NullLogger<DbChangeSetConsumer>.Instance, _tracker, new ReplicationLagTracker(), _localInstanceInfo, _synchronizationState);
@@ -75,7 +75,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_trigger_full_sync_on_buffer_timeout()
+        public async Task Should_trigger_full_sync_on_buffer_timeout()
         {
             // Arrange
             var consumer = new DbChangeSetConsumer(_services, NullLogger<DbChangeSetConsumer>.Instance, _tracker, new ReplicationLagTracker(), _localInstanceInfo, _synchronizationState);
@@ -94,7 +94,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_not_trigger_full_sync_on_contiguous_sequence()
+        public async Task Should_not_trigger_full_sync_on_contiguous_sequence()
         {
             // Arrange
             var consumer = new DbChangeSetConsumer(_services, NullLogger<DbChangeSetConsumer>.Instance, _tracker, new ReplicationLagTracker(), _localInstanceInfo, _synchronizationState);
@@ -111,7 +111,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_accept_first_message_with_any_sequence()
+        public async Task Should_accept_first_message_with_any_sequence()
         {
             // Arrange
             var consumer = new DbChangeSetConsumer(_services, NullLogger<DbChangeSetConsumer>.Instance, _tracker, new ReplicationLagTracker(), _localInstanceInfo, _synchronizationState);
@@ -126,7 +126,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_accept_messages_after_tracker_reset()
+        public async Task Should_accept_messages_after_tracker_reset()
         {
             // Arrange
             var consumer = new DbChangeSetConsumer(_services, NullLogger<DbChangeSetConsumer>.Instance, _tracker, new ReplicationLagTracker(), _localInstanceInfo, _synchronizationState);
@@ -143,7 +143,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_skip_duplicate_message()
+        public async Task Should_skip_duplicate_message()
         {
             // Arrange
             var consumer = new DbChangeSetConsumer(_services, NullLogger<DbChangeSetConsumer>.Instance, _tracker, new ReplicationLagTracker(), _localInstanceInfo, _synchronizationState);

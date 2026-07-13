@@ -1,4 +1,5 @@
-﻿using Core.OS.Connections.Extensions;
+using AwesomeAssertions;
+using Core.OS.Connections.Extensions;
 using Core.OS.Connections.Mqtt;
 using Core.OS.DbContext;
 using Core.OS.Instance;
@@ -27,65 +28,68 @@ public class IConnectionDbContextExtensionsTests : TestWithDbContextSqlite<Conne
         return services.BuildServiceProvider();
     }
 
-    [Fact]
-    public async Task Should_seed_system_default_tag()
+    public sealed class SeedConnections : IConnectionDbContextExtensionsTests
     {
-        // Arrange
-        await using var serviceProvider = CreateServiceProvider();
-        var token = TestContext.Current.CancellationToken;
+        [Fact]
+        public async Task Should_seed_system_default_tag()
+        {
+            // Arrange
+            await using var serviceProvider = CreateServiceProvider();
+            var token = TestContext.Current.CancellationToken;
 
-        // Act
-        await serviceProvider.SeedConnections(token);
+            // Act
+            await serviceProvider.SeedConnections(token);
 
-        // Assert
-        var dbContext = serviceProvider.GetRequiredService<IConnectionDbContext>();
-        Assert.NotNull(dbContext.Tags.FirstOrDefault(k => k.Id == ConnectionConstants.Tags.SystemDefault.Id));
-    }
+            // Assert
+            var dbContext = serviceProvider.GetRequiredService<IConnectionDbContext>();
+            dbContext.Tags.FirstOrDefault(k => k.Id == ConnectionConstants.Tags.SystemDefault.Id).Should().NotBeNull();
+        }
 
-    [Fact]
-    public async Task ConfiguredMqttConnectionsGetSeeded()
-    {
-        // Arrange
-        await using var serviceProvider = CreateServiceProvider(CreateMqttClientConfig());
-        var token = TestContext.Current.CancellationToken;
+        [Fact]
+        public async Task Should_seed_configured_mqtt_connections()
+        {
+            // Arrange
+            await using var serviceProvider = CreateServiceProvider(CreateMqttClientConfig());
+            var token = TestContext.Current.CancellationToken;
 
-        // Act
-        await serviceProvider.SeedConnections(token);
+            // Act
+            await serviceProvider.SeedConnections(token);
 
-        // Assert
-        var dbContext = serviceProvider.GetRequiredService<IConnectionDbContext>();
-        Assert.Equal(2, dbContext.Connections.Count(k => k.Type == ConnectionType.Mqtt));
-    }
+            // Assert
+            var dbContext = serviceProvider.GetRequiredService<IConnectionDbContext>();
+            dbContext.Connections.Count(k => k.Type == ConnectionType.Mqtt).Should().Be(2);
+        }
 
-    [Fact]
-    public async Task DisabledMqttConnectionsDontGetSeeded()
-    {
-        // Arrange
-        await using var serviceProvider = CreateServiceProvider();
-        var token = TestContext.Current.CancellationToken;
+        [Fact]
+        public async Task Should_not_seed_disabled_mqtt_connections()
+        {
+            // Arrange
+            await using var serviceProvider = CreateServiceProvider();
+            var token = TestContext.Current.CancellationToken;
 
-        // Act
-        await serviceProvider.SeedConnections(token);
+            // Act
+            await serviceProvider.SeedConnections(token);
 
-        // Assert
-        var dbContext = serviceProvider.GetRequiredService<IConnectionDbContext>();
-        Assert.Empty(dbContext.Connections.Where(k => k.Type == ConnectionType.Mqtt));
-    }
+            // Assert
+            var dbContext = serviceProvider.GetRequiredService<IConnectionDbContext>();
+            dbContext.Connections.Where(k => k.Type == ConnectionType.Mqtt).Should().BeEmpty();
+        }
 
-    [Fact]
-    public async Task ExistingMqttConnectionsGetRemovedIfDisabled()
-    {
-        // Arrange
-        await using var enabledProvider = CreateServiceProvider(CreateMqttClientConfig());
-        await using var disabledProvider = CreateServiceProvider();
-        var token = TestContext.Current.CancellationToken;
+        [Fact]
+        public async Task Should_remove_existing_mqtt_connections_when_disabled()
+        {
+            // Arrange
+            await using var enabledProvider = CreateServiceProvider(CreateMqttClientConfig());
+            await using var disabledProvider = CreateServiceProvider();
+            var token = TestContext.Current.CancellationToken;
 
-        // Act
-        await enabledProvider.SeedConnections(token);
-        await disabledProvider.SeedConnections(token);
+            // Act
+            await enabledProvider.SeedConnections(token);
+            await disabledProvider.SeedConnections(token);
 
-        // Assert
-        Assert.Empty(TestDbContext.Connections.Where(k => k.Type == ConnectionType.Mqtt));
+            // Assert
+            TestDbContext.Connections.Where(k => k.Type == ConnectionType.Mqtt).Should().BeEmpty();
+        }
     }
 
     private static Dictionary<string, string?> CreateMqttClientConfig()
