@@ -23,10 +23,10 @@ public static class IServiceCollectionExtensions
             .WithSaveHandler<AddPasskeyControlPanelSaveHandler>()
             .WithResetHandler<AddPasskeyControlPanelResetHandler>();
 
-        services.AddControlPanel<SharedClientModule, RenamePasskeyControlPanel, RenamePasskeyControlPanelState>()
-            .WithAutoDiscovery<RenamePasskeyControlPanelDescriptor>()
-            .WithSaveHandler<RenamePasskeyControlPanelSaveHandler>()
-            .WithResetHandler<RenamePasskeyControlPanelResetHandler>();
+        services.AddControlPanel<SharedClientModule, EditPasskeyControlPanel, EditPasskeyControlPanelState>()
+            .WithAutoDiscovery<EditPasskeyControlPanelDescriptor>()
+            .WithSaveHandler<EditPasskeyControlPanelSaveHandler>()
+            .WithResetHandler<EditPasskeyControlPanelResetHandler>();
 
         services.AddControlPanel<SharedClientModule, ExternalIdProvidersControlPanel, ExternalIdProvidersControlPanelState>()
             .WithAutoDiscovery<ExternalIdProvidersControlPanelDescriptor>();

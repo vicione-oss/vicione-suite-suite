@@ -1,11 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:element name="root" msdata:IsDataSet="true">
-
-    </xsd:element>
-  </xsd:schema>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
   </resheader>
@@ -18,10 +11,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="RenamePasskeyTitle" xml:space="preserve">
-    <value>Rename passkey</value>
+  <data name="EditPasskeyTitle" xml:space="preserve">
+    <value>Passkey bearbeiten</value>
   </data>
   <data name="Description" xml:space="preserve">
-    <value>Enter a new name for the selected passkey. The name helps you identify the device or account associated with this passkey.</value>
+    <value>Hier können Sie den Namen des Passkeys bearbeiten. Ändern Sie dazu die bisherige Eingabe und bestätigen Sie anschließend Ihre Änderung um diese für den Passkey zu übernehmen. Der Name hilft Ihnen, das Gerät oder das Konto zu identifizieren, das mit diesem Passkey verknüpft ist.</value>
   </data>
 </root>

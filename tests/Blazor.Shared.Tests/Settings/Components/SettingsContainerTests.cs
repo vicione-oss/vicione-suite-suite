@@ -14,6 +14,7 @@ using NSubstitute;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Extensions;
+using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Modules;
 using Sdk.Modules;
@@ -204,5 +205,55 @@ public class SettingsContainerTests
 
         // Assert
         Assert.NotNull(component.Find(".error-message"));
+    }
+
+    [Fact]
+    public async Task Should_request_navigate_back_after_save_with_navigate_back_result()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = await SaveControlPanelEditWithResult(ctx, new NavigateBackOnSaveSuccessResult());
+
+        // Assert
+        var navigateBackRequest = ctx.Services.GetRequiredService<INavigateBackRequest>();
+        component.WaitForAssertion(() => _ = navigateBackRequest.Received(1).Send());
+    }
+
+    [Fact]
+    public async Task Should_not_request_navigate_back_after_plain_successful_save()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = await SaveControlPanelEditWithResult(ctx, new SaveSuccessResult());
+
+        // Assert
+        component.WaitForAssertion(() => Assert.Empty(component.FindAll(".dirty-state")));
+        _ = ctx.Services.GetRequiredService<INavigateBackRequest>().DidNotReceive().Send();
+    }
+
+    private static async Task<IRenderedComponent<SettingsContainer>> SaveControlPanelEditWithResult(BunitContext ctx, ISaveResult saveResult)
+    {
+        ctx.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
+
+        var saveHandler = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
+        saveHandler.Save(Arg.Any<ControlPanelState>(), Arg.Any<CancellationToken>())
+            .Returns(saveResult);
+        ctx.Services.AddSingleton(saveHandler);
+
+        var component = ctx.Render<SettingsContainer>();
+
+        var controlPanelEditRegistry = ctx.Services.GetRequiredService<IControlPanelEditRegistry>();
+        controlPanelEditRegistry.Single().Begin();
+
+        component.Render();
+
+        var saveButton = component.Find(".popup-content-action-button--confirm");
+        await saveButton.ClickAsync();
+
+        return component;
     }
 }

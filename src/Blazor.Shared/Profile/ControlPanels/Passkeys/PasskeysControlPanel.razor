@@ -1,5 +1,6 @@
 @using Blazor.Shared.Services
 @using Blazor.Shared.Profile.Localization
+@using Core.Shared.Passkeys.Contracts
 @using Core.Shared.UserManagement.Contracts
 @using Microsoft.AspNetCore.Identity
 @using Sdk.Authorization
@@ -9,6 +10,8 @@
 @using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
 @using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
 @using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
 @using CommonPhrases = Blazor.Shared.Profile.Localization.CommonPhrases
 
 @inherits ControlPanelBase<PasskeysControlPanelState>
@@ -20,7 +23,8 @@
 @inject UserManager<SuiteUser> UserManager
 
 <ControlPanelPage Title="@Passkey.PasskeyTermPlural">
-    <DescriptionBanner Title="@Passkey.SettingsTitle">
+    <DescriptionBanner Title="@Passkey.SettingsTitle"
+                       IconCssClass="@MonochromeIconName.PassKeyLight.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated()">
         @CommonPhrases.PasskeysDescription
     </DescriptionBanner>
     @if (ShowUnavailableNotice)
@@ -43,7 +47,7 @@
                                          Enabled="@IsPasskeyHostSupported"
                                          Title="@AddPasskeyTitle"></AddGridActionButton>
                 }
-                <EditGridActionButton Enabled="@IsSinglePasskeySelected" OnClick="@ShowRenamePasskey"></EditGridActionButton>
+                <EditGridActionButton Enabled="@IsSinglePasskeySelected" OnClick="@ShowEditPasskey"></EditGridActionButton>
                 <DeleteGridActionButton OnClick="@MarkPasskeysForDeletion"></DeleteGridActionButton>
             </ActionButtons>
 
@@ -52,6 +56,9 @@
                                   Selection="@SelectedPasskeys"/>
 
                 <PropertyColumn Title="@CommonVocabulary.Name" Property="item => item.Name"/>
+
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@(async (PasskeyInfo item) => await EditPasskey(item))"/>
             </ChildContent>
 
             <Footer>

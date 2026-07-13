@@ -4,6 +4,8 @@
 @using Sdk.Authorization
 @using Sdk.Client.ControlPanels.Attributes
 @using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
 
 @inherits ControlPanelBase<AddPasskeysControlPanelState>
 
@@ -14,7 +16,8 @@
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
-<DescriptionBanner Title="@AddPasskey.AddPasskeyTitle">
+<DescriptionBanner Title="@AddPasskey.AddPasskeyTitle"
+                   IconCssClass="@MonochromeIconName.PassKeyLight.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated()">
     @AddPasskey.Description
 </DescriptionBanner>
 

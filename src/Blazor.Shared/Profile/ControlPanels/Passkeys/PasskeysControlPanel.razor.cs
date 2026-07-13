@@ -109,15 +109,19 @@ public partial class PasskeysControlPanel
             s.ExistingUserPasskeys = Passkeys.ToArray();
         });
 
-    private async Task ShowRenamePasskey()
+    private async Task ShowEditPasskey()
     {
         var selectedId = SelectedPasskeys.Single();
         var passkey = Passkeys.First(info => info.Id == selectedId);
+        await EditPasskey(passkey);
+    }
 
-        await ControlPanelRequest.Send<RenamePasskeyControlPanel, RenamePasskeyControlPanelState>(s =>
+    private async Task EditPasskey(PasskeyInfo passkey)
+    {
+        await ControlPanelRequest.Send<EditPasskeyControlPanel, EditPasskeyControlPanelState>(s =>
         {
             s.UserId = User.Id;
-            s.PasskeyId = selectedId;
+            s.PasskeyId = passkey.Id;
             s.CurrentName = passkey.Name;
             s.NewName = passkey.Name;
             s.ExistingNames = Passkeys.Select(info => info.Name).OfType<string>().ToArray();

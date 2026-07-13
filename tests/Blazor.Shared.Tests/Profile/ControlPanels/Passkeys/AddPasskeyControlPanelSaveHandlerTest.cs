@@ -1,6 +1,7 @@
 ﻿using AwesomeAssertions;
 using Core.Shared.Passkeys.Contracts;
 using Blazor.Shared.Profile.ControlPanels.Passkeys;
+using Blazor.Shared.Settings.Models;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
@@ -72,10 +73,27 @@ public class AddPasskeyControlPanelSaveHandlerTest
             .And.ContainEquivalentOf("name");
     }
 
-    private static AddPasskeyControlPanelSaveHandler CreateSut()
+    [Fact]
+    public async Task Should_request_navigate_back_after_successful_save()
+    {
+        // Arrange
+        var sut = CreateSut(Options.Create(new AntiforgeryOptions()));
+
+        // Act
+        var result = await sut.Save(new AddPasskeysControlPanelState()
+            {
+                Name = "test",
+            },
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().BeOfType<NavigateBackOnSaveSuccessResult>();
+    }
+
+    private static AddPasskeyControlPanelSaveHandler CreateSut(IOptions<AntiforgeryOptions>? antiforgeryOptions = null)
         => new(
             Substitute.For<AntiforgeryStateProvider>(),
-            Substitute.For<IOptions<AntiforgeryOptions>>(),
+            antiforgeryOptions ?? Substitute.For<IOptions<AntiforgeryOptions>>(),
             Substitute.For<IJSRuntime>(),
             Substitute.For<ILogger<AddPasskeyControlPanelSaveHandler>>()
         );

@@ -14,11 +14,16 @@
 - `Microsoft.FeatureManagement` package
 - Account lockout after 5 failed sign-in or current-password attempts; locked accounts auto-unlock after 5 minutes. Lockout is surfaced as the same generic credentials error as a wrong password to avoid disclosing account state.
 - Auto resolving module versions allows now fixed version parts (e.g. `1.*` or `1.2.*`) in addition to the `latest` keyword
+- `NavigateBackOnSaveSuccessResult`, a `SaveSuccessResult` a control panel save handler can return to have the settings navigate back to the previous panel after a successful save; the navigation is triggered by the `SettingsContainer` after the save completes, so the unsaved-changes guard does not interfere
 
 ### Changed
 
 - `Passkeys` feature flag is now enabled by default; the flag remains available to disable it via configuration
 - Replaced `DxTabs` with `ViciOne.Ui.Blazor.Components.TabStrip`
+- External ID providers and passkeys settings panels now display dedicated monochrome icons
+- The passkeys settings panel now provides a per-row navigation button to rename a passkey
+- The panel for renaming a passkey now uses the established edit wording (`Edit passkey`) instead of a dedicated rename wording
+- After successfully adding a passkey, the settings navigate back to the passkeys list
 
 ### Fixed
 
@@ -43,6 +48,7 @@
 - `MailKit` packages, update to version `4.17.0`
 - `Microsoft` packages, update to version `10.0.9`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.16.0`
+- `ViciOne.Ui.MonochromeIcons` package, update version to `4.12.0`
 
 ## 1.2.2 - 2026-06-11
 

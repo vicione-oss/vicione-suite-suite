@@ -11,16 +11,16 @@ using RenamePasskeyCommand = Core.Shared.Passkeys.Commands.RenamePasskey;
 
 namespace Blazor.Shared.Profile.ControlPanels.Passkeys;
 
-public class RenamePasskeyControlPanelSaveHandler :
-    ControlPanelSaveHandlerBase<RenamePasskeyControlPanelState>,
+public class EditPasskeyControlPanelSaveHandler :
+    ControlPanelSaveHandlerBase<EditPasskeyControlPanelState>,
     IEventConsumer<PasskeyRenamingCompleted>
 {
-    public RenamePasskeyControlPanelSaveHandler(IUiMediator mediator) : base(mediator)
+    public EditPasskeyControlPanelSaveHandler(IUiMediator mediator) : base(mediator)
     {
         Register<PasskeyRenamingCompleted>();
     }
 
-    public override async Task<ISaveResult> Save(RenamePasskeyControlPanelState state, CancellationToken cancellationToken)
+    public override async Task<ISaveResult> Save(EditPasskeyControlPanelState state, CancellationToken cancellationToken)
     {
         if (state.UserId is null)
             return new SaveErrorResult(Localization.ValidationMessages.UserIsNotSet);
@@ -70,7 +70,7 @@ public class RenamePasskeyControlPanelSaveHandler :
             _ => Localization.ValidationMessages.PasskeyRenameFailed
         });
 
-    private static bool NameIsAlreadyTaken(RenamePasskeyControlPanelState state)
+    private static bool NameIsAlreadyTaken(EditPasskeyControlPanelState state)
         => state.ExistingNames
             .Where(name => !string.Equals(name, state.CurrentName, StringComparison.OrdinalIgnoreCase))
             .Contains(state.NewName, StringComparer.OrdinalIgnoreCase);

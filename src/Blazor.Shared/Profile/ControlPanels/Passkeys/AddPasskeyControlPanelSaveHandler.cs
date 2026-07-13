@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Antiforgery;
+﻿using Blazor.Shared.Settings.Models;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,7 +44,7 @@ public class AddPasskeyControlPanelSaveHandler(
             return new SaveErrorResult(Localization.ValidationMessages.ErrorSavingPasskey);
         }
 
-        return new SaveSuccessResult();
+        return new NavigateBackOnSaveSuccessResult();
     }
 
     private static bool NameIsAlreadyTaken(AddPasskeysControlPanelState state)

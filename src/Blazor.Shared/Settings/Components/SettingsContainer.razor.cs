@@ -37,6 +37,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
 
     private bool _initialized;
     private readonly List<SaveErrorResult> _lastSaveErrorResults = [];
+    private bool _navigateBackAfterSaveRequested;
     private int _controlPanelEditRunningCount;
     private readonly Lock _controlPanelEditRunningCountLock = new();
 
@@ -149,7 +150,12 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
     {
         var success = await SaveControlPanelEdits();
 
-        if (success)
+        if (!success)
+            return;
+
+        if (_navigateBackAfterSaveRequested)
+            await NavigateBackRequest.Send();
+        else
             await Update();
     }
 
@@ -587,6 +593,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         try
         {
             _lastSaveErrorResults.Clear();
+            _navigateBackAfterSaveRequested = false;
 
             var controlPanelEdits = ControlPanelEditRegistry.ToArray();
             var saveTasks = controlPanelEdits.Select(controlPanelEdit => controlPanelEdit.Save()).ToArray();
@@ -594,6 +601,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
             var saveResults = await Task.WhenAll(saveTasks);
 
             _lastSaveErrorResults.AddRange(saveResults.OfType<SaveErrorResult>());
+            _navigateBackAfterSaveRequested = saveResults.OfType<NavigateBackOnSaveSuccessResult>().Any();
 
             var success = _lastSaveErrorResults.Count == 0;
 

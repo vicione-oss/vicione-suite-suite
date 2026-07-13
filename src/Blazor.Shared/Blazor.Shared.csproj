@@ -504,10 +504,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AddPasskey.resx</DependentUpon>
     </Compile>
-    <Compile Update="Profile\Localization\RenamePasskey.Designer.cs">
+    <Compile Update="Profile\Localization\EditPasskey.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>RenamePasskey.resx</DependentUpon>
+      <DependentUpon>EditPasskey.resx</DependentUpon>
     </Compile>
     <Compile Update="Profile\Localization\ValidationMessages.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -874,9 +874,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>AddPasskey.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Profile\Localization\RenamePasskey.resx">
+    <EmbeddedResource Update="Profile\Localization\EditPasskey.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>RenamePasskey.Designer.cs</LastGenOutput>
+      <LastGenOutput>EditPasskey.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Profile\Localization\ValidationMessages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -916,6 +916,7 @@
       <MonochromeIcon Include="expander-light-right" Size="24" />
       <MonochromeIcon Include="expander-light-top" Size="24" />
       <MonochromeIcon Include="export" Size="16" />
+      <MonochromeIcon Include="external-id-provider-light" Size="16;32" />
       <MonochromeIcon Include="external-link" Size="16" />
       <MonochromeIcon Include="folder" Size="16" />
       <MonochromeIcon Include="filter-light" Size="32" />
@@ -937,6 +938,7 @@
       <MonochromeIcon Include="network-topology" Size="32" />
       <MonochromeIcon Include="offline-light" Size="32;48" />
       <MonochromeIcon Include="open-in-new-window" Size="16;32" />
+      <MonochromeIcon Include="pass-key-light" Size="32" />
       <MonochromeIcon Include="permission-none" Size="16" />
       <MonochromeIcon Include="permission-view-and-edit" Size="16" />
       <MonochromeIcon Include="permission-view-only" Size="16" />
