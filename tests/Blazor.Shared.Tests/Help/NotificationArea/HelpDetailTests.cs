@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Help.Contracts;
+using Blazor.Shared.Help.Contracts;
 using Blazor.Shared.Help.NotificationArea;
 using Bunit;
 using AwesomeAssertions;
@@ -8,11 +8,12 @@ namespace Blazor.Shared.Tests.Help.NotificationArea;
 
 public sealed class HelpDetailTests
 {
-    public class OnLinkClick
+    public sealed class OnLinkClick
     {
         [Fact]
-        public void Invokes_event()
+        public void Should_invoke_event()
         {
+            // Arrange
             using var ctx = new BunitContext();
             var invoked = false;
             var help = new HelpModel
@@ -29,8 +30,10 @@ public sealed class HelpDetailTests
                 parameters.Add(p => p.OnLinkClick, () => invoked = true);
             });
 
+            // Act
             component.Find(".link").Click();
 
+            // Assert
             invoked.Should().BeTrue();
         }
     }

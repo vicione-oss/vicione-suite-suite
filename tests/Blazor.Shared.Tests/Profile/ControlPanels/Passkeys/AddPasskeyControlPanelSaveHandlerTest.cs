@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.Shared.Passkeys.Contracts;
 using Blazor.Shared.Profile.ControlPanels.Passkeys;
 using Blazor.Shared.Settings.Models;
@@ -14,7 +14,7 @@ using PasskeyConstants = Core.Shared.Passkeys.Constants;
 
 namespace Blazor.Shared.Tests.Settings.Profile.ControlPanels.Passkeys;
 
-public class AddPasskeyControlPanelSaveHandlerTest
+public sealed class AddPasskeyControlPanelSaveHandlerTest
 {
     [Fact]
     public async Task Should_validate_that_name_is_not_null()

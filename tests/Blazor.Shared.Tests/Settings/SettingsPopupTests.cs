@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Settings.Components;
 using Blazor.Shared.Settings.Extensions;
 using Bunit;
@@ -5,10 +6,10 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Settings;
 
-public class SettingsPopupTests
+public sealed class SettingsPopupTests
 {
     [Fact]
-    public async Task ComponentGetsRendered()
+    public async Task Should_render_component()
     {
         // Arrange
         await using var ctx = new BunitContext();
@@ -20,6 +21,6 @@ public class SettingsPopupTests
         var component = ctx.Render<SettingsPopup>();
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 }

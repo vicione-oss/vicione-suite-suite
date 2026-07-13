@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Wizards.Models;
 using Blazor.Shared.Wizards.Services;
 using NSubstitute;
@@ -17,13 +17,13 @@ public sealed class WizardStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_loading_overlay_visible_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_loading_overlay_visible_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
         => _tests.AssertChangedEventHandlingWhenPropertyIsSet(state => state.LoadingOverlayVisible, initialValue, value, shouldTriggerChangedEvent);
 
     [Theory]
     [InlineData(false, true)]
     [InlineData(true, false)]
-    public void Assert_changed_event_handling_when_steps_is_set(bool sameInstance, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_steps_is_set(bool sameInstance, bool shouldTriggerChangedEvent)
     {
         var initialSteps = new List<WizardStep>();
         var steps = sameInstance ? initialSteps : [];
@@ -34,7 +34,7 @@ public sealed class WizardStateTests
     [Theory]
     [InlineData(false, true)]
     [InlineData(true, false)]
-    public void Assert_changed_event_handling_when_active_step_is_set(bool sameInstance, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_active_step_is_set(bool sameInstance, bool shouldTriggerChangedEvent)
     {
         var initialActiveStep = new WizardStep
         {
@@ -58,7 +58,7 @@ public sealed class WizardStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_back_button_enabled_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_back_button_enabled_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
         => _tests.AssertChangedEventHandlingWhenPropertyIsSet(state => state.BackButtonEnabled, initialValue, value, shouldTriggerChangedEvent);
 
     [Theory]
@@ -66,7 +66,7 @@ public sealed class WizardStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_next_button_enabled_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_next_button_enabled_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
         => _tests.AssertChangedEventHandlingWhenPropertyIsSet(state => state.NextButtonEnabled, initialValue, value, shouldTriggerChangedEvent);
 
     [Theory]
@@ -74,7 +74,7 @@ public sealed class WizardStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_finish_button_enabled_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_finish_button_enabled_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
         => _tests.AssertChangedEventHandlingWhenPropertyIsSet(state => state.FinishButtonEnabled, initialValue, value, shouldTriggerChangedEvent);
 
     [Fact]

@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Services;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.Instance.Commands;

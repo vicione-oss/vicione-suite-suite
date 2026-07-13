@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels.Repositories.Services;
 
-public class ArtifactRepositoryClientServiceTests
+public abstract class ArtifactRepositoryClientServiceTests
 {
     private readonly IUiMediator _mediator = Substitute.For<IUiMediator>();
 

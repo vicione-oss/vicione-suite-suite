@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Authorization;
+using AwesomeAssertions;
+using Blazor.Shared.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -13,68 +14,86 @@ public class AccessLevelPolicyProviderFacts
 {
     private static readonly ILogger<AccessLevelPolicyProvider> Logger = Substitute.For<ILogger<AccessLevelPolicyProvider>>();
 
-    public class GetDefaultPolicyAsync
+    public sealed class GetDefaultPolicyAsync : AccessLevelPolicyProviderFacts
     {
         [Fact]
-        public async Task Acceptance()
+        public async Task Should_return_deny_anonymous_requirement()
         {
+            // Arrange
             var provider = new AccessLevelPolicyProvider(Options.Create(new AuthorizationOptions()), Logger);
 
+            // Act
             var defaultPolicy = await provider.GetDefaultPolicyAsync();
 
-            Assert.IsType<DenyAnonymousAuthorizationRequirement>(defaultPolicy.Requirements[0]);
+            // Assert
+            defaultPolicy.Requirements[0].Should().BeOfType<DenyAnonymousAuthorizationRequirement>();
         }
     }
 
-    public class GetFallbackPolicyAsync
+    public sealed class GetFallbackPolicyAsync : AccessLevelPolicyProviderFacts
     {
         [Fact]
-        public async Task Acceptance()
+        public async Task Should_return_null()
         {
+            // Arrange
             var provider = new AccessLevelPolicyProvider(Options.Create(new AuthorizationOptions()), Logger);
 
+            // Act
             var result = await provider.GetFallbackPolicyAsync();
-            Assert.Null(result);
+
+            // Assert
+            result.Should().BeNull();
         }
     }
 
-    public class GetPolicyAsync
+    public sealed class GetPolicyAsync : AccessLevelPolicyProviderFacts
     {
-        private const string moduleId = "moduleId";
-        private const string feature = "feature";
-        private const AccessLevel AccessLevel = Sdk.Authorization.AccessLevel.Partial;
+        private const string ModuleId = "moduleId";
+        private const string Feature = "feature";
+        private const AccessLevel Level = Sdk.Authorization.AccessLevel.Partial;
 
         [Fact]
-        public async Task AcceptanceWithoutFeature()
+        public async Task Should_return_policy_without_feature()
         {
+            // Arrange
             var provider = new AccessLevelPolicyProvider(Options.Create(new AuthorizationOptions()), Logger);
 
-            var policy = await provider.GetPolicyAsync($"{Sdk.Constants.AuthorizationPolicyPrefix}_{moduleId}_{AccessLevel}");
+            // Act
+            var policy = await provider.GetPolicyAsync($"{Sdk.Constants.AuthorizationPolicyPrefix}_{ModuleId}_{Level}");
 
-            Assert.Equal(moduleId, ((AccessLevelAuthorizationRequirement)policy!.Requirements[0]).ModuleId);
-            Assert.Equal(AccessLevel, ((AccessLevelAuthorizationRequirement)policy.Requirements[0]).MinimumAccessLevel);
+            // Assert
+            var requirement = (AccessLevelAuthorizationRequirement)policy!.Requirements[0];
+            requirement.ModuleId.Should().Be(ModuleId);
+            requirement.MinimumAccessLevel.Should().Be(Level);
         }
 
         [Fact]
-        public async Task AcceptanceWithFeature()
+        public async Task Should_return_policy_with_feature()
         {
+            // Arrange
             var provider = new AccessLevelPolicyProvider(Options.Create(new AuthorizationOptions()), Logger);
 
-            var policy = await provider.GetPolicyAsync($"{Sdk.Constants.AuthorizationPolicyPrefix}_{moduleId}_{AccessLevel}_{feature}");
+            // Act
+            var policy = await provider.GetPolicyAsync($"{Sdk.Constants.AuthorizationPolicyPrefix}_{ModuleId}_{Level}_{Feature}");
 
-            Assert.Equal(moduleId, ((AccessLevelAuthorizationRequirement)policy!.Requirements[0]).ModuleId);
-            Assert.Equal(AccessLevel, ((AccessLevelAuthorizationRequirement)policy.Requirements[0]).MinimumAccessLevel);
-            Assert.Equal(feature, ((AccessLevelAuthorizationRequirement)policy.Requirements[0]).FeatureName);
+            // Assert
+            var requirement = (AccessLevelAuthorizationRequirement)policy!.Requirements[0];
+            requirement.ModuleId.Should().Be(ModuleId);
+            requirement.MinimumAccessLevel.Should().Be(Level);
+            requirement.FeatureName.Should().Be(Feature);
         }
 
         [Fact]
-        public async Task WrongPrefix()
+        public async Task Should_return_null_for_wrong_prefix()
         {
+            // Arrange
             var provider = new AccessLevelPolicyProvider(Options.Create(new AuthorizationOptions()), Logger);
 
-            var policy = await provider.GetPolicyAsync($"notfeature_{moduleId}_{AccessLevel}_{feature}");
+            // Act
+            var policy = await provider.GetPolicyAsync($"notfeature_{ModuleId}_{Level}_{Feature}");
 
-            Assert.Null(policy);
+            // Assert
+            policy.Should().BeNull();
         }
     }
 }

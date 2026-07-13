@@ -82,7 +82,7 @@ public sealed class SystemConfigurationTests
         }
     }
 
-    public class Clone
+    public sealed class Clone
     {
 
         [Fact]

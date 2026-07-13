@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.MessageBanner.Components;
+using Blazor.Shared.MessageBanner.Components;
 using Blazor.Shared.MessageBanner.Services;
 using Bunit;
 using AwesomeAssertions;
@@ -26,13 +26,13 @@ public sealed class MessageBannerDialogTests
         var component = ctx.Render<MessageBannerDialog>();
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 
     [Theory]
     [InlineData(true, true)]
     [InlineData(false, false)]
-    public void Assert_visibility(bool stateVisible, bool shouldBeVisible)
+    public void Should_show_or_hide_based_on_state_visibility(bool stateVisible, bool shouldBeVisible)
     {
         // Arrange
         var state = new MessageBannerDialogState { Visible = stateVisible };

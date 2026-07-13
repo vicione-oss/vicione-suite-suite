@@ -14,7 +14,7 @@ namespace Blazor.Shared.Tests.Onboarding.Extensions;
 
 public class IServiceProviderExtensionsTests
 {
-    public sealed class UseOnboarding : IServiceProviderExtensionsTests
+    public class UseOnboarding : IServiceProviderExtensionsTests
     {
         private readonly InstanceInformation _instanceInformation = new() { Id = Guid.NewGuid(), Type = InstanceType.Standalone };
         private readonly IInstanceInformationProvider _informationProvider = Substitute.For<IInstanceInformationProvider>();

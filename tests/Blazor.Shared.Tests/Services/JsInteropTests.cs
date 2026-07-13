@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Services;
+using AwesomeAssertions;
+using Blazor.Shared.Services;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -8,13 +9,13 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Services;
 
-public class JsInteropTests
+public sealed class JsInteropTests
 {
     private readonly ILogger<JsInterop> _loggerMock = Substitute.For<ILogger<JsInterop>>();
 
 
     [Fact]
-    public async Task Calling_all_functions_should_call_js_runtime()
+    public async Task Should_call_js_runtime_for_all_functions()
     {
         var thing = new Dictionary<string, Func<JsInterop, Task>>()
         {
@@ -53,7 +54,7 @@ public class JsInteropTests
     }
 
     [Fact]
-    public async Task GetCookie()
+    public async Task Should_return_empty_cookie()
     {
         // Arrange        
         await using var ctx = new BunitContext();
@@ -65,11 +66,11 @@ public class JsInteropTests
         var result = await interop.GetCookie(Guid.NewGuid().ToString(), Xunit.TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.True(string.IsNullOrEmpty(result));
+        string.IsNullOrEmpty(result).Should().BeTrue();
     }
 
     [Fact]
-    public async Task FormValid()
+    public async Task Should_return_invalid_form()
     {
         // Arrange        
         await using var ctx = new BunitContext();
@@ -82,11 +83,11 @@ public class JsInteropTests
         var result = await interop.FormValid(reference, Xunit.TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.False(result);
+        result.Should().BeFalse();
     }
 
     [Fact]
-    public async Task GetElementByName()
+    public async Task Should_return_empty_element_when_not_found()
     {
         // Arrange        
         await using var ctx = new BunitContext();
@@ -98,6 +99,6 @@ public class JsInteropTests
         var element = await interop.GetElementByName("name", Xunit.TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.True(string.IsNullOrEmpty(element));
+        string.IsNullOrEmpty(element).Should().BeTrue();
     }
 }

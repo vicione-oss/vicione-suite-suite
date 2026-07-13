@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Wizards.Extensions;
 using Xunit;
 using Xunit.Sdk;
@@ -41,7 +41,7 @@ public sealed class IEnumerableExtensionsTests
 
     [Theory]
     [MemberData(nameof(AssertReturnValueContexts))]
-    public void Assert_returned_value(AssertReturnValueContext context)
+    public void Should_return_expected_value(AssertReturnValueContext context)
     {
         // Arrange
         var steps = Enumerable.Range(1, context.ItemCount);

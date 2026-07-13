@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Services;
+using AwesomeAssertions;
+using Blazor.Shared.Services;
 using Blazor.Shared.SystemInformation.Extensions;
 using Blazor.Shared.SystemInformation.NotificationArea;
 using Bunit;
@@ -29,6 +30,6 @@ public sealed class SystemInformationNotificationElementFlyoutContentTests
         var component = ctx.Render<SystemInformationNotificationElementFlyoutContent>();
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 }

@@ -68,7 +68,7 @@ public class ConnectionsControlPanelTests
         return registry;
     }
 
-    public class AddNewItem : ConnectionsControlPanelTests
+    public sealed class AddNewItem : ConnectionsControlPanelTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
         public void Should_send_control_panel_request_with_connection_id_null()
@@ -91,7 +91,7 @@ public class ConnectionsControlPanelTests
         }
     }
 
-    public class EditSelectedItem : ConnectionsControlPanelTests
+    public sealed class EditSelectedItem : ConnectionsControlPanelTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
         public void Should_send_control_panel_request_with_connection_id()
@@ -121,10 +121,10 @@ public class ConnectionsControlPanelTests
         }
     }
 
-    public class DeleteSelectedItems : ConnectionsControlPanelTests
+    public sealed class DeleteSelectedItems : ConnectionsControlPanelTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
-        public void Adds_correct_connection_to_list()
+        public void Should_add_correct_connection_to_list()
         {
             // Arrange
             using var ctx = SetupTestContext();
@@ -150,10 +150,10 @@ public class ConnectionsControlPanelTests
         }
     }
 
-    public class OnConnectionStateChanged : ConnectionsControlPanelTests
+    public sealed class OnConnectionStateChanged : ConnectionsControlPanelTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
-        public void Renders_when_new_connection_is_added()
+        public void Should_render_when_new_connection_is_added()
         {
             // Arrange
             using var ctx = SetupTestContext();

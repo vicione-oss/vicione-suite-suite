@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Dialogs;
 using Blazor.Shared.Profile.ControlPanels;
 using Blazor.Shared.Profile.ControlPanels.ExternalIdProviders;
@@ -24,7 +25,7 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Profile.ControlPanels.ExternalIdProviders;
 
-public class ExternalIdProvidersControlPanelTests
+public sealed class ExternalIdProvidersControlPanelTests
 {
     private const string UserName = "TestUser";
 
@@ -46,7 +47,7 @@ public class ExternalIdProvidersControlPanelTests
         var component = RenderControlPanel(ctx, new ExternalIdProvidersControlPanelState());
 
         // Assert
-        Assert.Contains(Blazor.Shared.Profile.Localization.ExternalIdProviders.NoProviderConfigured, component.Markup);
+        component.Markup.Should().Contain(Blazor.Shared.Profile.Localization.ExternalIdProviders.NoProviderConfigured);
     }
 
     [Fact]
@@ -62,7 +63,7 @@ public class ExternalIdProvidersControlPanelTests
         var component = RenderControlPanel(ctx, new ExternalIdProvidersControlPanelState());
 
         // Assert
-        Assert.Contains(Blazor.Shared.Profile.Localization.ExternalIdProviders.NoLinkedAccount, component.Markup);
+        component.Markup.Should().Contain(Blazor.Shared.Profile.Localization.ExternalIdProviders.NoLinkedAccount);
     }
 
     [Fact]
@@ -80,7 +81,7 @@ public class ExternalIdProvidersControlPanelTests
         var component = RenderControlPanel(ctx, new ExternalIdProvidersControlPanelState());
 
         // Assert
-        Assert.Contains(displayName, component.Markup);
+        component.Markup.Should().Contain(displayName);
     }
 
     [Fact]
@@ -98,7 +99,7 @@ public class ExternalIdProvidersControlPanelTests
         var component = RenderControlPanel(ctx, new ExternalIdProvidersControlPanelState());
 
         // Assert
-        Assert.Contains(loginProvider, component.Markup);
+        component.Markup.Should().Contain(loginProvider);
     }
 
     [Fact]
@@ -127,8 +128,8 @@ public class ExternalIdProvidersControlPanelTests
         await component.InvokeAsync(async () => await dialog.Instance.OnConfirm.InvokeAsync());
 
         // Assert
-        Assert.Equal("/account/login?returnUrl=%2F", capturingNavManager.LastNavigatedUri);
-        Assert.True(capturingNavManager.LastForceLoad);
+        capturingNavManager.LastNavigatedUri.Should().Be("/account/login?returnUrl=%2F");
+        capturingNavManager.LastForceLoad.Should().BeTrue();
     }
 
     [Fact]
@@ -158,8 +159,8 @@ public class ExternalIdProvidersControlPanelTests
         await component.InvokeAsync(async () => await dialog.Instance.OnConfirm.InvokeAsync());
 
         // Assert
-        Assert.Null(capturingNavManager.LastNavigatedUri);
-        Assert.Contains(errorMessage, component.Markup);
+        capturingNavManager.LastNavigatedUri.Should().BeNull();
+        component.Markup.Should().Contain(errorMessage);
     }
 
     private static IRenderedComponent<ExternalIdProvidersControlPanel> RenderControlPanel(

@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.UserInterface.ControlPanels.Language.Services;
 using Bunit;
 using Bunit.TestDoubles;
@@ -15,15 +16,15 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.UserInterface.ControlPanels.Language.Services;
 
-public class LanguageControlPanelSaveHandlerTests
+public sealed class LanguageControlPanelSaveHandlerTests
 {
-    public class Save
+    public sealed class Save
     {
         private readonly IUiMediator _clientMediator = Substitute.For<IUiMediator>();
         private Guid _correlationId = Guid.Empty;
 
         [Fact]
-        public async Task Save_Successful()
+        public async Task Should_save_successfully()
         {
             // Arrange
             await using var context = new BunitContext();
@@ -60,9 +61,9 @@ public class LanguageControlPanelSaveHandlerTests
             // Assert
             await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
 
-            Assert.True(state.ShowPageRefreshInformation);
-            Assert.False(state.ShowLanguageDoesNotAffectCurrentUser);
-            Assert.IsType<SaveSuccessResult>(handlerResult);
+            state.ShowPageRefreshInformation.Should().BeTrue();
+            state.ShowLanguageDoesNotAffectCurrentUser.Should().BeFalse();
+            handlerResult.Should().BeOfType<SaveSuccessResult>();
         }
 
         [Fact]
@@ -106,13 +107,13 @@ public class LanguageControlPanelSaveHandlerTests
             // Assert
             await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
 
-            Assert.False(state.ShowPageRefreshInformation);
-            Assert.True(state.ShowLanguageDoesNotAffectCurrentUser);
-            Assert.IsType<SaveSuccessResult>(handlerResult);
+            state.ShowPageRefreshInformation.Should().BeFalse();
+            state.ShowLanguageDoesNotAffectCurrentUser.Should().BeTrue();
+            handlerResult.Should().BeOfType<SaveSuccessResult>();
         }
 
         [Fact]
-        public async Task Save_Failed()
+        public async Task Should_fail_to_save()
         {
             // Arrange
             var errorMessage = "Error occurred.";
@@ -151,10 +152,10 @@ public class LanguageControlPanelSaveHandlerTests
             // Assert
             await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
 
-            Assert.False(state.ShowPageRefreshInformation);
-            Assert.IsType<SaveErrorResult>(handlerResult);
-            Assert.Equal(errorMessage, handlerResult.Message);
-            Assert.Equal(CrossInstanceConfigurationError.AddOrUpdateFailed, ((SaveErrorResult)handlerResult).ErrorCode);
+            state.ShowPageRefreshInformation.Should().BeFalse();
+            handlerResult.Should().BeOfType<SaveErrorResult>();
+            handlerResult.Message.Should().Be(errorMessage);
+            ((SaveErrorResult)handlerResult).ErrorCode.Should().Be(CrossInstanceConfigurationError.AddOrUpdateFailed);
         }
 
         private void SetupUserRequest(string userName, string? language = null)

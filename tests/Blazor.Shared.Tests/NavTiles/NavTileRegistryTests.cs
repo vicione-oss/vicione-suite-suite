@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.NavTiles.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -72,7 +72,7 @@ public sealed class NavTileRegistryTests
     }
 
     [Fact]
-    public void Assert_registered_nav_tile_parameters_of_discovered_nav_tile()
+    public void Should_have_registered_nav_tile_parameters_of_discovered_nav_tile()
     {
         // Arrange
         var services = new ServiceCollection()
@@ -98,7 +98,7 @@ public sealed class NavTileRegistryTests
     }
 
     [Fact]
-    public void Assert_registered_nav_tile_parameters_after_add_operation()
+    public void Should_have_registered_nav_tile_parameters_after_add_operation()
     {
         // Arrange
         var services = new ServiceCollection()

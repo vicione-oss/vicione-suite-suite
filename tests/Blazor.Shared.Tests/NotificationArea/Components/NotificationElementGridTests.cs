@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Blazor.Shared.Authorization;
 using Blazor.Shared.NotificationArea.Components;
 using Blazor.Shared.NotificationArea.Extensions;
@@ -280,7 +280,7 @@ public sealed class NotificationElementGridTests
             Assert.NotNull(titleElement);
             var title = titleElement.GetAttribute("title");
 
-            Assert.Contains(title, authorizationScenario.ExpectedNotificationElementTitles);
+            authorizationScenario.ExpectedNotificationElementTitles.Should().Contain(title);
         }
     }
 

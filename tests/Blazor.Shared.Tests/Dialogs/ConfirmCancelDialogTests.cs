@@ -13,7 +13,7 @@ namespace Blazor.Shared.Tests.Dialogs;
 public sealed class ConfirmCancelDialogTests
 {
     [Fact]
-    public async Task ComponentGetsRendered()
+    public async Task Should_render_component()
     {
         // Arrange
         await using var ctx = new BunitContext();
@@ -23,11 +23,11 @@ public sealed class ConfirmCancelDialogTests
         var cut = ctx.Render<ConfirmCancelDialog>();
 
         // Assert
-        Assert.NotNull(cut);
+        cut.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task Should_Be_Rendered_Hidden()
+    public async Task Should_render_hidden()
     {
         // Arrange
         await using var ctx = new BunitContext();
@@ -43,7 +43,7 @@ public sealed class ConfirmCancelDialogTests
     }
 
     [Fact]
-    public async Task Should_Be_Rendered_Visible()
+    public async Task Should_render_visible()
     {
         // Arrange
         await using var ctx = new BunitContext();
@@ -57,11 +57,11 @@ public sealed class ConfirmCancelDialogTests
         var sectionContent = innerDialog.RenderSectionContent(ctx);
 
         // Assert
-        Assert.NotNull(sectionContent.Find(".confirm-cancel-dialog"));
+        sectionContent.Find(".confirm-cancel-dialog").Should().NotBeNull();
     }
 
     [Fact]
-    public async Task OnConfirm_Event_Is_Fired_On_Confirmed_Button_Click()
+    public async Task Should_fire_on_confirm_event_on_confirm_button_click()
     {
         // Arrange
         var onConfirmFired = false;
@@ -83,12 +83,12 @@ public sealed class ConfirmCancelDialogTests
         await innerButton.ClickAsync();
 
         // Assert
-        Assert.True(onConfirmFired);
-        Assert.False(onCancelFired);
+        onConfirmFired.Should().BeTrue();
+        onCancelFired.Should().BeFalse();
     }
 
     [Fact]
-    public async Task OnCancel_Event_Is_Fired_On_Cancel_Button_Click()
+    public async Task Should_fire_on_cancel_event_on_cancel_button_click()
     {
         // Arrange
         var onConfirmFired = false;
@@ -110,12 +110,12 @@ public sealed class ConfirmCancelDialogTests
         await innerButton.ClickAsync();
 
         // Assert
-        Assert.False(onConfirmFired);
-        Assert.True(onCancelFired);
+        onConfirmFired.Should().BeFalse();
+        onCancelFired.Should().BeTrue();
     }
 
     [Fact]
-    public async Task OnCancel_Event_Is_Fired_On_Close_Button_Click()
+    public async Task Should_fire_on_cancel_event_on_close_button_click()
     {
         // Arrange
         var onConfirmFired = false;
@@ -137,12 +137,12 @@ public sealed class ConfirmCancelDialogTests
         await innerButton.ClickAsync();
 
         // Assert
-        Assert.False(onConfirmFired);
-        Assert.True(onCancelFired);
+        onConfirmFired.Should().BeFalse();
+        onCancelFired.Should().BeTrue();
     }
 
     [Fact]
-    public async Task Header_Text_Is_Passed_To_Dialog()
+    public async Task Should_pass_header_text_to_dialog()
     {
         // Arrange
         var headerText = "Test header";
@@ -161,7 +161,7 @@ public sealed class ConfirmCancelDialogTests
     }
 
     [Fact]
-    public async Task Body_Is_Rendered()
+    public async Task Should_render_body()
     {
         // Arrange
         var body = "<p>Test body</p>";

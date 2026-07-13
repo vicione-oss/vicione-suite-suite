@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Popup.Services;
 using Blazor.Shared.Settings.Components;
 using Blazor.Shared.Settings.Models;
@@ -16,7 +16,7 @@ public sealed class PopupMasterDetailLayoutTests
     [Theory]
     [InlineData(".detail__separator")]
     [InlineData(".detail__action-buttons")]
-    public async Task Assert_element_exists_when_control_panel_edit_is_running(string expectedCssClass)
+    public async Task Should_render_element_when_control_panel_edit_is_running(string expectedCssClass)
     {
         // Arrange
         await using var ctx = new BunitContext();

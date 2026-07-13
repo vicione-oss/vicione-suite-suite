@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
+using AwesomeAssertions;
 using Blazor.Shared.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +11,7 @@ namespace Blazor.Shared.Tests.Authorization;
 
 public class ModuleAccessLevelHandlerFacts
 {
-    public class HandleRequirementAsync
+    public sealed class HandleRequirementAsync : ModuleAccessLevelHandlerFacts
     {
         private readonly ModuleAccessLevelHandler _moduleAccessLevelHandler;
 
@@ -29,47 +30,59 @@ public class ModuleAccessLevelHandlerFacts
         [Theory]
         [InlineData(AccessLevel.Partial)]
         [InlineData(AccessLevel.Full)]
-        public async Task SuccessfulDifferentAccessLevelsWithFullUser(AccessLevel accessLevel)
+        public async Task Should_succeed_for_different_access_levels_with_full_user(AccessLevel accessLevel)
         {
+            // Arrange
             var context = Initialize(accessLevel, AccessLevel.Full);
 
+            // Act
             await _moduleAccessLevelHandler.HandleAsync(context);
 
-            Assert.False(context.HasFailed);
-            Assert.True(context.HasSucceeded);
+            // Assert
+            context.HasFailed.Should().BeFalse();
+            context.HasSucceeded.Should().BeTrue();
         }
 
         [Fact]
-        public async Task SuccessfulAccessLevelReadWithUserReadableAndFeature()
+        public async Task Should_succeed_for_partial_access_level_with_matching_feature()
         {
+            // Arrange
             var context = Initialize(AccessLevel.Partial, AccessLevel.Partial, "Feature");
 
+            // Act
             await _moduleAccessLevelHandler.HandleAsync(context);
 
-            Assert.False(context.HasFailed);
-            Assert.True(context.HasSucceeded);
+            // Assert
+            context.HasFailed.Should().BeFalse();
+            context.HasSucceeded.Should().BeTrue();
         }
 
         [Fact]
-        public async Task SuccessfulDifferentAccessLevelsWithUserPartial()
+        public async Task Should_succeed_for_different_access_levels_with_partial_user()
         {
+            // Arrange
             var context = Initialize(AccessLevel.Partial, AccessLevel.Partial);
 
+            // Act
             await _moduleAccessLevelHandler.HandleAsync(context);
 
-            Assert.False(context.HasFailed);
-            Assert.True(context.HasSucceeded);
+            // Assert
+            context.HasFailed.Should().BeFalse();
+            context.HasSucceeded.Should().BeTrue();
         }
 
         [Fact]
-        public async Task CheckForbiddenAccessLevelFullWithUserPartial()
+        public async Task Should_fail_when_full_access_level_required_with_partial_user()
         {
+            // Arrange
             var context = Initialize(AccessLevel.Full, AccessLevel.Partial);
 
+            // Act
             await _moduleAccessLevelHandler.HandleAsync(context);
 
-            Assert.True(context.HasFailed);
-            Assert.False(context.HasSucceeded);
+            // Assert
+            context.HasFailed.Should().BeTrue();
+            context.HasSucceeded.Should().BeFalse();
         }
 
         private static AuthorizationHandlerContext Initialize(AccessLevel requiredAccessLevel, AccessLevel userAccessLevel, string? feature = null)

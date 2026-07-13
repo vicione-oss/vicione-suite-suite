@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Profile.ControlPanels;
 using Blazor.Shared.Profile.ControlPanels.Passkeys;
 using Blazor.Shared.Settings.Extensions;
@@ -21,7 +22,7 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Profile.ControlPanels.Passkeys;
 
-public class PasskeysControlPanelTests
+public sealed class PasskeysControlPanelTests
 {
     private const string UserName = "TestUser";
 
@@ -43,7 +44,7 @@ public class PasskeysControlPanelTests
         var component = RenderControlPanel(ctx);
 
         // Assert
-        Assert.DoesNotContain(Blazor.Shared.Profile.Localization.Passkey.RequiresDnsHost, component.Markup);
+        component.Markup.Should().NotContain(Blazor.Shared.Profile.Localization.Passkey.RequiresDnsHost);
     }
 
     [Fact]
@@ -59,7 +60,7 @@ public class PasskeysControlPanelTests
         var component = RenderControlPanel(ctx);
 
         // Assert
-        Assert.Contains(Blazor.Shared.Profile.Localization.Passkey.RequiresDnsHost, component.Markup);
+        component.Markup.Should().Contain(Blazor.Shared.Profile.Localization.Passkey.RequiresDnsHost);
     }
 
     private static IRenderedComponent<PasskeysControlPanel> RenderControlPanel(BunitContext ctx)

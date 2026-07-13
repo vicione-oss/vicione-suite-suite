@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Instances.Models;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Services;
@@ -12,12 +13,12 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels.Instances.Services;
 
-public class InstanceControlPanelSaveHandlerTests
+public sealed class InstanceControlPanelSaveHandlerTests
 {
-    public class Save
+    public sealed class Save
     {
         [Fact]
-        public async Task Save_of_instance_information_is_successful()
+        public async Task Should_succeed_saving_instance_information()
         {
             // Arrange
             var clientMediator = Substitute.For<IUiMediator>();
@@ -48,11 +49,11 @@ public class InstanceControlPanelSaveHandlerTests
             // Assert
             await clientMediator.Received().Send(Arg.Is<UpdateInstanceInformation>(a => a.CorrelationId == correlationId), Arg.Any<CancellationToken>());
 
-            Assert.IsType<SaveSuccessResult>(handlerResult);
+            handlerResult.Should().BeOfType<SaveSuccessResult>();
         }
 
         [Fact]
-        public async Task Save_of_instance_information_fails()
+        public async Task Should_fail_saving_instance_information()
         {
             // Arrange
             var clientMediator = Substitute.For<IUiMediator>();
@@ -83,7 +84,7 @@ public class InstanceControlPanelSaveHandlerTests
             // Assert
             await clientMediator.Received().Send(Arg.Is<UpdateInstanceInformation>(a => a.CorrelationId == correlationId), Arg.Any<CancellationToken>());
 
-            Assert.IsType<SaveErrorResult>(handlerResult);
+            handlerResult.Should().BeOfType<SaveErrorResult>();
         }
     }
 }

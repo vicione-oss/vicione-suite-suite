@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Repositories;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Models;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Services;
@@ -52,6 +53,6 @@ public class ArtifactRepositoriesControlPanelTests
         var component = ctx.Render<ArtifactRepositoriesControlPanel>(p => p.Add(c => c.State, state));
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 }

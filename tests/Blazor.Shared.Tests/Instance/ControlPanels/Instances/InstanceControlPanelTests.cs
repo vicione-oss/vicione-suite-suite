@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Instances;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Instance.Extensions;
@@ -39,7 +40,7 @@ public class InstanceControlPanelTests
         var component = ctx.Render<InstanceControlPanel>(p => p.Add(c => c.State, state));
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 
     [Fact]
@@ -73,8 +74,8 @@ public class InstanceControlPanelTests
         var component = ctx.Render<InstanceControlPanel>(p => p.Add(c => c.State, state));
 
         // Assert
-        Assert.NotNull(component);
-        Assert.NotNull(mediator);
+        component.Should().NotBeNull();
+        mediator.Should().NotBeNull();
         await mediator.Received().Request<GetInstances, GetInstancesResponse>(
             Arg.Is<GetInstances>(k => k.InstanceId == state.InstanceId), Arg.Any<CancellationToken>());
     }
