@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Server.Backend.Components;
 using Blazor.Shared.Profile.Models;
 using Bunit;
@@ -7,7 +8,7 @@ using Xunit;
 
 namespace Blazor.Server.Tests.Components;
 
-public class PasskeySubmitTests
+public sealed class PasskeySubmitTests
 {
     private const string TooltipText = "Passkeys require a DNS hostname.";
 
@@ -27,10 +28,10 @@ public class PasskeySubmitTests
 
         // Assert
         var button = component.Find("button");
-        Assert.True(button.HasAttribute("disabled"));
-        Assert.Equal(TooltipText, button.GetAttribute("title"));
-        Assert.Equal(TooltipText, button.GetAttribute("aria-label"));
-        Assert.Empty(component.FindAll("passkey-submit"));
+        button.HasAttribute("disabled").Should().BeTrue();
+        button.GetAttribute("title").Should().Be(TooltipText);
+        button.GetAttribute("aria-label").Should().Be(TooltipText);
+        component.FindAll("passkey-submit").Should().BeEmpty();
     }
 
     [Fact]
@@ -47,8 +48,8 @@ public class PasskeySubmitTests
             .Add(c => c.Disabled, false));
 
         // Assert
-        Assert.NotEmpty(component.FindAll("passkey-submit"));
-        Assert.False(component.Find("button").HasAttribute("disabled"));
+        component.FindAll("passkey-submit").Should().NotBeEmpty();
+        component.Find("button").HasAttribute("disabled").Should().BeFalse();
     }
 
     private static BunitContext CreateContext()

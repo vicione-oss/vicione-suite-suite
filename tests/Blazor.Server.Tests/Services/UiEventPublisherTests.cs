@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Security.Principal;
 using AwesomeAssertions;
 using Blazor.Server.Backend.Services;
@@ -120,7 +120,7 @@ public abstract class UiEventPublisherTests
         }
 
         [Fact]
-        public async Task Publish_ui_event_consume_failed_exception_suppressed()
+        public async Task Should_suppress_exception_when_consume_fails()
         {
             // Arrange
             using var serviceProvider = SetupServiceProvider();

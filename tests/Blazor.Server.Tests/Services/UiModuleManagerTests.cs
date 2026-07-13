@@ -29,10 +29,10 @@ public class UiModuleManagerTests
         return uiModulManager;
     }
 
-    public class UiModules : UiModuleManagerTests
+    public sealed class UiModules : UiModuleManagerTests
     {
         [Fact]
-        public void Returns_ui_client_modules()
+        public void Should_return_ui_client_modules()
         {
             // Arrange
             var uiModuleManager = SetupTest();
@@ -45,10 +45,10 @@ public class UiModuleManagerTests
         }
     }
 
-    public class UiModuleAssemblies : UiModuleManagerTests
+    public sealed class UiModuleAssemblies : UiModuleManagerTests
     {
         [Fact]
-        public void Returns_ui_client_module_assemblies()
+        public void Should_return_ui_client_module_assemblies()
         {
             // Arrange
             var uiModuleManager = SetupTest();
@@ -61,7 +61,7 @@ public class UiModuleManagerTests
         }
     }
 
-    public class GetAdditionalAssemblies : UiModuleManagerTests
+    public sealed class GetAdditionalAssemblies : UiModuleManagerTests
     {
         [Fact]
         public void Should_returns_additional_assemblies()

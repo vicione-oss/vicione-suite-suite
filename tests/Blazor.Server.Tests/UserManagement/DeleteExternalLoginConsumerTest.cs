@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Blazor.Server.Tests.UserManagement;
 
-public class DeleteExternalLoginConsumerTest
+public sealed class DeleteExternalLoginConsumerTest
 {
     private const string LoginProvider = "OpenIdConnect";
     private const string ProviderKey = "subject-1";
