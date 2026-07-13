@@ -2,7 +2,7 @@ using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Profile.ControlPanels.Passkeys;
 
-public class RenamePasskeyControlPanelState : ControlPanelState
+public class EditPasskeyControlPanelState : ControlPanelState
 {
     public string? PasskeyId { get; set; }
 

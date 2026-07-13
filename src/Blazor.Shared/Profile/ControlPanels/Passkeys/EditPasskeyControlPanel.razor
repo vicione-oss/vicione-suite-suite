@@ -3,15 +3,18 @@
 @using Sdk.Authorization
 @using Sdk.Client.ControlPanels.Attributes
 @using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
 
-@inherits ControlPanelBase<RenamePasskeyControlPanelState>
+@inherits ControlPanelBase<EditPasskeyControlPanelState>
 
 @attribute [ControlPanelCategory<ProfileCategoryDescriptor>]
 @attribute [ControlPanelGroup<SecondaryControlPanelGroupDescriptor>]
 @attribute [ModuleAuthorize(SharedClientModule.ModuleId)]
 
-<DescriptionBanner Title="@RenamePasskey.RenamePasskeyTitle">
-    @RenamePasskey.Description
+<DescriptionBanner Title="@EditPasskey.EditPasskeyTitle"
+                   IconCssClass="@MonochromeIconName.PassKeyLight.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated()">
+    @EditPasskey.Description
 </DescriptionBanner>
 
 <SettingsLayout>

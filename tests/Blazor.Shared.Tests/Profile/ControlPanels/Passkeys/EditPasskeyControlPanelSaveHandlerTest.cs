@@ -7,7 +7,7 @@ using PasskeyConstants = Core.Shared.Passkeys.Constants;
 
 namespace Blazor.Shared.Tests.Settings.Profile.ControlPanels.Passkeys;
 
-public class RenamePasskeyControlPanelSaveHandlerTest
+public class EditPasskeyControlPanelSaveHandlerTest
 {
     [Fact]
     public async Task Should_return_error_when_user_id_is_null()
@@ -16,7 +16,7 @@ public class RenamePasskeyControlPanelSaveHandlerTest
         using var sut = CreateSut();
 
         // Act
-        var result = await sut.Save(new RenamePasskeyControlPanelState
+        var result = await sut.Save(new EditPasskeyControlPanelState
             {
                 UserId = null,
                 PasskeyId = "some-id",
@@ -35,7 +35,7 @@ public class RenamePasskeyControlPanelSaveHandlerTest
         using var sut = CreateSut();
 
         // Act
-        var result = await sut.Save(new RenamePasskeyControlPanelState
+        var result = await sut.Save(new EditPasskeyControlPanelState
             {
                 UserId = "user-id",
                 PasskeyId = "some-id",
@@ -54,7 +54,7 @@ public class RenamePasskeyControlPanelSaveHandlerTest
         using var sut = CreateSut();
 
         // Act
-        var result = await sut.Save(new RenamePasskeyControlPanelState
+        var result = await sut.Save(new EditPasskeyControlPanelState
             {
                 UserId = "user-id",
                 PasskeyId = "some-id",
@@ -73,8 +73,8 @@ public class RenamePasskeyControlPanelSaveHandlerTest
     public async Task Should_allow_saving_the_same_name_as_current()
     {
         // Arrange
-        using var sut = new RenamePasskeyControlPanelSaveHandler(Substitute.For<IUiMediator>());
-        var state = new RenamePasskeyControlPanelState
+        using var sut = new EditPasskeyControlPanelSaveHandler(Substitute.For<IUiMediator>());
+        var state = new EditPasskeyControlPanelState
         {
             UserId = "user-id",
             PasskeyId = "some-id",
@@ -97,7 +97,7 @@ public class RenamePasskeyControlPanelSaveHandlerTest
         using var sut = CreateSut();
 
         // Act
-        var result = await sut.Save(new RenamePasskeyControlPanelState
+        var result = await sut.Save(new EditPasskeyControlPanelState
             {
                 UserId = "user-id",
                 PasskeyId = "some-id",
@@ -110,6 +110,6 @@ public class RenamePasskeyControlPanelSaveHandlerTest
             .And.ContainEquivalentOf("name");
     }
 
-    private static RenamePasskeyControlPanelSaveHandler CreateSut()
+    private static EditPasskeyControlPanelSaveHandler CreateSut()
         => new(Substitute.For<IUiMediator>());
 }

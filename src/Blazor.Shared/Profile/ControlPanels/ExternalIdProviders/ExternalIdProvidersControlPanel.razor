@@ -5,6 +5,7 @@
 @using Sdk.Client.ControlPanels.Attributes
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
 
 @inherits ControlPanelBase<ExternalIdProvidersControlPanelState>
 
@@ -13,7 +14,8 @@
 @attribute [ModuleAuthorize(SharedClientModule.ModuleId)]
 
 <ControlPanelPage Title="@ExternalIdProviders.Title">
-    <DescriptionBanner Title="@ExternalIdProviders.Title">
+    <DescriptionBanner Title="@ExternalIdProviders.Title"
+                       IconCssClass="@MonochromeIconName.ExternalIdProviderLight.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated()">
         @ExternalIdProviders.Description
     </DescriptionBanner>
 

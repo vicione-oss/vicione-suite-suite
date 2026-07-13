@@ -6,7 +6,7 @@
     <OpenTelemetryVersion>1.15.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.10</MassTransitVersion>
     <ViciOneUiBlazorComponentsVersion>5.16.0</ViciOneUiBlazorComponentsVersion>
-    <ViciOneUiMonochromeIconsVersion>4.11.0</ViciOneUiMonochromeIconsVersion>
+    <ViciOneUiMonochromeIconsVersion>4.12.0</ViciOneUiMonochromeIconsVersion>
     <ViciOneSuiteSdkVersion>2.2.0-ci2642740921</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
