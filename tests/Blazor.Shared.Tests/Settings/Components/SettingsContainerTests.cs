@@ -22,7 +22,7 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Settings.Components;
 
-public class SettingsContainerTests
+public sealed class SettingsContainerTests
 {
     public sealed class DummyClientModule : IClientModule
     {
@@ -91,7 +91,7 @@ public class SettingsContainerTests
     }
 
     [Fact]
-    public async Task ComponentShouldRender()
+    public async Task Should_render_component()
     {
         // Arrange
         await using var ctx = SetupTestContext();
@@ -100,11 +100,11 @@ public class SettingsContainerTests
         var component = ctx.Render<SettingsContainer>();
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task CategoryClickLoadsSubCategories()
+    public async Task Should_load_sub_categories_on_category_click()
     {
         // Arrange
         await using var ctx = SetupTestContext();
@@ -133,7 +133,7 @@ public class SettingsContainerTests
     }
 
     [Fact]
-    public async Task SubCategoryClickRendersComponent()
+    public async Task Should_render_component_on_sub_category_click()
     {
         // Arrange
         await using var ctx = SetupTestContext();
@@ -162,12 +162,12 @@ public class SettingsContainerTests
         Assert.NotNull(cloudMenuItem);
         await cloudMenuItem.ClickAsync();
 
-        Assert.NotNull(component.Find(".control-panel-container"));
-        Assert.NotNull(component.FindComponent<DummyClientModule.CloudControlPanel>());
+        component.Find(".control-panel-container").Should().NotBeNull();
+        component.FindComponent<DummyClientModule.CloudControlPanel>().Should().NotBeNull();
     }
 
     [Fact]
-    public async Task SaveAndRevertButtonHiddenOnCleanState()
+    public async Task Should_hide_save_and_revert_buttons_on_clean_state()
     {
         // Arrange
         await using var ctx = SetupTestContext();
@@ -175,11 +175,11 @@ public class SettingsContainerTests
         // Act + Assert
         var component = ctx.Render<SettingsContainer>();
 
-        Assert.Empty(component.FindAll(".dirty-state"));
+        component.FindAll(".dirty-state").Should().BeEmpty();
     }
 
     [Fact]
-    public async Task SaveErrorGetsDisplayed()
+    public async Task Should_display_save_error()
     {
         // Arrange
         await using var ctx = SetupTestContext();
@@ -204,7 +204,7 @@ public class SettingsContainerTests
         await saveButton.ClickAsync();
 
         // Assert
-        Assert.NotNull(component.Find(".error-message"));
+        component.Find(".error-message").Should().NotBeNull();
     }
 
     [Fact]

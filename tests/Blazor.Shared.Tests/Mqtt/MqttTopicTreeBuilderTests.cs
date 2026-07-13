@@ -1,11 +1,11 @@
-﻿using Blazor.Shared.Mqtt.Contracts;
+using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Helpers;
 using AwesomeAssertions;
 using Xunit;
 
 namespace Blazor.Shared.Tests.Mqtt;
 
-public class MqttTopicTreeBuilderTests
+public sealed class MqttTopicTreeBuilderTests
 {
     private const string Topic1 = "topic1";
     private const string SubTopic1 = $"{Topic1}/subTopic1";
@@ -15,7 +15,7 @@ public class MqttTopicTreeBuilderTests
     private const string SubSubTopic2 = $"{SubTopic2}/subSubTopic2";
 
     [Fact]
-    public void Set_tree_element_should_generate_topic_groups()
+    public void Should_generate_topic_groups()
     {
         // Arrange
         var allTopic = new TopicGroup
@@ -40,7 +40,7 @@ public class MqttTopicTreeBuilderTests
     }
 
     [Fact]
-    public void Set_tree_element_should_multiple_times_should_not_extend_topics()
+    public void Should_not_extend_topics_when_called_multiple_times()
     {
         // Arrange
         var allTopic = new TopicGroup

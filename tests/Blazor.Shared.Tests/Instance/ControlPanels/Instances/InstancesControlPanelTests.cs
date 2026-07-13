@@ -67,7 +67,7 @@ public class InstancesControlPanelTests
         return ctx;
     }
 
-    public class OnInitializedAsync : InstancesControlPanelTests
+    public sealed class OnInitializedAsync : InstancesControlPanelTests
     {
         [Fact]
         public void Should_render_component()
@@ -77,7 +77,7 @@ public class InstancesControlPanelTests
             var state = new InstancesControlPanelState();
 
             // Act + Assert
-            Assert.NotNull(ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state)));
+            ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state)).Should().NotBeNull();
         }
 
         [Fact]
@@ -98,15 +98,15 @@ public class InstancesControlPanelTests
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
 
             // Assert
-            Assert.NotNull(component);
-            Assert.NotNull(mediator);
+            component.Should().NotBeNull();
+            mediator.Should().NotBeNull();
 
             await mediator.Received()
                 .Request<GetInstances, GetInstancesResponse>(Arg.Is<GetInstances>(k => k.InstanceId == null), Arg.Any<CancellationToken>());
         }
     }
 
-    public class DeleteSelectedInstances : InstancesControlPanelTests
+    public sealed class DeleteSelectedInstances : InstancesControlPanelTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
         public async Task Should_add_deleting_instance_to_list()
@@ -131,13 +131,13 @@ public class InstancesControlPanelTests
             await component.FindGridActionButton(MonochromeIconName.Delete).ClickAsync();
 
             // Assert
-            Assert.NotNull(mediator);
+            mediator.Should().NotBeNull();
             state.DeletingInstances.Count.Should().Be(1);
             state.DeletingInstances.First().Id.Should().Be(info.Id);
         }
     }
 
-    public class SynchronizeSelectedInstances : InstancesControlPanelTests
+    public sealed class SynchronizeSelectedInstances : InstancesControlPanelTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
         public async Task Should_send_command_on_mediator()
@@ -162,14 +162,14 @@ public class InstancesControlPanelTests
             await component.FindGridActionButton(MonochromeIconName.Reload).ClickAsync();
 
             // Assert
-            Assert.NotNull(mediator);
+            mediator.Should().NotBeNull();
             //await mediator.Received(1).Send(
             //    Arg.Is((ControlInstance c) => c.InstanceId == info.Id &&
             //    c.Action == InstanceCommand.Synchronize));
         }
     }
 
-    public class EditInstance : InstancesControlPanelTests
+    public sealed class EditInstance : InstancesControlPanelTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
         public async Task Should_send_control_panel_request()
@@ -192,13 +192,13 @@ public class InstancesControlPanelTests
             await component.Find(".navigate-button").ClickAsync();
 
             // Assert
-            Assert.NotNull(controlPanelRequest);
+            controlPanelRequest.Should().NotBeNull();
             await controlPanelRequest.Received(1).Send<InstanceControlPanel, InstanceControlPanelState>(
                 Arg.Any<Action<InstanceControlPanelState>>());
         }
     }
 
-    public class Consume : InstancesControlPanelTests
+    public sealed class Consume : InstancesControlPanelTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
         public async Task Should_remove_deleted_instance()

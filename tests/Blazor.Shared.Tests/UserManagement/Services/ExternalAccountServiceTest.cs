@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.UserManagement.Services;
+using AwesomeAssertions;
+using Blazor.Shared.UserManagement.Services;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,7 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.UserManagement.Services;
 
-public class ExternalAccountServiceTest
+public sealed class ExternalAccountServiceTest
 {
     [Fact]
     public async Task Should_return_null_when_no_external_accounts_exist()
@@ -22,7 +23,7 @@ public class ExternalAccountServiceTest
         var externalAccount = await sut.GetExternalUserAccount(user);
 
         // Assert
-        Assert.Null(externalAccount);
+        externalAccount.Should().BeNull();
     }
 
     [Fact]
@@ -36,7 +37,7 @@ public class ExternalAccountServiceTest
         var externalAccount = await sut.GetExternalUserAccount(user);
 
         // Assert
-        Assert.Equal("test", externalAccount?.ProviderKey);
+        externalAccount?.ProviderKey.Should().Be("test");
     }
 
     [Fact]
@@ -48,8 +49,10 @@ public class ExternalAccountServiceTest
             new UserLoginInfo("test2", "test2",  "test2"));
 
         // Act
+        var act = async () => await sut.GetExternalUserAccount(user);
+
         // Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await sut.GetExternalUserAccount(user));
+        await act.Should().ThrowAsync<InvalidOperationException>();
     }
 
 

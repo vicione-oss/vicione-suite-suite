@@ -23,7 +23,7 @@ namespace Blazor.Shared.Tests.Connections.Services;
 
 public class SuiteConnectionServiceTests
 {
-    public class UpsertTagOperations
+    public sealed class UpsertTagOperations : SuiteConnectionServiceTests
     {
         [Fact]
         public async Task Should_create_tag()
@@ -85,7 +85,7 @@ public class SuiteConnectionServiceTests
         }
     }
 
-    public class DeleteTagOperations
+    public sealed class DeleteTagOperations : SuiteConnectionServiceTests
     {
         [Fact]
         public async Task Should_remove_specific_tag_from_list()
@@ -162,10 +162,10 @@ public class SuiteConnectionServiceTests
         }
     }
 
-    public class ConsumeConnectionChangedEvent
+    public sealed class ConsumeConnectionChangedEvent : SuiteConnectionServiceTests
     {
         [Fact]
-        public async Task Created_event_adds_connection_and_updates_state()
+        public async Task Should_add_connection_and_update_state_on_created_event()
         {
             // Arrange
             var uiMediator = Substitute.For<IUiMediator>();
@@ -199,7 +199,7 @@ public class SuiteConnectionServiceTests
         }
 
         [Fact]
-        public async Task Updated_event_updates_connection_and_state()
+        public async Task Should_update_connection_and_state_on_updated_event()
         {
             // Arrange
             var mock = new SuiteConnectionServiceTests();
@@ -235,7 +235,7 @@ public class SuiteConnectionServiceTests
         }
 
         [Fact]
-        public async Task Deleted_event_removes_connection_and_updates_state()
+        public async Task Should_remove_connection_and_update_state_on_deleted_event()
         {
             // Arrange
             var mock = new SuiteConnectionServiceTests();
@@ -267,7 +267,7 @@ public class SuiteConnectionServiceTests
         }
     }
 
-    public class UpsertConnectionOperations
+    public sealed class UpsertConnectionOperations : SuiteConnectionServiceTests
     {
         [Fact]
         public async Task Should_create_connection()
@@ -321,11 +321,11 @@ public class SuiteConnectionServiceTests
             // Assert
             await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());
 
-            Assert.IsType<SuiteConnectionServiceSuccessResult>(result);
+            result.Should().BeOfType<SuiteConnectionServiceSuccessResult>();
         }
 
         [Fact]
-        public async Task Update_connection_timed_out()
+        public async Task Should_time_out_when_updating_connection()
         {
             // Arrange
             var uiMediator = Substitute.For<IUiMediator>();
@@ -349,7 +349,7 @@ public class SuiteConnectionServiceTests
         }
     }
 
-    public class DeleteConnectionOperations
+    public sealed class DeleteConnectionOperations : SuiteConnectionServiceTests
     {
         [Fact]
         public async Task Should_delete_connection()
@@ -389,7 +389,7 @@ public class SuiteConnectionServiceTests
         }
     }
 
-    public class ConnectionServiceUpsertConnection
+    public sealed class ConnectionServiceUpsertConnection : SuiteConnectionServiceTests
     {
         private static BunitContext SetupTestContext(Connection? connection = null, Action<ClientServiceConfigurator>? additionalSetup = null)
         {
@@ -415,7 +415,7 @@ public class SuiteConnectionServiceTests
         }
 
         [Fact]
-        public async Task Update_connection_successful()
+        public async Task Should_succeed_when_updating_connection()
         {
             // Arrange
             var databaseConnection = ConnectionFactory.SQLiteConnection;
@@ -457,11 +457,11 @@ public class SuiteConnectionServiceTests
             // Assert
             await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());
 
-            Assert.IsType<SuiteConnectionServiceSuccessResult>(serviceResult);
+            serviceResult.Should().BeOfType<SuiteConnectionServiceSuccessResult>();
         }
 
         [Fact]
-        public async Task Update_connection_failed_timeout_occurred()
+        public async Task Should_fail_when_update_connection_times_out()
         {
             // Arrange
             var databaseConnection = ConnectionFactory.SQLiteConnection;
@@ -503,7 +503,7 @@ public class SuiteConnectionServiceTests
             // Assert
             await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());
 
-            Assert.IsType<SuiteConnectionServiceErrorResult>(serviceResult);
+            serviceResult.Should().BeOfType<SuiteConnectionServiceErrorResult>();
         }
     }
 }

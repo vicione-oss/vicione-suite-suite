@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Module.ControlPanels;
 using Blazor.Shared.Module.ControlPanels.Extensions;
 using Blazor.Shared.Module.ControlPanels.Services;
@@ -13,7 +14,7 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Module.ControlPanels;
 
-public class ModuleManagementControlPanelTests
+public sealed class ModuleManagementControlPanelTests
 {
     private readonly IModuleManagementService _moduleManagementService = Substitute.For<IModuleManagementService>();
 
@@ -53,6 +54,6 @@ public class ModuleManagementControlPanelTests
             .AddCascadingValue(registryItem));
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 }

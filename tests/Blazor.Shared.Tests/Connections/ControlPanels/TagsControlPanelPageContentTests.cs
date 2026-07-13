@@ -84,7 +84,7 @@ public class TagsControlPanelPageContentTests
     private static IElement FindEditButton(IRenderedComponent<TagsControlPanelPageContent> component)
         => component.FindAll("button").First(b => b.InnerHtml.Contains("monochrome-icon-edit", StringComparison.Ordinal));
 
-    public class OnInitializedAsync : TagsControlPanelPageContentTests
+    public sealed class OnInitializedAsync : TagsControlPanelPageContentTests
     {
         [Fact]
         public void Should_render_component()
@@ -100,7 +100,7 @@ public class TagsControlPanelPageContentTests
         }
     }
 
-    public class OnCreateTag : TagsControlPanelPageContentTests
+    public sealed class OnCreateTag : TagsControlPanelPageContentTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
         public async Task Should_send_control_request()
@@ -140,10 +140,10 @@ public class TagsControlPanelPageContentTests
         }
     }
 
-    public class OnEditTag : TagsControlPanelPageContentTests
+    public sealed class OnEditTag : TagsControlPanelPageContentTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
-        public async Task One_row_is_selected_than_button_should_enable()
+        public async Task Should_enable_button_when_one_row_is_selected()
         {
             // Arrange
             IControlPanelRequest? controlPanelRequest = null;
@@ -183,7 +183,7 @@ public class TagsControlPanelPageContentTests
         }
 
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
-        public void Two_rows_are_selected_than_button_should_disable()
+        public void Should_disable_button_when_two_rows_are_selected()
         {
             // Arrange
             IControlPanelRequest? controlPanelRequest = null;
@@ -220,7 +220,7 @@ public class TagsControlPanelPageContentTests
         }
 
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
-        public async Task Arrow_button_should_send_command_on_mediator()
+        public async Task Should_send_command_on_mediator_when_arrow_button_clicked()
         {
             // Arrange
             IControlPanelRequest? controlPanelRequest = null;
@@ -259,10 +259,10 @@ public class TagsControlPanelPageContentTests
         }
     }
 
-    public class DeleteSelectedTags : TagsControlPanelPageContentTests
+    public sealed class DeleteSelectedTags : TagsControlPanelPageContentTests
     {
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
-        public void Adds_correct_tag_to_list()
+        public void Should_add_correct_tag_to_list()
         {
             // Arrange
             IControlPanelRequest? controlPanelRequest = null;
@@ -305,7 +305,7 @@ public class TagsControlPanelPageContentTests
         }
 
         [Fact(Skip = "Incompatibility with bunit and virtual scrolling.")]
-        public void Disables_delete_button_if_tag_is_protected()
+        public void Should_disable_delete_button_if_tag_is_protected()
         {
             // Arrange
             IControlPanelRequest? controlPanelRequest = null;

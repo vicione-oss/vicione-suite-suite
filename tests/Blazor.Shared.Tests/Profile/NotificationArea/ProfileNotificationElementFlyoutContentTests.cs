@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Profile.Extensions;
+using Blazor.Shared.Profile.Extensions;
 using Blazor.Shared.Profile.NotificationArea;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.DateAndTime.Services;
@@ -29,7 +29,7 @@ public sealed class ProfileNotificationElementFlyoutContentTests
     private readonly IPhoneNumberValidator _phoneNumberValidator = Substitute.For<IPhoneNumberValidator>();
 
     [Fact]
-    public void Component_should_render()
+    public void Should_render_component()
     {
         // Arrange
         using var ctx = MockContext();

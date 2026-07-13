@@ -11,7 +11,7 @@ namespace Blazor.Shared.Tests.Help.NotificationArea;
 public sealed class HelpNotificationElementFlyoutContentTests
 {
     [Fact]
-    public void Component_should_render()
+    public void Should_render_component()
     {
         // Arrange
         using var ctx = new BunitContext();
@@ -21,19 +21,22 @@ public sealed class HelpNotificationElementFlyoutContentTests
         var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 
-    public class GetHelpItems
+    public sealed class GetHelpItems
     {
         [Fact]
-        public void Shows_all_help_items()
+        public void Should_show_all_help_items()
         {
+            // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
+            // Act
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
+            // Assert
             component.Markup.Should().Contain("Help 1");
             component.Markup.Should().Contain("Help 2");
             component.Markup.Should().Contain("Help 3");
@@ -41,8 +44,9 @@ public sealed class HelpNotificationElementFlyoutContentTests
         }
 
         [Fact]
-        public async Task Shows_filtered_help_itemsAsync()
+        public async Task Should_show_filtered_help_items()
         {
+            // Arrange
             await using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
@@ -52,9 +56,12 @@ public sealed class HelpNotificationElementFlyoutContentTests
             {
                 Value = "2"
             };
+
+            // Act
             await textbox.InputAsync(args);
             await textbox.KeyUpAsync(new KeyboardEventArgs());
 
+            // Assert
             component.Markup.Should().NotContain("Help 1");
             component.Markup.Should().Contain("Help 2");
             component.Markup.Should().NotContain("Help 3");
@@ -62,20 +69,23 @@ public sealed class HelpNotificationElementFlyoutContentTests
         }
     }
 
-    public class OnArrowBackClick
+    public sealed class OnArrowBackClick
     {
         [Fact]
-        public void Shows_previous_help()
+        public void Should_show_previous_help()
         {
+            // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
+            // Act
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
             component.Find(".link").Click();
             component.Find(".arrow-back").Click();
 
+            // Assert
             component.Markup.Should().Contain("Help 1");
             component.Markup.Should().NotContain("Help 2");
             component.Markup.Should().NotContain("Help 3");
@@ -83,16 +93,19 @@ public sealed class HelpNotificationElementFlyoutContentTests
         }
 
         [Fact]
-        public void Shows_card_view()
+        public void Should_show_card_view()
         {
+            // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
+            // Act
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more")).Click();
             component.Find(".arrow-back").Click();
 
+            // Assert
             component.Markup.Should().Contain("Help 1");
             component.Markup.Should().Contain("Help 2");
             component.Markup.Should().Contain("Help 3");
@@ -100,20 +113,23 @@ public sealed class HelpNotificationElementFlyoutContentTests
         }
     }
 
-    public class OnHomeClick
+    public sealed class OnHomeClick
     {
         [Fact]
         public void Should_redirect_to_listed_help_items()
         {
+            // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
+            // Act
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
             component.Find(".link").Click();
             component.Find(".home").Click();
 
+            // Assert
             component.Markup.Should().Contain("Help 1");
             component.Markup.Should().Contain("Help 2");
             component.Markup.Should().Contain("Help 3");
@@ -123,6 +139,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
         [Fact]
         public async Task Should_reset_filter()
         {
+            // Arrange
             await using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
@@ -135,8 +152,10 @@ public sealed class HelpNotificationElementFlyoutContentTests
             await textbox.InputAsync(args);
             await textbox.KeyUpAsync(new KeyboardEventArgs());
 
+            // Act
             await component.Find(".home").ClickAsync();
 
+            // Assert
             component.Markup.Should().Contain("Help 1");
             component.Markup.Should().Contain("Help 2");
             component.Markup.Should().Contain("Help 3");
@@ -144,19 +163,22 @@ public sealed class HelpNotificationElementFlyoutContentTests
         }
     }
 
-    public class OnLinkClick
+    public sealed class OnLinkClick
     {
         [Fact]
         public void Should_open_linked_help_detail()
         {
+            // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
+            // Act
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
             component.Find(".link").Click();
 
+            // Assert
             component.Markup.Should().NotContain("Help 1");
             component.Markup.Should().NotContain("Help 2");
             component.Markup.Should().Contain("Help 3");
@@ -164,34 +186,40 @@ public sealed class HelpNotificationElementFlyoutContentTests
         }
     }
 
-    public class OnHelpClick
+    public sealed class OnHelpClick
     {
         [Fact]
         public void Should_open_help_detail()
         {
+            // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
+            // Act
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more")).Click();
 
+            // Assert
             component.Markup.Should().Contain("text-container");
         }
     }
 
-    public class OnCloseClick
+    public sealed class OnCloseClick
     {
         [Fact]
-        public void Removes_help_card()
+        public void Should_remove_help_card()
         {
+            // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
+            // Act
             component.Find(".close").Click();
 
+            // Assert
             component.Markup.Should().NotContain("Help 1");
             component.Markup.Should().Contain("Help 2");
             component.Markup.Should().Contain("Help 3");

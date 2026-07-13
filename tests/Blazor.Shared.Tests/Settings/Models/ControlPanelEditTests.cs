@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Settings.Models;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -84,7 +84,7 @@ public sealed class ControlPanelEditTests
     }
 
     [Fact]
-    public async Task Dispose_should_result_in_cancellation_of_save_handler()
+    public async Task Should_cancel_save_handler_on_dispose()
     {
         // Arrange
         var services = new ServiceCollection()
@@ -110,7 +110,7 @@ public sealed class ControlPanelEditTests
     }
 
     [Fact]
-    public async Task Dispose_should_result_in_cancellation_of_cancel_handler()
+    public async Task Should_cancel_cancel_handler_on_dispose()
     {
         // Arrange
         var services = new ServiceCollection()
@@ -136,7 +136,7 @@ public sealed class ControlPanelEditTests
     }
 
     [Fact]
-    public async Task Dispose_should_result_in_cancellation_of_reset_handler()
+    public async Task Should_cancel_reset_handler_on_dispose()
     {
         // Arrange
         var services = new ServiceCollection()
@@ -173,7 +173,7 @@ public sealed class ControlPanelEditTests
     [InlineData(OperationKind.None, OperationKind.Substitute, OperationKind.LongerRunning)]
     [InlineData(OperationKind.Substitute, OperationKind.None, OperationKind.LongerRunning)]
     [InlineData(OperationKind.Substitute, OperationKind.LongerRunning, OperationKind.None)]
-    public async Task Executing_an_operation_should_result_in_cancellation_of_another_running_operation(
+    public async Task Should_cancel_another_running_operation_when_executing_an_operation(
         OperationKind resetOperationKind, OperationKind saveOperationKind, OperationKind cancelOperationKind)
     {
         // Arrange

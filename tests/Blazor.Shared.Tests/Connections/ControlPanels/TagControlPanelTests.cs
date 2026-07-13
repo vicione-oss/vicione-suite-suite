@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Settings.Extensions;
+using AwesomeAssertions;
+using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Connections.ControlPanels;
 using Blazor.Shared.Connections.ControlPanels.Tags;
 using Blazor.Shared.Connections.ControlPanels.Tags.Services;
@@ -47,7 +48,7 @@ public sealed class TagControlPanelTests
         var component = ctx.Render<TagControlPanel>(p => p.Add(c => c.State, state));
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 
     [Fact]

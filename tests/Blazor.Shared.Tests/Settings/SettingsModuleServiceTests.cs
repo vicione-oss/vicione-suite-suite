@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Services;
 using Blazor.Shared.Tests.Models;
 using AwesomeAssertions;
@@ -61,7 +61,7 @@ public sealed class SettingsModuleServiceTests
     }
 
     [Fact]
-    public async Task GetCategoriesGroupedByPanelElements()
+    public async Task Should_get_categories_grouped_by_panel_elements()
     {
         // Arrange
         await using var serviceProvider = SetupServiceProvider();
@@ -79,7 +79,7 @@ public sealed class SettingsModuleServiceTests
     }
 
     [Fact]
-    public async Task GetSubCategoriesGroupedByPanelElements()
+    public async Task Should_get_sub_categories_grouped_by_panel_elements()
     {
         // Arrange
         await using var serviceProvider = SetupServiceProvider();
@@ -98,7 +98,7 @@ public sealed class SettingsModuleServiceTests
     }
 
     [Fact]
-    public async Task GetControlPanelsByCategoryAndSubCategory()
+    public async Task Should_get_control_panels_by_category_and_sub_category()
     {
         // Arrange
         await using var serviceProvider = SetupServiceProvider();
@@ -114,7 +114,7 @@ public sealed class SettingsModuleServiceTests
         {
             foreach (var settingsEntries in service.GetSettingsEntries(controlPanelRegistryItems, groupPosition: 0, category.Title))
             {
-                Assert.NotNull(settingsEntries.ControlPanelRegistryItem);
+                settingsEntries.ControlPanelRegistryItem.Should().NotBeNull();
             }
         }
     }

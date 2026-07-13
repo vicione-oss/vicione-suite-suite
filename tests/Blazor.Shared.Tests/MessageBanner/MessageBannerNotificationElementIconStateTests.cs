@@ -12,7 +12,7 @@ public sealed class MessageBannerNotificationElementIconStateTests
     [Theory]
     [InlineData(nameof(MonochromeIconName.InfoLight), nameof(MonochromeIconName.InfoLight), false)]
     [InlineData(nameof(MonochromeIconName.InfoLight), nameof(MonochromeIconName.CloseCircleSolid), true)]
-    public void Assert_changed_event_handling_when_icon_name_is_set(string initialIcon,
+    public void Should_handle_changed_event_when_icon_name_is_set(string initialIcon,
         string icon, bool shouldTriggerChangedEvent)
     {
         // Arrange
@@ -32,7 +32,7 @@ public sealed class MessageBannerNotificationElementIconStateTests
     [Theory]
     [InlineData(MessageType.Information, MessageType.Information, false)]
     [InlineData(MessageType.Information, MessageType.Warning, true)]
-    public void Assert_changed_event_handling_when_message_type_is_set(MessageType initialMessageType,
+    public void Should_handle_changed_event_when_message_type_is_set(MessageType initialMessageType,
         MessageType messageType, bool shouldTriggerChangedEvent)
     {
         // Arrange

@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.NotificationArea.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
@@ -71,7 +71,7 @@ public sealed class NotificationElementRegistryTests
     }
 
     [Fact]
-    public void Assert_registered_notification_element_parameters_of_first_discovered_notification_element()
+    public void Should_have_registered_notification_element_parameters_of_first_discovered_notification_element()
     {
         // Arrange
         var services = new ServiceCollection()
@@ -94,7 +94,7 @@ public sealed class NotificationElementRegistryTests
     }
 
     [Fact]
-    public void Assert_registered_notification_element_parameters_after_add_operation()
+    public void Should_have_registered_notification_element_parameters_after_add_operation()
     {
         // Arrange
         var services = new ServiceCollection()

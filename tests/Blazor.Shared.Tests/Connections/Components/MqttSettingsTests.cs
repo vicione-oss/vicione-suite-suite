@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Connections.Components;
+using Blazor.Shared.Connections.Components;
 using Blazor.Shared.Tests.Connections.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
@@ -12,7 +12,7 @@ namespace Blazor.Shared.Tests.Connections.Components;
 public class MqttSettingsTests
 {
     [Fact]
-    public void ComponentGetsRendered()
+    public void Should_render_component()
     {
         // Arrange
         var connection = ConnectionFactory.MqttConnection.GetMqttConnection();
@@ -28,7 +28,7 @@ public class MqttSettingsTests
     }
 
     [Fact]
-    public void FieldsBindToModel()
+    public void Should_bind_fields_to_model()
     {
         // Arrange
         var connection = ConnectionFactory.MqttConnection.GetMqttConnection();

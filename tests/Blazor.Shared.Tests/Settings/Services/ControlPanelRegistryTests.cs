@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
@@ -108,7 +108,7 @@ public sealed class ControlPanelRegistryTests
     }
 
     [Fact]
-    public void Assert_registered_control_panel_parameters_of_control_panel_discovered_from_di_registration()
+    public void Should_have_registered_control_panel_parameters_of_control_panel_discovered_from_di_registration()
     {
         // Arrange
         var services = new ServiceCollection();
@@ -135,7 +135,7 @@ public sealed class ControlPanelRegistryTests
     }
 
     [Fact]
-    public void Assert_registered_control_panel_parameters_after_add_operation()
+    public void Should_have_registered_control_panel_parameters_after_add_operation()
     {
         // Arrange
         var services = new ServiceCollection();

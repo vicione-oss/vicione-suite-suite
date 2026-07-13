@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
+using AwesomeAssertions;
 using Blazor.Shared.Services;
 using NSubstitute;
 using Sdk.Client.Infrastructure;
@@ -20,7 +21,7 @@ public sealed class LayoutServiceTests : IDisposable
     public LayoutServiceTests() => _service = new LayoutService(_instanceInformationProvider, _uiMediator);
 
     [Fact]
-    public void Check_property_changed_title_bar_app_name_if_set_new_value()
+    public void Should_change_title_bar_app_name_when_set_to_new_value()
     {
         // Arrange
         _service.PropertyChanged += PropertyHasChanged;
@@ -32,12 +33,12 @@ public sealed class LayoutServiceTests : IDisposable
         _service.TitleBarAppName = TitleBarSecondValue;
 
         // Assert
-        Assert.Equal(TitleBarSecondValue, _service.TitleBarAppName);
-        Assert.Equal(nameof(LayoutService.TitleBarAppName), _propertyName); // check that property has changed
+        _service.TitleBarAppName.Should().Be(TitleBarSecondValue);
+        _propertyName.Should().Be(nameof(LayoutService.TitleBarAppName)); // check that property has changed
     }
 
     [Fact]
-    public void Check_property_changed_title_bar_text_if_set_new_value()
+    public void Should_change_title_bar_text_when_set_to_new_value()
     {
         // Arrange
         _service.PropertyChanged += PropertyHasChanged;
@@ -49,12 +50,12 @@ public sealed class LayoutServiceTests : IDisposable
         _service.TitleBarText = TitleBarSecondValue;
 
         // Assert
-        Assert.Equal(TitleBarSecondValue, _service.TitleBarText);
-        Assert.Equal(nameof(LayoutService.TitleBarText), _propertyName); // check that property has changed
+        _service.TitleBarText.Should().Be(TitleBarSecondValue);
+        _propertyName.Should().Be(nameof(LayoutService.TitleBarText)); // check that property has changed
     }
 
     [Fact]
-    public void Check_property_changed_is_sidebar_open_if_set_new_value()
+    public void Should_change_is_sidebar_open_when_set_to_new_value()
     {
         // Arrange
         _service.PropertyChanged += PropertyHasChanged;
@@ -66,12 +67,12 @@ public sealed class LayoutServiceTests : IDisposable
         _service.IsSidebarOpen = true;
 
         // Assert
-        Assert.True(_service.IsSidebarOpen);
-        Assert.Equal(nameof(LayoutService.IsSidebarOpen), _propertyName); // check that property has changed
+        _service.IsSidebarOpen.Should().BeTrue();
+        _propertyName.Should().Be(nameof(LayoutService.IsSidebarOpen)); // check that property has changed
     }
 
     [Fact]
-    public void Check_property_changed_is_loading_overlay_visible_if_set_new_value()
+    public void Should_change_is_loading_overlay_visible_when_set_to_new_value()
     {
         // Arrange
         _service.PropertyChanged += PropertyHasChanged;
@@ -83,12 +84,12 @@ public sealed class LayoutServiceTests : IDisposable
         _service.IsLoadingOverlayVisible = true;
 
         // Assert
-        Assert.True(_service.IsLoadingOverlayVisible);
-        Assert.Equal(nameof(LayoutService.IsLoadingOverlayVisible), _propertyName); // check that property has changed
+        _service.IsLoadingOverlayVisible.Should().BeTrue();
+        _propertyName.Should().Be(nameof(LayoutService.IsLoadingOverlayVisible)); // check that property has changed
     }
 
     [Fact]
-    public void Check_property_not_changed_title_bar_app_name_if_set_same_value()
+    public void Should_not_change_title_bar_app_name_when_set_to_same_value()
     {
         // Arrange
         _service.PropertyChanged += PropertyHasChanged;
@@ -100,12 +101,12 @@ public sealed class LayoutServiceTests : IDisposable
         _service.TitleBarAppName = TitleBarFirstValue;
 
         // Assert
-        Assert.Equal(TitleBarFirstValue, _service.TitleBarAppName);
-        Assert.Equal(string.Empty, _propertyName); // check that property has not changed
+        _service.TitleBarAppName.Should().Be(TitleBarFirstValue);
+        _propertyName.Should().Be(string.Empty); // check that property has not changed
     }
 
     [Fact]
-    public void Check_property_not_changed_title_bar_text_if_set_same_value()
+    public void Should_not_change_title_bar_text_when_set_to_same_value()
     {
         // Arrange
         _service.PropertyChanged += PropertyHasChanged;
@@ -117,12 +118,12 @@ public sealed class LayoutServiceTests : IDisposable
         _service.TitleBarText = TitleBarFirstValue;
 
         // Assert
-        Assert.Equal(TitleBarFirstValue, _service.TitleBarText);
-        Assert.Equal(string.Empty, _propertyName); // check that property has not changed
+        _service.TitleBarText.Should().Be(TitleBarFirstValue);
+        _propertyName.Should().Be(string.Empty); // check that property has not changed
     }
 
     [Fact]
-    public void Check_property_not_changed_is_sidebar_open_if_set_same_value()
+    public void Should_not_change_is_sidebar_open_when_set_to_same_value()
     {
         // Arrange
         _service.PropertyChanged += PropertyHasChanged;
@@ -134,12 +135,12 @@ public sealed class LayoutServiceTests : IDisposable
         _service.IsSidebarOpen = false;
 
         // Assert
-        Assert.False(_service.IsSidebarOpen);
-        Assert.Equal(string.Empty, _propertyName); // check that property has not changed
+        _service.IsSidebarOpen.Should().BeFalse();
+        _propertyName.Should().Be(string.Empty); // check that property has not changed
     }
 
     [Fact]
-    public void Check_property_not_changed_is_loading_overlay_visible_if_set_same_value()
+    public void Should_not_change_is_loading_overlay_visible_when_set_to_same_value()
     {
         // Arrange
         _service.PropertyChanged += PropertyHasChanged;
@@ -151,8 +152,8 @@ public sealed class LayoutServiceTests : IDisposable
         _service.IsLoadingOverlayVisible = false;
 
         // Assert
-        Assert.False(_service.IsLoadingOverlayVisible);
-        Assert.Equal(string.Empty, _propertyName); // check that property has not changed
+        _service.IsLoadingOverlayVisible.Should().BeFalse();
+        _propertyName.Should().Be(string.Empty); // check that property has not changed
     }
 
     private void PropertyHasChanged(object? sender, PropertyChangedEventArgs e)

@@ -32,7 +32,7 @@ public sealed class MessageBannerNotificationElementTests
             c => c.Add(p => p.State, state));
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 
     [Fact]

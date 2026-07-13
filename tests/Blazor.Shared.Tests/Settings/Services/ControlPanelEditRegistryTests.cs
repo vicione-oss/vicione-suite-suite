@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Services;
@@ -27,7 +27,7 @@ public sealed class ControlPanelEditRegistryTests
     }
 
     [Fact]
-    public void Assert_registered_items_after_add_operation()
+    public void Should_have_registered_items_after_add_operation()
     {
         // Arrange
         var services = new ServiceCollection()

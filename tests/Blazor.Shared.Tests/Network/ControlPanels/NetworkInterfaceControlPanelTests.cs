@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Components;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Network.Extensions;
@@ -15,10 +16,10 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Network.ControlPanels;
 
-public class NetworkInterfaceControlPanelTests
+public sealed class NetworkInterfaceControlPanelTests
 {
     [Fact]
-    public async Task ComponentShouldRender()
+    public async Task Should_render_component()
     {
         // Arrange
         var timeProvider = Substitute.For<TimeProvider>();
@@ -57,6 +58,6 @@ public class NetworkInterfaceControlPanelTests
             .AddCascadingValue(registryItem));
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 }

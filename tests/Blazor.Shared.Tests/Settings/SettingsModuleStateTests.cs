@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using AwesomeAssertions;
 using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Services;
@@ -18,7 +18,7 @@ public sealed class SettingsModuleStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_show_navigate_back_button_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_show_navigate_back_button_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
         => _tests.AssertChangedEventHandlingWhenPropertyIsSet(state => state.ShowNavigateBackButton, initialValue, value, shouldTriggerChangedEvent);
 
 
@@ -27,7 +27,7 @@ public sealed class SettingsModuleStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_is_loading_overlay_visible_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_is_loading_overlay_visible_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
         => _tests.AssertChangedEventHandlingWhenPropertyIsSet(state => state.IsLoadingOverlayVisible, initialValue, value, shouldTriggerChangedEvent);
 
     [Theory]
@@ -35,7 +35,7 @@ public sealed class SettingsModuleStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_expanded_settings_category_is_set(bool hasInitialValue, bool hasValue, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_expanded_settings_category_is_set(bool hasInitialValue, bool hasValue, bool shouldTriggerChangedEvent)
     {
         var settingsCategory = new SettingsCategory { Title = "Foo" };
 
@@ -50,7 +50,7 @@ public sealed class SettingsModuleStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_active_control_panel_registry_item_is_set(bool hasInitialValue, bool hasValue, bool shouldTriggerChangedEvent)
+    public void Should_trigger_changed_event_when_active_control_panel_registry_item_is_set(bool hasInitialValue, bool hasValue, bool shouldTriggerChangedEvent)
     {
         var activeControlPanelRegistryItem = Substitute.For<IControlPanelRegistryItem>();
 
@@ -65,7 +65,7 @@ public sealed class SettingsModuleStateTests
     [InlineData(false, false, true, false)]
     [InlineData(true, true, false, false)]
     [InlineData(true, false, true, true)]
-    public void Assert_changed_event_handling_when_last_active_control_panel_registry_item_map_is_changed(
+    public void Should_trigger_changed_event_when_last_active_control_panel_registry_item_map_is_changed(
         bool hasInitialEntries, bool addOrSetEntry, bool removeEntry, bool shouldTriggerChangedEvent)
     {
         // Arrange

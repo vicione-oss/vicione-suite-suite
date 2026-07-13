@@ -23,7 +23,7 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
     public sealed class UpdateRepositoryTests
     {
         [Fact]
-        public void Created_adds_repository_to_list()
+        public void Should_add_repository_to_list_on_created()
         {
             // Arrange
             var repo = CreateRepository();
@@ -38,7 +38,7 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
         }
 
         [Fact]
-        public void Updated_updates_existing_repository_in_list()
+        public void Should_update_existing_repository_in_list_on_updated()
         {
             // Arrange
             var repo = CreateRepository();
@@ -56,7 +56,7 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
         }
 
         [Fact]
-        public void Updated_returns_false_when_repository_not_found()
+        public void Should_return_false_when_repository_not_found_on_updated()
         {
             // Arrange
             var state = new ArtifactRepositoriesControlPanelState();
@@ -71,7 +71,7 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
         }
 
         [Fact]
-        public void Deleted_removes_repository_from_list()
+        public void Should_remove_repository_from_list_on_deleted()
         {
             // Arrange
             var repo = CreateRepository();
@@ -86,7 +86,7 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
         }
 
         [Fact]
-        public void Deleted_returns_false_when_repository_not_found()
+        public void Should_return_false_when_repository_not_found_on_deleted()
         {
             // Arrange
             var state = new ArtifactRepositoriesControlPanelState();
@@ -103,7 +103,7 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
     public sealed class DeleteRepositoryTests
     {
         [Fact]
-        public void Moves_repository_to_marked_for_deletion_and_removes_from_list()
+        public void Should_move_repository_to_marked_for_deletion_and_remove_from_list()
         {
             // Arrange
             var repo = CreateRepository();
@@ -119,7 +119,7 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
         }
 
         [Fact]
-        public void Returns_false_when_repository_not_found()
+        public void Should_return_false_when_repository_not_found()
         {
             // Arrange
             var state = new ArtifactRepositoriesControlPanelState();
@@ -133,7 +133,7 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
         }
 
         [Fact]
-        public void Does_not_affect_other_repositories_when_deleting()
+        public void Should_not_affect_other_repositories_when_deleting()
         {
             // Arrange
             var repoToDelete = CreateRepository("https://delete.example.com");

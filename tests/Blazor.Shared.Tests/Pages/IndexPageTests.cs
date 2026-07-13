@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.Components.Pages;
 using Blazor.Shared.NavTiles.Extensions;
 using Bunit;
@@ -10,10 +10,10 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Pages;
 
-public class IndexPageTests
+public sealed class IndexPageTests
 {
     [Fact]
-    public void NavItemsGetRendered()
+    public void Should_render_nav_items()
     {
         // Arrange
         using var ctx = new BunitContext();
@@ -32,14 +32,14 @@ public class IndexPageTests
 
         // Assert
         var tileGroups = component.FindAll(".nav-tile-panel");
-        Assert.Equal(2, tileGroups.Count);
+        tileGroups.Should().HaveCount(2);
 
         var navTiles = component.FindAll(".nav-tile-container");
         navTiles.Should().HaveCount(2);
     }
 
     [Fact]
-    public void ShouldRenderNavTiles()
+    public void Should_render_nav_tiles()
     {
         // Arrange
         var clientModules = new List<ClientModule>
@@ -69,9 +69,9 @@ public class IndexPageTests
 
         // Assert
         var navTileContainers = component.FindAll(".nav-tile-container");
-        Assert.Equal(clientModules.Count, navTileContainers.Count);
+        navTileContainers.Should().HaveCount(clientModules.Count);
 
         var navTileContent = component.FindAll(".nav-tile-standard-content");
-        Assert.Equal(clientModules.Count, navTileContent.Count);
+        navTileContent.Should().HaveCount(clientModules.Count);
     }
 }

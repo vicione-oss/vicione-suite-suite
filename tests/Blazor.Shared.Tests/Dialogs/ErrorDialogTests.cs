@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Dialogs;
 using Bunit;
 using Bunit.Rendering;
@@ -12,7 +13,7 @@ namespace Blazor.Shared.Tests.Dialogs;
 public sealed class ErrorDialogTests
 {
     [Fact]
-    public async Task ComponentGetsRendered()
+    public async Task Should_render_component()
     {
         // Arrange
         await using var ctx = new BunitContext();
@@ -22,11 +23,11 @@ public sealed class ErrorDialogTests
         var cut = ctx.Render<ErrorDialog>();
 
         // Assert
-        Assert.NotNull(cut);
+        cut.Should().NotBeNull();
     }
 
     [Fact]
-    public async Task Should_Be_Rendered_Hidden()
+    public async Task Should_render_hidden()
     {
         // Arrange
         await using var ctx = new BunitContext();
@@ -42,7 +43,7 @@ public sealed class ErrorDialogTests
     }
 
     [Fact]
-    public async Task Should_Be_Rendered_Visible()
+    public async Task Should_render_visible()
     {
         // Arrange
         await using var ctx = new BunitContext();
@@ -56,11 +57,11 @@ public sealed class ErrorDialogTests
         var sectionContent = innerDialog.RenderSectionContent(ctx);
 
         // Assert
-        Assert.NotNull(sectionContent.Find(".error-dialog"));
+        sectionContent.Find(".error-dialog").Should().NotBeNull();
     }
 
     [Fact]
-    public async Task OnConfirm_Event_Is_Fired_On_Ok_Button_Click()
+    public async Task Should_fire_on_confirm_event_on_ok_button_click()
     {
         // Arrange
         var onConfirmFired = false;
@@ -80,11 +81,11 @@ public sealed class ErrorDialogTests
         await innerButton.ClickAsync();
 
         // Assert
-        Assert.True(onConfirmFired);
+        onConfirmFired.Should().BeTrue();
     }
 
     [Fact]
-    public async Task OnConfirm_Event_Is_Fired_On_Close_Button_Click()
+    public async Task Should_fire_on_confirm_event_on_close_button_click()
     {
         // Arrange
         var onConfirmFired = false;
@@ -104,11 +105,11 @@ public sealed class ErrorDialogTests
         await innerButton.ClickAsync();
 
         // Assert
-        Assert.True(onConfirmFired);
+        onConfirmFired.Should().BeTrue();
     }
 
     [Fact]
-    public async Task Exception_Is_Rendered()
+    public async Task Should_render_exception()
     {
         // Arrange
         var exceptionMessage = "Exception test message";

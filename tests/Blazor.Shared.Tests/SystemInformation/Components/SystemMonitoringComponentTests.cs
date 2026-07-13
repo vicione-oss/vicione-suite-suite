@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.Services;
+using AwesomeAssertions;
+using Blazor.Shared.Services;
 using Blazor.Shared.SystemInformation.Components;
 using Blazor.Shared.SystemInformation.Services;
 using Bunit;
@@ -10,7 +11,7 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.SystemInformation.Components;
 
-public class SystemMonitoringComponentTests
+public sealed class SystemMonitoringComponentTests
 {
     private readonly IJsInterop _jsInterop = Substitute.For<IJsInterop>();
 
@@ -32,7 +33,7 @@ public class SystemMonitoringComponentTests
         var component = ctx.Render<SystemMonitoringComponent>();
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 
     [Fact]
@@ -55,7 +56,7 @@ public class SystemMonitoringComponentTests
 
             // Act
             var component = ctx.Render<SystemMonitoringComponent>();
-            Assert.NotNull(component);
+            component.Should().NotBeNull();
         }
 
         // Assert

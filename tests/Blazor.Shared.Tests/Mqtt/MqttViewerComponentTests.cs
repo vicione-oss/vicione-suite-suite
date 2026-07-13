@@ -76,10 +76,10 @@ public class MqttViewerComponentTests
         ctx.Services.AddScoped<MqttTopicTreeAdapter>();
     }
 
-    public class OnInitializedAsync : MqttViewerComponentTests
+    public sealed class OnInitializedAsync : MqttViewerComponentTests
     {
         [Fact(Skip = SkipFailing)]
-        public void Sets_variables()
+        public void Should_set_variables()
         {
             using var ctx = new BunitContext();
             ConfigureTestServices(ctx,
@@ -117,7 +117,7 @@ public class MqttViewerComponentTests
         }
 
         [Fact(Skip = SkipMessage)]
-        public void Sets_message_when_no_connections_are_configured()
+        public void Should_set_message_when_no_connections_are_configured()
         {
             // Arrange
             using var ctx = new BunitContext();
@@ -131,10 +131,10 @@ public class MqttViewerComponentTests
         }
     }
 
-    public class ConnectClient : MqttViewerComponentTests
+    public sealed class ConnectClient : MqttViewerComponentTests
     {
         [Fact(Skip = SkipFailing)]
-        public async Task Returns_when_selected_connection_is_null()
+        public async Task Should_return_when_selected_connection_is_null()
         {
             // Arrange
             await using var ctx = new BunitContext();
@@ -150,7 +150,7 @@ public class MqttViewerComponentTests
         }
 
         [Fact(Skip = SkipFailing)]
-        public async Task Calls_connect_on_client()
+        public async Task Should_call_connect_on_client()
         {
             // Arrange
             await using var ctx = new BunitContext();
@@ -176,7 +176,7 @@ public class MqttViewerComponentTests
         }
 
         [Fact(Skip = SkipFailing)]
-        public void Shows_error_message_on_failure()
+        public void Should_show_error_message_on_failure()
         {
             // Arrange
             using var ctx = new BunitContext();
@@ -203,10 +203,10 @@ public class MqttViewerComponentTests
         }
     }
 
-    public class DisconnectClient : MqttViewerComponentTests
+    public sealed class DisconnectClient : MqttViewerComponentTests
     {
         [Fact(Skip = SkipFailing)]
-        public async Task Calls_disconnect_on_client()
+        public async Task Should_call_disconnect_on_client()
         {
             // Arrange
             await using var ctx = new BunitContext();
@@ -244,10 +244,10 @@ public class MqttViewerComponentTests
         }
     }
 
-    public class ClearButtonClicked : MqttViewerComponentTests
+    public sealed class ClearButtonClicked : MqttViewerComponentTests
     {
         [Fact(Skip = SkipFailing)]
-        public void Clears_message_list()
+        public void Should_clear_message_list()
         {
             // Arrange
             using var ctx = new BunitContext();
@@ -270,10 +270,10 @@ public class MqttViewerComponentTests
         }
     }
 
-    public class ShowMessageDetails : MqttViewerComponentTests
+    public sealed class ShowMessageDetails : MqttViewerComponentTests
     {
         [Fact(Skip = SkipFailing)]
-        public void Shows_message_in_message_detail_box_on_all_messages_grid_click()
+        public void Should_show_message_in_message_detail_box_on_all_messages_grid_click()
         {
             // Arrange
             using var ctx = new BunitContext();
@@ -299,7 +299,7 @@ public class MqttViewerComponentTests
         }
 
         [Fact(Skip = SkipFailing)]
-        public void Shows_message_details_on_filtered_messages_grid_click()
+        public void Should_show_message_details_on_filtered_messages_grid_click()
         {
             // Arrange
             using var ctx = new BunitContext();
@@ -341,10 +341,10 @@ public class MqttViewerComponentTests
         }
     }
 
-    public class ReloadIntervalChanged : MqttViewerComponentTests
+    public sealed class ReloadIntervalChanged : MqttViewerComponentTests
     {
         [Fact(Skip = SkipMessage)]
-        public void Set_correct_reload_interval()
+        public void Should_set_correct_reload_interval()
         {
             // Arrange
             using var ctx = new BunitContext();
@@ -371,10 +371,10 @@ public class MqttViewerComponentTests
         }
     }
 
-    public class BeforeExpandAndCollapseTreeView : MqttViewerComponentTests
+    public sealed class BeforeExpandAndCollapseTreeView : MqttViewerComponentTests
     {
         [Fact(Skip = SkipFailing)]
-        public void Expands_note_on_chevron_click()
+        public void Should_expand_node_on_chevron_click()
         {
             // Arrange
             using var ctx = new BunitContext();
@@ -404,10 +404,10 @@ public class MqttViewerComponentTests
         }
     }
 
-    public class OnFilterChanged : MqttViewerComponentTests
+    public sealed class OnFilterChanged : MqttViewerComponentTests
     {
         [Fact(Skip = SkipFailing)]
-        public void Shows_only_filtered_messages()
+        public void Should_show_only_filtered_messages()
         {
             // Arrange
             var messageModels = new List<MessageModel>
@@ -455,10 +455,10 @@ public class MqttViewerComponentTests
         }
     }
 
-    public class SetTreeList : MqttViewerComponentTests
+    public sealed class SetTreeList : MqttViewerComponentTests
     {
         [Fact(Skip = SkipFailing)]
-        public void Sets_correct_tree_on_incoming_message()
+        public void Should_set_correct_tree_on_incoming_message()
         {
             // Arrange
             using var ctx = new BunitContext();

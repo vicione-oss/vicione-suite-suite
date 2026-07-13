@@ -7,12 +7,12 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.Mqtt.Services;
 
-public class MqttServiceTests
+public sealed class MqttServiceTests
 {
-    public class Connect
+    public sealed class Connect
     {
         [Fact]
-        public async Task Throws_invalid_enum_argument_exception_when_protocol_is_unknown()
+        public async Task Should_throw_invalid_enum_argument_exception_when_protocol_is_unknown()
         {
             // Arrange
             const int protocolType = 3;
@@ -41,7 +41,7 @@ public class MqttServiceTests
         }
 
         [Fact]
-        public async Task Invokes_event_with_tcp_connection()
+        public async Task Should_invoke_event_with_tcp_connection()
         {
             // Arrange
             await using var service = new MqttService();
@@ -69,7 +69,7 @@ public class MqttServiceTests
         }
 
         [Fact]
-        public async Task Invokes_event_with_tcp_connection_with_tls()
+        public async Task Should_invoke_event_with_tcp_connection_with_tls()
         {
             // Arrange
             await using var service = new MqttService();
@@ -95,7 +95,7 @@ public class MqttServiceTests
         }
 
         [Fact(Skip = "We can't ensure that this address is available in test environment yet")]
-        public async Task Invokes_event_with_websocket_connection()
+        public async Task Should_invoke_event_with_websocket_connection()
         {
             // Arrange
             await using var service = new MqttService();
@@ -121,10 +121,10 @@ public class MqttServiceTests
         }
     }
 
-    public class Disconnect
+    public sealed class Disconnect
     {
         [Fact]
-        public async Task Cleans_lists()
+        public async Task Should_clean_lists()
         {
             // Arrange
             await using var service = new MqttService();
@@ -141,10 +141,10 @@ public class MqttServiceTests
         }
     }
 
-    public class ClearMessages
+    public sealed class ClearMessages
     {
         [Fact]
-        public async Task Cleans_lists()
+        public async Task Should_clean_lists()
         {
             // Arrange
             await using var service = new MqttService();
@@ -161,10 +161,10 @@ public class MqttServiceTests
         }
     }
 
-    public class Subscribe
+    public sealed class Subscribe
     {
         [Fact]
-        public async Task Invokes_event()
+        public async Task Should_invoke_event()
         {
             // Arrange
             await using var service = new MqttService();

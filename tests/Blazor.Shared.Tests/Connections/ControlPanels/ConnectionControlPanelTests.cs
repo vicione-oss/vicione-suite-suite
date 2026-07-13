@@ -56,7 +56,7 @@ public class ConnectionControlPanelTests
         return ctx;
     }
 
-    public class OnInitializedAsync : ConnectionControlPanelTests
+    public sealed class OnInitializedAsync : ConnectionControlPanelTests
     {
         [Fact]
         public async Task Should_init_empty_connection_if_state_connection_id_is_not_set()

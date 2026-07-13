@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.MessageBanner.NotificationArea;
+using Blazor.Shared.MessageBanner.NotificationArea;
 using AwesomeAssertions;
 using Xunit;
 
@@ -11,7 +11,7 @@ public sealed class MessageBannerNotificationElementStateTests
     [InlineData("", "Random title", true)]
     [InlineData("Random title", "", true)]
     [InlineData("Random title", "Random title", false)]
-    public void Assert_changed_event_handling_when_title_is_set(string initialTitle, string title, bool shouldTriggerChangedEvent)
+    public void Should_handle_changed_event_when_title_is_set(string initialTitle, string title, bool shouldTriggerChangedEvent)
     {
         // Arrange
         var changedTriggered = false;

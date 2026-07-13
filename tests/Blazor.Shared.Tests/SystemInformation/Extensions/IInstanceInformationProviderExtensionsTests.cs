@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.SystemInformation.Extensions;
+using AwesomeAssertions;
+using Blazor.Shared.SystemInformation.Extensions;
 using NSubstitute;
 using Sdk.Instance;
 using Sdk.Modules;
@@ -9,7 +10,7 @@ namespace Blazor.Shared.Tests.SystemInformation.Extensions;
 public sealed class IInstanceInformationProviderExtensionsTests
 {
     [Fact]
-    public async Task GetSysInfoMd_WhenNoModules_ReturnsExpectedMarkdown_WithNoModulesMessage_AndLFOnly()
+    public async Task Should_return_markdown_with_no_modules_message_and_lf_only_when_no_modules()
     {
         // Arrange
         var provider = Substitute.For<IInstanceInformationProvider>();
@@ -66,12 +67,12 @@ public sealed class IInstanceInformationProviderExtensionsTests
         var md = await provider.GetSystemInformationMarkdown();
 
         // Assert
-        Assert.Contains("| Sn. | SN123 (MySystem) |\n", md, StringComparison.Ordinal);
-        Assert.DoesNotContain('\r', md);
+        md.Should().Contain("| Sn. | SN123 (MySystem) |\n");
+        md.Should().NotContain("\r");
     }
 
     [Fact]
-    public async Task GetSysInfoMd_WhenModulesExist_RendersModulesTable()
+    public async Task Should_render_modules_table_when_modules_exist()
     {
         // Arrange
         var provider = Substitute.For<IInstanceInformationProvider>();
@@ -97,21 +98,21 @@ public sealed class IInstanceInformationProviderExtensionsTests
         var md = await provider.GetSystemInformationMarkdown();
 
         // Assert
-        Assert.Contains("**Modules**\n\n", md, StringComparison.Ordinal);
+        md.Should().Contain("**Modules**\n\n");
 
         // Modules table header + separator
-        Assert.Contains("|Name|Version|\n|---|---|\n", md, StringComparison.Ordinal);
+        md.Should().Contain("|Name|Version|\n|---|---|\n");
 
         // Rows
-        Assert.Contains("| ModA | v3.4.5 |\n", md, StringComparison.Ordinal);
-        Assert.Contains("| ModB | v0.1.0 |\n", md, StringComparison.Ordinal);
+        md.Should().Contain("| ModA | v3.4.5 |\n");
+        md.Should().Contain("| ModB | v0.1.0 |\n");
 
         // Still LF-only
-        Assert.DoesNotContain('\r', md);
+        md.Should().NotContain("\r");
     }
 
     [Fact]
-    public async Task GetSysInfoMd_EscapesPipeCharacters_InFieldsAndModuleData()
+    public async Task Should_escape_pipe_characters_in_fields_and_module_data()
     {
         // Arrange
         var provider = Substitute.For<IInstanceInformationProvider>();
@@ -136,14 +137,14 @@ public sealed class IInstanceInformationProviderExtensionsTests
         var md = await provider.GetSystemInformationMarkdown();
 
         // Assert (pipes escaped in fields that go through EscapeMd)
-        Assert.Contains("| Suite | v1\\|2\\|3 |\n", md, StringComparison.Ordinal);
-        Assert.Contains("| Sn. | SN\\|X (SYS\\|T) |\n", md, StringComparison.Ordinal);
+        md.Should().Contain("| Suite | v1\\|2\\|3 |\n");
+        md.Should().Contain("| Sn. | SN\\|X (SYS\\|T) |\n");
 
         // Pipes escaped in module name/version
-        Assert.Contains("| Name\\|With\\|Pipes | vVer\\|1 |\n", md, StringComparison.Ordinal);
+        md.Should().Contain("| Name\\|With\\|Pipes | vVer\\|1 |\n");
 
         // Sanity: still a table row (unescaped pipes would increase column count visually)
-        Assert.DoesNotContain('\r', md);
+        md.Should().NotContain("\r");
     }
 
     private static ModuleMetadata CreateModuleMetadata(string name, string version)

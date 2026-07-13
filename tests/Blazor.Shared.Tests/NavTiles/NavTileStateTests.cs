@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Sdk.Client.NavTiles.Components;
 using Xunit;
 
@@ -82,7 +82,7 @@ public sealed class NavTileStateTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Assert_changed_event_handling_on_end_loading(bool isLoading)
+    public void Should_handle_changed_event_on_end_loading(bool isLoading)
     {
         // Arrange
         var changedTriggered = false;
@@ -106,7 +106,7 @@ public sealed class NavTileStateTests
     [InlineData(false, true, true)]
     [InlineData(true, false, true)]
     [InlineData(true, true, false)]
-    public void Assert_changed_event_handling_when_enabled_is_set(bool isEnabledInitially, bool isEnabled, bool shouldTriggerChangedEvent)
+    public void Should_handle_changed_event_when_enabled_is_set(bool isEnabledInitially, bool isEnabled, bool shouldTriggerChangedEvent)
     {
         // Arrange
         var changedTriggered = false;
@@ -126,7 +126,7 @@ public sealed class NavTileStateTests
     [InlineData("/foo", "/foo", false)]
     [InlineData("/foo", "/bar", true)]
     [InlineData("/bar", null, true)]
-    public void Assert_changed_event_handling_when_link_target_is_set(string? initialLinkTarget, string? newLinkTarget, bool shouldTriggerChangedEvent)
+    public void Should_handle_changed_event_when_link_target_is_set(string? initialLinkTarget, string? newLinkTarget, bool shouldTriggerChangedEvent)
     {
         // Arrange
         var changedTriggered = false;

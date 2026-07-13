@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Components;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Extensions;
@@ -13,7 +14,7 @@ namespace Blazor.Shared.Tests.UserInterface.ControlPanels.Theme;
 public sealed class ThemeControlPanelTests
 {
     [Fact]
-    public void Component_should_render()
+    public void Should_render_component()
     {
         // Arrange
         using var ctx = new BunitContext();
@@ -35,6 +36,6 @@ public sealed class ThemeControlPanelTests
             .AddCascadingValue(registryItem));
 
         // Assert
-        Assert.NotNull(component);
+        component.Should().NotBeNull();
     }
 }

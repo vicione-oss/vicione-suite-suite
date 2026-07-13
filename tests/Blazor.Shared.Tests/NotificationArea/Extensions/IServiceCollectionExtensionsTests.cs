@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Blazor.Shared.NotificationArea.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.NotificationArea.Extensions;
@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Blazor.Shared.Tests.NotificationArea.Extensions;
 
-public class IServiceCollectionExtensionsTests
+public sealed class IServiceCollectionExtensionsTests
 {
     public sealed class AddNotificationElements
     {
