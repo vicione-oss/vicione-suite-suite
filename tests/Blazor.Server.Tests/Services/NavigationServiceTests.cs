@@ -1,4 +1,4 @@
-﻿using Blazor.Server.Backend.Services;
+using Blazor.Server.Backend.Services;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Components;
 using NSubstitute;
@@ -18,7 +18,7 @@ public sealed class NavigationServiceTests
     private readonly IJsInterop _jsInterOp = Substitute.For<IJsInterop>();
 
     [Fact]
-    public void Location_values_not_set_if_baseuri_and_uri_are_different()
+    public void Should_not_set_location_values_when_base_uri_and_uri_are_different()
     {
         // Arrange
         var navigationManager = new MockNavigationManager(BaseUri, TestUri);
@@ -38,7 +38,7 @@ public sealed class NavigationServiceTests
     }
 
     [Fact]
-    public void Location_values_set_if_baseuri_and_uri_are_equal()
+    public void Should_set_location_values_when_base_uri_and_uri_are_equal()
     {
         // Arrange
         var navigationManager = new MockNavigationManager(BaseUri, BaseUri);
@@ -58,7 +58,7 @@ public sealed class NavigationServiceTests
     }
 
     [Fact]
-    public void Check_logout_steps()
+    public void Should_execute_logout_steps()
     {
         // Arrange
         var navigationManager = new MockNavigationManager(BaseUri, BaseUri);
@@ -74,7 +74,7 @@ public sealed class NavigationServiceTests
     }
 
     [Fact]
-    public void Jump_to_login_page_if_call_redirect()
+    public void Should_redirect_to_login_page_when_redirect_is_called()
     {
         // Arrange
         var navigationManager = new MockNavigationManager(BaseUri, TestUri);

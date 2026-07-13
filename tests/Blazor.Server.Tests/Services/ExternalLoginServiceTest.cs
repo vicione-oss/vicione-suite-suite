@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using AwesomeAssertions;
 using Blazor.Server.Backend.Services;
 using Blazor.Shared.UserManagement.Services.Validators;
 using Core.Shared.UserManagement;
@@ -11,7 +12,7 @@ using Xunit;
 
 namespace Blazor.Server.Tests.Services;
 
-public class ExternalLoginServiceTest
+public sealed class ExternalLoginServiceTest
 {
     private const string LoginProvider = "OpenIdConnect";
     private const string ProviderKey = "some-sub-id";
@@ -34,7 +35,7 @@ public class ExternalLoginServiceTest
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        Assert.Null(result);
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -49,7 +50,7 @@ public class ExternalLoginServiceTest
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        Assert.Null(result);
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -65,7 +66,7 @@ public class ExternalLoginServiceTest
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        Assert.Null(result);
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -83,11 +84,11 @@ public class ExternalLoginServiceTest
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal("john.doe", result.UserName);
-        Assert.Equal("john.doe@example.com", result.Email);
-        Assert.True(result.EmailConfirmed);
-        Assert.Equal(DateTimeOffset.MinValue, result.PasswordExpirationDate);
+        result.Should().NotBeNull();
+        result.UserName.Should().Be("john.doe");
+        result.Email.Should().Be("john.doe@example.com");
+        result.EmailConfirmed.Should().BeTrue();
+        result.PasswordExpirationDate.Should().Be(DateTimeOffset.MinValue);
         await userManager.DidNotReceive().AddToRoleAsync(Arg.Any<SuiteUser>(), AuthorizationConstants.AdminRoleName);
     }
 
@@ -105,7 +106,7 @@ public class ExternalLoginServiceTest
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        Assert.NotNull(result);
+        result.Should().NotBeNull();
         await userManager.Received(1).AddToRoleAsync(result, AuthorizationConstants.AdminRoleName);
     }
 
@@ -125,7 +126,7 @@ public class ExternalLoginServiceTest
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        Assert.Null(result);
+        result.Should().BeNull();
         await userManager.Received(1).CreateAsync(Arg.Any<SuiteUser>());
         await userManager.DidNotReceive().AddLoginAsync(Arg.Any<SuiteUser>(), Arg.Any<UserLoginInfo>());
     }
@@ -143,7 +144,7 @@ public class ExternalLoginServiceTest
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        Assert.NotNull(result);
+        result.Should().NotBeNull();
         await userManager.Received(1).AddToRoleAsync(result, AuthorizationConstants.AdminRoleName);
     }
 

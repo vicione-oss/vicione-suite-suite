@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Blazor.Server.Tests.Passkeys;
 
-public class RenamePasskeyConsumerTest
+public sealed class RenamePasskeyConsumerTest
 {
     private readonly UserManager<SuiteUser> _userManagerMock = Substitute.For<UserManager<SuiteUser>>(
         Substitute.For<IUserStore<SuiteUser>>(),

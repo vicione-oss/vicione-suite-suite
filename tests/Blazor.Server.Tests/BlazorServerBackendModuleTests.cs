@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reflection;
 using Blazor.Server.Backend;
 using Blazor.Server.Backend.Services;
@@ -30,10 +30,10 @@ public class BlazorServerBackendModuleTests
         return (serviceCollection, new BlazorServerBackendModule());
     }
 
-    public class LoadUiDependencies : BlazorServerBackendModuleTests
+    public sealed class LoadUiDependencies : BlazorServerBackendModuleTests
     {
         [Fact]
-        public async Task Load_ui_dependencies_is_successful()
+        public async Task Should_load_ui_dependencies_successfully()
         {
             // Arrange
             var (serviceCollection, backend) = SetupTest();
@@ -57,10 +57,10 @@ public class BlazorServerBackendModuleTests
         }
     }
 
-    public class RegisterUiDependencies : BlazorServerBackendModuleTests
+    public sealed class RegisterUiDependencies : BlazorServerBackendModuleTests
     {
         [Fact]
-        public async Task Register_ui_blazor_server_client_module_and_client_service_is_successful()
+        public async Task Should_register_ui_blazor_server_client_module_and_client_service_successfully()
         {
             // Arrange
             var (serviceCollection, backend) = SetupTest();

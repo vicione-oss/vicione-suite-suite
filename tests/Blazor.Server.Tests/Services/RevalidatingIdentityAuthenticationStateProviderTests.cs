@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Security.Claims;
 using Blazor.Server.Backend.Services;
 using AwesomeAssertions;
@@ -15,14 +15,14 @@ using Xunit;
 
 namespace Blazor.Server.Tests.Services;
 
-public class RevalidatingIdentityAuthenticationStateProviderTests
+public sealed class RevalidatingIdentityAuthenticationStateProviderTests
 {
     private readonly ILoggerFactory _loggerFactory = Substitute.For<ILoggerFactory>();
     private readonly IServiceScopeFactory _scopeFactory = Substitute.For<IServiceScopeFactory>();
     private readonly IOptions<IdentityOptions> _identityOptions = Substitute.For<IOptions<IdentityOptions>>();
 
     [Fact]
-    public async Task Returns_authentication_state_if_user_is_unknown()
+    public async Task Should_return_authentication_state_when_user_is_unknown()
     {
         // Arrange
         var option = new IdentityOptions();
@@ -56,7 +56,7 @@ public class RevalidatingIdentityAuthenticationStateProviderTests
     }
 
     [Fact]
-    public async Task Returns_authentication_state_if_user_is_common_and_supports_user_security_stamp_is_false()
+    public async Task Should_return_authentication_state_when_user_is_common_and_supports_user_security_stamp_is_false()
     {
         // Arrange
         var option = new IdentityOptions();
@@ -91,7 +91,7 @@ public class RevalidatingIdentityAuthenticationStateProviderTests
     }
 
     [Fact]
-    public async Task Returns_authentication_state_if_user_is_common_and_supports_user_security_stamp_is_true()
+    public async Task Should_return_authentication_state_when_user_is_common_and_supports_user_security_stamp_is_true()
     {
         // Arrange
         var option = new IdentityOptions();

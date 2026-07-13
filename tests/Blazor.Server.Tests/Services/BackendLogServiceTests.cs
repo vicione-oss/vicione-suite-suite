@@ -1,4 +1,4 @@
-﻿using Blazor.Server.Backend.Services;
+using Blazor.Server.Backend.Services;
 using AwesomeAssertions;
 using Core.Shared.Logging;
 using Microsoft.Extensions.Logging;
@@ -11,29 +11,32 @@ public class BackendLogServiceTests
 {
     private readonly ILogLevelSwitch _logLevelSwitch = Substitute.For<ILogLevelSwitch>();
 
-    public class LogLevelTests : BackendLogServiceTests
+    public sealed class SetLogLevel : BackendLogServiceTests
     {
         [Fact]
-        public async Task Set_loglevel_from_log_level_switch()
+        public async Task Should_set_log_level_from_log_level_switch()
         {
             // Arrange
             var backendLogService = new BackendLogService(_logLevelSwitch);
 
-            // Act 
+            // Act
             await backendLogService.SetLogLevel(LogLevel.Debug);
 
             // Assert
             _logLevelSwitch.Received().LogLevel = LogLevel.Debug;
         }
+    }
 
+    public sealed class GetLogLevel : BackendLogServiceTests
+    {
         [Fact]
-        public async Task Returns_loglevel_from_log_level_switch()
+        public async Task Should_return_log_level_from_log_level_switch()
         {
             // Arrange
             var backendLogService = new BackendLogService(_logLevelSwitch);
             _logLevelSwitch.LogLevel.Returns(LogLevel.Debug);
 
-            // Act 
+            // Act
             var actualLogLevel = await backendLogService.GetLogLevel();
 
             // Assert

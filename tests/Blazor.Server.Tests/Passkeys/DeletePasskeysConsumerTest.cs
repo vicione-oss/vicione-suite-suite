@@ -1,4 +1,4 @@
-﻿using Blazor.Server.Backend.Passkeys;
+using Blazor.Server.Backend.Passkeys;
 using Core.Shared.Passkeys;
 using Core.Shared.Passkeys.Commands;
 using Core.Shared.UserManagement.Contracts;
@@ -14,7 +14,7 @@ using MassTransit.Testing;
 
 namespace Blazor.Server.Tests.Passkeys;
 
-public class DeletePasskeysConsumerTest
+public sealed class DeletePasskeysConsumerTest
 {
     private readonly UserManager<SuiteUser> _userManagerMock = Substitute.For<UserManager<SuiteUser>>(
         Substitute.For<IUserStore<SuiteUser>>(),
