@@ -1,4 +1,5 @@
-﻿using Core.OS.Connections.Mqtt;
+using AwesomeAssertions;
+using Core.OS.Connections.Mqtt;
 using Core.OS.Tests.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -7,7 +8,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Connections.Mqtt;
 
-public class MqttConfigurationTests
+public sealed class MqttConfigurationTests
 {
     [Fact]
     public void Add_mqtt_services_should_register_client_options()
@@ -28,17 +29,17 @@ public class MqttConfigurationTests
         // Assert
         var clientOptions = serviceProvider.GetRequiredService<IOptions<MqttClientOptions>>().Value;
         Assert.NotNull(clientOptions.WebSocketClient);
-        Assert.Equal("wss://localhost/mqtt", clientOptions.WebSocketClient.Endpoint);
-        Assert.Equal(5001, clientOptions.WebSocketClient.Port);
-        Assert.Equal("user-wsc", clientOptions.WebSocketClient.UserName);
-        Assert.Equal("pwd-wsc", clientOptions.WebSocketClient.Password);
-        Assert.Equal("topic-wsc", clientOptions.WebSocketClient.TopicFilter);
+        clientOptions.WebSocketClient.Endpoint.Should().Be("wss://localhost/mqtt");
+        clientOptions.WebSocketClient.Port.Should().Be(5001);
+        clientOptions.WebSocketClient.UserName.Should().Be("user-wsc");
+        clientOptions.WebSocketClient.Password.Should().Be("pwd-wsc");
+        clientOptions.WebSocketClient.TopicFilter.Should().Be("topic-wsc");
 
         Assert.NotNull(clientOptions.ServiceClient);
-        Assert.Equal("localhost", clientOptions.ServiceClient.Endpoint);
-        Assert.Equal(1883, clientOptions.ServiceClient.Port);
-        Assert.Equal("user-sc", clientOptions.ServiceClient.UserName);
-        Assert.Equal("pwd-sc", clientOptions.ServiceClient.Password);
-        Assert.Equal("topic-sc", clientOptions.ServiceClient.TopicFilter);
+        clientOptions.ServiceClient.Endpoint.Should().Be("localhost");
+        clientOptions.ServiceClient.Port.Should().Be(1883);
+        clientOptions.ServiceClient.UserName.Should().Be("user-sc");
+        clientOptions.ServiceClient.Password.Should().Be("pwd-sc");
+        clientOptions.ServiceClient.TopicFilter.Should().Be("topic-sc");
     }
 }

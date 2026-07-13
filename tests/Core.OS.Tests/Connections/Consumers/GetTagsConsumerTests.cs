@@ -13,7 +13,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Connections.Consumers;
 
-public class GetTagsConsumerTests : TestWithDbContextSqlite<ConnectionDbContextSqlite>
+public sealed class GetTagsConsumerTests : TestWithDbContextSqlite<ConnectionDbContextSqlite>
 {
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
@@ -26,19 +26,18 @@ public class GetTagsConsumerTests : TestWithDbContextSqlite<ConnectionDbContextS
         };
 
     [Fact]
-    public async Task Can_handle_exceptions()
+    public async Task Should_return_error_response_on_exception()
     {
         // Arrange
         var db = Substitute.For<IConnectionDbContext>();
-
-        void ConfigureServices(IBusRegistrationConfigurator cfg)
+        Action<IBusRegistrationConfigurator> configureServices = cfg =>
         {
             cfg.AddConsumer<GetTagsConsumer>();
             cfg.AddSingleton(db);
             cfg.AddSingleton(Substitute.For<ILogger<GetTagsConsumer>>());
-        }
+        };
 
-        await using var tester = new MassTransitTester(ConfigureServices);
+        await using var tester = new MassTransitTester(configureServices);
 
         db.Tags.Throws(new ArgumentException("Test"));
 
@@ -53,7 +52,7 @@ public class GetTagsConsumerTests : TestWithDbContextSqlite<ConnectionDbContextS
     }
 
     [Fact]
-    public async Task Returns_all_tags()
+    public async Task Should_return_all_tags()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -78,7 +77,7 @@ public class GetTagsConsumerTests : TestWithDbContextSqlite<ConnectionDbContextS
     }
 
     [Fact]
-    public async Task Request_returns_empty_list_if_no_tags_exist()
+    public async Task Should_return_empty_list_if_no_tags_exist()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

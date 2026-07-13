@@ -1,4 +1,4 @@
-﻿using Core.OS.Instance;
+using Core.OS.Instance;
 using Core.OS.Instance.Consumers;
 using Core.Shared.Persistence.Contracts;
 using Core.Shared.Persistence.Requests;
@@ -28,7 +28,7 @@ public sealed class GetBackupConsumerTests
         };
 
     [Fact]
-    public async Task Request_should_be_consumed()
+    public async Task Should_return_error_when_no_backup_exists()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -43,7 +43,7 @@ public sealed class GetBackupConsumerTests
     }
 
     [Fact]
-    public async Task Request_should_return_data_for_requested_filename()
+    public async Task Should_return_data_for_requested_filename()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -62,7 +62,7 @@ public sealed class GetBackupConsumerTests
     }
 
     [Fact]
-    public async Task Request_should_return_data_for_most_recent_backup()
+    public async Task Should_return_data_for_most_recent_backup()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

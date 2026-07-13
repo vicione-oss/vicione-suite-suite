@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class SyncRoutingSlipFaultedConsumerTests
+public sealed class SyncRoutingSlipFaultedConsumerTests
 {
     private readonly SynchronizationState _synchronizationState = new();
     private readonly SyncRetryState _syncRetryState = new();
@@ -58,7 +58,7 @@ public class SyncRoutingSlipFaultedConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_ignore_event_for_different_instance()
+    public async Task Should_ignore_event_for_different_instance()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -74,7 +74,7 @@ public class SyncRoutingSlipFaultedConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_reset_synchronization_state_on_fault()
+    public async Task Should_reset_synchronization_state_on_fault()
     {
         // Arrange
         _synchronizationState.CompleteSynchronization(); // simulate it was set
@@ -90,7 +90,7 @@ public class SyncRoutingSlipFaultedConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_send_re_registration_on_first_failure()
+    public async Task Should_send_re_registration_on_first_failure()
     {
         // Arrange
         var state = new SyncRetryState { RetryDelay = TimeSpan.Zero };
@@ -119,7 +119,7 @@ public class SyncRoutingSlipFaultedConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_mark_degraded_after_max_retries()
+    public async Task Should_mark_degraded_after_max_retries()
     {
         // Arrange
         // Exhaust retries (default max = 3)
@@ -138,7 +138,7 @@ public class SyncRoutingSlipFaultedConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_not_send_re_registration_when_retries_exhausted()
+    public async Task Should_not_send_re_registration_when_retries_exhausted()
     {
         // Arrange — pre-exhaust to 2 failures (one more will exhaust)
         _syncRetryState.RecordFailure(); // attempt 1

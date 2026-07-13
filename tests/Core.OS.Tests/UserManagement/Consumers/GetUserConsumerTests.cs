@@ -30,7 +30,7 @@ public class GetUserConsumerTests
         };
 
     [Fact]
-    public async Task Request_should_be_consumed()
+    public async Task Should_be_consumed()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -43,7 +43,7 @@ public class GetUserConsumerTests
     }
 
     [Fact]
-    public async Task Request_should_return_correct_get_users_response_with_all_users()
+    public async Task Should_return_correct_get_users_response_with_all_users()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -58,7 +58,7 @@ public class GetUserConsumerTests
     }
 
     [Fact]
-    public async Task Request_should_return_correct_get_users_response_with_single_user()
+    public async Task Should_return_correct_get_users_response_with_single_user()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -73,7 +73,7 @@ public class GetUserConsumerTests
     }
 
     [Fact]
-    public async Task Request_should_return_error_for_unknown_username()
+    public async Task Should_return_error_for_unknown_username()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

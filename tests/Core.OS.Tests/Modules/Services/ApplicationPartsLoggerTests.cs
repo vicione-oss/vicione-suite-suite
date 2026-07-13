@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules.Services;
+using Core.OS.Modules.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.Logging;
@@ -10,7 +10,7 @@ namespace Core.OS.Tests.Modules.Services;
 public class ApplicationPartsLoggerTests
 {
     [Fact]
-    public async Task LoggerStart()
+    public async Task Should_start_without_error()
     {
         // Arrange
         var cancellationToken = new CancellationToken();

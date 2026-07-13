@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Connections.Extensions;
 using Sdk.Connections;
 using Sdk.Connections.Contracts;
@@ -8,7 +8,7 @@ namespace Core.OS.Tests.Connections.Extensions;
 
 public class ConnectionExtensionsTests
 {
-    public sealed class SetInstanceMetadata
+    public sealed class SetInstanceMetadata : ConnectionExtensionsTests
     {
         [Fact]
         public void Should_add_instance_id_and_protocol_to_metadata()
@@ -30,7 +30,7 @@ public class ConnectionExtensionsTests
         }
     }
 
-    public sealed class SetBaseProperties
+    public sealed class SetBaseProperties : ConnectionExtensionsTests
     {
         [Fact]
         public void Should_set_name_and_description()

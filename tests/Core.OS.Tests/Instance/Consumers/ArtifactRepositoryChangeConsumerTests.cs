@@ -31,7 +31,7 @@ public class ArtifactRepositoryChangeConsumerTests
         };
 
     [Fact]
-    public async Task ArtifactRepositoryChanged_event_should_be_consumed()
+    public async Task Should_consume_event()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
@@ -43,7 +43,7 @@ public class ArtifactRepositoryChangeConsumerTests
     }
 
     [Fact]
-    public async Task ArtifactRepositoryChanged_should_invalidate_caches_on_success()
+    public async Task Should_invalidate_caches_on_success()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
@@ -59,7 +59,7 @@ public class ArtifactRepositoryChangeConsumerTests
     }
 
     [Fact]
-    public async Task ArtifactRepositoryChanged_should_not_invalidate_caches_when_event_has_error()
+    public async Task Should_not_invalidate_caches_when_event_has_error()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };

@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.Modules.Consumers;
 using Core.OS.Modules.Contracts;
@@ -26,7 +26,7 @@ public class GetModuleMetadataBundlesConsumerTests
         };
     }
 
-    public class GetInstalledModuleMetadata : GetModuleMetadataBundlesConsumerTests
+    public sealed class GetInstalledModuleMetadata : GetModuleMetadataBundlesConsumerTests
     {
         [Fact]
         public async Task Should_return_empty_list_if_no_metadata_is_available()

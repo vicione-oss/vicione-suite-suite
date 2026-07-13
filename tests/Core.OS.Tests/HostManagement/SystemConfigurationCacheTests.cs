@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -25,7 +25,7 @@ public class SystemConfigurationCacheTests
             .AddSingleton<SystemConfigurationCache>()
             .BuildServiceProvider();
 
-    public class Set : SystemConfigurationCacheTests
+    public sealed class Set : SystemConfigurationCacheTests
     {
         [Fact]
         public async Task Should_set_cache_system_config()
@@ -43,7 +43,7 @@ public class SystemConfigurationCacheTests
         }
     }
 
-    public class Get : SystemConfigurationCacheTests
+    public sealed class Get : SystemConfigurationCacheTests
     {
         [Fact]
         public async Task Should_get_cached_system_config()
@@ -79,7 +79,7 @@ public class SystemConfigurationCacheTests
         }
     }
 
-    public class Invalidate : SystemConfigurationCacheTests
+    public sealed class Invalidate : SystemConfigurationCacheTests
     {
         [Fact]
         public void Should_invalidate_cache()

@@ -1,4 +1,5 @@
-﻿using Core.OS.Persistence;
+using AwesomeAssertions;
+using Core.OS.Persistence;
 using Xunit;
 
 namespace Core.OS.Tests.Persistence;
@@ -6,7 +7,7 @@ namespace Core.OS.Tests.Persistence;
 public class EntityTypeCacheTests
 {
     [Fact]
-    public void GetOrAdd_ReturnsCorrectType_WhenTypeAndAssemblyAreProvided()
+    public void Should_return_correct_type_when_type_and_assembly_are_provided()
     {
         // Arrange
         var expectedType = typeof(string);
@@ -17,11 +18,11 @@ public class EntityTypeCacheTests
         var result = EntityTypeCache.GetOrAdd(typeFullName, assemblyFullName);
 
         // Assert
-        Assert.Equal(expectedType, result);
+        result.Should().Be(expectedType);
     }
 
     [Fact]
-    public void GetOrAdd_ReturnsCorrectType_WhenOnlyTypeIsProvided()
+    public void Should_return_correct_type_when_only_type_is_provided()
     {
         // Arrange
         var expectedType = typeof(long);
@@ -31,27 +32,33 @@ public class EntityTypeCacheTests
         var result = EntityTypeCache.GetOrAdd(typeFullName, null);
 
         // Assert
-        Assert.Equal(expectedType, result);
+        result.Should().Be(expectedType);
     }
 
     [Fact]
-    public void GetOrAdd_ThrowsException_WhenTypeIsNotFound()
+    public void Should_throw_when_type_is_not_found()
     {
         // Arrange
         var typeFullName = "InvalidType";
 
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => EntityTypeCache.GetOrAdd(typeFullName, null));
+        // Act
+        var act = () => EntityTypeCache.GetOrAdd(typeFullName, null);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Fact]
-    public void GetOrAdd_ThrowsException_WhenTypeIsNotFoundInSpecifiedAssembly()
+    public void Should_throw_when_type_is_not_found_in_specified_assembly()
     {
         // Arrange
         var typeFullName = typeof(int).FullName!;
         var assemblyFullName = "InvalidAssembly";
 
-        // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => EntityTypeCache.GetOrAdd(typeFullName, assemblyFullName));
+        // Act
+        var act = () => EntityTypeCache.GetOrAdd(typeFullName, assemblyFullName);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
     }
 }

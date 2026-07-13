@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 
-public class ArtifactRepositoryTokenServiceTests
+public sealed class ArtifactRepositoryTokenServiceTests
 {
     private readonly Uri _baseAddress = new Uri("https://system.update.ifm");
 

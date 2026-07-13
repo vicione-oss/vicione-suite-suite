@@ -31,7 +31,7 @@ public class IFileSystemExtensionsTests
         _fileSystem.AddDirectory(_instanceOptions.HomeDirectory);
     }
 
-    public class DetectVersionDowngrade : IFileSystemExtensionsTests
+    public sealed class DetectVersionDowngrade : IFileSystemExtensionsTests
     {
         [Fact]
         public async Task Should_ensure_data_version_gets_persisted()

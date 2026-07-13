@@ -16,7 +16,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class CreateArtifactRepositoryConsumerTests
+public sealed class CreateArtifactRepositoryConsumerTests
 {
     private readonly IArtifactRepositoryStore _repositoryStore = Substitute.For<IArtifactRepositoryStore>();
     private readonly IArtifactRepositoryTokenService _tokenService = Substitute.For<IArtifactRepositoryTokenService>();
@@ -32,7 +32,7 @@ public class CreateArtifactRepositoryConsumerTests
         };
 
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_consume_command()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
@@ -47,7 +47,7 @@ public class CreateArtifactRepositoryConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_correlated_change_event_on_success()
+    public async Task Should_publish_correlated_change_event_on_success()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
@@ -68,7 +68,7 @@ public class CreateArtifactRepositoryConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_change_event_with_error_on_failure()
+    public async Task Should_publish_change_event_with_error_on_failure()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
@@ -88,7 +88,7 @@ public class CreateArtifactRepositoryConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_update_token_and_publish_change_event_when_token_endpoint_is_set()
+    public async Task Should_update_token_and_publish_change_event_when_token_endpoint_is_set()
     {
         // Arrange
         var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1", TokenEndpoint = "https://token.example.com" };

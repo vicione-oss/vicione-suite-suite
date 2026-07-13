@@ -1,3 +1,4 @@
+using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.UserManagement.Configuration;
 using Core.Shared.UserManagement.Configuration;
@@ -36,8 +37,8 @@ public class DynamicExternalIdProviderOptionsTest
         sut.Configure("SomeOtherName", options);
 
         // Assert
-        Assert.Equal(originalAuthority, options.Authority);
-        Assert.Equal(originalClientId, options.ClientId);
+        options.Authority.Should().Be(originalAuthority);
+        options.ClientId.Should().Be(originalClientId);
     }
 
     [Fact]
@@ -54,8 +55,8 @@ public class DynamicExternalIdProviderOptionsTest
         sut.Configure(DynamicExternalIdProviderOptions.OptionsName, options);
 
         // Assert
-        Assert.Equal(Constants.UnconfiguredClient, options.ClientId);
-        Assert.Equal("https://unconfigured.local", options.Authority);
+        options.ClientId.Should().Be(Constants.UnconfiguredClient);
+        options.Authority.Should().Be("https://unconfigured.local");
     }
 
     [Fact]
@@ -89,8 +90,8 @@ public class DynamicExternalIdProviderOptionsTest
         sut.Configure(DynamicExternalIdProviderOptions.OptionsName, options);
 
         // Assert
-        Assert.Equal(firstProviderInDb.ClientId, options.ClientId);
-        Assert.Equal(firstProviderInDb.Authority, options.Authority);
+        options.ClientId.Should().Be(firstProviderInDb.ClientId);
+        options.Authority.Should().Be(firstProviderInDb.Authority);
     }
 
     [Fact]
@@ -119,8 +120,8 @@ public class DynamicExternalIdProviderOptionsTest
         sut.Configure(DynamicExternalIdProviderOptions.OptionsName, options);
 
         // Assert
-        Assert.Equal("ConfigClientId", options.ClientId);
-        Assert.Equal("https://config.example.com", options.Authority);
+        options.ClientId.Should().Be("ConfigClientId");
+        options.Authority.Should().Be("https://config.example.com");
     }
 
     [Fact]
@@ -158,8 +159,8 @@ public class DynamicExternalIdProviderOptionsTest
         sut.Configure(DynamicExternalIdProviderOptions.OptionsName, options);
 
         // Assert
-        Assert.Equal("DbClientId", options.ClientId);
-        Assert.Equal("https://db.example.com", options.Authority);
+        options.ClientId.Should().Be("DbClientId");
+        options.Authority.Should().Be("https://db.example.com");
     }
 
     private static IConfiguration CreateConfiguration(ExternalIdProviderOptions options)

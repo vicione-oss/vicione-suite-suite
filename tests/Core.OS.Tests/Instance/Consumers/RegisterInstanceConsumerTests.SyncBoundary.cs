@@ -47,7 +47,7 @@ public partial class RegisterInstanceConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_trigger_sync_when_slave_registered_exactly_at_queue_lifetime()
+        public async Task Should_trigger_sync_when_slave_registered_exactly_at_queue_lifetime()
         {
             // Arrange
             var instanceId = Guid.NewGuid();
@@ -79,7 +79,7 @@ public partial class RegisterInstanceConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_trigger_sync_when_slave_registered_one_second_past_queue_lifetime()
+        public async Task Should_trigger_sync_when_slave_registered_one_second_past_queue_lifetime()
         {
             // Arrange
             var instanceId = Guid.NewGuid();
@@ -111,7 +111,7 @@ public partial class RegisterInstanceConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_trigger_sync_when_new_slave_has_null_last_registered()
+        public async Task Should_trigger_sync_when_new_slave_has_null_last_registered()
         {
             // Arrange
             await using var tester = new MassTransitTester(_syncBoundaryServices);
@@ -128,7 +128,7 @@ public partial class RegisterInstanceConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_bypass_ttl_check_when_force_sync()
+        public async Task Should_bypass_ttl_check_when_force_sync()
         {
             // Arrange
             var instanceId = Guid.NewGuid();
@@ -156,7 +156,7 @@ public partial class RegisterInstanceConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_trigger_sync_when_slave_sequence_ahead_of_master()
+        public async Task Should_trigger_sync_when_slave_sequence_ahead_of_master()
         {
             // Arrange
             var instanceId = Guid.NewGuid();
@@ -186,7 +186,7 @@ public partial class RegisterInstanceConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_not_trigger_mismatch_when_slave_has_empty_sequences()
+        public async Task Should_not_trigger_mismatch_when_slave_has_empty_sequences()
         {
             // Arrange
             var instanceId = Guid.NewGuid();
@@ -216,7 +216,7 @@ public partial class RegisterInstanceConsumerTests
         }
 
         [Fact]
-        public async Task Consume_should_not_trigger_sync_when_slave_has_matching_sequences()
+        public async Task Should_not_trigger_sync_when_slave_has_matching_sequences()
         {
             // Arrange
             var instanceId = Guid.NewGuid();

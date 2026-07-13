@@ -30,7 +30,7 @@ public class CreateRoleConsumerTests
         };
 
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_be_consumed()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -43,7 +43,7 @@ public class CreateRoleConsumerTests
     }
 
     [Fact]
-    public async Task Command_should_publish_role_changed_event()
+    public async Task Should_publish_role_changed_event()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -61,7 +61,7 @@ public class CreateRoleConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_role_error_event_if_role_exists()
+    public async Task Should_publish_role_error_event_if_role_exists()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

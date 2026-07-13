@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Connections;
 using NSubstitute;
 using Sdk.Connections.Contracts;
@@ -8,11 +8,11 @@ namespace Core.OS.Tests.Connections;
 
 public class ConnectionTypeRegistryTests
 {
-    public sealed class Register
-    {
-        private readonly IConnectionSerializer _connectionSerializer = Substitute.For<IConnectionSerializer>();
-        private readonly IConnection _connection = Substitute.For<IConnection>();
+    private readonly IConnectionSerializer _connectionSerializer = Substitute.For<IConnectionSerializer>();
+    private readonly IConnection _connection = Substitute.For<IConnection>();
 
+    public sealed class Register : ConnectionTypeRegistryTests
+    {
         [Fact]
         public void Should_register_new_connection_type_successfully()
         {
@@ -47,7 +47,7 @@ public class ConnectionTypeRegistryTests
         }
     }
 
-    public sealed class GetConnectionTypes
+    public sealed class GetConnectionTypes : ConnectionTypeRegistryTests
     {
         [Fact]
         public void Should_return_all_registered_keys()
@@ -66,7 +66,7 @@ public class ConnectionTypeRegistryTests
         }
     }
 
-    public sealed class TryCreateConnection
+    public sealed class TryCreateConnection : ConnectionTypeRegistryTests
     {
         [Fact]
         public void Should_return_true_and_create_connection_when_id_exists()
@@ -99,7 +99,7 @@ public class ConnectionTypeRegistryTests
         }
     }
 
-    public sealed class TryGetConnectionSerializer
+    public sealed class TryGetConnectionSerializer : ConnectionTypeRegistryTests
     {
         [Fact]
         public void Should_return_true_and_serializer_when_found()
@@ -132,11 +132,8 @@ public class ConnectionTypeRegistryTests
         }
     }
 
-    public sealed class TryGetConnectionTest
+    public sealed class TryGetConnectionTest : ConnectionTypeRegistryTests
     {
-        private readonly IConnectionSerializer _connectionSerializer = Substitute.For<IConnectionSerializer>();
-        private readonly IConnection _connection = Substitute.For<IConnection>();
-
         [Fact]
         public void Should_return_true_and_test_when_found()
         {

@@ -1,4 +1,4 @@
-﻿using Core.OS.Instance.HealthCheck;
+using Core.OS.Instance.HealthCheck;
 using Core.Shared.Instance.HealthCheck;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.HealthCheck;
 
-public class InstanceHealthCheckConsumerTests
+public sealed class InstanceHealthCheckConsumerTests
 {
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
@@ -21,7 +21,7 @@ public class InstanceHealthCheckConsumerTests
         };
 
     [Fact]
-    public async Task Calls_check_health_status()
+    public async Task Should_call_check_health_status()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

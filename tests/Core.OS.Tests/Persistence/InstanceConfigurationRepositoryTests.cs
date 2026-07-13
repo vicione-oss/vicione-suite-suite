@@ -1,5 +1,6 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
+using AwesomeAssertions;
 using Core.OS.Connections.Mqtt;
 using Core.OS.Instance.Extensions;
 using Core.OS.Modules;
@@ -19,7 +20,7 @@ public class InstanceConfigurationRepositoryTests
     private static readonly Guid _instanceConfigGuid = Guid.Parse("9f58350b-67a4-4f8d-8f0e-ac5dc8990e91");
 
     [Fact]
-    public async Task Configuration_repository_should_be_serializable()
+    public async Task Should_be_serializable()
     {
         // Arrange
         var instanceId = Guid.NewGuid();
@@ -31,20 +32,20 @@ public class InstanceConfigurationRepositoryTests
         var instanceConfig = await repository.GetConfiguration(instanceId);
 
         // Assert
-        Assert.NotNull(instanceConfig);
+        instanceConfig.Should().NotBeNull();
 
         var mqttClientOptionsOrig = config.GetMqttClientOptions();
         var mqttClientOptionsCopy = instanceConfig.GetMqttClientOptions();
-        Assert.Equivalent(mqttClientOptionsOrig, mqttClientOptionsCopy, true);
+        mqttClientOptionsCopy.Should().BeEquivalentTo(mqttClientOptionsOrig);
 
         var instanceSettingsOrig = config.GetInstanceOptions();
         var instanceSettingsCopy = instanceConfig.GetInstanceOptions();
 
-        Assert.Equivalent(instanceSettingsOrig, instanceSettingsCopy, true);
+        instanceSettingsCopy.Should().BeEquivalentTo(instanceSettingsOrig);
     }
 
     [Fact]
-    public async Task Configuration_repository_should_provide_mqtt_options()
+    public async Task Should_provide_mqtt_options()
     {
         // Arrange
         var repository = CreateRepository();
@@ -53,32 +54,34 @@ public class InstanceConfigurationRepositoryTests
         var instanceConfig = await repository.GetConfiguration(_instanceConfigGuid);
 
         // Assert
-        Assert.NotNull(instanceConfig);
+        instanceConfig.Should().NotBeNull();
 
         var mqttOptions = instanceConfig.GetMqttClientOptions();
-        Assert.NotNull(mqttOptions);
-        Assert.NotNull(mqttOptions.ServiceClient);
-        Assert.NotNull(mqttOptions.ServiceClient.Endpoint);
-        Assert.NotNull(mqttOptions.WebSocketClient);
-        Assert.NotNull(mqttOptions.WebSocketClient.Endpoint);
+        mqttOptions.Should().NotBeNull();
+        mqttOptions.ServiceClient.Should().NotBeNull();
+        mqttOptions.ServiceClient!.Endpoint.Should().NotBeNull();
+        mqttOptions.WebSocketClient.Should().NotBeNull();
+        mqttOptions.WebSocketClient!.Endpoint.Should().NotBeNull();
     }
 
     [Fact]
-    public void App_settings_should_not_provide_mqtt_clients()
+    public void Should_not_provide_mqtt_clients_from_app_settings()
     {
         // Arrange
         var settingsFilePath = PathHelpers.GetAppSettingsFilePath();
+
+        // Act
         var instanceConfig = new ConfigurationBuilder()
             .AddJsonFile(settingsFilePath)
             .Build();
 
         // Assert
-        Assert.NotNull(instanceConfig);
+        instanceConfig.Should().NotBeNull();
 
         var mqttOptions = instanceConfig.GetMqttClientOptions();
-        Assert.NotNull(mqttOptions);
-        Assert.Null(mqttOptions.ServiceClient);
-        Assert.Null(mqttOptions.WebSocketClient);
+        mqttOptions.Should().NotBeNull();
+        mqttOptions.ServiceClient.Should().BeNull();
+        mqttOptions.WebSocketClient.Should().BeNull();
     }
 
     private static InstanceConfigurationRepository CreateRepository()

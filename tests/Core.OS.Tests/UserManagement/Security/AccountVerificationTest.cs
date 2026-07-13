@@ -1,4 +1,5 @@
-﻿using Core.OS.UserManagement.Security;
+using AwesomeAssertions;
+using Core.OS.UserManagement.Security;
 using Core.Shared.Mail;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
@@ -32,7 +33,7 @@ public class AccountVerificationTest
         var needsVerification = await accountVerification.NeedsVerification(UserId, TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.Equal(userNeedsVerification, needsVerification);
+        needsVerification.Should().Be(userNeedsVerification);
     }
 
     private static AccountVerification CreateAccountVerification(bool mailSystemIsConfigured,

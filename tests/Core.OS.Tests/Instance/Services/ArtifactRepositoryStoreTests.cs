@@ -61,7 +61,7 @@ public class ArtifactRepositoryStoreTests
             .BuildServiceProvider();
     }
 
-    public class MigrateConfiguredRepositories : ArtifactRepositoryStoreTests
+    public sealed class MigrateConfiguredRepositories : ArtifactRepositoryStoreTests
     {
         [Fact]
         public async Task Should_not_throw_on_missing_section()
@@ -171,7 +171,7 @@ public class ArtifactRepositoryStoreTests
         }
     }
 
-    public class GetRepositories : ArtifactRepositoryStoreTests
+    public sealed class GetRepositories : ArtifactRepositoryStoreTests
     {
         [Fact]
         public async Task Should_return_empty_list_when_no_sources_exist()
@@ -232,7 +232,7 @@ public class ArtifactRepositoryStoreTests
         }
     }
 
-    public class CreateOrUpdate : ArtifactRepositoryStoreTests
+    public sealed class CreateOrUpdate : ArtifactRepositoryStoreTests
     {
         [Fact]
         public async Task Should_create_source_and_return_created_action()
@@ -295,7 +295,7 @@ public class ArtifactRepositoryStoreTests
         }
     }
 
-    public class Delete : ArtifactRepositoryStoreTests
+    public sealed class Delete : ArtifactRepositoryStoreTests
     {
         [Fact]
         public async Task Should_delete_existing_source_and_return_it()

@@ -14,7 +14,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Connections.Consumers;
 
-public class UpsertTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContextSqlite>
+public sealed class UpsertTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContextSqlite>
 {
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
@@ -27,7 +27,7 @@ public class UpsertTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
         };
 
     [Fact]
-    public async Task Adds_new_tag_to_db_and_raises_tag_changed_event()
+    public async Task Should_add_new_tag_and_publish_change_event()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -42,7 +42,7 @@ public class UpsertTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
     }
 
     [Fact]
-    public async Task Command_gets_consumed()
+    public async Task Should_consume_command()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -52,7 +52,7 @@ public class UpsertTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
     }
 
     [Fact]
-    public async Task Updates_tag_and_raises_tag_changed_event()
+    public async Task Should_update_existing_tag_and_publish_change_event()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -77,7 +77,7 @@ public class UpsertTagConsumerTests : TestWithDbContextSqlite<ConnectionDbContex
     }
 
     [Fact]
-    public async Task Updates_only_tag_with_given_id()
+    public async Task Should_only_update_tag_with_matching_id()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

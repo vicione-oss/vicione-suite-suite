@@ -6,10 +6,10 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.HealthCheck;
 
-public class SyncRetryHealthCheckTests
+public sealed class SyncRetryHealthCheckTests
 {
     [Fact]
-    public async Task CheckHealthAsync_should_return_healthy_when_no_failures()
+    public async Task Should_return_healthy_when_no_failures()
     {
         // Arrange
         var state = new SyncRetryState();
@@ -23,7 +23,7 @@ public class SyncRetryHealthCheckTests
     }
 
     [Fact]
-    public async Task CheckHealthAsync_should_return_degraded_when_failures_below_limit()
+    public async Task Should_return_degraded_when_failures_below_limit()
     {
         // Arrange
         var state = new SyncRetryState();
@@ -38,7 +38,7 @@ public class SyncRetryHealthCheckTests
     }
 
     [Fact]
-    public async Task CheckHealthAsync_should_return_unhealthy_when_retries_exhausted()
+    public async Task Should_return_unhealthy_when_retries_exhausted()
     {
         // Arrange
         var state = new SyncRetryState();
@@ -55,7 +55,7 @@ public class SyncRetryHealthCheckTests
     }
 
     [Fact]
-    public async Task CheckHealthAsync_should_return_healthy_after_reset()
+    public async Task Should_return_healthy_after_reset()
     {
         // Arrange
         var state = new SyncRetryState();

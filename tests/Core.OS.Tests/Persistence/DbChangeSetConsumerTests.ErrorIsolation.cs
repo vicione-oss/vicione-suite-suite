@@ -68,7 +68,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task ApplyChangeSet_should_apply_good_entities_when_one_entity_fails()
+        public async Task Should_apply_good_entities_when_one_entity_fails()
         {
             // Arrange
             var consumer = CreateConsumer();
@@ -91,7 +91,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task ApplyChangeSet_should_log_error_when_entity_fails()
+        public async Task Should_log_error_when_entity_fails()
         {
             // Arrange
             var consumer = CreateConsumer();
@@ -119,7 +119,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task ApplyChangeSet_should_throw_when_all_entities_fail()
+        public async Task Should_throw_when_all_entities_fail()
         {
             // Arrange
             var consumer = CreateConsumer();
@@ -145,7 +145,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task ApplyChangeSet_should_skip_null_entity_and_apply_good_ones()
+        public async Task Should_skip_null_entity_and_apply_good_ones()
         {
             // Arrange
             var consumer = CreateConsumer();
@@ -168,7 +168,7 @@ public partial class DbChangeSetConsumerTests
         }
 
         [Fact]
-        public async Task ApplyChangeSet_should_apply_all_good_entities_when_one_fails()
+        public async Task Should_apply_all_good_entities_when_one_fails()
         {
             // Arrange
             var consumer = CreateConsumer();

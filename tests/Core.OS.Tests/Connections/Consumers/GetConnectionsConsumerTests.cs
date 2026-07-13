@@ -16,7 +16,7 @@ namespace Core.OS.Tests.Connections.Consumers;
 
 public sealed class GetConnectionsConsumerTests : TestWithDbContextSqlite<ConnectionDbContextSqlite>
 {
-    private Action<IBusRegistrationConfigurator> _configureServices;
+    private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
     public GetConnectionsConsumerTests()
     {
@@ -28,7 +28,7 @@ public sealed class GetConnectionsConsumerTests : TestWithDbContextSqlite<Connec
     }
 
     [Fact]
-    public async Task Unknown_id_should_return_empty_list()
+    public async Task Should_return_empty_list_for_unknown_id()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -42,7 +42,7 @@ public sealed class GetConnectionsConsumerTests : TestWithDbContextSqlite<Connec
     }
 
     [Fact]
-    public async Task Known_id_should_return_matching_connection()
+    public async Task Should_return_matching_connection_for_known_id()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -53,12 +53,12 @@ public sealed class GetConnectionsConsumerTests : TestWithDbContextSqlite<Connec
         var response = await tester.TestRequest<GetConnectionsResponse, GetConnections>(request);
 
         // Assert
-        Assert.Single(response.Connections);
-        Assert.True(response.Connections.First().IsEqualTo(connection));
+        response.Connections.Should().ContainSingle();
+        response.Connections.First().IsEqualTo(connection).Should().BeTrue();
     }
 
     [Fact]
-    public async Task Filter_by_type_should_only_return_matching_connections()
+    public async Task Should_return_only_matching_connections_when_filtered_by_type()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -73,12 +73,12 @@ public sealed class GetConnectionsConsumerTests : TestWithDbContextSqlite<Connec
         var response = await tester.TestRequest<GetConnectionsResponse, GetConnections>(request);
 
         // Assert
-        Assert.Single(response.Connections);
-        Assert.True(response.Connections.First().IsEqualTo(mqttConnection));
+        response.Connections.Should().ContainSingle();
+        response.Connections.First().IsEqualTo(mqttConnection).Should().BeTrue();
     }
 
     [Fact]
-    public async Task Filter_by_tag_should_only_return_matching_connections()
+    public async Task Should_return_only_matching_connections_when_filtered_by_tag()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -109,7 +109,7 @@ public sealed class GetConnectionsConsumerTests : TestWithDbContextSqlite<Connec
     }
 
     [Fact]
-    public async Task Filter_by_instance_id_should_only_return_matching_connections()
+    public async Task Should_return_only_matching_connections_when_filtered_by_instance_id()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -137,15 +137,15 @@ public sealed class GetConnectionsConsumerTests : TestWithDbContextSqlite<Connec
     }
 
     [Fact]
-    public async Task Consume_should_publish_response_on_failure()
+    public async Task Should_return_error_response_on_exception()
     {
         // Arrange
         var dbContextMock = Substitute.For<IConnectionDbContext>();
         dbContextMock.Connections.Throws(new ArgumentException("test"));
 
-        _configureServices += cfg => cfg.AddSingleton(dbContextMock);
+        var configureServices = _configureServices + (cfg => cfg.AddSingleton(dbContextMock));
 
-        await using var tester = new MassTransitTester(_configureServices);
+        await using var tester = new MassTransitTester(configureServices);
         var instanceId = Guid.NewGuid();
         var request = new GetConnections(null, null, null, instanceId);
 

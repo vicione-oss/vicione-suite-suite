@@ -22,7 +22,7 @@ public class BackupReaderTests
         return services.BuildServiceProvider();
     }
 
-    public class GetBackupMetadata : BackupReaderTests
+    public sealed class GetBackupMetadata : BackupReaderTests
     {
         [Fact]
         public async Task Should_get_metadata_from_backup_file()
@@ -72,7 +72,7 @@ public class BackupReaderTests
         }
     }
 
-    public class GetSystemConfiguration : BackupReaderTests
+    public sealed class GetSystemConfiguration : BackupReaderTests
     {
         [Fact]
         public async Task Should_get_system_configuration_from_backup_file()
@@ -119,7 +119,7 @@ public class BackupReaderTests
         }
     }
 
-    public class GetModuleEntries : BackupReaderTests
+    public sealed class GetModuleEntries : BackupReaderTests
     {
         [Fact]
         public async Task Should_get_module_entries_from_file()
@@ -166,7 +166,7 @@ public class BackupReaderTests
         }
     }
 
-    public class ExtractModulesTo : BackupReaderTests
+    public sealed class ExtractModulesTo : BackupReaderTests
     {
         private const string _destinationPath = "path\\to\\destination";
 
@@ -186,7 +186,7 @@ public class BackupReaderTests
         }
     }
 
-    public class ExtractSystemModuleTo : BackupReaderTests
+    public sealed class ExtractSystemModuleTo : BackupReaderTests
     {
         private const string _destinationPath = "path\\to\\destination";
 

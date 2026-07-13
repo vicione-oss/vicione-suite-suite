@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using AwesomeAssertions;
 using Core.OS.Instance;
@@ -56,7 +56,7 @@ public class BackupStoreTests
     public sealed class ReadBackupFile : BackupStoreTests
     {
         [Fact]
-        public void Reads_latest_file()
+        public void Should_read_latest_file()
         {
             // Arrange
             var backupStore = CreateBackupStore();
@@ -77,7 +77,7 @@ public class BackupStoreTests
         }
 
         [Fact]
-        public void Reads_specific_file()
+        public void Should_read_specific_file()
         {
             // Arrange
             var backupStore = CreateBackupStore();
@@ -101,7 +101,7 @@ public class BackupStoreTests
     public sealed class GetBackupFiles : BackupStoreTests
     {
         [Fact]
-        public void Returns_files()
+        public void Should_return_files()
         {
             // Arrange
             var backupStore = CreateBackupStore();

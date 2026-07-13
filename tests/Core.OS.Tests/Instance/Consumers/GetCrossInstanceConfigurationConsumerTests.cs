@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Instance.Consumers;
 using Core.Shared.Instance.Contracts;
@@ -26,7 +26,7 @@ public sealed class GetCrossInstanceConfigurationConsumerTests : TestWithDbConte
         };
 
     [Fact]
-    public async Task Request_should_be_consumed_and_return_default_configuration()
+    public async Task Should_return_default_configuration_when_none_exists()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -42,7 +42,7 @@ public sealed class GetCrossInstanceConfigurationConsumerTests : TestWithDbConte
     }
 
     [Fact]
-    public async Task Request_should_return_existing_cross_configuration()
+    public async Task Should_return_existing_cross_configuration()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);

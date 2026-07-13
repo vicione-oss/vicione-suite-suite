@@ -3,6 +3,7 @@ using Core.OS.Modules.Consumers;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Events;
+using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -47,8 +48,9 @@ public class UpdateModulePackageOperationsConsumerTests
         await tester.TestCommand<UpdateModulePackageOperations, UpdateModulePackageOperationsConsumer>(command);
 
         // Assert
-        Assert.True(await tester.Harness.Consumed.Any<UpdateModulePackageOperations>(k
-            => k.Context.Message.CorrelationId == command.CorrelationId, TestContext.Current.CancellationToken));
+        var consumed = await tester.Harness.Consumed.Any<UpdateModulePackageOperations>(k
+            => k.Context.Message.CorrelationId == command.CorrelationId, TestContext.Current.CancellationToken);
+        consumed.Should().BeTrue();
     }
 
     [Fact]
@@ -83,8 +85,9 @@ public class UpdateModulePackageOperationsConsumerTests
         await tester.TestCommand<UpdateModulePackageOperations, UpdateModulePackageOperationsConsumer>(command);
 
         // Assert: Dependencies updated event published with correct operations
-        Assert.True(await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
-            => k.Context.Message.Changes.Count == changes.Count, TestContext.Current.CancellationToken));
+        var published = await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
+            => k.Context.Message.Changes.Count == changes.Count, TestContext.Current.CancellationToken);
+        published.Should().BeTrue();
     }
 
     [Fact]
@@ -131,10 +134,11 @@ public class UpdateModulePackageOperationsConsumerTests
         await tester.TestCommand<UpdateModulePackageOperations, UpdateModulePackageOperationsConsumer>(command);
 
         // Assert        
-        Assert.True(await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
+        var published = await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
             => k.Context.Message.CorrelationId == command.CorrelationId
             && k.Context.Message.Error is not null
-            && k.Context.Message.Error.ErrorCode == 230, TestContext.Current.CancellationToken));
+            && k.Context.Message.Error.ErrorCode == 230, TestContext.Current.CancellationToken);
+        published.Should().BeTrue();
     }
 
     [Fact]
@@ -152,8 +156,9 @@ public class UpdateModulePackageOperationsConsumerTests
         await tester.TestCommand<UpdateModulePackageOperations, UpdateModulePackageOperationsConsumer>(command);
 
         // Assert: Empty operations should still succeed
-        Assert.True(await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
-            => k.Context.Message.Changes.Count == 0, TestContext.Current.CancellationToken));
+        var published = await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
+            => k.Context.Message.Changes.Count == 0, TestContext.Current.CancellationToken);
+        published.Should().BeTrue();
 
         await _packageStore.Received(1).EnqueueOperations(
             Arg.Is<List<ModulePackageOperation>>(ops => ops.Count == 0),
@@ -243,10 +248,11 @@ public class UpdateModulePackageOperationsConsumerTests
         await tester.TestCommand<UpdateModulePackageOperations, UpdateModulePackageOperationsConsumer>(command);
 
         // Assert: Mixed operations should be handled correctly
-        Assert.True(await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
+        var published = await tester.Harness.Published.Any<ModulePackageOperationsChanged>(k
             => k.Context.Message.Changes.Count == 3
             && k.Context.Message.Changes[0].Operation.OperationKind == ModulePackageOperationKind.Install
             && k.Context.Message.Changes[1].Operation.OperationKind == ModulePackageOperationKind.Uninstall
-            && k.Context.Message.Changes[2].Operation.OperationKind == ModulePackageOperationKind.Install, TestContext.Current.CancellationToken));
+            && k.Context.Message.Changes[2].Operation.OperationKind == ModulePackageOperationKind.Install, TestContext.Current.CancellationToken);
+        published.Should().BeTrue();
     }
 }

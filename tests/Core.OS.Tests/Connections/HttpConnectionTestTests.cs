@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.OS.Connections;
 using NSubstitute;
 using Sdk.Connections.Contracts;
@@ -8,7 +8,7 @@ namespace Core.OS.Tests.Connections;
 
 public class HttpConnectionTestTests
 {
-    public sealed class Test
+    public sealed class Test : HttpConnectionTestTests
     {
         [Fact]
         public async Task Should_return_failure_when_connection_is_not_http_connection()

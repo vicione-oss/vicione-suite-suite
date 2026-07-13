@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
-public class GetArtifactRepositoriesConsumerTests
+public sealed class GetArtifactRepositoriesConsumerTests
 {
     private readonly IArtifactRepositoryStore _repositoryStore = Substitute.For<IArtifactRepositoryStore>();
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
@@ -25,7 +25,7 @@ public class GetArtifactRepositoriesConsumerTests
         };
 
     [Fact]
-    public async Task Request_should_be_consumed()
+    public async Task Should_return_empty_response_when_no_repositories()
     {
         // Arrange
         _repositoryStore.GetRepositories(null, Arg.Any<CancellationToken>()).Returns([]);
@@ -42,7 +42,7 @@ public class GetArtifactRepositoriesConsumerTests
     }
 
     [Fact]
-    public async Task Request_should_return_repository_sources()
+    public async Task Should_return_repository_sources()
     {
         // Arrange
         List<ArtifactRepository> repos =
@@ -65,7 +65,7 @@ public class GetArtifactRepositoriesConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_response_on_failure()
+    public async Task Should_return_error_response_on_failure()
     {
         // Arrange
         _repositoryStore.GetRepositories(null, Arg.Any<CancellationToken>()).ThrowsAsync(new ArgumentException("test"));

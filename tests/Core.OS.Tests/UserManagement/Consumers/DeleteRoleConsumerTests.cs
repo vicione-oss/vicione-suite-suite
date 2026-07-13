@@ -35,7 +35,7 @@ public class DeleteRoleConsumerTests
         };
 
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_be_consumed()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -48,7 +48,7 @@ public class DeleteRoleConsumerTests
     }
 
     [Fact]
-    public async Task Command_should_publish_role_deleted_event()
+    public async Task Should_publish_role_deleted_event()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -70,7 +70,7 @@ public class DeleteRoleConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_idempotent_success_when_role_already_deleted()
+    public async Task Should_publish_idempotent_success_when_role_already_deleted()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -88,7 +88,7 @@ public class DeleteRoleConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_not_delete_default_roles()
+    public async Task Should_not_delete_default_roles()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
@@ -107,7 +107,7 @@ public class DeleteRoleConsumerTests
     }
 
     [Fact]
-    public async Task Consume_should_publish_delete_failed_error_on_unexpected_exception()
+    public async Task Should_publish_delete_failed_error_on_unexpected_exception()
     {
         // Arrange — bypass the MassTransit harness to inject a throwing store directly.
         const string roleName = "TestRole";

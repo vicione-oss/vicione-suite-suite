@@ -37,7 +37,7 @@ public class BackupBuilderTests
         return services.BuildServiceProvider();
     }
 
-    public class Metadata : BackupBuilderTests
+    public sealed class Metadata : BackupBuilderTests
     {
         [Fact]
         public async Task Should_add_backup_metadata_always()
@@ -56,7 +56,7 @@ public class BackupBuilderTests
         }
     }
 
-    public class UseModuleBackup : BackupBuilderTests
+    public sealed class UseModuleBackup : BackupBuilderTests
     {
         [Trait(Traits.Category, Traits.System)]
         [Fact]
@@ -90,7 +90,7 @@ public class BackupBuilderTests
         }
     }
 
-    public class UseSystemConfigurationBackup : BackupBuilderTests
+    public sealed class UseSystemConfigurationBackup : BackupBuilderTests
     {
         [Trait(Traits.Category, Traits.System)]
         [Fact]
@@ -139,7 +139,7 @@ public class BackupBuilderTests
         }
     }
 
-    public class UseOverrideExistingBackup : BackupBuilderTests
+    public sealed class UseOverrideExistingBackup : BackupBuilderTests
     {
         private const string BackupFileName = "my-backup.zip";
         private const string BackupPath = "/destination";
@@ -195,7 +195,7 @@ public class BackupBuilderTests
         }
     }
 
-    public class FullBackup : BackupBuilderTests
+    public sealed class FullBackup : BackupBuilderTests
     {
         [Trait(Traits.Category, Traits.System)]
         [Fact]

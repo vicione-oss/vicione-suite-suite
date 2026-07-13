@@ -1,5 +1,6 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
+using AwesomeAssertions;
 using Core.OS.Instance.Extensions;
 using Core.OS.Modules.Services;
 using Core.Tests.Tools;
@@ -45,7 +46,7 @@ public class WorkspaceManagementTests
             var moduleHome = workspaceMgmt.GetHomeDirectory(TestBackendModule.Id);
 
             // Assert
-            Assert.Equal(_fileSystem.Path.Combine(_fileSystem.GetRootedHomeDirectory(instanceOptions), TestBackendModule.Id), moduleHome);
+            moduleHome.Should().Be(_fileSystem.Path.Combine(_fileSystem.GetRootedHomeDirectory(instanceOptions), TestBackendModule.Id));
         }
 
         [Fact]
@@ -84,7 +85,7 @@ public class WorkspaceManagementTests
             var moduleCache = workspaceMgmt.GetCacheDirectory(TestBackendModule.Id);
 
             // Assert
-            Assert.Equal(_fileSystem.Path.Combine(_fileSystem.GetRootedCacheDirectory(instanceOptions), TestBackendModule.Id), moduleCache);
+            moduleCache.Should().Be(_fileSystem.Path.Combine(_fileSystem.GetRootedCacheDirectory(instanceOptions), TestBackendModule.Id));
         }
 
         [Fact]

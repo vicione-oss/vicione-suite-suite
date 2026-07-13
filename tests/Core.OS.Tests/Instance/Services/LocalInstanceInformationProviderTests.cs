@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.OS.Instance;
 using Core.OS.Instance.Services;
 using Core.OS.Modules;
@@ -39,7 +39,7 @@ public class LocalInstanceInformationProviderTests
             .BuildServiceProvider();
     }
 
-    public class Local : LocalInstanceInformationProviderTests
+    public sealed class Local : LocalInstanceInformationProviderTests
     {
         [Fact]
         public void Should_throw_if_local_instance_is_not_initialized()
@@ -49,7 +49,8 @@ public class LocalInstanceInformationProviderTests
             var provider = serviceProvider.GetRequiredService<ILocalInstanceInformationProvider>();
 
             // Act + Assert
-            Assert.Throws<InvalidOperationException>(() => provider.Local);
+            var action = () => provider.Local;
+            action.Should().Throw<InvalidOperationException>();
         }
 
         [Fact]
@@ -69,7 +70,7 @@ public class LocalInstanceInformationProviderTests
         }
     }
 
-    public class ReadLocalInstanceId : LocalInstanceInformationProviderTests
+    public sealed class ReadLocalInstanceId : LocalInstanceInformationProviderTests
     {
         [Fact]
         public void Should_return_local_instance_id_from_file()
@@ -83,7 +84,7 @@ public class LocalInstanceInformationProviderTests
             var result = provider.ReadLocalInstanceId();
 
             // Assert
-            Assert.Equal(instanceId, result);
+            result.Should().Be(instanceId);
         }
 
         [Fact]

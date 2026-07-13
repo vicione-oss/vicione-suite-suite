@@ -1,51 +1,69 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Serilog.Sinks.Journal;
 using Xunit;
 
 namespace Core.OS.Tests.Logging;
 
-public class ModuleIdEnricher_TryGetModuleIdFromStackTrace
+public class ModuleIdEnricherTests
 {
-    [Fact]
-    public void Can_get_ModuleId()
+    public sealed class TryGetModuleIdFromStackTrace : ModuleIdEnricherTests
     {
-        ModuleIdEnricher.TryGetModuleIdFromStackTrace(0, [".Tests"], out var id).Should().BeTrue();
+        [Fact]
+        public void Should_get_module_id()
+        {
+            // Arrange + Act
+            var result = ModuleIdEnricher.TryGetModuleIdFromStackTrace(0, [".Tests"], out var id);
 
-        id.Should().Be("ViciOne.Suite.Core.OS");
-    }
-}
-
-public class ModuleIdEnricher_TryGetModule
-{
-    [Fact]
-    public void Can_get_module()
-    {
-        ModuleIdEnricher.TryGetModuleId([".Tests"], "Serilog.Tests", out var id).Should().BeTrue();
-
-        id.Should().Be("Serilog");
+            // Assert
+            result.Should().BeTrue();
+            id.Should().Be("ViciOne.Suite.Core.OS");
+        }
     }
 
-    [Fact]
-    public void Returns_false_if_there_is_no_match()
+    public sealed class TryGetModuleId : ModuleIdEnricherTests
     {
-        ModuleIdEnricher.TryGetModuleId([".Tests"], "Serilog.Sinks", out var id).Should().BeFalse();
+        [Fact]
+        public void Should_get_module()
+        {
+            // Arrange + Act
+            var result = ModuleIdEnricher.TryGetModuleId([".Tests"], "Serilog.Tests", out var id);
 
-        id.Should().Be(null);
-    }
+            // Assert
+            result.Should().BeTrue();
+            id.Should().Be("Serilog");
+        }
 
-    [Fact]
-    public void Returns_false_with_no_suffix()
-    {
-        ModuleIdEnricher.TryGetModuleId([], "Serilog.Sinks", out var id).Should().BeFalse();
+        [Fact]
+        public void Should_return_false_if_there_is_no_match()
+        {
+            // Arrange + Act
+            var result = ModuleIdEnricher.TryGetModuleId([".Tests"], "Serilog.Sinks", out var id);
 
-        id.Should().Be(null);
-    }
+            // Assert
+            result.Should().BeFalse();
+            id.Should().Be(null);
+        }
 
-    [Fact]
-    public void Returns_false_when_assembly_name_is_null()
-    {
-        ModuleIdEnricher.TryGetModuleId([".Tests"], null, out var id).Should().BeFalse();
+        [Fact]
+        public void Should_return_false_with_no_suffix()
+        {
+            // Arrange + Act
+            var result = ModuleIdEnricher.TryGetModuleId([], "Serilog.Sinks", out var id);
 
-        id.Should().Be(null);
+            // Assert
+            result.Should().BeFalse();
+            id.Should().Be(null);
+        }
+
+        [Fact]
+        public void Should_return_false_when_assembly_name_is_null()
+        {
+            // Arrange + Act
+            var result = ModuleIdEnricher.TryGetModuleId([".Tests"], null, out var id);
+
+            // Assert
+            result.Should().BeFalse();
+            id.Should().Be(null);
+        }
     }
 }
