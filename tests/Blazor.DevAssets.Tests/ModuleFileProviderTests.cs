@@ -1,5 +1,5 @@
-﻿using System.Reflection;
 using Sdk.Client.Modules;
+using System.Reflection;
 using TestModule.Client;
 using Xunit;
 
@@ -8,7 +8,7 @@ namespace Blazor.DevAssets.Tests;
 public class ModuleFileProviderTests
 {
     [Fact(Skip = "Todo")]
-    public void Request_to_module_assets_should_be_resolved()
+    public void Should_resolve_request_to_module_assets()
     {
         // Arrange
         var moduleAssembly = Assembly.GetAssembly(typeof(TestClientModule));

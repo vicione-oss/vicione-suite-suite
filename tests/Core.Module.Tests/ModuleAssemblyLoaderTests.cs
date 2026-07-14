@@ -1,4 +1,4 @@
-﻿using Core.Tests.Tools;
+using Core.Tests.Tools;
 using Sdk.Backend.Modules;
 using Xunit;
 
@@ -8,7 +8,7 @@ public class ModuleAssemblyLoaderTests
 {    
     [Trait(Traits.Category, Traits.System)]
     [Fact]
-    public void Load_assembly_from_absolute_directory_should_return_module()
+    public void Should_return_module_when_loading_assembly_from_absolute_directory()
     {
         // Arrange
         var suiteContext = TestFactory.CreateSuiteContext(enableUiHost: false, enableUiModules: false);
@@ -23,7 +23,7 @@ public class ModuleAssemblyLoaderTests
 
     [Trait(Traits.Category, Traits.System)]
     [Fact]
-    public void Load_assembly_from_debug_should_return_module()
+    public void Should_return_module_when_loading_assembly_from_debug()
     {
         // Arrange
         var suiteContext = TestFactory.CreateSuiteContext(enableUiHost: false, enableUiModules: false);
@@ -38,7 +38,7 @@ public class ModuleAssemblyLoaderTests
 
     [Trait(Traits.Category, Traits.System)]
     [Fact]
-    public void Disabled_module_should_not_get_loaded()
+    public void Should_not_load_disabled_module()
     {
         // Arrange
         var suiteContext = TestFactory.CreateSuiteContext(false, false, false);

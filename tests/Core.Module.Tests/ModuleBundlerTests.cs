@@ -1,4 +1,4 @@
-﻿using Core.Module.Extensions;
+using Core.Module.Extensions;
 using Core.Shared.Modules;
 using Xunit;
 
@@ -7,7 +7,7 @@ namespace Core.Module.Tests;
 public class ModuleBundlerTests
 {
     [Fact]
-    public async Task Client_modules_should_get_zipped_with_dependencies()
+    public async Task Should_zip_client_modules_with_dependencies()
     {
         // Arrange
         var suiteContext = TestFactory.CreateSuiteContext(enableBackendModules: false);

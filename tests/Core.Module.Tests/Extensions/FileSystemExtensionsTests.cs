@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
 using Core.Module.Extensions;
 using Core.Module.Options;
@@ -13,7 +13,7 @@ namespace Core.Module.Tests.Extensions;
 
 public class FileSystemExtensionsTests
 {
-    public class GetBackendModuleAssemblyPaths : FileSystemExtensionsTests
+    public sealed class GetBackendModuleAssemblyPaths : FileSystemExtensionsTests
     {
         [Fact]
         public void Should_return_existing_dlls_from_path()
@@ -37,7 +37,7 @@ public class FileSystemExtensionsTests
         }
     }
 
-    public class GetUiModuleAssemblyPaths : FileSystemExtensionsTests
+    public sealed class GetUiModuleAssemblyPaths : FileSystemExtensionsTests
     {
         [Fact]
         public void Should_return_existing_dlls()
@@ -90,7 +90,7 @@ public class FileSystemExtensionsTests
         }
     }
 
-    public class GetUiHostModuleAssemblyPaths : FileSystemExtensionsTests
+    public sealed class GetUiHostModuleAssemblyPaths : FileSystemExtensionsTests
     {
         [Fact]
         public void Should_return_existing_ui_host_dlls()

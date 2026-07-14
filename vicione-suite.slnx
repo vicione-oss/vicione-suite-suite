@@ -62,8 +62,9 @@
     <File Path="docs/suite-startup.md" />
     <File Path="docs/target-platforms.md" />
     <File Path="docs/suite-architecture.md" />
-    <File Path="docs\passkeys.md" />
-    <File Path="docs\oidc.md" />
+    <File Path="docs/passkeys.md" />
+    <File Path="docs/test-structure-guide.md" />
+    <File Path="docs/oidc.md" />
   </Folder>
   <Folder Name="/src/">
     <File Path="src/.editorconfig" />
