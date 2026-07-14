@@ -25,7 +25,7 @@ public class SuiteDependencyContextBuilderTests
                 .AddTestUiHost(enableUiHost, useDebugPaths)
                 .BuildConfiguration();
 
-    public class WithCore : SuiteDependencyContextBuilderTests
+    public sealed class WithCore : SuiteDependencyContextBuilderTests
     {
         [Fact]
         public void Should_create_valid_context()
@@ -64,7 +64,7 @@ public class SuiteDependencyContextBuilderTests
         }
     }
 
-    public class WithUiHost : SuiteDependencyContextBuilderTests
+    public sealed class WithUiHost : SuiteDependencyContextBuilderTests
     {
         [Fact]
         public void Should_create_valid_context()
@@ -150,7 +150,7 @@ public class SuiteDependencyContextBuilderTests
         }
     }
 
-    public class WithBackendModules : SuiteDependencyContextBuilderTests
+    public sealed class WithBackendModules : SuiteDependencyContextBuilderTests
     {
         [Fact]
         public void Should_add_startup_error_for_invalid_module_with_module_type_validation()
@@ -206,7 +206,7 @@ public class SuiteDependencyContextBuilderTests
         }
     }
 
-    public class WithClientModules : SuiteDependencyContextBuilderTests
+    public sealed class WithClientModules : SuiteDependencyContextBuilderTests
     {
         [Fact]
         public void Should_create_valid_context()
@@ -232,7 +232,7 @@ public class SuiteDependencyContextBuilderTests
         }
     }
 
-    public class WithStartupValidation : SuiteDependencyContextBuilderTests
+    public sealed class WithStartupValidation : SuiteDependencyContextBuilderTests
     {
         [Fact]
         public void Should_create_valid_context()
@@ -284,7 +284,7 @@ public class SuiteDependencyContextBuilderTests
         }
     }
 
-    public class WithMappingDisabled : SuiteDependencyContextBuilderTests
+    public sealed class WithMappingDisabled : SuiteDependencyContextBuilderTests
     {
         [Fact]
         public void Should_create_mappings_by_default()
@@ -326,10 +326,10 @@ public class SuiteDependencyContextBuilderTests
         }
     }
 
-    public class Build : SuiteDependencyContextBuilderTests
+    public sealed class Build : SuiteDependencyContextBuilderTests
     {
         [Fact]
-        public void Different_options_should_create_different_contexts()
+        public void Should_create_different_contexts_for_different_options()
         {
             // Arrange
             var config = CreateConfiguration();
@@ -423,7 +423,7 @@ public class SuiteDependencyContextBuilderTests
         }
     }
 
-    public class ValidateDependencies : SuiteDependencyContextBuilderTests
+    public sealed class ValidateDependencies : SuiteDependencyContextBuilderTests
     {
         [Fact]
         public void Should_add_startup_errors_for_missing_dependencies()
@@ -450,7 +450,7 @@ public class SuiteDependencyContextBuilderTests
         }
     }
 
-    public class ValidateSdkVersion : SuiteDependencyContextBuilderTests
+    public sealed class ValidateSdkVersion : SuiteDependencyContextBuilderTests
     {
         [Fact]
         public void Should_add_startup_error_on_version_mismatch()

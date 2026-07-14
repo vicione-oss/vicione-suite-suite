@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.Loader;
 using Sdk.Connections.Contracts;
 using Sdk.Modules;
@@ -10,7 +10,7 @@ namespace Core.Module.Tests;
 public class ModuleAssemblyLoadContextTests
 {
     [Fact]
-    public void AssemblyLoadedIntoModuleContext()
+    public void Should_load_assembly_into_module_context()
     {
         // Arrange
         var moduleAssembly = Assembly.GetAssembly(typeof(TestBackendModule));

@@ -1,4 +1,4 @@
-﻿using Core.Module.Extensions;
+using Core.Module.Extensions;
 using Core.Module.Utils;
 using Core.Tests.Tools;
 using AwesomeAssertions;
@@ -11,7 +11,7 @@ namespace Core.Module.Tests.Extensions;
 
 public partial class SuiteDependencyContextExtensionsTests
 {
-    public class IsInvalidModule : SuiteDependencyContextExtensionsTests
+    public sealed class IsInvalidModule : SuiteDependencyContextExtensionsTests
     {
         [Fact]
         public void Should_be_false_for_modules_without_startup_errors()
@@ -67,7 +67,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
     }
 
-    public class ValidateAssemblyModuleType : SuiteDependencyContextExtensionsTests
+    public sealed class ValidateAssemblyModuleType : SuiteDependencyContextExtensionsTests
     {
         [Fact]
         public void Should_validate_modules_by_type()
@@ -117,7 +117,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
     }
 
-    public class ValidateSdkVersion : SuiteDependencyContextExtensionsTests
+    public sealed class ValidateSdkVersion : SuiteDependencyContextExtensionsTests
     {
         [Fact]
         public void Should_validate_matching_sdk_version()
@@ -185,7 +185,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
     }
 
-    public class ValidateDependencies : SuiteDependencyContextExtensionsTests
+    public sealed class ValidateDependencies : SuiteDependencyContextExtensionsTests
     {
         [Fact]
         public void Should_validate_module_dependencies()

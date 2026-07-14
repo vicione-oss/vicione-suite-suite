@@ -1,4 +1,4 @@
-﻿using Core.Module.Extensions;
+using Core.Module.Extensions;
 using AwesomeAssertions;
 using Sdk.Modules;
 using TestModule.Backend;
@@ -9,7 +9,7 @@ namespace Core.Module.Tests.Extensions;
 
 public partial class SuiteDependencyContextExtensionsTests
 {
-    public class GetUiModulesAssemblyPathInfos : SuiteDependencyContextExtensionsTests
+    public sealed class GetUiModulesAssemblyPathInfos : SuiteDependencyContextExtensionsTests
     {
         [Fact]
         public void Should_return_paths_of_active_client_modules()
@@ -65,7 +65,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
     }
 
-    public class GetBackendModulesAssemblyPaths : SuiteDependencyContextExtensionsTests
+    public sealed class GetBackendModulesAssemblyPaths : SuiteDependencyContextExtensionsTests
     {
         [Fact]
         public void Should_return_paths_of_active_backend_modules()

@@ -1,4 +1,4 @@
-﻿using AwesomeAssertions;
+using AwesomeAssertions;
 using Core.Module.Utils;
 using Xunit;
 
@@ -7,7 +7,7 @@ namespace Core.Module.Tests.Utils;
 public class VersionUtilsTests
 {
     [Fact]
-    public void Evaluate_version_order()
+    public void Should_order_versions_correctly()
     {
         // Arrange
         var versions = new List<Version>()

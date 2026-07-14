@@ -24,7 +24,7 @@ public class IArtifactQueryResultExtensionsTests
         return result;
     }
 
-    public class OrderModuleArtifactsByVersionDesc : IArtifactQueryResultExtensionsTests
+    public sealed class OrderModuleArtifactsByVersionDesc : IArtifactQueryResultExtensionsTests
     {
         [Fact]
         public void Should_return_empty_when_no_artifacts()
@@ -160,7 +160,7 @@ public class IArtifactQueryResultExtensionsTests
         }
     }
 
-    public class FilterCompatibleModuleArtifactsBySdkVersion : IArtifactQueryResultExtensionsTests
+    public sealed class FilterCompatibleModuleArtifactsBySdkVersion : IArtifactQueryResultExtensionsTests
     {
         [Fact]
         public void Should_return_empty_when_no_artifacts()
