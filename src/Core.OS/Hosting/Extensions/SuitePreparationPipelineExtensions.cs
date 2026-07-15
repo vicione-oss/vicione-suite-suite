@@ -80,7 +80,7 @@ internal static class SuitePreparationPipelineExtensions
     private static void DeleteDeviceImageFile(IFileSystem fileSystem, InstanceOptions instanceOptions, Serilog.ILogger logger)
     {
         var cacheRoot = fileSystem.GetRootedCacheDirectory(instanceOptions);
-        var deviceImageFilePath = fileSystem.Path.Combine(cacheRoot, Shared.Constants.SystemModuleId, Shared.Constants.DeviceImageFileName);
+        var deviceImageFilePath = fileSystem.Path.Combine(cacheRoot, Shared.Constants.SystemModuleId, Core.Shared.Constants.DeviceImageFileName);
 
         if (!fileSystem.File.Exists(deviceImageFilePath))
             return;

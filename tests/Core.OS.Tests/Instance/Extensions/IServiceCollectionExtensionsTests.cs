@@ -110,7 +110,6 @@ public sealed class IServiceCollectionExtensionsTests
             services.Should().Contain(s => s.ServiceType == typeof(IBackupFactory));
             services.Should().Contain(s => s.ServiceType == typeof(INonceStore));
             services.Should().Contain(s => s.ServiceType == typeof(IOnboardingStateStore));
-            services.Should().Contain(s => s.ServiceType == typeof(IStreamUploadHandler));
         }
     }
 }

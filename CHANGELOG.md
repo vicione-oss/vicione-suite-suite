@@ -47,6 +47,7 @@
 - `AspNetCore.SassCompiler` packages, update to version `1.101.0`
 - `MailKit` packages, update to version `4.17.0`
 - `Microsoft` packages, update to version `10.0.9`
+- `ViciOne.Suite.Sdk` packages, update to version `2.2.0-ci2679100668`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.16.0`
 - `ViciOne.Ui.MonochromeIcons` package, update version to `4.12.0`
 

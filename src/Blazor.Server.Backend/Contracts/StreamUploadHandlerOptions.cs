@@ -1,4 +1,4 @@
-﻿namespace Core.OS.Instance;
+namespace Blazor.Server.Backend.Contracts;
 
 public sealed class StreamUploadHandlerOptions<TContext>
 {
