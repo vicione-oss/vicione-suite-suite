@@ -1,8 +1,8 @@
-@using Microsoft.AspNetCore.Components.Forms
+@using System.Globalization
 @using Blazor.Shared.Instance.ControlPanels.Update.Services
 @using Blazor.Shared.Settings.Components
+@using Microsoft.AspNetCore.Components.Forms
 @using Sdk.Client.Components.Settings.Expanders
-@using System.Globalization
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
@@ -76,6 +76,7 @@
                     <SettingsFieldFileUpload @bind-Filename="State.SwuFilename"
                                              Placeholder="@Localization.UpdateControlPanel.SwuFileUploadPlaceholder"
                                              UploadTicket="State.SwuFileUploadTicket"
+                                             UploadTicketFactory="@UploadTicketFactory"
                                              UploadHandler="StreamUploadHandler"
                                              Accept="@Core.Shared.Constants.DeviceImageFileExtension"
                                              MaximumAllowedSize="@Core.Shared.Constants.DeviceImageMaximumAllowedSize"

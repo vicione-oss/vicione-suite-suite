@@ -1,11 +1,12 @@
-﻿using System.IO.Abstractions;
-using Core.OS.Instance.Contracts;
-using Core.Shared.Instance.Models;
-using Core.Shared.Instance.Services;
+using System.IO.Abstractions;
+using Blazor.Server.Backend.Contracts;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sdk.Backend.Modules;
+using Sdk.Client.Models;
+using Sdk.Services;
 
-namespace Core.OS.Instance.Services;
+namespace Blazor.Server.Backend.Services;
 
 public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspaceProvider<TModule> workspace, IFileSystem fileSystem,
     IOptions<StreamUploadHandlerOptions<TContext>> options, ILogger<StreamUploadHandler<TModule, TContext>> logger)

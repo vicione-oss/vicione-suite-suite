@@ -1,5 +1,6 @@
 using System.Reflection;
 using Blazor.DevAssets;
+using Blazor.Server.Backend.Contracts;
 using Blazor.Server.Backend.Extensions;
 using Blazor.Server.Backend.Localization;
 using Blazor.Server.Backend.Middleware;
@@ -30,6 +31,7 @@ using Microsoft.Extensions.Options;
 using Sdk.Backend.Extensions;
 using Sdk.Backend.Modules;
 using Sdk.Client.Modules;
+using Sdk.Client.Services;
 using Sdk.Extensions;
 using Sdk.Modules;
 
@@ -85,7 +87,8 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddTransient(typeof(IUiEventSubscriptionHolder<>), typeof(UiEventPublisher<>));
         services.AddSingleton(typeof(IUiEventSubscriptionRegistry<>), typeof(UiEventSubscriptionRegistry<>));
         services.AddLocalHttpClient();
-        services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();
+        services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();        
+        services.AddStreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(options => options.FilenameTransform = filename => Core.Shared.Constants.DeviceImageFileName);
     }
 
     /// <inheritdoc/>

@@ -1,7 +1,5 @@
-using Core.OS.Instance.Contracts;
 using Core.OS.Instance.HealthCheck;
 using Core.OS.Instance.Services;
-using Core.OS.Modules;
 using Core.OS.Persistence;
 using Core.OS.UserManagement.Services;
 using Core.Shared.Instance.HealthCheck;
@@ -9,7 +7,6 @@ using Core.Shared.Instance.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Sdk.Backend.Modules;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
 
@@ -78,19 +75,7 @@ internal static class IServiceCollectionExtensions
                 .AddSingleton<ReplicationLagTracker>()
                 .AddScoped<ILoginDesignService, LoginDesignService>()
                 .AddScoped<INonceStore, NonceStore>()
-                .AddScoped<IOnboardingStateStore, OnboardingStateStore>()
-                .AddStreamUploadHandler<SystemBackendModule, DeviceImageContext>(options => options.FilenameTransform = filename => Shared.Constants.DeviceImageFileName);
-        }
-
-        private IServiceCollection AddStreamUploadHandler<TModule, TContext>(Action<StreamUploadHandlerOptions<TContext>>? configureOptions = null)
-            where TModule : BackendModule
-        {
-            if (configureOptions is not null)
-                services.Configure(configureOptions);
-
-            services.AddTransient<IStreamUploadHandler, StreamUploadHandler<TModule, TContext>>();
-
-            return services;
+                .AddScoped<IOnboardingStateStore, OnboardingStateStore>();
         }
     }
 }

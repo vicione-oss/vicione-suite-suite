@@ -1,6 +1,5 @@
 using System.Reactive.Disposables;
 using System.Security.Principal;
-using Blazor.Shared;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +14,7 @@ public sealed partial class BlazorServerUiMediator(ISuiteMediator suiteMediator,
 {
     private IIdentity? _scopeIdentity;
 
-    public int CommandTimeoutMs => Constants.CommandTimeoutMs;
+    public int CommandTimeoutMs => Shared.Constants.CommandTimeoutMs;
 
     public Task Send<TCommand>(TCommand command, CancellationToken cancellationToken = default)
         where TCommand : class, ICommand

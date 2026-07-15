@@ -1,6 +1,6 @@
-using Blazor.Shared.Settings.Models;
 using Core.Shared.HostManagement;
 using Sdk.Client.ControlPanels.Services;
+using Sdk.Client.Models;
 using ViciOne.Ui.Blazor.Components.ComboBox;
 
 namespace Blazor.Shared.Instance.ControlPanels.Update.Services;

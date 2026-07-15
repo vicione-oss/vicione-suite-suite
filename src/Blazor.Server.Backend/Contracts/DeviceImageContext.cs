@@ -1,3 +1,3 @@
-﻿namespace Core.OS.Instance.Contracts;
+namespace Blazor.Server.Backend.Contracts;
 
 internal sealed class DeviceImageContext;

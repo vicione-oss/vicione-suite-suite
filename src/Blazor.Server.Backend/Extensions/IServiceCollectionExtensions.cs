@@ -1,5 +1,5 @@
+using Blazor.Server.Backend.Contracts;
 using Blazor.Server.Backend.Services;
-using Blazor.Shared;
 using Blazor.Shared.Connections.Components;
 using Blazor.Shared.Connections.Validators;
 using Blazor.Shared.Extensions;
@@ -10,9 +10,12 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
 using Sdk.Authorization.Extensions;
+using Sdk.Backend.Modules;
 using Sdk.Client.Connections;
 using Sdk.Client.Infrastructure;
+using Sdk.Client.Services;
 using Sdk.Connections.Contracts;
+using Sdk.Services;
 using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Server.Backend.Extensions;
@@ -57,7 +60,7 @@ internal static class IServiceCollectionExtensions
                 .AddTransient<IBackendLogService, BackendLogService>()
                 .AddTransient<INavigationService, NavigationService>();
 
-            services.AddModuleFeature(_ => new ModuleFeature(Core.Shared.Constants.SystemModuleId, Constants.LogViewFeature, "Controls access to the 'Log viewer'-feature"));
+            services.AddModuleFeature(_ => new ModuleFeature(Core.Shared.Constants.SystemModuleId, Shared.Constants.LogViewFeature, "Controls access to the 'Log viewer'-feature"));
 
             services.AddSingleton<IConnectionTypeUiRegistry, ConnectionTypeUiRegistry>(_ =>
             {
@@ -70,6 +73,18 @@ internal static class IServiceCollectionExtensions
 
                 return registry;
             });
+
+            return services;
+        }
+
+        public IServiceCollection AddStreamUploadHandler<TModule, TContext>(Action<StreamUploadHandlerOptions<TContext>>? configureOptions = null)
+            where TModule : BackendModule
+        {
+            if (configureOptions is not null)
+                services.Configure(configureOptions);
+
+            services.AddScoped<IUploadTicketFactory, UploadTicketFactory>();
+            services.AddTransient<IStreamUploadHandler, StreamUploadHandler<TModule, TContext>>();
 
             return services;
         }

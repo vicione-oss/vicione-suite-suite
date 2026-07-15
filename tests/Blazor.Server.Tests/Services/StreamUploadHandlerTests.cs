@@ -1,27 +1,26 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using AwesomeAssertions;
-using Core.OS.Instance;
-using Core.OS.Instance.Contracts;
-using Core.OS.Instance.Services;
-using Core.OS.Modules;
-using Core.Shared.Instance.Models;
+using Blazor.Server.Backend;
+using Blazor.Server.Backend.Contracts;
+using Blazor.Server.Backend.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sdk.Backend.Modules;
+using Sdk.Client.Models;
 using Xunit;
 
-namespace Core.OS.Tests.Instance.Services;
+namespace Blazor.Server.Tests.Services;
 
 public class StreamUploadHandlerTests
 {
     public sealed class Execute
     {
-        private readonly ILogger<StreamUploadHandler<SystemBackendModule, DeviceImageContext>> _logger = Substitute.For<ILogger<StreamUploadHandler<SystemBackendModule, DeviceImageContext>>>();
+        private readonly ILogger<StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>> _logger = Substitute.For<ILogger<StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>>>();
         private readonly StreamUploadHandlerOptions<DeviceImageContext> _options = new();
-        private readonly IWorkspaceProvider<SystemBackendModule> _workspaceProvider = Substitute.For<IWorkspaceProvider<SystemBackendModule>>();
+        private readonly IWorkspaceProvider<BlazorServerBackendModule> _workspaceProvider = Substitute.For<IWorkspaceProvider<BlazorServerBackendModule>>();
 
         private string SetupSystemWorkspace(MockFileSystem fileSystem)
         {
@@ -48,7 +47,7 @@ public class StreamUploadHandlerTests
             var fileSystem = Substitute.For<IFileSystem>();
             fileSystem.DriveInfo.New("cache").AvailableFreeSpace.Returns(1);
 
-            var sut = new StreamUploadHandler<SystemBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
 
             var stream = new MemoryStream(Encoding.UTF8.GetBytes("hello"));
 
@@ -66,7 +65,7 @@ public class StreamUploadHandlerTests
             var fileSystem = new MockFileSystem();
             var systemWorkspace = SetupSystemWorkspace(fileSystem);
 
-            var sut = new StreamUploadHandler<SystemBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
 
             var content = Encoding.UTF8.GetBytes("HelloWorld");
             var inputStream = new MemoryStream(content);
@@ -89,7 +88,7 @@ public class StreamUploadHandlerTests
 
             _options.PathTransform = _ => transform.FullName;
 
-            var sut = new StreamUploadHandler<SystemBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
 
             var content = "HelloWorld"u8.ToArray();
             var inputStream = new MemoryStream(content);
@@ -111,7 +110,7 @@ public class StreamUploadHandlerTests
             var fileSystem = new MockFileSystem();
             _ = SetupSystemWorkspace(fileSystem);
 
-            var sut = new StreamUploadHandler<SystemBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
 
             IStreamUploadProgress? captured = null;
             sut.OnProgress = p => { captured = p; return Task.CompletedTask; };
@@ -138,7 +137,7 @@ public class StreamUploadHandlerTests
             fileSystem.File.Create(Arg.Any<string>()).Returns(_ => throw new IOException("disk error"));
             fileSystem.Path.Combine("cache", "bad.txt").Returns("cache/bad.txt");
 
-            var sut = new StreamUploadHandler<SystemBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, Options.Create(_options), _logger);
             var input = new MemoryStream("foo"u8.ToArray());
 
             // Act
