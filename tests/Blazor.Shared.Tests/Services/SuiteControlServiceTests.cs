@@ -57,7 +57,7 @@ public class SuiteControlServiceTests
             // Assert
             await _mediator.Received(1).Send(
                 Arg.Is<ControlInstance>(cmd =>
-                    cmd.InstanceId == instanceId &&
+                    cmd!.InstanceId == instanceId &&
                     cmd.Action == InstanceCommand.Restart &&
                     cmd.Delay > TimeSpan.Zero &&
                     cmd.CorrelationId != Guid.Empty),
@@ -100,7 +100,7 @@ public class SuiteControlServiceTests
 
             // Assert
             await _mediator.Received(1).Send(
-                Arg.Is<ControlSystem>(cmd => cmd.Command == SystemCommand.Restart),
+                Arg.Is<ControlSystem>(cmd => cmd!.Command == SystemCommand.Restart),
                 instanceId,
                 Arg.Any<CancellationToken>());
         }
@@ -120,7 +120,7 @@ public class SuiteControlServiceTests
 
             // Assert
             await _mediator.Received(1).Send(
-                Arg.Is<ControlSystem>(cmd => cmd.Command == SystemCommand.Shutdown),
+                Arg.Is<ControlSystem>(cmd => cmd!.Command == SystemCommand.Shutdown),
                 instanceId,
                 Arg.Any<CancellationToken>());
         }

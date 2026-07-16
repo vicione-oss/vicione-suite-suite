@@ -1,13 +1,13 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <DotNetVersion>10.0.9</DotNetVersion>
+    <DotNetVersion>10.0.10</DotNetVersion>
     <HostManagementVersion>1.3.0</HostManagementVersion>
-    <OpenTelemetryVersion>1.15.0</OpenTelemetryVersion>
+    <OpenTelemetryVersion>1.16.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.10</MassTransitVersion>
     <ViciOneUiBlazorComponentsVersion>5.16.0</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.12.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>2.2.0-ci2679611646</ViciOneSuiteSdkVersion>
+    <ViciOneSuiteSdkVersion>2.2.0-ci2678919385</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
@@ -35,11 +35,11 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Localization" Version="$(DotNetVersion)" />
-    <PackageVersion Include="Microsoft.FeatureManagement" Version="4.5.0" />
-    <PackageVersion Include="Microsoft.FeatureManagement.AspNetCore" Version="4.5.0" />
     <PackageVersion Include="Microsoft.TypeScript.MSBuild" Version="5.9.3" />
+    <PackageVersion Include="Microsoft.FeatureManagement" Version="4.6.0" />
+    <PackageVersion Include="Microsoft.FeatureManagement.AspNetCore" Version="4.6.0" />
     <PackageVersion Include="minisign-net" Version="1.0.0" />
-    <PackageVersion Include="MQTTnet" Version="5.1.0.1559" />
+    <PackageVersion Include="MQTTnet" Version="5.2.0.1603" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
@@ -53,7 +53,7 @@
     <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
     <PackageVersion Include="Serilog.Sinks.Journal" Version="1.2.0" />
     <PackageVersion Include="StronglyTypedId" Version="0.2.1" />
-    <PackageVersion Include="System.IO.Abstractions" Version="22.1.1" />
+    <PackageVersion Include="System.IO.Abstractions" Version="22.2.0" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(DotNetVersion)" />
     <PackageVersion Include="TimeZoneNames" Version="7.0.0" />
     <PackageVersion Include="ViciOne.Journal" Version="1.2.0" />
@@ -76,10 +76,10 @@
     <PackageVersion Include="bunit" Version="2.7.2" />
     <PackageVersion Include="Extensions.Logging.NSubstitute" Version="1.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(DotNetVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.7.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.8.0" />
-    <PackageVersion Include="NSubstitute" Version="5.3.0" />
-    <PackageVersion Include="System.IO.Abstractions.TestingHelpers" Version="22.1.1" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.8.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.9.0" />
+    <PackageVersion Include="NSubstitute" Version="6.0.0" />
+    <PackageVersion Include="System.IO.Abstractions.TestingHelpers" Version="22.2.0" />
     <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Testing" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Ui.Blazor.Components.TestingHelpers" Version="$(ViciOneUiBlazorComponentsVersion)" />

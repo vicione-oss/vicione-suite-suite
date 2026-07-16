@@ -45,12 +45,12 @@ public sealed class InstanceHealthCheckPublisherTests
         _ = _mediatorMock.Received()
             .Publish(
                 Arg.Is<InstanceHealthInfo>(message =>
-                    message.SenderInstanceId == instanceId && message.Status == HealthStatus.Unhealthy),
+                    message!.SenderInstanceId == instanceId && message.Status == HealthStatus.Unhealthy),
                 Arg.Any<CancellationToken>());
 
         _ = _mediatorMock.Received()
             .Publish(
-                Arg.Is<InstanceHealthChangedEvent>(message => message.Status == HealthStatus.Unhealthy),
+                Arg.Is<InstanceHealthChangedEvent>(message => message!.Status == HealthStatus.Unhealthy),
                 Arg.Any<CancellationToken>());
     }
 
@@ -72,7 +72,7 @@ public sealed class InstanceHealthCheckPublisherTests
         _ = _mediatorMock.Received()
             .Publish(
                 Arg.Is<InstanceHealthInfo>(message =>
-                    message.SenderInstanceId == instanceId &&
+                    message!.SenderInstanceId == instanceId &&
                     message.Status == HealthStatus.Healthy),
                 TestContext.Current.CancellationToken);
 

@@ -14,18 +14,8 @@ namespace Blazor.Server.Tests.Passkeys;
 
 public sealed class GetPasskeysConsumerTest
 {
-    private readonly UserManager<SuiteUser> _userManagerMock = Substitute.For<UserManager<SuiteUser>>(
-        Substitute.For<IUserStore<SuiteUser>>(),
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
-
-    private readonly ILogger<GetPasskeysConsumer> _loggerMock =
+    private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
+    private readonly ILogger<GetPasskeysConsumer> _logger =
         Substitute.For<ILogger<GetPasskeysConsumer>>();
 
     [Fact]
@@ -48,16 +38,17 @@ public sealed class GetPasskeysConsumerTest
             true,
             true,
             [],
-            []) { Name = "phone" };
+            [])
+        { Name = "phone" };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<GetPasskeysConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -81,14 +72,14 @@ public sealed class GetPasskeysConsumerTest
             UserName = "testuser"
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo>());
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo>());
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<GetPasskeysConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -104,13 +95,13 @@ public sealed class GetPasskeysConsumerTest
     {
         // Arrange
         const string userId = "unknown-user-id";
-        _userManagerMock.FindByIdAsync(userId).Returns((SuiteUser?)null);
+        _userManager.FindByIdAsync(userId).Returns((SuiteUser?)null);
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<GetPasskeysConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -120,7 +111,7 @@ public sealed class GetPasskeysConsumerTest
         response.Passkeys.Should().BeEmpty();
         response.RequestError.Should().NotBeNull();
         response.RequestError!.ErrorCode.Should().Be((int)PasskeyError.UserNotFound);
-        await _userManagerMock.DidNotReceive().GetPasskeysAsync(Arg.Any<SuiteUser>());
+        await _userManager.DidNotReceive().GetPasskeysAsync(Arg.Any<SuiteUser>());
     }
 
     [Fact]
@@ -134,14 +125,14 @@ public sealed class GetPasskeysConsumerTest
             UserName = "testuser"
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.GetPasskeysAsync(user).Returns<IList<UserPasskeyInfo>>(_ => throw new InvalidOperationException("store unavailable"));
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.GetPasskeysAsync(user).Returns<IList<UserPasskeyInfo>>(_ => throw new InvalidOperationException("store unavailable"));
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<GetPasskeysConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act

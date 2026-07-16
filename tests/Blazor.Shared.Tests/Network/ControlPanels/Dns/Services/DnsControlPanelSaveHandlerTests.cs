@@ -58,8 +58,8 @@ public sealed class DnsControlPanelSaveHandlerTests
             .Do(call =>
             {
                 var command = call.Arg<SetSystemConfiguration>();
-                onSend?.Invoke(command);
-                FireSuccessEvent(handler, command);
+                onSend?.Invoke(command!);
+                FireSuccessEvent(handler, command!);
             });
     }
 
@@ -70,7 +70,7 @@ public sealed class DnsControlPanelSaveHandlerTests
             .Do(call =>
             {
                 var command = call.Arg<SetSystemConfiguration>();
-                var @event = new SetSystemConfigurationError(command.CorrelationId, error);
+                var @event = new SetSystemConfigurationError(command!.CorrelationId, error);
                 _ = handler.Consume(new ClientContext<SetSystemConfigurationError>(@event, command.CorrelationId), CancellationToken.None);
             });
     }

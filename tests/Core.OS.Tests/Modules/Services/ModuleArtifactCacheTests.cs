@@ -172,7 +172,7 @@ public class ModuleArtifactCacheTests
             _moduleRepository.QueryModuleMetadataArtifacts(_sdkVersion, null, Arg.Any<CancellationToken>())
                 .Returns([.. moduleArtifacts]);
 
-            _moduleRepository.GetModuleMetadata(Arg.Is<IArtifact>(k => k.Name == firstArtifact.Name), Arg.Any<CancellationToken>())
+            _moduleRepository.GetModuleMetadata(Arg.Is<IArtifact>(k => k!.Name == firstArtifact.Name), Arg.Any<CancellationToken>())
                     .Returns(firstMetadata);
 
             // Act

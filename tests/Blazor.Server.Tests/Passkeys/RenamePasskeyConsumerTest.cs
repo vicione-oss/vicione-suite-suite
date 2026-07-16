@@ -16,19 +16,8 @@ namespace Blazor.Server.Tests.Passkeys;
 
 public sealed class RenamePasskeyConsumerTest
 {
-    private readonly UserManager<SuiteUser> _userManagerMock = Substitute.For<UserManager<SuiteUser>>(
-        Substitute.For<IUserStore<SuiteUser>>(),
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
-
-    private readonly ILogger<RenamePasskeyConsumer> _loggerMock =
-        Substitute.For<ILogger<RenamePasskeyConsumer>>();
+    private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
+    private readonly ILogger<RenamePasskeyConsumer> _logger = Substitute.For<ILogger<RenamePasskeyConsumer>>();
 
     [Fact]
     public async Task Should_return_an_error_when_user_is_unknown()
@@ -42,13 +31,13 @@ public sealed class RenamePasskeyConsumerTest
             NewName = "new name"
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns((SuiteUser?)null);
+        _userManager.FindByIdAsync(userId).Returns((SuiteUser?)null);
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<RenamePasskeyConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -81,14 +70,14 @@ public sealed class RenamePasskeyConsumerTest
             NewName = "new name"
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo>());
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo>());
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<RenamePasskeyConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -123,7 +112,8 @@ public sealed class RenamePasskeyConsumerTest
             true,
             true,
             [],
-            []) { Name = "old name" };
+            [])
+        { Name = "old name" };
         var request = new RenamePasskey
         {
             UserId = userId,
@@ -131,15 +121,15 @@ public sealed class RenamePasskeyConsumerTest
             NewName = "new name"
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
-        _userManagerMock.AddOrUpdatePasskeyAsync(user, Arg.Any<UserPasskeyInfo>()).Returns(IdentityResult.Success);
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
+        _userManager.AddOrUpdatePasskeyAsync(user, Arg.Any<UserPasskeyInfo>()).Returns(IdentityResult.Success);
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<RenamePasskeyConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -151,9 +141,9 @@ public sealed class RenamePasskeyConsumerTest
             .FirstOrDefault();
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().BeNull();
-        await _userManagerMock.Received(1)
+        await _userManager.Received(1)
             .AddOrUpdatePasskeyAsync(user,
-                Arg.Is<UserPasskeyInfo>(p => p.Name == "new name"));
+                Arg.Is<UserPasskeyInfo>(p => p!.Name == "new name"));
     }
 
     [Fact]
@@ -177,7 +167,8 @@ public sealed class RenamePasskeyConsumerTest
             true,
             true,
             [],
-            []) { Name = existingName };
+            [])
+        { Name = existingName };
         var request = new RenamePasskey
         {
             UserId = userId,
@@ -185,14 +176,14 @@ public sealed class RenamePasskeyConsumerTest
             NewName = existingName
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<RenamePasskeyConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -204,7 +195,7 @@ public sealed class RenamePasskeyConsumerTest
             .FirstOrDefault();
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().BeNull();
-        await _userManagerMock.DidNotReceive()
+        await _userManager.DidNotReceive()
             .AddOrUpdatePasskeyAsync(Arg.Any<SuiteUser>(), Arg.Any<UserPasskeyInfo>());
     }
 
@@ -229,7 +220,8 @@ public sealed class RenamePasskeyConsumerTest
             true,
             true,
             [],
-            []) { Name = existingName };
+            [])
+        { Name = existingName };
         var request = new RenamePasskey
         {
             UserId = userId,
@@ -237,15 +229,15 @@ public sealed class RenamePasskeyConsumerTest
             NewName = existingName.ToUpperInvariant()
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
-        _userManagerMock.AddOrUpdatePasskeyAsync(user, Arg.Any<UserPasskeyInfo>()).Returns(IdentityResult.Success);
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
+        _userManager.AddOrUpdatePasskeyAsync(user, Arg.Any<UserPasskeyInfo>()).Returns(IdentityResult.Success);
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<RenamePasskeyConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -257,9 +249,9 @@ public sealed class RenamePasskeyConsumerTest
             .FirstOrDefault();
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().BeNull();
-        await _userManagerMock.Received(1)
+        await _userManager.Received(1)
             .AddOrUpdatePasskeyAsync(user,
-                Arg.Is<UserPasskeyInfo>(p => p.Name == existingName.ToUpperInvariant()));
+                Arg.Is<UserPasskeyInfo>(p => p!.Name == existingName.ToUpperInvariant()));
     }
 
     [Theory]
@@ -282,13 +274,13 @@ public sealed class RenamePasskeyConsumerTest
             NewName = newName!
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
+        _userManager.FindByIdAsync(userId).Returns(user);
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<RenamePasskeyConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -301,7 +293,7 @@ public sealed class RenamePasskeyConsumerTest
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().NotBeNull();
         message.Context.Message.ErrorInfo!.ErrorCode.Should().Be((int)PasskeyError.NameInvalid);
-        await _userManagerMock.DidNotReceive()
+        await _userManager.DidNotReceive()
             .GetPasskeysAsync(Arg.Any<SuiteUser>());
     }
 
@@ -326,7 +318,8 @@ public sealed class RenamePasskeyConsumerTest
             true,
             true,
             [],
-            []) { Name = "phone" };
+            [])
+        { Name = "phone" };
         var otherPasskey = new UserPasskeyInfo(otherCredentialId,
             [],
             DateTimeOffset.UtcNow,
@@ -336,7 +329,8 @@ public sealed class RenamePasskeyConsumerTest
             true,
             true,
             [],
-            []) { Name = "tablet" };
+            [])
+        { Name = "tablet" };
         var request = new RenamePasskey
         {
             UserId = userId,
@@ -344,15 +338,15 @@ public sealed class RenamePasskeyConsumerTest
             NewName = "TABLET"
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.GetPasskeysAsync(user)
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.GetPasskeysAsync(user)
             .Returns(new List<UserPasskeyInfo> { targetPasskey, otherPasskey });
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<RenamePasskeyConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -365,7 +359,7 @@ public sealed class RenamePasskeyConsumerTest
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().NotBeNull();
         message.Context.Message.ErrorInfo!.ErrorCode.Should().Be((int)PasskeyError.NameAlreadyInUse);
-        await _userManagerMock.DidNotReceive()
+        await _userManager.DidNotReceive()
             .AddOrUpdatePasskeyAsync(Arg.Any<SuiteUser>(), Arg.Any<UserPasskeyInfo>());
     }
 
@@ -386,13 +380,13 @@ public sealed class RenamePasskeyConsumerTest
             NewName = new string('a', 201) // Exceeds 200 character limit
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
+        _userManager.FindByIdAsync(userId).Returns(user);
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<RenamePasskeyConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -405,7 +399,7 @@ public sealed class RenamePasskeyConsumerTest
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().NotBeNull();
         message.Context.Message.ErrorInfo!.ErrorCode.Should().Be((int)PasskeyError.NameInvalid);
-        await _userManagerMock.DidNotReceive()
+        await _userManager.DidNotReceive()
             .GetPasskeysAsync(Arg.Any<SuiteUser>());
     }
 }

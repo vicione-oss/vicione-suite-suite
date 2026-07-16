@@ -9,9 +9,11 @@ using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Security;
 
-public class AccountVerificationTest
+public sealed class AccountVerificationTest : IDisposable
 {
     private const string UserId = "123";
+
+    private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
 
     [Theory]
     [InlineData(false, true, true, false)]
@@ -36,43 +38,22 @@ public class AccountVerificationTest
         needsVerification.Should().Be(userNeedsVerification);
     }
 
-    private static AccountVerification CreateAccountVerification(bool mailSystemIsConfigured,
+    private AccountVerification CreateAccountVerification(bool mailSystemIsConfigured,
         bool settingsRequireVerification,
         bool userIsConfirmed)
     {
-        MockDependencies(out var mailSenderStatus,
-            out _,
-            out var securitySettings,
-            out var userManager);
+        var mailSenderStatus = Substitute.For<IMailSenderStatus>();
+        var securitySettings = Substitute.For<ISecuritySettings>();
+
         mailSenderStatus.IsConfigured().Returns(mailSystemIsConfigured);
         securitySettings.RequireAccountVerification.Returns(settingsRequireVerification);
+
         var suiteUser = new SuiteUser { EmailConfirmed = userIsConfirmed };
-        userManager.FindByIdAsync(UserId).Returns(suiteUser);
-        userManager.IsEmailConfirmedAsync(suiteUser).Returns(userIsConfirmed);
-        return new AccountVerification(mailSenderStatus,
-            securitySettings,
-            userManager);
+        _userManager.FindByIdAsync(UserId).Returns(suiteUser);
+        _userManager.IsEmailConfirmedAsync(suiteUser).Returns(userIsConfirmed);
+
+        return new AccountVerification(mailSenderStatus, securitySettings, _userManager);
     }
 
-    private static void MockDependencies(out IMailSenderStatus mailSenderStatus,
-        out IMailSender mailSender,
-        out ISecuritySettings securitySettings,
-        out UserManager<SuiteUser> userManager)
-    {
-        mailSenderStatus = Substitute.For<IMailSenderStatus>();
-        mailSender = Substitute.For<IMailSender>();
-
-        securitySettings = Substitute.For<ISecuritySettings>();
-
-        userManager = Substitute.For<UserManager<SuiteUser>>(
-            Substitute.For<IUserStore<SuiteUser>>(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null);
-    }
+    public void Dispose() => _userManager.Dispose();
 }

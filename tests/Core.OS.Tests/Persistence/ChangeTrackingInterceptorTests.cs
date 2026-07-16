@@ -69,7 +69,7 @@ public class ChangeTrackingInterceptorTests
             // Assert
             _ = _mockMediator.Received()
                 .Publish(
-                    Arg.Is<DbChangeSet>(m => m.Changes.Count == 1
+                    Arg.Is<DbChangeSet>(m => m!.Changes.Count == 1
                         && m.Changes.First().EntityTypeFullName == expectedChange.EntityTypeFullName
                         && m.Changes.First().AssemblyFullName == expectedChange.AssemblyFullName
                         && m.Changes.First().State == expectedChange.State
@@ -133,7 +133,7 @@ public class ChangeTrackingInterceptorTests
             // Assert
             _ = _mockMediator.Received()
                 .Publish(
-                    Arg.Is<DbChangeSet>(m => m.Changes.Count == 1
+                    Arg.Is<DbChangeSet>(m => m!.Changes.Count == 1
                         && m.Changes.First().EntityTypeFullName == expectedChange.EntityTypeFullName
                         && m.Changes.First().AssemblyFullName == expectedChange.AssemblyFullName
                         && m.Changes.First().State == expectedChange.State
@@ -179,7 +179,7 @@ public class ChangeTrackingInterceptorTests
             // Assert
             _ = _mockMediator.Received(1)
                 .Publish(
-                    Arg.Is<DbChangeSet>(m => m.Changes.Count == 1
+                    Arg.Is<DbChangeSet>(m => m!.Changes.Count == 1
                         && m.Changes.First().State == EntityState.Modified),
                     _cancellationToken);
         }
@@ -201,7 +201,7 @@ public class ChangeTrackingInterceptorTests
             // Assert
             _ = _mockMediator.Received(1)
                 .Publish(
-                    Arg.Is<DbChangeSet>(m => m.Changes.Count == 1
+                    Arg.Is<DbChangeSet>(m => m!.Changes.Count == 1
                         && m.Changes.First().State == EntityState.Deleted),
                     _cancellationToken);
         }

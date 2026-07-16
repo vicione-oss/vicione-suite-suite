@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Connections.Services;
+using Blazor.Shared.Connections.Services;
 using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
@@ -16,7 +16,7 @@ internal static class IUiMediatorExtensions
             .Do(async callinfo =>
             {
                 var command = callinfo.Arg<TCommand>();
-                var correlationId = command.CorrelationId;
+                var correlationId = command!.CorrelationId;
 
                 var @event = eventFactory(command);
                 var context = new ClientContext<TEvent>(@event, correlationId);

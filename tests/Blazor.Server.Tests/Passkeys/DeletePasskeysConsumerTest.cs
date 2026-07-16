@@ -1,33 +1,23 @@
+using AwesomeAssertions;
 using Blazor.Server.Backend.Passkeys;
 using Core.Shared.Passkeys;
 using Core.Shared.Passkeys.Commands;
+using Core.Shared.Passkeys.Events;
 using Core.Shared.UserManagement.Contracts;
+using MassTransit.Testing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Testing.Backend;
 using Xunit;
-using AwesomeAssertions;
-using Core.Shared.Passkeys.Events;
-using MassTransit.Testing;
 
 namespace Blazor.Server.Tests.Passkeys;
 
 public sealed class DeletePasskeysConsumerTest
 {
-    private readonly UserManager<SuiteUser> _userManagerMock = Substitute.For<UserManager<SuiteUser>>(
-        Substitute.For<IUserStore<SuiteUser>>(),
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
-
-    private readonly ILogger<DeletePasskeysConsumer> _loggerMock = Substitute.For<ILogger<DeletePasskeysConsumer>>();
+    private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
+    private readonly ILogger<DeletePasskeysConsumer> _logger = Substitute.For<ILogger<DeletePasskeysConsumer>>();
 
     [Fact]
     public async Task Should_return_an_error_when_user_is_unknown()
@@ -40,13 +30,13 @@ public sealed class DeletePasskeysConsumerTest
             PasskeyIds = ["passkey-1"]
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns((SuiteUser?)null);
+        _userManager.FindByIdAsync(userId).Returns((SuiteUser?)null);
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<DeletePasskeysConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -80,14 +70,14 @@ public sealed class DeletePasskeysConsumerTest
             PasskeyIds = [passkeyId1, passkeyId2]
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
-        _userManagerMock.RemovePasskeyAsync(user, Arg.Any<byte[]>()).Returns(Task.FromResult(new IdentityResult()));
+        _userManager.FindByIdAsync(userId).Returns(user);
+        _userManager.RemovePasskeyAsync(user, Arg.Any<byte[]>()).Returns(Task.FromResult(new IdentityResult()));
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<DeletePasskeysConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -97,7 +87,7 @@ public sealed class DeletePasskeysConsumerTest
         var message = await tester.Harness.Published
             .SelectAsync<PasskeyDeletionCompleted>(TestContext.Current.CancellationToken).FirstOrDefault();
         message.Should().NotBeNull();
-        await _userManagerMock.Received(2).RemovePasskeyAsync(Arg.Is(user), Arg.Any<byte[]>());
+        await _userManager.Received(2).RemovePasskeyAsync(Arg.Is(user), Arg.Any<byte[]>());
     }
 
     [Fact]
@@ -117,13 +107,13 @@ public sealed class DeletePasskeysConsumerTest
             PasskeyIds = Array.Empty<string>()
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns(user);
+        _userManager.FindByIdAsync(userId).Returns(user);
 
         await using var tester = new MassTransitTester(cfg =>
         {
             cfg.AddConsumer<DeletePasskeysConsumer>();
-            cfg.AddSingleton(_userManagerMock);
-            cfg.AddSingleton(_loggerMock);
+            cfg.AddSingleton(_userManager);
+            cfg.AddSingleton(_logger);
         });
 
         // Act
@@ -133,6 +123,6 @@ public sealed class DeletePasskeysConsumerTest
         var message = await tester.Harness.Published
             .SelectAsync<PasskeyDeletionCompleted>(TestContext.Current.CancellationToken).FirstOrDefault();
         message.Should().NotBeNull();
-        await _userManagerMock.DidNotReceive().RemovePasskeyAsync(Arg.Any<SuiteUser>(), Arg.Any<byte[]>());
+        await _userManager.DidNotReceive().RemovePasskeyAsync(Arg.Any<SuiteUser>(), Arg.Any<byte[]>());
     }
 }

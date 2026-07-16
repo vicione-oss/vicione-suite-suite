@@ -77,6 +77,6 @@ public class InstanceControlPanelTests
         component.Should().NotBeNull();
         mediator.Should().NotBeNull();
         await mediator.Received().Request<GetInstances, GetInstancesResponse>(
-            Arg.Is<GetInstances>(k => k.InstanceId == state.InstanceId), Arg.Any<CancellationToken>());
+            Arg.Is<GetInstances>(k => k!.InstanceId == state.InstanceId), Arg.Any<CancellationToken>());
     }
 }

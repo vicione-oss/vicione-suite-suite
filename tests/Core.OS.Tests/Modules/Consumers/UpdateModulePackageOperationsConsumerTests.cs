@@ -109,7 +109,7 @@ public class UpdateModulePackageOperationsConsumerTests
 
         // Assert: Verify the dependency store was called with the correct operations
         await _packageStore.Received(1).EnqueueOperations(
-            Arg.Is<List<ModulePackageOperation>>(ops => ops.Count == operations.Count
+            Arg.Is<List<ModulePackageOperation>>(ops => ops!.Count == operations.Count
                 && ops[0].OperationKind == operations[0].OperationKind
                 && ops[0].Package.Name == operations[0].Package.Name
                 && ops[0].Package.Version == operations[0].Package.Version),
@@ -161,7 +161,7 @@ public class UpdateModulePackageOperationsConsumerTests
         published.Should().BeTrue();
 
         await _packageStore.Received(1).EnqueueOperations(
-            Arg.Is<List<ModulePackageOperation>>(ops => ops.Count == 0),
+            Arg.Is<List<ModulePackageOperation>>(ops => ops!.Count == 0),
             Arg.Any<CancellationToken>());
     }
 
@@ -206,7 +206,7 @@ public class UpdateModulePackageOperationsConsumerTests
 
         // Assert: All operations should be queued
         await _packageStore.Received(1).EnqueueOperations(
-            Arg.Is<List<ModulePackageOperation>>(ops => ops.Count == changes.Count),
+            Arg.Is<List<ModulePackageOperation>>(ops => ops!.Count == changes.Count),
             Arg.Any<CancellationToken>());
     }
 

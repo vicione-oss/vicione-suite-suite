@@ -337,15 +337,15 @@ public class ModuleManagementServiceTests
                 .Do(async callinfo =>
                 {
                     var command = callinfo.Arg<TCommand>();
-                    var @event = eventFactory(command);
+                    var @event = eventFactory(command!);
                     if (@event is ModulePackageOperationsChanged operationsChanged)
                     {
-                        var context = new ClientContext<ModulePackageOperationsChanged>(operationsChanged, command.CorrelationId);
+                        var context = new ClientContext<ModulePackageOperationsChanged>(operationsChanged, command!.CorrelationId);
                         await service.Consume(context, CancellationToken.None);
                     }
                     else if (@event is ModuleOptionsChanged optionsChanged)
                     {
-                        var context = new ClientContext<ModuleOptionsChanged>(optionsChanged, command.CorrelationId);
+                        var context = new ClientContext<ModuleOptionsChanged>(optionsChanged, command!.CorrelationId);
                         await service.Consume(context, CancellationToken.None);
                     }
                 });

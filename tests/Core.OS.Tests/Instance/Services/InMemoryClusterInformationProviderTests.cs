@@ -190,7 +190,7 @@ public sealed class InMemoryClusterInformationProviderTests
             mediator.Request<GetInstances, GetInstancesResponse>(Arg.Any<GetInstances>(), Arg.Any<CancellationToken>())
                 .Returns(new GetInstancesResponse([master,]));
 
-            mediator.Request<GetInstances, GetInstancesResponse>(Arg.Is((GetInstances r) => r.InstanceId == slave.Id), Arg.Any<CancellationToken>())
+            mediator.Request<GetInstances, GetInstancesResponse>(Arg.Is((GetInstances? r) => r!.InstanceId == slave.Id), Arg.Any<CancellationToken>())
                 .Returns(new GetInstancesResponse([slave,]));
 
             clusterInformationProvider.NewInstanceAdded += (_) => { called = true; return Task.CompletedTask; };

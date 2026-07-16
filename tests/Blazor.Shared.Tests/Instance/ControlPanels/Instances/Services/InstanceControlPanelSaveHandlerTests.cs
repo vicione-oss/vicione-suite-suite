@@ -34,7 +34,7 @@ public sealed class InstanceControlPanelSaveHandlerTests
                 .Do(async callinfo =>
                 {
                     var command = callinfo.Arg<UpdateInstanceInformation>();
-                    correlationId = command.CorrelationId;
+                    correlationId = command!.CorrelationId;
                     var information = command.InstanceInformation;
 
                     var message = new InstanceInformationUpdated(correlationId, information);
@@ -47,7 +47,7 @@ public sealed class InstanceControlPanelSaveHandlerTests
             var handlerResult = await saveHandler.Save(state, TestContext.Current.CancellationToken);
 
             // Assert
-            await clientMediator.Received().Send(Arg.Is<UpdateInstanceInformation>(a => a.CorrelationId == correlationId), Arg.Any<CancellationToken>());
+            await clientMediator.Received().Send(Arg.Is<UpdateInstanceInformation>(a => a!.CorrelationId == correlationId), Arg.Any<CancellationToken>());
 
             handlerResult.Should().BeOfType<SaveSuccessResult>();
         }
@@ -69,7 +69,7 @@ public sealed class InstanceControlPanelSaveHandlerTests
                 .Do(async callinfo =>
                 {
                     var command = callinfo.Arg<UpdateInstanceInformation>();
-                    correlationId = command.CorrelationId;
+                    correlationId = command!.CorrelationId;
                     var information = command.InstanceInformation;
 
                     var message = new InstanceInformationUpdated(correlationId, information, new Sdk.Messaging.ErrorInfo(100, "Failure"));
@@ -82,7 +82,7 @@ public sealed class InstanceControlPanelSaveHandlerTests
             var handlerResult = await saveHandler.Save(state, TestContext.Current.CancellationToken);
 
             // Assert
-            await clientMediator.Received().Send(Arg.Is<UpdateInstanceInformation>(a => a.CorrelationId == correlationId), Arg.Any<CancellationToken>());
+            await clientMediator.Received().Send(Arg.Is<UpdateInstanceInformation>(a => a!.CorrelationId == correlationId), Arg.Any<CancellationToken>());
 
             handlerResult.Should().BeOfType<SaveErrorResult>();
         }

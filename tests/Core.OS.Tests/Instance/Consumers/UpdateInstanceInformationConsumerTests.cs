@@ -72,7 +72,7 @@ public sealed class UpdateInstanceInformationConsumerTests : TestWithDbContextSq
         var inMemoryInstances = await _informationProvider.GetInstancesInCluster(TestContext.Current.CancellationToken);
         inMemoryInstances.Should().ContainSingle(i => i.Id == instance.Id && i.Name == update.Name && i.FormattedName == update.FormattedName);
 
-        _localInformationProvider.Received().UpdateLocal(Arg.Is<IInstanceInformation>(i => i.Id == instance.Id && i.Name == update.Name && i.FormattedName == update.FormattedName));
+        _localInformationProvider.Received().UpdateLocal(Arg.Is<IInstanceInformation>(i => i!.Id == instance.Id && i.Name == update.Name && i.FormattedName == update.FormattedName));
     }
 
     [Fact]

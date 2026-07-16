@@ -18,18 +18,8 @@ public sealed class DeleteExternalLoginConsumerTest
     private const string LoginProvider = "OpenIdConnect";
     private const string ProviderKey = "subject-1";
 
-    private readonly UserManager<SuiteUser> _userManagerMock = Substitute.For<UserManager<SuiteUser>>(
-        Substitute.For<IUserStore<SuiteUser>>(),
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
-
-    private readonly ILogger<DeleteExternalLoginConsumer> _loggerMock = Substitute.For<ILogger<DeleteExternalLoginConsumer>>();
+    private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
+    private readonly ILogger<DeleteExternalLoginConsumer> _logger = Substitute.For<ILogger<DeleteExternalLoginConsumer>>();
 
     [Fact]
     public async Task Should_return_an_error_when_user_is_unknown()
@@ -43,7 +33,7 @@ public sealed class DeleteExternalLoginConsumerTest
             ProviderKey = ProviderKey
         };
 
-        _userManagerMock.FindByIdAsync(userId).Returns((SuiteUser?)null);
+        _userManager.FindByIdAsync(userId).Returns((SuiteUser?)null);
 
         await using var tester = CreateTester();
 
@@ -56,7 +46,7 @@ public sealed class DeleteExternalLoginConsumerTest
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().NotBeNull();
         message.Context.Message.ErrorInfo!.ErrorCode.Should().Be((int)ExternalLoginError.UserNotFound);
-        await _userManagerMock.DidNotReceive().RemoveLoginAsync(Arg.Any<SuiteUser>(), Arg.Any<string>(), Arg.Any<string>());
+        await _userManager.DidNotReceive().RemoveLoginAsync(Arg.Any<SuiteUser>(), Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -71,10 +61,10 @@ public sealed class DeleteExternalLoginConsumerTest
             ProviderKey = ProviderKey
         };
 
-        _userManagerMock.FindByIdAsync(user.Id).Returns(user);
-        _userManagerMock.HasPasswordAsync(user).Returns(false);
-        _userManagerMock.GetPasskeysAsync(user).Returns(Task.FromResult<IList<UserPasskeyInfo>>([]));
-        _userManagerMock.GetLoginsAsync(user)
+        _userManager.FindByIdAsync(user.Id).Returns(user);
+        _userManager.HasPasswordAsync(user).Returns(false);
+        _userManager.GetPasskeysAsync(user).Returns(Task.FromResult<IList<UserPasskeyInfo>>([]));
+        _userManager.GetLoginsAsync(user)
             .Returns(Task.FromResult<IList<UserLoginInfo>>(
                 [new UserLoginInfo(LoginProvider, ProviderKey, null)]));
 
@@ -89,7 +79,7 @@ public sealed class DeleteExternalLoginConsumerTest
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().NotBeNull();
         message.Context.Message.ErrorInfo!.ErrorCode.Should().Be((int)ExternalLoginError.LastCredential);
-        await _userManagerMock.DidNotReceive().RemoveLoginAsync(Arg.Any<SuiteUser>(), Arg.Any<string>(), Arg.Any<string>());
+        await _userManager.DidNotReceive().RemoveLoginAsync(Arg.Any<SuiteUser>(), Arg.Any<string>(), Arg.Any<string>());
     }
 
     [Fact]
@@ -104,9 +94,9 @@ public sealed class DeleteExternalLoginConsumerTest
             ProviderKey = ProviderKey
         };
 
-        _userManagerMock.FindByIdAsync(user.Id).Returns(user);
-        _userManagerMock.HasPasswordAsync(user).Returns(true);
-        _userManagerMock.RemoveLoginAsync(user, LoginProvider, ProviderKey).Returns(IdentityResult.Success);
+        _userManager.FindByIdAsync(user.Id).Returns(user);
+        _userManager.HasPasswordAsync(user).Returns(true);
+        _userManager.RemoveLoginAsync(user, LoginProvider, ProviderKey).Returns(IdentityResult.Success);
 
         await using var tester = CreateTester();
 
@@ -118,7 +108,7 @@ public sealed class DeleteExternalLoginConsumerTest
             .SelectAsync<ExternalLoginDeletionCompleted>(TestContext.Current.CancellationToken).FirstOrDefault();
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().BeNull();
-        await _userManagerMock.Received(1).RemoveLoginAsync(user, LoginProvider, ProviderKey);
+        await _userManager.Received(1).RemoveLoginAsync(user, LoginProvider, ProviderKey);
     }
 
     [Fact]
@@ -133,9 +123,9 @@ public sealed class DeleteExternalLoginConsumerTest
             ProviderKey = ProviderKey
         };
 
-        _userManagerMock.FindByIdAsync(user.Id).Returns(user);
-        _userManagerMock.HasPasswordAsync(user).Returns(false);
-        _userManagerMock.GetPasskeysAsync(user).Returns(
+        _userManager.FindByIdAsync(user.Id).Returns(user);
+        _userManager.HasPasswordAsync(user).Returns(false);
+        _userManager.GetPasskeysAsync(user).Returns(
             Task.FromResult<IList<UserPasskeyInfo>>(
                 [new UserPasskeyInfo([],
                     [],
@@ -147,7 +137,7 @@ public sealed class DeleteExternalLoginConsumerTest
                     true,
                     [],
                     []) { Name = "I haz passkey" }]));
-        _userManagerMock.RemoveLoginAsync(user, LoginProvider, ProviderKey).Returns(IdentityResult.Success);
+        _userManager.RemoveLoginAsync(user, LoginProvider, ProviderKey).Returns(IdentityResult.Success);
 
         await using var tester = CreateTester();
 
@@ -159,7 +149,7 @@ public sealed class DeleteExternalLoginConsumerTest
             .SelectAsync<ExternalLoginDeletionCompleted>(TestContext.Current.CancellationToken).FirstOrDefault();
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().BeNull();
-        await _userManagerMock.Received(1).RemoveLoginAsync(user, LoginProvider, ProviderKey);
+        await _userManager.Received(1).RemoveLoginAsync(user, LoginProvider, ProviderKey);
     }
 
     [Fact]
@@ -174,16 +164,16 @@ public sealed class DeleteExternalLoginConsumerTest
             ProviderKey = ProviderKey
         };
 
-        _userManagerMock.FindByIdAsync(user.Id).Returns(user);
-        _userManagerMock.HasPasswordAsync(user).Returns(false);
-        _userManagerMock.GetPasskeysAsync(user).Returns(Task.FromResult<IList<UserPasskeyInfo>>([]));
-        _userManagerMock.GetLoginsAsync(user)
+        _userManager.FindByIdAsync(user.Id).Returns(user);
+        _userManager.HasPasswordAsync(user).Returns(false);
+        _userManager.GetPasskeysAsync(user).Returns(Task.FromResult<IList<UserPasskeyInfo>>([]));
+        _userManager.GetLoginsAsync(user)
             .Returns(Task.FromResult<IList<UserLoginInfo>>(
             [
                 new UserLoginInfo(LoginProvider, ProviderKey, null),
                 new UserLoginInfo("OtherProvider", "other-key", null)
             ]));
-        _userManagerMock.RemoveLoginAsync(user, LoginProvider, ProviderKey).Returns(IdentityResult.Success);
+        _userManager.RemoveLoginAsync(user, LoginProvider, ProviderKey).Returns(IdentityResult.Success);
 
         await using var tester = CreateTester();
 
@@ -195,7 +185,7 @@ public sealed class DeleteExternalLoginConsumerTest
             .SelectAsync<ExternalLoginDeletionCompleted>(TestContext.Current.CancellationToken).FirstOrDefault();
         message.Should().NotBeNull();
         message.Context.Message.ErrorInfo.Should().BeNull();
-        await _userManagerMock.Received(1).RemoveLoginAsync(user, LoginProvider, ProviderKey);
+        await _userManager.Received(1).RemoveLoginAsync(user, LoginProvider, ProviderKey);
     }
 
     [Fact]
@@ -210,9 +200,9 @@ public sealed class DeleteExternalLoginConsumerTest
             ProviderKey = ProviderKey
         };
 
-        _userManagerMock.FindByIdAsync(user.Id).Returns(user);
-        _userManagerMock.HasPasswordAsync(user).Returns(true);
-        _userManagerMock.RemoveLoginAsync(user, LoginProvider, ProviderKey)
+        _userManager.FindByIdAsync(user.Id).Returns(user);
+        _userManager.HasPasswordAsync(user).Returns(true);
+        _userManager.RemoveLoginAsync(user, LoginProvider, ProviderKey)
             .Returns(IdentityResult.Failed(new IdentityError { Description = "boom" }));
 
         await using var tester = CreateTester();
@@ -231,7 +221,7 @@ public sealed class DeleteExternalLoginConsumerTest
     private MassTransitTester CreateTester() => new(cfg =>
     {
         cfg.AddConsumer<DeleteExternalLoginConsumer>();
-        cfg.AddSingleton(_userManagerMock);
-        cfg.AddSingleton(_loggerMock);
+        cfg.AddSingleton(_userManager);
+        cfg.AddSingleton(_logger);
     });
 }

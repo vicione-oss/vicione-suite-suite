@@ -65,7 +65,7 @@ public class ModulePackageManifestExtensionsTests
 
             // Assert
             result.Should().BeEmpty();
-            _logger.Received().Warning(Arg.Is<string>(msg => msg.StartsWith("Disable module")), "A", dependency.Name, dependency.Version);
+            _logger.Received().Warning(Arg.Is<string>(msg => msg!.StartsWith("Disable module")), "A", dependency.Name, dependency.Version);
         }
 
         [Theory]
