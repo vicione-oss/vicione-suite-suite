@@ -108,11 +108,11 @@ public abstract class UiEventPublisherTests
 
             // Assert
             await consumerWithUser.Received(1).Consume(
-                Arg.Is<ClientContext<FooEvent>>(c => c.Message == evt && c.CorrelationId == correlation),
+                Arg.Is<ClientContext<FooEvent>>(c => c!.Message == evt && c.CorrelationId == correlation),
                 Arg.Any<CancellationToken>());
 
             await consumerAnon.Received(1).Consume(
-                Arg.Is<ClientContext<FooEvent>>(c => c.Message == evt && c.CorrelationId == correlation),
+                Arg.Is<ClientContext<FooEvent>>(c => c!.Message == evt && c.CorrelationId == correlation),
                 Arg.Any<CancellationToken>());
 
             CultureInfo.CurrentUICulture.Should().Be(defaultUi);

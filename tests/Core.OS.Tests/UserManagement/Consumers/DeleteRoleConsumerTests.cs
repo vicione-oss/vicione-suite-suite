@@ -139,7 +139,7 @@ public class DeleteRoleConsumerTests
 
         // Assert
         await context.Received(1).Publish(
-            Arg.Is<RoleDeletedEvent>(e => e.ErrorInfo != null && e.ErrorInfo.ErrorCode == RoleErrorCodes.DeleteFailed),
+            Arg.Is<RoleDeletedEvent>(e => e!.ErrorInfo != null && e.ErrorInfo.ErrorCode == RoleErrorCodes.DeleteFailed),
             Arg.Any<CancellationToken>());
     }
 }

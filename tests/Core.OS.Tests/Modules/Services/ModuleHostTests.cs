@@ -381,12 +381,14 @@ public class ModuleHostTests
             var module = new TestBackendModule();
             var config = CreateConfiguration();
             var manager = CreateModuleHost(module, config);
-            var testAssembly = Assembly.GetExecutingAssembly();
+            //var testAssembly = Assembly.GetExecutingAssembly();
 
             var fileSystem = Substitute.For<IFileSystem>();
-            fileSystem.Path
-                .GetDirectoryName(testAssembly.Location)
-                .Throws(new DirectoryNotFoundException());
+            var pathSubstitute = Substitute.For<IPath>();
+            fileSystem.Path.Returns(pathSubstitute);
+            pathSubstitute
+                .When(p => p.GetDirectoryName(Arg.Any<string?>()))
+                .Do(_ => throw new DirectoryNotFoundException());
 
             await using var services = new ServiceCollection()
                 .AddSingleton(config)
@@ -402,7 +404,6 @@ public class ModuleHostTests
         public async Task Module_with_null_resource_options_should_be_skipped()
         {
             // Arrange
-            var module = new TestBackendModule(); // default returns resources, we need a no-resource module
             var noResourceModule = Substitute.ForPartsOf<BackendModule>();
             noResourceModule.GetResourceOptions(Arg.Any<IServiceProvider>()).Returns((ModuleResourceOptions?)null);
 

@@ -52,7 +52,7 @@ public sealed class MasterHealthObserverTests
         var expectedMessageType = MessageType.Warning;
 
         messageBannerMediator.Received(1).ShowMessageBanner(Arg.Is<IMessage>(message =>
-            message.Type == expectedMessageType &&
+            message!.Type == expectedMessageType &&
             message.Description == Shared.MessageBanner.Localization.MessageBanner.MasterNotReachable &&
             message.Icon == MonochromeIconName.OfflineLight &&
             message.Title == expectedMessageType.ToTitle()));

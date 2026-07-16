@@ -319,7 +319,7 @@ public class SuiteConnectionServiceTests
             var result = await suiteConnectionService.UpsertConnection(databaseConnection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());
+            await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a!.Connection == databaseConnection), Arg.Any<CancellationToken>());
 
             result.Should().BeOfType<SuiteConnectionServiceSuccessResult>();
         }
@@ -429,7 +429,7 @@ public class SuiteConnectionServiceTests
                         {
                             var command = callInfo.Arg<UpsertConnection>();
                             var ct = callInfo.Arg<CancellationToken>();
-                            var correlationId = command.CorrelationId;
+                            var correlationId = command!.CorrelationId;
                             var connection = command.Connection;
 
                             var message = new ConnectionChanged(CrudAction.Updated, connection, [], []) { CorrelationId = correlationId };
@@ -455,7 +455,7 @@ public class SuiteConnectionServiceTests
             var serviceResult = await connectionService.UpsertConnection(databaseConnection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());
+            await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a!.Connection == databaseConnection), Arg.Any<CancellationToken>());
 
             serviceResult.Should().BeOfType<SuiteConnectionServiceSuccessResult>();
         }
@@ -476,7 +476,7 @@ public class SuiteConnectionServiceTests
                             var command = callInfo.Arg<UpsertConnection>();
                             var ct = callInfo.Arg<CancellationToken>();
                             var correlationId = Guid.NewGuid(); // unknown correlation-id causes timeout
-                            var connection = command.Connection;
+                            var connection = command!.Connection;
 
                             var message = new ConnectionChanged(CrudAction.Updated, connection, [], []) { CorrelationId = correlationId };
                             var context = new ClientContext<ConnectionChanged>(message, Guid.NewGuid());
@@ -501,7 +501,7 @@ public class SuiteConnectionServiceTests
             var serviceResult = await connectionService.UpsertConnection(databaseConnection, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a.Connection == databaseConnection), Arg.Any<CancellationToken>());
+            await uiMediator.Received().Send(Arg.Is<UpsertConnection>(a => a!.Connection == databaseConnection), Arg.Any<CancellationToken>());
 
             serviceResult.Should().BeOfType<SuiteConnectionServiceErrorResult>();
         }

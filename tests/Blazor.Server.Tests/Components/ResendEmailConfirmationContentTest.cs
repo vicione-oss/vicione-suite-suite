@@ -17,17 +17,7 @@ public sealed class ResendEmailConfirmationContentTest
 {
     private const string TestEmail = "user@example.com";
 
-    private readonly UserManager<SuiteUser> _userManager = Substitute.For<UserManager<SuiteUser>>(
-        Substitute.For<IUserStore<SuiteUser>>(),
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
-
+    private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
     private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
     private readonly ISuiteMediator _mediator = Substitute.For<ISuiteMediator>();
 
@@ -91,7 +81,7 @@ public sealed class ResendEmailConfirmationContentTest
 
         // Assert
         await _mediator.Received(1)
-            .Send(Arg.Is<SendVerifyEmailAddressLink>(cmd => cmd.UserId == user.Id), Arg.Any<CancellationToken>());
+            .Send(Arg.Is<SendVerifyEmailAddressLink>(cmd => cmd!.UserId == user.Id), Arg.Any<CancellationToken>());
         _navigationService.Received(1).RedirectTo(IdentityRoutes.EmailConfirmationRoute);
     }
 

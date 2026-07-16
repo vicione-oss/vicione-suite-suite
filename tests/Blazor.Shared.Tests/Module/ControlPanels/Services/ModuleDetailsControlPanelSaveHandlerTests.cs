@@ -76,7 +76,7 @@ public sealed class ModuleDetailsControlPanelSaveHandlerTests
         result.Should().BeOfType<SaveSuccessResult>();
         state.ModuleMetadata.HasModifiedOptions.Should().BeFalse();
         await _mgmtService.Received(1).UpdateOptions(state.ModuleMetadata.ModuleId, Arg.Is<ICollection<ModuleOptionDeclaration>>(opts =>
-            opts.Count == 2 &&
+            opts!.Count == 2 &&
             opts.Any(o => o.Key == "option1" && o.Value == "value1" && o.OptionType == ModuleOptionType.Text) &&
             opts.Any(o => o.Key == "option2" && o.Value == "true" && o.OptionType == ModuleOptionType.Boolean)
         ), Arg.Any<CancellationToken>());
@@ -146,7 +146,7 @@ public sealed class ModuleDetailsControlPanelSaveHandlerTests
         // Assert
         result.Should().BeOfType<SaveSuccessResult>();
         await _mgmtService.Received(1).UpdateOperations(Arg.Is<List<ModulePackageOperation>>(ops =>
-            ops.Any(op => op.Package.Name == _package.Name &&
+            ops!.Any(op => op.Package.Name == _package.Name &&
             op.Package.Version == state.VersionToInstall)), Arg.Any<CancellationToken>());
     }
 
@@ -177,7 +177,7 @@ public sealed class ModuleDetailsControlPanelSaveHandlerTests
         // Assert
         result.Should().BeOfType<SaveErrorResult>();
         await _mgmtService.Received(1).UpdateOperations(Arg.Is<List<ModulePackageOperation>>(ops =>
-            ops.Any(op => op.Package.Name == _package.Name &&
+            ops!.Any(op => op.Package.Name == _package.Name &&
             op.Package.Version == state.VersionToInstall)), Arg.Any<CancellationToken>());
     }
 }

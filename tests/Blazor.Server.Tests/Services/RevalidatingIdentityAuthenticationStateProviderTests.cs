@@ -1,14 +1,13 @@
 using System.Globalization;
 using System.Security.Claims;
-using Blazor.Server.Backend.Services;
 using AwesomeAssertions;
+using Blazor.Server.Backend.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using Sdk.Authorization;
 using Sdk.Client.Infrastructure;
 using Xunit;
@@ -37,8 +36,8 @@ public sealed class RevalidatingIdentityAuthenticationStateProviderTests
         using var serviceProvider = services.BuildServiceProvider();
         scope.ServiceProvider.Returns(serviceProvider);
 
-        // keinen User zurückliefern, da unbekannt
-        _ = userManager.GetUserAsync(Arg.Any<ClaimsPrincipal>()).ReturnsNull();
+        // return null for unknown user
+        _ = userManager.GetUserAsync(Arg.Any<ClaimsPrincipal>()).Returns(Task.FromResult<IdentityUser?>(null));
 
         var claimPrincipalUserAdmin = new ClaimsPrincipal(new ClaimsIdentity([
             new Claim(ClaimsIdentity.DefaultRoleClaimType, AccessLevel.Full.ToString())
@@ -71,8 +70,8 @@ public sealed class RevalidatingIdentityAuthenticationStateProviderTests
         using var serviceProvider = services.BuildServiceProvider();
         scope.ServiceProvider.Returns(serviceProvider);
 
-        var identityUserAdmin = Substitute.For<IdentityUser?>();
-        _ = userManager.GetUserAsync(Arg.Any<ClaimsPrincipal>()).Returns(Task.FromResult(identityUserAdmin));
+        var identityUserAdmin = Substitute.For<IdentityUser>();
+        _ = userManager.GetUserAsync(Arg.Any<ClaimsPrincipal>()).Returns(Task.FromResult<IdentityUser?>(identityUserAdmin));
         userManager.SupportsUserSecurityStamp.Returns(false);
 
         var claimPrincipalUserAdmin = new ClaimsPrincipal(new ClaimsIdentity([
@@ -111,8 +110,8 @@ public sealed class RevalidatingIdentityAuthenticationStateProviderTests
         ]));
         var securityStamp = GenerateSecurityStamp();
 
-        var identityUserAdmin = Substitute.For<IdentityUser?>();
-        _ = userManager.GetUserAsync(Arg.Any<ClaimsPrincipal>()).Returns(Task.FromResult(identityUserAdmin));
+        var identityUserAdmin = Substitute.For<IdentityUser>();
+        _ = userManager.GetUserAsync(Arg.Any<ClaimsPrincipal>()).Returns(Task.FromResult<IdentityUser?>(identityUserAdmin));
         userManager.SupportsUserSecurityStamp.Returns(true);
         userManager.GetSecurityStampAsync(Arg.Any<IdentityUser>()).Returns(Task.FromResult(securityStamp));
 

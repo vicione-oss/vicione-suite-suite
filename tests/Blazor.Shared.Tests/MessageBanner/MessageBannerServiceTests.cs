@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.MessageBanner.Extensions;
+using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.Models;
 using Blazor.Shared.MessageBanner.Services;
 using AwesomeAssertions;
@@ -53,7 +53,7 @@ public sealed class MessageBannerServiceTests
         messageBannerService.ShowMessageBanner(messageType, description);
 
         messageBannerMediator.Received(1).ShowMessageBanner(Arg.Is<IMessage>(message =>
-            message.Type == messageType &&
+            message!.Type == messageType &&
             message.Description == description &&
             message.Icon == messageType.ToIcon() &&
             message.Title == messageType.ToTitle()));

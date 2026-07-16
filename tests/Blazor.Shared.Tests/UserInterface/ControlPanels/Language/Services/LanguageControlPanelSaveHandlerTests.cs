@@ -46,7 +46,7 @@ public sealed class LanguageControlPanelSaveHandlerTests
                 .Do(async callinfo =>
                 {
                     var command = callinfo.Arg<SetCrossInstanceConfiguration>();
-                    _correlationId = command.CorrelationId;
+                    _correlationId = command!.CorrelationId;
                     var configuration = state.CrossInstanceConfiguration;
 
                     var message = new CrossInstanceConfigurationChanged(_correlationId, configuration);
@@ -59,7 +59,7 @@ public sealed class LanguageControlPanelSaveHandlerTests
             var handlerResult = await saveHandler.Save(state, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
+            await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a!.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
 
             state.ShowPageRefreshInformation.Should().BeTrue();
             state.ShowLanguageDoesNotAffectCurrentUser.Should().BeFalse();
@@ -92,7 +92,7 @@ public sealed class LanguageControlPanelSaveHandlerTests
                 .Do(async callinfo =>
                 {
                     var command = callinfo.Arg<SetCrossInstanceConfiguration>();
-                    _correlationId = command.CorrelationId;
+                    _correlationId = command!.CorrelationId;
                     var configuration = state.CrossInstanceConfiguration;
 
                     var message = new CrossInstanceConfigurationChanged(_correlationId, configuration);
@@ -105,7 +105,7 @@ public sealed class LanguageControlPanelSaveHandlerTests
             var handlerResult = await saveHandler.Save(state, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
+            await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a!.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
 
             state.ShowPageRefreshInformation.Should().BeFalse();
             state.ShowLanguageDoesNotAffectCurrentUser.Should().BeTrue();
@@ -136,7 +136,7 @@ public sealed class LanguageControlPanelSaveHandlerTests
                 .Do(async callinfo =>
                 {
                     var command = callinfo.Arg<SetCrossInstanceConfiguration>();
-                    _correlationId = command.CorrelationId;
+                    _correlationId = command!.CorrelationId;
 
                     var errorInfo = new ErrorInfo(CrossInstanceConfigurationError.AddOrUpdateFailed, errorMessage);
 
@@ -150,7 +150,7 @@ public sealed class LanguageControlPanelSaveHandlerTests
             var handlerResult = await saveHandler.Save(state, Xunit.TestContext.Current.CancellationToken);
 
             // Assert
-            await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
+            await _clientMediator.Received().Send(Arg.Is<SetCrossInstanceConfiguration>(a => a!.CorrelationId == _correlationId), Arg.Any<CancellationToken>());
 
             state.ShowPageRefreshInformation.Should().BeFalse();
             handlerResult.Should().BeOfType<SaveErrorResult>();

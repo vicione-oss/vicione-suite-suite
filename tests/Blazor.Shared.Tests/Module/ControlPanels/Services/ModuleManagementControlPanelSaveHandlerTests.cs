@@ -89,7 +89,7 @@ public sealed class ModuleManagementControlPanelSaveHandlerTests
         // Assert
         result.Should().BeOfType<SaveSuccessResult>();
         await _mgmtService.Received(1).UpdateOperations(Arg.Is<List<ModulePackageOperation>>(
-            k => k.Count == 1 && k.Any(op => op == uninstallOperation)), Arg.Any<CancellationToken>());
+            k => k!.Count == 1 && k.Any(op => op == uninstallOperation)), Arg.Any<CancellationToken>());
         state.EnqueuedOperations.Should().BeEmpty();
     }
 

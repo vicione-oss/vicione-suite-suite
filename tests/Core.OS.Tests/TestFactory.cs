@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -6,8 +6,12 @@ using Core.Module;
 using Core.Module.Utils;
 using Core.OS.Modules;
 using Core.OS.Modules.Extensions;
+using Core.Shared.UserManagement.Contracts;
 using Core.Tests.Tools;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Messaging;
@@ -26,6 +30,19 @@ internal static class TestFactory
     public const string ClusterManagementMetadataResource = "0.22.0-win-x64_0.18.0.json";
     public const string ClusterManagementCiMetadataResource = "ci-1399909-win-x64_0.18.0.json";
     public const string DataCollectionWizardMetadataResource = "0.5.0-win-x64_0.18.0.json";
+
+    public static UserManager<SuiteUser> CreateUserManager()
+        => Substitute.For<UserManager<SuiteUser>>(
+            Substitute.For<IUserStore<SuiteUser>>(),                          // store
+            Substitute.For<IOptions<IdentityOptions>>(),                      // optionsAccessor
+            Substitute.For<IPasswordHasher<SuiteUser>>(),                     // passwordHasher
+            Array.Empty<IUserValidator<SuiteUser>>(),                         // userValidators
+            Array.Empty<IPasswordValidator<SuiteUser>>(),                     // passwordValidators
+            Substitute.For<ILookupNormalizer>(),                              // keyNormalizer
+            new IdentityErrorDescriber(),                                     // errors
+            Substitute.For<IServiceProvider>(),                               // services
+            Substitute.For<ILogger<UserManager<SuiteUser>>>()
+            );
 
     /// <summary>
     /// Create a suite context with Core, optional TestUiHostBackend, optional TestBackendModule, optional TestClientModule

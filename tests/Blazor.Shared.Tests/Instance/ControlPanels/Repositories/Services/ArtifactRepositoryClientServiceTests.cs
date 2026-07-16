@@ -27,10 +27,10 @@ public abstract class ArtifactRepositoryClientServiceTests
             .Do(async callinfo =>
             {
                 var command = callinfo.Arg<TCommand>();
-                var @event = eventFactory(command);
+                var @event = eventFactory(command!);
                 if (@event is ArtifactRepositoryChanged change)
                 {
-                    var context = new ClientContext<ArtifactRepositoryChanged>(change, command.CorrelationId);
+                    var context = new ClientContext<ArtifactRepositoryChanged>(change, command!.CorrelationId);
                     await service.Consume(context, TestContext.Current.CancellationToken);
                 }
             });

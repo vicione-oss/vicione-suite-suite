@@ -12,7 +12,6 @@ using Core.OS.Modules.Services;
 using Core.OS.Tests.Extensions;
 using Core.Shared.Modules;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using Sdk.Backend.Artifacts;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
@@ -189,7 +188,7 @@ public class ModuleSynchronizerTests
             // Assert
             await _moduleRepository.Received().DownloadAndExtract(
                 Arg.Any<string>(),
-                Arg.Is<ModuleDependencyPackage[]>(p => p.Contains(_moduleB) && p.Any(k => k.Name == _moduleA.Name && k.Version == latestVersion) && p.Length == 2),
+                Arg.Is<ModuleDependencyPackage[]>(p => p!.Contains(_moduleB) && p!.Any(k => k.Name == _moduleA.Name && k.Version == latestVersion) && p!.Length == 2),
                 Arg.Any<CancellationToken>());
         }
 
@@ -326,7 +325,7 @@ public class ModuleSynchronizerTests
 
             // Ensure we won't find metadata for moduleB
             _moduleRepository.QueryLatestModuleMetadataArtifact(Arg.Any<Version>(), _moduleB.Name, null, null, Arg.Any<CancellationToken>())
-                .ReturnsNull();
+                .Returns(Task.FromResult<IArtifact?>(null));
 
             using var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
@@ -355,7 +354,7 @@ public class ModuleSynchronizerTests
             moduleArtifact.Path.Returns($"modules/{_moduleA.Name}/");
             moduleArtifact.Repository.Returns("vicione-suite");
 
-            var matchVersion = Arg.Is<Version>(k => k.Major == _sdkVersion.Major && k.Minor == _sdkVersion.Minor);
+            var matchVersion = Arg.Is<Version>(k => k!.Major == _sdkVersion.Major && k.Minor == _sdkVersion.Minor);
             _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(moduleArtifact);
 
@@ -383,7 +382,7 @@ public class ModuleSynchronizerTests
             moduleArtifact.Path.Returns($"modules/{_moduleA.Name}/");
             moduleArtifact.Repository.Returns("vicione-suite");
 
-            var matchVersion = Arg.Is<Version>(k => k.Major == _sdkVersion.Major && k.Minor == _sdkVersion.Minor);
+            var matchVersion = Arg.Is<Version>(k => k!.Major == _sdkVersion.Major && k.Minor == _sdkVersion.Minor);
             _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(moduleArtifact);
 

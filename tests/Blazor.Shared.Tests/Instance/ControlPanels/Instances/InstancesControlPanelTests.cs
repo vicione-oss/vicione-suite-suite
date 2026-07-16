@@ -102,7 +102,7 @@ public class InstancesControlPanelTests
             mediator.Should().NotBeNull();
 
             await mediator.Received()
-                .Request<GetInstances, GetInstancesResponse>(Arg.Is<GetInstances>(k => k.InstanceId == null), Arg.Any<CancellationToken>());
+                .Request<GetInstances, GetInstancesResponse>(Arg.Is<GetInstances>(k => k!.InstanceId == null), Arg.Any<CancellationToken>());
         }
     }
 
