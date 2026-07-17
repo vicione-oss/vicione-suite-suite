@@ -153,6 +153,7 @@ internal static class IServiceCollectionExtensions
             IFileSystem fileSystem)
         {
             const string OtelEndpoint = "OTEL_EXPORTER_OTLP_ENDPOINT";
+            const string OtelServiceName = "OTEL_SERVICE_NAME";
             const string OtelAdditionalMeters = "OTEL_ADDITIONAL_METERS";
             const string OtelAdditionalSources = "OTEL_ADDITIONAL_SOURCES";
 
@@ -164,7 +165,7 @@ internal static class IServiceCollectionExtensions
                 .ConfigureResource(b =>
                 {
                     b.AddService(
-                            CoreActivitySource.SourceName,
+                            configuration.GetValue<string?>(OtelServiceName) ?? CoreActivitySource.SourceName,
                             serviceNamespace: "vicione",
                             serviceVersion: Assembly.GetExecutingAssembly()
                                 .GetCustomAttribute<AssemblyInformationalVersionAttribute>()

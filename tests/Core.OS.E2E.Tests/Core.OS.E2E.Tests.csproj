@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>ViciOne.Suite.Core.OS.E2E.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Playwright" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Shared test helpers (IntegrationServiceSettings, Traits). No reference to Core.OS:
+         these tests are black-box and reach the running instance over HTTP/the browser. -->
+    <ProjectReference Include="..\Core.Tests.Tools\Core.Tests.Tools.csproj" />
+  </ItemGroup>
+
+</Project>

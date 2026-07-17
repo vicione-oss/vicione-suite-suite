@@ -53,6 +53,7 @@
   </Folder>
   <Folder Name="/Solution Items/docs/">
     <File Path="docs/code-style-guide.md" />
+    <File Path="docs/e2e-testing.md" />
     <File Path="docs/edge-s.md" />
     <File Path="docs/integration-testing.md" />
     <File Path="docs/localization-guide.md" />
@@ -89,6 +90,7 @@
     <Project Path="tests/Blazor.Tests.Tools/Blazor.Tests.Tools.csproj" />
     <Project Path="tests/Core.Artifacts.Tests/Core.Artifacts.Tests.csproj" />
     <Project Path="tests/Core.Module.Tests/Core.Module.Tests.csproj" />
+    <Project Path="tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj" />
     <Project Path="tests/Core.OS.Tests/Core.OS.Tests.csproj" />
     <Project Path="tests/Core.Shared.Tests/Core.Shared.Tests.csproj" />
     <Project Path="tests/Core.Tests.Tools/Core.Tests.Tools.csproj" />

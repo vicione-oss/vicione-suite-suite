@@ -27,9 +27,10 @@
                 "UserManagement__SeedTestUsers": "true",
 
                 "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+                "OTEL_SERVICE_NAME": "vicione-master",
 
                 "MessageBus__UseInMemoryBus": "false",
-                "MessageBus__CleanVirtualHost": "true",
+                "MessageBus__CleanVirtualHost": "false",
                 "MessageBus__Connection__Host": "localhost",
                 "MessageBus__Connection__Port": "5672",
                 "MessageBus__Connection__Username": "guest",
@@ -39,7 +40,7 @@
             },
             "applicationUrl": "https://localhost:5001;http://localhost:5000"
         },
-        "Slave-Ui-1": {
+        "Slave1-Ui": {
             "commandName": "Project",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
@@ -54,9 +55,10 @@
                 "UserManagement__SeedTestUsers": "false",
 
                 "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+                "OTEL_SERVICE_NAME": "vicione-slave1",
 
                 "MessageBus__UseInMemoryBus": "false",
-                "MessageBus__CleanVirtualHost": "true",
+                "MessageBus__CleanVirtualHost": "false",
                 "MessageBus__Connection__Host": "localhost",
                 "MessageBus__Connection__Port": "5672",
                 "MessageBus__Connection__Username": "guest",
@@ -64,7 +66,7 @@
             },
             "applicationUrl": "https://localhost:6001;http://localhost:6000"
         },
-        "Slave-Ui-2": {
+        "Slave2-Ui": {
             "commandName": "Project",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
@@ -79,9 +81,10 @@
                 "UserManagement__SeedTestUsers": "false",
 
                 "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+                "OTEL_SERVICE_NAME": "vicione-slave2",
 
                 "MessageBus__UseInMemoryBus": "false",
-                "MessageBus__CleanVirtualHost": "true",
+                "MessageBus__CleanVirtualHost": "false",
                 "MessageBus__Connection__Host": "localhost",
                 "MessageBus__Connection__Port": "5672",
                 "MessageBus__Connection__Username": "guest",

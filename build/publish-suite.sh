@@ -4,10 +4,10 @@
 # Variables
 #######################################
 
-# defaults
-MODULE='main'
-PUBLISH_DIRECTORY='./publish-linux'
-PLATFORM='linux-x64'
+# defaults, overridable via environment
+MODULE="${MODULE:-main}"
+PUBLISH_DIRECTORY="${PUBLISH_DIRECTORY:-./publish-linux}"
+PLATFORM="${PLATFORM:-linux-x64}"
 
 #######################################
 # Package handling
