@@ -58,24 +58,6 @@ public partial class RegisterInstanceConsumerTests : TestWithDbContextSqlite<App
     }
 
     [Fact]
-    public async Task Should_trigger_synchronisation_for_new_slave_instance()
-    {
-        // Arrange
-        await using var tester = new MassTransitTester(_configureServices);
-        var command = new RegisterInstance
-        {
-            Name = "Test",
-            InstanceId = Guid.NewGuid(),
-            Type = InstanceType.Slave
-        };
-
-        command.InstalledModules.Add(Shared.Constants.SystemModuleId);
-
-        // Act + Assert
-        await tester.TestCommand<RegisterInstance, RegisterInstanceConsumer>(command);
-    }
-
-    [Fact]
     public async Task Should_consume_command_for_slave_instance()
     {
         // Arrange

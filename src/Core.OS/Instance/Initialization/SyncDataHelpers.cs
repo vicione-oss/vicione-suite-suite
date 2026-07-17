@@ -1,5 +1,6 @@
 using System.Data.Common;
 using Core.OS.DbContext.Extensions;
+using Core.Shared;
 using Microsoft.EntityFrameworkCore;
 using Sdk.Backend.Persistence;
 
@@ -10,6 +11,17 @@ internal static class SyncDataHelpers
     public const string InstanceCommandKey = "Cmd";
     public const string InstanceIdVariableKey = "InstanceId";
     public const string InstanceIsNewVariableKey = "IsNew";
+
+    /// <summary>
+    /// Modules whose data is always included in a sync, regardless of the target's installed
+    /// modules. The "System" module hosts core contexts (users/roles, instance data, ...) that
+    /// every instance has but that never appear as a loaded module bundle, so it would otherwise
+    /// be missing from a caller's module list (e.g. a slave's reported InstalledModules).
+    /// </summary>
+    private static readonly string[] AlwaysSyncedModuleIds = [Constants.SystemModuleId];
+
+    internal static IEnumerable<string> WithAlwaysSyncedModules(IEnumerable<string> moduleIds) =>
+        moduleIds.Concat(AlwaysSyncedModuleIds).Distinct(StringComparer.Ordinal);
 
     private static ModuleContextTypeInformation[] TryGetContextTypeInfos(IServiceProvider services)
     {
@@ -48,7 +60,7 @@ internal static class SyncDataHelpers
             }
         );
 
-        foreach (var moduleId in moduleIds)
+        foreach (var moduleId in WithAlwaysSyncedModules(moduleIds))
         {
             var arguments = await CreateSyncDataArguments(services, moduleId, contextTypeInfos, dataSyncArgs, cancellationToken);
             list.AddRange(arguments);
@@ -73,7 +85,7 @@ internal static class SyncDataHelpers
                 await command.GetValuesCsvSqlite(table, columns, cancellationToken)
         );
 
-        foreach (var moduleId in moduleIds)
+        foreach (var moduleId in WithAlwaysSyncedModules(moduleIds))
         {
             var arguments = await CreateSyncDataArguments(services, moduleId, contextTypeInfos, dataSyncArgs, cancellationToken);
             list.AddRange(arguments);

@@ -10,7 +10,9 @@ public static class DbCommandExtensions
     {
         public async Task<List<string>> GetTablesPg(string schemaName, CancellationToken cancellationToken)
         {
-            var sql = $"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schemaName}';";
+            // Exclude EF's migration history (mirrors GetTablesSqlite): its rows are provider-specific
+            // (Postgres migration ids differ from the slave's Sqlite ones) and must not be replicated.
+            var sql = $"SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = '{schemaName}' AND tablename NOT LIKE '%EFMigration%';";
             return await command.GetTables(sql, cancellationToken);
         }
 

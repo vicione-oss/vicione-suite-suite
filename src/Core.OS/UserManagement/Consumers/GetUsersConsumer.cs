@@ -28,9 +28,20 @@ public sealed partial class GetUsersConsumer(UserManager<SuiteUser> userManager,
 
         //Get
         var suiteUsers = await userManager.Users.AsNoTracking().ToListAsync(cancellationToken);
-        var users = await Task.WhenAll(suiteUsers.Select(async u => await u.CreateUserProfile(userManager)));
+        var users = await CreateUserProfilesThreadSafe(suiteUsers);
 
         return new GetUsersResponse([.. users]);
+    }
+
+    private async Task<List<UserProfile>> CreateUserProfilesThreadSafe(List<SuiteUser> suiteUsers)
+    {
+        // Build the profiles sequentially: CreateUserProfile queries the UserManager's DbContext
+        // (roles + claims), and a DbContext is not thread-safe — running these concurrently with
+        // Task.WhenAll triggers "A second operation was started on this context instance".
+        var users = new List<UserProfile>(suiteUsers.Count);
+        foreach (var suiteUser in suiteUsers)
+            users.Add(await suiteUser.CreateUserProfile(userManager));
+        return users;
     }
 
     public override Task<GetUsersResponse> HandleException(GetUsers message, Exception e, CancellationToken cancellationToken)
