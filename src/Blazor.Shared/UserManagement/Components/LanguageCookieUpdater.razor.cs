@@ -31,8 +31,11 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
 
         var userName = await AuthenticationStateProvider.GetUserName();
 
+        // The user may not be present on this instance (an anonymous request, or a slave whose
+        // replica does not have the account yet), so the result can be empty — fall back to no
+        // user language instead of throwing. The cookie logic below already handles a null value.
         var userLanguage = (await UiMediator.Request<GetUsers, GetUsersResponse>(
-            new GetUsers(new(userName)))).Users.First().Language;
+            new GetUsers(new(userName)))).Users.FirstOrDefault()?.Language;
 
         var result = await UiMediator.Request<GetCrossInstanceConfiguration, GetCrossInstanceConfigurationResponse>(
             new GetCrossInstanceConfiguration());
