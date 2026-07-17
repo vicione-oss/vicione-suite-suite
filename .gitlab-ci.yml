@@ -89,6 +89,12 @@ include:
   # External-service integration tests (SMTP/mail, ...) — see docs/integration-testing.md
   - local: '.gitlab/ci/integration-tests.yml'
 
+  # End-to-end UI tests (Playwright, standalone instance) — see docs/e2e-testing.md
+  - local: '.gitlab/ci/e2e-standalone-tests.yml'
+
+  # End-to-end master/slave tests (Playwright, master + 2 slaves) — see docs/e2e-testing.md
+  - local: '.gitlab/ci/e2e-master-slave-tests.yml'
+
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/version/version-calc@v1.2.0
     inputs:
       rules:
@@ -113,7 +119,7 @@ include:
       tags:
         - saas-linux-large-$RUNNER_ARCH
       image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
-      filter: '/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)]'
+      filter: '/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)&(Category!=E2E)&(Category!=E2E-MasterSlave)]'
       coverage: true
       before_script:
         - *activate_mise

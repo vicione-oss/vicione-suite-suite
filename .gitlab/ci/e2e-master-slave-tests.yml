@@ -1,0 +1,130 @@
+# End-to-end master/slave tests (Playwright) against a master + 2 slaves topology.
+# Postgres (master only) and RabbitMQ are provided as GitLab services; slaves use in-memory
+# SQLite and replicate over RabbitMQ. Non-blocking (allow_failure) while the harness is proven.
+#
+# The instances run from a published layout (build/publish-suite.sh) instead of `dotnet run`, so
+# static web assets are served the way production serves them (published wwwroot, not the debug
+# staticwebassets manifest). appsettings.Development.json is not part of a publish, so all
+# instance configuration is passed explicitly as environment variables below.
+# See docs/e2e-testing.md.
+#
+"E2E Smoke tests (master-slave)":
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.60.0-noble
+  needs: []
+  allow_failure: true
+  tags:
+    - saas-linux-large-amd64
+  services:
+    - name: postgres:16
+      alias: postgres
+    - name: rabbitmq:3
+      alias: rabbitmq
+  variables:
+    RUNNER_ARCH: amd64
+    # Development is kept ONLY because the sample modules (Burger, JiTChat) are activated in
+    # Development; static assets are served production-style regardless, because the published
+    # layout has no appsettings.Development.json and therefore no UseDebugRoot=true.
+    ASPNETCORE_ENVIRONMENT: Development
+    # Replacements for settings that normally come from appsettings.Development.json (absent from
+    # the publish): the deployed module directory inside the publish output, the embedded mock
+    # host-management data, and console logging (published default is Journal) so the *.log
+    # artifacts capture the instance output.
+    ModuleLoader__ModulesPath: Modules
+    HostManagement__MockClient__DataSource: SystemConfigurationEmbedded
+    Logging__LogTargets__0: Console
+    # Put the job and its services on one network so the instances reach them by alias hostname.
+    FF_NETWORK_PER_BUILD: "true"
+    # Instance URLs the tests target (each instance binds localhost in this job container).
+    SUITE_MASTER_URL: "https://localhost:5001"
+    SUITE_SLAVE1_URL: "https://localhost:6001"
+    SUITE_SLAVE2_URL: "https://localhost:7001"
+    # Shared messaging config for all instances. Keys bind to MassTransit's RabbitMqTransportOptions
+    # (User/Pass, not Username/Password). 'guest' is rejected over the network, so use a real user.
+    MessageBus__UseInMemoryBus: "false"
+    MessageBus__Connection__Host: rabbitmq
+    MessageBus__Connection__Port: "5672"
+    MessageBus__Connection__User: suite
+    MessageBus__Connection__Pass: suite
+    # Service-container configuration (job variables are passed to services).
+    POSTGRES_DB: vo-suite
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    RABBITMQ_DEFAULT_USER: suite
+    RABBITMQ_DEFAULT_PASS: suite
+    # SUITE_TEST_USERNAME / SUITE_TEST_PASSWORD — the master-seeded account the login test signs in
+    # with — are supplied as masked project CI/CD variables (Settings -> CI/CD -> Variables), not
+    # stored here. They must match a user the master seeds. See docs/e2e-testing.md.
+    SUITE_TEST_USERNAME:
+    SUITE_TEST_PASSWORD:
+  cache:
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      # pull only: this key is produced (pushed) by the always-running build/test jobs.
+      policy: pull
+    - key:
+        prefix: nuget-${RUNNER_ARCH}-v2
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
+      paths:
+        - .nuget/packages/
+        - ./**/obj/
+      # pull only: this key is produced (pushed) by the always-running build/test jobs.
+      policy: pull
+    - key:
+        prefix: node-${RUNNER_ARCH}-v1
+        files:
+          - package-lock.json
+      paths:
+        - node_modules/
+      policy: pull-push
+  before_script:
+    - bash .gitlab/ci/scripts/e2e-check-credentials.sh
+    # The Playwright image ships browsers but no mise; install it before activating the toolchain.
+    - curl -fsSL https://mise.run | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - !reference [.activate_mise]
+    - !reference [.update_nuget_source_ro]
+    - !reference [.install_npm_packages]
+    - !reference [.run_npm_scripts]
+    - bash .gitlab/ci/scripts/e2e-prepare.sh
+    # 1) Master first (Postgres-backed, seeds the users). Wait until healthy so seeding is done
+    #    before any slave starts to sync — this removes the seed-vs-sync race.
+    - |
+      Instance__Type=Master \
+      ConnectionStrings__Postgres="Server=postgres;Port=5432;Database=vo-suite;User Id=postgres;Password=postgres" \
+      UserManagement__SeedTestUsers=true \
+      bash .gitlab/ci/scripts/e2e-start-instance.sh Master 5000 5001 master.log &
+    - bash .gitlab/ci/scripts/e2e-wait-healthy.sh master 5001 master.log
+    # 2) Slaves next (in-memory SQLite replicas; obtain users via replication, never seed).
+    - |
+      Instance__Type=Slave \
+      UserManagement__SeedTestUsers=false \
+      bash .gitlab/ci/scripts/e2e-start-instance.sh Slave1 6000 6001 slave1.log &
+    - |
+      Instance__Type=Slave \
+      UserManagement__SeedTestUsers=false \
+      bash .gitlab/ci/scripts/e2e-start-instance.sh Slave2 7000 7001 slave2.log &
+    - bash .gitlab/ci/scripts/e2e-wait-healthy.sh slave1 6001 slave1.log
+    - bash .gitlab/ci/scripts/e2e-wait-healthy.sh slave2 7001 slave2.log
+  script:
+    - dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --no-build --filter-query "/[Category=E2E-MasterSlave]"
+  artifacts:
+    when: on_failure
+    paths:
+      - master.log
+      - slave1.log
+      - slave2.log
+      # Playwright failure traces written by the E2E base class (MasterSlaveE2ETest), one per
+      # instance context. The ** keeps this robust to build config / target framework. Open with
+      # `playwright show-trace` or trace.playwright.dev.
+      - tests/Core.OS.E2E.Tests/bin/**/traces/*.zip
+    expire_in: 1 week
+  rules: !reference [.rules_common_manual]

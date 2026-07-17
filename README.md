@@ -119,17 +119,17 @@ To do so:
 1. Choose your preferred `instance mode`:
    1. **Standalone-Ui:** will start a standalone instance (**Recommended**)
    1. **Master-Ui:** will start a master instance
-   1. **Slave-Ui-1:** will start a slave instance
-   1. **Slave-Ui-2:** will start a slave instance
+   1. **Slave1-Ui:** will start a slave instance
+   1. **Slave2-Ui:** will start a slave instance
 1. Start debugging (The first start might take a minute)
 1. Open a browser and go to the URL https://localhost:XXXX*
 1. Login using one of the below-mentioned [ViciOne Suite Accounts](#vicione-suite-accounts)
 
 >\*Note: The port depends on chosen instance mode. For example, standalone listens on Port 5001. If you are unsure, check the console for an information like *"Now listening on: https://localhost:XXXX"*
 
->\*\*Note: To successfully start a master/slave setup, make sure to have the prerequisites installed and running (best to use `compose.yaml` to start Postgres, RabbitMQ and jaeger)
+>\*\*Note: To successfully start a master/slave setup, make sure to have the prerequisites installed and running (best to use `tests/compose.master-slave.yaml` to start Postgres, RabbitMQ and jaeger)
 
-It is possible to start multiple instances using the launch profiles Master-Ui & Slave-Ui-(1|2).
+It is possible to start multiple instances using the launch profiles Master-Ui & Slave(1|2)-Ui.
 
 ## ViciOne Suite Accounts
 

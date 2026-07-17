@@ -77,6 +77,8 @@ This sets the template for integration tests that need an external service (data
    environment variable with the service alias. Starting it inline in the job is the fallback when no
    suitable image exists or the service needs files the stock image can't provide.
 
+End-to-end UI tests (Playwright) live in their own document — see [e2e-testing.md](e2e-testing.md).
+
 
 # Testing OIDC
 

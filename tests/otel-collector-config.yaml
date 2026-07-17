@@ -1,0 +1,40 @@
+# OpenTelemetry Collector config for the local master/slave setup: receive OTLP from the Suite instances on the
+# standard ports and fan every signal out to the trace UIs. Traces go to both Jaeger and the Aspire
+# Dashboard so a single run populates both; metrics and logs go to the Aspire Dashboard only, since
+# Jaeger ingests traces only. Wired up by tests/compose.master-slave.yaml.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+
+exporters:
+  # Plaintext OTLP over the compose network — both backends terminate without TLS, so insecure.
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+  otlp/aspire:
+    endpoint: aspire-dashboard:18889
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/jaeger, otlp/aspire]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/aspire]

@@ -1,11 +1,11 @@
 namespace Core.Tests.Tools;
 
 /// <summary>
-/// Resolves connection details for external services used by integration tests
-/// (mail, databases, brokers, ...). Values are read from environment variables so
-/// that CI can point tests at a service it provides, while falling back to
-/// localhost defaults suitable for a service started locally (e.g. mailpit via
-/// docker or mise). See docs/integration-testing.md.
+/// Resolves settings for integration and E2E tests from environment variables, so CI can
+/// point tests at the services and accounts it provides. Settings with a safe default
+/// (hosts, ports, URLs, ...) fall back to a local default suitable for a service started
+/// locally (e.g. mailpit via docker or mise); settings that must not have a default
+/// (credentials, ...) are required and throw when unset. See docs/integration-testing.md.
 /// </summary>
 public static class IntegrationServiceSettings
 {
@@ -17,11 +17,22 @@ public static class IntegrationServiceSettings
         => Environment.GetEnvironmentVariable(envVar) is { Length: > 0 } value ? value : defaultValue;
 
     /// <summary>
+    /// Returns the value of <paramref name="envVar"/>, or throws when it is unset or empty.
+    /// Use this for settings that have no safe default and must be supplied by the
+    /// environment (e.g. credentials).
+    /// </summary>
+    public static string GetRequiredValue(string envVar)
+        => Environment.GetEnvironmentVariable(envVar) is { Length: > 0 } value
+            ? value
+            : throw new InvalidOperationException(
+                $"Required environment variable '{envVar}' is not set. It has no default and must "
+                + "be supplied by the environment so the test can reach the service or account under test.");
+
+    /// <summary>
     /// Returns the host from <paramref name="envVar"/>, or <paramref name="defaultHost"/>
     /// (localhost by default) when the variable is unset or empty.
     /// </summary>
-    public static string GetHost(string envVar, string defaultHost = "localhost")
-        => GetValue(envVar, defaultHost);
+    public static string GetHost(string envVar, string defaultHost = "localhost") => GetValue(envVar, defaultHost);
 
     /// <summary>
     /// Returns the port from <paramref name="envVar"/>, or <paramref name="defaultPort"/>
