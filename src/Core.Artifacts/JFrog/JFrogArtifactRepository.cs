@@ -60,23 +60,36 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
 
         LogDownloadingArtifactToPatch(logger, sourceUri, targetFolderPath);
 
-        await using var httpStream = await client.GetStreamAsync(sourceUri, cancellationToken);
-        await using var ms = new MemoryStream();
+        // Stream the archive to a temporary file on disk instead
+        var tempFilePath = fileSystem.Path.Combine(targetFolderPath, $".{Guid.NewGuid():N}.download.tmp");
 
-        await httpStream.CopyToAsync(ms, cancellationToken);
-
-        using var archive = new ZipArchive(ms);
-        foreach (var archiveEntry in archive.Entries)
+        try
         {
-            if (archiveEntry.FullName.EndsWith('/'))
+            await using (var httpStream = await client.GetStreamAsync(sourceUri, cancellationToken))
+            await using (var tempFileStream = fileSystem.FileStream.New(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
             {
-                var entryFolderPath = fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
-                fileSystem.Directory.CreateDirectory(entryFolderPath);
-                continue;
+                await httpStream.CopyToAsync(tempFileStream, cancellationToken);
             }
 
-            var entryFilePath = fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
-            await archiveEntry.ExtractToFileAsync(entryFilePath, true, cancellationToken);
+            await using var archiveStream = fileSystem.FileStream.New(tempFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true);
+            using var archive = new ZipArchive(archiveStream, ZipArchiveMode.Read);
+            foreach (var archiveEntry in archive.Entries)
+            {
+                if (archiveEntry.FullName.EndsWith('/'))
+                {
+                    var entryFolderPath = fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
+                    fileSystem.Directory.CreateDirectory(entryFolderPath);
+                    continue;
+                }
+
+                var entryFilePath = fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
+                await archiveEntry.ExtractToFileAsync(entryFilePath, true, cancellationToken);
+            }
+        }
+        finally
+        {
+            if (fileSystem.File.Exists(tempFilePath))
+                fileSystem.File.Delete(tempFilePath);
         }
     }
 

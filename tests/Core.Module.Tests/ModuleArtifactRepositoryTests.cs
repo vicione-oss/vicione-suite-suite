@@ -114,6 +114,83 @@ public class ModuleArtifactRepositoryTests
         }
     }
 
+    public sealed class BulkDownloadConcurrency : ModuleArtifactRepositoryTests
+    {
+        [Fact]
+        public async Task Should_cap_concurrent_module_downloads()
+        {
+            // Arrange
+            var fileSystem = new FileSystem();
+            using var tempDir = new TemporaryDirectory();
+
+            var artifactRepository = Substitute.For<IArtifactRepository>();
+
+            var queryBuilder = Substitute.For<IArtifactQueryBuilder>();
+            queryBuilder.AndPathMatches(Arg.Any<string>()).Returns(queryBuilder);
+            queryBuilder.AndNameMatches(Arg.Any<string>()).Returns(queryBuilder);
+            queryBuilder.OrderByDescending(Arg.Any<string[]>()).Returns(queryBuilder);
+            queryBuilder.Build().Returns("query");
+            artifactRepository.CreateQueryBuilder().Returns(queryBuilder);
+
+            var artifact = Substitute.For<IArtifact>();
+            var queryResult = Substitute.For<IArtifactQueryResult>();
+            queryResult.Artifacts.Returns([artifact]);
+            artifactRepository.Query(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(queryResult);
+            artifactRepository.Download(Arg.Any<IArtifact>(), Arg.Any<CancellationToken>())
+                .Returns(_ => new MemoryStream("{}"u8.ToArray()));
+
+            var concurrent = 0;
+            var maxObserved = 0;
+
+            artifactRepository
+                .DownloadAndExtract(Arg.Any<IArtifact>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(call => TrackConcurrency(call.ArgAt<string>(1)));
+
+            async Task TrackConcurrency(string targetPath)
+            {
+                var current = Interlocked.Increment(ref concurrent);
+                InterlockedMax(ref maxObserved, current);
+
+                // Hold the "download" open long enough for overlap to be observable.
+                await Task.Delay(50);
+
+                // Mimic extraction creating the target folder so metadata can be written afterwards.
+                fileSystem.Directory.CreateDirectory(targetPath);
+                Interlocked.Decrement(ref concurrent);
+            }
+
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem);
+            var packages = Enumerable.Range(0, 12)
+                .Select(i => new ModuleDependencyPackage { Name = $"Module.{i}", Version = "1.0.0" })
+                .ToArray();
+
+            // Act
+            var results = await repository.DownloadAndExtract(tempDir.Path, packages, TestContext.Current.CancellationToken);
+
+            // Assert
+            results.Should().HaveCount(packages.Length);
+            var errors = results.Where(r => r.Error is not null).Select(r => r.Error!.Message).ToArray();
+            errors.Should().BeEmpty("no download should fail but got: " + string.Join(" | ", errors));
+
+            // Concurrency must be bounded: fewer in-flight downloads than packages and within the cap.
+            maxObserved.Should().BeGreaterThan(0);
+            maxObserved.Should().BeLessThan(packages.Length);
+            maxObserved.Should().BeLessThanOrEqualTo(5);
+        }
+
+        private static void InterlockedMax(ref int target, int value)
+        {
+            int initial;
+            do
+            {
+                initial = Volatile.Read(ref target);
+                if (value <= initial)
+                    return;
+            }
+            while (Interlocked.CompareExchange(ref target, value, initial) != initial);
+        }
+    }
+
     public sealed class GetModuleDownloadStreamTest : ModuleArtifactRepositoryTests
     {
         [Trait(Traits.Category, Traits.System)]
