@@ -167,6 +167,35 @@ public class JFrogArtifactQueryApiTests
             fileSystem.Directory.Exists(tempDirectory.Path).Should().BeTrue();
             fileSystem.File.Exists(fileSystem.Path.Combine(tempDirectory.Path, "test.txt")).Should().BeTrue();
         }
+
+        [Fact]
+        public async Task Should_remove_temporary_download_file_after_extraction()
+        {
+            // Arrange
+            using var zipStream = new MemoryStream();
+            await using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+            {
+                var entry = archive.CreateEntry("test.txt");
+                await using var writer = new StreamWriter(await entry.OpenAsync(TestContext.Current.CancellationToken));
+                await writer.WriteAsync("content");
+            }
+            zipStream.Position = 0;
+
+            var artifact = Substitute.For<IArtifact>();
+            using var tempDirectory = new TemporaryDirectory();
+            var fileSystem = new FileSystem();
+
+            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(contentStream: zipStream);
+            _httpClientFactory.BaseAddress = new Uri("https://host/");
+
+            var repository = CreateRepository(_httpClientFactory, fileSystem);
+
+            // Act
+            await repository.DownloadAndExtract(artifact, tempDirectory.Path, TestContext.Current.CancellationToken);
+
+            // Assert - the archive is streamed to a temp file which must be cleaned up afterwards
+            fileSystem.Directory.GetFiles(tempDirectory.Path, "*.download.tmp").Should().BeEmpty();
+        }
     }
 
     public sealed class QueryRaw : JFrogArtifactQueryApiTests

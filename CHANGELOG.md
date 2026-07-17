@@ -18,6 +18,8 @@
 
 ### Changed
 
+- `JFrogArtifactRepository`, module archives are now streamed to a temporary file on disk and extracted from there instead of being buffered in memory.
+- `ModuleArtifactRepository`, bulk module downloads are now capped with a sliding-window throttle
 - `Passkeys` feature flag is now enabled by default; the flag remains available to disable it via configuration
 - Replaced `DxTabs` with `ViciOne.Ui.Blazor.Components.TabStrip`
 - External ID providers and passkeys settings panels now display dedicated monochrome icons

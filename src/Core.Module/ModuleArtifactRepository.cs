@@ -12,9 +12,47 @@ namespace Core.Module;
 public sealed class ModuleArtifactRepository(IArtifactRepository artifactRepository, IFileSystem fileSystem) : IModuleArtifactRepository
 {
     private const string ModulesBaseFolder = "modules"; // Base folder in the repository
+    private const int MaxConcurrentDownloads = 5;
 
     public async Task<ModulePackageDownloadResult[]> DownloadAndExtract(string modulesPath, IEnumerable<ModuleDependencyPackage> packages, CancellationToken cancellationToken)
-        => await Task.WhenAll(packages.Select(mp => DownloadAndExtract(modulesPath, mp, cancellationToken)));
+    {
+        var packageList = packages as IReadOnlyList<ModuleDependencyPackage> ?? [.. packages];
+        if (packageList.Count == 0)
+            return [];
+
+        var results = new ModulePackageDownloadResult[packageList.Count];
+
+        // Use a bounded sliding window instead of an unbounded Task.WhenAll to cap concurrency.
+        using var throttle = new SemaphoreSlim(MaxConcurrentDownloads, MaxConcurrentDownloads);
+        var tasks = packageList.Select((package, index) => ThrottledDownloadAndExtract(index, package, throttle)).ToArray();
+        await Task.WhenAll(tasks);
+
+        return results;
+
+        async Task ThrottledDownloadAndExtract(int index, ModuleDependencyPackage package, SemaphoreSlim semaphore)
+        {
+            try
+            {
+                await semaphore.WaitAsync(cancellationToken);
+                try
+                {
+                    results[index] = await DownloadAndExtract(modulesPath, package, cancellationToken);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Nothing to do here, we return gracefully
+            }
+            catch (ObjectDisposedException)
+            {
+                // Semaphore or other object already disposed, nothing we can do, return gracefully
+            }
+        }
+    }
 
     public async Task<ModulePackageDownloadResult> DownloadAndExtract(string modulesPath, ModuleDependencyPackage package, CancellationToken cancellationToken)
     {
