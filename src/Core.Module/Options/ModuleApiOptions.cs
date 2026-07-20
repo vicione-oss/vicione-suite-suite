@@ -1,7 +1,9 @@
 namespace Core.Module.Options;
 
-[Obsolete("Use ArtifactRepositoryOptions instead - ModuleApiOptions will be removed")]
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Setter properties are required for deserialisation")]
+// Deprecated: superseded by Core.Artifacts.ArtifactRepositoryOptions. Retained only so the legacy
+// "ModuleApi" configuration section keeps working for existing deployments (see ArtifactRepositoryStore).
+// Do not use for new configuration; this type will be removed in a future release.
+[Obsolete("Use Core.Artifacts.ArtifactRepositoryOptions instead. Kept only for backwards compatibility with the legacy 'ModuleApi' config section and will be removed in a future release.")]
 public class ModuleApiOptions
 {
     public const string ConfigSection = "ModuleApi";

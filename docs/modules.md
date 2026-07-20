@@ -22,7 +22,7 @@ Before a module gets loaded by _Core.OS_ its dependencies and referenced SDK ver
 
 ## Installation
 Changes to module configuration either un-/installing or modifying options will only be applied after restarting the system. If you install a module that requires additional parameters like accesskeys, username, paths it won't be loaded until at least the required parameters are set.
-Missing module versions will be downloaded on demand by from http source. The source can be configured by using [ArtifactRepositoryOptions](../src/Core.Module/Options/ArtifactRepositoryOptions.cs) set by appsettings.json, environment etc. Actually this [Nexus](https://nexus.nsc-gmbh.de/#browse/browse:raw-fb-server:modules) is used by our deployments.
+Missing module versions are downloaded on demand from an artifact repository. The repository sources can be configured using [ArtifactRepositoryOptions](../src/Core.Artifacts/ArtifactRepositoryOptions.cs) set by appsettings.json, environment variables, user secrets etc. Currently a [JFrog Artifactory](https://system.update.ifm/artifactory/vicione-suite/) backend is supported, queried via AQL (see [JFrogArtifactRepository](../src/Core.Artifacts/JFrog/JFrogArtifactRepository.cs)). Each source is configured with an `Endpoint` and, optionally, `UserName`/`Password` or a `TokenEndpoint` for authentication. Any concrete repository URLs used by our deployments (for example an internal Artifactory instance) and can be replaced with your own source endpoints.
 
 The installation of new modules and the modification of existing ones can be disabled by setting the `AllowInstallation` flag of the [ModuleLoaderOptions](../src/Core.Module/Options/ModuleLoaderOptions.cs) to `false`. The module manifest itself can still be modified manually if necessary.  Modules can be installed and configured in two different ways as described in the following sections.
 
@@ -35,33 +35,40 @@ Start _Core.OS_ and use an admin account for authentication. Goto `Settings`->`S
 Any changes to installed or available modules need to be confirmed before they get applied. After restarting the system applied changes will be processed, downloading missing modules, using modified options etc. A persisted version of these options gets stored in `AppData` folder. The persisted options can still be overriden by environment variables or user secrets. 
 
 ### Manual Installation
-In `AppData` directory you can find `modules.json` file that contains the installed module definitions. If you modify your module configuration using the UI this file will get modified. Of course you can edit it manually for development reasons. Add a module by adding a new entry to `modules.json` like:
+In `AppData` directory you can find `modules.json` file that contains the installed module manifest. If you modify your module configuration using the UI this file will get modified. Of course you can edit it manually for development reasons. The file is a manifest object with `Name`, `Description`, `LastModified` and a `Packages` array of installed modules:
 ```json
 {
-    "Name": "ModuleName",
-    "Version": "0.2.0"
+    "Name": "ViciOne.Module.ApiManifest",
+    "Description": "Define module versions to be synchronized per api",
+    "LastModified": "2024-01-01T00:00:00+00:00",
+    "Packages": [
+        {
+            "Name": "ModuleName",
+            "Version": "0.2.0"
+        }
+    ]
 }
 ```
 
-If this module depends on another module you need to extend the entry like here:
+If a module depends on another module you extend its entry with a `DependingOn` list:
 ```json
 {
     "Name": "ModuleName",
     "Version": "0.2.0",
     "DependingOn": [
         {
-          "Name": "OtherModuleName",
-          "Version": "0.24.0"
+            "Name": "OtherModuleName",
+            "Version": "0.24.0"
         }
-      ]
+    ]
 }
 ```
 
-Sometimes you would like to deploy a module pre-release on a test system. To achieve that you have to enter the pre-release version in the [modules.json](/src/Core.OS/modules.json) packages section. Use the `Version` property to override the package version.
+Sometimes you would like to deploy a module pre-release on a test system. To achieve that you enter the pre-release version in the `Packages` section of `modules.json`. Use the `Version` property to override the package version.
 ```json
 {
     "Name": "ModuleName",
-    "Version": "ci-1298597"
+    "Version": "2.1.3-ci2685762"
 }
 ```
 
