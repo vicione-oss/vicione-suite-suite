@@ -25,6 +25,7 @@ using Sdk.Client.Services;
 using ViciOne.Ui.Blazor.Components.SectionRail.Extensions;
 using ViciOne.Ui.Blazor.Components.Toolbar.Extensions;
 using ViciOne.Ui.Blazor.Components.Tooltip.Extensions;
+using ViciOne.Ui.MonochromeIcons.Assets.Extensions;
 using ViciOne.Ui.Shared.Dx.Components.Scrolling.Extensions;
 using ViciOne.Ui.TreeEditor.Builder;
 
@@ -59,6 +60,8 @@ public static class IServiceCollectionExtensions
                 .AddNavTiles()
                 .AddWizards()
                 .AddOnboarding();
+
+            services.AddFileSystemBasedMonochromeIconSvgMarkupProvider();
 
             return services;
         }

@@ -31,9 +31,9 @@ using Microsoft.Extensions.Options;
 using Sdk.Backend.Extensions;
 using Sdk.Backend.Modules;
 using Sdk.Client.Modules;
-using Sdk.Client.Services;
 using Sdk.Extensions;
 using Sdk.Modules;
+using ViciOne.Ui.MonochromeIcons.Assets.Extensions;
 
 namespace Blazor.Server.Backend;
 
@@ -95,6 +95,8 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
     public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccurred = null)
     {
         var failedModuleIds = new List<string>();
+
+        AdjustFileSystemBasedMonochromeIconSvgMarkupProvider(services, uiEnvironment);
 
         services.AddUiHostClientServices();
 
@@ -250,6 +252,21 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
                 return null;
 
             return new ProviderCultureResult(defaultCulture);
+        }
+    }
+
+    private static void AdjustFileSystemBasedMonochromeIconSvgMarkupProvider(
+        IServiceCollection services,
+        IUiHostEnvironment uiEnvironment)
+    {
+        if (uiEnvironment.IsDevelopment)
+        {
+            services.AddStaticWebAssetsRuntimeJsonBaseFilenameProvider<UiHostStaticWebAssetsRuntimeJsonBaseFilenameProvider>();
+            services.AddStaticWebAssetsRuntimeJsonPathProvider<UiHostStaticWebAssetsRuntimeJsonPathProvider>();
+        }
+        else
+        {
+            services.AddFileSystemBasedContentRootProvider<UiHostFileSystemBasedContentRootProvider>();
         }
     }
 }

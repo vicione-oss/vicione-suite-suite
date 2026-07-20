@@ -76,6 +76,7 @@ internal static class LoggingConfiguration
                 .OverrideMinimumLevel(configuration, "Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
                 .OverrideMinimumLevel(configuration, "AspNetCore.HealthChecks", LogEventLevel.Warning)
                 .OverrideMinimumLevel(configuration, "System", LogEventLevel.Warning)
+                .OverrideMinimumLevel(configuration, "ViciOne.Ui.MonochromeIcons.Assets", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
                 .Enrich.WithModuleId();
 

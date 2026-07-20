@@ -1,10 +1,6 @@
 # Files provides by ViciOne.Suite.Sdk.Client
 wwwroot/images/wallpapers
 
-# Files provided by ViciOne.Ui.MonochromeIcons.Assets
-wwwroot/icons/monochrome-icons
-Styles/icons/monochrome-icons
-
 # Files provided by ViciOne.Ui.Design
 Styles/design
 

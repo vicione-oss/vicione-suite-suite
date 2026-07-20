@@ -1,4 +1,4 @@
-﻿@use "../../../shared/styles/badges/deprecated";
+@use "../../../shared/styles/badges/deprecated";
 @use "../Styles/typography/fonts/noto-sans/variables" as noto-sans;
 @use "../Styles/design/colors";
 @use "../../../shared/styles/variables";
@@ -51,6 +51,12 @@
         background-color: colors.$background-darker-hover;
         color: colors.$font;
         text-decoration: none;
+    }
+
+    & ::deep svg {
+        height: 24px;
+        width: 24px;
+        fill: currentColor;
     }
 }
 
