@@ -56,9 +56,11 @@ public partial class ModulePackageOperationStore(
 
             LogEnqueuedOperations(logger, result.Operations.Count, updateFile);
 
-            // Rewrite file containing queued updates
-            await using var fileStream = fileSystem.FileStream.New(updateFile, FileMode.Create, FileAccess.Write, FileShare.None);
-            await JsonSerializer.SerializeAsync(fileStream, result.Operations, DefaultJsonSerializerSettings.Default, cancellationToken);
+            // Rewrite file containing queued updates atomically so a crash mid-write can't corrupt the queue.
+            await fileSystem.WriteFileAtomic(
+                updateFile,
+                stream => JsonSerializer.SerializeAsync(stream, result.Operations, DefaultJsonSerializerSettings.Default, cancellationToken),
+                cancellationToken);
             return result.Changes;
         }
         finally

@@ -33,6 +33,7 @@
 
 - First run wizards does not indicate a system restart when simply stepping through steps
 - Recovery mode no longer loops indefinitely when the crash cause is unrelated to modules; after a failed recovery attempt the suite enters a terminal degraded state (serving HTTP 503)
+- Module control-plane files are now written atomically via a temp-file + rename. A corrupt manifest is no longer masked as an empty one
 - Consumer idempotency: all delete and replication consumers now handle message redelivery safely
   - `DbChangeSetConsumer`, upsert semantics ensure redelivered messages no longer cause silent data loss
   - `ControlInstanceConsumer`, delete redelivery publishes completion event to unblock orchestrators
@@ -57,7 +58,7 @@
 - `Microsoft.FeatureManagement` packages, update to version `4.6.0`
 - `MQTTnet` package, update version to `5.2.0.1603`
 - `System.IO.Abstractions` package, update version to `22.2.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.2.0-ci2684084316`
+- `ViciOne.Suite.Sdk` packages, update to version `2.2.0-ci2689717416`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.18.0`
 - `ViciOne.Ui.MonochromeIcons` package, update version to `4.14.0`
 

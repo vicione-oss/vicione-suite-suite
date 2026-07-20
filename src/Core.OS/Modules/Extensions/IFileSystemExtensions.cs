@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reflection;
 using System.Text.Json;
 using Core.Module;
@@ -149,6 +149,35 @@ internal static class IFileSystemExtensions
             fileSystem.Directory.CreateDirectory(moduleAppData);
 
             return moduleAppData;
+        }
+
+        /// <summary>
+        /// Writes a file atomically so a crash or power-loss mid-write can never leave a
+        /// truncated/corrupt file: the content is written to a temporary sibling file first
+        /// and then atomically moved into place, keeping the previous valid file intact until
+        /// the new one is fully persisted.
+        /// </summary>
+        public async Task WriteFileAtomic(string filePath, Func<Stream, Task> writeContent, CancellationToken cancellationToken = default)
+        {
+            var directory = fileSystem.Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory) && !fileSystem.Directory.Exists(directory))
+                fileSystem.Directory.CreateDirectory(directory);
+
+            // Write to a temp file first and move it so a crash can't leave a corrupt file.
+            var tempPath = filePath + ".tmp";
+            await using (var stream = fileSystem.FileStream.New(tempPath, new FileStreamOptions
+            {
+                Mode = FileMode.Create,
+                Access = FileAccess.Write,
+                Share = FileShare.None,
+                Options = FileOptions.Asynchronous,
+            }))
+            {
+                await writeContent(stream);
+                await stream.FlushAsync(cancellationToken);
+            }
+
+            fileSystem.File.Move(tempPath, filePath, overwrite: true);
         }
 
         /// <summary>
