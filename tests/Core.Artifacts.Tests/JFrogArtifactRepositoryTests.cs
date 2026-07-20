@@ -17,12 +17,12 @@ namespace Core.Artifacts.Tests;
 /// <summary>
 /// https://jfrog.com/help/r/jfrog-rest-apis/artifactory-query-language
 /// </summary>
-public class JFrogArtifactQueryApiTests
+public class JFrogArtifactRepositoryTests
 {
     private const string TestApiAddress = "https://ifm.jfrog.io/artifactory";
     private readonly TestHttpClientFactory _httpClientFactory = new();
 
-    public sealed class CreateQueryBuilder : JFrogArtifactQueryApiTests
+    public sealed class CreateQueryBuilder : JFrogArtifactRepositoryTests
     {
         [Fact]
         public void Returns_a_jfrog_artifact_query_builder()
@@ -38,7 +38,7 @@ public class JFrogArtifactQueryApiTests
         }
     }
 
-    public sealed class GetDownloadUri : JFrogArtifactQueryApiTests
+    public sealed class GetDownloadUri : JFrogArtifactRepositoryTests
     {
         [Fact]
         public void Constructs_uri_using_artifact_path_and_repo()
@@ -77,7 +77,7 @@ public class JFrogArtifactQueryApiTests
         }
     }
 
-    public sealed class Query : JFrogArtifactQueryApiTests
+    public sealed class Query : JFrogArtifactRepositoryTests
     {
         [Fact]
         public async Task Returns_result_when_http_response_is_successful()
@@ -112,7 +112,7 @@ public class JFrogArtifactQueryApiTests
         }
     }
 
-    public sealed class DownloadToFile : JFrogArtifactQueryApiTests
+    public sealed class DownloadToFile : JFrogArtifactRepositoryTests
     {
         [Fact]
         public async Task Writes_stream_to_file_system()
@@ -136,7 +136,7 @@ public class JFrogArtifactQueryApiTests
         }
     }
 
-    public sealed class DownloadAndExtract : JFrogArtifactQueryApiTests
+    public sealed class DownloadAndExtract : JFrogArtifactRepositoryTests
     {
         [Fact]
         public async Task Extracts_zip_file_into_target_folder()
@@ -196,9 +196,79 @@ public class JFrogArtifactQueryApiTests
             // Assert - the archive is streamed to a temp file which must be cleaned up afterwards
             fileSystem.Directory.GetFiles(tempDirectory.Path, "*.download.tmp").Should().BeEmpty();
         }
+
+        [Theory]
+        [InlineData("../evil.txt")]
+        [InlineData("../../evil.txt")]
+        [InlineData("sub/../../evil.txt")]
+        [InlineData("nested/../../../evil.txt")]
+        public async Task Rejects_zip_slip_entries(string maliciousEntryName)
+        {
+            // Arrange
+            using var zipStream = CreateZipStream(maliciousEntryName, "malicious");
+
+            var artifact = Substitute.For<IArtifact>();
+            using var tempDirectory = new TemporaryDirectory();
+            var fileSystem = new FileSystem();
+
+            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(contentStream: zipStream);
+            _httpClientFactory.BaseAddress = new Uri("https://host/");
+
+            var repository = CreateRepository(_httpClientFactory, fileSystem);
+
+            // Act
+            var act = () => repository.DownloadAndExtract(artifact, tempDirectory.Path, TestContext.Current.CancellationToken);
+
+            // Assert - traversing entries must fail extraction rather than escape the target folder
+            await act.Should().ThrowAsync<InvalidOperationException>();
+
+            var escapedFile = fileSystem.Path.GetFullPath(
+                fileSystem.Path.Combine(tempDirectory.Path, maliciousEntryName));
+            fileSystem.File.Exists(escapedFile).Should().BeFalse();
+        }
+
+        [Theory]
+        [InlineData("/etc/passwd")]
+        [InlineData("/tmp/evil.txt")]
+        public async Task Rejects_rooted_entries(string rootedEntryName)
+        {
+            // Arrange
+            using var zipStream = CreateZipStream(rootedEntryName, "malicious");
+
+            var artifact = Substitute.For<IArtifact>();
+            using var tempDirectory = new TemporaryDirectory();
+            var fileSystem = new FileSystem();
+
+            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(contentStream: zipStream);
+            _httpClientFactory.BaseAddress = new Uri("https://host/");
+
+            var repository = CreateRepository(_httpClientFactory, fileSystem);
+
+            // Act
+            var act = () => repository.DownloadAndExtract(artifact, tempDirectory.Path, TestContext.Current.CancellationToken);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>();
+        }
+
+        private static MemoryStream CreateZipStream(string entryName, string content)
+        {
+            var zipStream = new MemoryStream();
+
+            using (var archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+            {
+                var entry = archive.CreateEntry(entryName);
+                using var writer = new StreamWriter(entry.Open());
+                writer.Write(content);
+            }
+
+            zipStream.Position = 0;
+
+            return zipStream;
+        }
     }
 
-    public sealed class QueryRaw : JFrogArtifactQueryApiTests
+    public sealed class QueryRaw : JFrogArtifactRepositoryTests
     {
         [Fact]
         [Trait(Traits.Category, Traits.System)]
@@ -234,7 +304,7 @@ public class JFrogArtifactQueryApiTests
         }
     }
 
-    public sealed class Limit : JFrogArtifactQueryApiTests
+    public sealed class Limit : JFrogArtifactRepositoryTests
     {
         [Fact]
         [Trait(Traits.Category, Traits.System)]
@@ -277,7 +347,7 @@ public class JFrogArtifactQueryApiTests
         }
     }
 
-    public sealed class FilterBy : JFrogArtifactQueryApiTests
+    public sealed class FilterBy : JFrogArtifactRepositoryTests
     {
         [Fact]
         [Trait(Traits.Category, Traits.System)]
@@ -299,7 +369,7 @@ public class JFrogArtifactQueryApiTests
         }
     }
 
-    public sealed class QuerySuiteArtifacts : JFrogArtifactQueryApiTests
+    public sealed class QuerySuiteArtifacts : JFrogArtifactRepositoryTests
     {
         [Fact]
         [Trait(Traits.Category, Traits.System)]

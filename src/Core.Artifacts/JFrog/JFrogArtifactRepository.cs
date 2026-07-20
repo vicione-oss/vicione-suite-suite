@@ -77,12 +77,12 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
             {
                 if (archiveEntry.FullName.EndsWith('/'))
                 {
-                    var entryFolderPath = fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
+                    var entryFolderPath = fileSystem.EnsureContainedPath(targetFolderPath, archiveEntry.FullName);
                     fileSystem.Directory.CreateDirectory(entryFolderPath);
                     continue;
                 }
 
-                var entryFilePath = fileSystem.Path.Combine(targetFolderPath, archiveEntry.FullName);
+                var entryFilePath = fileSystem.EnsureContainedPath(targetFolderPath, archiveEntry.FullName);
                 await archiveEntry.ExtractToFileAsync(entryFilePath, true, cancellationToken);
             }
         }
