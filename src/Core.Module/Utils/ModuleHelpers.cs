@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Sdk.Modules;
 using System.Reflection;
 using Semver;
@@ -7,10 +7,21 @@ namespace Core.Module.Utils;
 
 public static class ModuleHelpers
 {
+    /// <summary>
+    /// Name of the marker file written as the final step of a successful module install.
+    /// Its presence signals that download, extraction and metadata write all completed.
+    /// A module directory without this marker is considered incomplete/not-installed.
+    /// </summary>
+    public const string CompletenessMarkerFileName = ".ready";
+
     public static string DllToDepsJson(string name) => name.Replace(".dll", ".deps.json", StringComparison.OrdinalIgnoreCase);
+
     public static string DepsJsonToDll(string name) => name.Replace(".deps.json", ".dll", StringComparison.OrdinalIgnoreCase);
+
     public static string GetNameVersionKey(string name, Version? version) => GetNameVersionKey(name, version?.ToString(3) ?? "unknown");
+
     public static string GetNameVersionKey(string name, string version) => $"{name}-{version}";
+
     public static string GetLocalMetadataFileName(string packageName)
         => $"{packageName}.meta.json";
 

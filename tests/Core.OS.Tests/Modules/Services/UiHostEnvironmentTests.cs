@@ -1,7 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Core.Module;
 using Core.OS.Modules.Services;
-using Core.Shared.Modules;
 using Core.UiHosting;
 using AwesomeAssertions;
 using Sdk.Client.Modules;
@@ -15,41 +14,6 @@ namespace Core.OS.Tests.Modules.Services;
 
 public class UiHostEnvironmentTests
 {
-    public sealed class CreateModulesResourceArchive : UiHostEnvironmentTests
-    {
-        private const string Locale = "de-DE";
-
-        [Fact]
-        public async Task Should_return_localization_assemblies()
-        {
-            // Arrange
-            var suiteContext = TestFactory.CreateSuiteContext(enableBackendModules: false);
-            var hostManagement = new UiHostEnvironment(suiteContext);
-
-            // Act
-            var archive = await hostManagement.CreateModulesResourceArchive(Locale);
-
-            // Assert
-            var extracted = await ModuleZip.ExtractArchive(archive, []);
-            extracted.Dlls.Should().NotBeNullOrEmpty();
-        }
-
-        [Fact]
-        public async Task Should_not_return_localization_assemblies_for_backend_modules()
-        {
-            // Arrange
-            var suiteContext = TestFactory.CreateSuiteContext(enableUiHost: false, enableUiModules: false);
-            var hostManagement = new UiHostEnvironment(suiteContext);
-
-            // Act
-            var archive = await hostManagement.CreateModulesResourceArchive(Locale);
-
-            // Assert
-            var extracted = await ModuleZip.ExtractArchive(archive, []);
-            extracted.Dlls.Should().BeEmpty();
-        }
-    }
-
     public sealed class GetWwwRootFolder : UiHostEnvironmentTests
     {
         [Fact]

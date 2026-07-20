@@ -1,9 +1,7 @@
-﻿using System.Globalization;
 using System.Reflection;
 using Core.Module;
 using Core.Module.Contracts;
 using Core.Module.Extensions;
-using Core.Module.Utils;
 using Core.Shared.Modules;
 using Core.UiHosting;
 using Sdk.Modules;
@@ -63,37 +61,6 @@ internal sealed class UiHostEnvironment(SuiteDependencyContext suiteContext) : I
         return ModuleZip.CreateArchive(assemblies);
 
         bool NotLoadedYet(string filename) => !excludedAssemblyNames.Any(a => a.EndsWith(Path.GetFileName(filename), StringComparison.Ordinal));
-    }
-
-    public Task<byte[]> CreateModulesResourceArchive(string locale)
-    {
-        var cultureInfo = new CultureInfo(locale);
-        var allResources = new Dictionary<string, string>();
-
-        foreach (var pathInfo in _suiteContext.GetUiModulesAssemblyPathInfos())
-        {
-            // a list of all dlls [+pdb] of the module
-            var moduleDirectory = Path.GetDirectoryName(pathInfo.AssemblyPath);
-            if (!Directory.Exists(moduleDirectory))
-                continue;
-
-            // possible that there are no resources for this language
-            var resourcePath = Path.Combine(moduleDirectory, cultureInfo.TwoLetterISOLanguageName);
-            if (!Directory.Exists(resourcePath))
-                continue;
-
-            // get all top assemblies from e.g. /de folder
-            var moduleResources = Directory.GetFiles(resourcePath, "*.*", SearchOption.TopDirectoryOnly)
-                .Where(f => ModuleHelpers.IsDllOrPdb(f, false))
-                .ToDictionary(p => Path.GetFileName(p) ?? throw new InvalidOperationException(), p => p);
-
-            foreach (var resource in moduleResources)
-            {
-                allResources.TryAdd(resource.Key, resource.Value);
-            }
-        }
-
-        return ModuleZip.CreateArchive(allResources);
     }
 
     public IEnumerable<ModuleMetadata> GetModuleMetadata()

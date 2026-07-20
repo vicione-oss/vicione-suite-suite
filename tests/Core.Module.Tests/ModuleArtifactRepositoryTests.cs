@@ -154,8 +154,10 @@ public class ModuleArtifactRepositoryTests
                 // Hold the "download" open long enough for overlap to be observable.
                 await Task.Delay(50);
 
-                // Mimic extraction creating the target folder so metadata can be written afterwards.
+                // Mimic extraction creating the target folder and a payload file so the
+                // staged module passes completeness verification before promotion.
                 fileSystem.Directory.CreateDirectory(targetPath);
+                await fileSystem.File.WriteAllTextAsync(fileSystem.Path.Combine(targetPath, "payload.dll"), "payload");
                 Interlocked.Decrement(ref concurrent);
             }
 
@@ -188,6 +190,101 @@ public class ModuleArtifactRepositoryTests
                     return;
             }
             while (Interlocked.CompareExchange(ref target, value, initial) != initial);
+        }
+    }
+
+    public sealed class InterruptedDownload : ModuleArtifactRepositoryTests
+    {
+        private static (IArtifactRepository repo, IArtifactQueryBuilder builder) CreateArtifactRepositoryMock()
+        {
+            var artifactRepository = Substitute.For<IArtifactRepository>();
+
+            var queryBuilder = Substitute.For<IArtifactQueryBuilder>();
+            queryBuilder.AndPathMatches(Arg.Any<string>()).Returns(queryBuilder);
+            queryBuilder.AndNameMatches(Arg.Any<string>()).Returns(queryBuilder);
+            queryBuilder.OrderByDescending(Arg.Any<string[]>()).Returns(queryBuilder);
+            queryBuilder.Build().Returns("query");
+            artifactRepository.CreateQueryBuilder().Returns(queryBuilder);
+
+            var artifact = Substitute.For<IArtifact>();
+            var queryResult = Substitute.For<IArtifactQueryResult>();
+            queryResult.Artifacts.Returns([artifact]);
+            artifactRepository.Query(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(queryResult);
+            artifactRepository.Download(Arg.Any<IArtifact>(), Arg.Any<CancellationToken>())
+                .Returns(_ => new MemoryStream("{}"u8.ToArray()));
+
+            return (artifactRepository, queryBuilder);
+        }
+
+        [Fact]
+        public async Task Should_not_promote_partial_module_when_extraction_is_interrupted()
+        {
+            // Arrange
+            var fileSystem = new FileSystem();
+            using var tempDir = new TemporaryDirectory();
+            var (artifactRepository, _) = CreateArtifactRepositoryMock();
+            var package = new ModuleDependencyPackage { Name = "Module.Interrupted", Version = "1.0.0" };
+            var targetPath = fileSystem.Path.Combine(tempDir.Path, package.Name, package.Version);
+
+            // Simulate an interrupted extraction: write a partial file into the staging folder, then fail.
+            artifactRepository
+                .DownloadAndExtract(Arg.Any<IArtifact>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(async call =>
+                {
+                    var stagingPath = call.ArgAt<string>(1);
+                    fileSystem.Directory.CreateDirectory(stagingPath);
+                    await fileSystem.File.WriteAllTextAsync(fileSystem.Path.Combine(stagingPath, "partial.dll"), "partial");
+                    throw new IOException("There is not enough space on the disk.");
+                });
+
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem);
+
+            // Act
+            var result = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Error.Should().NotBeNull();
+            result.Skipped.Should().BeFalse();
+            fileSystem.Directory.Exists(targetPath).Should().BeFalse("no partial module directory may be promoted");
+        }
+
+        [Fact]
+        public async Task Should_reacquire_module_after_interrupted_download()
+        {
+            // Arrange
+            var fileSystem = new FileSystem();
+            using var tempDir = new TemporaryDirectory();
+            var (artifactRepository, _) = CreateArtifactRepositoryMock();
+            var package = new ModuleDependencyPackage { Name = "Module.Reacquire", Version = "1.0.0" };
+            var targetPath = fileSystem.Path.Combine(tempDir.Path, package.Name, package.Version);
+
+            var attempts = 0;
+            artifactRepository
+                .DownloadAndExtract(Arg.Any<IArtifact>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(async call =>
+                {
+                    var stagingPath = call.ArgAt<string>(1);
+                    fileSystem.Directory.CreateDirectory(stagingPath);
+                    await fileSystem.File.WriteAllTextAsync(fileSystem.Path.Combine(stagingPath, "payload.dll"), "payload");
+
+                    // First attempt is interrupted after writing a partial payload.
+                    if (Interlocked.Increment(ref attempts) == 1)
+                        throw new IOException("There is not enough space on the disk.");
+                });
+
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem);
+
+            // Act
+            var first = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);
+            var second = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);
+
+            // Assert
+            first.Error.Should().NotBeNull();
+            first.Skipped.Should().BeFalse();
+
+            second.Error.Should().BeNull();
+            second.Skipped.Should().BeFalse("a partial module must be re-acquired, not skipped");
+            fileSystem.File.Exists(fileSystem.Path.Combine(targetPath, ".ready")).Should().BeTrue();
         }
     }
 
