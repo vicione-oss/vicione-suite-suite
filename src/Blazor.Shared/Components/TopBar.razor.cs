@@ -1,14 +1,20 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.Services;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
+using ViciOne.Ui.MonochromeIcons.Assets.Services;
 
 namespace Blazor.Shared.Components;
 
 public sealed partial class TopBar : ComponentBase, IDisposable
 {
+    private MarkupString? _generalMenuIconSvgMarkup;
+
     [Inject] private ILayoutService LayoutService { get; set; } = default!;
     [Inject] private INavigationService NavigationService { get; set; } = default!;
+
+    [Inject] private IMonochromeIconSvgMarkupProvider MonochromeIconSvgMarkupProvider { get; set; } = default!;
 
     public void Dispose()
     {
@@ -19,6 +25,10 @@ public sealed partial class TopBar : ComponentBase, IDisposable
     {
         ArgumentNullException.ThrowIfNull(LayoutService, nameof(LayoutService));
         LayoutService.PropertyChanged += OnLayoutServicePropertyChanged;
+
+        var svg = MonochromeIconSvgMarkupProvider.GetSvgMarkup(MonochromeIconName.GeneralMenu, MonochromeIconSize.Medium);
+
+        _generalMenuIconSvgMarkup = new(svg ?? string.Empty);
     }
 
     private async void OnLayoutServicePropertyChanged(object? _, PropertyChangedEventArgs e)

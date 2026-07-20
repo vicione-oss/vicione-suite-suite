@@ -5,6 +5,7 @@ using Blazor.Shared.UserInterface.ControlPanels.Theme.Extensions;
 using Blazor.Shared.UserInterface.ControlPanels.Theme.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
 using Xunit;
@@ -18,6 +19,11 @@ public sealed class ThemeControlPanelTests
     {
         // Arrange
         using var ctx = new BunitContext();
+
+        var dropDownModule = ctx.JSInterop.SetupModule("./_content/ViciOne.Ui.Blazor.Components/drop-down/drop-down.js"); 
+        var dropDownInstance = dropDownModule.SetupModule("attach", _ => true);
+        dropDownInstance.SetupVoid("attachInputElement", _ => true);
+        dropDownInstance.SetupVoid("reserveWidth");
 
         ctx.SetupSuiteServices(setup =>
         {

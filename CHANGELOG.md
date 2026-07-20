@@ -57,9 +57,9 @@
 - `Microsoft.FeatureManagement` packages, update to version `4.6.0`
 - `MQTTnet` package, update version to `5.2.0.1603`
 - `System.IO.Abstractions` package, update version to `22.2.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.2.0-ci2678919385`
-- `ViciOne.Ui.Blazor.Components` package, update version to `5.16.0`
-- `ViciOne.Ui.MonochromeIcons` package, update version to `4.12.0`
+- `ViciOne.Suite.Sdk` packages, update to version `2.2.0-ci2684084316`
+- `ViciOne.Ui.Blazor.Components` package, update version to `5.18.0`
+- `ViciOne.Ui.MonochromeIcons` package, update version to `4.14.0`
 
 ## 1.2.2 - 2026-06-11
 

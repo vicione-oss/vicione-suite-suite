@@ -7,6 +7,7 @@ using NSubstitute;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
+using ViciOne.Ui.MonochromeIcons.Assets.Services;
 
 namespace Blazor.Shared.Tests;
 
@@ -17,6 +18,7 @@ internal static class TestContextExtensions
         public BunitContext SetLocalServices()
         {
             ctx.Services.AddSingleton(Substitute.For<INavigationService>());
+            ctx.Services.AddSingleton(Substitute.For<IMonochromeIconSvgMarkupProvider>());
 
             return ctx;
         }
