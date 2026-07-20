@@ -241,19 +241,15 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
 
         var configFilePath = CreateModuleWorkspaceConfigFilePath(moduleId);
 
-        await using var fs = fileSystem.FileStream.New(configFilePath, new FileStreamOptions()
-        {
-            Mode = FileMode.Create,
-            Access = FileAccess.Write,
-            Share = FileShare.None,
-            Options = FileOptions.Asynchronous,
-        });
-
         // we need to tranform IConfiguration to be able to store it
         //https://stackoverflow.com/questions/62713523/using-system-text-json-to-serialize-an-iconfiguration-back-to-json
         var dictionary = configuration.AsEnumerable().ToDictionary(c => c.Key, c => c.Value);
 
-        await JsonSerializer.SerializeAsync(fs, dictionary, ModuleSerializerOptions.GetOptions(), cancellationToken: cancellationToken);
+        // Write atomically so a crash mid-write can't corrupt the module settings file.
+        await fileSystem.WriteFileAtomic(
+            configFilePath,
+            stream => JsonSerializer.SerializeAsync(stream, dictionary, ModuleSerializerOptions.GetOptions(), cancellationToken: cancellationToken),
+            cancellationToken);
     }
 
     private string CreateModuleWorkspaceConfigFilePath(string moduleId)

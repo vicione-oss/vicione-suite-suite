@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using Core.Module.Options;
 using Core.OS.Extensions;
 using Core.OS.HostManagement;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using Sdk.Backend.IO;
 using Sdk.Backend.Messaging;
 using Sdk.Backend.Modules;
 using Sdk.Backend.Persistence;
@@ -84,6 +86,9 @@ public class PlatformConfigurationTests
         Assert.NotNull(serviceProvider.GetService<IPipeClient>());
         Assert.NotNull(serviceProvider.GetService<EventCallbackRegistry>());
         Assert.Null(serviceProvider.GetService<IHealthCheckPublisher>());
+
+        Assert.NotNull(serviceProvider.GetService<IFileSystem>());
+        Assert.NotNull(serviceProvider.GetService<IAtomicFileWriter>());
     }
 
     [Fact]

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
 using AwesomeAssertions;
@@ -75,6 +75,21 @@ public class ModulePackageManifestStoreTests
 
             // Assert
             manifest.Packages.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Should_surface_error_and_not_mask_corrupt_manifest_as_empty()
+        {
+            // Arrange
+            var store = _services.GetRequiredService<IModulePackageManifestStore>();
+            var packagesFile = _fileSystem.GetModuleVersionsFilePath(_options.Value);
+            _fileSystem.AddFile(packagesFile, new MockFileData("{ this is not valid json"));
+
+            // Act
+            var act = () => store.Load(CancellationToken.None);
+
+            // Assert - a corrupt manifest must be surfaced, never silently returned as empty
+            await act.Should().ThrowAsync<Exception>();
         }
     }
 
@@ -155,6 +170,29 @@ public class ModulePackageManifestStoreTests
             storedManifest.Should().NotBeNull();
             storedManifest!.Packages.Should().HaveCount(1);
             storedManifest.Packages.Should().Contain(d => d.Name == package.Name && d.Version == package.Version);
+        }
+    }
+
+    public sealed class AtomicWrite : ModulePackageManifestStoreTests
+    {
+        [Fact]
+        public async Task Should_leave_previous_file_intact_when_write_fails_mid_write()
+        {
+            // Arrange - an existing, valid manifest on disk
+            var existingPackage = new ModuleDependencyPackage() { Name = "ExistingPackage", Version = "1.0.0" };
+            var packagesFile = SetupModulePackageManifestFile([existingPackage]);
+            var originalContent = await _fileSystem.File.ReadAllTextAsync(packagesFile, TestContext.Current.CancellationToken);
+
+            // Act - simulate a power-cut mid-write by throwing while writing the new content
+            var act = () => _fileSystem.WriteFileAtomic(
+                packagesFile,
+                _ => throw new IOException("simulated power loss"),
+                CancellationToken.None);
+
+            // Assert - the write fails but the previous valid file is untouched
+            await act.Should().ThrowAsync<IOException>();
+            _fileSystem.File.Exists(packagesFile).Should().BeTrue();
+            (await _fileSystem.File.ReadAllTextAsync(packagesFile, TestContext.Current.CancellationToken)).Should().Be(originalContent);
         }
     }
 

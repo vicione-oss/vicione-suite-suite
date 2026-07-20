@@ -33,6 +33,7 @@ using OpenTelemetry.Trace;
 using Core.Artifacts;
 using Microsoft.FeatureManagement;
 using Constants = Core.Shared.Constants;
+using Sdk.Backend.IO;
 
 namespace Core.OS.Extensions;
 
@@ -91,6 +92,7 @@ internal static class IServiceCollectionExtensions
 
             services
                 .AddSingleton(fileSystem)
+                .AddTransient<IAtomicFileWriter, AtomicFileWriter>()
                 .AddSingleton<IModuleDbContextRegistrar>(new ModuleDbContextRegistrar())
                 .AddCoreDbContexts()
                 .AddInstanceServices(instanceOptions, messageBusOptions.UseInMemoryBus)
