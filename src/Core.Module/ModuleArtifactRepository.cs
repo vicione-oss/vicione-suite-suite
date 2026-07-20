@@ -65,37 +65,95 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
 
         var result = new ModulePackageDownloadResult(package);
 
+        // Stage into a sibling directory on the same volume so promotion is an atomic rename.
+        var packageFolder = fileSystem.Path.Combine(modulesPath, package.Name);
+        var stagingPath = fileSystem.Path.Combine(packageFolder, $".staging-{Guid.NewGuid():N}");
+
         try
         {
-            // target path e.g. /path/to/modules/name/version
+            // A fully installed module is marked complete; anything else is treated as not-installed.
             if (ModuleVersionExists(targetPath))
             {
                 result.Skipped = true;
                 return result;
             }
 
+            // A leftover directory without the completeness marker is partial/corrupt; discard it.
+            if (fileSystem.Directory.Exists(targetPath))
+                fileSystem.Directory.Delete(targetPath, recursive: true);
+
+            fileSystem.Directory.CreateDirectory(stagingPath);
+
             // try to find the matching artifact on the repository                      
             var moduleArtifact = await QueryModuleArtifact(package, cancellationToken)
                 ?? throw new InvalidOperationException($"Can't find artifact for package='{package.Name}' version='{package.Version}'");
 
-            // download the module zip and extract it
-            await artifactRepository.DownloadAndExtract(moduleArtifact, targetPath, cancellationToken);
+            // download the module zip and extract it into the staging directory
+            await artifactRepository.DownloadAndExtract(moduleArtifact, stagingPath, cancellationToken);
 
             // because the metadata is not part of the zip we try download it and put it into module directory.            
             // we don't know with which sdk version the module got published
             // we have to query a matching one by package version                       
-            var metadataPath = fileSystem.Path.Combine(targetPath, ModuleHelpers.GetLocalMetadataFileName(package.Name));
-            await using var metadataDownloadStream = await GetMetadataDownloadStream(package, cancellationToken);
-            await using var metadataFileStream = fileSystem.FileStream.New(metadataPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+            var metadataPath = fileSystem.Path.Combine(stagingPath, ModuleHelpers.GetLocalMetadataFileName(package.Name));
+            await using (var metadataDownloadStream = await GetMetadataDownloadStream(package, cancellationToken))
+            await using (var metadataFileStream = fileSystem.FileStream.New(metadataPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
+            {
+                await metadataDownloadStream.CopyToAsync(metadataFileStream, cancellationToken);
+            }
 
-            await metadataDownloadStream.CopyToAsync(metadataFileStream, cancellationToken);
+            // Verify the staged content is complete before it is made visible under its version folder.
+            VerifyStagedModule(stagingPath, metadataPath);
+
+            // Write the completeness marker as the very last write into staging.
+            var markerPath = fileSystem.Path.Combine(stagingPath, ModuleHelpers.CompletenessMarkerFileName);
+            await fileSystem.File.WriteAllTextAsync(markerPath, DateTimeOffset.UtcNow.ToString("O"), cancellationToken);
+
+            // Atomically promote the fully-staged module to its final versioned folder.
+            fileSystem.Directory.CreateDirectory(packageFolder);
+            fileSystem.Directory.Move(stagingPath, targetPath);
         }
         catch (Exception e)
         {
             result.Error = e;
         }
+        finally
+        {
+            // Always clean up staging: on success it has been moved away, on failure it must not linger.
+            TryDeleteDirectory(stagingPath);
+        }
 
         return result;
+    }
+
+    private void VerifyStagedModule(string stagingPath, string metadataPath)
+    {
+        if (!fileSystem.File.Exists(metadataPath))
+            throw new InvalidOperationException($"Staged module is incomplete: metadata file missing at '{metadataPath}'.");
+
+        // The extracted archive must have produced at least one payload file besides the metadata.
+        var hasPayload = fileSystem.Directory
+            .EnumerateFiles(stagingPath, "*", SearchOption.AllDirectories)
+            .Any(file => !string.Equals(file, metadataPath, StringComparison.Ordinal));
+
+        if (!hasPayload)
+            throw new InvalidOperationException($"Staged module is incomplete: no extracted payload found in '{stagingPath}'.");
+    }
+
+    private void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            if (fileSystem.Directory.Exists(path))
+                fileSystem.Directory.Delete(path, recursive: true);
+        }
+        catch (IOException)
+        {
+            // Best-effort cleanup; leftover staging directories are ignored on next run (no marker).
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Best-effort cleanup; leftover staging directories are ignored on next run (no marker).
+        }
     }
 
     public async Task<ModuleMetadata?> GetModuleMetadata(ModuleDependencyPackage package, CancellationToken cancellationToken = default)
@@ -214,5 +272,5 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
     }
 
     private bool ModuleVersionExists(string modulePath)
-        => fileSystem.Directory.Exists(modulePath) && fileSystem.Directory.GetFiles(modulePath).Length > 0;
+        => fileSystem.File.Exists(fileSystem.Path.Combine(modulePath, ModuleHelpers.CompletenessMarkerFileName));
 }
