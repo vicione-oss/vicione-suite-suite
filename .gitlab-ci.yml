@@ -194,6 +194,28 @@ include:
         - *activate_mise
         - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_RW_JFrog -p $NuGet_PW_RW_JFrog --store-password-in-clear-text
 
+  # Promote to staging
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/promote@v2.0.1
+    inputs:
+      name: "Release Packages to JFrog"
+      stage: release
+      rules: 
+        - *rules_tag_manual
+      source_repository: "vicione-suite-dev"
+      destination_repository: "vicione-suite-staging"
+      remote_path: "suites"
+
+  # Promote staging to production
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/promote@v2.0.1
+    inputs:
+      name: "Public-Release Packages to JFrog"
+      stage: release-public
+      rules:
+        - *rules_tag_manual
+      source_repository: "vicione-suite-staging"
+      destination_repository: "vicione-suite"
+      remote_path: "suites"
+
 variables:
   PACKAGE_NAME: "ci-artifacts"
   ARTIFACT_PREFIX: "suite"
@@ -723,50 +745,6 @@ Prerelease Packages to JFrog:
 #     - docker buildx create --name mybuilder --use --bootstrap
 #     - docker buildx build --push --platform linux/amd64,linux/arm64 -t "${REPO}/${IMAGE_NAME}:${TAG}" -f "${DOCKERFILE}" .
 #     - !reference [.docker_logout]
-
-Release Packages to JFrog:
-  extends: .jfrog-package-release
-  stage: release
-  variables:
-    SERVER: "https://ifm.jfrog.io/artifactory"
-    USER: ${Raw_User_RW_JFrog}
-    PASSWORD: ${Raw_PW_RW_JFrog}
-    REPOSITORY_DESTINATION: "vicione-suite-staging"
-  needs:
-    - "trigger deb packaging"
-  rules:
-    - <<: *rules_tag_manual
-
-#################### Release Public stage
-
-Public-Release Packages to JFrog:
-  extends: .jfrog-package-release
-  stage: release-public
-  variables:
-    SERVER: "https://ifm.jfrog.io/artifactory"
-    USER: ${Raw_User_RW_JFrog}
-    PASSWORD: ${Raw_PW_RW_JFrog}
-    REPOSITORY_SOURCE: "vicione-suite-staging"
-    REPOSITORY_DESTINATION: "vicione-suite"
-  script:
-    - |
-      while IFS= read -r artifact; do
-        echo "Processing artifact: ${artifact}"
-
-        # Move to public repository
-        case "${artifact}" in
-          *.deb|*.json)
-            source="${REPOSITORY_SOURCE}/*/${artifact}"
-            destination="${REPOSITORY_DESTINATION}/${artifact}"
-            echo "Moving artifact: from \"${REPOSITORY_SOURCE}\" to \"${REPOSITORY_DESTINATION}\""
-            jf rt mv "${source}" "${destination}"
-            ;;
-        esac
-      done < artifacts.list
-  needs:
-    - "Release Packages to JFrog"
-  rules:
-    - <<: *rules_tag_manual
 
 #################### Cleanup stage
 # Cleanup job created by registry component include above
