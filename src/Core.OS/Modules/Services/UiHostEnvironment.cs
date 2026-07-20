@@ -2,7 +2,6 @@ using System.Reflection;
 using Core.Module;
 using Core.Module.Contracts;
 using Core.Module.Extensions;
-using Core.Shared.Modules;
 using Core.UiHosting;
 using Sdk.Modules;
 
@@ -52,15 +51,6 @@ internal sealed class UiHostEnvironment(SuiteDependencyContext suiteContext) : I
         }
 
         return dic;
-    }
-
-    public Task<byte[]> CreateModulesArchive(string[] excludedAssemblyNames)
-    {
-        var assemblies = _suiteContext.GetAllUiRuntimeDependencies(NotLoadedYet);
-
-        return ModuleZip.CreateArchive(assemblies);
-
-        bool NotLoadedYet(string filename) => !excludedAssemblyNames.Any(a => a.EndsWith(Path.GetFileName(filename), StringComparison.Ordinal));
     }
 
     public IEnumerable<ModuleMetadata> GetModuleMetadata()
