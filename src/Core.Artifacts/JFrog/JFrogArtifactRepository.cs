@@ -271,6 +271,13 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
     /// <param name="sourceConfig"></param>    
     private HttpClient CreateSourceClient(ApiSourceConfig sourceConfig)
     {
+        if (!string.Equals(sourceConfig.BaseAddress.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+        {
+            LogInsecureSourceRejected(logger, sourceConfig.ApiSource.Endpoint);
+            throw new InvalidOperationException(
+                $"Artifact source endpoint '{sourceConfig.ApiSource.Endpoint}' is not secure. Artifact sources must use HTTPS.");
+        }
+
         var client = httpClientFactory.CreateClient(sourceConfig.RepositoryKey);
         client.BaseAddress ??= sourceConfig.BaseAddress;
 
@@ -377,4 +384,7 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create source configuration for endpoint='{Endpoint}'")]
     private static partial void LogFailedToCreateApiConfig(ILogger logger, Exception exception, string endpoint);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Rejected artifact source with insecure (non-HTTPS) endpoint='{Endpoint}'. Artifact sources must use HTTPS.")]
+    private static partial void LogInsecureSourceRejected(ILogger logger, string endpoint);
 }

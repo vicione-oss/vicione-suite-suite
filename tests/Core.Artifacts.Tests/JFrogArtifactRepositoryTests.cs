@@ -20,12 +20,14 @@ namespace Core.Artifacts.Tests;
 public class JFrogArtifactRepositoryTests
 {
     private const string TestApiAddress = "https://ifm.jfrog.io/artifactory";
+    private const string UnsecureApiAddress = "http://ifm.jfrog.io/artifactory/vicione-suite";
+
     private readonly TestHttpClientFactory _httpClientFactory = new();
 
     public sealed class CreateQueryBuilder : JFrogArtifactRepositoryTests
     {
         [Fact]
-        public void Returns_a_jfrog_artifact_query_builder()
+        public void Should_return_jfrog_artifact_query_builder()
         {
             // Arrange
             var repository = CreateRepository(_httpClientFactory);
@@ -41,7 +43,7 @@ public class JFrogArtifactRepositoryTests
     public sealed class GetDownloadUri : JFrogArtifactRepositoryTests
     {
         [Fact]
-        public void Constructs_uri_using_artifact_path_and_repo()
+        public void Should_construct_uri_using_artifact_path_and_repo()
         {
             // Arrange
             var artifact = Substitute.For<IArtifact>();
@@ -59,7 +61,7 @@ public class JFrogArtifactRepositoryTests
         }
 
         [Fact]
-        public void Uses_default_repo_if_not_set_on_artifact()
+        public void Should_use_default_repo_if_not_set_on_artifact()
         {
             // Arrange
             var artifact = Substitute.For<IArtifact>();
@@ -109,6 +111,66 @@ public class JFrogArtifactRepositoryTests
 
             // Assert
             result.Errors.Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public async Task Should_reject_insecure_http_source()
+        {
+            // Arrange
+            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(HttpStatusCode.OK, """{ "results": [] }""");
+
+            var options = new ArtifactRepositoryOptions
+            {
+                Sources = [new ArtifactRepositorySourceOption { Endpoint = UnsecureApiAddress }]
+            };
+
+            var repository = CreateRepository(_httpClientFactory, opts: options);
+
+            // Act
+            var result = await repository.Query("items.find({})", TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Errors.Should().NotBeEmpty();
+        }
+    }
+
+    public sealed class Download : JFrogArtifactRepositoryTests
+    {
+        [Fact]
+        public async Task Should_reject_insecure_http_source()
+        {
+            // Arrange
+            var options = new ArtifactRepositoryOptions
+            {
+                Sources = [new ArtifactRepositorySourceOption { Endpoint = UnsecureApiAddress }]
+            };
+
+            var artifact = Substitute.For<IArtifact>();
+            var repository = CreateRepository(_httpClientFactory, opts: options);
+
+            // Act
+            var act = () => repository.Download(artifact, TestContext.Current.CancellationToken);
+
+            // Assert
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                .WithMessage("*not secure*");
+        }
+
+        [Fact]
+        public async Task Download_allows_secure_https_source()
+        {
+            // Arrange
+            using var stream = new MemoryStream("Hello world"u8.ToArray());
+            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(contentStream: stream);
+
+            var artifact = Substitute.For<IArtifact>();
+            var repository = CreateRepository(_httpClientFactory);
+
+            // Act
+            var act = () => repository.Download(artifact, TestContext.Current.CancellationToken);
+
+            // Assert
+            await act.Should().NotThrowAsync();
         }
     }
 
@@ -202,7 +264,7 @@ public class JFrogArtifactRepositoryTests
         [InlineData("../../evil.txt")]
         [InlineData("sub/../../evil.txt")]
         [InlineData("nested/../../../evil.txt")]
-        public async Task Rejects_zip_slip_entries(string maliciousEntryName)
+        public async Task Should_reject_zip_slip_entries(string maliciousEntryName)
         {
             // Arrange
             using var zipStream = CreateZipStream(maliciousEntryName, "malicious");
@@ -230,7 +292,7 @@ public class JFrogArtifactRepositoryTests
         [Theory]
         [InlineData("/etc/passwd")]
         [InlineData("/tmp/evil.txt")]
-        public async Task Rejects_rooted_entries(string rootedEntryName)
+        public async Task Should_reject_rooted_entries(string rootedEntryName)
         {
             // Arrange
             using var zipStream = CreateZipStream(rootedEntryName, "malicious");
@@ -272,7 +334,7 @@ public class JFrogArtifactRepositoryTests
     {
         [Fact]
         [Trait(Traits.Category, Traits.System)]
-        public async Task Returns_raw_string_when_successful()
+        public async Task Should_return_raw_string_when_successful()
         {
             // Arrange
             var repository = CreateRepository(_httpClientFactory, fs: new FileSystem());

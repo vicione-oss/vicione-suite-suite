@@ -8,6 +8,10 @@ internal class ArtifactRepositoryTokenService(IHttpClientFactory httpClientFacto
 {
     public async Task<ArtifactRepositoryTokenResponse> GetToken(Uri tokenEndpoint, CancellationToken cancellationToken)
     {
+        if (!string.Equals(tokenEndpoint.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException(
+                $"Token endpoint '{tokenEndpoint}' is not secure. Artifact repository token endpoints must use HTTPS.");
+
         using var httpClient = httpClientFactory.CreateClient();
         await using var stream = await httpClient.GetStreamAsync(tokenEndpoint, cancellationToken);
 

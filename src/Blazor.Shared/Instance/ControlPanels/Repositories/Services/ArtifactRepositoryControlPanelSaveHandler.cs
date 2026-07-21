@@ -14,14 +14,20 @@ internal sealed class ArtifactRepositoryControlPanelSaveHandler(IArtifactReposit
         if (string.IsNullOrEmpty(state.Repository.Endpoint))
             return new SaveErrorResult(Localization.ArtifactRepositoryControlPanel.EndpointRequired);
 
-        if (!state.Repository.Endpoint.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        if (!state.Repository.Endpoint.StartsWith(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
             return new SaveErrorResult(Localization.ArtifactRepositoryControlPanel.EndpointMustBeHttps);
 
         if (!Uri.IsWellFormedUriString(state.Repository.Endpoint, UriKind.Absolute))
             return new SaveErrorResult(Localization.ArtifactRepositoryControlPanel.EndpointInvalidUrl);
 
-        if (!string.IsNullOrEmpty(state.Repository.TokenEndpoint) && !Uri.IsWellFormedUriString(state.Repository.TokenEndpoint, UriKind.Absolute))
-            return new SaveErrorResult(Localization.ArtifactRepositoryControlPanel.TokenEndpointMustBeAbsoluteUri);
+        if (!string.IsNullOrEmpty(state.Repository.TokenEndpoint))
+        {
+            if (!Uri.IsWellFormedUriString(state.Repository.TokenEndpoint, UriKind.Absolute))
+                return new SaveErrorResult(Localization.ArtifactRepositoryControlPanel.TokenEndpointMustBeAbsoluteUri);
+
+            if (!state.Repository.TokenEndpoint.StartsWith(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
+                return new SaveErrorResult(Localization.ArtifactRepositoryControlPanel.TokenEndpointMustBeHttps);
+        }
 
         IArtifactRepositoryServiceResult result;
 
