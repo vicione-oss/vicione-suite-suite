@@ -68,6 +68,37 @@ public class ModulePackageManifestExtensionsTests
             _logger.Received().Warning(Arg.Is<string>(msg => msg!.StartsWith("Disable module")), "A", dependency.Name, dependency.Version);
         }
 
+        [Fact]
+        public void Should_exclude_package_when_one_of_multiple_dependencies_is_missing()
+        {
+            // Arrange - a satisfied dependency follows a missing one; the missing result must not be masked.
+            var manifest = new ModulePackageManifest
+            {
+                Packages =
+                [
+                    new() { Name = "PresentDep", Version = "1.0.0" },
+                    new()
+                    {
+                        Name = "A",
+                        Version = "0.2.0",
+                        DependingOn =
+                        [
+                            new() { Name = "MissingDep", Version = "1.0.0" },
+                            new() { Name = "PresentDep", Version = "1.0.0" }
+                        ]
+                    }
+                ]
+            };
+
+            var moduleIds = new List<string> { "A", "PresentDep" };
+
+            // Act
+            var result = manifest.GetValidModulePackages(moduleIds, [], _logger);
+
+            // Assert
+            result.Select(p => p.Name).Should().NotContain("A");
+        }
+
         [Theory]
         [InlineData("1.0.0", "1.0.0")]
         [InlineData("1.0.4", "1.0.0")]
@@ -191,6 +222,40 @@ public class ModulePackageManifestExtensionsTests
 
             var versionMap = new Dictionary<string, SemVersion?>
             {
+                ["A"] = SemVersion.Parse("9.9.9"),
+                ["Dep"] = SemVersion.Parse("5.5.5")
+            };
+
+            // Act
+            var result = manifest.UpdatePackageVersions(versionMap);
+
+            // Assert
+            result.Single(p => p.Name == "A").Version.Should().Be("9.9.9");
+            dep.Version.Should().Be("5.5.5");
+        }
+
+        [Fact]
+        public void Should_not_update_dependency_version_when_dependency_name_not_in_map()
+        {
+            // Arrange
+            var dep = new ModuleDependencyPackage { Name = "Dep", Version = "0.0.1" };
+
+            var manifest = new ModulePackageManifest
+            {
+                Packages =
+                [
+                    new()
+                    {
+                        Name = "A",
+                        Version = "0.0.1",
+                        DependingOn = [dep]
+                    }
+                ]
+            };
+
+            // Only the parent package is in the map, not the dependency.
+            var versionMap = new Dictionary<string, SemVersion?>
+            {
                 ["A"] = SemVersion.Parse("9.9.9")
             };
 
@@ -199,7 +264,7 @@ public class ModulePackageManifestExtensionsTests
 
             // Assert
             result.Single(p => p.Name == "A").Version.Should().Be("9.9.9");
-            dep.Version.Should().Be("9.9.9");
+            dep.Version.Should().Be("0.0.1");
         }
 
         [Fact]

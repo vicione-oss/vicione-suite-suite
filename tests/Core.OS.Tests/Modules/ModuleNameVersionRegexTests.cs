@@ -38,6 +38,20 @@ public class ModuleNameVersionRegexTests
         }
 
         [Fact]
+        public void Should_parse_rc_version_from_name()
+        {
+            // Arrange
+            var path = "0.24.0-rc5-win-x64_0.19.0.json";
+
+            // Act
+            var match = ModuleNameVersionRegex.GetModuleVersion(path, out var moduleVersion);
+
+            // Assert
+            match.Should().BeTrue();
+            moduleVersion.Should().BeEquivalentTo(new SemVersion(0, 24, 0, ["rc5"]));
+        }
+
+        [Fact]
         public void Should_return_false_for_invalid_name()
         {
             // Arrange
