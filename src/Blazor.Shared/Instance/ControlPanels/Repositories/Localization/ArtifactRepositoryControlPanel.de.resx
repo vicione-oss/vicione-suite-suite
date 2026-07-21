@@ -144,4 +144,7 @@
   <data name="TokenEndpointMustBeAbsoluteUri" xml:space="preserve">
     <value>Token-Endpunkt muss eine absolute URI sein</value>
   </data>
+  <data name="TokenEndpointMustBeHttps" xml:space="preserve">
+    <value>Token-Endpunkt muss eine sichere HTTPS-URL sein</value>
+  </data>
 </root>

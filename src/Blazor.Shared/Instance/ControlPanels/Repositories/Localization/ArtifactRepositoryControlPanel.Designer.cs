@@ -141,5 +141,14 @@ namespace Blazor.Shared.Instance.ControlPanels.Repositories.Localization {
                 return ResourceManager.GetString("TokenEndpointMustBeAbsoluteUri", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Token endpoint must be a secure HTTPS URL.
+        /// </summary>
+        internal static string TokenEndpointMustBeHttps {
+            get {
+                return ResourceManager.GetString("TokenEndpointMustBeHttps", resourceCulture);
+            }
+        }
     }
 }

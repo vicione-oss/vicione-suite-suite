@@ -45,6 +45,26 @@ public sealed class ArtifactRepositoryTokenServiceTests
         tokenResponse.Token.Should().NotBeNullOrEmpty();
     }
 
+    [Fact]
+    public async Task Should_reject_insecure_http_token_endpoint()
+    {
+        // Arrange
+        var services = new ServiceCollection()
+            .AddHttpClient()
+            .AddSingleton<ArtifactRepositoryTokenService>()
+            .BuildServiceProvider();
+
+        var tokenService = services.GetRequiredService<ArtifactRepositoryTokenService>();
+        var tokenUri = new Uri("http://system.update.ifm/artifactory/vicione-token/token.json");
+
+        // Act
+        var act = () => tokenService.GetToken(tokenUri, TestContext.Current.CancellationToken);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>()
+            .WithMessage("*not secure*");
+    }
+
     private Uri CreateTokenUri(Uri baseAddress)
     {
         var uriBuilder = new UriBuilder(baseAddress)

@@ -18,7 +18,9 @@
 
 ### Changed
 
-- `JFrogArtifactRepository`, module archives are now streamed to a temporary file on disk and extracted from there instead of being buffered in memory.
+- `JFrogArtifactRepository`
+    - module archives are now streamed to a temporary file on disk and extracted from there instead of being buffered in memory.
+    - artifact source endpoints are required to be secure HTTPs urls
 - `ModuleArtifactRepository` 
     - bulk module downloads are now capped with a sliding-window throttle
     - modules are now extracted into a staging directory, verified for completeness, and only then atomically promoted to their versioned folder
