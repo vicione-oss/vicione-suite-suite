@@ -7,9 +7,9 @@ namespace Core.Module.Utils;
 public static partial class ModuleNameVersionRegex
 {
     /// <summary>
-    /// https://regex101.com/r/muwDlB/2
+    /// https://regex101.com/r/muwDlB/3
     /// </summary>
-    [GeneratedRegex(@"(?'version'\d+\.\d+\.\d+)-(?'civersion'[ci|rc]+[0-9]+)?", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"(?'version'\d+\.\d+\.\d+)-(?'civersion'(?:ci|rc)[0-9]+)?", RegexOptions.CultureInvariant)]
 
     private static partial Regex Matcher();
 

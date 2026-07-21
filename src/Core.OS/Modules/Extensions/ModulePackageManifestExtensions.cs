@@ -48,7 +48,7 @@ internal static class ModulePackageManifestExtensions
                     if (debug.TryGetValue(missing.Name, out var versionString) && SemVersion.TryParse(versionString, out var version))
                     {
                         // Check if debug version satisfies required version
-                        hasMissingDependencies = SemVersion.ComparePrecedence(version, missingVersion) < 0;
+                        hasMissingDependencies |= SemVersion.ComparePrecedence(version, missingVersion) < 0;
                     }
                     else
                     {
@@ -77,7 +77,7 @@ internal static class ModulePackageManifestExtensions
                 // major version difference contains breaking changes
                 if (packageVersion.Major != dependencyVersion.Major)
                     return false;
-                
+
                 // check if the package version is equal or higher than the dependency version
                 return SemVersion.ComparePrecedence(packageVersion, dependencyVersion) >= 0;
             }
@@ -98,7 +98,7 @@ internal static class ModulePackageManifestExtensions
                 // also update dependencies to new package version
                 foreach (var dependency in package.DependingOn)
                 {
-                    if (packageVersions.TryGetValue(package.Name, out var dependencyVersion) && dependencyVersion != null)
+                    if (packageVersions.TryGetValue(dependency.Name, out var dependencyVersion) && dependencyVersion != null)
                         dependency.Version = dependencyVersion.ToString();
                 }
             }

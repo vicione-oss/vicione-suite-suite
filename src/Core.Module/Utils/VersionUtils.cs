@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Core.Module.Utils;
 
@@ -9,9 +9,11 @@ internal static class VersionUtils
 
     public static bool TryParseVersion(string versionString, [NotNullWhen(true)] out Version? version)
     {
-        // Even SemVer won't parse "-ci" version easily so this is a patch to get working
-        var cleaned = versionString.EndsWith("-ci", StringComparison.Ordinal)
-            ? versionString.Replace("-ci", string.Empty, StringComparison.Ordinal)
+        // System.Version can't parse SemVer pre-release/build metadata (e.g. "-ci1733049", "-rc1", "+build").
+        // Strip everything from the first '-' or '+' so we parse the core Major.Minor.Build.
+        var separatorIndex = versionString.IndexOfAny(['-', '+']);
+        var cleaned = separatorIndex >= 0
+            ? versionString[..separatorIndex]
             : versionString;
 
         if (Version.TryParse(cleaned, out var parsed))
