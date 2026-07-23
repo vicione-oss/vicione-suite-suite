@@ -10,26 +10,30 @@ internal static class PreparationResult
 /// Builds and executes an ordered sequence of preparation steps.
 /// Execution stops at the first <see cref="IPreparationAbortResult"/>.
 /// </summary>
-internal sealed class SuitePreparationPipeline
+internal sealed class SuitePreparationPipeline(ILogger logger)
 {
     private record PreparationCancelledResult(string Reason) : IPreparationAbortResult;
 
-    private readonly List<Func<CancellationToken, Task<IPreparationResult>>> _steps = [];
+    private readonly List<Func<ILogger, CancellationToken, Task<IPreparationResult>>> _steps = [];
 
     /// <summary>Adds a step that returns an explicit preparation result.</summary>
-    public SuitePreparationPipeline Use(Func<CancellationToken, Task<IPreparationResult>> step)
+    public SuitePreparationPipeline Use(Func<ILogger, CancellationToken, Task<IPreparationResult>> step)
     {
         _steps.Add(step);
         return this;
     }
 
     /// <summary>Adds a fire-and-forget async step that is always treated as success.</summary>
-    public SuitePreparationPipeline Use(Func<CancellationToken, Task> step)
-        => Use(async ct => { await step(ct); return PreparationResult.Success; });
+    public SuitePreparationPipeline Use(Func<ILogger, CancellationToken, Task> step)
+        => Use(async (logger, ct) => { await step(logger, ct); return PreparationResult.Success; });
 
     /// <summary>Adds a synchronous side-effect step that is always treated as success.</summary>
     public SuitePreparationPipeline Use(Action step)
-        => Use(_ => { step(); return Task.FromResult(PreparationResult.Success); });
+        => Use((_, _) =>
+        {
+            step();
+            return Task.FromResult(PreparationResult.Success);
+        });
 
     /// <summary>
     /// Executes all registered steps in order.
@@ -40,7 +44,7 @@ internal sealed class SuitePreparationPipeline
     {
         foreach (var step in _steps)
         {
-            var result = await step(cancellationToken);
+            var result = await step(logger, cancellationToken);
             if (result is IPreparationAbortResult)
                 return result;
         }

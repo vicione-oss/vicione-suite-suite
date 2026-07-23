@@ -5,6 +5,7 @@ using Core.OS.Hosting;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Extensions;
 using Core.OS.Instance;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Instance;
 using Xunit;
@@ -14,7 +15,7 @@ namespace Core.OS.Tests.Hosting.Extensions;
 public class IFileSystemExtensionsTests
 {
     private readonly MockFileSystem _fileSystem = new();
-    private readonly Serilog.ILogger _logger = Substitute.For<Serilog.ILogger>();
+    private readonly ILogger _logger = Substitute.For<ILogger>();
     private readonly InstanceOptions _instanceOptions;
 
     public IFileSystemExtensionsTests()

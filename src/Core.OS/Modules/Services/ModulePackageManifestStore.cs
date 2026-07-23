@@ -13,7 +13,7 @@ public partial class ModulePackageManifestStore(IFileSystem fileSystem, IOptions
     /// <summary>
     /// Static version of <see cref="ModulePackageManifestStore.Load"/> method, used in scenarios where dependency injection is not available (e.g. during instance initialization before the service container is built)
     /// </summary>    
-    public static async Task<ModulePackageManifest> Load(IFileSystem fileSystem, InstanceOptions options, Serilog.ILogger logger, CancellationToken cancellationToken)
+    public static async Task<ModulePackageManifest> Load(IFileSystem fileSystem, InstanceOptions options, ILogger logger, CancellationToken cancellationToken)
     {
         try
         {
@@ -24,26 +24,13 @@ public partial class ModulePackageManifestStore(IFileSystem fileSystem, IOptions
             // Do NOT mask corruption as an empty manifest: persisting an empty set would silently
             // wipe the installed-module state. Surface the error so the startup recovery pipeline
             // can back up the corrupt file and reseed it.
-            logger.Error(ex, "Failed to load module package manifest from a file that exists but is unreadable");
-            throw;
-        }
-    }
-
-    public async Task<ModulePackageManifest> Load(CancellationToken cancellationToken)
-    {
-        try
-        {
-            return await DeserializeModulePackageManifest(fileSystem, instanceOptions.Value, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            // Do NOT mask corruption as an empty manifest: persisting an empty set would silently
-            // wipe the installed-module state. Surface the error so the startup recovery pipeline
-            // can back up the corrupt file and reseed it.
             LogLoadManifestError(logger, ex);
             throw;
         }
     }
+
+    public Task<ModulePackageManifest> Load(CancellationToken cancellationToken)
+        => Load(fileSystem, instanceOptions.Value, logger, cancellationToken);
 
     public async Task Store(ModulePackageManifest manifest, CancellationToken cancellationToken)
         => await StoreInternal(manifest, fileSystem, instanceOptions.Value, cancellationToken);

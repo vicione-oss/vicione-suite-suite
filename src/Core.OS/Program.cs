@@ -6,6 +6,7 @@ using Core.OS.Instance.Extensions;
 using Core.OS.Logging;
 using Core.OS.Modules.Extensions;
 using Serilog;
+using Serilog.Extensions.Logging;
 
 Thread.CurrentThread.Name = "MainThread";
 
@@ -19,19 +20,21 @@ builder.Services.Configure<HostOptions>(c =>
 builder.Services.ConfigureLogging(builder.Configuration);
 var fileSystem = new FileSystem();
 var instanceOptions = builder.Configuration.GetInstanceOptions();
+using var loggerFactory = new SerilogLoggerFactory(logger: null, dispose: false);
 
 // on preparation we access http api, load modules etc.
-var result = await new SuitePreparationPipeline()
+var result = await new SuitePreparationPipeline(loggerFactory.CreateLogger<SuitePreparationPipeline>())
     // filesystem / workspace preparation
     .UseInstanceId(fileSystem, instanceOptions)
-    .UseDeviceImageCleanup(fileSystem, instanceOptions, Log.Logger)
-    .UseResetFile(fileSystem, instanceOptions, Log.Logger)
-    .UseRestore(fileSystem, instanceOptions, Log.Logger)
-    .UseVersionDowngradeCheck(fileSystem, instanceOptions, Log.Logger)
-    .UseRecoveryMode(builder, fileSystem, instanceOptions, Log.Logger)
+    .UseDeviceImageCleanup(fileSystem, instanceOptions)
+    .UseResetFile(fileSystem, instanceOptions)
+    .UseRestore(fileSystem, instanceOptions)
+    .UseVersionDowngradeCheck(fileSystem, instanceOptions)
+    .UseRecoveryMode(builder, fileSystem, instanceOptions)
     // host / DI setup — only reached when all previous preparation steps succeed
-    .Use(async ct =>
+    .Use(async (logger, ct) =>
     {
+        // add serilogs services like DiagnosticContext 
         builder.Host.UseSerilog();
 
         // validate appsettings, env vars etc.
@@ -40,7 +43,7 @@ var result = await new SuitePreparationPipeline()
         builder.Services.AddSuiteOpenTelemetry(builder.Configuration, instanceOptions, fileSystem);
 
         // modules need to be (down-)loaded before server starts
-        var moduleHost = await builder.AddModuleHost(fileSystem, instanceOptions, ct);
+        var moduleHost = await builder.AddModuleHost(fileSystem, instanceOptions, loggerFactory, ct);
 
         builder.Services.AddServices(fileSystem, builder.Configuration, moduleHost);
     })

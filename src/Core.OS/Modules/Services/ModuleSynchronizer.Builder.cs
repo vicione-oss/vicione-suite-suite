@@ -6,6 +6,7 @@ using Core.Module.Utils;
 using Core.OS.Modules.Extensions;
 using Sdk.Modules;
 using Semver;
+using Serilog.Extensions.Logging;
 
 namespace Core.OS.Modules.Services;
 
@@ -19,7 +20,7 @@ internal sealed partial class ModuleSynchronizer : IDisposable
     private string? _modulesPath;
     private List<ModuleDependencyPackage>? _packages;
     private LowHttpFactory? _httpClientFactory;
-    private LoggerFactory? _loggerFactory;
+    private ILoggerFactory? _loggerFactory;
 
     private sealed class SynchronizationOptions
     {
@@ -81,6 +82,12 @@ internal sealed partial class ModuleSynchronizer : IDisposable
         return this;
     }
 
+    public ModuleSynchronizer WithLoggerFactory(ILoggerFactory loggerFactory)
+    {
+        _loggerFactory = loggerFactory;
+        return this;
+    }
+
     private SynchronizationOptions BuildOptions() => new()
     {
         DeleteOrphanedPackages = _deleteOrphanedVersions,
@@ -131,7 +138,7 @@ internal sealed partial class ModuleSynchronizer : IDisposable
         if (_apiOptionsProvider is null)
             throw new InvalidOperationException($"Use '{nameof(WithApiAdapter)}' method to setup the module API.");
 
-        _loggerFactory = new LoggerFactory();
+        _loggerFactory ??= new SerilogLoggerFactory(logger: null, dispose: false);
         _httpClientFactory = new LowHttpFactory();
 
         var artifactory = ArtifactRepositoryFactory.Create(fileSystem, _httpClientFactory, _apiOptionsProvider, _loggerFactory);

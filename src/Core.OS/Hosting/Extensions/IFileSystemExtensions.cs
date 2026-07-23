@@ -6,7 +6,7 @@ using Semver;
 
 namespace Core.OS.Hosting.Extensions;
 
-internal static class IFileSystemExtensions
+internal static partial class IFileSystemExtensions
 {
     extension(IFileSystem fileSystem)
     {
@@ -46,14 +46,14 @@ internal static class IFileSystemExtensions
         /// <see langword="null"/> when no downgrade action is required;
         /// otherwise a <see cref="VersionDowngradeInformation"/> describing the current and persisted versions.
         /// </returns>
-        public async Task<VersionDowngradeInformation?> DetectVersionDowngrade(InstanceOptions options, Serilog.ILogger logger, CancellationToken cancellationToken = default)
+        public async Task<VersionDowngradeInformation?> DetectVersionDowngrade(InstanceOptions options, ILogger logger, CancellationToken cancellationToken = default)
         {
             var suiteVersionString = SuiteVersionUtils.GetSuiteVersion();
 
             if (!fileSystem.DataVersionFileExists(options))
             {
                 await fileSystem.WriteDataVersionFile(options, suiteVersionString, cancellationToken);
-                logger.Information("Initialized data version to '{SuiteVersion}'", suiteVersionString);
+                LogDataVersionInitialized(logger, suiteVersionString);
                 return null;
             }
 
@@ -62,7 +62,7 @@ internal static class IFileSystemExtensions
             {
                 // should never happen but for sanity we need try to fix it to current version
                 await fileSystem.WriteDataVersionFile(options, suiteVersionString, cancellationToken);
-                logger.Warning("Empty data version restored to '{SuiteVersion}'", suiteVersionString);
+                LogDataVersionEmptyRestored(logger, suiteVersionString);
                 throw new InvalidOperationException($"Empty data version. Try restore to {suiteVersionString}");
             }
 
@@ -76,7 +76,7 @@ internal static class IFileSystemExtensions
             if (compareResult > 0)
             {
                 await fileSystem.WriteDataVersionFile(options, suiteVersionString, cancellationToken);
-                logger.Information("Updated data version to '{SuiteVersion}'", suiteVersionString);
+                LogDataVersionUpdated(logger, suiteVersionString);
                 return null;
             }
 
@@ -85,11 +85,11 @@ internal static class IFileSystemExtensions
             if (SuiteVersionUtils.IsPatchUpdate(suiteVersion, persistedVersion))
             {
                 await fileSystem.WriteDataVersionFile(options, suiteVersionString, cancellationToken);
-                logger.Warning("Downgraded data version to '{SuiteVersion}'", suiteVersionString);
+                LogDataVersionDowngraded(logger, suiteVersionString);
                 return null;
             }
 
-            logger.Warning("Software version should be updated from '{SuiteVersion}' to at least '{PersistedVersion}'", suiteVersionString, persistedVersionString);
+            LogDataVersionDowngradeDetected(logger, suiteVersionString, persistedVersionString);
 
             return new VersionDowngradeInformation(suiteVersionString, persistedVersionString);
         }

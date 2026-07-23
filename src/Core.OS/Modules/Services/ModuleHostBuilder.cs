@@ -30,6 +30,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
     private IConfigurationManager? _configurationManager;
     private IServiceCollection? _services;
     private ModuleOptionsStore? _moduleOptionsStore;
+    private ILoggerFactory? _loggerFactory;
 
     private class SortedMetadataComparer : IComparer<ModuleMetadataBundle>
     {
@@ -73,6 +74,12 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
     {
         _configurationManager = configurationManager;
         _services = services;
+        return this;
+    }
+
+    internal ModuleHostBuilder WithLoggerFactory(ILoggerFactory loggerFactory)
+    {
+        _loggerFactory = loggerFactory;
         return this;
     }
 
@@ -170,6 +177,9 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
             .WithModulesPath(_loaderOptions)
             .WithPackageSdkValidation()
             .WithOrphanedVersionCleanup();
+
+        if (_loggerFactory is not null)
+            synchronizer.WithLoggerFactory(_loggerFactory);
 
         // start synchronisation with configured options
         var result = await synchronizer.ProcessSynchronization(cancellationToken);

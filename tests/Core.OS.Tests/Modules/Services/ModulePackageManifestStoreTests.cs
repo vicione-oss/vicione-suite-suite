@@ -103,7 +103,7 @@ public class ModulePackageManifestStoreTests
             _ = SetupModulePackageManifestFile([existingPackage]);
 
             // Act
-            var manifest = await ModulePackageManifestStore.Load(_fileSystem, _options.Value, Substitute.For<Serilog.ILogger>(), CancellationToken.None);
+            var manifest = await ModulePackageManifestStore.Load(_fileSystem, _options.Value, Substitute.For<ILogger>(), CancellationToken.None);
 
             // Assert
             manifest.Packages.Should().HaveCount(1);
@@ -114,7 +114,7 @@ public class ModulePackageManifestStoreTests
         public async Task Should_return_empty_manifest_when_file_missing()
         {
             // Arrange
-            var logger = Substitute.For<Serilog.ILogger>();
+            var logger = Substitute.For<ILogger>();
 
             // Act
             var manifest = await ModulePackageManifestStore.Load(_fileSystem, _options.Value, logger, CancellationToken.None);

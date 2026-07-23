@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using System.Text.Json;
@@ -12,12 +12,13 @@ using NSubstitute;
 using Sdk.Messaging;
 using Sdk.Modules;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace Core.OS.Tests.Modules.Extensions;
 
 public class IFileSystemExtensionsTests
 {
-    private readonly Serilog.ILogger _logger = Substitute.For<Serilog.ILogger>();
+    private readonly ILogger _logger = Substitute.For<ILogger>();
     private readonly InstanceOptions _instanceOptions = new()
     {
         HomeDirectory = "AppData",

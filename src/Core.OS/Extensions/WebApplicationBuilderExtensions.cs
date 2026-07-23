@@ -13,15 +13,16 @@ namespace Core.OS.Extensions;
 
 internal static partial class WebApplicationBuilderExtensions
 {
-    public static async Task<IPreparationResult> PrepareSuite(this WebApplicationBuilder builder, IFileSystem fileSystem, InstanceOptions instanceOptions, Serilog.ILogger logger, CancellationToken cancellationToken = default)
+    public static async Task<IPreparationResult> PrepareSuite(this WebApplicationBuilder builder, IFileSystem fileSystem, InstanceOptions instanceOptions, ILoggerFactory loggerFactory, CancellationToken cancellationToken = default)
     {
-        var preparation = new SuitePreparationPipeline()
+        var logger = loggerFactory.CreateLogger(nameof(PrepareSuite));
+        var preparation = new SuitePreparationPipeline(logger)
             .UseInstanceId(fileSystem, instanceOptions)
-            .UseDeviceImageCleanup(fileSystem, instanceOptions, logger)
-            .UseResetFile(fileSystem, instanceOptions, logger)
-            .UseRestore(fileSystem, instanceOptions, logger)
-            .UseVersionDowngradeCheck(fileSystem, instanceOptions, logger)
-            .UseRecoveryMode(builder, fileSystem, instanceOptions, logger);
+            .UseDeviceImageCleanup(fileSystem, instanceOptions)
+            .UseResetFile(fileSystem, instanceOptions)
+            .UseRestore(fileSystem, instanceOptions)
+            .UseVersionDowngradeCheck(fileSystem, instanceOptions)
+            .UseRecoveryMode(builder, fileSystem, instanceOptions);
 
         return await preparation.RunAsync(cancellationToken);
     }

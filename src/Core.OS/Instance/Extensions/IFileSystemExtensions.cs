@@ -9,7 +9,7 @@ using Sdk.Messaging;
 
 namespace Core.OS.Instance.Extensions;
 
-internal static class IFileSystemExtensions
+internal static partial class IFileSystemExtensions
 {
     public const string InstanceIdFileName = "InstanceId.info";
 
@@ -40,11 +40,11 @@ internal static class IFileSystemExtensions
             fileSystem.File.WriteAllText(localInfoFilePath, id.ToString());
         }
 
-        internal async Task<RecoveryDecision> UseRecoveryMode(InstanceOptions instanceOptions, Serilog.ILogger logger, CancellationToken cancellationToken = default)
+        internal async Task<RecoveryDecision> UseRecoveryMode(InstanceOptions instanceOptions, ILogger logger, CancellationToken cancellationToken = default)
         {
             if (instanceOptions.Recovery is null || instanceOptions.Recovery.TimespanMinutes <= 0)
             {
-                logger.Information("Recovery mode is disabled by configuration");
+                LogRecoveryModeDisabled(logger);
                 return RecoveryDecision.Continue;
             }
 
@@ -59,7 +59,7 @@ internal static class IFileSystemExtensions
             var existingState = await fileSystem.ReadRecoveryState(recoveryFilePath, logger, cancellationToken);
             if (existingState is null)
             {
-                logger.Warning("Failed to restore recovery state");
+                LogRecoveryStateReadFailed(logger);
                 return RecoveryDecision.Continue;
             }
 
@@ -78,23 +78,20 @@ internal static class IFileSystemExtensions
             {
                 existingState.Startups++;
                 await fileSystem.WriteRecoveryState(recoveryFilePath, existingState, cancellationToken);
-                logger.Information("Startup counter increased to {Count}", existingState.Startups);
+                LogStartupCounterIncreased(logger, existingState.Startups);
                 return RecoveryDecision.Continue;
             }
 
             // Recovery was already applied but the suite still crashes — escalate to terminal state
             if (existingState.RecoveryApplied)
             {
-                logger.Fatal(
-                    "Recovery mode was already applied but the suite crashed {Startups} more times within {Minutes} minutes. Entering terminal failed state",
-                    existingState.Startups,
-                    instanceOptions.Recovery.TimespanMinutes);
+                LogRecoveryExhausted(logger, existingState.Startups, instanceOptions.Recovery.TimespanMinutes);
                 return RecoveryDecision.RecoveryExhausted;
             }
 
             // First time hitting threshold — apply recovery and mark it
             await fileSystem.WriteRecoveryStateReset(recoveryFilePath, recoveryApplied: true, cancellationToken: cancellationToken);
-            logger.Warning("Fallback to recovery mode after {Startups} startups", existingState.Startups);
+            LogFallingBackToRecovery(logger, existingState.Startups);
             return RecoveryDecision.ApplyRecovery;
         }
 
@@ -119,7 +116,7 @@ internal static class IFileSystemExtensions
         internal string GetLocalRecoveryFilePath(InstanceOptions instanceOptions)
             => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(instanceOptions), RecoveryFileName);
 
-        internal async Task<RecoveryState?> ReadRecoveryState(string recoveryFilePath, Serilog.ILogger logger, CancellationToken cancellationToken = default)
+        internal async Task<RecoveryState?> ReadRecoveryState(string recoveryFilePath, ILogger logger, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -138,20 +135,20 @@ internal static class IFileSystemExtensions
                 try
                 {
                     var content = await fileSystem.File.ReadAllTextAsync(recoveryFilePath, cancellationToken);
-                    logger.Error(e1, "Failed to read recovery state. Content: {FileContent}", content);
+                    LogReadRecoveryStateContentFailed(logger, e1, content);
                 }
                 catch (Exception e2)
                 {
-                    logger.Error(e2, "Failed to read recovery state. File '{FilePath}' is corrupt", recoveryFilePath);
+                    LogReadRecoveryStateFileFailed(logger, e2, recoveryFilePath);
                 }
                 try
                 {
-                    logger.Information("Attempting to delete recovery state file");
+                    LogDeletingRecoveryStateFile(logger);
                     fileSystem.File.Delete(recoveryFilePath);
                 }
                 catch (Exception e3)
                 {
-                    logger.Fatal(e3, "Failed to delete recovery state");
+                    LogDeleteRecoveryStateFailed(logger, e3);
                 }
             }
             return null;
@@ -225,7 +222,7 @@ internal static class IFileSystemExtensions
         /// </summary>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public void DeleteCacheDirectories(InstanceOptions options, Serilog.ILogger? logger = null)
+        public void DeleteCacheDirectories(InstanceOptions options, ILogger? logger = null)
             => fileSystem.DeleteChildDirectories(fileSystem.GetRootedCacheDirectory(options), "cache", logger);
 
         /// <summary>
@@ -233,10 +230,10 @@ internal static class IFileSystemExtensions
         /// </summary>
         /// <param name="options"></param>
         /// <param name="logger"></param>
-        public void DeleteHomeDirectories(InstanceOptions options, Serilog.ILogger? logger = null)
+        public void DeleteHomeDirectories(InstanceOptions options, ILogger? logger = null)
             => fileSystem.DeleteChildDirectories(fileSystem.GetRootedHomeDirectory(options), "home", logger);
 
-        private void DeleteChildDirectories(string parentPath, string source, Serilog.ILogger? logger)
+        private void DeleteChildDirectories(string parentPath, string source, ILogger? logger)
         {
             if (!fileSystem.Directory.Exists(parentPath))
                 return;
@@ -245,7 +242,7 @@ internal static class IFileSystemExtensions
             fileSystem.TryDeleteDirectories(directories, source, logger);
         }
 
-        public void ClearBackupFiles(InstanceOptions options, Serilog.ILogger? logger = null)
+        public void ClearBackupFiles(InstanceOptions options, ILogger? logger = null)
         {
             var backupDirectory = fileSystem.GetRootedBackupDirectory(options);
             if (!fileSystem.Directory.Exists(backupDirectory))

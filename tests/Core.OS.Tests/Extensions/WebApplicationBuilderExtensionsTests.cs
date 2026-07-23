@@ -14,18 +14,21 @@ using Sdk.Instance;
 using Xunit;
 using Core.OS.Hosting.Extensions;
 using Core.OS.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Core.OS.Tests.Extensions;
 
 public class WebApplicationBuilderExtensionsTests
 {
     private readonly MockFileSystem _fileSystem = new();
-    private readonly Serilog.ILogger _logger = Substitute.For<Serilog.ILogger>();
+    private readonly ILoggerFactory _loggerFactory = Substitute.For<ILoggerFactory>();
     private readonly string _backupFileName = "2025-05-21_10-08-23.zip";
     private readonly InstanceOptions _instanceOptions;
 
     public WebApplicationBuilderExtensionsTests()
     {
+        _loggerFactory.CreateLogger(Arg.Any<string>()).Returns(Substitute.For<ILogger>());
+
         _instanceOptions = new InstanceOptions
         {
             HomeDirectory = _fileSystem.Path.GetFullPath("AppData"),
@@ -48,7 +51,7 @@ public class WebApplicationBuilderExtensionsTests
             var builder = WebApplication.CreateBuilder();
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.File.Exists(_fileSystem.GetLocalInstanceIdFilePath(_instanceOptions)).Should().BeTrue();
@@ -70,7 +73,7 @@ public class WebApplicationBuilderExtensionsTests
             await _fileSystem.WriteDataVersionFile(_instanceOptions, higherVersion, TestContext.Current.CancellationToken);
 
             // Act
-            var result = await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            var result = await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeOfType<VersionDowngradePreparationResult>();
@@ -91,7 +94,7 @@ public class WebApplicationBuilderExtensionsTests
             _fileSystem.AddEmptyFile(deviceImageFile);
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.File.Exists(deviceImageFile).Should().BeFalse();
@@ -113,7 +116,7 @@ public class WebApplicationBuilderExtensionsTests
             _fileSystem.WriteResetFile(_instanceOptions);
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();
@@ -139,7 +142,7 @@ public class WebApplicationBuilderExtensionsTests
             _fileSystem.WriteResetFile(_instanceOptions);
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();
@@ -164,7 +167,7 @@ public class WebApplicationBuilderExtensionsTests
             SetupTestFiles(_fileSystem, backupDirectory);
 
             // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _logger, TestContext.Current.CancellationToken);
+            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().NotBeEmpty();

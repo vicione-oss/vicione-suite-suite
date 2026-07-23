@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
 using AwesomeAssertions;
 using Core.OS.Instance;
@@ -6,6 +6,7 @@ using Core.OS.Instance.Extensions;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
 using Core.Shared.Modules.Contracts;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Messaging;
 using Sdk.Modules;
@@ -15,7 +16,7 @@ namespace Core.OS.Tests.Modules.Services;
 
 public class ModulePackageOperationProcessorTests
 {
-    private readonly Serilog.ILogger _seriLogger = Substitute.For<Serilog.ILogger>();
+    private readonly ILoggerFactory _loggerFactory = Substitute.For<ILoggerFactory>();
     private readonly MockFileSystem _fileSystem = new();
     private readonly InstanceOptions _instanceOptions = new()
     {
@@ -40,7 +41,7 @@ public class ModulePackageOperationProcessorTests
             SetupModulePackageManifestFile([existingPackage]);
 
             // Act
-            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             manifest.Packages.Should().HaveCount(2);
@@ -60,7 +61,7 @@ public class ModulePackageOperationProcessorTests
             SetupModulePackageManifestFile([existingPackage]);
 
             // Act
-            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             manifest.Packages.Should().HaveCount(2);
@@ -80,7 +81,7 @@ public class ModulePackageOperationProcessorTests
 
 
             // Act
-            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             manifest.Packages.Should().HaveCount(1);
@@ -97,7 +98,7 @@ public class ModulePackageOperationProcessorTests
             _ = SetupUpdateQueueFile([]);
 
             // Act
-            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             manifest.Packages.Should().HaveCount(1);
@@ -117,7 +118,7 @@ public class ModulePackageOperationProcessorTests
             ]);
 
             // Act
-            _ = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            _ = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             var updateFile = _fileSystem.GetModulePackageOperationsFilePath(_instanceOptions);
@@ -137,7 +138,7 @@ public class ModulePackageOperationProcessorTests
             ]);
 
             // Act
-            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             manifest.Packages.Should().HaveCount(1);
@@ -165,7 +166,7 @@ public class ModulePackageOperationProcessorTests
             _fileSystem.AddDirectory(cacheDir);
 
             // Act
-            _ = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            _ = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             _fileSystem.Directory.Exists(homeDir).Should().BeFalse();
@@ -193,7 +194,7 @@ public class ModulePackageOperationProcessorTests
             _fileSystem.AddDirectory(cacheDir);
 
             // Act
-            _ = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            _ = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             _fileSystem.Directory.Exists(homeDir).Should().BeTrue();
@@ -221,7 +222,7 @@ public class ModulePackageOperationProcessorTests
             _fileSystem.AddDirectory(cacheDir);
 
             // Act
-            _ = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _seriLogger, CancellationToken.None);
+            _ = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(_fileSystem, _instanceOptions, _loggerFactory, CancellationToken.None);
 
             // Assert
             _fileSystem.Directory.Exists(homeDir).Should().BeTrue();

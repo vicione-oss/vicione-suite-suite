@@ -5,14 +5,14 @@ using Core.OS.Modules.Extensions;
 using Core.Shared.Modules.Contracts;
 using Microsoft.Extensions.Options;
 using Sdk.Modules;
-using Serilog;
 
 namespace Core.OS.Modules.Services;
 
-internal class ModulePackageOperationProcessor
+internal partial class ModulePackageOperationProcessor
 {
-    public static async Task<ModulePackageManifest> ApplyEnqueuedOperations(IFileSystem fileSystem, InstanceOptions options, Serilog.ILogger logger, CancellationToken cancellationToken)
+    public static async Task<ModulePackageManifest> ApplyEnqueuedOperations(IFileSystem fileSystem, InstanceOptions options, ILoggerFactory loggerFactory, CancellationToken cancellationToken)
     {
+        var logger = loggerFactory.CreateLogger<ModulePackageOperationProcessor>();
         var manifest = await ModulePackageManifestStore.Load(fileSystem, options, logger, cancellationToken);
 
         var operations = await ModulePackageOperationStore.GetEnqueuedOperations(fileSystem, options, cancellationToken);
@@ -32,11 +32,11 @@ internal class ModulePackageOperationProcessor
             // First attempt: write sentinel before the destructive workspace cleanup so that a crash
             // here does not cause directories to be wiped a second time on the next startup.
             await fileSystem.File.WriteAllTextAsync(sentinelPath, string.Empty, cancellationToken);
-            ProcessOperationOptions(operations, fileSystem, options, logger);
+            ProcessOperationOptions(operations, fileSystem, options, loggerFactory, logger);
         }
         else
         {
-            logger.Information("Skipping workspace cleanup for {Count} pending operation(s) — sentinel present, cleanup was already applied in a previous run", operations.Count);
+            LogSkippingWorkspaceCleanup(logger, operations.Count);
         }
 
         manifest.Packages = DeterminePackageChanges(manifest, operations);
@@ -48,16 +48,13 @@ internal class ModulePackageOperationProcessor
         return manifest;
     }
 
-    private static void ProcessOperationOptions(IEnumerable<ModulePackageOperation> operations, IFileSystem fileSystem, InstanceOptions options, Serilog.ILogger logger)
+    private static void ProcessOperationOptions(IEnumerable<ModulePackageOperation> operations, IFileSystem fileSystem, InstanceOptions options, ILoggerFactory loggerFactory, ILogger logger)
     {
         var operationsWithOptions = operations.Where(o => o.Options is not null).ToList();
         if (operationsWithOptions.Count == 0)
             return;
 
-        using var loggerFactory = new LoggerFactory();
-        loggerFactory.AddSerilog(logger);
-        var workspaceLogger = loggerFactory.CreateLogger<WorkspaceManagement>();
-        var workspaceManagement = new WorkspaceManagement(fileSystem, Options.Create(options), workspaceLogger);
+        var workspaceManagement = new WorkspaceManagement(fileSystem, Options.Create(options), loggerFactory.CreateLogger<WorkspaceManagement>());
 
         foreach (var operation in operationsWithOptions)
         {
@@ -67,7 +64,7 @@ internal class ModulePackageOperationProcessor
             var resetHome = !operation.Options.AutonomousMigration && !operation.Options.IsPatchUpdate;
             var resetCache = !operation.Options.IsPatchUpdate;
 
-            logger.Information("Apply package update operation for module {PackageName}, resetHome: {ResetHome}, resetCache: {ResetCache}", operation.Package.Name, resetHome, resetCache);
+            LogApplyPackageUpdateOperation(logger, operation.Package.Name, resetHome, resetCache);
 
             if (resetHome)
             {
@@ -86,7 +83,7 @@ internal class ModulePackageOperationProcessor
     private static List<ModuleDependencyPackage> DeterminePackageChanges(ModulePackageManifest packagesManifest, IEnumerable<ModulePackageOperation> operations)
     {
         var operationsArray = operations.ToArray();
-        
+
         // Get the packages to be removed
         var packagesToRemove = operationsArray
             .Where(k => k.OperationKind == ModulePackageOperationKind.Uninstall)
@@ -104,4 +101,10 @@ internal class ModulePackageOperationProcessor
 
         return updatedPackages;
     }
+
+    [LoggerMessage(LogLevel.Information, "Skipping workspace cleanup for {Count} pending operation(s) — sentinel present, cleanup was already applied in a previous run")]
+    private static partial void LogSkippingWorkspaceCleanup(ILogger logger, int count);
+
+    [LoggerMessage(LogLevel.Information, "Apply package update operation for module {PackageName}, resetHome: {ResetHome}, resetCache: {ResetCache}")]
+    private static partial void LogApplyPackageUpdateOperation(ILogger logger, string packageName, bool resetHome, bool resetCache);
 }
