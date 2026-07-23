@@ -7,6 +7,7 @@ using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Modules;
 using Core.OS.Modules.Extensions;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Messaging;
 using Sdk.Modules;
@@ -16,7 +17,7 @@ namespace Core.OS.Tests.Instance.Extensions;
 
 public class IFileSystemExtensionsTests
 {
-    private readonly Serilog.ILogger _logger = Substitute.For<Serilog.ILogger>();
+    private readonly ILogger _logger = Substitute.For<ILogger>();
 
     private readonly InstanceOptions _instanceOptions = new()
     {

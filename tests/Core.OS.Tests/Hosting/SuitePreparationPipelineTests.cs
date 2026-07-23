@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Core.OS.Hosting;
 using Core.OS.Hosting.Contracts;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Core.OS.Tests.Hosting;
@@ -8,6 +9,7 @@ namespace Core.OS.Tests.Hosting;
 public class SuitePreparationPipelineTests
 {
     private record FailureResult(string Reason) : IPreparationAbortResult;
+    private readonly ILogger _logger = NSubstitute.Substitute.For<ILogger>();
 
     public sealed class RunAsync : SuitePreparationPipelineTests
     {
@@ -15,7 +17,7 @@ public class SuitePreparationPipelineTests
         public async Task Should_return_success_when_no_steps_are_registered()
         {
             // Arrange + Act
-            var result = await new SuitePreparationPipeline()
+            var result = await new SuitePreparationPipeline(_logger)
                 .RunAsync(TestContext.Current.CancellationToken);
 
             // Assert
@@ -26,10 +28,10 @@ public class SuitePreparationPipelineTests
         public async Task Should_return_success_when_all_steps_succeed()
         {
             // Arrange + Act
-            var result = await new SuitePreparationPipeline()
+            var result = await new SuitePreparationPipeline(_logger)
                 .Use(() => { })
-                .Use(_ => Task.CompletedTask)
-                .Use(_ => Task.FromResult(PreparationResult.Success as IPreparationResult))
+                .Use((_, _) => Task.CompletedTask)
+                .Use((_, _) => Task.FromResult(PreparationResult.Success as IPreparationResult))
                 .RunAsync(TestContext.Current.CancellationToken);
 
             // Assert
@@ -44,10 +46,14 @@ public class SuitePreparationPipelineTests
             var step3Executed = false;
 
             // Act
-            var result = await new SuitePreparationPipeline()
+            var result = await new SuitePreparationPipeline(_logger)
                 .Use(() => { })
-                .Use(_ => Task.FromResult(failure as IPreparationResult))
-                .Use(_ => { step3Executed = true; return Task.FromResult(PreparationResult.Success as IPreparationResult); })
+                .Use((_, _) => Task.FromResult(failure as IPreparationResult))
+                .Use((_, _) =>
+                {
+                    step3Executed = true;
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
                 .RunAsync(TestContext.Current.CancellationToken);
 
             // Assert
@@ -62,11 +68,27 @@ public class SuitePreparationPipelineTests
             var executedSteps = new List<int>();
 
             // Act
-            var result = await new SuitePreparationPipeline()
-                .Use(_ => { executedSteps.Add(1); return Task.FromResult(PreparationResult.Success as IPreparationResult); })
-                .Use(_ => { executedSteps.Add(2); return Task.FromResult(new FailureResult("failed") as IPreparationResult); })
-                .Use(_ => { executedSteps.Add(3); return Task.FromResult(PreparationResult.Success as IPreparationResult); })
-                .Use(_ => { executedSteps.Add(4); return Task.FromResult(PreparationResult.Success as IPreparationResult); })
+            var result = await new SuitePreparationPipeline(_logger)
+                .Use((_, _) =>
+                {
+                    executedSteps.Add(1);
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
+                .Use((_, _) =>
+                {
+                    executedSteps.Add(2);
+                    return Task.FromResult(new FailureResult("failed") as IPreparationResult);
+                })
+                .Use((_, _) =>
+                {
+                    executedSteps.Add(3);
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
+                .Use((_, _) =>
+                {
+                    executedSteps.Add(4);
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
                 .RunAsync(TestContext.Current.CancellationToken);
 
             // Assert
@@ -81,10 +103,22 @@ public class SuitePreparationPipelineTests
             var executedSteps = new List<int>();
 
             // Act
-            var result = await new SuitePreparationPipeline()
-                .Use(_ => { executedSteps.Add(1); return Task.FromResult(PreparationResult.Success as IPreparationResult); })
-                .Use(_ => { executedSteps.Add(2); return Task.FromResult(PreparationResult.Success as IPreparationResult); })
-                .Use(_ => { executedSteps.Add(3); return Task.FromResult(PreparationResult.Success as IPreparationResult); })
+            var result = await new SuitePreparationPipeline(_logger)
+                .Use((_, _) =>
+                {
+                    executedSteps.Add(1);
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
+                .Use((_, _) =>
+                {
+                    executedSteps.Add(2);
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
+                .Use((_, _) =>
+                {
+                    executedSteps.Add(3);
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
                 .RunAsync(TestContext.Current.CancellationToken);
 
             // Assert
@@ -100,9 +134,17 @@ public class SuitePreparationPipelineTests
             var receivedTokens = new List<CancellationToken>();
 
             // Act
-            await new SuitePreparationPipeline()
-                .Use(ct => { receivedTokens.Add(ct); return Task.FromResult(PreparationResult.Success as IPreparationResult); })
-                .Use(ct => { receivedTokens.Add(ct); return Task.FromResult(PreparationResult.Success as IPreparationResult); })
+            await new SuitePreparationPipeline(_logger)
+                .Use((_, ct) =>
+                {
+                    receivedTokens.Add(ct);
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
+                .Use((_, ct) =>
+                {
+                    receivedTokens.Add(ct);
+                    return Task.FromResult(PreparationResult.Success as IPreparationResult);
+                })
                 .RunAsync(cts.Token);
 
             // Assert
@@ -116,8 +158,8 @@ public class SuitePreparationPipelineTests
             const string expectedReason = "something went wrong";
 
             // Act
-            var result = await new SuitePreparationPipeline()
-                .Use(_ => Task.FromResult(new FailureResult(expectedReason) as IPreparationResult))
+            var result = await new SuitePreparationPipeline(_logger)
+                .Use((_, _) => Task.FromResult(new FailureResult(expectedReason) as IPreparationResult))
                 .RunAsync(TestContext.Current.CancellationToken);
 
             // Assert

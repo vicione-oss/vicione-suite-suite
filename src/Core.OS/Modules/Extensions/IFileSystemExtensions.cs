@@ -22,12 +22,12 @@ internal static class IFileSystemExtensions
     /// <param name="fileSystem"></param>
     extension(IFileSystem fileSystem)
     {
-        public async Task EnsureModuleVersionsFile(InstanceOptions instanceOptions, string? manifestSeedingPath, Serilog.ILogger logger, CancellationToken cancellationToken = default)
+        public async Task EnsureModuleVersionsFile(InstanceOptions instanceOptions, string? manifestSeedingPath, ILogger logger, CancellationToken cancellationToken = default)
         {
             var modulesFilePath = GetModuleVersionsFilePath(fileSystem, instanceOptions);
             if (fileSystem.File.Exists(modulesFilePath))
             {
-                logger.Information("Use existing module version file from '{FilePath}'", modulesFilePath);
+                logger.LogInformation("Use existing module version file from '{FilePath}'", modulesFilePath);
                 return;
             }
 
@@ -37,24 +37,24 @@ internal static class IFileSystemExtensions
                 {
                     await CopyModuleManifestSeedTo(fileSystem, manifestSeedingPath, modulesFilePath, cancellationToken);
 
-                    logger.Information("Use module version seeding file '{FilePath}'", manifestSeedingPath);
+                    logger.LogInformation("Use module version seeding file '{FilePath}'", manifestSeedingPath);
                     return;
                 }
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Failed on module versions from seeding file '{FilePath}'", modulesFilePath);
+                logger.LogError(ex, "Failed on module versions from seeding file '{FilePath}'", modulesFilePath);
             }
 
             try
             {
                 await CopyInitialModuleManifestTo(fileSystem, modulesFilePath, cancellationToken);
 
-                logger.Information("Use empty initial module versions file");
+                logger.LogInformation("Use empty initial module versions file");
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Failed to create initial module versions file '{FilePath}'", modulesFilePath);
+                logger.LogError(ex, "Failed to create initial module versions file '{FilePath}'", modulesFilePath);
             }
         }
 

@@ -3,7 +3,6 @@ using Core.OS.Instance;
 using Core.OS.Instance.Services;
 using Core.OS.Modules.Services;
 using Microsoft.Extensions.Options;
-using Serilog;
 
 namespace Core.OS.Modules.Extensions;
 
@@ -12,7 +11,7 @@ public static class WebApplicationBuilderExtensions
     /// <summary>
     /// Create and init (create suite context, validate options, load backend assemblies) <see cref="IModuleHost"/> using <see cref="ModuleHostBuilder"/>
     /// </summary>    
-    public static async Task<IModuleHost> AddModuleHost(this WebApplicationBuilder builder, IFileSystem fileSystem, InstanceOptions instanceOptions, CancellationToken token = default)
+    public static async Task<IModuleHost> AddModuleHost(this WebApplicationBuilder builder, IFileSystem fileSystem, InstanceOptions instanceOptions, ILoggerFactory loggerFactory, CancellationToken token = default)
     {
         AppDomain.CurrentDomain.UnhandledException -= LogUnhandledExceptionEvent;
         AppDomain.CurrentDomain.UnhandledException += LogUnhandledExceptionEvent;
@@ -20,12 +19,14 @@ public static class WebApplicationBuilderExtensions
         var version = fileSystem.EvaluateLocalVersionString(out var branchName);
         var branchInfo = branchName is null ? string.Empty : $" branch: '{branchName}'";
 
-        Log.Information("Configuring '{InstanceType}' application version '{Version}'{BranchInfo}", instanceOptions.Type, version, branchInfo);
+        var logger = loggerFactory.CreateLogger(nameof(AddModuleHost));
+
+        logger.LogInformation("Configuring '{InstanceType}' application version '{Version}'{BranchInfo}", instanceOptions.Type, version, branchInfo);
 
         builder.Services.AddModuleServices();
 
         // now apply enqueued package operations to the manifest and store it if there were any changes.
-        var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(fileSystem, instanceOptions, Log.Logger, token);
+        var manifest = await ModulePackageOperationProcessor.ApplyEnqueuedOperations(fileSystem, instanceOptions, loggerFactory, token);
 
         // migrate repositories from configuration to file if needed using a temporary instance of the store.
         // we will create the real one with options support in AddModuleArtifactQueryApi extension
@@ -49,11 +50,12 @@ public static class WebApplicationBuilderExtensions
         var hostBuilder = new ModuleHostBuilder(fileSystem, builder.Configuration, moduleOptions)
             .WithSynchronization(manifest, repositoryOptionsProvider)
             .WithSuiteDependencyContext()
-            .WithOptionsSupport(builder.Configuration, builder.Services);
+            .WithOptionsSupport(builder.Configuration, builder.Services)
+            .WithLoggerFactory(loggerFactory);
 
         var moduleHost = await hostBuilder.Build(builder.Services.AddControllersWithViews, token);
 
-        Log.Debug("Module host created successfully");
+        logger.LogDebug("Module host created successfully");
 
         builder.Services.AddSingleton(moduleHost);
 
@@ -61,5 +63,5 @@ public static class WebApplicationBuilderExtensions
     }
 
     private static void LogUnhandledExceptionEvent(object sender, UnhandledExceptionEventArgs e)
-        => Log.Error("Unhandled error! {Error}", e.ExceptionObject);
+        => Serilog.Log.Error("Unhandled error! {Error}", e.ExceptionObject);
 }
