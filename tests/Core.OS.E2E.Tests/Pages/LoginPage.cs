@@ -21,6 +21,10 @@ public sealed partial class LoginPage(IPage page)
     private ILocator InvalidField =>
         page.Locator("input[name='Input.Username'].invalid, input[name='Input.Password'].invalid");
 
+    // Passkey sign-in button. AccountButton renders name="__passkeySubmit"; it is only present when
+    // the 'Passkeys' feature is enabled, and disabled when the host is not DNS-capable.
+    private ILocator PasskeySignInButton => page.Locator("button[name='__passkeySubmit']");
+
     [GeneratedRegex("/account/login")]
     private static partial Regex LoginUrl();
 
@@ -45,4 +49,14 @@ public sealed partial class LoginPage(IPage page)
 
     /// <summary>Asserts the user is authenticated (navigated away from the login page).</summary>
     public Task ExpectAuthenticated() => Expect(page).Not.ToHaveURLAsync(LoginUrl());
+
+    /// <summary>
+    /// True when passkey sign-in is offered and actionable — i.e. the 'Passkeys' feature is on and
+    /// the host is DNS-capable (the button is rendered but disabled on a non-DNS host).
+    /// </summary>
+    public async Task<bool> IsPasskeySignInAvailable()
+        => await PasskeySignInButton.IsVisibleAsync() && await PasskeySignInButton.IsEnabledAsync();
+
+    /// <summary>Trigger passkey login; the virtual authenticator answers navigator.credentials.get().</summary>
+    public Task LoginViaPasskey() => PasskeySignInButton.ClickAsync();
 }

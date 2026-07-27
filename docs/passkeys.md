@@ -66,7 +66,7 @@ Only **creating** a passkey needs the browser (`navigator.credentials.create`), 
 Some client-side passkey helper code is **intentionally duplicated** between the two scripts described above:
 
 - `src/Blazor.Server.Backend/wwwroot/js/passkey-submit.js` — the template-aligned `<passkey-submit>` custom element loaded on the **login page**.
-- `src/Blazor.Shared/Profile/ControlPanels/Passkeys/AddPasskeyControlPanel.razor.js` — the profile "Add passkey" control panel module, which runs **inside the Blazor app**.
+- `src/Blazor.Shared/Profile/ControlPanels/Passkeys/Components/AddPasskeyControlPanel.razor.js` — the profile "Add passkey" control panel module, which runs **inside the Blazor app**.
 
 They run in separate JS contexts and cannot share a module without changing how the template-aligned login script is loaded. When fixing the duplicated helper code, apply the change to both scripts.
 

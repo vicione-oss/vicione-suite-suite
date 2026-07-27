@@ -45,7 +45,13 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
     private readonly ConcurrentQueue<ItemTransition> _itemTransitions = [];
     private bool _shouldRender;
 
+    private bool _disposed;
+
     private readonly SemaphoreSlim _settingsModuleStateSemaphore = new(1);
+
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+    private CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
     [Inject] private IControlPanelPageRegistry ControlPanelPageRegistry { get; set; } = default!;
 
@@ -66,9 +72,15 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
 
     public void Dispose()
     {
+        if (Interlocked.CompareExchange(ref _disposed, true, false))
+            return;
+
         SettingsModuleState.Changed -= SettingsModuleStateChanged;
         NavigateBackRequest.NavigateBackRequested -= NavigateBackRequested;
         ControlPanelRequest.ControlPanelRequested -= ControlPanelRequested;
+
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
 
         _settingsModuleStateSemaphore.Dispose();
     }
@@ -87,25 +99,31 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
 
     protected override async void OnAfterRender(bool firstRender)
     {
-        if (_itemTransitions.TryDequeue(out var itemTranstion))
-        {
-            await Task.Delay(itemTranstion.Animation.DurationMs); // give browser some time to animate
+        if (_disposed)
+            return;
 
-            await _settingsModuleStateSemaphore.WaitAsync().ConfigureAwait(false);
+        if (!_itemTransitions.TryDequeue(out var itemTransition))
+            return;
+
+        try
+        {
+            await Task.Delay(itemTransition.Animation.DurationMs, CancellationToken); // give browser some time to animate
+
+            await _settingsModuleStateSemaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
             try
             {
                 SettingsModuleState.BeginUpdate();
                 try
                 {
-                    SettingsModuleState.ActiveControlPanelRegistryItem = itemTranstion.To;
+                    SettingsModuleState.ActiveControlPanelRegistryItem = itemTransition.To;
 
-                    if (itemTranstion.Direction == ItemTransitionDirection.Next)
+                    if (itemTransition.Direction == ItemTransitionDirection.Next)
                     {
                         SettingsModuleState.ShowNavigateBackButton = true;
                     }
-                    else if (itemTranstion.Direction == ItemTransitionDirection.Previous)
+                    else if (itemTransition.Direction == ItemTransitionDirection.Previous)
                     {
-                        ResetActiveControlPanelPage(itemTranstion.From);
+                        ResetActiveControlPanelPage(itemTransition.From);
 
                         SettingsModuleState.PopRequestedControlPanelRegistryItem();
                         SettingsModuleState.ShowNavigateBackButton = SettingsModuleState.RequestedControlPanelRegistryItems.Count > 1;
@@ -121,6 +139,14 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
                 _settingsModuleStateSemaphore.Release();
             }
         }
+        catch (OperationCanceledException)
+        {
+            // The carousel was disposed (e.g. settings closed) mid-animation; nothing left to commit.
+        }
+        catch (ObjectDisposedException)
+        {
+            // CancellationTokenSource behind CancellationToken already disposed, nothing we can do, return gracefully
+        }
     }
 
     private static void ResetActiveControlPanelPage(IControlPanelRegistryItem? controlPanelRegistryItem)
@@ -131,85 +157,101 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
 
     private async Task ControlPanelRequested(ControlPanelRequestedEventArgs args)
     {
-        if (args.Cancel)
+        if (_disposed || args.Cancel)
             return;
 
-        await _settingsModuleStateSemaphore.WaitAsync().ConfigureAwait(false);
         try
         {
-            if (!SettingsModuleState.TryPushRequestedControlPanelRegistryItem(args.RegistryItem))
-                return;
-
-            UpdateItems(SettingsModuleState.RequestedControlPanelRegistryItems);
-
-            args.ConfigureState?.Invoke();
-
-            var activeControlPanel = _items.FirstOrDefault(i => i.Active)?.ControlPanelRegistryItem;
-            var requestedControlPanel = args.RegistryItem;
-
-            var itemTransition = new ItemTransition
+            await _settingsModuleStateSemaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
+            try
             {
-                From = activeControlPanel,
-                To = requestedControlPanel,
-                Direction = ItemTransitionDirection.Next,
-                Animation = new ItemAnimation { RegistryItem = activeControlPanel, Kind = AnimationKind.SlideLeft }
-            };
+                if (!SettingsModuleState.TryPushRequestedControlPanelRegistryItem(args.RegistryItem))
+                    return;
 
-            _itemTransitions.Enqueue(itemTransition);
+                UpdateItems(SettingsModuleState.RequestedControlPanelRegistryItems);
+
+                args.ConfigureState?.Invoke();
+
+                var activeControlPanel = _items.FirstOrDefault(i => i.Active)?.ControlPanelRegistryItem;
+                var requestedControlPanel = args.RegistryItem;
+
+                var itemTransition = new ItemTransition
+                {
+                    From = activeControlPanel,
+                    To = requestedControlPanel,
+                    Direction = ItemTransitionDirection.Next,
+                    Animation = new ItemAnimation { RegistryItem = activeControlPanel, Kind = AnimationKind.SlideLeft }
+                };
+
+                _itemTransitions.Enqueue(itemTransition);
+            }
+            finally
+            {
+                _settingsModuleStateSemaphore.Release();
+            }
+
+            _shouldRender = true;
+
+            await InvokeAsync(StateHasChanged);
         }
-        finally
+        catch (OperationCanceledException)
         {
-            _settingsModuleStateSemaphore.Release();
+            // Disposed while awaiting; nothing to do.
         }
-
-        _shouldRender = true;
-
-        await InvokeAsync(StateHasChanged);
+        catch (ObjectDisposedException)
+        {
+            // CancellationTokenSource behind CancellationToken already disposed, nothing we can do, return gracefully
+        }
     }
 
     private async Task NavigateBackRequested(NavigateBackRequestedEventArgs args)
     {
-        if (args.Cancel)
+        if (_disposed || args.Cancel)
             return;
 
-        await _settingsModuleStateSemaphore.WaitAsync().ConfigureAwait(false);
         try
         {
-            var activeControlPanelRequestDescriptor = SettingsModuleState.RequestedControlPanelRegistryItems
-                .Select((controlPanelRegistryItem, index) => new { ControlPanelRegistryItem = controlPanelRegistryItem, Index = index })
-                .FirstOrDefault(i => i.ControlPanelRegistryItem == SettingsModuleState.ActiveControlPanelRegistryItem);
-
-            if (activeControlPanelRequestDescriptor == null || activeControlPanelRequestDescriptor.Index < 1)
-                return;
-
-            var controlPanelRequestedBeforeActiveControlPanel = SettingsModuleState.RequestedControlPanelRegistryItems
-                .Skip(activeControlPanelRequestDescriptor.Index - 1)
-                .FirstOrDefault();
-
-            if (controlPanelRequestedBeforeActiveControlPanel == null)
-                return;
-
-            var activeControlPanel = activeControlPanelRequestDescriptor.ControlPanelRegistryItem;
-            var requestedControlPanel = controlPanelRequestedBeforeActiveControlPanel;
-
-            var itemTransition = new ItemTransition
+            await _settingsModuleStateSemaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
+            try
             {
-                From = activeControlPanel,
-                To = requestedControlPanel,
-                Direction = ItemTransitionDirection.Previous,
-                Animation = new ItemAnimation { RegistryItem = requestedControlPanel, Kind = AnimationKind.SlideRight }
-            };
+                // The top of the requested-control-panel stack is the source of truth for what a navigate-back
+                // pops. We deliberately do not key off ActiveControlPanelRegistryItem: that is only committed by
+                // the forward transition's delayed OnAfterRender, so a navigate-back arriving before that commit
+                // (e.g. right after a save that completes near-instantly) would otherwise be silently dropped.
+                var requestedControlPanels = SettingsModuleState.RequestedControlPanelRegistryItems;
+                if (requestedControlPanels.Count < 2)
+                    return;
 
-            _itemTransitions.Enqueue(itemTransition);
+                var controlPanelToNavigateAwayFrom = requestedControlPanels[^1];
+                var controlPanelToNavigateBackTo = requestedControlPanels[^2];
+
+                var itemTransition = new ItemTransition
+                {
+                    From = controlPanelToNavigateAwayFrom,
+                    To = controlPanelToNavigateBackTo,
+                    Direction = ItemTransitionDirection.Previous,
+                    Animation = new ItemAnimation { RegistryItem = controlPanelToNavigateBackTo, Kind = AnimationKind.SlideRight }
+                };
+
+                _itemTransitions.Enqueue(itemTransition);
+            }
+            finally
+            {
+                _settingsModuleStateSemaphore.Release();
+            }
+
+            _shouldRender = true;
+
+            await InvokeAsync(StateHasChanged);
         }
-        finally
+        catch (OperationCanceledException)
         {
-            _settingsModuleStateSemaphore.Release();
+            // Disposed while awaiting; nothing to do.
         }
-
-        _shouldRender = true;
-
-        await InvokeAsync(StateHasChanged);
+        catch (ObjectDisposedException)
+        {
+            // CancellationTokenSource behind CancellationToken already disposed, nothing we can do, return gracefully
+        }
     }
 
     private void UpdateItems(IReadOnlyList<IControlPanelRegistryItem> requestedControlPanelRegistryItems)
@@ -243,9 +285,12 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
 
     private async void SettingsModuleStateChanged(PropertiesChangedEventArgs args)
     {
-        if (args.PropertyNames.Contains(nameof(SettingsModuleState.ActiveControlPanelRegistryItem)))
+        if (_disposed || !args.PropertyNames.Contains(nameof(SettingsModuleState.ActiveControlPanelRegistryItem)))
+            return;
+
+        try
         {
-            await _settingsModuleStateSemaphore.WaitAsync().ConfigureAwait(false);
+            await _settingsModuleStateSemaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
             try
             {
                 UpdateItems(SettingsModuleState.RequestedControlPanelRegistryItems);
@@ -258,6 +303,14 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IDisposable
             _shouldRender = true;
 
             await InvokeAsync(StateHasChanged);
+        }
+        catch (OperationCanceledException)
+        {
+            // Disposed while awaiting; nothing to do.
+        }
+        catch (ObjectDisposedException)
+        {
+            // CancellationTokenSource behind CancellationToken already disposed, nothing we can do, return gracefully
         }
     }
 }

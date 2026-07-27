@@ -1,6 +1,6 @@
 using AwesomeAssertions;
 using Core.Shared.Passkeys.Contracts;
-using Blazor.Shared.Profile.ControlPanels.Passkeys;
+using Blazor.Shared.Profile.ControlPanels.Passkeys.Services;
 using Blazor.Shared.Settings.Models;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components.Forms;
@@ -23,7 +23,7 @@ public sealed class AddPasskeyControlPanelSaveHandlerTest
         var sut = CreateSut();
 
         // Act
-        var result = await sut.Save(new AddPasskeysControlPanelState()
+        var result = await sut.Save(new AddPasskeyControlPanelState()
             {
                 Name = string.Empty,
             },
@@ -40,7 +40,7 @@ public sealed class AddPasskeyControlPanelSaveHandlerTest
         var sut = CreateSut();
 
         // Act
-        var result = await sut.Save(new AddPasskeysControlPanelState()
+        var result = await sut.Save(new AddPasskeyControlPanelState()
             {
                 ExistingUserPasskeys =
                 [
@@ -62,7 +62,7 @@ public sealed class AddPasskeyControlPanelSaveHandlerTest
         var sut = CreateSut();
 
         // Act
-        var result = await sut.Save(new AddPasskeysControlPanelState()
+        var result = await sut.Save(new AddPasskeyControlPanelState()
             {
                 Name = new string('a', PasskeyConstants.MaxPasskeyNameLength + 1),
             },
@@ -80,7 +80,7 @@ public sealed class AddPasskeyControlPanelSaveHandlerTest
         var sut = CreateSut(Options.Create(new AntiforgeryOptions()));
 
         // Act
-        var result = await sut.Save(new AddPasskeysControlPanelState()
+        var result = await sut.Save(new AddPasskeyControlPanelState()
             {
                 Name = "test",
             },

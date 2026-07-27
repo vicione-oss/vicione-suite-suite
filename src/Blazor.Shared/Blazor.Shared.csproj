@@ -485,30 +485,35 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>TagsControlPanelPageContent.resx</DependentUpon>
     </Compile>
-    <Compile Update="Profile\Localization\Passkey.Designer.cs">
+    <Compile Update="Profile\ControlPanels\Passkeys\Components\Localization\PasskeysControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Passkey.resx</DependentUpon>
+      <DependentUpon>PasskeysControlPanel.resx</DependentUpon>
     </Compile>
-    <Compile Update="Profile\Localization\CommonPhrases.Designer.cs">
+    <Compile Update="Profile\ControlPanels\Passkeys\Components\Localization\AddPasskeyControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>CommonPhrases.resx</DependentUpon>
+      <DependentUpon>AddPasskeyControlPanel.resx</DependentUpon>
     </Compile>
-    <Compile Update="Profile\Localization\AddPasskey.Designer.cs">
+    <Compile Update="Profile\ControlPanels\Passkeys\Components\Localization\EditPasskeyControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>AddPasskey.resx</DependentUpon>
+      <DependentUpon>EditPasskeyControlPanel.resx</DependentUpon>
     </Compile>
-    <Compile Update="Profile\Localization\EditPasskey.Designer.cs">
+    <Compile Update="Profile\ControlPanels\Passkeys\Services\Localization\PasskeysControlPanelSaveHandler.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>EditPasskey.resx</DependentUpon>
+      <DependentUpon>PasskeysControlPanelSaveHandler.resx</DependentUpon>
     </Compile>
-    <Compile Update="Profile\Localization\ValidationMessages.Designer.cs">
+    <Compile Update="Profile\ControlPanels\Passkeys\Services\Localization\AddPasskeyControlPanelSaveHandler.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>ValidationMessages.resx</DependentUpon>
+      <DependentUpon>AddPasskeyControlPanelSaveHandler.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Profile\ControlPanels\Passkeys\Services\Localization\EditPasskeyControlPanelSaveHandler.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>EditPasskeyControlPanelSaveHandler.resx</DependentUpon>
     </Compile>
     <Compile Update="Profile\Localization\ExternalIdProviders.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -858,25 +863,29 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TagsControlPanelPageContent.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Profile\Localization\Passkey.resx">
+    <EmbeddedResource Update="Profile\ControlPanels\Passkeys\Components\Localization\PasskeysControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Passkey.Designer.cs</LastGenOutput>
+      <LastGenOutput>PasskeysControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Profile\Localization\CommonPhrases.resx">
+    <EmbeddedResource Update="Profile\ControlPanels\Passkeys\Components\Localization\AddPasskeyControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CommonPhrases.Designer.cs</LastGenOutput>
+      <LastGenOutput>AddPasskeyControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Profile\Localization\AddPasskey.resx">
+    <EmbeddedResource Update="Profile\ControlPanels\Passkeys\Components\Localization\EditPasskeyControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>AddPasskey.Designer.cs</LastGenOutput>
+      <LastGenOutput>EditPasskeyControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Profile\Localization\EditPasskey.resx">
+    <EmbeddedResource Update="Profile\ControlPanels\Passkeys\Services\Localization\PasskeysControlPanelSaveHandler.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>EditPasskey.Designer.cs</LastGenOutput>
+      <LastGenOutput>PasskeysControlPanelSaveHandler.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Profile\Localization\ValidationMessages.resx">
+    <EmbeddedResource Update="Profile\ControlPanels\Passkeys\Services\Localization\AddPasskeyControlPanelSaveHandler.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ValidationMessages.Designer.cs</LastGenOutput>
+      <LastGenOutput>AddPasskeyControlPanelSaveHandler.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Profile\ControlPanels\Passkeys\Services\Localization\EditPasskeyControlPanelSaveHandler.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>EditPasskeyControlPanelSaveHandler.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Profile\Localization\ExternalIdProviders.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
