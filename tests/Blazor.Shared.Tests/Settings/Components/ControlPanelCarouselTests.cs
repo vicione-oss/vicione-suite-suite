@@ -68,6 +68,40 @@ public sealed class ControlPanelCarouselTests
         component.FindComponent<FirstLevelControlPanel>();
     }
 
+    [Fact]
+    public async Task Should_navigate_back_when_requested_before_forward_transition_committed_active_panel()
+    {
+        // Arrange - reproduce the state a near-instant save produces: two panels are on the requested stack
+        // but the forward transition has not yet committed the active panel (it is still uncommitted), so a
+        // navigate-back arrives before ActiveControlPanelRegistryItem has advanced to the top of the stack.
+        // The stack is populated directly (rather than via ControlPanelRequest) so no forward transitions are
+        // in flight and the single navigate-back transition drains deterministically.
+        await using var testContext = SetupTestContext();
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var settingsModuleState = testContext.Services.GetRequiredService<SettingsModuleState>();
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+
+        var firstLevel = controlPanelRegistry.First(i => i.ComponentType == typeof(FirstLevelControlPanel));
+        var secondLevel = controlPanelRegistry.First(i => i.ComponentType == typeof(SecondLevelControlPanel));
+
+        settingsModuleState.TryPushRequestedControlPanelRegistryItem(firstLevel);
+        settingsModuleState.TryPushRequestedControlPanelRegistryItem(secondLevel);
+
+        var navigateBackRequest = testContext.Services.GetRequiredService<INavigateBackRequest>();
+
+        // Act
+        await navigateBackRequest.Send();
+
+        // Assert - the navigate-back is honored (second level popped) rather than silently dropped. The timeout
+        // is generous because the pop is applied by the carousel's delayed (animation) OnAfterRender.
+        component.WaitForAssertion(
+            () => settingsModuleState.RequestedControlPanelRegistryItems.Should().ContainSingle()
+                .Which.Should().Be(firstLevel),
+            TimeSpan.FromSeconds(5));
+    }
+
     private static void SetActiveControlPanel<TControlPanel>(BunitContext ctx)
         where TControlPanel : ControlPanelBase<ControlPanelState>
     {

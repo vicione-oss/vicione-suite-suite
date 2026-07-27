@@ -10,7 +10,7 @@
 # See docs/e2e-testing.md.
 "E2E Smoke tests (standalone)":
   stage: test
-  image: mcr.microsoft.com/playwright:v1.60.0-noble
+  image: mcr.microsoft.com/playwright:v1.61.0-noble
   needs: []
   allow_failure: true
   # Step down from the default large runner (set in the root `default:`). A single standalone instance

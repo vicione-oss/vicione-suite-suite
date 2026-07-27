@@ -1,0 +1,68 @@
+@using Blazor.Shared.Services
+@using Blazor.Shared.Profile.ControlPanels.Passkeys.Services
+@using Core.Shared.Passkeys.Contracts
+@using Core.Shared.UserManagement.Contracts
+@using Microsoft.AspNetCore.Identity
+@using Sdk.Authorization
+@using Sdk.Client.ControlPanels.Attributes
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
+@inherits ControlPanelBase<PasskeysControlPanelState>
+
+@attribute [ControlPanelCategory<ProfileCategoryDescriptor>]
+@attribute [ControlPanelGroup<SecondaryControlPanelGroupDescriptor>]
+@attribute [ModuleAuthorize(SharedClientModule.ModuleId)]
+
+@inject UserManager<SuiteUser> UserManager
+
+<ControlPanelPage Title="@Localization.PasskeysControlPanel.PasskeyTermPlural">
+    <DescriptionBanner Title="@Localization.PasskeysControlPanel.SettingsTitle"
+                       IconCssClass="@MonochromeIconName.PassKeyLight.GetCssClasses(MonochromeIconSize.Medium).ToSpaceSeparated()">
+        @Localization.PasskeysControlPanel.PasskeysDescription
+    </DescriptionBanner>
+    @if (ShowUnavailableNotice)
+    {
+        <SettingsLayout>
+            <SettingsGroup Title="@CommonVocabulary.Common">
+                <SettingsField Label="@CommonVocabulary.Status">
+                    <span>@Localization.PasskeysControlPanel.FeatureNotAvailable</span>
+                </SettingsField>
+            </SettingsGroup>
+        </SettingsLayout>
+    }
+    else
+    {
+        <Grid Items="Passkeys">
+            <ActionButtons>
+                @if (IsAddPasskeyAllowed)
+                {
+                    <AddGridActionButton OnClick="@ShowAddPasskey"
+                                         Enabled="@IsPasskeyHostSupported"
+                                         Title="@AddPasskeyTitle"></AddGridActionButton>
+                }
+                <EditGridActionButton Enabled="@IsSinglePasskeySelected" OnClick="@ShowEditPasskey"></EditGridActionButton>
+                <DeleteGridActionButton OnClick="@MarkPasskeysForDeletion"></DeleteGridActionButton>
+            </ActionButtons>
+
+            <ChildContent>
+                <ItemSelectColumn KeySelector="item => item.Id"
+                                  Selection="@SelectedPasskeys"/>
+
+                <PropertyColumn Title="@CommonVocabulary.Name" Property="item => item.Name"/>
+
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@(async (PasskeyInfo item) => await EditPasskey(item))"/>
+            </ChildContent>
+
+            <Footer>
+                <SelectionFooter GridSelection="SelectedPasskeys"/>
+            </Footer>
+        </Grid>
+    }
+</ControlPanelPage>

@@ -34,6 +34,9 @@ public abstract class E2ETest(PlaywrightFixture fixture) : IAsyncLifetime
 
     private IBrowserContext _context = null!;
 
+    /// <summary>The browser context backing <see cref="Page"/> (its own cookies/storage).</summary>
+    protected IBrowserContext Context => _context;
+
     /// <summary>A fresh, isolated page for the current test.</summary>
     protected IPage Page { get; private set; } = null!;
 

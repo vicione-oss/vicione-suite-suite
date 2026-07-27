@@ -1,5 +1,5 @@
 using AwesomeAssertions;
-using Blazor.Shared.Profile.ControlPanels.Passkeys;
+using Blazor.Shared.Profile.ControlPanels.Passkeys.Services;
 using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Xunit;

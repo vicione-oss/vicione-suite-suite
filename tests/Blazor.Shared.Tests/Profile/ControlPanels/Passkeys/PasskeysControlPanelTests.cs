@@ -1,6 +1,7 @@
 using AwesomeAssertions;
 using Blazor.Shared.Profile.ControlPanels;
-using Blazor.Shared.Profile.ControlPanels.Passkeys;
+using Blazor.Shared.Profile.ControlPanels.Passkeys.Components;
+using Blazor.Shared.Profile.ControlPanels.Passkeys.Services;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
@@ -44,7 +45,7 @@ public sealed class PasskeysControlPanelTests
         var component = RenderControlPanel(ctx);
 
         // Assert
-        component.Markup.Should().NotContain(Blazor.Shared.Profile.Localization.Passkey.RequiresDnsHost);
+        component.Markup.Should().NotContain(Blazor.Shared.Profile.ControlPanels.Passkeys.Components.Localization.PasskeysControlPanel.RequiresDnsHost);
     }
 
     [Fact]
@@ -60,7 +61,7 @@ public sealed class PasskeysControlPanelTests
         var component = RenderControlPanel(ctx);
 
         // Assert
-        component.Markup.Should().Contain(Blazor.Shared.Profile.Localization.Passkey.RequiresDnsHost);
+        component.Markup.Should().Contain(Blazor.Shared.Profile.ControlPanels.Passkeys.Components.Localization.PasskeysControlPanel.RequiresDnsHost);
     }
 
     private static IRenderedComponent<PasskeysControlPanel> RenderControlPanel(BunitContext ctx)
@@ -68,7 +69,7 @@ public sealed class PasskeysControlPanelTests
         var registry = ctx.Services.GetRequiredService<IControlPanelRegistry<SharedClientModule>>();
         var state = new PasskeysControlPanelState();
         var registryItem = registry.Add<PasskeysControlPanel, PasskeysControlPanelState>(
-            new PasskeyControlPanelDescriptor(),
+            new PasskeysControlPanelDescriptor(),
             state,
             new ProfileCategoryDescriptor());
 
@@ -91,7 +92,7 @@ public sealed class PasskeysControlPanelTests
 
         ctx.Services
             .AddGridItemSelectColumn()
-            .AddGridItemSelection<string>(typeof(PasskeyControlPanelServiceKey));
+            .AddGridItemSelection<string>(typeof(PasskeysControlPanelServiceKey));
 
         _mediator.Request<GetPasskeys, GetPasskeysResponse>(Arg.Any<GetPasskeys>(), Arg.Any<CancellationToken>())
             .Returns(new GetPasskeysResponse([]));
