@@ -11,12 +11,12 @@ internal static class IServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddModuleServices()
+        public IServiceCollection AddModuleServices(IModuleHost moduleHost, IModuleOptionsStore optionStore)
         {
-            services.AddModuleArtifactQueryApi();
-            services.AddWorkspaceManagement();
-
             services
+                .AddWorkspaceManagement()
+                .AddSingleton(moduleHost)
+                .AddSingleton(optionStore)
                 .AddSingleton<IModuleArtifactCache, ModuleArtifactCache>()
                 .AddTransient<IModuleMetadataProvider, ModuleMetadataProvider>()
                 .AddSingleton<IModulePackageManifestStore, ModulePackageManifestStore>()
@@ -25,8 +25,9 @@ internal static class IServiceCollectionExtensions
             return services;
         }
 
-        private IServiceCollection AddModuleArtifactQueryApi()
+        public IServiceCollection AddModuleArtifactQueryApi(IArtifactRepositoryOptionsCache optionsCache)
         {
+            services.AddSingleton(optionsCache);
             services.AddArtifactRepository(s => s.GetRequiredService<IArtifactRepositoryOptionsCache>());
             services.AddTransient<IModuleArtifactRepository, ModuleArtifactRepository>();
             services.AddTransient<ISuiteArtifactRepository, SuiteArtifactRepository>();

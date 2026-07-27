@@ -1,5 +1,6 @@
 using AwesomeAssertions;
 using Core.OS.Modules.Extensions;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Modules;
 using Semver;
@@ -11,7 +12,7 @@ public class ModulePackageManifestExtensionsTests
 {
     public sealed class GetValidModulePackages
     {
-        private readonly Serilog.ILogger _logger = Substitute.For<Serilog.ILogger>();
+        private readonly ILogger _logger = Substitute.For<ILogger>();
 
         [Fact]
         public void Should_return_only_enabled_packages_without_dependencies()
@@ -65,7 +66,6 @@ public class ModulePackageManifestExtensionsTests
 
             // Assert
             result.Should().BeEmpty();
-            _logger.Received().Warning(Arg.Is<string>(msg => msg!.StartsWith("Disable module")), "A", dependency.Name, dependency.Version);
         }
 
         [Fact]

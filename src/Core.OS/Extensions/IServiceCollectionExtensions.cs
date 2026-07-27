@@ -34,6 +34,8 @@ using Core.Artifacts;
 using Microsoft.FeatureManagement;
 using Constants = Core.Shared.Constants;
 using Sdk.Backend.IO;
+using Core.OS.Modules.Extensions;
+using Core.OS.Hosting;
 
 namespace Core.OS.Extensions;
 
@@ -70,11 +72,25 @@ internal static class IServiceCollectionExtensions
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
 
-        public IServiceCollection AddServices(IFileSystem fileSystem,
-            ConfigurationManager config,
-            IModuleHost moduleHost)
+        public IServiceCollection AddSuiteServices(ConfigurationManager config, SuitePreparationContext context)
         {
-            services.AddCoreServices(fileSystem, config, moduleHost);
+            if (context.ModuleContext is null)
+                throw new InvalidOperationException("ModulePreparationContext is not set in SuitePreparationContext.");
+
+            if (context.ModuleContext.ModuleHost is null)
+                throw new InvalidOperationException("ModuleHost is not set in ModulePreparationContext.");
+
+            if (context.ModuleContext.ModuleOptionsStore is null)
+                throw new InvalidOperationException("ModuleOptionsStore is not set in ModulePreparationContext.");
+
+            if (context.ModuleContext.RepositoryOptionsCache is null)
+                throw new InvalidOperationException("RepositoryOptionsCache is not set in ModulePreparationContext.");
+
+            services.AddModuleArtifactQueryApi(context.ModuleContext.RepositoryOptionsCache);
+            services.AddModuleServices(context.ModuleContext.ModuleHost, context.ModuleContext.ModuleOptionsStore);
+            services.AddSingleton(context.FileSystem);
+
+            services.AddCoreServices(config, context.ModuleContext.ModuleHost);
             services.AddMailing();
             services.AddSystemMonitoring(config);
             services.AddJournalService();
@@ -83,7 +99,7 @@ internal static class IServiceCollectionExtensions
             return services;
         }
 
-        internal IServiceCollection AddCoreServices(IFileSystem fileSystem,
+        internal IServiceCollection AddCoreServices(
             ConfigurationManager config,
             IModuleHost moduleHost)
         {
@@ -91,7 +107,6 @@ internal static class IServiceCollectionExtensions
             var messageBusOptions = config.GetMessageBusOptions();
 
             services
-                .AddSingleton(fileSystem)
                 .AddTransient<IAtomicFileWriter, AtomicFileWriter>()
                 .AddSingleton<IModuleDbContextRegistrar>(new ModuleDbContextRegistrar())
                 .AddCoreDbContexts()
@@ -110,12 +125,11 @@ internal static class IServiceCollectionExtensions
             // MessageBus
             services.AddMassTransitMessageBus(config,
                 moduleHost.ConfigureBusRegistrationConfigurator,
-                moduleHost.GetModuleAssemblies()
+                [.. moduleHost.GetModuleAssemblies()
                     .Union(
                     [
                         Assembly.GetExecutingAssembly()
-                    ])
-                    .ToArray());
+                    ])]);
 
             // The following must come after the MessageBus is ready
             services.AddHostedService<ApplicationWorker>();

@@ -9,7 +9,7 @@ using Sdk.Messaging;
 
 namespace Core.OS.Instance.Services;
 
-public class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<InstanceOptions> instanceOptions) : IArtifactRepositoryStore, IDisposable
+internal partial class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<InstanceOptions> instanceOptions, ILogger logger) : IArtifactRepositoryStore, IDisposable
 {
     private const string RepositoriesFileName = "repo-sources.json";
     private const string MigrationFallbackTokenEndpoint = "https://system.update.ifm/artifactory/vicione-token/token.json";
@@ -189,7 +189,12 @@ public class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<InstanceOp
         if (!fileSystem.File.Exists(updateFile))
             return Task.CompletedTask;
 
+        LogClearArtifactSources(logger);
+
         fileSystem.File.Delete(updateFile);
         return Task.CompletedTask;
     }
+
+    [LoggerMessage(LogLevel.Debug, "Clear artifact sources")]
+    private static partial void LogClearArtifactSources(ILogger logger);
 }

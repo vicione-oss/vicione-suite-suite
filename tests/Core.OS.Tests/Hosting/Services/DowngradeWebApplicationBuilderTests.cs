@@ -9,6 +9,7 @@ using Core.Shared.HostManagement;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -20,7 +21,7 @@ public sealed class DowngradeWebApplicationBuilderTests
     private readonly TimeSpan _testTimeout = TimeSpan.FromMinutes(2);
     private readonly MockFileSystem _fileSystem = new();
 
-    private readonly Serilog.ILogger _logger = Substitute.For<Serilog.ILogger>();
+    private readonly ILogger _logger = Substitute.For<ILogger>();
     private readonly InstanceOptions _options = new()
     {
         BackupDirectory = "backup",

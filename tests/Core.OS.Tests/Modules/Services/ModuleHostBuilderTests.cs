@@ -1,15 +1,17 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
 using Core.Module.Contracts;
 using Core.OS.Modules;
+using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
 using Core.OS.Tests.Extensions;
 using Core.Tests.Tools;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
 using Sdk.Instance;
+using Sdk.Messaging;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
 using TestModule.Backend;
@@ -20,6 +22,18 @@ namespace Core.OS.Tests.Modules.Services;
 public class ModuleHostBuilderTests
 {
     private readonly MockFileSystem _fileSystem = new();
+
+    private ModuleHostBuilder SetupModuleHostBuilder()
+    {
+        var config = new TestConfig()
+            .AddInstanceOptions(type: InstanceType.Standalone)
+            .ConfigureModuleLoader()
+            .BuildConfiguration();
+
+        var moduleOptions = new Dictionary<string, ModuleOptions>();
+
+        return new ModuleHostBuilder(_fileSystem, config, moduleOptions);
+    }
 
     private ModuleMetadata SetupBackendModuleMetadataJson(List<ModuleOptionDeclaration>? moduleOptions = null)
     {
@@ -44,13 +58,7 @@ public class ModuleHostBuilderTests
         public async Task Should_build_host_without_features()
         {
             // Arrange
-            var config = new TestConfig()
-                .AddInstanceOptions(type: InstanceType.Standalone)
-                .ConfigureModuleLoader()
-                .BuildConfiguration();
-
-            var moduleOptions = new Dictionary<string, ModuleOptions>();
-            var hostBuilder = new ModuleHostBuilder(_fileSystem, config, moduleOptions);
+            var hostBuilder = SetupModuleHostBuilder();
 
             // Act
             var moduleHost = await hostBuilder.Build(() => null, TestContext.Current.CancellationToken);
@@ -64,14 +72,7 @@ public class ModuleHostBuilderTests
         {
             // Arrange
             var context = TestFactory.CreateSuiteContext();
-
-            var config = new TestConfig()
-                .AddInstanceOptions(type: InstanceType.Standalone)
-                .ConfigureModuleLoader()
-                .BuildConfiguration();
-
-            var moduleOptions = new Dictionary<string, ModuleOptions>();
-            var hostBuilder = new ModuleHostBuilder(_fileSystem, config, moduleOptions);
+            var hostBuilder = SetupModuleHostBuilder();
 
             // Act
             var moduleHost = await hostBuilder
@@ -91,13 +92,7 @@ public class ModuleHostBuilderTests
             var context = TestFactory.CreateSuiteContext();
             context.Modules.First().StartupErrors.Add(new InvalidOperationException("Test error"));
 
-            var config = new TestConfig()
-                .AddInstanceOptions(type: InstanceType.Standalone)
-                .ConfigureModuleLoader()
-                .BuildConfiguration();
-
-            var moduleOptions = new Dictionary<string, ModuleOptions>();
-            var hostBuilder = new ModuleHostBuilder(_fileSystem, config, moduleOptions);
+            var hostBuilder = SetupModuleHostBuilder();
 
             SetupBackendModuleMetadataJson();
 
@@ -142,41 +137,10 @@ public class ModuleHostBuilderTests
     public class WithOptionsSupport : ModuleHostBuilderTests
     {
         [Fact]
-        public async Task Should_add_services_and_configuration_source()
-        {
-            // Arrange
-            var serviceCollection = new ServiceCollection();
-            var config = new TestConfig()
-                .AddInstanceOptions(type: InstanceType.Standalone)
-                .AddTestUiHost()
-                .ConfigureModuleLoader()
-                .AddTestBackendClientModule()
-                .BuildConfiguration();
-
-            using var configManager = new ConfigurationManager();
-            configManager.AddConfiguration(config);
-
-            var loaderOptions = config.GetModuleLoaderOptions();
-            var moduleOptions = config.CreateModuleTestOptions(loaderOptions);
-            var hostBuilder = new ModuleHostBuilder(new FileSystem(), config, moduleOptions);
-
-            // Act
-            var moduleHost = await hostBuilder
-                .WithSuiteDependencyContext()
-                .WithOptionsSupport(configManager, serviceCollection)
-                .Build(() => null, TestContext.Current.CancellationToken);
-
-            // Assert
-            serviceCollection.Should().ContainSingle(s => s.ServiceType == typeof(IModuleOptionsStore) && s.Lifetime == ServiceLifetime.Singleton);
-            configManager.Sources.Should().Contain(k => k is ModuleOptionsSource);
-        }
-
-        [Fact]
         public async Task Should_add_option_validation_errors_to_module_error_list()
         {
             // Arrange
             var context = TestFactory.CreateSuiteContext();
-            var services = new ServiceCollection();
             var config = new TestConfig()
                 .AddInstanceOptions(type: InstanceType.Standalone)
                 .ConfigureModuleLoader()
@@ -199,7 +163,7 @@ public class ModuleHostBuilderTests
             // Act
             var moduleHost = await hostBuilder
                 .WithSuiteDependencyContext(context)
-                .WithOptionsSupport(configManager, services)
+                .WithOptionsSupport(configManager, Substitute.For<IModuleOptionsStore>())
                 .Build(() => null, TestContext.Current.CancellationToken);
 
             // Assert
@@ -211,7 +175,6 @@ public class ModuleHostBuilderTests
         public async Task Should_throw_if_suite_context_is_null()
         {
             // Arrange
-            var services = new ServiceCollection();
             var config = new TestConfig()
                 .AddInstanceOptions(type: InstanceType.Standalone)
                 .ConfigureModuleLoader()
@@ -221,7 +184,7 @@ public class ModuleHostBuilderTests
             configManager.AddConfiguration(config);
             var moduleOptions = new Dictionary<string, ModuleOptions>();
             var buildTask = new ModuleHostBuilder(_fileSystem, config, moduleOptions)
-                .WithOptionsSupport(configManager, services)
+                .WithOptionsSupport(configManager, Substitute.For<IModuleOptionsStore>())
                 .Build(() => null, TestContext.Current.CancellationToken);
 
             var act = () => buildTask;
@@ -231,16 +194,113 @@ public class ModuleHostBuilderTests
         }
     }
 
-    public class WithSynchronization : ModuleHostBuilderTests
+    public class WithSynchronizationResults : ModuleHostBuilderTests
     {
-        [Fact(Skip = "Implement after abstraction of synchronizer")]
-        public void Should_add_services_and_configuration_source()
+        [Fact]
+        public async Task Should_not_add_any_module_errors_when_no_results_are_provided()
         {
             // Arrange
+            var hostBuilder = SetupModuleHostBuilder();
 
             // Act
+            var moduleHost = await hostBuilder
+                .WithSynchronizationResults(null)
+                .Build(() => null, TestContext.Current.CancellationToken);
 
             // Assert
+            moduleHost.GetModules().Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Should_add_error_bundle_for_resolved_result_with_error()
+        {
+            // Arrange
+            const string moduleName = "Unresolvable.Module";
+            var hostBuilder = SetupModuleHostBuilder();
+
+            var synchronizationResults = new ModuleSynchronizationResults();
+            synchronizationResults.Resolved.Add(new ModuleSynchronizationResult(moduleName)
+            {
+                Error = new ErrorInfo(1, "Failed to resolve module version"),
+            });
+
+            // Act
+            var moduleHost = await hostBuilder
+                .WithSynchronizationResults(synchronizationResults)
+                .Build(() => null, TestContext.Current.CancellationToken);
+
+            // Assert
+            var module = moduleHost.GetManifestModules().Should().ContainSingle(k => k.ModuleId == moduleName).Which;
+            module.Errors.Should().ContainSingle(e => e.Message == "Failed to resolve module version");
+        }
+
+        [Fact]
+        public async Task Should_add_error_bundle_for_update_failed_result_with_error()
+        {
+            // Arrange
+            const string moduleName = "UpdateFailed.Module";
+            var hostBuilder = SetupModuleHostBuilder();
+
+            var synchronizationResults = new ModuleSynchronizationResults();
+            synchronizationResults.UpdateFailed.Add(new ModuleSynchronizationResult(moduleName)
+            {
+                Error = new ErrorInfo(2, "Failed to download update"),
+            });
+
+            // Act
+            var moduleHost = await hostBuilder
+                .WithSynchronizationResults(synchronizationResults)
+                .Build(() => null, TestContext.Current.CancellationToken);
+
+            // Assert
+            var module = moduleHost.GetManifestModules().Should().ContainSingle(k => k.ModuleId == moduleName).Which;
+            module.Errors.Should().ContainSingle(e => e.Message == "Failed to download update");
+        }
+
+        [Fact]
+        public async Task Should_not_add_module_error_when_result_has_no_error()
+        {
+            // Arrange
+            const string moduleName = "Healthy.Module";
+            var hostBuilder = SetupModuleHostBuilder();
+
+            var synchronizationResults = new ModuleSynchronizationResults();
+            synchronizationResults.Resolved.Add(new ModuleSynchronizationResult(moduleName));
+
+            // Act
+            var moduleHost = await hostBuilder
+                .WithSynchronizationResults(synchronizationResults)
+                .Build(() => null, TestContext.Current.CancellationToken);
+
+            // Assert
+            moduleHost.GetModules().Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Should_add_error_to_existing_module_bundle_when_module_already_known()
+        {
+            // Arrange
+            var context = TestFactory.CreateSuiteContext();
+            var moduleId = context.Modules.First().ModuleId;
+            var hostBuilder = SetupModuleHostBuilder();
+
+            SetupBackendModuleMetadataJson();
+
+            var synchronizationResults = new ModuleSynchronizationResults();
+            synchronizationResults.Resolved.Add(new ModuleSynchronizationResult(moduleId)
+            {
+                Error = new ErrorInfo(3, "Synchronization warning"),
+            });
+
+            // Act
+            var moduleHost = await hostBuilder
+                .WithSuiteDependencyContext(context)
+                .WithSynchronizationResults(synchronizationResults)
+                .Build(() => null, TestContext.Current.CancellationToken);
+
+            // Assert
+            var module = moduleHost.GetManifestModules().Should().ContainSingle(k => k.ModuleId == moduleId).Which;
+            module.Errors.Should().ContainSingle(e => e.Message == "Synchronization warning");
         }
     }
 }

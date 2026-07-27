@@ -1,65 +1,76 @@
 using System.IO.Abstractions;
+using Core.OS.Extensions;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
 using Core.OS.Modules.Extensions;
+using Core.OS.Modules.Hosting;
 using Microsoft.Extensions.Options;
+using Sdk.Instance;
 
 namespace Core.OS.Hosting.Extensions;
 
 internal static partial class SuitePreparationPipelineExtensions
 {
     public static SuitePreparationPipeline UseInstanceId(
-        this SuitePreparationPipeline pipeline, IFileSystem fileSystem, InstanceOptions options)
-        => pipeline.Use(() => fileSystem.EnsureInstanceIdFile(options));
+        this SuitePreparationPipeline pipeline)
+        => pipeline.Use((context, _) =>
+        {
+            context.FileSystem.EnsureInstanceIdFile(context.InstanceOptions);
+
+            var version = context.FileSystem.EvaluateLocalVersionString(out var branchName);
+            var branchInfo = branchName is null ? string.Empty : $" branch: '{branchName}'";
+
+            LogInstanceVersion(context.Logger, context.InstanceOptions.Type, version, branchInfo);
+            return Task.CompletedTask;
+        });
 
     public static SuitePreparationPipeline UseDeviceImageCleanup(
-        this SuitePreparationPipeline pipeline, IFileSystem fileSystem, InstanceOptions options)
-        => pipeline.Use((logger, ct) =>
+        this SuitePreparationPipeline pipeline)
+        => pipeline.Use((context, ct) =>
         {
-            DeleteDeviceImageFile(fileSystem, options, logger);
+            DeleteDeviceImageFile(context.FileSystem, context.InstanceOptions, context.Logger);
             return Task.CompletedTask;
         });
 
     public static SuitePreparationPipeline UseResetFile(
-        this SuitePreparationPipeline pipeline, IFileSystem fileSystem, InstanceOptions options)
-        => pipeline.Use((logger, ct) => ResetDependingOnFileFlag(fileSystem, options, logger, ct));
+        this SuitePreparationPipeline pipeline)
+        => pipeline.Use((context, ct) => ResetDependingOnFileFlag(context.FileSystem, context.InstanceOptions, context.Logger, ct));
 
     public static SuitePreparationPipeline UseRestore(
-        this SuitePreparationPipeline pipeline, IFileSystem fileSystem, InstanceOptions options)
-        => pipeline.Use((logger, ct) => RestoreDependingOnFileFlag(fileSystem, options, logger, ct));
+        this SuitePreparationPipeline pipeline)
+        => pipeline.Use((context, ct) => RestoreDependingOnFileFlag(context.FileSystem, context.InstanceOptions, context.Logger, ct));
 
     public static SuitePreparationPipeline UseVersionDowngradeCheck(
-        this SuitePreparationPipeline pipeline, IFileSystem fileSystem, InstanceOptions options)
-        => pipeline.Use(async (logger, ct) =>
+        this SuitePreparationPipeline pipeline)
+        => pipeline.Use(async (context, ct) =>
         {
-            var info = await fileSystem.DetectVersionDowngrade(options, logger, ct);
+            var info = await context.FileSystem.DetectVersionDowngrade(context.InstanceOptions, context.Logger, ct);
             return info is null
                 ? PreparationResult.Success
                 : new VersionDowngradePreparationResult(info);
         });
 
     public static SuitePreparationPipeline UseRecoveryMode(
-        this SuitePreparationPipeline pipeline, WebApplicationBuilder builder, IFileSystem fileSystem,
-        InstanceOptions options)
-        => pipeline.Use(async (logger, ct) =>
+        this SuitePreparationPipeline pipeline, WebApplicationBuilder builder)
+        => pipeline.Use(async (context, ct) =>
         {
-            var decision = await fileSystem.UseRecoveryMode(options, logger, ct);
+            var decision = await context.FileSystem.UseRecoveryMode(context.InstanceOptions, context.Logger, ct);
 
             switch (decision)
             {
                 case RecoveryDecision.ApplyRecovery:
                     {
-                        var modulesFilePath = fileSystem.GetModuleVersionsFilePath(options);
-                        var backupFilePath = fileSystem.GetModuleVersionsBackupFilePath(options);
+                        var modulesFilePath = context.FileSystem.GetModuleVersionsFilePath(context.InstanceOptions);
+                        var backupFilePath = context.FileSystem.GetModuleVersionsBackupFilePath(context.InstanceOptions);
 
-                        fileSystem.File.Copy(modulesFilePath, backupFilePath);
-                        await fileSystem.CopyInitialModuleManifestTo(modulesFilePath, ct);
+                        context.FileSystem.File.Copy(modulesFilePath, backupFilePath);
+                        await context.FileSystem.CopyInitialModuleManifestTo(modulesFilePath, ct);
 
                         LocalInstanceInformationProvider.RunningInRecoveryMode = true;
-                        LogRecoveryModeActive(logger, backupFilePath);
+                        LogRecoveryModeActive(context.Logger, backupFilePath);
                         break;
                     }
 
@@ -69,12 +80,39 @@ internal static partial class SuitePreparationPipelineExtensions
                 default:
                     {
                         var loaderOptions = builder.Configuration.GetModuleLoaderOptions();
-                        await fileSystem.EnsureModuleVersionsFile(options, loaderOptions.ManifestSeedPath, logger, ct);
+                        await context.FileSystem.EnsureModuleVersionsFile(context.InstanceOptions, loaderOptions.ManifestSeedPath, context.Logger, ct);
                         break;
                     }
             }
 
             return PreparationResult.Success;
+        });
+
+    public static SuitePreparationPipeline UseOptionValidation(
+        this SuitePreparationPipeline pipeline, WebApplicationBuilder builder)
+        => pipeline.Use((context, _) =>
+        {
+            // validate appsettings, env vars etc.
+            builder.Services.ConfigureAndValidateOptions(context.InstanceOptions);
+            return Task.CompletedTask;
+        });
+
+    public static SuitePreparationPipeline UseModulePipeline(
+        this SuitePreparationPipeline pipeline, WebApplicationBuilder builder)
+        => pipeline.Use(async (context, ct) =>
+        {
+            context.ModuleContext = new ModulePreparationContext(builder, context.FileSystem, context.InstanceOptions, context.LoggerFactory);
+            var modulePipeline = new ModulePreparationPipeline(context.ModuleContext)
+                .UseApplyEnqueuedOperations()
+                .UseRepositoryOptions()
+                .UseModuleLoaderOptions()
+                .UseModuleSynchronization()
+                .UseModuleHost();
+
+            context.ModuleContext.Result = await modulePipeline.RunAsync(ct);
+
+            // propagate a module-host abort so the outer pipeline / TryRunCoreOs can fall back gracefully
+            return context.ModuleContext.Result;
         });
 
     /// <summary>
@@ -117,14 +155,11 @@ internal static partial class SuitePreparationPipelineExtensions
         try
         {
             // we'll have to reset our home, caches and backups
-            LogClearingWorkspaceCache(logger);
             fileSystem.DeleteCacheDirectories(options, logger);
 
             // actually user has no way to only restore some modules - we'll remove everything
-            LogClearingWorkspaceHome(logger);
             fileSystem.DeleteHomeDirectories(options, logger);
 
-            LogClearingWorkspaceBackup(logger);
             fileSystem.ClearBackupFiles(options, logger);
 
             LogResetModuleManifest(logger);
@@ -135,8 +170,7 @@ internal static partial class SuitePreparationPipelineExtensions
             var dataVersionPath = fileSystem.GetLocalDataVersionFilePath(options);
             fileSystem.File.Delete(dataVersionPath);
 
-            LogClearArtifactSources(logger);
-            using var repoStore = new ArtifactRepositoryStore(fileSystem, Options.Create(options));
+            using var repoStore = new ArtifactRepositoryStore(fileSystem, Options.Create(options), logger);
             await repoStore.Clear(cancellationToken);
         }
         catch (Exception e)
@@ -183,12 +217,10 @@ internal static partial class SuitePreparationPipelineExtensions
             // on importing a backup various things might happen like in ClusterManagement `packages.json` was
             // changed but in cache we have still other FB versions so nothing will fit together :(
             // best possible way is to also clear the caches.
-            LogClearingWorkspaceCache(logger);
-            fileSystem.DeleteCacheDirectories(options);
+            fileSystem.DeleteCacheDirectories(options, logger);
 
             // actually user has no way to only restore some modules we'll remove everything
-            LogClearingWorkspaceHome(logger);
-            fileSystem.DeleteHomeDirectories(options);
+            fileSystem.DeleteHomeDirectories(options, logger);
 
             // backup is already validated - this will be recreated later on 
             var dataVersionPath = fileSystem.GetLocalDataVersionFilePath(options);
@@ -215,6 +247,9 @@ internal static partial class SuitePreparationPipelineExtensions
         }
     }
 
+    [LoggerMessage(LogLevel.Information, "Preparing '{Type}' application version '{Version}':{BranchInfo}")]
+    private static partial void LogInstanceVersion(ILogger logger, InstanceType type, string? version, string? branchInfo);
+
     [LoggerMessage(LogLevel.Warning, "Recovery mode - all modules disabled. Previous configuration stored within '{Path}'")]
     private static partial void LogRecoveryModeActive(ILogger logger, string path);
 
@@ -227,23 +262,11 @@ internal static partial class SuitePreparationPipelineExtensions
     [LoggerMessage(LogLevel.Error, "Failed to delete leftover device image file.")]
     private static partial void LogDeleteDeviceImageFileFailed(ILogger logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Debug, "Clearing workspace cache")]
-    private static partial void LogClearingWorkspaceCache(ILogger logger);
-
-    [LoggerMessage(LogLevel.Debug, "Clearing workspace home")]
-    private static partial void LogClearingWorkspaceHome(ILogger logger);
-
-    [LoggerMessage(LogLevel.Debug, "Clearing backup workspace")]
-    private static partial void LogClearingWorkspaceBackup(ILogger logger);
-
     [LoggerMessage(LogLevel.Debug, "Reset module manifest")]
     private static partial void LogResetModuleManifest(ILogger logger);
 
     [LoggerMessage(LogLevel.Debug, "Reset data version info")]
     private static partial void LogResetDataVersionInfo(ILogger logger);
-
-    [LoggerMessage(LogLevel.Debug, "Clear artifact sources")]
-    private static partial void LogClearArtifactSources(ILogger logger);
 
     [LoggerMessage(LogLevel.Error, "Failed to reset workspaces")]
     private static partial void LogResetWorkspaceFailed(ILogger logger, Exception exception);

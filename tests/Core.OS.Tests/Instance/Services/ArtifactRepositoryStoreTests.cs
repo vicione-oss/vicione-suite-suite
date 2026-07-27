@@ -7,6 +7,7 @@ using Core.OS.Instance.Services;
 using Core.Shared.Instance.Contracts;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sdk.Messaging;
 using Sdk.Testing.Backend;
@@ -18,6 +19,7 @@ public class ArtifactRepositoryStoreTests
 {
     private readonly MockFileSystem _fileSystem = new();
     private readonly IOptions<InstanceOptions> _options;
+    private readonly ILogger _logger = NSubstitute.Substitute.For<ILogger>();
     private readonly ArtifactRepository _releaseSource = new()
     {
         Id = Guid.NewGuid(),
@@ -57,6 +59,7 @@ public class ArtifactRepositoryStoreTests
         _services = new ServiceCollection()
             .AddSingleton<IFileSystem>(_fileSystem)
             .AddSingleton(_options)
+            .AddSingleton(_logger)
             .AddSingleton<IArtifactRepositoryStore, ArtifactRepositoryStore>()
             .BuildServiceProvider();
     }

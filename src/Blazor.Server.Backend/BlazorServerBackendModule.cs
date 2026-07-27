@@ -87,7 +87,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddTransient(typeof(IUiEventSubscriptionHolder<>), typeof(UiEventPublisher<>));
         services.AddSingleton(typeof(IUiEventSubscriptionRegistry<>), typeof(UiEventSubscriptionRegistry<>));
         services.AddLocalHttpClient();
-        services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();        
+        services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();
         services.AddStreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(options => options.FilenameTransform = filename => Core.Shared.Constants.DeviceImageFileName);
     }
 

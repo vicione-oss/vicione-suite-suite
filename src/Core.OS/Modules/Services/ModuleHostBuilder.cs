@@ -1,12 +1,10 @@
 using System.IO.Abstractions;
 using System.Text.Json;
-using Core.Artifacts;
 using Core.Module;
 using Core.Module.Contracts;
 using Core.Module.Extensions;
 using Core.Module.Options;
 using Core.OS.Hosting;
-using Core.OS.Instance.Extensions;
 using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Factories;
@@ -25,12 +23,9 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
     private bool _buildDependencyContext;
     private SuiteDependencyContext? _suiteContext;
-    private ModulePackageManifest? _manifest;
-    private IArtifactRepositoryOptionsProvider? _apiOptionsProvider;
     private IConfigurationManager? _configurationManager;
-    private IServiceCollection? _services;
-    private ModuleOptionsStore? _moduleOptionsStore;
-    private ILoggerFactory? _loggerFactory;
+    private IModuleOptionsStore? _moduleOptionsStore;
+    private ModuleSynchronizationResults? _synchronizationResults;
 
     private class SortedMetadataComparer : IComparer<ModuleMetadataBundle>
     {
@@ -47,6 +42,12 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         return this;
     }
 
+    public ModuleHostBuilder WithSynchronizationResults(ModuleSynchronizationResults? results)
+    {
+        _synchronizationResults = results;
+        return this;
+    }
+
     /// <summary>
     /// Use given <see cref="SuiteDependencyContext"/> for building module host
     /// </summary>    
@@ -57,29 +58,13 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
     }
 
     /// <summary>
-    /// Resolve module packages marked by 'latest', download if necessary and delete orphaned ones
-    /// </summary>    
-    internal ModuleHostBuilder WithSynchronization(ModulePackageManifest manifest, IArtifactRepositoryOptionsProvider apiOptionsProvider)
-    {
-        _manifest = manifest;
-        _apiOptionsProvider = apiOptionsProvider;
-        return this;
-    }
-
-    /// <summary>
     /// Add validation for module options provided by metadata, environment settings or user secrets.
     /// Add <see cref="IModuleOptionsStore"/> to service collection. Depends on <see cref="WithSuiteDependencyContext"/>
     /// </summary>    
-    internal ModuleHostBuilder WithOptionsSupport(IConfigurationManager configurationManager, IServiceCollection services)
+    internal ModuleHostBuilder WithOptionsSupport(IConfigurationManager configurationManager, IModuleOptionsStore optionsStore)
     {
         _configurationManager = configurationManager;
-        _services = services;
-        return this;
-    }
-
-    internal ModuleHostBuilder WithLoggerFactory(ILoggerFactory loggerFactory)
-    {
-        _loggerFactory = loggerFactory;
+        _moduleOptionsStore = optionsStore;
         return this;
     }
 
@@ -88,8 +73,8 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         _modules.Clear();
         _moduleOptionsStore = null;
 
-        // depending on current manifest we resolve, download or remove modules
-        await SynchronizeModules(cancellationToken);
+        // if we have synchronization results we need to process them and add errors to _modules
+        ProcessSynchronizationResults();
 
         // regarding these options we build a context that contains all assembly information based on deps.json
         // we have about core, uihost and modules available on disk
@@ -128,10 +113,8 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         var moduleHost = new ModuleHost(hostOptions);
 
         // -> WithOptionsSupport
-        if (_moduleOptionsStore is not null && _services is not null)
+        if (_moduleOptionsStore is not null)
         {
-            _services.AddSingleton<IModuleOptionsStore>(_moduleOptionsStore);
-
             // add module options available as configuration source
             _configurationManager?.AddModuleConfigurationSource(moduleHost, _moduleOptionsStore);
         }
@@ -155,65 +138,22 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         return ModuleAssemblyLoader.LoadBackendModuleBundles<BackendModule>(_suiteContext);
     }
 
-    private async Task SynchronizeModules(CancellationToken cancellationToken)
+    private void ProcessSynchronizationResults()
     {
-        if (_manifest is null || _apiOptionsProvider == null)
+        if (_synchronizationResults is null)
             return;
 
-        // get versions of loaded debug modules
-        var debugModuleVersions = await fileSystem.GetDebugModuleVersions(_loaderOptions, cancellationToken);
-
-        // contains package versions with dependencies from AppData/modules.json
-        var moduleIds = moduleOptions
-            .Where(k => k.Value.Enable)
-            .Select(k => k.Key);
-
-        // prevent downloading packages that are not enabled by configuration
-        var packages = _manifest.GetValidModulePackages([.. moduleIds], debugModuleVersions, Log.Logger);
-
-        using var synchronizer = new ModuleSynchronizer(fileSystem)
-            .WithApiAdapter(_apiOptionsProvider)
-            .WithPackages(packages)
-            .WithModulesPath(_loaderOptions)
-            .WithPackageSdkValidation()
-            .WithOrphanedVersionCleanup();
-
-        if (_loggerFactory is not null)
-            synchronizer.WithLoggerFactory(_loggerFactory);
-
-        // start synchronisation with configured options
-        var result = await synchronizer.ProcessSynchronization(cancellationToken);
-        var resolvedModules = result.Resolved
-                .Where(k => k.Error == null)
-                .ToDictionary(k => k.Name, v => v.Version);
-
-        if (resolvedModules.Count > 0)
-        {
-            // manifest could contain a module that is only disabled by env or appsettings
-            // we don't want to modify these but need to update the resolved package versions
-            var update = _manifest.UpdatePackageVersions(resolvedModules);
-            if (update is not null)
-            {
-                _manifest.Packages.Clear();
-                _manifest.Packages.AddRange(packages);
-                _manifest.LastModified = DateTimeOffset.UtcNow;
-
-                var instanceOptions = configuration.GetInstanceOptions();
-
-                // persist the resolved package versions so next synchronization won't resolve them again
-                await ModulePackageManifestStore.Store(_manifest, fileSystem, instanceOptions, cancellationToken);
-            }
-        }
-
         var sdkVersion = SuiteVersionUtils.GetSuiteSdkVersion();
-        ProcessSynchronizationResults(result.Resolved, sdkVersion);
-        ProcessSynchronizationResults(result.UpdateFailed, sdkVersion);
 
-        LogSynchronizationResults(result);
+        ProcessSynchronizationResults(_synchronizationResults.Resolved, sdkVersion);
+        ProcessSynchronizationResults(_synchronizationResults.UpdateFailed, sdkVersion);
     }
 
     private void ProcessSynchronizationResults(IEnumerable<ModuleSynchronizationResult> updateResults, string sdkVersion)
     {
+        if (_synchronizationResults is null)
+            return;
+
         foreach (var updateResult in updateResults)
         {
             if (updateResult.Error is null)
@@ -228,30 +168,6 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
             _modules.Add(ModuleMetadataBundleFactory.CreateErrorBundle(updateResult, sdkVersion));
         }
-    }
-
-    private static void LogSynchronizationResults(ModuleSynchronizationResults result)
-    {
-        if (result.HttpResolveError is not null)
-        {
-            Log.Error(result.HttpResolveError, "Module synchronization failed");
-        }
-
-        // sdk version mismatch - we set package to be resolved to latest
-        foreach (var synchronizeResult in result.Incompatible.Where(k => k.Error is null))
-        {
-            Log.Information("Automatic upgrade of module {Name} version '{Version}' because of sdk incompatibility",
-                synchronizeResult.Name, synchronizeResult.Version);
-        }
-
-        Log.Information("Update {Update} modules (skipped:{Skipped}, removed:{Removed}, errors:{Errors})",
-            result.Updated.Count,
-            result.UpdateSkipped.Count,
-            result.Deleted.Count,
-            result.UpdateFailed.Count);
-
-        foreach (var synchronizeResult in result.All.Where(k => k.Error is not null))
-            Log.Error("Module {Name} synchronisation failed - {Message}", synchronizeResult.Name, synchronizeResult.Error!.Message);
     }
 
     private async Task AddModuleOptionsSupport(CancellationToken cancellationToken)

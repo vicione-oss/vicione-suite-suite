@@ -9,7 +9,7 @@ internal record DowngradeWebApiParameters
 
     public required HostManagementOptions HostManagement { get; init; }
 
-    public required Serilog.ILogger Logger { get; init; }
+    public required ILogger Logger { get; init; }
 
     public required VersionDowngradeInformation DowngradeInformation { get; init; }
 

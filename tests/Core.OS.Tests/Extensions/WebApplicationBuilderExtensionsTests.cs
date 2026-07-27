@@ -1,20 +1,14 @@
 using System.IO.Abstractions.TestingHelpers;
-using Core.OS.Extensions;
+using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
 using Core.OS.Tests.Persistence;
-using AwesomeAssertions;
-using Microsoft.AspNetCore.Builder;
-using Core.OS.Hosting.Contracts;
-using System.Globalization;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Sdk.Instance;
 using Xunit;
-using Core.OS.Hosting.Extensions;
-using Core.OS.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Core.OS.Tests.Extensions;
 
@@ -43,138 +37,9 @@ public class WebApplicationBuilderExtensionsTests
 
     public class PrepareSuite : WebApplicationBuilderExtensionsTests
     {
-
-        [Fact]
-        public async Task Should_ensure_instance_file_exists()
-        {
-            // Arrange
-            var builder = WebApplication.CreateBuilder();
-
-            // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
-
-            // Assert
-            _fileSystem.File.Exists(_fileSystem.GetLocalInstanceIdFilePath(_instanceOptions)).Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task Should_return_downgrade_preparation_result_when_persisted_version_is_higher()
-        {
-            // Arrange
-            var builder = WebApplication.CreateBuilder();
-
-            // persist a higher version than running suite to simulate downgrade
-            var parts = SuiteVersionUtils.GetSuiteVersion().Split('.');
-            var major = int.Parse(parts[0], CultureInfo.InvariantCulture);
-            var minor = int.Parse(parts[1], CultureInfo.InvariantCulture) + 1;
-            var patch = int.Parse(parts[2], CultureInfo.InvariantCulture);
-            var higherVersion = $"{major}.{minor}.{patch}";
-
-            await _fileSystem.WriteDataVersionFile(_instanceOptions, higherVersion, TestContext.Current.CancellationToken);
-
-            // Act
-            var result = await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
-
-            // Assert
-            result.Should().BeOfType<VersionDowngradePreparationResult>();
-            var downgrade = (VersionDowngradePreparationResult)result!;
-            downgrade.DowngradeInformation.DataVersion.Should().Be(higherVersion);
-            downgrade.DowngradeInformation.CurrentVersion.Should().Be(SuiteVersionUtils.GetSuiteVersion());
-        }
-
-        [Fact]
-        public async Task Should_delete_left_free_device_image()
-        {
-            // Arrange
-            var builder = WebApplication.CreateBuilder();
-            var cacheDirectory = _fileSystem.GetRootedCacheDirectory(_instanceOptions);
-            var deviceImageFile = _fileSystem.Path.Combine(cacheDirectory, Shared.Constants.SystemModuleId, Shared.Constants.DeviceImageFileName);
-
-            SetupTestFiles(_fileSystem, cacheDirectory);
-            _fileSystem.AddEmptyFile(deviceImageFile);
-
-            // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
-
-            // Assert
-            _fileSystem.File.Exists(deviceImageFile).Should().BeFalse();
-        }
-
-        [Fact]
-        public async Task Should_clear_instance_directories_if_reset_file_exists()
-        {
-            // Arrange
-            var builder = WebApplication.CreateBuilder();
-            var homeDirectory = _fileSystem.GetRootedHomeDirectory(_instanceOptions);
-            var cacheDirectory = _fileSystem.GetRootedCacheDirectory(_instanceOptions);
-            var backupDirectory = _fileSystem.GetRootedBackupDirectory(_instanceOptions);
-
-            SetupTestFiles(_fileSystem, homeDirectory);
-            SetupTestFiles(_fileSystem, cacheDirectory);
-            SetupTestFiles(_fileSystem, backupDirectory);
-
-            _fileSystem.WriteResetFile(_instanceOptions);
-
-            // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
-
-            // Assert
-            _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();
-            _fileSystem.Directory.GetDirectories(cacheDirectory).Should().BeEmpty();
-            _fileSystem.Directory.GetFiles(backupDirectory).Should().BeEmpty();
-            _fileSystem.ResetFileExists(_instanceOptions).Should().BeFalse();
-            _fileSystem.File.Exists(_fileSystem.GetLocalInstanceIdFilePath(_instanceOptions)).Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task Should_clear_instance_directories_and_artifact_sources_if_reset_file_exists_and_folder_exists()
-        {
-            // Arrange
-            var builder = WebApplication.CreateBuilder();
-            var homeDirectory = _fileSystem.GetRootedHomeDirectory(_instanceOptions);
-            var backupDirectory = _fileSystem.GetRootedBackupDirectory(_instanceOptions);
-            var reposSourceFile = _fileSystem.Path.Combine(homeDirectory, "repo-sources.json");
-
-            _fileSystem.AddEmptyFile(reposSourceFile);
-            SetupTestFiles(_fileSystem, homeDirectory);
-            SetupTestFiles(_fileSystem, backupDirectory);
-
-            _fileSystem.WriteResetFile(_instanceOptions);
-
-            // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
-
-            // Assert
-            _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();
-            _fileSystem.Directory.GetFiles(backupDirectory).Should().BeEmpty();
-            _fileSystem.File.Exists(reposSourceFile).Should().BeFalse();
-
-            _fileSystem.ResetFileExists(_instanceOptions).Should().BeFalse();
-            _fileSystem.File.Exists(_fileSystem.GetLocalInstanceIdFilePath(_instanceOptions)).Should().BeTrue();
-        }
-
-        [Fact]
-        public async Task Should_not_touch_instance_directories_if_reset_file_not_exists()
-        {
-            // Arrange
-            var builder = WebApplication.CreateBuilder();
-            var homeDirectory = _fileSystem.GetRootedHomeDirectory(_instanceOptions);
-            var cacheDirectory = _fileSystem.GetRootedCacheDirectory(_instanceOptions);
-            var backupDirectory = _fileSystem.GetRootedBackupDirectory(_instanceOptions);
-
-            SetupTestFiles(_fileSystem, homeDirectory);
-            SetupTestFiles(_fileSystem, cacheDirectory);
-            SetupTestFiles(_fileSystem, backupDirectory);
-
-            // Act
-            await builder.PrepareSuite(_fileSystem, _instanceOptions, _loggerFactory, TestContext.Current.CancellationToken);
-
-            // Assert
-            _fileSystem.Directory.GetDirectories(homeDirectory).Should().NotBeEmpty();
-            _fileSystem.Directory.GetDirectories(cacheDirectory).Should().NotBeEmpty();
-            _fileSystem.Directory.GetFiles(backupDirectory).Should().NotBeEmpty();
-            _fileSystem.File.Exists(_fileSystem.GetLocalInstanceIdFilePath(_instanceOptions)).Should().BeTrue();
-        }
+        // NOTE: The step-focused preparation tests were migrated to
+        // Core.OS.Tests.Hosting.SuitePreparationPipelineTests.Steps after the pipeline refactor
+        // (PrepareSuite is no longer a WebApplicationBuilder extension).
 
         [Trait(Traits.Category, Traits.System)]
         [Fact]
@@ -192,7 +57,7 @@ public class WebApplicationBuilderExtensionsTests
             SetupTestFiles(_fileSystem, cacheDirectory);
 
             // Act
-            //await RestoreProcessor.HandleSuiteRestore(_fileSystem, instanceOptions, _logger);
+            //await RestoreProcessor.HandleSuiteRestore(_fileSystem, instanceOptions, _loggerFactory);
 
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();
