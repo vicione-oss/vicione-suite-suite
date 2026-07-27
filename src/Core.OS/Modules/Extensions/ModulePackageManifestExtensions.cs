@@ -3,11 +3,11 @@ using Semver;
 
 namespace Core.OS.Modules.Extensions;
 
-internal static class ModulePackageManifestExtensions
+internal static partial class ModulePackageManifestExtensions
 {
     extension(ModulePackageManifest manifest)
     {
-        public ModuleDependencyPackage[] GetValidModulePackages(List<string> moduleIds, Dictionary<string, string> debugModules, Serilog.ILogger? logger)
+        public ModuleDependencyPackage[] GetValidModulePackages(List<string> moduleIds, Dictionary<string, string> debugModules, ILogger logger)
         {
             var validPackages = new HashSet<ModuleDependencyPackage>();
 
@@ -27,7 +27,7 @@ internal static class ModulePackageManifestExtensions
             // prevent downloading packages that are not enabled by configuration
             return [.. validPackages];
 
-            static bool HasMissingDependency(ModulePackageManifest manifest, ModuleDependencyPackage dependencyPackage, Dictionary<string, string> debug, Serilog.ILogger? logger)
+            static bool HasMissingDependency(ModulePackageManifest manifest, ModuleDependencyPackage dependencyPackage, Dictionary<string, string> debug, ILogger logger)
             {
                 if (dependencyPackage.DependingOn is null)
                     return false;
@@ -40,8 +40,7 @@ internal static class ModulePackageManifestExtensions
                 {
                     if (!SemVersion.TryParse(missing.Version, out var missingVersion))
                     {
-                        logger?.Warning("Disable module {Package} because dependency {MissingName} version '{MissingVersion}' is not a valid semver version.",
-                            dependencyPackage.Name, missing.Name, missing.Version);
+                        LogDisablePackageWithMissingDependency(logger, dependencyPackage.Name, missing.Name, missing.Version);
                         continue;
                     }
 
@@ -52,8 +51,7 @@ internal static class ModulePackageManifestExtensions
                     }
                     else
                     {
-                        logger?.Warning("Disable module {Package} because dependency {MissingName} version '{MissingVersion}' can't be found.",
-                            dependencyPackage.Name, missing.Name, missing.Version);
+                        LogDisablePackageWithMissingVersion(logger, dependencyPackage.Name, missing.Name, missing.Version);
                         hasMissingDependencies = true;
                     }
                 }
@@ -106,4 +104,10 @@ internal static class ModulePackageManifestExtensions
             return [.. manifest.Packages];
         }
     }
+
+    [LoggerMessage(LogLevel.Warning, "Disable module {Package} because dependency {MissingPackage} version '{MissingVersion}' is not a valid semver version.")]
+    private static partial void LogDisablePackageWithMissingDependency(ILogger logger, string package, string missingPackage, string missingVersion);
+
+    [LoggerMessage(LogLevel.Warning, "Disable module {Package} because dependency {MissingPackage} version '{MissingVersion}' can't be found.")]
+    private static partial void LogDisablePackageWithMissingVersion(ILogger logger, string package, string missingPackage, string missingVersion);
 }

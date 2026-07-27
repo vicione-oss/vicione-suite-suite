@@ -137,7 +137,7 @@ public class ModuleHostTests
             var testHost = new TestUiHostBackend();
             var manager = CreateModuleHostWithUiSupport(testHost, out var services, out _);
             var mvcBuilder = CreateMvcBuilder(services);
-            services.AddModuleServices();
+            services.AddModuleServices(Substitute.For<IModuleHost>(), Substitute.For<IModuleOptionsStore>());
 
             var stack = new Stack<string>();
             stack.Push(nameof(IUiHostModule.ConfigureUiServices));
@@ -669,12 +669,11 @@ public class ModuleHostTests
             .Bind(config.GetSection(LoggingOptions.ConfigSection));
 
         services.AddSingleton<IFileSystem, MockFileSystem>();
-        services.AddModuleServices();
 
-        var manager = CreateModuleHost(modules, config);
-        services.AddSingleton<IModuleHost>(manager);
+        var moduleHost = CreateModuleHost(modules, config);
+        services.AddModuleServices(moduleHost, Substitute.For<IModuleOptionsStore>());
 
-        return manager;
+        return moduleHost;
     }
 
     private ModuleHost CreateModuleHost(List<BackendModule> modules, IConfiguration? configuration = null)

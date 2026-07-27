@@ -2,54 +2,21 @@ using Core.OS.Hosting.Contracts;
 
 namespace Core.OS.Hosting;
 
-internal static class PreparationResult
-{
-    public static IPreparationSuccessResult Success { get; } = new PreparationSuccessResult();
-}
 /// <summary>
-/// Builds and executes an ordered sequence of preparation steps.
+/// Builds and executes an ordered sequence of filesystem/workspace preparation steps.
 /// Execution stops at the first <see cref="IPreparationAbortResult"/>.
 /// </summary>
-internal sealed class SuitePreparationPipeline(ILogger logger)
+internal sealed class SuitePreparationPipeline(SuitePreparationContext preparationContext)
+    : PreparationPipeline<SuitePreparationPipeline, SuitePreparationContext>(context: preparationContext)
 {
     private record PreparationCancelledResult(string Reason) : IPreparationAbortResult;
 
-    private readonly List<Func<ILogger, CancellationToken, Task<IPreparationResult>>> _steps = [];
+    private record PreparationFaultedResult(string Reason) : IPreparationAbortResult;
 
-    /// <summary>Adds a step that returns an explicit preparation result.</summary>
-    public SuitePreparationPipeline Use(Func<ILogger, CancellationToken, Task<IPreparationResult>> step)
-    {
-        _steps.Add(step);
-        return this;
-    }
+    protected override ILogger Logger => Context.Logger;
 
-    /// <summary>Adds a fire-and-forget async step that is always treated as success.</summary>
-    public SuitePreparationPipeline Use(Func<ILogger, CancellationToken, Task> step)
-        => Use(async (logger, ct) => { await step(logger, ct); return PreparationResult.Success; });
-
-    /// <summary>Adds a synchronous side-effect step that is always treated as success.</summary>
-    public SuitePreparationPipeline Use(Action step)
-        => Use((_, _) =>
-        {
-            step();
-            return Task.FromResult(PreparationResult.Success);
-        });
-
-    /// <summary>
-    /// Executes all registered steps in order.
-    /// Returns the first <see cref="IPreparationAbortResult"/> encountered,
-    /// or <see cref="PreparationResult.Success"/> if all steps succeed.
-    /// </summary>
-    public async Task<IPreparationResult> RunAsync(CancellationToken cancellationToken = default)
-    {
-        foreach (var step in _steps)
-        {
-            var result = await step(logger, cancellationToken);
-            if (result is IPreparationAbortResult)
-                return result;
-        }
-        return PreparationResult.Success;
-    }
+    protected override IPreparationAbortResult CreateFaultResult(string stepName, Exception exception)
+        => new PreparationFaultedResult($"Preparation step '{stepName}' failed: {exception.Message}");
 
     /// <summary>
     /// Executes the pipeline while listening for process termination signals (Ctrl+C,
@@ -65,6 +32,9 @@ internal sealed class SuitePreparationPipeline(ILogger logger)
 
         Console.CancelKeyPress += OnConsoleCancel;
         AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+
+        AppDomain.CurrentDomain.UnhandledException -= LogUnhandledExceptionEvent;
+        AppDomain.CurrentDomain.UnhandledException += LogUnhandledExceptionEvent;
 
         try
         {
@@ -83,4 +53,7 @@ internal sealed class SuitePreparationPipeline(ILogger logger)
         void OnProcessExit(object? o, EventArgs e) => cts.Cancel();
         void OnConsoleCancel(object? o, ConsoleCancelEventArgs e) { e.Cancel = true; cts.Cancel(); }
     }
+
+    private static void LogUnhandledExceptionEvent(object sender, UnhandledExceptionEventArgs e)
+        => Serilog.Log.Error("Unhandled error! {Error}", e.ExceptionObject);
 }

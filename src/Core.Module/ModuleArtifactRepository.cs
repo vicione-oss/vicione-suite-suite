@@ -82,6 +82,10 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
             if (fileSystem.Directory.Exists(targetPath))
                 fileSystem.Directory.Delete(targetPath, recursive: true);
 
+            // Sweep orphaned staging directories left behind by a previously interrupted run
+            // (e.g. a killed debug session). A still-locked one is skipped best-effort and retried later.
+            CleanupOrphanedStagingDirectories(packageFolder);
+
             fileSystem.Directory.CreateDirectory(stagingPath);
 
             // try to find the matching artifact on the repository                      
@@ -137,6 +141,26 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
 
         if (!hasPayload)
             throw new InvalidOperationException($"Staged module is incomplete: no extracted payload found in '{stagingPath}'.");
+    }
+
+    private void CleanupOrphanedStagingDirectories(string packageFolder)
+    {
+        if (!fileSystem.Directory.Exists(packageFolder))
+            return;
+
+        try
+        {
+            foreach (var directory in fileSystem.Directory.EnumerateDirectories(packageFolder, ".staging-*"))
+                TryDeleteDirectory(directory);
+        }
+        catch (IOException)
+        {
+            // Best-effort sweep; a locked or missing folder is retried on a later run.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Best-effort sweep; a locked or missing folder is retried on a later run.
+        }
     }
 
     private void TryDeleteDirectory(string path)

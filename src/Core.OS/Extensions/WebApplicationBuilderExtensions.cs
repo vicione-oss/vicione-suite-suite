@@ -1,53 +1,21 @@
-using System.IO.Abstractions;
 using Core.OS.Hosting;
 using Core.OS.Hosting.Contracts;
-using Core.OS.Hosting.Extensions;
 using Core.OS.Hosting.Services;
 using Core.OS.HostManagement.Extensions;
-using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
-using Core.OS.Logging;
-using Serilog;
 
 namespace Core.OS.Extensions;
 
 internal static partial class WebApplicationBuilderExtensions
 {
-    public static async Task<IPreparationResult> PrepareSuite(this WebApplicationBuilder builder, IFileSystem fileSystem, InstanceOptions instanceOptions, ILoggerFactory loggerFactory, CancellationToken cancellationToken = default)
-    {
-        var logger = loggerFactory.CreateLogger(nameof(PrepareSuite));
-        var preparation = new SuitePreparationPipeline(logger)
-            .UseInstanceId(fileSystem, instanceOptions)
-            .UseDeviceImageCleanup(fileSystem, instanceOptions)
-            .UseResetFile(fileSystem, instanceOptions)
-            .UseRestore(fileSystem, instanceOptions)
-            .UseVersionDowngradeCheck(fileSystem, instanceOptions)
-            .UseRecoveryMode(builder, fileSystem, instanceOptions);
-
-        return await preparation.RunAsync(cancellationToken);
-    }
-
-    public static async Task TryRunCoreOs(this WebApplicationBuilder builder, IFileSystem fileSystem, IPreparationResult preparationResult, string[] args)
+    public static async Task TryRunCoreOs(this WebApplicationBuilder builder, SuitePreparationContext preparationContext, IPreparationResult preparationResult, string[] args)
     {
         try
         {
             // handle version downgrade case - we trigger a host with minimal api that only serves the downgrade endpoint and then stops the program workflow here.
             if (preparationResult is VersionDowngradePreparationResult downgradeResult)
             {
-                var hostMgmtOptions = builder.Configuration.GetHostManagementOptions();
-                var instanceOptions = builder.Configuration.GetInstanceOptions();
-
-                var downgradeOptions = new DowngradeWebApiParameters
-                {
-                    Instance = instanceOptions,
-                    HostManagement = hostMgmtOptions,
-                    Logger = Log.Logger,
-                    DowngradeInformation = downgradeResult.DowngradeInformation
-                };
-
-                // run the host that will stop the program workflow here
-                await using var downgradeHost = DowngradeWebApiHostBuilder.Build(builder, fileSystem, downgradeOptions);
-                await downgradeHost.RunAsync();
+                await builder.RunDowngradeHost(preparationContext, downgradeResult);
                 return;
             }
 
@@ -55,22 +23,21 @@ internal static partial class WebApplicationBuilderExtensions
             // so the service manager does not trigger another restart loop.
             if (preparationResult is RecoveryExhaustedPreparationResult exhaustedResult)
             {
-                var fallbackHost = FallbackHostBuilder.Build(args, new FallbackHostOptions
-                {
-                    Status = FallbackHostStatus.RecoveryExhausted,
-                    Messages = [exhaustedResult.Reason],
-                    HttpStatusCode = 503,
-                    LogLevel = Serilog.Events.LogEventLevel.Fatal,
-                });
-                await fallbackHost.RunAsync();
+                await RunExhaustedHost(exhaustedResult, args);
                 return;
             }
 
+            // Any other preparation failure (e.g. file system migration, module manifest generation, etc.) — log and abort startup.
             if (preparationResult is IPreparationAbortResult failure)
             {
-                Log.Warning("Suite preparation did not complete: {Reason}. Startup aborted.", failure.Reason);
+                LogStartupAborted(preparationContext.Logger, failure.Reason);
                 return;
             }
+
+            // validate appsettings, env vars etc.
+            builder.Services.ConfigureAndValidateOptions(preparationContext.InstanceOptions);
+            builder.Services.AddSuiteOpenTelemetry(builder.Configuration, preparationContext.InstanceOptions, preparationContext.FileSystem);
+            builder.Services.AddSuiteServices(builder.Configuration, preparationContext);
 
             // all services have to be already registered to service collection!
             var host = builder.Build();
@@ -78,13 +45,7 @@ internal static partial class WebApplicationBuilderExtensions
             var failures = host.GetInvalidOptions();
             if (failures is not null)
             {
-                var fallbackHost = FallbackHostBuilder.Build(args, new FallbackHostOptions
-                {
-                    Status = FallbackHostStatus.InvalidOptions,
-                    Messages = [.. failures],
-                    HttpStatusCode = 500,
-                });
-                await fallbackHost.RunAsync();
+                await RunInvalidOptionsHost(failures, args);
             }
             else
             {
@@ -93,8 +54,54 @@ internal static partial class WebApplicationBuilderExtensions
         }
         catch (Exception ex)
         {
-            LoggingConfiguration.SetupStaticStartupLogger(builder.Configuration);
-            Log.Error(ex, "Startup Failed");
+            LogStartupFailed(preparationContext.Logger, ex);
         }
     }
+
+    private static async Task RunDowngradeHost(this WebApplicationBuilder builder, SuitePreparationContext preparationContext, VersionDowngradePreparationResult downgradeResult)
+    {
+        var hostMgmtOptions = builder.Configuration.GetHostManagementOptions();
+        var instanceOptions = builder.Configuration.GetInstanceOptions();
+
+        var downgradeOptions = new DowngradeWebApiParameters
+        {
+            Instance = instanceOptions,
+            HostManagement = hostMgmtOptions,
+            Logger = preparationContext.Logger,
+            DowngradeInformation = downgradeResult.DowngradeInformation
+        };
+
+        // run the host that will stop the program workflow here
+        await using var downgradeHost = DowngradeWebApiHostBuilder.Build(builder, preparationContext.FileSystem, downgradeOptions);
+        await downgradeHost.RunAsync();
+    }
+
+    private static async Task RunExhaustedHost(RecoveryExhaustedPreparationResult exhaustedResult, string[] args)
+    {
+        var fallbackHost = FallbackHostBuilder.Build(args, new FallbackHostOptions
+        {
+            Status = FallbackHostStatus.RecoveryExhausted,
+            Messages = [exhaustedResult.Reason],
+            HttpStatusCode = 503,
+            LogLevel = Serilog.Events.LogEventLevel.Fatal,
+        });
+        await fallbackHost.RunAsync();
+    }
+
+    private static async Task RunInvalidOptionsHost(IEnumerable<string> failures, string[] args)
+    {
+        var fallbackHost = FallbackHostBuilder.Build(args, new FallbackHostOptions
+        {
+            Status = FallbackHostStatus.InvalidOptions,
+            Messages = [.. failures],
+            HttpStatusCode = 500,
+        });
+        await fallbackHost.RunAsync();
+    }
+
+    [LoggerMessage(LogLevel.Warning, "Suite preparation did not complete: {Reason}. Startup aborted.")]
+    private static partial void LogStartupAborted(ILogger logger, string? reason);
+
+    [LoggerMessage(LogLevel.Critical, "Startup Failed")]
+    private static partial void LogStartupFailed(ILogger logger, Exception ex);
 }

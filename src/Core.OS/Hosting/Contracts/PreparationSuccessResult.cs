@@ -11,3 +11,5 @@ internal record RecoveryExhaustedPreparationResult : IPreparationAbortResult
 {
     public string Reason => "Recovery mode was already activated, but the suite continues to crash. No further self-healing possible — manual intervention required.";
 }
+
+internal record ModuleHostPreparationResult(string Reason) : IPreparationAbortResult;
