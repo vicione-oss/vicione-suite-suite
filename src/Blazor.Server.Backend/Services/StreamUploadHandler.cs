@@ -1,16 +1,15 @@
 using System.IO.Abstractions;
 using Blazor.Server.Backend.Contracts;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Sdk.Backend.Modules;
+using Sdk.Client.Contracts;
 using Sdk.Client.Models;
-using Sdk.Services;
 
 namespace Blazor.Server.Backend.Services;
 
 public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspaceProvider<TModule> workspace, IFileSystem fileSystem,
-    IOptions<StreamUploadHandlerOptions<TContext>> options, ILogger<StreamUploadHandler<TModule, TContext>> logger)
-        : IStreamUploadHandler
+    StreamUploadHandlerOptions options, ILogger<StreamUploadHandler<TModule, TContext>> logger)
+        : IStreamUploadHandler<TContext>
             where TModule : BackendModule
 {
     public Func<IStreamUploadProgress, Task>? OnProgress { get; set; }
@@ -18,21 +17,32 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
     public async Task<IStreamUploadResult> Execute(Stream stream, string filename, CancellationToken cancellationToken = default)
     {
         var path = workspace.Cache;
-        if (options.Value.PathTransform is not null)
-            path = options.Value.PathTransform(path);
 
-        var drive = fileSystem.DriveInfo.New(path);
-        if (drive.AvailableFreeSpace < stream.Length * 2)
-            return new StreamUploadErrorResult("The device requires at least twice as much free disk space as the file size.");
+        try
+        {
+            if (options.PathTransform is not null)
+                path = options.PathTransform(path);
+
+            var drive = fileSystem.DriveInfo.New(path);
+            if (drive.AvailableFreeSpace < stream.Length * 2)
+                return new StreamUploadErrorResult("The device requires at least twice as much free disk space as the file size.");
+
+            Directory.CreateDirectory(path);
+        }
+        catch (Exception ex)
+        {
+            PathHandlingError(logger, filename, ex.GetType().Name, ex.Message, ex.StackTrace ?? string.Empty);
+            return new StreamUploadErrorResult("Failed to prepare upload path");
+        }
 
         var progress = new StreamUploadProgress { Path = path, Filename = filename, BytesTotal = stream.Length };
 
         try
         {
-            if (options.Value.FilenameTransform is not null)
-                filename = options.Value.FilenameTransform(filename);
+            if (options.FilenameTransform is not null)
+                filename = options.FilenameTransform(filename);
 
-            progress.DestinationFile = fileSystem.Path.Combine(path, filename);
+            progress.DestinationFile = fileSystem.Path.Combine(progress.Path, filename);
 
             await using var fileSystemStream = fileSystem.File.Create(progress.DestinationFile);
             try
@@ -83,6 +93,9 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
             return new StreamUploadErrorResult(ex.Message);
         }
     }
+
+    [LoggerMessage(1, LogLevel.Error, "An error occured during path preparation for file upload {filename}: {ex} {message} {trace}")]
+    private static partial void PathHandlingError(ILogger<StreamUploadHandler<TModule, TContext>> logger, string filename, string ex, string message, string trace);
 
     [LoggerMessage(1, LogLevel.Information, "Upload successful ({@LastProgress})")]
     private static partial void UploadSuccessful(ILogger<StreamUploadHandler<TModule, TContext>> logger, IStreamUploadProgress lastProgress);

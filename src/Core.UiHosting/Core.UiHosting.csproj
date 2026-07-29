@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="ViciOne.Suite.Sdk" />
+    <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,6 @@
 using Blazor.Shared.Instance.ControlPanels.Update.Services;
 using Blazor.Shared.Services;
+using Core.Shared;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
 using Core.Shared.Persistence.Commands;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Logging;
 using Sdk.Authorization;
+using Sdk.Client.Contracts;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.Infrastructure;
@@ -16,7 +18,6 @@ using Sdk.Client.Models;
 using Sdk.Client.Services;
 using Sdk.Instance;
 using Sdk.MessageBanner.Contracts;
-using Sdk.Services;
 using Sdk.Utils;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Extensions;
@@ -67,7 +68,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
     private INavigationService NavigationManager { get; set; } = default!;
 
     [Inject]
-    private IStreamUploadHandler StreamUploadHandler { get; set; } = default!;
+    private IStreamUploadHandler<ImageUpload> StreamUploadHandler { get; set; } = default!;
 
     [Inject]
     private IUploadTicketFactory UploadTicketFactory{ get; set; } = default!;

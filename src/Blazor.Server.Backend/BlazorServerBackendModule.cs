@@ -1,6 +1,5 @@
 using System.Reflection;
 using Blazor.DevAssets;
-using Blazor.Server.Backend.Contracts;
 using Blazor.Server.Backend.Extensions;
 using Blazor.Server.Backend.Localization;
 using Blazor.Server.Backend.Middleware;
@@ -9,6 +8,7 @@ using Blazor.Shared.Authorization;
 using Blazor.Shared.Components;
 using Blazor.Shared.Services;
 using Blazor.Shared.UserManagement.Services;
+using Core.Shared;
 using Core.Shared.Messaging;
 using Core.Shared.UserManagement.Contracts;
 using Core.UiHosting;
@@ -30,7 +30,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sdk.Backend.Extensions;
 using Sdk.Backend.Modules;
+using Sdk.Client.Contracts;
+using Sdk.Client.Extensions;
 using Sdk.Client.Modules;
+using Sdk.Client.Services;
 using Sdk.Extensions;
 using Sdk.Modules;
 using ViciOne.Ui.MonochromeIcons.Assets.Extensions;
@@ -88,7 +91,9 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddSingleton(typeof(IUiEventSubscriptionRegistry<>), typeof(UiEventSubscriptionRegistry<>));
         services.AddLocalHttpClient();
         services.AddScoped<ILanguageCookieReader, LanguageCookieReader>();
-        services.AddStreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(options => options.FilenameTransform = filename => Core.Shared.Constants.DeviceImageFileName);
+        services.AddScoped<IUploadTicketFactory, UploadTicketFactory>();
+        services.AddScoped<IStreamUploadHandlerFactory, StreamUploadHandlerFactory>();
+        services.AddStreamUploadHandler<ImageUpload, BlazorServerBackendModule>((options) => options.FilenameTransform = (filename) => Core.Shared.Constants.DeviceImageFileName);
     }
 
     /// <inheritdoc/>
