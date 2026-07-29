@@ -1,4 +1,5 @@
 using System.Reflection;
+using Sdk.Backend.Modules;
 using Sdk.Modules;
 
 namespace Core.UiHosting;
@@ -10,6 +11,8 @@ public interface IUiHostEnvironment
     string? ModulePath { get; }
 
     string? GetWwwRootFolder();
+
+    BackendModule? GetBackendModule(string moduleId);
 
     Dictionary<ModulePathInfo, string> GetModulesContentPathInfos();
 

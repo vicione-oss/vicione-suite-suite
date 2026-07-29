@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reflection;
 using Core.Module;
 using Core.Module.Contracts;
@@ -385,7 +385,7 @@ internal sealed partial class ModuleHost : IModuleHost
         // the ui host has to load the ui modules itself 
         var moduleBundle = _loadedModuleBundles.First(k => k.Module.ModuleKey.ModuleId == UiHostModule.ModuleId);
 
-        return new UiHostEnvironment(_suiteContext)
+        return new UiHostEnvironment(_suiteContext, this)
         {
             // use debug modules only in development mode 
             IsDevelopment = uiHostOptions.UseDebugRoot,

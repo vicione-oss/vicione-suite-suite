@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -48,7 +48,7 @@ internal sealed class NavTileRegistry<TClientModule> : INavTileRegistry<TClientM
                     Enabled = r.InitialNavTileAttribute.Enabled,
                     LinkTarget = r.InitialNavTileAttribute.LinkTarget
                 },
-                AuthorizationRequirement = r.ModuleAuthorizeAttribute.GetAccessLevelRequirement()
+                AuthorizationRequirement = r.ModuleAuthorizeAttribute.GetAccessLevelAuthorizationRequirement()
             };
 
             _itemMap.Add(item.Id, item);

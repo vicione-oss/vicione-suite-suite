@@ -9,6 +9,17 @@ using Sdk.Modules;
 using TestModule.Backend;
 using TestModule.Client;
 using Xunit;
+using Core.OS.Modules;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
+using MassTransit;
+using Core.Shared.Modules.Contracts;
+using Sdk.Backend.Modules;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using NSubstitute;
 
 namespace Core.OS.Tests.Modules.Services;
 
@@ -21,7 +32,7 @@ public class UiHostEnvironmentTests
         {
             // Arrange
             var suiteContext = TestFactory.CreateSuiteContext(enableBackendModules: false, enableUiModules: false);
-            var hostManagement = new UiHostEnvironment(suiteContext);
+            var hostManagement = new UiHostEnvironment(suiteContext, Substitute.For<IModuleHost>());
 
             // Act
             var path = hostManagement.GetWwwRootFolder();
@@ -35,7 +46,7 @@ public class UiHostEnvironmentTests
         {
             // Arrange
             var suiteContext = TestFactory.CreateSuiteContext(enableBackendModules: false, enableUiModules: false);
-            var hostManagement = new UiHostEnvironment(suiteContext)
+            var hostManagement = new UiHostEnvironment(suiteContext, Substitute.For<IModuleHost>())
             {
                 IsDevelopment = true
             };
@@ -57,7 +68,7 @@ public class UiHostEnvironmentTests
         {
             // Arrange
             var suiteContext = TestFactory.CreateSuiteContext(enableBackendModules: false);
-            var hostManagement = new UiHostEnvironment(suiteContext);
+            var hostManagement = new UiHostEnvironment(suiteContext, Substitute.For<IModuleHost>());
 
             // Act
             var infos = hostManagement.GetModuleMetadata();
@@ -71,7 +82,7 @@ public class UiHostEnvironmentTests
         {
             // Arrange
             var suiteContext = TestFactory.CreateSuiteContext(enableUiHost: false, enableUiModules: false);
-            var hostManagement = new UiHostEnvironment(suiteContext);
+            var hostManagement = new UiHostEnvironment(suiteContext, Substitute.For<IModuleHost>());
 
             // Act
             var infos = hostManagement.GetModuleMetadata();
@@ -89,7 +100,7 @@ public class UiHostEnvironmentTests
         {
             // Arrange
             var suiteContext = TestFactory.CreateSuiteContext(enableBackendModules: false);
-            var hostManagement = new UiHostEnvironment(suiteContext);
+            var hostManagement = new UiHostEnvironment(suiteContext, Substitute.For<IModuleHost>());
 
             // Act
             var bundles = hostManagement.LoadModuleBundles(CreateBundle).ToList();
@@ -104,7 +115,7 @@ public class UiHostEnvironmentTests
         {
             // Arrange
             var suiteContext = TestFactory.CreateSuiteContext(enableUiHost: false, enableUiModules: false);
-            var hostManagement = new UiHostEnvironment(suiteContext);
+            var hostManagement = new UiHostEnvironment(suiteContext, Substitute.For<IModuleHost>());
 
             // Act
             var bundles = hostManagement.LoadModuleBundles(CreateBundle);

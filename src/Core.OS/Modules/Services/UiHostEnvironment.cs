@@ -3,16 +3,21 @@ using Core.Module;
 using Core.Module.Contracts;
 using Core.Module.Extensions;
 using Core.UiHosting;
+using Sdk.Backend.Modules;
 using Sdk.Modules;
 
 namespace Core.OS.Modules.Services;
 
-internal sealed class UiHostEnvironment(SuiteDependencyContext suiteContext) : IUiHostEnvironment
+internal sealed class UiHostEnvironment(SuiteDependencyContext suiteContext, IModuleHost moduleHost) : IUiHostEnvironment
 {
     private readonly SuiteDependencyContext _suiteContext = suiteContext;
+    private readonly IModuleHost _moduleHost = moduleHost;
 
     public bool IsDevelopment { get; init; }
     public string? ModulePath { get; set; }
+
+    public BackendModule? GetBackendModule(string moduleId)
+        => _moduleHost.GetModules().FirstOrDefault(m => m.ModuleKey.ModuleId == moduleId && m is BackendModule) as BackendModule;
 
     public string? GetWwwRootFolder()
     {
