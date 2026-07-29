@@ -17,6 +17,7 @@ public class ArtifactRepositoryChangeConsumerTests
 {
     private readonly IArtifactRepositoryStore _repositoryStore = Substitute.For<IArtifactRepositoryStore>();
     private readonly IArtifactRepositoryOptionsCache _optionsCache = Substitute.For<IArtifactRepositoryOptionsCache>();
+    private readonly IArtifactRepositoryTokenService _tokenService = Substitute.For<IArtifactRepositoryTokenService>();
     private readonly IModuleArtifactCache _artifactsCache = Substitute.For<IModuleArtifactCache>();
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
@@ -27,6 +28,7 @@ public class ArtifactRepositoryChangeConsumerTests
             cfg.AddSingleton(_repositoryStore);
             cfg.AddSingleton(_optionsCache);
             cfg.AddSingleton(_artifactsCache);
+            cfg.AddSingleton(_tokenService);
             cfg.AddSingleton(Substitute.For<ILogger<ArtifactRepositoryChangeConsumer>>());
         };
 
@@ -55,7 +57,7 @@ public class ArtifactRepositoryChangeConsumerTests
 
         // Assert
         await _artifactsCache.Received(1).Invalidate(Arg.Any<CancellationToken>());
-        await _optionsCache.Received(1).ReloadOptions(_repositoryStore, Arg.Any<CancellationToken>());
+        await _optionsCache.Received(1).ReloadOptions(_repositoryStore, _tokenService, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -71,6 +73,6 @@ public class ArtifactRepositoryChangeConsumerTests
 
         // Assert
         await _artifactsCache.Received(0).Invalidate(Arg.Any<CancellationToken>());
-        await _optionsCache.DidNotReceive().ReloadOptions(Arg.Any<IArtifactRepositoryStore>(), Arg.Any<CancellationToken>());
+        await _optionsCache.DidNotReceive().ReloadOptions(Arg.Any<IArtifactRepositoryStore>(), Arg.Any<IArtifactRepositoryTokenService>(), Arg.Any<CancellationToken>());
     }
 }

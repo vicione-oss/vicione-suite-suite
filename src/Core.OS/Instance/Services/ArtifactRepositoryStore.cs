@@ -9,7 +9,7 @@ using Sdk.Messaging;
 
 namespace Core.OS.Instance.Services;
 
-internal partial class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<InstanceOptions> instanceOptions, ILogger logger) : IArtifactRepositoryStore, IDisposable
+internal partial class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<InstanceOptions> instanceOptions, ILogger<ArtifactRepositoryStore> logger) : IArtifactRepositoryStore, IDisposable
 {
     private const string RepositoriesFileName = "repo-sources.json";
     private const string MigrationFallbackTokenEndpoint = "https://system.update.ifm/artifactory/vicione-token/token.json";

@@ -23,10 +23,11 @@ public class ModulePreparationPipelineTests
         Type = InstanceType.Standalone
     };
     private readonly IFileSystem _fileSystem = NSubstitute.Substitute.For<IFileSystem>();
+    private readonly IArtifactRepositoryStore _repositoryStore = NSubstitute.Substitute.For<IArtifactRepositoryStore>();
     private readonly ILoggerFactory _loggerFactory = NSubstitute.Substitute.For<ILoggerFactory>();
 
     private ModulePreparationContext GetContext()
-        => new(WebApplication.CreateBuilder([]), _fileSystem, _instanceOptions, _loggerFactory);
+        => new(WebApplication.CreateBuilder([]), _fileSystem, _instanceOptions, _repositoryStore, _loggerFactory);
 
     public sealed class RunAsync : ModulePreparationPipelineTests
     {
@@ -34,8 +35,8 @@ public class ModulePreparationPipelineTests
         public async Task Should_return_success_when_no_steps_are_registered()
         {
             // Arrange + Act
-            var result = await new ModulePreparationPipeline(GetContext())
-                .RunAsync(TestContext.Current.CancellationToken);
+            using var pipeline = new ModulePreparationPipeline(GetContext());
+            var result = await pipeline.RunAsync(TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeAssignableTo<IPreparationSuccessResult>();
@@ -45,7 +46,8 @@ public class ModulePreparationPipelineTests
         public async Task Should_return_success_when_all_steps_succeed()
         {
             // Arrange + Act
-            var result = await new ModulePreparationPipeline(GetContext())
+            using var pipeline = new ModulePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) => Task.CompletedTask)
                 .Use((_, _) => Task.FromResult(PreparationResult.Success as IPreparationResult))
                 .RunAsync(TestContext.Current.CancellationToken);
@@ -62,7 +64,8 @@ public class ModulePreparationPipelineTests
             var step3Executed = false;
 
             // Act
-            var result = await new ModulePreparationPipeline(GetContext())
+            using var pipeline = new ModulePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) => Task.CompletedTask)
                 .Use((_, _) => Task.FromResult(failure as IPreparationResult))
                 .Use((_, _) =>
@@ -85,7 +88,8 @@ public class ModulePreparationPipelineTests
             var receivedTokens = new List<CancellationToken>();
 
             // Act
-            await new ModulePreparationPipeline(GetContext())
+            using var pipeline = new ModulePreparationPipeline(GetContext());
+            await pipeline
                 .Use((_, ct) =>
                 {
                     receivedTokens.Add(ct);
@@ -106,7 +110,8 @@ public class ModulePreparationPipelineTests
         public async Task Should_convert_a_thrown_exception_into_a_module_host_abort_result()
         {
             // Act
-            var result = await new ModulePreparationPipeline(GetContext())
+            using var pipeline = new ModulePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) => Task.FromException<IPreparationResult>(new InvalidOperationException("boom")))
                 .RunAsync(TestContext.Current.CancellationToken);
 
@@ -122,7 +127,8 @@ public class ModulePreparationPipelineTests
             var executedSteps = new List<int>();
 
             // Act
-            var result = await new ModulePreparationPipeline(GetContext())
+            using var pipeline = new ModulePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) =>
                 {
                     executedSteps.Add(1);
@@ -145,8 +151,8 @@ public class ModulePreparationPipelineTests
         public async Task Should_rethrow_operation_cancelled_exception_rather_than_converting_it()
         {
             // Arrange
-            var pipeline = new ModulePreparationPipeline(GetContext())
-                .Use((_, ct) => throw new OperationCanceledException(ct));
+            using var pipeline = new ModulePreparationPipeline(GetContext());
+            pipeline.Use((_, ct) => throw new OperationCanceledException(ct));
 
             // Act
             var act = async () => await pipeline.RunAsync(TestContext.Current.CancellationToken);

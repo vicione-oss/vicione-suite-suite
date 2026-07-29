@@ -7,14 +7,13 @@ using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Hosting;
-using Microsoft.Extensions.Options;
 using Sdk.Instance;
 
 namespace Core.OS.Hosting.Extensions;
 
 internal static partial class SuitePreparationPipelineExtensions
 {
-    public static SuitePreparationPipeline UseInstanceId(
+    public static SuitePreparationPipeline UseInstanceIdentification(
         this SuitePreparationPipeline pipeline)
         => pipeline.Use((context, _) =>
         {
@@ -35,15 +34,15 @@ internal static partial class SuitePreparationPipelineExtensions
             return Task.CompletedTask;
         });
 
-    public static SuitePreparationPipeline UseResetFile(
+    public static SuitePreparationPipeline UseResetIfRequested(
         this SuitePreparationPipeline pipeline)
-        => pipeline.Use((context, ct) => ResetDependingOnFileFlag(context.FileSystem, context.InstanceOptions, context.Logger, ct));
+        => pipeline.Use((context, ct) => ResetDependingOnFileFlag(context.FileSystem, context.InstanceOptions, context.RepositoryStore, context.Logger, ct));
 
-    public static SuitePreparationPipeline UseRestore(
+    public static SuitePreparationPipeline UseRestoreIfRequested(
         this SuitePreparationPipeline pipeline)
         => pipeline.Use((context, ct) => RestoreDependingOnFileFlag(context.FileSystem, context.InstanceOptions, context.Logger, ct));
 
-    public static SuitePreparationPipeline UseVersionDowngradeCheck(
+    public static SuitePreparationPipeline UseVersionDowngradeDetection(
         this SuitePreparationPipeline pipeline)
         => pipeline.Use(async (context, ct) =>
         {
@@ -88,7 +87,7 @@ internal static partial class SuitePreparationPipelineExtensions
             return PreparationResult.Success;
         });
 
-    public static SuitePreparationPipeline UseOptionValidation(
+    public static SuitePreparationPipeline UseOptionsValidation(
         this SuitePreparationPipeline pipeline, WebApplicationBuilder builder)
         => pipeline.Use((context, _) =>
         {
@@ -97,12 +96,17 @@ internal static partial class SuitePreparationPipelineExtensions
             return Task.CompletedTask;
         });
 
-    public static SuitePreparationPipeline UseModulePipeline(
+    public static SuitePreparationPipeline UseModulePreparation(
         this SuitePreparationPipeline pipeline, WebApplicationBuilder builder)
         => pipeline.Use(async (context, ct) =>
         {
-            context.ModuleContext = new ModulePreparationContext(builder, context.FileSystem, context.InstanceOptions, context.LoggerFactory);
-            var modulePipeline = new ModulePreparationPipeline(context.ModuleContext)
+            context.ModuleContext = new ModulePreparationContext(builder,
+                context.FileSystem,
+                context.InstanceOptions,
+                context.RepositoryStore,
+                context.LoggerFactory);
+
+            using var modulePipeline = new ModulePreparationPipeline(context.ModuleContext)
                 .UseApplyEnqueuedOperations()
                 .UseRepositoryOptions()
                 .UseModuleLoaderOptions()
@@ -147,7 +151,7 @@ internal static partial class SuitePreparationPipelineExtensions
     /// - Home|Cache: remove all subdirectories and their contents. Keep instance file
     /// - Backup: remove all files
     /// </summary>
-    private static async Task ResetDependingOnFileFlag(IFileSystem fileSystem, InstanceOptions options, ILogger logger, CancellationToken cancellationToken)
+    private static async Task ResetDependingOnFileFlag(IFileSystem fileSystem, InstanceOptions options, IArtifactRepositoryStore repositoryStore, ILogger logger, CancellationToken cancellationToken)
     {
         if (!fileSystem.ResetFileExists(options))
             return;
@@ -170,8 +174,7 @@ internal static partial class SuitePreparationPipelineExtensions
             var dataVersionPath = fileSystem.GetLocalDataVersionFilePath(options);
             fileSystem.File.Delete(dataVersionPath);
 
-            using var repoStore = new ArtifactRepositoryStore(fileSystem, Options.Create(options), logger);
-            await repoStore.Clear(cancellationToken);
+            await repositoryStore.Clear(cancellationToken);
         }
         catch (Exception e)
         {

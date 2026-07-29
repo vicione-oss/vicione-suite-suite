@@ -19,7 +19,7 @@ public class ArtifactRepositoryStoreTests
 {
     private readonly MockFileSystem _fileSystem = new();
     private readonly IOptions<InstanceOptions> _options;
-    private readonly ILogger _logger = NSubstitute.Substitute.For<ILogger>();
+    private readonly ILogger<ArtifactRepositoryStore> _logger = NSubstitute.Substitute.For<ILogger<ArtifactRepositoryStore>>();
     private readonly ArtifactRepository _releaseSource = new()
     {
         Id = Guid.NewGuid(),

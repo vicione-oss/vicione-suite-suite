@@ -59,10 +59,7 @@ internal static class IServiceCollectionExtensions
                 .AddSingleton<IBackupStore, BackupStore>()
                 .AddTransient<IBackupFactory, BackupFactory>();
 
-            // Artifact repository
-            services.AddTransient<IArtifactRepositoryStore, ArtifactRepositoryStore>();
-            services.AddScoped<IArtifactRepositoryTokenService, ArtifactRepositoryTokenService>();
-            services.AddHostedService<ArtifactRepositoryTokenUpdateService>();
+            services.AddArtifactRepositoryServices();
 
             // General instance services
             return services.AddSingleton<ILocalInstanceInformationProvider, LocalInstanceInformationProvider>()
@@ -76,6 +73,15 @@ internal static class IServiceCollectionExtensions
                 .AddScoped<ILoginDesignService, LoginDesignService>()
                 .AddScoped<INonceStore, NonceStore>()
                 .AddScoped<IOnboardingStateStore, OnboardingStateStore>();
+        }
+
+        private IServiceCollection AddArtifactRepositoryServices()
+        {
+            services.AddTransient<IArtifactRepositoryStore, ArtifactRepositoryStore>();
+            services.AddScoped<IArtifactRepositoryTokenService, ArtifactRepositoryTokenService>();
+            services.AddHostedService<ArtifactRepositoryTokenUpdateService>();
+
+            return services;
         }
     }
 }

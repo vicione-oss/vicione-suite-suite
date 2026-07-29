@@ -25,8 +25,8 @@ public class SuitePreparationPipelineTests
         BackupDirectory = "/backup/test",
         Type = InstanceType.Standalone
     };
-    private readonly IFileSystem _fileSystem = NSubstitute.Substitute.For<IFileSystem>();
-    private readonly ILoggerFactory _loggerFactory = NSubstitute.Substitute.For<ILoggerFactory>();
+    private readonly IFileSystem _fileSystem = Substitute.For<IFileSystem>();
+    private readonly ILoggerFactory _loggerFactory = Substitute.For<ILoggerFactory>();
 
     private SuitePreparationContext GetContext() => new(_fileSystem, _instanceOptions, _loggerFactory);
 
@@ -36,8 +36,8 @@ public class SuitePreparationPipelineTests
         public async Task Should_return_success_when_no_steps_are_registered()
         {
             // Arrange + Act
-            var result = await new SuitePreparationPipeline(GetContext())
-                .RunAsync(TestContext.Current.CancellationToken);
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            var result = await pipeline.RunAsync(TestContext.Current.CancellationToken);
 
             // Assert
             result.Should().BeAssignableTo<IPreparationSuccessResult>();
@@ -47,7 +47,8 @@ public class SuitePreparationPipelineTests
         public async Task Should_return_success_when_all_steps_succeed()
         {
             // Arrange + Act
-            var result = await new SuitePreparationPipeline(GetContext())
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use(() => { })
                 .Use((_, _) => Task.CompletedTask)
                 .Use((_, _) => Task.FromResult(PreparationResult.Success as IPreparationResult))
@@ -65,7 +66,8 @@ public class SuitePreparationPipelineTests
             var step3Executed = false;
 
             // Act
-            var result = await new SuitePreparationPipeline(GetContext())
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use(() => { })
                 .Use((_, _) => Task.FromResult(failure as IPreparationResult))
                 .Use((_, _) =>
@@ -87,7 +89,8 @@ public class SuitePreparationPipelineTests
             var executedSteps = new List<int>();
 
             // Act
-            var result = await new SuitePreparationPipeline(GetContext())
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) =>
                 {
                     executedSteps.Add(1);
@@ -122,7 +125,8 @@ public class SuitePreparationPipelineTests
             var executedSteps = new List<int>();
 
             // Act
-            var result = await new SuitePreparationPipeline(GetContext())
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) =>
                 {
                     executedSteps.Add(1);
@@ -153,7 +157,8 @@ public class SuitePreparationPipelineTests
             var receivedTokens = new List<CancellationToken>();
 
             // Act
-            await new SuitePreparationPipeline(GetContext())
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            await pipeline
                 .Use((_, ct) =>
                 {
                     receivedTokens.Add(ct);
@@ -177,7 +182,8 @@ public class SuitePreparationPipelineTests
             const string expectedReason = "something went wrong";
 
             // Act
-            var result = await new SuitePreparationPipeline(GetContext())
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) => Task.FromResult(new FailureResult(expectedReason) as IPreparationResult))
                 .RunAsync(TestContext.Current.CancellationToken);
 
@@ -190,7 +196,8 @@ public class SuitePreparationPipelineTests
         public async Task Should_convert_a_thrown_exception_into_an_abort_result()
         {
             // Act
-            var result = await new SuitePreparationPipeline(GetContext())
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) => Task.FromException<IPreparationResult>(new InvalidOperationException("boom")))
                 .RunAsync(TestContext.Current.CancellationToken);
 
@@ -206,7 +213,8 @@ public class SuitePreparationPipelineTests
             var executedSteps = new List<int>();
 
             // Act
-            var result = await new SuitePreparationPipeline(GetContext())
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            var result = await pipeline
                 .Use((_, _) =>
                 {
                     executedSteps.Add(1);
@@ -229,8 +237,8 @@ public class SuitePreparationPipelineTests
         public async Task Should_rethrow_operation_cancelled_exception_rather_than_converting_it()
         {
             // Arrange
-            var pipeline = new SuitePreparationPipeline(GetContext())
-                .Use((_, ct) => throw new OperationCanceledException(ct));
+            using var pipeline = new SuitePreparationPipeline(GetContext());
+            pipeline.Use((_, ct) => throw new OperationCanceledException(ct));
 
             // Act
             var act = async () => await pipeline.RunAsync(TestContext.Current.CancellationToken);
@@ -247,12 +255,12 @@ public class SuitePreparationPipelineTests
     public sealed class Steps
     {
         private readonly MockFileSystem _fileSystem = new();
-        private readonly ILoggerFactory _loggerFactory = NSubstitute.Substitute.For<ILoggerFactory>();
+        private readonly ILoggerFactory _loggerFactory = Substitute.For<ILoggerFactory>();
         private readonly InstanceOptions _instanceOptions;
 
         public Steps()
         {
-            _loggerFactory.CreateLogger(NSubstitute.Arg.Any<string>()).Returns(NSubstitute.Substitute.For<ILogger>());
+            _loggerFactory.CreateLogger(Arg.Any<string>()).Returns(Substitute.For<ILogger>());
 
             _instanceOptions = new InstanceOptions
             {
@@ -267,14 +275,17 @@ public class SuitePreparationPipelineTests
         }
 
         private Task<IPreparationResult> PrepareSuite(WebApplicationBuilder builder, CancellationToken cancellationToken)
-            => new SuitePreparationPipeline(new SuitePreparationContext(_fileSystem, _instanceOptions, _loggerFactory))
-                .UseInstanceId()
+        {
+            using var pipeline = new SuitePreparationPipeline(new SuitePreparationContext(_fileSystem, _instanceOptions, _loggerFactory));
+            return pipeline
+                .UseInstanceIdentification()
                 .UseDeviceImageCleanup()
-                .UseResetFile()
-                .UseRestore()
-                .UseVersionDowngradeCheck()
+                .UseResetIfRequested()
+                .UseRestoreIfRequested()
+                .UseVersionDowngradeDetection()
                 .UseRecoveryMode(builder)
                 .RunAsync(cancellationToken);
+        }
 
         [Fact]
         public async Task Should_ensure_instance_file_exists()

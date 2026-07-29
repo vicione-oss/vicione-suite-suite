@@ -1,4 +1,5 @@
 using Core.Artifacts;
+using Core.OS.Instance.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Core.OS.Instance.Services;
@@ -17,7 +18,7 @@ public partial class ArtifactRepositoryTokenUpdateService(IServiceProvider servi
         {
             try
             {
-                await TryUpdateRepositoryTokens(stoppingToken);
+                await UpdateRepositoryTokens(stoppingToken);
 
                 await Task.Delay(_interval, stoppingToken);
             }
@@ -34,58 +35,17 @@ public partial class ArtifactRepositoryTokenUpdateService(IServiceProvider servi
         LogServiceIsStopping(logger, nameof(ArtifactRepositoryTokenUpdateService));
     }
 
-    internal async Task TryUpdateRepositoryTokens(CancellationToken cancellationToken)
+    internal async Task UpdateRepositoryTokens(CancellationToken cancellationToken)
     {
-        try
-        {
-            await using var scope = serviceProvider.CreateAsyncScope();
-            var repositoryStore = scope.ServiceProvider.GetRequiredService<IArtifactRepositoryStore>();
-            var tokenService = scope.ServiceProvider.GetRequiredService<IArtifactRepositoryTokenService>();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var repositoryStore = scope.ServiceProvider.GetRequiredService<IArtifactRepositoryStore>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<IArtifactRepositoryTokenService>();
 
-            // get all repositories and update tokens for those enabled and have token endpoint configured
-            var repositories = await repositoryStore.GetRepositories(null, cancellationToken);
-            var updateTasks = repositories.Where(r => r.Enabled && !string.IsNullOrEmpty(r.TokenEndpoint))
-                .Select(async repo =>
-                {
-                    try
-                    {
-                        var tokenResponse = await tokenService.GetToken(new Uri(repo.TokenEndpoint!), cancellationToken);
-                        repo.Password = tokenResponse.Token;
-                        repo.TokenValidUntil = tokenResponse.ValidUntil;
-                        repo.Modified = DateTimeOffset.UtcNow;
-                        repo.ModifiedBy = Environment.UserName;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogFailedToGetToken(logger, ex, repo.Name, repo.TokenEndpoint);
-                    }
-                }).ToArray();
-
-            if (updateTasks.Length == 0)
-            {
-                LogSkipUpdateRepositoryTokens(logger);
-                return;
-            }
-
-            await Task.WhenAll(updateTasks);
-
-            await repositoryStore.Store(repositories, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            // the whole process is failed, log it and try again in next interval
-            LogFailedToUpdateRepositoryTokens(logger, ex);
-        }
+        await repositoryStore.UpdateRepositoryTokens(tokenService, logger, cancellationToken);
     }
-
-    [LoggerMessage(LogLevel.Error, "Failed to get token for repository {Name} from '{Endpoint}'")]
-    static partial void LogFailedToGetToken(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex, string? name, string? endpoint);
 
     [LoggerMessage(LogLevel.Error, "Failed to update repository tokens")]
     static partial void LogFailedToUpdateRepositoryTokens(ILogger<ArtifactRepositoryTokenUpdateService> logger, Exception ex);
-
-    [LoggerMessage(LogLevel.Debug, "Skip update repository tokens")]
-    static partial void LogSkipUpdateRepositoryTokens(ILogger<ArtifactRepositoryTokenUpdateService> logger);
 
     [LoggerMessage(LogLevel.Debug, "{Service} started with interval {Interval}")]
     static partial void LogServiceStartedWithIntervalInterval(ILogger<ArtifactRepositoryTokenUpdateService> logger, string service, TimeSpan interval);

@@ -52,6 +52,7 @@
 - Users seeded on the master were not replicated to slaves during the initial synchronization: the System module's data (users, roles, instance data) is now always included in a sync, and the EF migration history table is excluded from Postgres replication
 - `GetUsersConsumer`, requesting all users failed with "A second operation was started on this context instance" when the instance has more than one user; the user profiles are now built sequentially because the underlying `DbContext` is not thread-safe
 - `LanguageCookieUpdater`, no longer throws when the requesting user is not present on the instance (anonymous request, or a slave whose replica has not received the account yet)
+- `SuitePreparationPipeline`, repository source tokens now get updated if neccessary before the first repository request
 
 ### Updated
 

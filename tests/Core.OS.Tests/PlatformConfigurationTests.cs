@@ -48,6 +48,7 @@ public class PlatformConfigurationTests
             Substitute.For<IHostApplicationBuilder>(),
         fileSystem ?? Substitute.For<IFileSystem>(),
         instanceOptions,
+        Substitute.For<IArtifactRepositoryStore>(),
         Substitute.For<ILoggerFactory>())
         {
             ModuleHost = Substitute.For<IModuleHost>(),
