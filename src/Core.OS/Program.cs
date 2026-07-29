@@ -26,16 +26,17 @@ var fileSystem = new FileSystem();
 var instanceOptions = builder.Configuration.GetInstanceOptions();
 using var loggerFactory = new SerilogLoggerFactory(logger: null, dispose: false);
 var preparationContext = new SuitePreparationContext(fileSystem, instanceOptions, loggerFactory);
+using var preparationPipeline = new SuitePreparationPipeline(preparationContext);
 
 // filesystem / workspace preparation
-var result = await new SuitePreparationPipeline(preparationContext)
-    .UseInstanceId()
+var result = await preparationPipeline
+    .UseInstanceIdentification()
     .UseDeviceImageCleanup()
-    .UseResetFile()
-    .UseRestore()
-    .UseVersionDowngradeCheck()
+    .UseResetIfRequested()
+    .UseRestoreIfRequested()
+    .UseVersionDowngradeDetection()
     .UseRecoveryMode(builder)
-    .UseModulePipeline(builder)
+    .UseModulePreparation(builder)
     .RunWithProcessSignalsAsync();
 
 // build host and validate options

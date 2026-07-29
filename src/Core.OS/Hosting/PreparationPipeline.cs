@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Core.OS.Hosting.Contracts;
@@ -13,14 +14,20 @@ internal static class PreparationResult
 /// Base for ordered preparation pipelines executing a sequence of steps over a shared
 /// <typeparamref name="TContext"/>. Execution stops at the first <see cref="IPreparationAbortResult"/>.
 /// <para>
-/// Uses the curiously recurring template pattern (<typeparamref name="TSelf"/>) so the fluent
-/// <c>Use</c> overloads return the concrete pipeline type, keeping extension-method chaining intact.
+/// Uses the curiously recurring template pattern (<typeparamref name="TSelf"/>) to be able to use fluent
+/// extension-method chaining.
 /// </para>
 /// </summary>
-internal abstract partial class PreparationPipeline<TSelf, TContext>(TContext context)
+internal abstract partial class PreparationPipeline<TSelf, TContext>(TContext context) : IDisposable
     where TSelf : PreparationPipeline<TSelf, TContext>
 {
     private readonly List<(string Name, Func<TContext, CancellationToken, Task<IPreparationResult>> Step)> _steps = [];
+
+    private readonly PipelineHttpFactory _httpFactory = new();
+    private bool _disposedValue;
+
+    /// <summary>A temporary http client factory to be used within steps.</summary>
+    public IHttpClientFactory HttpClientFactory => _httpFactory;
 
     /// <summary>The shared context passed to every step.</summary>
     protected TContext Context => context;
@@ -107,6 +114,43 @@ internal abstract partial class PreparationPipeline<TSelf, TContext>(TContext co
     /// </summary>
     protected virtual void OnStepCompleted(string stepName, TimeSpan elapsed, IPreparationResult result)
         => LogStepCompleted(Logger, stepName, elapsed.TotalMilliseconds);
+
+    /// <summary>
+    /// We can't have a service provider yet and therefore need to provide one
+    /// that takes care of clients disposal itself
+    /// </summary>
+    private sealed class PipelineHttpFactory : IHttpClientFactory, IDisposable
+    {
+        private readonly ConcurrentDictionary<string, Lazy<HttpClient>> _httpClients = new();
+
+        public HttpClient CreateClient(string name)
+            => _httpClients.GetOrAdd(name, static _ => new Lazy<HttpClient>(static () => new HttpClient())).Value;
+
+        public void Dispose()
+        {
+            foreach (var client in _httpClients.Values)
+            {
+                if (client.IsValueCreated)
+                    client.Value.Dispose();
+            }
+        }
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposedValue)
+            return;
+
+        if (disposing)
+            _httpFactory.Dispose();
+
+        _disposedValue = true;
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+    }
 
     [LoggerMessage(LogLevel.Debug, "Preparation step '{StepName}' completed in {ElapsedMs:F1}ms")]
     private static partial void LogStepCompleted(ILogger logger, string stepName, double elapsedMs);

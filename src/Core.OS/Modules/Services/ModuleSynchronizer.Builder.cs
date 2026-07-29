@@ -1,26 +1,21 @@
 using System.IO.Abstractions;
-using Core.Artifacts;
 using Core.Module;
 using Core.Module.Options;
 using Core.Module.Utils;
 using Core.OS.Modules.Extensions;
 using Sdk.Modules;
 using Semver;
-using Serilog.Extensions.Logging;
 
 namespace Core.OS.Modules.Services;
 
-internal sealed partial class ModuleSynchronizer : IDisposable
+internal sealed partial class ModuleSynchronizer
 {
-    private IArtifactRepositoryOptionsProvider? _apiOptionsProvider;
     private IModuleArtifactRepository? _apiAdapter;
     private ModuleLoaderOptions? _loaderOptions;
     private bool _validatePackages;
     private bool _deleteOrphanedVersions;
     private string? _modulesPath;
     private List<ModuleDependencyPackage>? _packages;
-    private LowHttpFactory? _httpClientFactory;
-    private ILoggerFactory? _loggerFactory;
 
     private sealed class SynchronizationOptions
     {
@@ -57,12 +52,6 @@ internal sealed partial class ModuleSynchronizer : IDisposable
         return this;
     }
 
-    public ModuleSynchronizer WithApiAdapter(IArtifactRepositoryOptionsProvider apiOptionsProvider)
-    {
-        _apiOptionsProvider = apiOptionsProvider;
-        return this;
-    }
-
     public ModuleSynchronizer WithPackages(IEnumerable<ModuleDependencyPackage> packages)
     {
         _packages ??= [];
@@ -79,12 +68,6 @@ internal sealed partial class ModuleSynchronizer : IDisposable
     public ModuleSynchronizer WithOrphanedVersionCleanup()
     {
         _deleteOrphanedVersions = true;
-        return this;
-    }
-
-    public ModuleSynchronizer WithLoggerFactory(ILoggerFactory loggerFactory)
-    {
-        _loggerFactory = loggerFactory;
         return this;
     }
 
@@ -126,52 +109,9 @@ internal sealed partial class ModuleSynchronizer : IDisposable
 
     private IModuleArtifactRepository GetModuleRepository()
     {
-        if (_apiAdapter is null && _apiOptionsProvider is null)
+        if (_apiAdapter is null)
             throw new InvalidOperationException($"Use one of the {nameof(WithApiAdapter)} methods to configure a valid module API.");
 
-        if (_apiAdapter is not null && _apiOptionsProvider is not null)
-            throw new InvalidOperationException($"Use only one of the {nameof(WithApiAdapter)} methods to configure a valid module API.");
-
-        if (_apiAdapter is not null)
-            return _apiAdapter;
-
-        if (_apiOptionsProvider is null)
-            throw new InvalidOperationException($"Use '{nameof(WithApiAdapter)}' method to setup the module API.");
-
-        _loggerFactory ??= new SerilogLoggerFactory(logger: null, dispose: false);
-        _httpClientFactory = new LowHttpFactory();
-
-        var artifactory = ArtifactRepositoryFactory.Create(fileSystem, _httpClientFactory, _apiOptionsProvider, _loggerFactory);
-
-        return new ModuleArtifactRepository(artifactory, fileSystem);
-    }
-
-    public void Dispose()
-    {
-        _httpClientFactory?.Dispose();
-        _loggerFactory?.Dispose();
-    }
-
-    /// <summary>
-    /// We can't have a service provider yet and therefore need to provide one
-    /// that takes care of clients disposal itself
-    /// </summary>
-    private class LowHttpFactory : IHttpClientFactory, IDisposable
-    {
-        private readonly Dictionary<string, HttpClient> _httpClients = [];
-
-        public HttpClient CreateClient(string name)
-        {
-            if (_httpClients.TryGetValue(name, out var httpClient))
-                return httpClient;
-
-            _httpClients[name] = new();
-            return _httpClients[name];
-        }
-        public void Dispose()
-        {
-            foreach (var client in _httpClients.Values)
-                client.Dispose();
-        }
+        return _apiAdapter;
     }
 }

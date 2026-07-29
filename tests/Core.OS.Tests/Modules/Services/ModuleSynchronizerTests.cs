@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using AwesomeAssertions;
-using Core.Artifacts;
 using Core.Module;
 using Core.Module.Options;
 using Core.Module.Utils;
@@ -60,7 +59,7 @@ public class ModuleSynchronizerTests
         public async Task Should_use_given_api_adapter()
         {
             // Arrange
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
                 .WithApiAdapter(_moduleRepository)
@@ -74,52 +73,12 @@ public class ModuleSynchronizerTests
         }
 
         [Fact]
-        public async Task Should_create_api_adapter_from_options()
-        {
-            // Arrange            
-            var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
-            optionsProvider.GetOptions()
-                .Returns(new ArtifactRepositoryOptions { Sources = [new ArtifactRepositorySourceOption { Endpoint = "http://vicione-test.ifm.com" }] });
-
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
-            synchronizer
-                .WithPackages([])
-                .WithApiAdapter(optionsProvider)
-                .WithModulesPath(ModulesFolder);
-
-            // Act + Assert
-            await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
-        }
-
-        [Fact]
         public void Should_throw_if_adapter_is_added()
         {
             // Arrange            
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
-                .WithModulesPath(ModulesFolder);
-
-            // Act
-            var action = () => synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
-
-            // Assert
-            action.Should().ThrowAsync<InvalidOperationException>();
-        }
-
-        [Fact]
-        public void Should_throw_if_both_methods_are_used()
-        {
-            // Arrange
-            var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
-            optionsProvider.GetOptions()
-                .Returns(new ArtifactRepositoryOptions { Sources = [] });
-
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
-            synchronizer
-                .WithPackages([])
-                .WithApiAdapter(_moduleRepository)
-                .WithApiAdapter(optionsProvider)
                 .WithModulesPath(ModulesFolder);
 
             // Act
@@ -140,7 +99,7 @@ public class ModuleSynchronizerTests
                 DependingOn = [_moduleA,]
             };
 
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([_moduleB, _moduleC])
                 .WithApiAdapter(_moduleRepository)
@@ -167,7 +126,7 @@ public class ModuleSynchronizerTests
         public async Task Should_try_download_and_extract_resolved_module_versions()
         {
             // Arrange
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([_moduleA, _moduleB])
                 .WithApiAdapter(_moduleRepository)
@@ -196,7 +155,7 @@ public class ModuleSynchronizerTests
         public async Task Should_not_download_and_extract_unresolved_module_versions()
         {
             // Arrange
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([_moduleA])
                 .WithApiAdapter(_moduleRepository)
@@ -232,7 +191,7 @@ public class ModuleSynchronizerTests
         public async Task Should_use_given_api_adapter()
         {
             // Arrange
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackageSdkValidation()
                 .WithPackages([_moduleA, _moduleB])
@@ -267,7 +226,7 @@ public class ModuleSynchronizerTests
             var moduleFolder = fileSystem.Path.Combine(fileSystem.Path.GetFullPath(ModulesFolder), moduleMetadata.Name, moduleMetadata.Version);
             fileSystem.SetupModuleMetadataJson(moduleMetadata, moduleFolder);
 
-            using var synchronizer = new ModuleSynchronizer(fileSystem);
+            var synchronizer = new ModuleSynchronizer(fileSystem);
             synchronizer
                 .WithPackageSdkValidation()
                 .WithPackages([_moduleA, _moduleB])
@@ -295,7 +254,7 @@ public class ModuleSynchronizerTests
             _moduleRepository.GetModuleMetadata(_moduleB, Arg.Any<CancellationToken>())
                 .Returns(moduleMetadata);
 
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackageSdkValidation()
                 .WithPackages([_moduleA, _moduleB])
@@ -327,7 +286,7 @@ public class ModuleSynchronizerTests
             _moduleRepository.QueryLatestModuleMetadataArtifact(Arg.Any<Version>(), _moduleB.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult<IArtifact?>(null));
 
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackageSdkValidation()
                 .WithPackages([_moduleA, _moduleB])
@@ -358,7 +317,7 @@ public class ModuleSynchronizerTests
             _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(moduleArtifact);
 
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackageSdkValidation()
                 .WithPackages([_moduleA])
@@ -386,7 +345,7 @@ public class ModuleSynchronizerTests
             _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, null, null, Arg.Any<CancellationToken>())
                 .Returns(moduleArtifact);
 
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackageSdkValidation()
                 .WithPackages([_moduleA, _moduleB])
@@ -408,7 +367,7 @@ public class ModuleSynchronizerTests
         public async Task Should_use_existing_modules_path()
         {
             // Arrange
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
                 .WithApiAdapter(_moduleRepository)
@@ -427,7 +386,7 @@ public class ModuleSynchronizerTests
         public void Should_throw_on_not_existing_modules_path()
         {
             // Arrange
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
                 .WithApiAdapter(_moduleRepository)
@@ -444,7 +403,7 @@ public class ModuleSynchronizerTests
         public async Task Should_create_modules_path()
         {
             // Arrange            
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
                 .WithApiAdapter(_moduleRepository)
@@ -461,7 +420,7 @@ public class ModuleSynchronizerTests
         public void Should_throw_if_both_methods_are_used()
         {
             // Arrange            
-            using var synchronizer = new ModuleSynchronizer(_fileSystem);
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
             synchronizer
                 .WithPackages([])
                 .WithApiAdapter(_moduleRepository)
@@ -501,7 +460,7 @@ public class ModuleSynchronizerTests
             AddModuleDirectory(fileSystem, _orphanedModuleD);
             AddModuleDirectory(fileSystem, _orphanedModuleE);
 
-            using var synchronizer = new ModuleSynchronizer(fileSystem);
+            var synchronizer = new ModuleSynchronizer(fileSystem);
             synchronizer
                 .WithApiAdapter(_moduleRepository)
                 .WithPackages([_moduleA, _moduleB])
@@ -533,7 +492,7 @@ public class ModuleSynchronizerTests
             fileSystem.AddDirectory(blazorServerPath1);
             fileSystem.AddDirectory(blazorServerPath2);
 
-            using var synchronizer = new ModuleSynchronizer(fileSystem);
+            var synchronizer = new ModuleSynchronizer(fileSystem);
             synchronizer
                 .WithPackages([])
                 .WithApiAdapter(_moduleRepository)
@@ -557,7 +516,7 @@ public class ModuleSynchronizerTests
             AddModuleDirectory(fileSystem, _moduleA);
             AddModuleDirectory(fileSystem, _orphanedModuleC);
 
-            using var synchronizer = new ModuleSynchronizer(fileSystem);
+            var synchronizer = new ModuleSynchronizer(fileSystem);
             synchronizer
                 .WithApiAdapter(_moduleRepository)
                 .WithPackages([_moduleA, _moduleB])

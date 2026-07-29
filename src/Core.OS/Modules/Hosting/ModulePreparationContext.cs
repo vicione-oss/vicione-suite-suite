@@ -19,6 +19,7 @@ internal sealed class ModulePreparationContext(
     IHostApplicationBuilder builder,
     IFileSystem fileSystem,
     InstanceOptions instanceOptions,
+    IArtifactRepositoryStore repositoryStore,
     ILoggerFactory loggerFactory)
 {
     private readonly ILogger logger = loggerFactory.CreateLogger(nameof(ModulePreparationContext));
@@ -40,12 +41,12 @@ internal sealed class ModulePreparationContext(
     /// Shared repository store instance reused across migrate/load steps.
     /// Owned by the context and disposed when the pipeline finishes.
     /// </summary>
-    public IArtifactRepositoryStore? RepositoryStore { get; set; }
+    public IArtifactRepositoryStore RepositoryStore => repositoryStore;
 
     /// <summary>Repository options cache populated during preparation, registered in the final step.</summary>
     public IArtifactRepositoryOptionsCache? RepositoryOptionsCache { get; set; }
 
-    public ModuleLoaderOptions? LoaderOptions { get; set; }
+    public ModuleLoaderOptions? ModuleLoaderOptions { get; set; }
 
     public IModuleOptionsStore? ModuleOptionsStore { get; set; }
 

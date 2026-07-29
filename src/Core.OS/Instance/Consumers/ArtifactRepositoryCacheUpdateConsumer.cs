@@ -8,6 +8,7 @@ namespace Core.OS.Instance.Consumers;
 public sealed partial class ArtifactRepositoryChangeConsumer(
     IArtifactRepositoryStore repositoryStore,
     IArtifactRepositoryOptionsCache optionsCache,
+    IArtifactRepositoryTokenService tokenService,
     IModuleArtifactCache artifactCache,
     ILogger<ArtifactRepositoryChangeConsumer> logger) :
     IConsumer<ArtifactRepositoryChanged>
@@ -33,7 +34,7 @@ public sealed partial class ArtifactRepositoryChangeConsumer(
 
         try
         {
-            await optionsCache.ReloadOptions(repositoryStore, cancellationToken);
+            await optionsCache.ReloadOptions(repositoryStore, tokenService, cancellationToken);
 
             if (logger.IsEnabled(LogLevel.Information))
             {

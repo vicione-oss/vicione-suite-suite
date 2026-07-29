@@ -4,5 +4,5 @@ namespace Core.OS.Instance;
 
 public interface IArtifactRepositoryOptionsCache : IArtifactRepositoryOptionsProvider
 {
-    Task ReloadOptions(IArtifactRepositoryStore repositoryStore, CancellationToken cancellationToken);
+    Task ReloadOptions(IArtifactRepositoryStore repositoryStore, IArtifactRepositoryTokenService tokenService, CancellationToken cancellationToken);
 }
