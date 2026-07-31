@@ -5,7 +5,7 @@ using Xunit;
 namespace Core.Module.Tests;
 
 public class ModuleAssemblyLoaderTests
-{    
+{
     [Trait(Traits.Category, Traits.System)]
     [Fact]
     public void Should_return_module_when_loading_assembly_from_absolute_directory()

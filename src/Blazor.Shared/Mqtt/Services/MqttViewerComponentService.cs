@@ -217,7 +217,7 @@ public sealed class MqttViewerComponentService
         EnsureAllTopicExists();
 
         if (_mqttService.IsConnected)
-            await _mqttService.Subscribe(MqttViewerConstants.AllTopicSubscription, MqttQualityOfServiceLevel.AtMostOnce);
+            await _mqttService.Subscribe(MqttViewerConstants.AllTopicSubscription, MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
 
         if (MqttConnected is not null)
             await MqttConnected.Invoke();

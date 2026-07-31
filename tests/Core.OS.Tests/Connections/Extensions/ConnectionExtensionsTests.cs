@@ -16,7 +16,7 @@ public class ConnectionExtensionsTests
             // Arrange
             var connection = new Connection();
             var instanceId = Guid.NewGuid();
-            var protocol = MqttConnectionType.TCPWithTLS;
+            var protocol = MqttConnectionType.TCP;
 
             // Act
             connection.SetInstanceMetadata(instanceId, protocol);

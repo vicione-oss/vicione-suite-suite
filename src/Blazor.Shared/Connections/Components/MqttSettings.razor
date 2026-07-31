@@ -1,17 +1,14 @@
-﻿@using Sdk.Client.Connections
+@using Sdk.Client.Connections
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.Blazor.Components.SpinEdit
 @using ViciOne.Ui.Blazor.Components.CheckBox
 
 @inherits ConnectionSettingsComponentBase<MqttConnection>
 
-<SettingsField Label="@($"{TechnicalAcronyms.Mqtt} {TechnicalTerms.Protocol}")">
-    <SettingsFieldComboBox Items="@_connectionTypes"
-                           ValueSelector="@(item => item.Value)"
-                           TextSelector="@(item => item.Text)"
-                           @bind-Value="@Connection.Protocol"
-                           @bind-Value:after="NotifyChanged" />
-
+<SettingsField Label="@Localization.MqttSettings.ClientId">
+    <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.ClientId"
+                          @bind-Value="@Connection.ClientId"
+                          @bind-Value:after="NotifyChanged" />
 </SettingsField>
 
 <SettingsField Label="@CommonVocabulary.Address">
@@ -20,12 +17,23 @@
                           @bind-Value:after="NotifyChanged" />
 </SettingsField>
 
+<!-- disable for websocket connection -->
+<SettingsField Label="@TechnicalTerms.Port">
+    <SpinEdit @bind-Value="@Connection.Port"
+              @bind-Value:after="NotifyChanged"
+              Interval="1"
+              Minimum="1"
+              Maximum="65535"
+              IsRastered="true"
+              Enabled="@(!_isPortReadonly)"
+              ReadOnly="@_isPortReadonly" />
+</SettingsField>
+
 <SettingsField Label="@TechnicalTerms.Username">
     <SettingsFieldTextBox Placeholder="@TechnicalTerms.Username"
                           @bind-Value="@Connection.Username"
                           @bind-Value:after="NotifyChanged" />
 </SettingsField>
-
 
 <SettingsField Label="@CommonVocabulary.Password">
     <SettingsFieldTextBox Placeholder="@CommonVocabulary.Password"
@@ -34,19 +42,65 @@
                           Password="true" />
 </SettingsField>
 
-<SettingsField Label="@TechnicalTerms.Port">
-    <SpinEdit @bind-Value="@Connection.Port"
-              @bind-Value:after="NotifyChanged"
-              Interval="1"
-              Minimum="1"
-              Maximum="65535"
-              IsRastered="true" />
+<SettingsField Label="@Localization.MqttSettings.TransportProtocol">
+    <SettingsFieldComboBox Items="@_connectionTypes"
+                           ValueSelector="@(item => item.Value)"
+                           TextSelector="@(item => item.Text)"
+                           @bind-Value="@Connection.Protocol"
+                           @bind-Value:after="UpdateFieldsAndNotifyChanged" />
 </SettingsField>
 
-<SettingsField Label="@Localization.MqttSettings.ClientId">
-    <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.ClientId"
-                          @bind-Value="@Connection.ClientId"
-                          @bind-Value:after="NotifyChanged" />
+@* SSL + Certificates *@
+
+<SettingsField Label="@Localization.MqttSettings.SslProtocol">
+    <SettingsFieldComboBox Items="@_supportedSslProtocols"
+                           ValueSelector="@(item => item.Value)"
+                           TextSelector="@(item => item.Text)"
+                           @bind-Value="@Connection.SslProtocol"
+                           @bind-Value:after="UpdateFieldsAndNotifyChanged" />
+</SettingsField>
+
+<SettingsField Label="@Localization.MqttSettings.AllowUntrustedCertificates">
+    <SettingsFieldSwitch Enabled="@_isSslEnabled"
+                         @bind-Value="@Connection.AllowUntrustedCertificates"
+                         @bind-Value:after="NotifyChanged" />
+</SettingsField>
+
+@if (_isSslEnabled)
+{
+    <SettingsFieldSeparator />
+
+    <SettingsField Label="@Localization.MqttSettings.ClientCertificate">
+        <SettingsFieldTextBox Placeholder="ClientCertificate"
+                              @bind-Value="@Connection.ClientCertificate"
+                              @bind-Value:after="NotifyChanged"
+                              Password="true" />
+    </SettingsField>
+
+    <SettingsField Label="@Localization.MqttSettings.ClientKey">
+        <SettingsFieldTextBox Placeholder="ClientKey"
+                              @bind-Value="@Connection.ClientCertificateKey"
+                              @bind-Value:after="NotifyChanged"
+                              Password="true" />
+    </SettingsField>
+
+    <SettingsField Label="@Localization.MqttSettings.ClientKeyPassword">
+        <SettingsFieldTextBox Placeholder="ClientKeyPassword"
+                              @bind-Value="@Connection.ClientCertificateKeyPassword"
+                              @bind-Value:after="NotifyChanged"
+                              Password="true" />
+    </SettingsField>
+}
+
+@* Advanced *@
+<SettingsFieldSeparator />
+
+<SettingsField Label="@($"{TechnicalAcronyms.Mqtt} {TechnicalTerms.Protocol}")">
+    <SettingsFieldComboBox Items="@_protocolVersions"
+                           ValueSelector="@(item => item.Value)"
+                           TextSelector="@(item => item.Text)"
+                           @bind-Value="@Connection.ProtocolVersion"
+                           @bind-Value:after="NotifyChanged" />
 </SettingsField>
 
 <SettingsField Label="@Localization.MqttSettings.CleanSession">
@@ -54,19 +108,56 @@
               @bind-Value:after="NotifyChanged" />
 </SettingsField>
 
-<SettingsField Label="@Localization.MqttSettings.WillTopic">
-    <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.WillTopic"
-                          @bind-Value="@Connection.WillTopic"
-                          @bind-Value:after="NotifyChanged" />
+<SettingsField Label="@Localization.MqttSettings.ConnectionTimeout">
+    <SpinEdit @bind-Value="@Connection.ConnectTimeoutSeconds"
+              @bind-Value:after="NotifyChanged"
+              Interval="1"
+              Minimum="1"
+              Maximum="1000"
+              IsRastered="true" />
 </SettingsField>
 
-<SettingsField Label="@Localization.MqttSettings.WillMessage">
-    <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.WillMessage"
-                          @bind-Value="@Connection.WillMessage"
-                          @bind-Value:after="NotifyChanged" />
+<SettingsField Label="@Localization.MqttSettings.KeepAlive">
+    <SpinEdit @bind-Value="@Connection.KeepAliveSeconds"
+              @bind-Value:after="NotifyChanged"
+              Interval="1"
+              Minimum="1"
+              Maximum="1000"
+              IsRastered="true" />
 </SettingsField>
 
-<SettingsField Label="@Localization.MqttSettings.WillRetain">
-    <CheckBox @bind-Value="@Connection.WillRetain"
-              @bind-Value:after="NotifyChanged" />
+@* Will *@
+<SettingsFieldSeparator />
+
+<SettingsField Label="@Localization.MqttSettings.WillOptions">
+    <SettingsFieldSwitch @bind-Value="@_showWillFields"
+                         @bind-Value:after="NotifyWillChanged" />
 </SettingsField>
+
+@if (_showWillFields)
+{
+    <SettingsField Label="@Localization.MqttSettings.WillTopic">
+        <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.WillTopic"
+                              @bind-Value="@Connection.WillTopic"
+                              @bind-Value:after="NotifyChanged" />
+    </SettingsField>
+
+    <SettingsField Label="@Localization.MqttSettings.WillMessage">
+        <SettingsFieldTextBox Placeholder="@Localization.MqttSettings.WillMessage"
+                              @bind-Value="@Connection.WillMessage"
+                              @bind-Value:after="NotifyChanged" />
+    </SettingsField>
+
+    <SettingsField Label="@Localization.MqttSettings.WillRetain">
+        <CheckBox @bind-Value="@Connection.WillRetain"
+                  @bind-Value:after="NotifyChanged" />
+    </SettingsField>
+
+    <SettingsField Label="@Localization.MqttSettings.QualityOfServiceLevels">
+        <SettingsFieldComboBox Items="@_qualityOfServiceLevels"
+                               ValueSelector="@(item => item.Value)"
+                               TextSelector="@(item => item.Text)"
+                               @bind-Value="@Connection.QualityOfService"
+                               @bind-Value:after="NotifyChanged" />
+    </SettingsField>
+}

@@ -115,7 +115,7 @@ public sealed class TestConnectionConsumerTests
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
-        var command = SetupCommandWithMqtt(MqttConnectionType.TCPWithTLS);
+        var command = SetupCommandWithMqtt(MqttConnectionType.TCP);
 
         SetupTestServiceForSuccess(command.Connection.Id);
 
