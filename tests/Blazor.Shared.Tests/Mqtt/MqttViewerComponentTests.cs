@@ -48,7 +48,7 @@ public class MqttViewerComponentTests
         Topic = "test",
         Message = "a",
         MessageId = 1,
-        Qos = MqttQualityOfServiceLevel.AtMostOnce,
+        Qos = MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce,
     };
 
     private static IElement FindConnectButton(IRenderedComponent<MqttViewerComponent> component)
@@ -104,7 +104,7 @@ public class MqttViewerComponentTests
                             Port = 1883,
                             Username = "username",
                             Password = "password",
-                            Protocol = MqttConnectionType.TCPWithTLS,
+                            Protocol = MqttConnectionType.TCP,
                         }),
                         Name = "test Connection2"
                     },
@@ -223,7 +223,7 @@ public class MqttViewerComponentTests
                     {
                         Message = "test",
                         MessageId = 1,
-                        Qos = MqttQualityOfServiceLevel.AtMostOnce,
+                        Qos = MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce,
                         Retained = true,
                         Topic = "test",
                         Timestamp = DateTimeOffset.Now,

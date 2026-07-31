@@ -1,5 +1,4 @@
 using Blazor.Shared.Mqtt.Contracts;
-using MQTTnet.Protocol;
 using Sdk.Connections.Contracts;
 
 namespace Blazor.Shared.Mqtt.Services;
@@ -17,6 +16,6 @@ public interface IMqttService : IAsyncDisposable
 
     Task Connect(MqttConnection mqttConnection);
     Task Disconnect();
-    Task Subscribe(string topic, MqttQualityOfServiceLevel qos);
+    Task Subscribe(string topic, MQTTnet.Protocol.MqttQualityOfServiceLevel qos);
     void ClearMessages();
 }

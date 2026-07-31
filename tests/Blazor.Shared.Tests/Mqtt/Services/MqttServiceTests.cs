@@ -1,7 +1,6 @@
 using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Services;
 using AwesomeAssertions;
-using MQTTnet.Protocol;
 using Sdk.Connections.Contracts;
 using Xunit;
 
@@ -77,7 +76,7 @@ public sealed class MqttServiceTests
             {
                 Address = "https://123.123.123.123",
                 Port = 1883,
-                Protocol = MqttConnectionType.TCPWithTLS,
+                Protocol = MqttConnectionType.TCP,
             };
             var errorMessage = string.Empty;
 
@@ -129,7 +128,7 @@ public sealed class MqttServiceTests
             // Arrange
             await using var service = new MqttService();
 
-            ((MessageModel[])service.Messages)[0] = new() { Message = "test", MessageId = 1, Retained = true, Qos = MqttQualityOfServiceLevel.AtMostOnce, Topic = "test", };
+            ((MessageModel[])service.Messages)[0] = new() { Message = "test", MessageId = 1, Retained = true, Qos = MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce, Topic = "test", };
 
             // Act
             await service.Connect(new());
@@ -178,7 +177,7 @@ public sealed class MqttServiceTests
 
             // Act
             await service.Connect(new());
-            await service.Subscribe("test", MqttQualityOfServiceLevel.AtMostOnce);
+            await service.Subscribe("test", MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
 
             // Assert
             errorMessage.Should().NotBeNullOrEmpty();

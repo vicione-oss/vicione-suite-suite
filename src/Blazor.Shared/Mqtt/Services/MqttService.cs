@@ -3,7 +3,6 @@ using System.Text;
 using Blazor.Shared.Mqtt.Contracts;
 using Core.Shared.Extensions;
 using MQTTnet;
-using MQTTnet.Protocol;
 using Sdk.Connections.Contracts;
 
 namespace Blazor.Shared.Mqtt.Services;
@@ -103,7 +102,7 @@ public sealed class MqttService : IMqttService
         ReceivedMessages = 0;
     }
 
-    public async Task Subscribe(string topic, MqttQualityOfServiceLevel qos)
+    public async Task Subscribe(string topic, MQTTnet.Protocol.MqttQualityOfServiceLevel qos)
     {
         try
         {
