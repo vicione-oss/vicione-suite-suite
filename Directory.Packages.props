@@ -5,9 +5,9 @@
     <HostManagementVersion>1.3.0</HostManagementVersion>
     <OpenTelemetryVersion>1.16.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.10</MassTransitVersion>
-    <ViciOneUiBlazorComponentsVersion>5.18.0</ViciOneUiBlazorComponentsVersion>
-    <ViciOneUiMonochromeIconsVersion>4.14.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>2.2.0-ci2711636451</ViciOneSuiteSdkVersion>
+    <ViciOneUiBlazorComponentsVersion>5.19.0</ViciOneUiBlazorComponentsVersion>
+    <ViciOneUiMonochromeIconsVersion>4.15.0</ViciOneUiMonochromeIconsVersion>
+    <ViciOneSuiteSdkVersion>2.2.0</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
@@ -72,8 +72,8 @@
     <PackageVersion Include="ViciOne.Ui.TreeEditor" Version="2.0.1" />
     <!--Used for tests only:-->
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
-    <PackageVersion Include="AwesomeAssertions" Version="9.4.0" />
-    <PackageVersion Include="bunit" Version="2.7.2" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.5.0" />
+    <PackageVersion Include="bunit" Version="2.8.6" />
     <PackageVersion Include="Extensions.Logging.NSubstitute" Version="1.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.8.0" />
