@@ -17,7 +17,7 @@
             <ActionButtons>
                 @if (State.AvailableUserRoles?.Any() == true)
                 {
-                    <ComboBox Items="@State.AvailableUserRoles" @bind-Value="State.RoleToAdd" />
+                    <ComboBox Items="@State.AvailableUserRoles" @bind-Value="State.RoleToAdd" CssClass="roles-combo-box" />
                     <AddGridActionButton OnClick="@AddToRole" Enabled="@(State.RoleToAdd != null)"/>
                 }
                 <DeleteGridActionButton Enabled="@_deleteRoleActionButtonEnabled" OnClick="@RemoveSelectedRoles" />
