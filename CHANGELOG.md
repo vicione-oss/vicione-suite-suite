@@ -4,6 +4,8 @@
 
 ### Added
 
+- New and rejoining cluster nodes now converge to the cluster's module set. When a slave registers, the master sends it the desired module manifest (its applied manifest plus any still-pending operations); the node enqueues the required install/uninstall operations and restarts to match, guarded against restart loops. This closes the gap where a slave's local `modules.json` was never reconciled with the cluster (e.g. a brand-new node or one offline beyond the queue lifetime).
+- Cluster-wide restart: a new `RestartCluster` command lets the master restart every node at once (fanned out as instance-dependent `ControlInstance` restart commands). The module management panel's restart action now restarts the whole cluster on master/slave setups and the single node on standalone.
 - MassTransit EF Core Bus Outbox for master-side replication publishing. `ChangeTrackingInterceptor` now publishes during `SavingChangesAsync` instead of after commit, eliminating silent data loss when the broker is unreachable.
 - Replication sequence numbers with in-memory reorder buffer. Monotonically increasing sequence numbers per context type enable gap detection on slaves. A reorder buffer absorbs brief out-of-order delivery from the Bus Outbox; persistent gaps trigger a forced full-sync.
 - `RegisterInstance.ForceSync` flag to force full data synchronization regardless of queue TTL, used by the gap-triggered resync path.
@@ -18,6 +20,7 @@
 
 ### Changed
 
+- Module package operations (install/update/uninstall) are now applied cluster-wide. The master fans out an instance-dependent `EnqueueModulePackageOperations` command to every registered instance so all nodes enqueue the same changes and apply them on their next restart; offline nodes receive the command from their durable queue on reconnect. Standalone behavior is unchanged. Only the master forwards the resulting `ModulePackageOperationsChanged` event to the UI, while every node emits a per-node `ModulePackageOperationsEnqueued` event for backend correlation.
 - `JFrogArtifactRepository`
     - module archives are now streamed to a temporary file on disk and extracted from there instead of being buffered in memory.
     - artifact source endpoints are required to be secure HTTPs urls

@@ -80,7 +80,7 @@ internal partial class ModulePackageOperationProcessor
         }
     }
 
-    private static List<ModuleDependencyPackage> DeterminePackageChanges(ModulePackageManifest packagesManifest, IEnumerable<ModulePackageOperation> operations)
+    internal static List<ModuleDependencyPackage> DeterminePackageChanges(ModulePackageManifest packagesManifest, IEnumerable<ModulePackageOperation> operations)
     {
         var operationsArray = operations.ToArray();
 

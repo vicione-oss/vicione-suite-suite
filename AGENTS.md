@@ -63,8 +63,8 @@ dotnet build vicione-suite.slnx
 # Run (startup project: Core.OS, profile: Standalone-Ui)
 dotnet run --project src/Core.OS
 
-# Tests
-dotnet test vicione-suite.slnx
+# Tests (MTP uses --filter-query, not --filter; locally exclude infra-heavy categories)
+dotnet test vicione-suite.slnx --no-build --filter-query "/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)&(Category!=E2E)&(Category!=E2E-MasterSlave)]"
 ```
 
 Note: If the repo was fully reset (e.g. `git clean -xfd`) or files in `src/Blazor.Shared/Scripts` where changed, run `npm ci && npm run build` first.

@@ -6,6 +6,7 @@ internal static class ModuleConstants
     public const string ModulesFileName = "modules.json";
     public const string ModuleOperationsFileName = "modules-ops.json";
     public const string ModuleOperationsSentinelFileName = "modules-ops.sentinel";
+    public const string ModuleReconcileSignatureFileName = "modules-reconcile.signature";
     public const string SetByEnvironmentMarker = "<set_by_environment>";
     public const string MetadataFileName = "module-metadata.json";
 

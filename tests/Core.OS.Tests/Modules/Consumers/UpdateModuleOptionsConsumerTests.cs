@@ -1,5 +1,6 @@
 using Core.OS.Modules;
 using Core.OS.Modules.Consumers;
+using Core.Shared.Modules;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Events;
 using AwesomeAssertions;
@@ -46,20 +47,22 @@ public class UpdateModuleOptionsConsumerTests
     }
 
     [Fact]
-    public async Task Should_send_event_if_store_fails()
+    public async Task Should_send_event_with_error_if_store_fails()
     {
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         var command = new UpdateModuleOptions(ModuleIdResolver.ResolveId<TestBackendModule>(), []);
 
         _optionsStore.Store(ModuleIdResolver.ResolveId<TestBackendModule>(), Arg.Any<List<ModuleOptionDeclaration>>(), Arg.Any<CancellationToken>())
-            .ThrowsAsync(new InvalidOperationException());
+            .ThrowsAsync(new InvalidOperationException("store unavailable"));
 
-        // Act
+        // Act — ADR-002: a failed store must not produce a success-shaped completion event.
         var result = await tester.TestCommand<UpdateModuleOptions, UpdateModuleOptionsConsumer, ModuleOptionsChanged>(command);
 
         // Assert
-        result.Error.Should().BeNull();
+        result.Error.Should().NotBeNull();
+        result.Error!.ErrorCode.Should().Be(ModuleErrorCodes.UpdateOptionsFailed);
+        result.Error.Message.Should().Be("store unavailable");
         await _optionsStore.Received()
             .Store(ModuleIdResolver.ResolveId<TestBackendModule>(), Arg.Any<List<ModuleOptionDeclaration>>(), Arg.Any<CancellationToken>());
     }

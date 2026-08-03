@@ -205,10 +205,10 @@
     </ControlPanelPage>
 }
 
-<ConfirmCancelDialog HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
-                     OnConfirm="@RestartSuite"
+<ConfirmCancelDialog HeaderText="@(IsStandalone ? Blazor.Shared.Localization.RestartSuite.DialogHeader : Blazor.Shared.Localization.RestartSuite.ClusterDialogHeader)"
+                     OnConfirm="@ConfirmRestart"
                      @bind-Visible="_dialogVisible">
     <Body>
-        @Blazor.Shared.Localization.RestartSuite.DialogBody
+        @(IsStandalone ? Blazor.Shared.Localization.RestartSuite.DialogBody : Blazor.Shared.Localization.RestartSuite.ClusterDialogBody)
     </Body>
 </ConfirmCancelDialog>

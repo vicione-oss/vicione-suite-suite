@@ -107,6 +107,9 @@ internal static class IFileSystemExtensions
         public string GetModulePackageOperationsSentinelFilePath(InstanceOptions instanceOptions)
             => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(instanceOptions), ModuleConstants.ModuleOperationsSentinelFileName);
 
+        public string GetModuleReconcileSignatureFilePath(InstanceOptions instanceOptions)
+            => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(instanceOptions), ModuleConstants.ModuleReconcileSignatureFileName);
+
         public string GetOrCreateRootedModulesPath(ModuleLoaderOptions loaderOptions)
         {
             // ensure the download path exists

@@ -11,6 +11,8 @@ using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
+using Sdk.Client.Services;
+using Sdk.Instance;
 using Sdk.Utils;
 using ViciOne.Ui.Blazor.Components.Grid.Services;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
@@ -38,6 +40,9 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
     public ISuiteControlService SuiteControlService { get; set; } = default!;
 
     [Inject]
+    private IInstanceInformationProvider InformationProvider { get; set; } = default!;
+
+    [Inject]
     private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
 
     [Inject]
@@ -48,6 +53,8 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
 
     [Inject(Key = typeof(AvailableModuleManagementControlPanelServiceKey))]
     private IGridItemSelection<ModuleMetadataModel> AvailableModuleSelection { get; set; } = default!;
+
+    private bool IsStandalone => InformationProvider.Local.Type == InstanceType.Standalone;
 
     protected override async ValueTask DisposeAsyncCore()
     {
@@ -136,8 +143,13 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         }
     }
 
-    private async Task RestartSuite()
-        => await SuiteControlService.RestartSuite();
+    private async Task ConfirmRestart()
+    {
+        if (IsStandalone)
+            await SuiteControlService.RestartInstance();
+        else
+            await SuiteControlService.RestartAllInstances();
+    }
 
     private IQueryable<ModuleMetadataModel> FilterInstalledItems(IQueryable<ModuleMetadataModel> installedModules)
     {

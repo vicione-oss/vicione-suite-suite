@@ -6,8 +6,11 @@ using Core.OS.Instance.Commands;
 using Core.OS.Instance.Initialization;
 using Core.OS.Instance.Services;
 using Core.OS.MessageBus.Extensions;
+using Core.OS.Modules;
+using Core.OS.Modules.Services;
 using Core.OS.Persistence;
 using Core.Shared.Instance.Contracts;
+using Core.Shared.Modules.Commands;
 using MassTransit;
 using MassTransit.Courier.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -328,6 +331,8 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
 
             await context.Publish(new InstanceCreated(command.InstanceId),
                 context.CancellationToken);
+
+            await SendModuleManifestReconciliation(context, command.InstanceId, command.CorrelationId, context.CancellationToken);
         }
         catch (Exception e)
         {
@@ -336,6 +341,37 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
                         e.Message
                     ]),
                 context.CancellationToken);
+        }
+    }
+
+    internal async Task SendModuleManifestReconciliation(ConsumeContext context, Guid instanceId, Guid correlationId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var manifestStore = services.GetRequiredService<IModulePackageManifestStore>();
+            var operationStore = services.GetRequiredService<IModulePackageOperationStore>();
+
+            var manifest = await manifestStore.Load(cancellationToken);
+            var pendingOperations = await operationStore.GetEnqueuedOperations(cancellationToken);
+
+            // Desired set = the master's applied manifest with its own still-pending operations applied. This
+            // covers a node joining while a cluster-wide update the master has not yet restarted for is in flight.
+            var desiredPackages = ModulePackageOperationProcessor.DeterminePackageChanges(manifest, pendingOperations);
+
+            var reconcile = new ReconcileModuleManifest(desiredPackages)
+            {
+                InstanceId = instanceId,
+                CorrelationId = correlationId,
+            };
+
+            await context.SendToInstance(reconcile, instanceId, cancellationToken);
+
+            LogSendReconcile(logger, instanceId, desiredPackages.Count);
+        }
+        catch (Exception e)
+        {
+            // Best-effort convergence: a failure here must not fail the registration/sync.
+            LogReconcileSendFailed(logger, e, instanceId);
         }
     }
 
@@ -397,4 +433,10 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Sequence mismatch detected for context '{ContextType}': slave reports {SlaveSequence}, master has {MasterSequence} ({Reason}). Triggering full-sync.")]
     private static partial void LogSequenceMismatchDetected(ILogger<RegisterInstanceConsumer> logger, string contextType, long slaveSequence, long masterSequence, string reason);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Sent module manifest reconciliation to instance {InstanceId} with {PackageCount} desired package(s)")]
+    private static partial void LogSendReconcile(ILogger<RegisterInstanceConsumer> logger, Guid instanceId, int packageCount);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to send module manifest reconciliation to instance {InstanceId}")]
+    private static partial void LogReconcileSendFailed(ILogger<RegisterInstanceConsumer> logger, Exception exception, Guid instanceId);
 }

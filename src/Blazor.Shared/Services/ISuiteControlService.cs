@@ -2,7 +2,9 @@
 
 public interface ISuiteControlService
 {
-    Task RestartSuite();
+    Task RestartInstance();
+
+    Task RestartAllInstances();
 
     Task RestartSystem();
 

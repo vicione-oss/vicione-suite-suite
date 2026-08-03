@@ -56,7 +56,7 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
         => NavigationService.RedirectTo(Constants.ProcessRoute);
 
     private async Task RestartSuite()
-        => await SuiteControlService.RestartSuite();
+        => await SuiteControlService.RestartInstance();
 
     private async Task RestartSystem()
         => await SuiteControlService.RestartSystem();
