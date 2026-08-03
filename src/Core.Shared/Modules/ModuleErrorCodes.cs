@@ -21,4 +21,7 @@ public static class ModuleErrorCodes
     public const int UnknownCompatibilityError = 201;
 
     public const int MetadataInvalid = 141;
+
+    public const int EnqueueOperationsFailed = 230;
+    public const int UpdateOptionsFailed = 231;
 }

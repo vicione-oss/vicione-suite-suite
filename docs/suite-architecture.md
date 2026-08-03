@@ -857,6 +857,15 @@ ViciOne Suite will make sure that the databases are migrated through its lifecyc
 
 By implementing `Sdk.Backend.Modules.BackendModule.ConfigureMessageBus`, modules can define their message bus configuration.
 
+#### Cluster module state
+
+The set of installed modules is control-plane state kept per node in the local `modules.json` manifest; it is not part of the database replication.
+To keep a cluster consistent, module install/update/uninstall is applied to every node rather than only the node whose UI triggered it:
+
+- **Fan-out:** A module change is sent to the master as an `UpdateModulePackageOperations` command. The master resolves every registered instance and dispatches an instance-dependent `EnqueueModulePackageOperations` command to each, so all nodes queue the same operations and apply them on their next restart. Offline nodes receive the command from their durable queue on reconnect.
+- **Restart:** Applying queued operations requires a restart. A `RestartCluster` command lets the master restart all nodes together; in a standalone setup this restarts the single node.
+- **Convergence on (re)join:** Because a node offline beyond the queue lifetime (or a brand-new node) cannot receive the fan-out, the master reconciles it during registration. After the slave's data sync completes, the master sends its desired module manifest via `ReconcileModuleManifest`; the node compares it to its local manifest, enqueues the missing installs / superfluous uninstalls, and restarts to converge. A signature guard bounds this to one restart per distinct desired set to prevent restart loops.
+
 #### Lifecycle
 
 Modules installed in an instance are loaded when the instance process starts.

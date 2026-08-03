@@ -123,6 +123,15 @@
   <data name="DialogHeader" xml:space="preserve">
     <value>Anwendung neu starten?</value>
   </data>
+  <data name="ClusterDialogBody" xml:space="preserve">
+    <value>Möchten Sie wirklich alle Knoten im Cluster neu starten?</value>
+  </data>
+  <data name="ClusterDialogHeader" xml:space="preserve">
+    <value>Cluster neu starten?</value>
+  </data>
+  <data name="ClusterRestartInXSeconds" xml:space="preserve">
+    <value>Alle Knoten im Cluster werden in {0} Sekunden neu gestartet.</value>
+  </data>
   <data name="SystemRestartInXSeconds" xml:space="preserve">
     <value>System wird in {0} Sekunden neu gestartet.</value>
   </data>

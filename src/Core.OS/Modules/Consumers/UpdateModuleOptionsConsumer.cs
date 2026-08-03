@@ -1,6 +1,8 @@
+using Core.Shared.Modules;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Events;
 using MassTransit;
+using Sdk.Messaging;
 
 namespace Core.OS.Modules.Consumers;
 
@@ -31,7 +33,9 @@ public sealed partial class UpdateModuleOptionsConsumer(IModuleOptionsStore opti
         {
             LogError(logger, ex, correlationId, moduleId);
 
-            var changeEvent = new ModuleOptionsChanged(moduleId)
+            // ADR-002: never publish a success-shaped completion for failed work — callers must be able
+            // to distinguish a stored option set from a failed store attempt.
+            var changeEvent = new ModuleOptionsChanged(moduleId, new ErrorInfo(ModuleErrorCodes.UpdateOptionsFailed, ex.Message))
             {
                 CorrelationId = correlationId
             };

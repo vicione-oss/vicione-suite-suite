@@ -1,36 +1,51 @@
+using Core.OS.DbContext;
+using Core.OS.MessageBus.Extensions;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Events;
 using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using Sdk.Messaging;
 
 namespace Core.OS.Modules.Consumers;
 
-public sealed partial class UpdateModulePackageOperationsConsumer(IModulePackageOperationStore store, ILogger<UpdateModulePackageOperationsConsumer> logger) : IConsumer<UpdateModulePackageOperations>
+/// <summary>
+/// Orchestrates a cluster-wide module package update. Runs on the master (or standalone) and fans out an
+/// instance-dependent <see cref="EnqueueModulePackageOperations"/> command to every known instance so each
+/// node enqueues the same operations locally and applies them on its next restart. Offline nodes receive
+/// the command from their durable queue once they reconnect.
+/// </summary>
+public sealed partial class UpdateModulePackageOperationsConsumer(IApplicationDbContext applicationDb, ILogger<UpdateModulePackageOperationsConsumer> logger) : IConsumer<UpdateModulePackageOperations>
 {
     public async Task Consume(ConsumeContext<UpdateModulePackageOperations> context)
     {
         var correlationId = context.Message.CorrelationId;
-
-        LogConsume(logger, correlationId, context.Message.Operations.Count);
+        var operations = context.Message.Operations;
 
         try
         {
-            var changes = await store.EnqueueOperations(context.Message.Operations, context.CancellationToken);
+            var instanceIds = await applicationDb.InstanceInfo
+                .AsNoTracking()
+                .Select(i => i.Id)
+                .ToListAsync(context.CancellationToken);
 
-            var changeEvent = new ModulePackageOperationsChanged(changes)
+            LogDispatch(logger, correlationId, operations.Count, instanceIds.Count);
+
+            foreach (var instanceId in instanceIds)
             {
-                CorrelationId = correlationId
-            };
+                var command = new EnqueueModulePackageOperations(operations)
+                {
+                    InstanceId = instanceId,
+                    CorrelationId = correlationId
+                };
 
-            LogOperationsUpdated(logger, correlationId, changes.Count);
-
-            await context.Publish(changeEvent, context.CancellationToken);
+                await context.SendToInstance(command, instanceId, context.CancellationToken);
+            }
         }
         catch (Exception ex)
         {
-            LogError(logger, context.Message.Operations.Count);
+            LogError(logger, ex, operations.Count);
 
-            var error = new ErrorInfo(230, ex.Message);
+            var error = new ErrorInfo(231, ex.Message);
             var changeEvent = new ModulePackageOperationsChanged([], error)
             {
                 CorrelationId = correlationId
@@ -40,12 +55,9 @@ public sealed partial class UpdateModulePackageOperationsConsumer(IModulePackage
         }
     }
 
-    [LoggerMessage(Level = LogLevel.Debug, Message = "Consume update of {OperationsCount} package operation correlated by {CorrelationId}")]
-    private static partial void LogConsume(ILogger<UpdateModulePackageOperationsConsumer> logger, Guid correlationId, int operationsCount);
+    [LoggerMessage(Level = LogLevel.Information, Message = "Dispatching {OperationsCount} package operation(s) correlated by {CorrelationId} to {InstanceCount} instance(s)")]
+    private static partial void LogDispatch(ILogger<UpdateModulePackageOperationsConsumer> logger, Guid correlationId, int operationsCount, int instanceCount);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "Updated {OperationsCount} package operations correlated by {CorrelationId}")]
-    private static partial void LogOperationsUpdated(ILogger<UpdateModulePackageOperationsConsumer> logger, Guid correlationId, int operationsCount);
-
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to enqueue {OperationCount} operations.")]
-    private static partial void LogError(ILogger<UpdateModulePackageOperationsConsumer> logger, int operationCount);
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to dispatch {OperationCount} operations to the cluster.")]
+    private static partial void LogError(ILogger<UpdateModulePackageOperationsConsumer> logger, Exception exception, int operationCount);
 }

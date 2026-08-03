@@ -36,7 +36,7 @@ public class SuiteControlServiceTests
             var service = CreateService();
 
             // Act
-            await service.RestartSuite();
+            await service.RestartInstance();
 
             // Assert
             _bannerService.Received(1).ShowMessageBanner(
@@ -52,7 +52,7 @@ public class SuiteControlServiceTests
             var service = CreateService(instanceId);
 
             // Act
-            await service.RestartSuite();
+            await service.RestartInstance();
 
             // Assert
             await _mediator.Received(1).Send(
@@ -75,14 +75,49 @@ public class SuiteControlServiceTests
             await _mediator.Send(Arg.Do<ControlInstance>(cmd => capturedCorrelationIds.Add(cmd.CorrelationId)), Arg.Any<Guid>(), Arg.Any<CancellationToken>());
 
             // Act
-            await service.RestartSuite();
-            await service.RestartSuite();
+            await service.RestartInstance();
+            await service.RestartInstance();
 
             // Assert
             capturedCorrelationIds.Should().HaveCount(2);
             capturedCorrelationIds[0].Should().NotBe(Guid.Empty);
             capturedCorrelationIds[1].Should().NotBe(Guid.Empty);
             capturedCorrelationIds[0].Should().NotBe(capturedCorrelationIds[1]);
+        }
+    }
+
+    public sealed class RestartCluster : SuiteControlServiceTests
+    {
+        [Fact]
+        public async Task Should_show_message_banner()
+        {
+            // Arrange
+            var service = CreateService();
+
+            // Act
+            await service.RestartAllInstances();
+
+            // Assert
+            _bannerService.Received(1).ShowMessageBanner(
+                Sdk.MessageBanner.Contracts.MessageType.Information,
+                Arg.Any<string>());
+        }
+
+        [Fact]
+        public async Task Should_send_restart_cluster_command_with_delay()
+        {
+            // Arrange
+            var service = CreateService();
+
+            // Act
+            await service.RestartAllInstances();
+
+            // Assert
+            await _mediator.Received(1).Send(
+                Arg.Is<Core.Shared.Instance.Commands.RestartAllInstances>(cmd =>
+                    cmd!.Delay > TimeSpan.Zero &&
+                    cmd.CorrelationId != Guid.Empty),
+                Arg.Any<CancellationToken>());
         }
     }
 

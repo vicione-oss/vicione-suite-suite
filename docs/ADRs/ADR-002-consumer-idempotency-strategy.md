@@ -103,7 +103,8 @@ Same pattern as Phase 1b/1c. Both consumers previously published an error-shaped
 - `UpsertTagConsumer`: upsert pattern (find-by-PK → add or update).
 - `TestConnectionConsumer`: stateless read-only test with result event.
 - `UpdateModuleOptionsConsumer`: file overwrite (`FileMode.Create`) produces same result on redelivery.
-- `UpdateModulePackageOperationsConsumer`: `UnionBy` merge produces same merged result on redelivery.
+- `UpdateModulePackageOperationsConsumer`: re-dispatching the same instance-dependent `EnqueueModulePackageOperations` commands to every instance produces the same fan-out on redelivery.
+- `EnqueueModulePackageOperationsConsumer`: `UnionBy` merge in the operation store produces the same merged result on redelivery.
 - `EventForwardToUiConsumer<T>`: pure UI notification relay, no persistent state.
 - `GetPasskeysConsumer`: request/response, read-only.
 - `RenamePasskeyConsumer`: `IsUpdatedName` check short-circuits when name is already set → publishes success.
@@ -115,3 +116,42 @@ Same pattern as Phase 1b/1c. Both consumers previously published an error-shaped
 #### Acknowledged residual risk: duplicate passkey/login deletion operations
 
 `DeletePasskeysConsumer`: ASP.NET Identity's `RemovePasskeyAsync` is a no-op when the credential is already gone — naturally idempotent. `DeleteExternalLoginConsumer`: `RemoveLoginAsync` may fail on redelivery (login already removed), producing a spurious error event. Classified as Medium — the user-facing impact is a transient error notification that resolves on page refresh.
+
+### 2026-08-03 — Phase 1e: Consumer Inventory Refresh
+
+Re-audit after the consumer count grew from 59 to 65. Six consumers were added since Phase 1d and are classified here.
+
+#### Naturally idempotent consumers (no fix required)
+
+- `ReconcileModuleManifestConsumer`: diffs the desired package set against the locally installed one, so a redelivered manifest produces an empty diff once reconciliation succeeded. The restart-loop guard signature file is written **after** the enqueue and restart dispatch — deliberately, so a transient failure is retried instead of being suppressed by the guard.
+- `SyncRoutingSlipFaultedConsumer`: guards on the local instance id, resets `SynchronizationState`, and delegates attempt counting to `SyncRetryState`. Redelivery of the same fault consumes one retry budget slot but converges to the same terminal state (re-registration or degraded). The delayed re-registration send runs on a detached task whose body catches and logs every exception, so no fault is lost.
+- `GetConnectionsConsumer`, `GetTagsConsumer`: read-only request/response.
+
+#### Acknowledged residual risk: duplicate cluster-wide restarts
+
+`RestartAllInstancesConsumer` fans an instance-dependent `ControlInstance(Restart)` out to every registered instance. Redelivery re-sends the restart to nodes that already restarted. The target `ControlInstanceConsumer` is itself idempotent and the restart is terminal, so the worst case is one extra reboot cycle. Classified as Medium and accepted — deduplicating would require an idempotency key store (see "Alternatives Rejected").
+
+#### Pattern: never publish a success-shaped completion for failed work
+
+`UpdateModuleOptionsConsumer` was idempotent (file overwrite) but published a bare `ModuleOptionsChanged(moduleId)` from its catch block. The client (`ModuleManagementService`) completes the pending command with **success** for any `ModuleOptionsChanged` without an `Error`, so a failed store was reported to the operator as applied. It now publishes `ModuleOptionsChanged(moduleId, ErrorInfo(ModuleErrorCodes.UpdateOptionsFailed, …))`, which the client already routes to `CompleteWithError`.
+
+This generalises the Phase 1b/1c rules: a completion event may be *success-shaped* only when the desired state actually holds — either because the work succeeded, or because it was already done (completion-on-already-deleted).
+
+#### Defect: exception dropped from the enqueue error log
+
+`EnqueueModulePackageOperationsConsumer` logged its failure through a `[LoggerMessage]` overload without an `Exception` parameter, discarding the stack trace of every enqueue failure. The overload now takes the exception, and the magic error code `230` was replaced by `ModuleErrorCodes.EnqueueOperationsFailed`.
+
+The consumer still reports the failure via `ModulePackageOperationsEnqueued`/`ModulePackageOperationsChanged` instead of rethrowing. Rethrowing is **not** an option here: `UseInMemoryOutbox` buffers everything published inside a consumer and discards it when the consumer throws, so "publish the error event and rethrow" would deliver nothing at all. Choosing between retry and correlated operator feedback is a general error-handling policy question, deferred to Phase 3a (ADR-004).
+
+#### Compliance backfill
+
+Explicit redelivery tests were added for the ADR-002 fixes that had none, so every documented pattern is now covered by at least one test:
+
+| Pattern | Consumer | Test |
+|---------|----------|------|
+| Upsert semantics | `DbChangeSetConsumer` | `DbChangeSetConsumerTests.Idempotency` |
+| Completion-on-already-deleted | `ControlInstanceConsumer` (Delete) | `Should_publish_completion_when_instance_already_deleted` |
+| Completion-on-already-deleted | `DeleteArtifactRepositoryConsumer` | `Should_publish_success_event_when_repository_already_deleted` |
+| Completion-on-already-deleted | `DeleteTagConsumer` | `Should_publish_success_event_for_unknown_tag_to_ensure_idempotency` |
+| Do not swallow exceptions | `RegisterInstanceConsumer` | `Should_propagate_exception_when_persistence_is_unavailable` |
+| Never report failure as success | `UpdateModuleOptionsConsumer` | `Should_send_event_with_error_if_store_fails` |

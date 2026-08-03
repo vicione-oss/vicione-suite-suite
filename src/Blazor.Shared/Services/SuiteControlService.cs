@@ -14,7 +14,7 @@ internal sealed class SuiteControlService(IUiMediator mediator,
     ILogger<SuiteControlService> logger) : ISuiteControlService
 {
     // We are currently unable to trigger a complete shutdown. This method shuts down the suite and then triggers a restart.
-    public async Task RestartSuite()
+    public async Task RestartInstance()
     {
 #if DEBUG
         var delay = 5;
@@ -35,6 +35,21 @@ internal sealed class SuiteControlService(IUiMediator mediator,
         logger.LogInformation("Requesting application restart for instance {InstanceId}", informationProvider.Local.Id);
 
         await mediator.Send(command, informationProvider.Local.Id);
+    }
+
+    public async Task RestartAllInstances()
+    {
+#if DEBUG
+        var delay = 5;
+#else
+        var delay = 10;
+#endif
+        var message = string.Format(CultureInfo.InvariantCulture, Localization.RestartSuite.ClusterRestartInXSeconds, delay);
+        bannerService.ShowMessageBanner(Sdk.MessageBanner.Contracts.MessageType.Information, message);
+
+        logger.LogInformation("Requesting cluster-wide restart");
+
+        await mediator.Send(new RestartAllInstances { Delay = TimeSpan.FromSeconds(delay) });
     }
 
     public async Task RestartSystem()
