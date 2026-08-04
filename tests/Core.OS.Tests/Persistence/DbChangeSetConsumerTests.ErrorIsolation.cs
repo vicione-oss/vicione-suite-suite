@@ -1,7 +1,5 @@
 using System.Text.Json;
-using AwesomeAssertions;
 using Core.OS.Instance;
-using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Services;
 using Core.OS.Persistence;
 using Core.OS.Persistence.Consumers;
@@ -11,11 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
-using NSubstitute;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
 using Sdk.Messaging;
-using Xunit;
 
 namespace Core.OS.Tests.Persistence;
 

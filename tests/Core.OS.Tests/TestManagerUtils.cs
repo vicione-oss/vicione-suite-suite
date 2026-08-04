@@ -1,14 +1,12 @@
-﻿using Core.Module.Contracts;
+using Core.Module.Contracts;
 using Core.OS.DbContext;
 using Core.OS.Modules;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Authorization;
 using Sdk.Authorization.Extensions;
 using Sdk.Backend.Modules;

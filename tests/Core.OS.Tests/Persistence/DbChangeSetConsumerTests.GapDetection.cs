@@ -1,15 +1,10 @@
 using Core.OS.Instance;
-using Core.OS.Instance.Contracts;
 using Core.OS.Persistence;
 using Core.OS.Persistence.Consumers;
-using AwesomeAssertions;
 using Core.OS.Instance.Services;
-using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Time.Testing;
-using NSubstitute;
 using Sdk.Instance;
-using Xunit;
 
 namespace Core.OS.Tests.Persistence;
 

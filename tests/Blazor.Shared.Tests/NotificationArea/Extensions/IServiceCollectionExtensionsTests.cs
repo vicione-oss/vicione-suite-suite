@@ -1,11 +1,9 @@
-using AwesomeAssertions;
 using Blazor.Shared.NotificationArea.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.NotificationArea.Extensions;
 using Sdk.Client.NotificationArea.Services;
 using TestModule.Client;
 using TestModule.Client.NotificationArea;
-using Xunit;
 
 namespace Blazor.Shared.Tests.NotificationArea.Extensions;
 

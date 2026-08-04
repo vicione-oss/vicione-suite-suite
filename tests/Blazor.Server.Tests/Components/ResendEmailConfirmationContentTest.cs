@@ -7,9 +7,7 @@ using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using NSubstitute;
 using Sdk.Backend.Messaging;
-using Xunit;
 
 namespace Blazor.Server.Tests.Components;
 

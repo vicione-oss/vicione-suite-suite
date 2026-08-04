@@ -1,4 +1,3 @@
-﻿using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Entities;
@@ -7,7 +6,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Services;
 

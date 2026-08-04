@@ -1,11 +1,9 @@
 using System.Reflection;
 using Blazor.Server.Backend.Services;
 using Core.UiHosting;
-using AwesomeAssertions;
 using Sdk.Client.Modules;
 using Sdk.Modules;
 using TestModule.Client;
-using Xunit;
 using Blazor.Server.Backend;
 
 namespace Blazor.Server.Tests.Services;

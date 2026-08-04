@@ -1,10 +1,8 @@
-﻿using AwesomeAssertions;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Extensions;
 using Core.Shared.UserManagement.Mappers;
 using Sdk.Authorization;
 using Sdk.UserManagement.Contracts;
-using Xunit;
 
 namespace Core.Shared.Tests.UserManagement.Extensions;
 

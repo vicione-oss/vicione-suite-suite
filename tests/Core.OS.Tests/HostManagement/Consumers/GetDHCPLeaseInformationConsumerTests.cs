@@ -1,13 +1,10 @@
-﻿using AwesomeAssertions;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 

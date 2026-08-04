@@ -7,7 +7,6 @@ using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Services;
 using Blazor.Shared.Tests.Mocks;
 using Blazor.Shared.Tests.Models;
-using AwesomeAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +17,6 @@ using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
-using Xunit;
 using Xunit.Sdk;
 
 namespace Blazor.Shared.Tests.Settings;

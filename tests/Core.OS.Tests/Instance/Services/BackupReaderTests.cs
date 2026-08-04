@@ -3,9 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using Core.OS.Instance.Services;
 using Core.OS.Tests.Persistence;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 

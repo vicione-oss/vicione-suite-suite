@@ -1,12 +1,9 @@
-using AwesomeAssertions;
 using Blazor.Shared.Network.ControlPanels.Proxies.Services;
 using Blazor.Shared.Services;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Network.ControlPanels.Proxies.Services;
 

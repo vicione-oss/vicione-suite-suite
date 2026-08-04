@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
 using AngleSharp.Dom;
-using AwesomeAssertions;
 using Blazor.Shared.Mqtt;
 using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Helpers;
@@ -9,12 +8,9 @@ using Blazor.Shared.Mqtt.Services;
 using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using MQTTnet.Protocol;
-using NSubstitute;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Extensions;
 using Sdk.Connections.Requests;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Mqtt;
 

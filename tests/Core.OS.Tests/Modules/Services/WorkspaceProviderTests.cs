@@ -1,12 +1,9 @@
-﻿using Core.OS.Modules;
+using Core.OS.Modules;
 using Core.OS.Modules.Services;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Modules;
 using TestModule.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

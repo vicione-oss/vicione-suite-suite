@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
@@ -8,7 +7,6 @@ using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Modules;
 using Sdk.Modules;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Settings.Services;
 

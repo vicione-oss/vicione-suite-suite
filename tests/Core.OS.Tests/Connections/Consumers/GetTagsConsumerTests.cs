@@ -1,15 +1,12 @@
 using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Requests;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Connections.Consumers;
 

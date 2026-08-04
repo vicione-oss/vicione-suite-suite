@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Instances.Models;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Services;
@@ -6,10 +5,8 @@ using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.Infrastructure;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels.Instances.Services;
 

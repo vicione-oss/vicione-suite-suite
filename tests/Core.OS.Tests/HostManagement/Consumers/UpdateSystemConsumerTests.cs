@@ -1,5 +1,4 @@
 using System.Text.Json;
-using AwesomeAssertions;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.Shared.HostManagement.Commands;
@@ -13,9 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 

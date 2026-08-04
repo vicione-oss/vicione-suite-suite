@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Module.ControlPanels;
 using Blazor.Shared.Module.ControlPanels.Extensions;
 using Blazor.Shared.Module.ControlPanels.Services;
@@ -8,9 +7,7 @@ using Blazor.Shared.Settings.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Module.ControlPanels;
 

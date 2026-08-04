@@ -1,4 +1,3 @@
-﻿using NSubstitute;
 using Sdk.Connections.Contracts;
 
 namespace Blazor.Shared.Tests.Connections.Extensions;

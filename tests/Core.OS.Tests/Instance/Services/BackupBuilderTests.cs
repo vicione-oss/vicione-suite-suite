@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
@@ -9,10 +8,8 @@ using Core.OS.Modules.Contracts;
 using Core.OS.Tests.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 

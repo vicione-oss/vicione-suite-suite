@@ -5,13 +5,10 @@ using Core.OS.UserManagement.Extensions;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Requests;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Consumers;
 

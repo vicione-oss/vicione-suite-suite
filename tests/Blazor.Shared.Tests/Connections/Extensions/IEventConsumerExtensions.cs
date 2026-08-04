@@ -3,7 +3,6 @@ using Sdk.Connections.Contracts;
 using Sdk.Connections.Events;
 using Sdk.Messaging;
 using Sdk.Testing.Client;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.Extensions;
 

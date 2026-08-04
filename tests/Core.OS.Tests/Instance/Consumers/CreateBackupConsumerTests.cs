@@ -1,11 +1,9 @@
-﻿using Core.OS.Instance;
+using Core.OS.Instance;
 using Core.OS.Instance.Consumers;
 using Core.Shared.Persistence.Commands;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 

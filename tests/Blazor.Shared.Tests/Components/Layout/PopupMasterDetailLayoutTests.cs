@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Blazor.Shared.Popup.Services;
 using Blazor.Shared.Settings.Components;
 using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Components.Layout;
 

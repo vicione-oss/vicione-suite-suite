@@ -1,6 +1,5 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Claims;
-using AwesomeAssertions;
 using Blazor.Server.Backend;
 using Blazor.Server.Backend.Services;
 using Blazor.Shared.Extensions;
@@ -8,7 +7,6 @@ using Blazor.Shared.Services;
 using Core.Shared.Instance.Services;
 using Core.UiHosting;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Authorization;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.Modules;
@@ -16,7 +14,6 @@ using Sdk.Instance;
 using Sdk.Testing.Backend;
 using TestModule.Backend;
 using TestModule.Client;
-using Xunit;
 
 namespace Blazor.Server.Tests.Services;
 

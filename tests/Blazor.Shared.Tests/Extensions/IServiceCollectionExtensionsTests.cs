@@ -1,17 +1,14 @@
-﻿using AwesomeAssertions;
 using Blazor.Shared.Extensions;
 using Blazor.Shared.Module.Services;
 using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.NotificationArea.Services;
 using Sdk.Client.Services;
 using Sdk.Instance;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Extensions;
 

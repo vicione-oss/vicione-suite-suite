@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Instances;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Instance.Extensions;
@@ -10,13 +9,11 @@ using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
 using Core.Shared.Instance.Requests;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
 using Sdk.Testing.Client;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
-using Xunit;
 using InstanceControlPanel = Blazor.Shared.Instance.ControlPanels.Instances.InstanceControlPanel;
 using TestContext = Xunit.TestContext;
 

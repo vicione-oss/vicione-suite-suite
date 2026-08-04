@@ -1,6 +1,4 @@
 using Blazor.Shared.MessageBanner.NotificationArea;
-using AwesomeAssertions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner;
 

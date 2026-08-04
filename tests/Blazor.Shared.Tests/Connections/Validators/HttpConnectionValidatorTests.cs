@@ -1,7 +1,5 @@
-﻿using Blazor.Shared.Connections.Validators;
-using AwesomeAssertions;
+using Blazor.Shared.Connections.Validators;
 using Sdk.Connections.Contracts;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.Validators;
 

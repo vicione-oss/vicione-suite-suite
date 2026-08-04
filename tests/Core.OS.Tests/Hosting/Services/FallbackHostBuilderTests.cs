@@ -1,7 +1,5 @@
 using System.Net;
-using AwesomeAssertions;
 using Core.OS.Hosting.Services;
-using Xunit;
 
 namespace Core.OS.Tests.Hosting.Services;
 

@@ -1,5 +1,4 @@
 using System.IO.Abstractions.TestingHelpers;
-using AwesomeAssertions;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Services;
 using Core.OS.HostManagement;
@@ -10,8 +9,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.Hosting.Services;
 

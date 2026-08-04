@@ -1,9 +1,6 @@
-﻿using Core.OS.Modules;
+using Core.OS.Modules;
 using Core.OS.Modules.Services;
-using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

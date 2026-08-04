@@ -2,10 +2,8 @@ using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.SystemConfiguration.Events;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 

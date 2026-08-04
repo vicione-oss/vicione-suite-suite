@@ -9,7 +9,6 @@ using Blazor.Shared.Tests.Connections.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.Connections;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
@@ -17,7 +16,6 @@ using Sdk.Connections.Requests;
 using Sdk.Testing.Client;
 using ViciOne.Ui.Blazor.Components.CheckBox.Extensions;
 using ViciOne.Ui.Localization.Resources;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.ControlPanels;
 

@@ -1,8 +1,6 @@
-using AwesomeAssertions;
 using Blazor.Shared.Settings.Components;
 using Blazor.Shared.Settings.Extensions;
 using Bunit;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Settings;
 

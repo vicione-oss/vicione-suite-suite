@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using AwesomeAssertions;
 using Core.OS.Hosting;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Instance;
@@ -7,7 +6,6 @@ using Core.OS.Modules.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Sdk.Instance;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Hosting;
 

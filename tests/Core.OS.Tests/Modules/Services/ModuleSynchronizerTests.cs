@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Options;
 using Core.Module.Utils;
@@ -10,11 +9,9 @@ using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
 using Core.OS.Tests.Extensions;
 using Core.Shared.Modules;
-using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

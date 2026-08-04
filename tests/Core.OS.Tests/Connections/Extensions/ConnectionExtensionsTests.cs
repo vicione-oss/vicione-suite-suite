@@ -1,8 +1,6 @@
-using AwesomeAssertions;
 using Core.OS.Connections.Extensions;
 using Sdk.Connections;
 using Sdk.Connections.Contracts;
-using Xunit;
 
 namespace Core.OS.Tests.Connections.Extensions;
 

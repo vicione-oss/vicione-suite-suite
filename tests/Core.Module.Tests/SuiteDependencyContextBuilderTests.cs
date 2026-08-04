@@ -1,9 +1,7 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
-using AwesomeAssertions;
 using Core.Module.Contracts;
 using Core.Module.Extensions;
-using Core.Module.Options;
 using Core.Module.Utils;
 using Core.Tests.Tools;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +11,6 @@ using TestModule.Backend;
 using TestModule.Client;
 using TestSystem.Backend;
 using TestUiHost;
-using Xunit;
 
 namespace Core.Module.Tests;
 

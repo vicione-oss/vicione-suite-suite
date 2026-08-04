@@ -4,14 +4,11 @@ using Core.OS.Tests.Extensions;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Events;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Consumers;
 

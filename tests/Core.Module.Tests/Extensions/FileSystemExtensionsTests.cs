@@ -1,5 +1,4 @@
 using System.IO.Abstractions.TestingHelpers;
-using AwesomeAssertions;
 using Core.Module.Extensions;
 using Core.Module.Options;
 using Core.Tests.Tools;
@@ -7,7 +6,6 @@ using Sdk.Testing.Backend;
 using TestModule.Backend;
 using TestModule.Client;
 using TestUiHost;
-using Xunit;
 
 namespace Core.Module.Tests.Extensions;
 

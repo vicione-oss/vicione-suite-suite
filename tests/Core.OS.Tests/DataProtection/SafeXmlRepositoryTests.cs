@@ -1,10 +1,7 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using System.Xml.Linq;
-using AwesomeAssertions;
 using Core.OS.DataProtection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.DataProtection;
 

@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Profile.ControlPanels;
 using Blazor.Shared.Profile.ControlPanels.Passkeys.Components;
 using Blazor.Shared.Profile.ControlPanels.Passkeys.Services;
@@ -13,13 +12,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using System.Security.Claims;
 using ViciOne.Ui.Blazor.Components.Grid.Extensions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Profile.ControlPanels.Passkeys;
 

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.OS.Modules;
 using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Configuration;
@@ -12,9 +12,7 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Consumers.Mail;
 

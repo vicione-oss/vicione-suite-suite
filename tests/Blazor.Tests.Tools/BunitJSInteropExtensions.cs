@@ -1,4 +1,4 @@
-﻿using Bunit;
+using Bunit;
 using DevExpress.Blazor.Internal;
 
 namespace Blazor.Tests.Tools;
@@ -34,7 +34,6 @@ public static class BunitJSInteropExtensions
 
             return interop;
         }
-        
 
         /// <summary>
         /// Possible workaround for bUnit integration with DevExpress Blazor controls provided at

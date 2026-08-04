@@ -1,9 +1,7 @@
 using Core.Module.Extensions;
-using AwesomeAssertions;
 using Sdk.Modules;
 using TestModule.Backend;
 using TestModule.Client;
-using Xunit;
 
 namespace Core.Module.Tests.Extensions;
 

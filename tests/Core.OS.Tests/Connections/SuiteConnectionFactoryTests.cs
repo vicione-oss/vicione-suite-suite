@@ -1,10 +1,8 @@
-using AwesomeAssertions;
 using Core.OS.Connections.Extensions;
 using Core.OS.Connections.Mqtt;
 using Sdk.Connections;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Extensions;
-using Xunit;
 
 namespace Core.OS.Tests.Connections;
 

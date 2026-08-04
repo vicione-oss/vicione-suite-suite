@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.Module.Contracts;
 using Core.Module.Options;
 using Core.OS.Modules;
@@ -13,7 +12,6 @@ using Sdk.Modules;
 using Sdk.Testing.Backend;
 using TestModule.Backend;
 using TestUiHost;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Extensions;
 

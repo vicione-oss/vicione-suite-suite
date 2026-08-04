@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using AwesomeAssertions;
 using Core.OS.Hosting;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Extensions;
@@ -9,9 +8,7 @@ using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Instance;
-using Xunit;
 
 namespace Core.OS.Tests.Hosting;
 

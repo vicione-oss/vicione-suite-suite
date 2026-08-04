@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.Connections.Consumers;
 using Core.OS.DbContext;
 using Core.OS.Tests.Extensions;
@@ -7,14 +6,12 @@ using MassTransit.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Connections;
 using Sdk.Connections.Commands;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Events;
 using Sdk.Messaging;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Connections.Consumers;
 

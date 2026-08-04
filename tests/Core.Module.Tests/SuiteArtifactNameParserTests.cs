@@ -1,6 +1,4 @@
-using AwesomeAssertions;
 using Semver;
-using Xunit;
 
 namespace Core.Module.Tests;
 

@@ -1,6 +1,4 @@
 using System.Net;
-using AwesomeAssertions;
-using Core.OS.Instance.Contracts;
 using Core.OS.Instance.HealthCheck;
 using Core.OS.Instance.Services;
 using Microsoft.AspNetCore.Builder;
@@ -9,7 +7,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sdk.Instance;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.HealthCheck;
 

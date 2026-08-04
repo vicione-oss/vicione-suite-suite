@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Dialogs;
 using Blazor.Shared.Profile.ControlPanels;
 using Blazor.Shared.Profile.ControlPanels.ExternalIdProviders;
@@ -16,12 +15,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using System.Security.Claims;
 using ViciOne.Ui.Blazor.Components.Dialog.Extensions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Profile.ControlPanels.ExternalIdProviders;
 

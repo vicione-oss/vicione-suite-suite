@@ -5,13 +5,10 @@ using Blazor.Server.Backend.Services;
 using Blazor.Server.Tests.Helpers;
 using Blazor.Shared.Services;
 using Core.UiHosting;
-using AwesomeAssertions;
 using Core.Shared.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Testing.Backend;
 using TestModule.Client;
-using Xunit;
 
 namespace Blazor.Server.Tests;
 

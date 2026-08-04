@@ -7,11 +7,8 @@ using Core.OS.Instance;
 using Core.OS.Instance.Services;
 using Core.OS.Modules;
 using Core.OS.Modules.Extensions;
-using AwesomeAssertions;
-using NSubstitute;
 using Sdk.Messaging;
 using Sdk.Modules;
-using Xunit;
 using Microsoft.Extensions.Logging;
 
 namespace Core.OS.Tests.Modules.Extensions;

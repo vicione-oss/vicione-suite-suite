@@ -1,12 +1,9 @@
-using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Modules;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Extensions;
 

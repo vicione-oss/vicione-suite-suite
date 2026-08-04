@@ -1,8 +1,5 @@
-﻿using AwesomeAssertions;
 using Core.OS.Monitoring;
-using NSubstitute;
 using ViciOne.Journal;
-using Xunit;
 
 namespace Core.OS.Tests.Monitoring;
 

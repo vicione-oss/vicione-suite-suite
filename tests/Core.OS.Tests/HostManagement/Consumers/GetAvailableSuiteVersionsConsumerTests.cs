@@ -1,15 +1,12 @@
-using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Contracts;
 using Core.OS.Instance.Consumers;
 using Core.Shared.HostManagement;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
 using Semver;
-using Xunit;
 using static Core.OS.Tests.TestFactory;
 
 namespace Core.OS.Tests.HostManagement.Consumers;

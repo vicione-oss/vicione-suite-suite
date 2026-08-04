@@ -1,8 +1,6 @@
 using System.Security.Authentication;
-using AwesomeAssertions;
 using Core.OS.Mail.MailKit;
 using MailKit.Net.Smtp;
-using Xunit;
 
 namespace Core.OS.Tests.Mail.MailKit;
 

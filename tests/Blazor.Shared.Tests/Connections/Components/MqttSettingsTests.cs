@@ -6,7 +6,6 @@ using Sdk.Connections.Contracts;
 using Sdk.Connections.Extensions;
 using Sdk.Testing.Client;
 using ViciOne.Ui.Localization.Resources;
-using Xunit;
 using MqttLocalization = Blazor.Shared.Connections.Components.Localization;
 
 namespace Blazor.Shared.Tests.Connections.Components;

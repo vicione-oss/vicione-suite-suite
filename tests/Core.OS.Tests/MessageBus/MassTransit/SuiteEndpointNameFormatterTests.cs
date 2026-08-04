@@ -1,12 +1,10 @@
-﻿using Core.OS.Instance;
+using Core.OS.Instance;
 using Core.OS.MessageBus.MassTransit;
 using MassTransit;
 using MassTransit.Courier.Contracts;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Messaging;
-using Xunit;
 
 namespace Core.OS.Tests.MessageBus.MassTransit;
 

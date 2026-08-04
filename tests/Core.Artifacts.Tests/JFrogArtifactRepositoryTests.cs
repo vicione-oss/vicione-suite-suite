@@ -3,14 +3,11 @@ using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
-using AwesomeAssertions;
 using Core.Artifacts.JFrog;
 using Core.Tests.Tools;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Testing;
-using Xunit;
 
 namespace Core.Artifacts.Tests;
 

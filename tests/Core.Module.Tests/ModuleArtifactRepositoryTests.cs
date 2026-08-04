@@ -1,13 +1,10 @@
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
 using Core.Tests.Tools;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Modules;
 using Sdk.Testing;
-using Xunit;
 using Core.Artifacts;
 using Core.Artifacts.Extensions;
 using Core.Module.Utils;

@@ -1,6 +1,5 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using AngleSharp.Dom;
-using AwesomeAssertions;
 using Blazor.Shared.Authorization;
 using Blazor.Shared.NavTiles.Components;
 using Blazor.Shared.NavTiles.Extensions;
@@ -11,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Authorization;
 using Sdk.Authorization.Extensions;
 using Sdk.Client.NavTiles.Attributes;
@@ -19,7 +17,6 @@ using Sdk.Client.NavTiles.Components;
 using Sdk.Client.NavTiles.Extensions;
 using Sdk.Client.NavTiles.Services;
 using Sdk.Client.Services;
-using Xunit;
 using Xunit.Sdk;
 
 namespace Blazor.Shared.Tests.Components;

@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
@@ -9,12 +8,10 @@ using MassTransit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Testing.Backend;
 using Sdk.UserManagement.Commands;
 using Sdk.UserManagement.Contracts;
 using Sdk.UserManagement.Events;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Consumers;
 

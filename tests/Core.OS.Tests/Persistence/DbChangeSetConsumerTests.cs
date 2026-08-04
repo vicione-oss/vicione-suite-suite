@@ -1,8 +1,5 @@
 using Core.OS.Persistence;
-using Core.OS.Persistence.Consumers;
 using MassTransit;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.Persistence;
 

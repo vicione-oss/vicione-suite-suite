@@ -1,7 +1,5 @@
 using System.Security.Claims;
-using AwesomeAssertions;
 using Core.OS.DbContext;
-using Core.OS.Persistence;
 using Core.OS.UserManagement.Entities;
 using Core.OS.UserManagement.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -9,8 +7,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Services;
 

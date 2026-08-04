@@ -23,7 +23,6 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Backend.IO;
 using Sdk.Backend.Messaging;
 using Sdk.Backend.Modules;
@@ -31,7 +30,6 @@ using Sdk.Backend.Persistence;
 using Sdk.Client.Services;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests;
 

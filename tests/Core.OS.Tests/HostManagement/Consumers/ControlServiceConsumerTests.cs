@@ -1,16 +1,13 @@
 using Core.OS.HostManagement.Consumers;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Messaging;
 using Sdk.SystemConfiguration;
 using Sdk.SystemConfiguration.Commands;
 using Sdk.SystemConfiguration.Contracts;
 using Sdk.SystemConfiguration.Events;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 

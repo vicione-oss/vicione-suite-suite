@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
-using AwesomeAssertions;
 using Blazor.Shared.Popup.Services;
 using Blazor.Shared.Settings.Components;
 using Blazor.Shared.Settings.Extensions;
@@ -10,7 +9,6 @@ using Blazor.Shared.Settings.Services;
 using Bunit;
 using Core.Shared.UserManagement.Comparers;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Extensions;
@@ -18,7 +16,6 @@ using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Modules;
 using Sdk.Modules;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Settings.Components;
 

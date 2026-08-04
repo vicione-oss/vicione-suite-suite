@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Connections.ControlPanels.Connections;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.Extensions;
@@ -7,14 +6,11 @@ using Blazor.Shared.Tests.Connections.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.Connections;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Client.Infrastructure;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Client;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.ControlPanels;
 

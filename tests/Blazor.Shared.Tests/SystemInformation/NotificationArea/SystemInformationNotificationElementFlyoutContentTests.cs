@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Blazor.Shared.Services;
 using Blazor.Shared.SystemInformation.Extensions;
 using Blazor.Shared.SystemInformation.NotificationArea;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
-using Xunit;
 
 namespace Blazor.Shared.Tests.SystemInformation.NotificationArea;
 

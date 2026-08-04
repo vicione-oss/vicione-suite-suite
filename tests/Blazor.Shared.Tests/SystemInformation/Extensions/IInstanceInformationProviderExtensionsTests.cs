@@ -1,9 +1,6 @@
-using AwesomeAssertions;
 using Blazor.Shared.SystemInformation.Extensions;
-using NSubstitute;
 using Sdk.Instance;
 using Sdk.Modules;
-using Xunit;
 
 namespace Blazor.Shared.Tests.SystemInformation.Extensions;
 

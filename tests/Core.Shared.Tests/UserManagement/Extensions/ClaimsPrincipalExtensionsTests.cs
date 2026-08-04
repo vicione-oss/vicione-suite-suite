@@ -1,8 +1,6 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Extensions;
-using AwesomeAssertions;
-using Xunit;
 
 namespace Core.Shared.Tests.UserManagement.Extensions;
 

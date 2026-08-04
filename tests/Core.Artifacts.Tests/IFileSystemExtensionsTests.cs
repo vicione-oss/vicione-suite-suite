@@ -1,7 +1,5 @@
 using System.IO.Abstractions;
-using AwesomeAssertions;
 using Core.Artifacts.Extensions;
-using Xunit;
 
 namespace Core.Artifacts.Tests;
 

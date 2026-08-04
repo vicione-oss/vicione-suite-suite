@@ -1,6 +1,5 @@
 using System.Reflection;
 using Core.UiHosting;
-using NSubstitute;
 using TestModule.Client;
 
 namespace Blazor.Server.Tests.Helpers

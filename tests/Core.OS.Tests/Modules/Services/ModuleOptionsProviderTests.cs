@@ -1,10 +1,7 @@
-﻿using Core.OS.Modules;
+using Core.OS.Modules;
 using Core.OS.Modules.Services;
-using AwesomeAssertions;
-using NSubstitute;
 using TestModule.Backend;
 using TestModule.Client;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

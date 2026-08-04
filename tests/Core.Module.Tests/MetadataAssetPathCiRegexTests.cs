@@ -1,5 +1,3 @@
-﻿using Xunit;
-
 namespace Core.Module.Tests;
 
 public class MetadataAssetPathCiRegexTests

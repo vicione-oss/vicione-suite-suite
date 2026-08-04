@@ -1,16 +1,13 @@
-using AwesomeAssertions;
 using Blazor.Shared.MessageBanner.Components;
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.Models;
 using Blazor.Shared.MessageBanner.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance.HealthCheck.Events;
 using Sdk.MessageBanner.Contracts;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
-using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner;
 

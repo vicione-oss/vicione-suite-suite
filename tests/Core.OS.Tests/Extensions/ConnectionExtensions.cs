@@ -1,5 +1,4 @@
-﻿using Sdk.Connections.Contracts;
-using Xunit;
+using Sdk.Connections.Contracts;
 
 namespace Core.OS.Tests.Extensions;
 

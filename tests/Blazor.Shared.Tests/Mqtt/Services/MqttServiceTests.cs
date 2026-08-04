@@ -1,8 +1,6 @@
 using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Services;
-using AwesomeAssertions;
 using Sdk.Connections.Contracts;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Mqtt.Services;
 

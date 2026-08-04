@@ -1,12 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
-using Xunit;
 using Core.OS.HostManagement;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts;
-using AwesomeAssertions;
 
 namespace Core.OS.Tests.HostManagement;
 

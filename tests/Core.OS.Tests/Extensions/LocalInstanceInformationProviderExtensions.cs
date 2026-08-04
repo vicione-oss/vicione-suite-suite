@@ -1,6 +1,5 @@
-﻿using Core.OS.Hosting;
+using Core.OS.Hosting;
 using Core.OS.Instance;
-using NSubstitute;
 using Sdk.Instance;
 using Sdk.Modules;
 using Sdk.Testing.Backend;

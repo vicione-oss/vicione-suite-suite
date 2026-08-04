@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Instance.Consumers;
 using Core.Shared.Instance.Contracts;
@@ -6,9 +5,7 @@ using Core.Shared.Instance.Requests;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 

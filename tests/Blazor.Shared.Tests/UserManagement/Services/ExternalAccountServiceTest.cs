@@ -1,12 +1,9 @@
-using AwesomeAssertions;
 using Blazor.Shared.UserManagement.Services;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
-using Xunit;
 
 namespace Blazor.Shared.Tests.UserManagement.Services;
 

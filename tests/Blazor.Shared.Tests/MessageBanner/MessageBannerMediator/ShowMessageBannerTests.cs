@@ -1,13 +1,11 @@
-﻿using Blazor.Shared.MessageBanner.Components;
+using Blazor.Shared.MessageBanner.Components;
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.Models;
 using Blazor.Shared.MessageBanner.NotificationArea;
 using Blazor.Shared.MessageBanner.Services;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.NotificationArea;
 using Sdk.Client.NotificationArea.Extensions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner.MessageBannerMediator;
 

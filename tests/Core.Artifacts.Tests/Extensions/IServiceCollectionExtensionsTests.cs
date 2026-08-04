@@ -1,9 +1,7 @@
-using AwesomeAssertions;
 using Core.Artifacts.Extensions;
 using Core.Artifacts.JFrog;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Backend.Artifacts;
-using Xunit;
 
 namespace Core.Artifacts.Tests.Extensions;
 

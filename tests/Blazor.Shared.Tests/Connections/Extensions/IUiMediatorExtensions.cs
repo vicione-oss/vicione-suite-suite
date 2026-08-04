@@ -1,8 +1,6 @@
 using Blazor.Shared.Connections.Services;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.Extensions;
 

@@ -2,24 +2,12 @@ using System.Reflection;
 using Core.Module;
 using Core.OS.Modules.Services;
 using Core.UiHosting;
-using AwesomeAssertions;
 using Sdk.Client.Modules;
 using Sdk.Extensions;
 using Sdk.Modules;
 using TestModule.Backend;
 using TestModule.Client;
-using Xunit;
 using Core.OS.Modules;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Identity;
-using MassTransit;
-using Core.Shared.Modules.Contracts;
-using Sdk.Backend.Modules;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using NSubstitute;
 
 namespace Core.OS.Tests.Modules.Services;
 

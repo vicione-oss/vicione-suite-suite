@@ -1,10 +1,7 @@
 using System.ComponentModel;
-using AwesomeAssertions;
 using Blazor.Shared.Services;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Services;
 

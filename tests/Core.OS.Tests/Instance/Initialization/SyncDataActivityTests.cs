@@ -1,5 +1,3 @@
-﻿using Xunit;
-
 namespace Core.OS.Tests.Instance.Initialization;
 
 public class SyncDataActivityTests

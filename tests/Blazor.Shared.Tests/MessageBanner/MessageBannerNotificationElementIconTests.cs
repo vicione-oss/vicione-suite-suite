@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.MessageBanner.NotificationArea;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +6,6 @@ using Sdk.Testing.Extensions;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 using ViciOne.Ui.MonochromeIcons.Core.Factories;
-using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner;
 

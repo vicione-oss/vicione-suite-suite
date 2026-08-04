@@ -5,7 +5,6 @@ using Bunit;
 using Sdk.Connections.Extensions;
 using Sdk.Testing.Client;
 using ViciOne.Ui.Localization.Resources;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.Components;
 

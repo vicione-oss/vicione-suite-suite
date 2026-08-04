@@ -2,7 +2,6 @@ using System.Text.Json;
 using Core.OS.HostManagement;
 using HostManagement.Shared.Communication;
 using HostManagement.Shared.Contracts;
-using NSubstitute;
 using CommunicationJsonContext = HostManagement.Shared.Communication.Contracts.SourceGenerationContext;
 using CommunicationEnums = HostManagement.Shared.Communication.Enums;
 using CommunicationContracts = HostManagement.Shared.Communication.Contracts;

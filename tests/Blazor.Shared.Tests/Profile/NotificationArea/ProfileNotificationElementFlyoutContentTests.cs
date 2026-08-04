@@ -11,9 +11,7 @@ using Core.Shared.Instance.Requests;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Profile.NotificationArea;
 

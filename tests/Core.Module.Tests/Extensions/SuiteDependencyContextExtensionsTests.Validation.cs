@@ -1,11 +1,9 @@
 using Core.Module.Extensions;
 using Core.Module.Utils;
 using Core.Tests.Tools;
-using AwesomeAssertions;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
 using TestSystem.Backend;
-using Xunit;
 
 namespace Core.Module.Tests.Extensions;
 

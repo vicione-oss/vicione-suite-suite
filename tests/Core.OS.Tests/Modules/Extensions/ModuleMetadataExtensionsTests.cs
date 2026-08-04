@@ -1,9 +1,6 @@
 using Core.OS.Modules.Extensions;
-using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
-using NSubstitute;
 using Sdk.Modules;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Extensions;
 

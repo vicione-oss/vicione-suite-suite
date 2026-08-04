@@ -7,15 +7,12 @@ using Core.OS.Modules.Extensions;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Contracts;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Instance;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Consumers;
 

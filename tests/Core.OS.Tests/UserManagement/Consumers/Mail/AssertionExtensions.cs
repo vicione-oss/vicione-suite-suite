@@ -1,5 +1,4 @@
 using Core.Shared.Mail;
-using NSubstitute;
 
 namespace Core.OS.Tests.UserManagement.Consumers.Mail;
 

@@ -1,16 +1,13 @@
 using System.Globalization;
 using System.Security.Claims;
-using AwesomeAssertions;
 using Blazor.Server.Backend.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Authorization;
 using Sdk.Client.Infrastructure;
-using Xunit;
 
 namespace Blazor.Server.Tests.Services;
 

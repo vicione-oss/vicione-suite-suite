@@ -1,14 +1,11 @@
-using AwesomeAssertions;
 using Core.OS.Connections.Extensions;
 using Core.OS.Connections.Mqtt;
 using Core.OS.DbContext;
 using Core.OS.Instance;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Connections;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Connections.Extensions;
 

@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.HealthCheck;
@@ -11,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Extensions;
 

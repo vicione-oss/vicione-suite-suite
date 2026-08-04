@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Messaging;
 using Sdk.Modules;
@@ -20,7 +19,6 @@ using Sdk.Testing.Backend;
 using TestModule.Backend;
 using TestModule.Client;
 using TestSystem.Backend;
-using Xunit;
 
 namespace Core.OS.Tests;
 

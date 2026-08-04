@@ -1,13 +1,10 @@
 using System.Text.Json;
 using Core.OS.Persistence;
-using AwesomeAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Backend.Persistence;
 using Sdk.Messaging;
-using Xunit;
 
 namespace Core.OS.Tests.Persistence;
 

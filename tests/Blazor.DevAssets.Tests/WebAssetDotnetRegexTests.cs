@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Blazor.DevAssets.Tests;
 
 public class WebAssetDotnetRegexTests

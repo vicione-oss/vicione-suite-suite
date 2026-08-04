@@ -1,15 +1,12 @@
 using Core.OS.Instance;
 using Core.OS.Instance.HealthCheck;
 using Core.Shared.Instance.HealthCheck;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.HealthCheck;
 

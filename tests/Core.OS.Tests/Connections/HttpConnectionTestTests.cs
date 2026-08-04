@@ -1,8 +1,5 @@
-using AwesomeAssertions;
 using Core.OS.Connections;
-using NSubstitute;
 using Sdk.Connections.Contracts;
-using Xunit;
 
 namespace Core.OS.Tests.Connections;
 

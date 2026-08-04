@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions.TestingHelpers;
+using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using Core.Module.Utils;
 using Sdk.Modules;
@@ -6,7 +6,6 @@ using TestModule.Backend;
 using TestModule.Client;
 using TestSystem.Backend;
 using TestUiHost;
-using Xunit;
 
 namespace Core.Module.Tests;
 

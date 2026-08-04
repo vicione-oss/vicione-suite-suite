@@ -1,11 +1,9 @@
 using System.Globalization;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
-using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Services;
 using Core.OS.Modules;
 using Core.OS.Modules.Services;
@@ -22,12 +20,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using OpenTelemetry.Trace;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using TestUiHost;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Components.Pages;
 using Blazor.Shared.NavTiles.Extensions;
 using Bunit;
@@ -6,7 +5,6 @@ using Sdk.Client.Modules;
 using Sdk.Client.NavTiles.Extensions;
 using Sdk.Testing.Client;
 using TestModule.Client;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Pages;
 
