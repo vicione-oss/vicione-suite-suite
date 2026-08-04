@@ -1,9 +1,7 @@
-using AwesomeAssertions;
 using Blazor.Shared.MessageBanner.NotificationArea;
 using Sdk.MessageBanner.Contracts;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Factories;
-using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner;
 

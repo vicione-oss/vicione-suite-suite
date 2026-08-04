@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
-using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Options;
 using Core.OS.Modules;
@@ -16,12 +15,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Core.Shared.Modules;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Messaging;
 using Sdk.Modules;
 using TestModule.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

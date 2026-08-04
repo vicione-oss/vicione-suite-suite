@@ -1,10 +1,8 @@
-using AwesomeAssertions;
 using Blazor.Server.Backend.Components;
 using Blazor.Shared.Profile.Models;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Blazor.Server.Tests.Components;
 

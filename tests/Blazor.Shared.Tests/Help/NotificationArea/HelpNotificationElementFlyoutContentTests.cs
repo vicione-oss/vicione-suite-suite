@@ -1,10 +1,8 @@
 using Blazor.Shared.Help.NotificationArea;
 using Bunit;
-using AwesomeAssertions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Sdk.Testing.Client;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Help.NotificationArea;
 

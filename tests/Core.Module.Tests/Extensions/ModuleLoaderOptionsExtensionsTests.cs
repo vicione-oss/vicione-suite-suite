@@ -1,9 +1,6 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using Core.Module.Extensions;
 using Core.Module.Options;
-using AwesomeAssertions;
-using NSubstitute;
-using Xunit;
 
 namespace Core.Module.Tests.Extensions;
 

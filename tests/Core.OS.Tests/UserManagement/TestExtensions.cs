@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
@@ -6,7 +6,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement;
 

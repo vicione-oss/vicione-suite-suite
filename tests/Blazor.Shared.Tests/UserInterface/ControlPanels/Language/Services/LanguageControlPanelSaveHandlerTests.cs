@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.UserInterface.ControlPanels.Language.Services;
 using Bunit;
 using Bunit.TestDoubles;
@@ -8,11 +7,9 @@ using Core.Shared.Instance.Events;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Requests;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
-using Xunit;
 
 namespace Blazor.Shared.Tests.UserInterface.ControlPanels.Language.Services;
 

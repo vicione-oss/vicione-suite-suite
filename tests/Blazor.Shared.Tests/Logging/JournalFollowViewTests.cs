@@ -1,12 +1,9 @@
-﻿using System.Runtime.Versioning;
+using System.Runtime.Versioning;
 using Blazor.Shared.Logging;
 using Blazor.Tests.Tools;
 using Bunit;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using ViciOne.Journal;
-using Xunit;
-using NSubstitute;
 
 namespace Blazor.Shared.Tests.Logging;
 

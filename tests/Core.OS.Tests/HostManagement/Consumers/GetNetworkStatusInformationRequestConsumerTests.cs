@@ -1,13 +1,10 @@
-﻿using Core.OS.HostManagement;
+using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Tests.HostManagement.Extensions;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.NetworkStatus.Requests;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 

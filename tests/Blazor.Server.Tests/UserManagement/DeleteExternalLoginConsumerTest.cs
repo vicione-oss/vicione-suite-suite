@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Server.Backend.UserManagement;
 using Core.Shared.UserManagement.Commands;
 using Core.Shared.UserManagement.Contracts;
@@ -7,9 +6,7 @@ using MassTransit.Testing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Blazor.Server.Tests.UserManagement;
 

@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Repositories;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Models;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Services;
@@ -7,12 +6,10 @@ using Blazor.Tests.Tools;
 using Bunit;
 using Core.Shared.Instance.Contracts;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Testing.Client;
 using ViciOne.Ui.Blazor.Components.CheckBox.Extensions;
 using ViciOne.Ui.Blazor.Components.Grid.Extensions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels.Repositories;
 

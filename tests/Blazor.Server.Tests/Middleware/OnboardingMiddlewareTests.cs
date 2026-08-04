@@ -1,13 +1,10 @@
-﻿using System.Security.Claims;
-using AwesomeAssertions;
+using System.Security.Claims;
 using Blazor.Server.Backend.Middleware;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Instance;
-using Xunit;
 
 namespace Blazor.Server.Tests.Middleware;
 

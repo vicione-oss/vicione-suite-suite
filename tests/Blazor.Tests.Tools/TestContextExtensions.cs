@@ -1,4 +1,4 @@
-﻿using Bunit;
+using Bunit;
 using DevExpress.Blazor.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -36,7 +36,7 @@ public static class TestContextExtensions
             ctx.SetupSuiteServices(setup);
 
             ctx.JSInterop.ConfigureJSInteropForResizeObserver();
-            
+
             ctx.Services
                 .AddCheckBox()
                 .AddShortSpinEdit()

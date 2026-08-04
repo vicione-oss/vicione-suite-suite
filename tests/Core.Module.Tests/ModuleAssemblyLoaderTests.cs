@@ -1,6 +1,5 @@
 using Core.Tests.Tools;
 using Sdk.Backend.Modules;
-using Xunit;
 
 namespace Core.Module.Tests;
 

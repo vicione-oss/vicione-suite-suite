@@ -1,11 +1,8 @@
 using System.Security.Cryptography;
-using AwesomeAssertions;
 using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Services;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client.Interfaces;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Settings;
 

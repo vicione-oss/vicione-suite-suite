@@ -1,17 +1,14 @@
-﻿using System.Security.Claims;
-using AwesomeAssertions;
+using System.Security.Claims;
 using Blazor.Server.Backend.Services;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Blazor.Server.Tests.Services;
 

@@ -1,12 +1,9 @@
-using AwesomeAssertions;
 using Blazor.Shared.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Authorization;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Authorization;
 

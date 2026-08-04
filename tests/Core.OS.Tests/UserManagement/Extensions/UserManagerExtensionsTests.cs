@@ -1,9 +1,6 @@
-using AwesomeAssertions;
 using Core.OS.UserManagement.Extensions;
 using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Contracts;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Extensions;
 

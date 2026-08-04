@@ -2,8 +2,6 @@ using Core.OS.Modules.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

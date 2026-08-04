@@ -3,8 +3,6 @@ using Blazor.Shared.Extensions;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.DateAndTime.Services;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Extensions;
 

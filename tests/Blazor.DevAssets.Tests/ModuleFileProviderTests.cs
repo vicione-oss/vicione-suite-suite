@@ -1,7 +1,6 @@
 using Sdk.Client.Modules;
 using System.Reflection;
 using TestModule.Client;
-using Xunit;
 
 namespace Blazor.DevAssets.Tests;
 

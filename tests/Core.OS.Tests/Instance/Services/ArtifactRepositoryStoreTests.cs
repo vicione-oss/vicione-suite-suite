@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
@@ -11,7 +10,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sdk.Messaging;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 

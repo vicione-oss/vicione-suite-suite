@@ -1,8 +1,6 @@
 using Blazor.Shared.Help.Contracts;
 using Blazor.Shared.Help.NotificationArea;
 using Bunit;
-using AwesomeAssertions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Help.NotificationArea;
 

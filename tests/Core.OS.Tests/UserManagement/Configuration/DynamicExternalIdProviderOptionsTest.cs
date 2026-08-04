@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.UserManagement.Configuration;
 using Core.Shared.UserManagement.Configuration;
@@ -6,7 +5,6 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Configuration;
 

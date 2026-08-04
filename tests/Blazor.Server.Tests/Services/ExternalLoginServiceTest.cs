@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using AwesomeAssertions;
 using Blazor.Server.Backend.Services;
 using Blazor.Shared.UserManagement.Services.Validators;
 using Core.Shared.UserManagement;
@@ -7,8 +6,6 @@ using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
-using Xunit;
 
 namespace Blazor.Server.Tests.Services;
 

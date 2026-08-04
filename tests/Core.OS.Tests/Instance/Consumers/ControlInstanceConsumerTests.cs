@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.HostManagement;
 using Core.OS.Instance;
@@ -14,11 +13,9 @@ using HostManagement.Shared.Communication.Enums;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 

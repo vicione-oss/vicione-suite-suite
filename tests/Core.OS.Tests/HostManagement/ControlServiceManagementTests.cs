@@ -1,12 +1,9 @@
 using Core.OS.HostManagement;
 using Core.OS.Tests.HostManagement.Extensions;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.SystemConfiguration.Commands;
 using Sdk.SystemConfiguration.Contracts;
-using Xunit;
 
 namespace Core.OS.Tests.HostManagement;
 

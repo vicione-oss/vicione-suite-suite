@@ -1,10 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Core.OS.Extensions;
 using Core.OS.Instance;
-using AwesomeAssertions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Core.OS.Tests;
 

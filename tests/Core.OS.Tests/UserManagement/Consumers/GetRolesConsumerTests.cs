@@ -3,10 +3,8 @@ using Core.OS.UserManagement.Consumers;
 using Core.OS.UserManagement.Extensions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Testing.Backend;
 using Sdk.UserManagement.Requests;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Consumers;
 

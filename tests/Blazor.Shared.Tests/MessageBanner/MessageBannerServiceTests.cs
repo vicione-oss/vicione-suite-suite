@@ -1,12 +1,9 @@
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.Models;
 using Blazor.Shared.MessageBanner.Services;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.Services;
 using Sdk.MessageBanner.Contracts;
-using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner;
 

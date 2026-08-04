@@ -1,9 +1,7 @@
 using Blazor.Shared.Help.Extensions;
 using Blazor.Shared.Help.NotificationArea;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.NotificationArea.Services;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Help.Extensions;
 

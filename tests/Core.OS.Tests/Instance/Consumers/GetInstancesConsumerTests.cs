@@ -2,13 +2,10 @@ using Core.OS.DbContext;
 using Core.OS.Instance.Consumers;
 using Core.OS.Tests.Extensions;
 using Core.Shared.Instance.Requests;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 

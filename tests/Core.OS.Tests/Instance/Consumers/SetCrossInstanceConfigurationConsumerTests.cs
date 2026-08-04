@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Instance.Consumers;
 using Core.OS.Modules;
@@ -10,10 +9,8 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Testing.Backend;
 using TestUiHost;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 

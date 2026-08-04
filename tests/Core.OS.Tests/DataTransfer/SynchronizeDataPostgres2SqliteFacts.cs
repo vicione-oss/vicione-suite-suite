@@ -4,11 +4,9 @@ using Core.OS.Tests.DataTransfer.Helpers;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Modules;
 using TestModule.Backend;
 using TestModule.Backend.Contracts;
-using Xunit;
 using static Core.OS.Tests.DataTransfer.Helpers.SeedData;
 using static Core.OS.Tests.DataTransfer.Helpers.UnitTestHelper;
 

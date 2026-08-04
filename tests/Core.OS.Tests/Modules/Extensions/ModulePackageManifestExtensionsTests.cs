@@ -1,10 +1,7 @@
-using AwesomeAssertions;
 using Core.OS.Modules.Extensions;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Modules;
 using Semver;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Extensions;
 

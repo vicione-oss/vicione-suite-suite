@@ -1,12 +1,10 @@
 using System.Security.Authentication;
-using AwesomeAssertions;
 using Core.OS.Mail;
 using Core.OS.Mail.MailKit;
 using Core.Shared.Mail;
 using Core.Tests.Tools;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
-using Xunit;
 using AuthenticationException = MailKit.Security.AuthenticationException;
 
 namespace Core.OS.Tests.Mail;

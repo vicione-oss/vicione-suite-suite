@@ -2,12 +2,10 @@ using Blazor.Shared.Instance.ControlPanels.Instances;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Instance.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.Services;
 using Sdk.Instance;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Instance.Extensions;
 

@@ -1,7 +1,5 @@
 using Core.Module.Exceptions;
 using Core.Module.Utils;
-using AwesomeAssertions;
-using Xunit;
 using Semver;
 
 namespace Core.Module.Tests.Utils;

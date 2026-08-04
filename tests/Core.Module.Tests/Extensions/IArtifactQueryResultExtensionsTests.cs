@@ -1,9 +1,6 @@
-using AwesomeAssertions;
 using Core.Module.Extensions;
-using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Semver;
-using Xunit;
 
 namespace Core.Module.Tests.Extensions;
 

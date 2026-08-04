@@ -1,6 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
-using AwesomeAssertions;
 using Core.OS.Connections.Mqtt;
 using Core.OS.Instance.Extensions;
 using Core.OS.Modules;
@@ -8,10 +7,8 @@ using Core.OS.Persistence;
 using Core.Tests.Tools;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Modules;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Persistence;
 

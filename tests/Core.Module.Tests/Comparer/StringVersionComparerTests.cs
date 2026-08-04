@@ -1,6 +1,4 @@
-﻿using AwesomeAssertions;
 using Core.Module.Comparer;
-using Xunit;
 
 namespace Core.Module.Tests.Comparer;
 

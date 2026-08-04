@@ -1,7 +1,5 @@
 using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Helpers;
-using AwesomeAssertions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Mqtt;
 

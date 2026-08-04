@@ -3,7 +3,6 @@ using Blazor.Shared.Settings.Services;
 using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;

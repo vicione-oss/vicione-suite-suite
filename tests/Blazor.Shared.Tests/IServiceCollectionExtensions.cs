@@ -1,7 +1,6 @@
-﻿using Blazor.Shared.Settings.Services;
+using Blazor.Shared.Settings.Services;
 using System.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Tests;

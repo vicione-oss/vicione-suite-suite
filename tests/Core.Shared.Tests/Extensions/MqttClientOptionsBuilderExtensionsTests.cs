@@ -1,10 +1,8 @@
 using System.IO.Abstractions.TestingHelpers;
 using System.Text;
-using AwesomeAssertions;
 using Core.Shared.Extensions;
 using MQTTnet;
 using Sdk.Connections.Contracts;
-using Xunit;
 
 namespace Core.Shared.Tests.Extensions;
 

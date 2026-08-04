@@ -1,11 +1,8 @@
-using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.Shared.Instance.Contracts;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Extensions;
 

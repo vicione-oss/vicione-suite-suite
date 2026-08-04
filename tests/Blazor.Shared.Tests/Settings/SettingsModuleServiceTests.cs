@@ -1,15 +1,12 @@
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Services;
 using Blazor.Shared.Tests.Models;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Settings;
 

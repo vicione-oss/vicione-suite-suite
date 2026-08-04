@@ -1,5 +1,4 @@
-﻿using Core.Shared.Persistence.Contracts;
-using AwesomeAssertions;
+using Core.Shared.Persistence.Contracts;
 using Sdk.Instance;
 
 namespace Core.OS.Tests.Instance;

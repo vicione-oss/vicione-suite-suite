@@ -1,6 +1,4 @@
-﻿using Core.OS.Hosting;
-using AwesomeAssertions;
-using Xunit;
+using Core.OS.Hosting;
 
 namespace Core.OS.Tests.Hosting;
 

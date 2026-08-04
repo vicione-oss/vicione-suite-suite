@@ -1,6 +1,4 @@
-using AwesomeAssertions;
 using Serilog.Sinks.Journal;
-using Xunit;
 
 namespace Core.OS.Tests.Logging;
 

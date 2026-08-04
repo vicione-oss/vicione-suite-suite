@@ -3,12 +3,9 @@ using Core.OS.Instance;
 using Core.OS.Instance.Services;
 using Core.OS.Modules;
 using Core.Shared.Instance.Contracts;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Instance;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 

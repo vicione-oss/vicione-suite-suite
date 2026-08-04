@@ -1,8 +1,6 @@
-using AwesomeAssertions;
 using Core.OS.Instance.HealthCheck;
 using Core.OS.Instance.Services;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.HealthCheck;
 

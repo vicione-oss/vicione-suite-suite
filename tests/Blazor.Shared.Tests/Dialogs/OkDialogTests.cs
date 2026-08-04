@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Dialogs;
 using Bunit;
 using Bunit.Rendering;
@@ -6,7 +5,6 @@ using ViciOne.Ui.Blazor.Components.Dialog.Components;
 using ViciOne.Ui.Blazor.Components.Dialog.Extensions;
 using ViciOne.Ui.Blazor.Components.Popup.Components;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.Dialog.Extensions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Dialogs;
 

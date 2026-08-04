@@ -1,7 +1,5 @@
 using System.Globalization;
 using Blazor.Shared.SystemInformation.Services;
-using AwesomeAssertions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.SystemInformation.Services;
 

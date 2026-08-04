@@ -3,10 +3,8 @@ using Blazor.Shared.Onboarding.Services;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Onboarding.Services;
 

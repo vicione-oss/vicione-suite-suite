@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Models;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels.Repositories.Services;
 

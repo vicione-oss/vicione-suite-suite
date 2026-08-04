@@ -1,9 +1,7 @@
 using System.IO.Abstractions;
 using System.Reflection;
-using AwesomeAssertions;
 using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Templates;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Services;
 

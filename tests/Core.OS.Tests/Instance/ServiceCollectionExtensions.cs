@@ -1,11 +1,10 @@
-﻿using AutoFixture;
+using AutoFixture;
 using Core.OS.Modules;
 using Core.OS.Modules.Contracts;
 using Core.Shared.HostManagement;
 using Core.Shared.Modules.Contracts;
 using HostManagement.Shared.Contracts;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Modules;
 using Sdk.Testing.Backend;

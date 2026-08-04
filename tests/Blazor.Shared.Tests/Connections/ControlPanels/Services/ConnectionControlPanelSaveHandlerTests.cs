@@ -1,15 +1,12 @@
-using AwesomeAssertions;
 using Blazor.Shared.Connections.Contracts;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Tests.Connections.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.Connections;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.ControlPanels.Services;
 

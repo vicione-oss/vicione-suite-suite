@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices;
-using AwesomeAssertions;
 using Core.OS.Logging;
 using Core.OS.Tests.Extensions;
 using Core.Shared;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Sdk.Testing.Backend;
 using Serilog;
-using Xunit;
 
 namespace Core.OS.Tests.Logging;
 

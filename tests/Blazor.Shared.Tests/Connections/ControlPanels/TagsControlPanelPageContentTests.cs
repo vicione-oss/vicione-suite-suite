@@ -1,5 +1,4 @@
 using AngleSharp.Dom;
-using AwesomeAssertions;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.ControlPanels.Tags;
 using Blazor.Shared.Connections.ControlPanels.Tags.Services;
@@ -8,12 +7,10 @@ using Blazor.Shared.Settings.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.AspNetCore.Components;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Client;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.ControlPanels;
 

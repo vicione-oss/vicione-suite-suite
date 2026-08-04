@@ -1,5 +1,3 @@
-﻿using Xunit;
-
 namespace Core.OS.Tests.Persistence;
 
 public class PostgresDbExtensionsTests

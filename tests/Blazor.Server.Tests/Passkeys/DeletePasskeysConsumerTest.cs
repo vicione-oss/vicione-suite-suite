@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Server.Backend.Passkeys;
 using Core.Shared.Passkeys;
 using Core.Shared.Passkeys.Commands;
@@ -8,9 +7,7 @@ using MassTransit.Testing;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Blazor.Server.Tests.Passkeys;
 

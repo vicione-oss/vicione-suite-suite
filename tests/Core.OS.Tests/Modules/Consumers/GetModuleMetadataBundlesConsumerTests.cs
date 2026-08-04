@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.Modules;
 using Core.OS.Modules.Consumers;
 using Core.OS.Modules.Contracts;
@@ -6,9 +5,7 @@ using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Requests;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Consumers;
 

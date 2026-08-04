@@ -1,5 +1,3 @@
-﻿using Xunit;
-
 namespace Core.OS.Tests.MessageBus;
 
 public class MediatorMessageFactoryProviderTests

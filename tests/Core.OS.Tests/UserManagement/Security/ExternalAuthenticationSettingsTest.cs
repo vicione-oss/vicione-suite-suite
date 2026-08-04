@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Security;
 using Core.Shared.UserManagement.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.UserManagement.Security;
 

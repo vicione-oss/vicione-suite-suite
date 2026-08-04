@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.Artifacts;
 using Core.Artifacts.JFrog;
 using Core.Module;
@@ -7,10 +6,8 @@ using Core.OS.Modules;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Backend.Modules;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Extensions;
 

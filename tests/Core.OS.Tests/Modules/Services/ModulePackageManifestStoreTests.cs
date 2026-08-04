@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
-using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Modules;
@@ -10,10 +9,8 @@ using Core.OS.Modules.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Messaging;
 using Sdk.Modules;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

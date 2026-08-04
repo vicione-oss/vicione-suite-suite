@@ -1,5 +1,4 @@
-﻿using Core.Shared.Passkeys;
-using Xunit;
+using Core.Shared.Passkeys;
 
 namespace Core.Shared.Tests.Passkeys;
 

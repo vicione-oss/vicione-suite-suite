@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Components;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Network.Extensions;
@@ -9,10 +8,8 @@ using Bunit;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Contracts;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Network.ControlPanels;
 

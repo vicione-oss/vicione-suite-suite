@@ -1,12 +1,9 @@
-using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Models;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 using Core.Shared.Instance.Contracts;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels.Repositories.Services;
 

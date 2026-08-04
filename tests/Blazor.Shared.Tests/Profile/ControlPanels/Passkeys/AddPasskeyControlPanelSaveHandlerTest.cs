@@ -1,15 +1,11 @@
-using AwesomeAssertions;
 using Core.Shared.Passkeys.Contracts;
 using Blazor.Shared.Profile.ControlPanels.Passkeys.Services;
 using Blazor.Shared.Settings.Models;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using NSubstitute;
-using Xunit;
 using PasskeyConstants = Core.Shared.Passkeys.Constants;
 
 namespace Blazor.Shared.Tests.Settings.Profile.ControlPanels.Passkeys;

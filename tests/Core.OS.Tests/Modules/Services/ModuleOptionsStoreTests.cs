@@ -3,14 +3,12 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
-using AwesomeAssertions;
 using Core.OS.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
 using TestModule.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

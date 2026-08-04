@@ -1,5 +1,4 @@
 using System.Net;
-using AwesomeAssertions;
 using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Onboarding.Models;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
@@ -7,7 +6,6 @@ using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using HostManagement.Shared.Contracts.Service;
 using HostManagement.Shared.Enums;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Onboarding.Services;
 

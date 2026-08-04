@@ -9,12 +9,10 @@ using Core.Shared.Instance.Requests;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 

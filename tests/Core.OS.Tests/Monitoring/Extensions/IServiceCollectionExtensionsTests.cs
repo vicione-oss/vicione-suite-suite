@@ -1,4 +1,3 @@
-﻿using AwesomeAssertions;
 using Core.OS.Connections.Mqtt;
 using Core.OS.Instance;
 using Core.OS.Monitoring.Extensions;
@@ -6,11 +5,9 @@ using Core.Shared.Monitoring;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Journal;
 using ViciOne.Journal;
 using ViciOne.SystemMonitoring.Configuration;
-using Xunit;
 
 namespace Core.OS.Tests.Monitoring.Extensions;
 

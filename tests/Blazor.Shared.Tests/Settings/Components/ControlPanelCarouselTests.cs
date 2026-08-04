@@ -1,4 +1,3 @@
-﻿using AwesomeAssertions;
 using Blazor.Shared.Settings.Components;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Settings.Services;
@@ -10,7 +9,6 @@ using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Modules;
 using Sdk.Modules;
-using Xunit;
 using static Blazor.Shared.Tests.Settings.Components.ControlPanelCarouselTests.TestClientModule;
 
 namespace Blazor.Shared.Tests.Settings.Components;

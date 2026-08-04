@@ -2,11 +2,9 @@ using Core.OS.DbContext;
 using Core.OS.Instance.Consumers;
 using Core.OS.Tests.Extensions;
 using Core.Shared.Instance.Commands;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 

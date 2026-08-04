@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using System.Text.Json;
@@ -8,7 +8,6 @@ using Core.OS.Instance.Extensions;
 using Core.OS.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Instance;
 using Sdk.Modules;
 

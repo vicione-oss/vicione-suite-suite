@@ -1,7 +1,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
-using AwesomeAssertions;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Instance;
@@ -18,10 +17,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 

@@ -1,7 +1,5 @@
-using AwesomeAssertions;
 using Blazor.Shared.UserManagement.Services.Validators;
 using Blazor.Shared.Validation.Services.Validators;
-using Xunit;
 
 namespace Blazor.Shared.Tests.UserManagement.Services.Validators;
 

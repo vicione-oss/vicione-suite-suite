@@ -1,9 +1,7 @@
-﻿using Blazor.Shared.MessageBanner.Extensions;
+using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.MessageBanner.Services;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.NotificationArea.Extensions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.MessageBanner.MessageBannerMediator;
 

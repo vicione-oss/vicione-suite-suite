@@ -3,7 +3,6 @@ using System.Runtime.Loader;
 using Sdk.Connections.Contracts;
 using Sdk.Modules;
 using TestModule.Backend;
-using Xunit;
 
 namespace Core.Module.Tests;
 

@@ -1,10 +1,8 @@
-﻿using AwesomeAssertions;
 using Core.OS.DbContext;
 using Core.OS.Instance.Services;
 using Core.Shared.Instance.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 

@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Module;
 using Blazor.Shared.Module.ControlPanels.Models;
 using Blazor.Shared.Module.Services;
@@ -7,12 +6,10 @@ using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Events;
 using Core.Shared.Modules.Requests;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
 using Sdk.Messaging;
 using Sdk.Modules;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Module.Services;
 

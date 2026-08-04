@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Tests.HostManagement.Extensions;
@@ -10,10 +9,8 @@ using HostManagement.Shared.Contracts.Service;
 using HostManagement.Shared.Enums;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.SystemConfiguration.Events;
 using Sdk.Testing.Backend;
-using Xunit;
 using OperationStatus = HostManagement.Shared.Communication.Enums.OperationStatus;
 
 namespace Core.OS.Tests.HostManagement.Consumers;

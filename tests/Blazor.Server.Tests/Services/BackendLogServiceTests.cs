@@ -1,9 +1,6 @@
 using Blazor.Server.Backend.Services;
-using AwesomeAssertions;
 using Core.Shared.Logging;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
 
 namespace Blazor.Server.Tests.Services;
 

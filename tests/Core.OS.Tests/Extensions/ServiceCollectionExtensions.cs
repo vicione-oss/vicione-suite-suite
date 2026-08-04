@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Testing.Backend;
 
 namespace Core.OS.Tests.Extensions;

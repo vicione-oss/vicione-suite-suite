@@ -1,6 +1,5 @@
 using Core.Artifacts.JFrog;
 using Sdk.Backend.Artifacts;
-using Xunit;
 
 namespace Core.Artifacts.Tests;
 

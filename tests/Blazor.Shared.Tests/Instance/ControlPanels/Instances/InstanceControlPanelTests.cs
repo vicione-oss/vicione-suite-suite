@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Instance.ControlPanels.Instances;
 using Blazor.Shared.Instance.ControlPanels.Instances.Services;
 using Blazor.Shared.Instance.Extensions;
@@ -7,11 +6,9 @@ using Blazor.Shared.Settings.Extensions;
 using Bunit;
 using Core.Shared.Instance.Requests;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Testing.Client;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels.Instances;
 

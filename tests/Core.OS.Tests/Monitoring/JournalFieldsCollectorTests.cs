@@ -1,11 +1,8 @@
-using AwesomeAssertions;
 using Core.OS.Monitoring;
 using Core.Shared.Monitoring;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Journal;
 using ViciOne.Journal;
-using Xunit;
 
 namespace Core.OS.Tests.Monitoring;
 

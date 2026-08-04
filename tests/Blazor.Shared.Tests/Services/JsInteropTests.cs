@@ -1,11 +1,8 @@
-using AwesomeAssertions;
 using Blazor.Shared.Services;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Testing.Client;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Services;
 

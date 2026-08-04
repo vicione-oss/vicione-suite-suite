@@ -1,17 +1,14 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json.Nodes;
-using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Utils;
 using Core.OS.Modules;
 using Core.OS.Modules.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Artifacts;
 using Sdk.Modules;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Services;
 

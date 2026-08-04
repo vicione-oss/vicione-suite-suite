@@ -1,4 +1,4 @@
-﻿using Core.Module;
+using Core.Module;
 using Core.OS.MessageBus.MassTransit;
 using Core.OS.MessageBus.MassTransit.Configuration;
 using Core.OS.Modules;
@@ -7,12 +7,10 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.MessageBus.MassTransit;
 

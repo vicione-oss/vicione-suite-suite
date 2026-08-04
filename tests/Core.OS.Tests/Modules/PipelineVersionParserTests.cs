@@ -1,6 +1,4 @@
-﻿using Core.OS.Modules;
-using AwesomeAssertions;
-using Xunit;
+using Core.OS.Modules;
 
 namespace Core.OS.Tests.Modules;
 

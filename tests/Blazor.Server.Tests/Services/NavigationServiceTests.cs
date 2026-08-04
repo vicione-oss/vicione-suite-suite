@@ -1,10 +1,7 @@
 using Blazor.Server.Backend.Services;
-using AwesomeAssertions;
 using Microsoft.AspNetCore.Components;
-using NSubstitute;
 using Sdk.Client.NotificationArea.Services;
 using Sdk.Client.Services;
-using Xunit;
 
 namespace Blazor.Server.Tests.Services;
 

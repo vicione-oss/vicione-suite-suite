@@ -2,7 +2,6 @@ using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 
 namespace Blazor.Server.Tests;
 

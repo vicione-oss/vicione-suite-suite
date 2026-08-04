@@ -1,5 +1,3 @@
-﻿using Xunit;
-
 namespace Core.Module.Tests;
 
 [CollectionDefinition(NonParallelCollection, DisableParallelization = true)]

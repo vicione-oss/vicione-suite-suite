@@ -3,16 +3,13 @@ using Core.OS.Modules.Consumers;
 using Core.Shared.Modules;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Events;
-using AwesomeAssertions;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
 using TestModule.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Consumers;
 

@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
@@ -6,10 +5,8 @@ using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Network.ControlPanels.NetworkInterface.Services;
 

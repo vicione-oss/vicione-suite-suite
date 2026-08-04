@@ -3,12 +3,10 @@ using Blazor.Shared.Onboarding.NavTiles;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Services;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Authorization;
 using Sdk.Client.NavTiles.Enums;
 using Sdk.Client.NavTiles.Services;
 using Sdk.Instance;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Onboarding.Extensions;
 

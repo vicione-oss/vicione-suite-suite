@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.NavTiles.Extensions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,7 +9,6 @@ using Sdk.Client.NavTiles.Enums;
 using Sdk.Client.NavTiles.Extensions;
 using Sdk.Client.NavTiles.Services;
 using Sdk.Modules;
-using Xunit;
 
 namespace Blazor.Shared.Tests.NavTiles;
 

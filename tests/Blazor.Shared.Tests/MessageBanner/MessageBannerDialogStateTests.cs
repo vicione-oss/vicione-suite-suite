@@ -1,6 +1,4 @@
-﻿using Blazor.Shared.MessageBanner.Components;
-using AwesomeAssertions;
-using Xunit;
+using Blazor.Shared.MessageBanner.Components;
 
 namespace Blazor.Shared.Tests.MessageBanner;
 

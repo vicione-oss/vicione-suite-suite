@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Blazor.Shared.Services;
 using Blazor.Shared.SystemInformation.Components;
 using Blazor.Shared.SystemInformation.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
-using NSubstitute;
 using Sdk.Client.Services;
-using Xunit;
 
 namespace Blazor.Shared.Tests.SystemInformation.Components;
 

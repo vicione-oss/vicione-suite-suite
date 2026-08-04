@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Core.OS.Instance.Services;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Requests;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using Sdk.Backend.Messaging;
 using Sdk.Instance;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Services;
 

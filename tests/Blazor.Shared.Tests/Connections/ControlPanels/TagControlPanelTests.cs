@@ -1,19 +1,15 @@
-using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
-using Blazor.Shared.Connections.ControlPanels;
 using Blazor.Shared.Connections.ControlPanels.Tags;
 using Blazor.Shared.Connections.ControlPanels.Tags.Services;
 using Blazor.Shared.Connections.Extensions;
 using Blazor.Shared.Connections.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Client;
 using ViciOne.Ui.Blazor.Components.CheckBox;
 using ViciOne.Ui.Localization.Resources;
-using Xunit;
 
 namespace Blazor.Shared.Tests.Connections.ControlPanels;
 

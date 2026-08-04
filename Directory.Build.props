@@ -89,6 +89,11 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="ViciOne.Suite.Sdk.Testing" />
+
+        <!-- Global usings for all test projects -->
+        <Using Include="AwesomeAssertions" />
+        <Using Include="Xunit" />
+        <Using Include="NSubstitute" />
     </ItemGroup>
 
     <!-- Do not publish tools projects -->

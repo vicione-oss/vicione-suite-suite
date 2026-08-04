@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.Module;
 using Core.Module.Contracts;
 using Core.OS.HostManagement.Consumers;
@@ -7,11 +6,9 @@ using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement;
 using Core.Shared.HostManagement.Events;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Backend.Modules;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 

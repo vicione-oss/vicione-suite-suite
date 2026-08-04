@@ -5,9 +5,7 @@ using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Tests.Connections.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
-using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Connections.Commands;
@@ -16,7 +14,6 @@ using Sdk.Connections.Events;
 using Sdk.Connections.Requests;
 using Sdk.Messaging;
 using Sdk.Testing.Client;
-using Xunit;
 using SuiteConnectionServiceLocalization = Blazor.Shared.Connections.Services.Localization.SuiteConnectionService;
 
 namespace Blazor.Shared.Tests.Connections.Services;
