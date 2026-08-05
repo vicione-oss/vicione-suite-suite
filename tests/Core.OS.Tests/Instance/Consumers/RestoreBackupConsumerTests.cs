@@ -71,7 +71,7 @@ public sealed class RestoreBackupConsumerTests
 
         var command = new RestoreBackup
         {
-            BackupFileContent = backupZipBytes,
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
         };
 
         // Act
@@ -95,7 +95,7 @@ public sealed class RestoreBackupConsumerTests
 
         var command = new RestoreBackup
         {
-            BackupFileContent = backupZipBytes,
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
             SuiteConfiguration = true,
         };
 
@@ -120,7 +120,7 @@ public sealed class RestoreBackupConsumerTests
 
         var command = new RestoreBackup
         {
-            BackupFileContent = backupZipBytes,
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
             SuiteConfiguration = false,
             SystemConfiguration = true,
         };
@@ -146,7 +146,7 @@ public sealed class RestoreBackupConsumerTests
 
         var command = new RestoreBackup
         {
-            BackupFileContent = backupZipBytes,
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
             SuiteConfiguration = true,
         };
 
@@ -171,7 +171,7 @@ public sealed class RestoreBackupConsumerTests
 
         var command = new RestoreBackup
         {
-            BackupFileContent = backupZipBytes,
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
             SuiteConfiguration = true,
         };
 
@@ -197,7 +197,7 @@ public sealed class RestoreBackupConsumerTests
 
         var command = new RestoreBackup
         {
-            BackupFileContent = backupZipBytes,
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
             SystemConfiguration = true,
         };
 
@@ -223,7 +223,7 @@ public sealed class RestoreBackupConsumerTests
 
         var command = new RestoreBackup
         {
-            BackupFileContent = backupZipBytes,
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
             SuiteConfiguration = true,
             SystemConfiguration = false,
         };
@@ -245,7 +245,7 @@ public sealed class RestoreBackupConsumerTests
 
         var command = new RestoreBackup
         {
-            BackupFileContent = backupZipBytes,
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
             SuiteConfiguration = true,
         };
 
@@ -272,4 +272,12 @@ public sealed class RestoreBackupConsumerTests
                 x[0] = "backup.zip";
                 return new MemoryStream();
             });
+
+    private string WriteUploadedBackup(byte[] bytes)
+    {
+        var path = _fileSystem.Path.Combine(_instanceOptions.CacheDirectory, Core.Shared.Constants.BackupFileName);
+        _fileSystem.AddFile(path, new MockFileData(bytes));
+
+        return path;
+    }
 }

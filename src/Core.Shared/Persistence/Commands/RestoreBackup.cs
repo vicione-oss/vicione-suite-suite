@@ -1,4 +1,4 @@
-﻿using Sdk.Messaging;
+using Sdk.Messaging;
 
 namespace Core.Shared.Persistence.Commands;
 
@@ -10,5 +10,5 @@ public class RestoreBackup : ICommand
 
     public bool SystemConfiguration { get; init; }
 
-    public required IReadOnlyCollection<byte> BackupFileContent { get; init; }
+    public required string BackupFilePath { get; init; }
 }
