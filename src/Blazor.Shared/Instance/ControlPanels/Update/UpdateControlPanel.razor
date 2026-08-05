@@ -1,11 +1,8 @@
 @using System.Globalization
 @using Blazor.Shared.Instance.ControlPanels.Update.Services
 @using Blazor.Shared.Settings.Components
-@using Microsoft.AspNetCore.Components.Forms
 @using Sdk.Client.Components.Settings.Expanders
 @using ViciOne.Ui.Localization.Resources
-@using ViciOne.Ui.MonochromeIcons.Components
-@using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 @inherits ControlPanelBase<UpdateControlPanelState>
 
@@ -121,17 +118,16 @@
             </SettingsInformation>
 
             <SettingsField Label="@Localization.UpdateControlPanel.BackupRestoreConfigurationFile" IsLoading="@_isRestoreInProgress" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
-                <label class="input-label" for="item-upload">
-                    <MonochromeIcon Name="MonochromeIconName.Reload" Size="MonochromeIconSize.Small" CssClass="icon" />
-
-                    @CommonVocabulary.RestoreVerb
-                </label>
-
-                <div class="input">
-                    <InputFile id="item-upload"
-                               accept="@(Core.Shared.Constants.BackupFileExtension)"
-                               OnChange="OnRestoreFileChange" disabled="@CanExecuteRestore()" />
-                </div>
+                <SettingsFieldFileUpload @bind-Filename="State.RestoreFilename"
+                                         UploadTicket="State.RestoreFileUploadTicket"
+                                         UploadTicketFactory="@UploadTicketFactory"
+                                         UploadHandler="BackupUploadHandler"
+                                         Accept="@Core.Shared.Constants.BackupFileExtension"
+                                         MaximumAllowedSize="@Constants.BackupFileSizeLimitMB"
+                                         OnUploadStart="RestoreFileUploadStart"
+                                         OnUploadSuccess="RestoreFileUploadSuccess"
+                                         OnUploadError="RestoreFileUploadError"
+                                         OnUploadCancel="RestoreFileUploadCancel" />
             </SettingsField>
 
             @if (!string.IsNullOrEmpty(_errorMessage))

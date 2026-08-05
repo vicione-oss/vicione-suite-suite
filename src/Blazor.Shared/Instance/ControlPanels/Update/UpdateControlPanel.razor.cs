@@ -7,7 +7,6 @@ using Core.Shared.Persistence.Commands;
 using Core.Shared.Persistence.Events;
 using Core.Shared.Persistence.Requests;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Logging;
 using Sdk.Authorization;
 using Sdk.Client.Contracts;
@@ -71,6 +70,9 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
     private IStreamUploadHandler<ImageUpload> StreamUploadHandler { get; set; } = default!;
 
     [Inject]
+    private IStreamUploadHandler<BackupUpload> BackupUploadHandler { get; set; } = default!;
+
+    [Inject]
     private IUploadTicketFactory UploadTicketFactory{ get; set; } = default!;
 
     protected override void OnInitialized()
@@ -90,37 +92,25 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
         await base.DisposeAsyncCore();
     }
 
-    private bool CanExecuteRestore()
+    private bool CanExecuteExportButton()
         => !_isRestoreInProgress && !_isExportInProgress;
 
-    private async Task OnRestoreFileChange(InputFileChangeEventArgs args)
+    private void RestoreFileUploadStart(IUploadTicket uploadTicket)
+    {
+        _errorMessage = null;
+        State.RestoreFileUploadTicket = uploadTicket;
+    }
+
+    private async Task RestoreFileUploadSuccess(StreamUploadSuccessResult successResult)
     {
         try
         {
-            if (!args.File.Name.EndsWith(Core.Shared.Constants.BackupFileExtension, StringComparison.OrdinalIgnoreCase))
-            {
-                _showErrorDialog = true;
-                return;
-            }
-            if (args.File.Size > Constants.BackupFileSizeLimitMB)
-            {
-                BannerService.ShowMessageBanner(MessageType.Warning, Localization.UpdateControlPanel.BackupFileLimitReached);
-                return;
-            }
-
             _isRestoreInProgress = true;
-            byte[] data;
-
-            await using (var ms = new MemoryStream())
-            {
-                await args.File.OpenReadStream(Constants.BackupFileSizeLimitMB).CopyToAsync(ms);
-                data = ms.ToArray();
-            }
 
             // TODO: checkboxes for System/Suite configuration
             var command = new RestoreBackup
             {
-                BackupFileContent = data,
+                BackupFilePath = successResult.DestinationFile,
                 SuiteConfiguration = true,
                 SystemConfiguration = true
             };
@@ -133,6 +123,19 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
             _isRestoreInProgress = false;
             Logger.LogError(ex, "Failed to restore backup");
         }
+    }
+
+    private void RestoreFileUploadError(StreamUploadErrorResult errorResult)
+    {
+        _isRestoreInProgress = false;
+        State.RestoreFilename = null;
+        BannerService.ShowMessageBanner(MessageType.Error, errorResult.Message);
+    }
+
+    private void RestoreFileUploadCancel()
+    {
+        _isRestoreInProgress = false;
+        State.RestoreFilename = null;
     }
 
     private void OnResetButtonClick()
@@ -167,9 +170,6 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
         _isResetInProgress = false;
         _showResetConfirmSection = false;
     }
-
-    private bool CanExecuteExportButton()
-        => !_isRestoreInProgress && !_isExportInProgress;
 
     private async Task OnExportButtonClick()
     {

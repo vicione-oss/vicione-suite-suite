@@ -94,6 +94,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         services.AddScoped<IUploadTicketFactory, UploadTicketFactory>();
         services.AddScoped<IStreamUploadHandlerFactory, StreamUploadHandlerFactory>();
         services.AddStreamUploadHandler<ImageUpload, BlazorServerBackendModule>((options) => options.FilenameTransform = (filename) => Core.Shared.Constants.DeviceImageFileName);
+        services.AddStreamUploadHandler<BackupUpload, BlazorServerBackendModule>((options) => options.FilenameTransform = (filename) => Core.Shared.Constants.BackupFileName);
     }
 
     /// <inheritdoc/>

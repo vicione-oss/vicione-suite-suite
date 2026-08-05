@@ -80,6 +80,24 @@ public sealed partial class RestoreBackupConsumer(
             // something went wrong - don't try to restore suite from backup
             fileSystem.DeleteRestoreTask(options.Value);
         }
+        finally
+        {
+            // the uploaded backup file has been copied to the backup store (if needed) and is no longer required
+            DeleteUploadedBackupFile(context.Message.BackupFilePath, correlationId);
+        }
+    }
+
+    private void DeleteUploadedBackupFile(string backupFilePath, Guid correlationId)
+    {
+        try
+        {
+            if (fileSystem.File.Exists(backupFilePath))
+                fileSystem.File.Delete(backupFilePath);
+        }
+        catch (Exception ex)
+        {
+            LogDeleteUploadedBackupFileFailed(logger, ex, correlationId, backupFilePath);
+        }
     }
 
     private async Task CallModuleRestore(ConsumeContext<RestoreBackup> context)
@@ -100,7 +118,7 @@ public sealed partial class RestoreBackupConsumer(
 
     private async Task<SystemConfiguration?> ProcessBackupArchive(ConsumeContext<RestoreBackup> context)
     {
-        await using MemoryStream contentStream = new([.. context.Message.BackupFileContent]);
+        await using Stream contentStream = fileSystem.File.OpenRead(context.Message.BackupFilePath);
 
         // this will throw if metadata can't be extracted and it is no valid archive
         var comparer = new StringVersionComparer();
@@ -207,4 +225,7 @@ public sealed partial class RestoreBackupConsumer(
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to process backup restore correlated by {CorrelationId}")]
     private static partial void LogUnexpectedError(ILogger logger, Exception exception, Guid correlationId);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Failed to delete uploaded backup file '{BackupFilePath}' correlated by {CorrelationId}")]
+    private static partial void LogDeleteUploadedBackupFileFailed(ILogger logger, Exception exception, Guid correlationId, string backupFilePath);
 }

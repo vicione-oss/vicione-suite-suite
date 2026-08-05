@@ -33,6 +33,9 @@ public sealed class UpdateControlPanelState : ControlPanelState
 
     internal string? SwuUploadMessage { get; set; }
 
+    internal string? RestoreFilename { get; set; }
+    internal IUploadTicket? RestoreFileUploadTicket { get; set; }
+
     internal void PreselectCurrentVersion()
     {
         SelectedVersion = SuiteVersions?
