@@ -378,6 +378,10 @@ public sealed partial class ModuleArtifactCache : IDisposable, IModuleArtifactCa
 
             // Write to a temp file first and move it so a crash can't leave a corrupt cache file.
             var tempPath = _cacheFilePath + ".tmp";
+
+            if (_fileSystem.File.Exists(tempPath))
+                _fileSystem.File.Delete(tempPath);
+
             await using (var stream = _fileSystem.FileStream.New(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
             {
                 await JsonSerializer.SerializeAsync(stream, data, ModuleSerializerOptions.GetOptions(), cancellationToken);
