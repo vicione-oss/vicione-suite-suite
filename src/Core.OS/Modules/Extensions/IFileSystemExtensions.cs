@@ -159,7 +159,21 @@ internal static class IFileSystemExtensions
         /// truncated/corrupt file: the content is written to a temporary sibling file first
         /// and then atomically moved into place, keeping the previous valid file intact until
         /// the new one is fully persisted.
+        /// <para>
+        /// Because the move replaces the target's directory entry, the temp file's metadata becomes the
+        /// metadata of the target. The unix file permissions of an already existing target are therefore
+        /// captured beforehand and re-applied to the temp file, so a custom mode (e.g. <c>0600</c>) is not
+        /// silently reset to the process default. A newly created file keeps the default permissions.
+        /// Ownership (uid/gid) and windows ACLs are not preserved.
+        /// </para>
+        /// <para>
+        /// If writing fails the temp file is removed (best effort) and the original exception is rethrown,
+        /// leaving the previous file and its permissions untouched.
+        /// </para>
         /// </summary>
+        /// <param name="filePath">Target file path. Missing parent directories are created.</param>
+        /// <param name="writeContent">Callback receiving the writable stream of the temporary file.</param>
+        /// <param name="cancellationToken"></param>
         public async Task WriteFileAtomic(string filePath, Func<Stream, Task> writeContent, CancellationToken cancellationToken = default)
         {
             var directory = fileSystem.Path.GetDirectoryName(filePath);
@@ -168,19 +182,73 @@ internal static class IFileSystemExtensions
 
             // Write to a temp file first and move it so a crash can't leave a corrupt file.
             var tempPath = filePath + ".tmp";
-            await using (var stream = fileSystem.FileStream.New(tempPath, new FileStreamOptions
+
+            if (fileSystem.File.Exists(tempPath))
+                fileSystem.File.Delete(tempPath);
+
+            // The move replaces the target's directory entry, so the temp file's permissions become the
+            // permissions of the target. Capture the existing ones to restore them after writing
+            var tempFileOptions = fileSystem.CreateTempFileOptions(filePath, out var existingFileMode);
+
+            try
+            {
+                await using (var stream = fileSystem.FileStream.New(tempPath, tempFileOptions))
+                {
+                    await writeContent(stream);
+                    await stream.FlushAsync(cancellationToken);
+                }
+
+                // UnixCreateMode is filtered by the process umask and only applies to a file that did not
+                // exist yet, so the mode has to be applied explicitly - chmod is not umask filtered.
+                if (existingFileMode is not null && !OperatingSystem.IsWindows())
+                    fileSystem.File.SetUnixFileMode(tempPath, existingFileMode.Value);
+
+                fileSystem.File.Move(tempPath, filePath, overwrite: true);
+            }
+            catch
+            {
+                // don't leave a partially written temp file behind
+                fileSystem.TryDeleteFile(tempPath);
+                throw;
+            }
+        }
+
+        public void TryDeleteFile(string filePath)
+        {
+            if (fileSystem.File.Exists(filePath))
+            {
+                try
+                {
+                    fileSystem.File.Delete(filePath);
+                }
+                catch
+                {
+                    // ignored - cleanup is best effort
+                }
+            }
+        }
+
+        private FileStreamOptions CreateTempFileOptions(string filePath, out UnixFileMode? existingFileMode)
+        {
+            var tempFileOptions = new FileStreamOptions
             {
                 Mode = FileMode.Create,
                 Access = FileAccess.Write,
                 Share = FileShare.None,
                 Options = FileOptions.Asynchronous,
-            }))
+            };
+
+            if (!OperatingSystem.IsWindows() && fileSystem.File.Exists(filePath))
             {
-                await writeContent(stream);
-                await stream.FlushAsync(cancellationToken);
+                existingFileMode = fileSystem.File.GetUnixFileMode(filePath);
+                tempFileOptions.UnixCreateMode = existingFileMode.Value;
+            }
+            else
+            {
+                existingFileMode = null;
             }
 
-            fileSystem.File.Move(tempPath, filePath, overwrite: true);
+            return tempFileOptions;
         }
 
         /// <summary>
