@@ -19,7 +19,7 @@ public class StreamUploadHandlerTests
         private readonly StreamUploadHandlerOptions _options = new();
         private readonly IWorkspaceProvider<BlazorServerBackendModule> _workspaceProvider = Substitute.For<IWorkspaceProvider<BlazorServerBackendModule>>();
 
-        private string SetupSystemWorkspace(MockFileSystem fileSystem)
+        private string SetupSystemWorkspace(MockFileSystem fileSystem, bool createWorkspaceDirectory = true)
         {
             var drive = fileSystem.AllDrives.First();
             var info = fileSystem.GetDrive(drive);
@@ -28,7 +28,9 @@ public class StreamUploadHandlerTests
             var cacheFolder = fileSystem.Path.Combine(drive, "cache");
             var systemWorkspace = fileSystem.Path.Combine(cacheFolder, "system");
             fileSystem.AddDirectory(cacheFolder);
-            fileSystem.AddDirectory(systemWorkspace);
+
+            if (createWorkspaceDirectory)
+                fileSystem.AddDirectory(systemWorkspace);
 
             _workspaceProvider.Cache.Returns(systemWorkspace);
 
@@ -71,6 +73,25 @@ public class StreamUploadHandlerTests
             var result = await sut.Execute(inputStream, "file.txt", TestContext.Current.CancellationToken);
 
             // Assert
+            ResultDestinationFileShouldExist(result, fileSystem.Path.Combine(systemWorkspace, "file.txt"));
+        }
+
+        [Fact]
+        public async Task Should_create_missing_upload_directory_via_file_system_abstraction()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            var systemWorkspace = SetupSystemWorkspace(fileSystem, createWorkspaceDirectory: false);
+
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, _options, _logger);
+
+            var inputStream = new MemoryStream("HelloWorld"u8.ToArray());
+
+            // Act
+            var result = await sut.Execute(inputStream, "file.txt", TestContext.Current.CancellationToken);
+
+            // Assert
+            fileSystem.Directory.Exists(systemWorkspace).Should().BeTrue();
             ResultDestinationFileShouldExist(result, fileSystem.Path.Combine(systemWorkspace, "file.txt"));
         }
 

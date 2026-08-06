@@ -77,7 +77,7 @@ internal partial class BackupBuilder
                     }
                     break;
                 case CreateEntryType.Directory:
-                    if (IsDirEmpty(fullPath))
+                    if (IsDirEmpty(fullPath, fileSystem))
                     {
                         // Create entry marking an empty dir:
                         // FullName never returns a directory separator character on the end,
@@ -107,9 +107,10 @@ internal partial class BackupBuilder
         => fileSystem.Path.GetRelativePath(sourceDirectory, filePath)
             .Replace("\\", "/", StringComparison.Ordinal); // for cross-platform compatibility
 
-    private static bool IsDirEmpty(string directoryFullName)
+    private static bool IsDirEmpty(string directoryFullName, IFileSystem fileSystem)
     {
-        using var enumerator = Directory.EnumerateFileSystemEntries(directoryFullName).GetEnumerator();
+        using var enumerator = fileSystem.Directory
+            .EnumerateFileSystemEntries(directoryFullName).GetEnumerator();
         return !enumerator.MoveNext();
     }
 }

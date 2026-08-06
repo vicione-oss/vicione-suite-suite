@@ -145,7 +145,7 @@ internal static class RabbitMqCleaner
         if (!fileSystem.File.Exists(GetCleanedNodesVersionFilePath(fileSystem, options)))
             return null;
 
-        var version = File.ReadAllText(GetCleanedNodesVersionFilePath(fileSystem, options));
+        var version = fileSystem.File.ReadAllText(GetCleanedNodesVersionFilePath(fileSystem, options));
         return Version.Parse(version);
     }
 

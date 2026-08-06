@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Templates;
@@ -7,15 +8,17 @@ namespace Core.OS.Tests.UserManagement.Services;
 
 public class FluidTemplateRendererTest
 {
+    private static readonly MockFileSystem TestFileSystem = new();
+
     [Fact]
     public async Task Should_throw_on_missing_file()
     {
         // Arrange
-        var renderer = new FluidTemplateRenderer();
+        var renderer = new FluidTemplateRenderer(TestFileSystem);
 
         // Act + Assert
         await Assert.ThrowsAsync<FileNotFoundException>(() =>
-            renderer.RenderFromTemplateFile(new FileSystem().FileInfo.New("non-existent-template"),
+            renderer.RenderFromTemplateFile(TestFileSystem.FileInfo.New("non-existent-template"),
                 _ => { }, TestContext.Current.CancellationToken));
     }
 
@@ -24,11 +27,11 @@ public class FluidTemplateRendererTest
     public async Task Should_render_template_when_template_exists(string templateFile)
     {
         // Arrange
-        var renderer = new FluidTemplateRenderer();
+        var renderer = new FluidTemplateRenderer(new FileSystem());
 
         // Act
         var result = await renderer.RenderFromTemplateFile(
-            new FileSystem().FileInfo.New(templateFile), _ => { }, TestContext.Current.CancellationToken);
+            TestFileSystem.FileInfo.New(templateFile), _ => { }, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().NotBeEmpty();

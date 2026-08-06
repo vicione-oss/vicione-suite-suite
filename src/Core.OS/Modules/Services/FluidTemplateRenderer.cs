@@ -3,7 +3,7 @@ using Fluid;
 
 namespace Core.OS.Modules.Services;
 
-public sealed class FluidTemplateRenderer
+public sealed class FluidTemplateRenderer(IFileSystem fileSystem)
 {
     private readonly FluidParser _fluidParser = new();
 
@@ -11,7 +11,7 @@ public sealed class FluidTemplateRenderer
         Action<TemplateContext> contextAction,
         CancellationToken cancellationToken = default)
     {
-        var fileContents = await File.ReadAllTextAsync(templateFile.FullName, cancellationToken);
+        var fileContents = await fileSystem.File.ReadAllTextAsync(templateFile.FullName, cancellationToken);
         return await RenderTemplate(fileContents, contextAction);
     }
 

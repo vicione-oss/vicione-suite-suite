@@ -27,7 +27,7 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
             if (drive.AvailableFreeSpace < stream.Length * 2)
                 return new StreamUploadErrorResult("The device requires at least twice as much free disk space as the file size.");
 
-            Directory.CreateDirectory(path);
+            fileSystem.Directory.CreateDirectory(path);
         }
         catch (Exception ex)
         {
