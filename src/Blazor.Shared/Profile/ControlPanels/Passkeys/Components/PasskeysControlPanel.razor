@@ -47,7 +47,7 @@
                                          Title="@AddPasskeyTitle"></AddGridActionButton>
                 }
                 <EditGridActionButton Enabled="@IsSinglePasskeySelected" OnClick="@ShowEditPasskey"></EditGridActionButton>
-                <DeleteGridActionButton OnClick="@MarkPasskeysForDeletion"></DeleteGridActionButton>
+                <DeleteGridActionButton Enabled="@CanMarkPasskeysForDeletion()" OnClick="@MarkPasskeysForDeletion"></DeleteGridActionButton>
             </ActionButtons>
 
             <ChildContent>
