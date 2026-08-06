@@ -131,6 +131,9 @@ public partial class PasskeysControlPanel
         await InvokeAsync(StateHasChanged);
     }
 
+    private bool CanMarkPasskeysForDeletion()
+        => SelectedPasskeys.Count > 0;
+
     private async Task MarkPasskeysForDeletion()
     {
         SelectedPasskeys.BeginUpdate();
