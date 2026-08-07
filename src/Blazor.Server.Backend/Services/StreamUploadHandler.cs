@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.IO.Abstractions;
 using Blazor.Server.Backend.Contracts;
 using Microsoft.Extensions.Logging;
@@ -12,73 +13,174 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
         : IStreamUploadHandler<TContext>
             where TModule : BackendModule
 {
+    /// <summary>
+    /// Size of the copy buffer in bytes. Matches the default used by <see cref="Stream.CopyTo(Stream)"/>,
+    /// which stays just below the large object heap threshold.
+    /// </summary>
+    private const int BufferSize = 81920;
+
+    /// <summary>
+    /// Amount of bytes that must be written before <see cref="OnProgress"/> is invoked again.
+    /// Reporting every chunk would flood the callback on large uploads.
+    /// </summary>
+    private const long ProgressReportThreshold = 1024 * 1024;
+
     public Func<IStreamUploadProgress, Task>? OnProgress { get; set; }
 
-    public async Task<IStreamUploadResult> Execute(Stream stream, string filename, CancellationToken cancellationToken = default)
+    private bool TryPathTransformation(StreamUploadHandlerOptions options, string fileName, out string path)
     {
-        var path = workspace.Cache;
+        path = workspace.Cache;
+        if (options.PathTransform is null)
+            return true;
 
         try
         {
-            if (options.PathTransform is not null)
-                path = options.PathTransform(path);
+            TransformingUploadPath(logger, path);
+            path = options.PathTransform(path);
+            TransformedUploadPath(logger, path);
 
-            var drive = fileSystem.DriveInfo.New(path);
-            if (drive.AvailableFreeSpace < stream.Length * 2)
-                return new StreamUploadErrorResult("The device requires at least twice as much free disk space as the file size.");
-
-            fileSystem.Directory.CreateDirectory(path);
+            return true;
         }
         catch (Exception ex)
         {
-            PathHandlingError(logger, filename, ex.GetType().Name, ex.Message, ex.StackTrace ?? string.Empty);
-            return new StreamUploadErrorResult("Failed to prepare upload path");
+            PathTransformationError(logger, ex, fileName);
+            return false;
+        }
+    }
+
+    private void PreparePath(string path, string fileName)
+    {
+        try
+        {
+            if (fileSystem.Directory.Exists(path))
+                return;
+
+            PreparingPath(logger, path);
+            fileSystem.Directory.CreateDirectory(path);
+            PreparedPath(logger, path);
+        }
+        catch (Exception ex)
+        {
+            PathPreparationError(logger, ex, fileName);
+            throw;
+        }
+    }
+
+    private void ValidateDiskSpace(Stream stream, string path, string fileName)
+    {
+        try
+        {
+            var drive = fileSystem.DriveInfo.New(path);
+            if (drive.AvailableFreeSpace < stream.Length * 2)
+                throw new IOException("The device requires at least twice as much free disk space as the file size.");
+        }
+        catch (Exception ex)
+        {
+            DiskSpaceValidationError(logger, ex, fileName);
+            throw;
+        }
+    }
+
+    private bool TryFileTransformation(StreamUploadHandlerOptions options, string fileName, out string transformed)
+    {
+        transformed = fileName;
+        if (options.FilenameTransform is null)
+            return true;
+
+        try
+        {
+            TransformingFilename(logger, fileName);
+            transformed = options.FilenameTransform(fileName);
+            TransformedFilename(logger, transformed);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            FilenameTransformationError(logger, ex, fileName);
+            return false;
+        }
+    }
+
+    private async Task<IStreamUploadResult> ExecuteUpload(Stream stream, StreamUploadProgress progress, string fileName, CancellationToken cancellationToken = default)
+    {
+        progress.DestinationFile = fileSystem.Path.Combine(progress.Path, fileName);
+
+        UploadingToDestination(logger, progress.DestinationFile);
+
+        await using var fileSystemStream = fileSystem.File.Create(progress.DestinationFile);
+        var buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
+        try
+        {
+            var bytesRead = 0;
+            var bytesSinceLastReport = 0L;
+
+            while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(0, BufferSize), cancellationToken).ConfigureAwait(false)) != 0)
+            {
+                await fileSystemStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken).ConfigureAwait(false);
+
+                progress.BytesUploaded += bytesRead;
+                bytesSinceLastReport += bytesRead;
+
+                if (bytesSinceLastReport < ProgressReportThreshold)
+                    continue;
+
+                bytesSinceLastReport = 0;
+
+                await ReportProgress(progress).ConfigureAwait(false);
+            }
+
+            await ReportProgress(progress).ConfigureAwait(false);
+
+            UploadSuccessful(logger, progress);
+
+            return new StreamUploadSuccessResult(progress.DestinationFile);
+        }
+        catch (Exception)
+        {
+            fileSystemStream.Close();
+
+            try
+            {
+                fileSystem.File.Delete(progress.DestinationFile);
+            }
+            catch (Exception ex)
+            {
+                DeleteFailed(logger, ex, progress.DestinationFile);
+            }
+
+            throw;
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
+    private Task ReportProgress(IStreamUploadProgress progress)
+        => OnProgress is null ? Task.CompletedTask : OnProgress(progress);
+
+    public async Task<IStreamUploadResult> Execute(Stream stream, string filename, CancellationToken cancellationToken = default)
+    {
+        if (!TryPathTransformation(options, filename, out var path))
+        {
+            return new StreamUploadErrorResult($"Failed to do path transformation on '{filename}'");
+        }
+
+        if (!TryFileTransformation(options, filename, out var transformedFileName))
+        {
+            return new StreamUploadErrorResult($"Failed to do file transformation on '{filename}'");
         }
 
         var progress = new StreamUploadProgress { Path = path, Filename = filename, BytesTotal = stream.Length };
 
         try
         {
-            if (options.FilenameTransform is not null)
-                filename = options.FilenameTransform(filename);
+            PreparePath(path, transformedFileName);
 
-            progress.DestinationFile = fileSystem.Path.Combine(progress.Path, filename);
+            ValidateDiskSpace(stream, path, transformedFileName);
 
-            await using var fileSystemStream = fileSystem.File.Create(progress.DestinationFile);
-            try
-            {
-                var bytesRead = 0;
-                var buffer = new byte[1024 * 10];
-
-                while ((bytesRead = await stream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) != 0)
-                {
-                    await fileSystemStream.WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken).ConfigureAwait(false);
-
-                    progress.BytesUploaded += bytesRead;
-
-                    if (OnProgress is not null)
-                        await OnProgress(progress).ConfigureAwait(false);
-                }
-
-                UploadSuccessful(logger, progress);
-
-                return new StreamUploadSuccessResult(progress.DestinationFile);
-            }
-            catch (Exception)
-            {
-                fileSystemStream.Close();
-
-                try
-                {
-                    fileSystem.File.Delete(progress.DestinationFile);
-                }
-                catch (Exception ex)
-                {
-                    DeleteFailed(logger, ex, progress.DestinationFile);
-                }
-
-                throw;
-            }
+            return await ExecuteUpload(stream, progress, transformedFileName, cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -93,20 +195,4 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
             return new StreamUploadErrorResult(ex.Message);
         }
     }
-
-    [LoggerMessage(1, LogLevel.Error, "An error occured during path preparation for file upload {filename}: {ex} {message} {trace}")]
-    private static partial void PathHandlingError(ILogger<StreamUploadHandler<TModule, TContext>> logger, string filename, string ex, string message, string trace);
-
-    [LoggerMessage(1, LogLevel.Information, "Upload successful ({@LastProgress})")]
-    private static partial void UploadSuccessful(ILogger<StreamUploadHandler<TModule, TContext>> logger, IStreamUploadProgress lastProgress);
-
-    [LoggerMessage(2, LogLevel.Error, "Upload failed ({@LastProgress})")]
-    private static partial void UploadFailed(ILogger<StreamUploadHandler<TModule, TContext>> logger, Exception exception,
-        IStreamUploadProgress lastProgress);
-
-    [LoggerMessage(3, LogLevel.Information, "Upload canceled ({@LastProgress})")]
-    private static partial void UploadCanceled(ILogger<StreamUploadHandler<TModule, TContext>> logger, IStreamUploadProgress lastProgress);
-
-    [LoggerMessage(4, LogLevel.Error, "Delete {Filename} failed")]
-    private static partial void DeleteFailed(ILogger<StreamUploadHandler<TModule, TContext>> logger, Exception exception, string filename);
 }
