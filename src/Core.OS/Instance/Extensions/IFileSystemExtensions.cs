@@ -113,6 +113,19 @@ internal static partial class IFileSystemExtensions
         internal string GetLocalInstanceIdFilePath(InstanceOptions instanceOptions)
             => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(instanceOptions), InstanceIdFileName);
 
+        /// <summary>
+        /// Returns the persisted instance id, or null when the instance id file has
+        /// not been created yet (e.g. before the preparation pipeline writes it on
+        /// the first boot).
+        /// </summary>
+        internal string? ReadLocalInstanceId(InstanceOptions instanceOptions)
+        {
+            var localInfoFilePath = fileSystem.GetLocalInstanceIdFilePath(instanceOptions);
+            return fileSystem.File.Exists(localInfoFilePath)
+                ? fileSystem.File.ReadAllText(localInfoFilePath).Trim()
+                : null;
+        }
+
         internal string GetLocalRecoveryFilePath(InstanceOptions instanceOptions)
             => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(instanceOptions), RecoveryFileName);
 

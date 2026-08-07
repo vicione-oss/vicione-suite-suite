@@ -238,7 +238,7 @@ SUITE_TEST_USERNAME=... SUITE_TEST_PASSWORD=... tests/run-master-slave-e2e.sh
 ```
 
 For quick interactive work (not the published CI setup), bring up the backing services (Postgres,
-RabbitMQ, Jaeger):
+RabbitMQ, Aspire Dashboard):
 
 ```bash
 docker compose -f tests/compose.master-slave.yaml up -d

@@ -74,8 +74,9 @@ internal sealed class LocalInstanceInformationProvider(IServiceProvider serviceP
             var fileSystem = serviceProvider.GetRequiredService<IFileSystem>();
             var instanceOptions = serviceProvider.GetRequiredService<IOptions<InstanceOptions>>().Value;
 
-            var instanceIdFile = fileSystem.GetLocalInstanceIdFilePath(instanceOptions);
-            var instanceId = fileSystem.File.ReadAllText(instanceIdFile);
+            var instanceId = fileSystem.ReadLocalInstanceId(instanceOptions)
+                ?? throw new InvalidOperationException(
+                    $"Instance id file '{fileSystem.GetLocalInstanceIdFilePath(instanceOptions)}' does not exist.");
 
             if (!Guid.TryParse(instanceId, out var parsedId))
                 throw new InvalidOperationException($"Failed to parse instance id from file content: '{instanceId}'.");

@@ -1,9 +1,14 @@
 using System.IO.Abstractions.TestingHelpers;
+using Core.OS.Extensions;
+using Core.OS.Hosting;
+using Core.OS.Hosting.Contracts;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
+using Core.OS.Tests.Logging;
 using Core.OS.Tests.Persistence;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Sdk.Instance;
 
@@ -30,6 +35,42 @@ public class WebApplicationBuilderExtensionsTests
 
         _fileSystem.AddDirectory(_instanceOptions.CacheDirectory);
         _fileSystem.AddDirectory(_instanceOptions.HomeDirectory);
+    }
+
+    [Collection(StaticSerilogLogger.Name)]
+    public class TryRunCoreOs : WebApplicationBuilderExtensionsTests
+    {
+        [Fact]
+        public async Task Should_flush_buffered_log_events_when_preparation_aborts()
+        {
+            // Arrange
+            using var staticLogger = new BufferedStaticLogger();
+            var builder = WebApplication.CreateBuilder();
+            var preparationContext = new SuitePreparationContext(_fileSystem, _instanceOptions, staticLogger.LoggerFactory);
+            var abort = new ModuleHostPreparationResult("module manifest generation failed");
+
+            // Act
+            await builder.TryRunCoreOs(preparationContext, abort, []);
+
+            // Assert
+            staticLogger.Delivered.Should().ContainSingle(e => e.Contains(abort.Reason, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public async Task Should_flush_buffered_log_events_when_startup_throws()
+        {
+            // Arrange
+            using var staticLogger = new BufferedStaticLogger();
+            var builder = WebApplication.CreateBuilder();
+            // the module context is missing, so the service registration throws and startup ends in the catch block
+            var preparationContext = new SuitePreparationContext(_fileSystem, _instanceOptions, staticLogger.LoggerFactory);
+
+            // Act
+            await builder.TryRunCoreOs(preparationContext, new PreparationSuccessResult(), []);
+
+            // Assert
+            staticLogger.Delivered.Should().ContainSingle(e => e.Contains("Startup Failed", StringComparison.Ordinal));
+        }
     }
 
     public class PrepareSuite : WebApplicationBuilderExtensionsTests

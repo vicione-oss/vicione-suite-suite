@@ -127,7 +127,7 @@ To do so:
 
 >\*Note: The port depends on chosen instance mode. For example, standalone listens on Port 5001. If you are unsure, check the console for an information like *"Now listening on: https://localhost:XXXX"*
 
->\*\*Note: To successfully start a master/slave setup, make sure to have the prerequisites installed and running (best to use `tests/compose.master-slave.yaml` to start Postgres, RabbitMQ and jaeger)
+>\*\*Note: To successfully start a master/slave setup, make sure to have the prerequisites installed and running (best to use `tests/compose.master-slave.yaml` to start Postgres, RabbitMQ and the Aspire Dashboard)
 
 It is possible to start multiple instances using the launch profiles Master-Ui & Slave(1|2)-Ui.
 
@@ -204,6 +204,8 @@ Sample configuration in `appsettings.json`:
 
 When using the runtime profiles from `launchSettings.json`, no additional configuration for OpenTelemetry is required.
 Also, when starting, OpenTelemetry is set up to trace `MassTransit`, so adding it to the `OTEL_ADDITIONAL_SOURCES` list is not required.
+
+For log export via OTLP and the specialities relevant to edge devices, see [OpenTelemetry](./docs/opentelemetry.md).
 
 #### Connection details for Backend-Services
 >:warning: Only use in development environment
