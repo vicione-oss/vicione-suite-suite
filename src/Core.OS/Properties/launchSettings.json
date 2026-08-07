@@ -9,7 +9,8 @@
                 "Instance__Type": "Standalone",
                 "Instance__HomeDirectory": "AppData_Standalone",
                 "Instance__CacheDirectory": "Cache_Standalone",
-                "Instance__BackupDirectory": "Backup_Standalone"
+                "Instance__BackupDirectory": "Backup_Standalone",
+                "VICIONE_SUITE_ENV_OVERRIDES": "true"
             },
             "applicationUrl": "https://localhost:5001;http://localhost:5000"
         },
@@ -23,6 +24,7 @@
                 "Instance__HomeDirectory": "AppData_Master",
                 "Instance__CacheDirectory": "Cache_Master",
                 "Instance__BackupDirectory": "Backup_Master",
+                "VICIONE_SUITE_ENV_OVERRIDES": "true",
 
                 "UserManagement__SeedTestUsers": "true",
 
@@ -51,6 +53,7 @@
                 "Instance__HomeDirectory": "AppData_Slave1",
                 "Instance__CacheDirectory": "Cache_Slave1",
                 "Instance__BackupDirectory": "Backup_Slave1",
+                "VICIONE_SUITE_ENV_OVERRIDES": "true",
 
                 "UserManagement__SeedTestUsers": "false",
 
@@ -77,6 +80,7 @@
                 "Instance__HomeDirectory": "AppData_Slave2",
                 "Instance__CacheDirectory": "Cache_Slave2",
                 "Instance__BackupDirectory": "Backup_Slave2",
+                "VICIONE_SUITE_ENV_OVERRIDES": "true",
 
                 "UserManagement__SeedTestUsers": "false",
 
