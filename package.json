@@ -1,39 +1,13 @@
 {
-  "version": "1.0.0",
-  "name": "vicione.suite",
-  "private": true,
-  "scripts": {
-    "build": "npm run build:typography && npm run js:minify:client",
-    "build:debug": "npm run build:typography && npm run js:minify:client",
-    "build:typography": "npm run copy:noto-sans-font-200 && npm run copy:noto-sans-font-300 && npm run copy:noto-sans-font-400 && npm run copy:noto-sans-font-500 && npm run copy:noto-sans-font-600 && npm run copy:roboto-font-400 && npm run copy:fixed-mixins",
-    "copy:roboto-font-400": "copyfiles-fixed -f ./node_modules/@fontsource/roboto/files/roboto-latin-400-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/roboto",
-    "copy:noto-sans-font-200": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-200-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
-    "copy:noto-sans-font-300": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-300-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
-    "copy:noto-sans-font-400": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
-    "copy:noto-sans-font-500": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-500-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
-    "copy:noto-sans-font-600": "copyfiles-fixed -f ./node_modules/@fontsource/noto-sans/files/noto-sans-latin-600-normal.woff* ./src/Blazor.Shared/wwwroot/fonts/noto-sans",
-    "copy:fixed-mixins-1": "copyfiles-fixed -f ./node_modules_fixed/@fontsource/noto-sans/scss/mixins.scss ./node_modules/@fontsource/noto-sans/scss",
-    "copy:fixed-mixins-2": "copyfiles-fixed -f ./node_modules_fixed/@fontsource/roboto/scss/mixins.scss ./node_modules/@fontsource/roboto/scss",
-    "copy:fixed-mixins-3": "copyfiles-fixed -f ./node_modules_fixed/@fontsource-utils/scss/src/mixins.scss ./node_modules/@fontsource-utils/scss/src",
-    "copy:fixed-mixins": "npm run copy:fixed-mixins-1 && npm run copy:fixed-mixins-2 && npm run copy:fixed-mixins-3",
-    "js:minify:client": "uglifyjs ./src/Blazor.Shared/Scripts/* -o ./src/Blazor.Shared/wwwroot/js/suite.js",
-    "lint": "eslint .",
-    "lint-with-fix": "eslint . --fix"
-  },
-  "devDependencies": {
-    "@fontsource-utils/scss": "^0.2.2",
-    "@fontsource/noto-sans": "^5.2.10",
-    "@fontsource/roboto": "^5.2.10",
-    "@types/blazor__javascript-interop": "3.1.7",
-    "@typescript-eslint/eslint-plugin": "^8.56.1",
-    "@typescript-eslint/parser": "^8.56.1",
-    "copyfiles-fixed": "^2.4.3",
-    "eslint": "^10.0.2",
-    "eslint-config-xo": "^0.50.0",
-    "eslint-config-xo-typescript": "^9.0.0",
-    "jquery-ui-dist": "1.13.1",
-    "sass": "^1.53.0",
-    "typescript": "^5.9.3",
-    "uglify-js": "^3.16.2"
-  }
+    "version": "1.0.0",
+    "name": "vicione.suite",
+    "private": true,
+    "workspaces": [
+        "src/Blazor.Shared"
+    ],
+    "scripts": {
+        "build": "npm run build -w src/Blazor.Shared",
+        "lint": "npm --workspaces --if-present run lint",
+        "lint-with-fix": "npm --workspaces --if-present run lint-with-fix"
+    }
 }

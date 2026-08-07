@@ -64,18 +64,18 @@
         <OutputType>Exe</OutputType>
         <IsPackable>false</IsPackable>
         <IsPublishable>true</IsPublishable>
-        <!-- Microsoft Testing Platform command line experience -->
+
+        <!-- Use the Microsoft Testing Platform runner (instead of VSTest) to enable the MTP command-line experience -->
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-        <!--
-          Newer Microsoft.Testing.Platform versions default the results directory to a single
-          'TestResults' folder at the working directory root instead of each project's output folder.
-          Force the previous per-project location so the CI report pattern 'tests/**/TestResults/*.cobertura.xml' keeps matching.
-        -->
+
+        <!-- Emit test results per project to match with 'tests/**/TestResults/*.cobertura.xml' expected in CI -->
         <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --results-directory "$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/TestResults"</TestingPlatformCommandLineArguments>
+        <TestingPlatformConfigurationFilePath>$(MSBuildThisFileDirectory)/tests/testconfig.json</TestingPlatformConfigurationFilePath>
     </PropertyGroup>
 
-    <ItemGroup Condition="$(MSBuildProjectDirectory.Contains('tests'))">
-        <Content Include="$(MSBuildThisFileDirectory)xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Configure xunit runner for test projects -->
+    <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
+        <Content Include="$(MSBuildThisFileDirectory)/tests/xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <!-- Add Test.SDK/XUnit package references to test projects -->

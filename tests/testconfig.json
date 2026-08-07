@@ -12,14 +12,15 @@
                 },
                 "Sources": {
                     "Exclude": [
-                        ".*.g.cs"
+                        ".*\\.g\\.cs$",
+                        ".*\\.nt\\.cs$"
                     ]
                 },
                 "ModulePaths": {
                     "Exclude": {
                         "ModulePath": [
-                            ".*Facts.dll",
-                            ".*Tests.dll"
+                            ".*Facts\\.dll$",
+                            ".*Tests\\.dll$"
                         ]
                     }
                 }

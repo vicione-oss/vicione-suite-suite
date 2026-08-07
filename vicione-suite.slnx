@@ -29,11 +29,9 @@
     <File Path="NuGet.Config" />
     <File Path="package.json" />
     <File Path="README.md" />
-    <File Path="testconfig.json" />
     <File Path="tsconfig.json" />
     <File Path="VERSION" />
     <File Path="VERSION_HOSTMANAGEMENT" />
-    <File Path="xunit.runner.json" />
   </Folder>
   <Folder Name="/Solution Items/build/">
     <File Path="build/deploy.sh" />
@@ -84,6 +82,8 @@
   <Folder Name="/tests/">
     <File Path="tests/.editorconfig" />
     <File Path="tests/AGENTS.md" />
+    <File Path="tests/testconfig.json" />
+    <File Path="tests/xunit.runner.json" />
     <Project Path="tests/Blazor.DevAssets.Tests/Blazor.DevAssets.Tests.csproj" />
     <Project Path="tests/Blazor.Server.Tests/Blazor.Server.Tests.csproj" />
     <Project Path="tests/Blazor.Shared.Tests/Blazor.Shared.Tests.csproj" />
