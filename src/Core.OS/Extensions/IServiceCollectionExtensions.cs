@@ -5,6 +5,7 @@ using Core.OS.Connections.Extensions;
 using Core.OS.DataProtection.Extensions;
 using Core.OS.DbContext;
 using Core.OS.Diagnostics;
+using Core.OS.EnvironmentOverrides;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
@@ -108,6 +109,7 @@ internal static class IServiceCollectionExtensions
 
             services
                 .AddTransient<IAtomicFileWriter, AtomicFileWriter>()
+                .AddTransient<IEnvironmentOverridesRepository, EnvironmentOverridesRepository>()
                 .AddSingleton<IModuleDbContextRegistrar>(new ModuleDbContextRegistrar())
                 .AddCoreDbContexts()
                 .AddInstanceServices(instanceOptions, messageBusOptions.UseInMemoryBus)
