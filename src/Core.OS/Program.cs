@@ -25,8 +25,15 @@ builder.Services.Configure<HostOptions>(c =>
     c.ServicesStopConcurrently = true;
 });
 
+var instanceOptions = builder.Configuration.GetInstanceOptions();
+
+// the logger stamps the instance id on every exported event, so the device identity has to exist
+// before it is created - otherwise the logs of a first boot report no instance while the traces do.
+// The preparation pipeline repeats this call; writing the file is idempotent.
+fileSystem.EnsureInstanceIdFile(instanceOptions);
+
 // add ILogLevelSwitch and configure serilogs sinks etc.
-builder.Services.ConfigureLogging(builder.Configuration);
+builder.Services.ConfigureLogging(builder.Configuration, fileSystem, instanceOptions);
 
 // add serilogs services like DiagnosticContext
 builder.Host.UseSerilog();
@@ -39,7 +46,6 @@ else if (environmentOverridesPath is null)
         "Runtime environment overrides are off - set {Variable} to true to enable them",
         EnvironmentOverridesFile.EnabledEnvironmentVariable);
 
-var instanceOptions = builder.Configuration.GetInstanceOptions();
 using var loggerFactory = new SerilogLoggerFactory(logger: null, dispose: false);
 var preparationContext = new SuitePreparationContext(fileSystem, instanceOptions, loggerFactory);
 using var preparationPipeline = new SuitePreparationPipeline(preparationContext);

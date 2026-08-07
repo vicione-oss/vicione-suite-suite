@@ -28,6 +28,9 @@
 
                 "UserManagement__SeedTestUsers": "true",
 
+                "Logging__LogTargets__0": "Console",
+                "Logging__LogTargets__1": "OpenTelemetry",
+
                 "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
                 "OTEL_SERVICE_NAME": "vicione-master",
 
@@ -57,6 +60,9 @@
 
                 "UserManagement__SeedTestUsers": "false",
 
+                "Logging__LogTargets__0": "Console",
+                "Logging__LogTargets__1": "OpenTelemetry",
+
                 "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
                 "OTEL_SERVICE_NAME": "vicione-slave1",
 
@@ -83,6 +89,9 @@
                 "VICIONE_SUITE_ENV_OVERRIDES": "true",
 
                 "UserManagement__SeedTestUsers": "false",
+
+                "Logging__LogTargets__0": "Console",
+                "Logging__LogTargets__1": "OpenTelemetry",
 
                 "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
                 "OTEL_SERVICE_NAME": "vicione-slave2",

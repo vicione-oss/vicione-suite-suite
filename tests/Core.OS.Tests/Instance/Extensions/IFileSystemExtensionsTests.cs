@@ -86,6 +86,38 @@ public class IFileSystemExtensionsTests
         }
     }
 
+    public sealed class ReadLocalInstanceId : IFileSystemExtensionsTests
+    {
+        [Fact]
+        public void Should_return_trimmed_instance_id_from_file()
+        {
+            // Arrange
+            var instanceId = Guid.NewGuid();
+            var fileSystem = new MockFileSystem();
+            var instanceIdFilePath = fileSystem.GetLocalInstanceIdFilePath(_instanceOptions);
+            fileSystem.AddFile(instanceIdFilePath, new MockFileData($"{instanceId}\n"));
+
+            // Act
+            var result = fileSystem.ReadLocalInstanceId(_instanceOptions);
+
+            // Assert
+            result.Should().Be(instanceId.ToString());
+        }
+
+        [Fact]
+        public void Should_return_null_when_instance_id_file_does_not_exist()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+
+            // Act
+            var result = fileSystem.ReadLocalInstanceId(_instanceOptions);
+
+            // Assert
+            result.Should().BeNull();
+        }
+    }
+
     public sealed class UseRecoveryMode : IFileSystemExtensionsTests
     {
         private readonly InstanceOptions _recoveryOptions = new()

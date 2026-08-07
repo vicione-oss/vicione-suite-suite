@@ -4,5 +4,6 @@ public enum LogTarget
 {
     Console,
     LogFile,
-    Journal
+    Journal,
+    OpenTelemetry
 }

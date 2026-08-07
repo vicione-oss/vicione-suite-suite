@@ -1,4 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO.Abstractions;
+using Core.OS.Diagnostics;
+using Core.OS.Diagnostics.Extensions;
+using Core.OS.Instance;
 using Core.Shared;
 using Core.Shared.Logging;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -21,6 +26,14 @@ internal static class LoggingConfiguration
     private const string JournalLogtemplate =
         "{#if SourceContext is not null}[{SourceContext}]{#if ModuleId is not null}({ModuleId}){#end} {#end}{@m}{#if @x is not null}\n{@x}{#end}";
 
+    private const string GrpcProtocolName = "grpc";
+    private const string HttpProtobufProtocolName = "http/protobuf";
+
+    private const int MinimumQueueLimit = 1;
+
+    private const string QueueLimitConfigurationKey =
+        $"{LoggingOptions.ConfigSection}:{LoggingOpenTelemetryOptions.ConfigSection}:{nameof(LoggingOpenTelemetryOptions.QueueLimit)}";
+
     private static readonly SerilogLogLevelSwitch _loggingLevelSwitch
         = new(new LoggingLevelSwitch(LogEventLevel.Warning));
 
@@ -31,13 +44,60 @@ internal static class LoggingConfiguration
     /// creates the logger used on startup methods
     /// https://stackoverflow.com/questions/66045967/serilog-static-logger-is-silentlogger-when-theres-an-exception-in-masstransit-a
     /// </summary>
-    internal static void SetupStaticStartupLogger(IConfiguration configuration)
+    internal static void SetupStaticStartupLogger(IConfiguration configuration,
+        IFileSystem fileSystem,
+        InstanceOptions instanceOptions)
     {
         SetLoggingSwitchSwitchLogLevel(configuration);
 
-        Log.Logger = new LoggerConfiguration()
-                .ApplyConfiguration(configuration)
-                .CreateLogger();
+        var loggerConfiguration = new LoggerConfiguration();
+        var openTelemetrySinkError = loggerConfiguration.ApplyConfiguration(configuration, fileSystem, instanceOptions);
+        Log.Logger = loggerConfiguration.CreateLogger();
+
+        WarnOnOpenTelemetryMisconfiguration(configuration, openTelemetrySinkError);
+    }
+
+    private static void WarnOnOpenTelemetryMisconfiguration(IConfiguration configuration, string? openTelemetrySinkError)
+    {
+        var logOptions = configuration.GetLoggingSettings();
+        if (!logOptions.GetLogTargets().Contains(LogTarget.OpenTelemetry))
+            return;
+
+        var exporterOptions = configuration.GetOtelExporterOptions();
+
+        if (string.IsNullOrWhiteSpace(exporterOptions.Endpoint))
+            Log.Warning(
+                "Log target {LogTarget} is configured but {EnvironmentVariable} is not set - OpenTelemetry logging is disabled",
+                LogTarget.OpenTelemetry,
+                OtelEnvironment.Endpoint);
+        else if (!IsValidOpenTelemetryEndpoint(exporterOptions.Endpoint))
+            Log.Warning(
+                "Log target {LogTarget} is configured but {EnvironmentVariable} value {Endpoint} is not an absolute http(s) URL - OpenTelemetry logging is disabled",
+                LogTarget.OpenTelemetry,
+                OtelEnvironment.Endpoint,
+                exporterOptions.Endpoint);
+
+        // the sink matches protocol names case-sensitively, so the check here must too
+        var protocol = exporterOptions.Protocol;
+        if (!string.IsNullOrEmpty(protocol)
+            && !string.Equals(protocol, GrpcProtocolName, StringComparison.Ordinal)
+            && !string.Equals(protocol, HttpProtobufProtocolName, StringComparison.Ordinal))
+            Log.Warning(
+                "{EnvironmentVariable} value {Protocol} is not supported - OpenTelemetry logging falls back to gRPC",
+                OtelEnvironment.Protocol,
+                protocol);
+
+        if (logOptions.OpenTelemetry is { QueueLimit: < MinimumQueueLimit } sinkOptions)
+            Log.Warning(
+                "{ConfigurationKey} value {QueueLimit} is not positive - OpenTelemetry logging falls back to {Fallback}",
+                QueueLimitConfigurationKey,
+                sinkOptions.QueueLimit,
+                MinimumQueueLimit);
+
+        if (openTelemetrySinkError is not null)
+            Log.Warning(
+                "The OpenTelemetry sink rejected the OTLP configuration: {Reason} - OpenTelemetry logging is disabled",
+                openTelemetrySinkError);
     }
 
     private static void SetLoggingSwitchSwitchLogLevel(IConfiguration configuration)
@@ -47,10 +107,13 @@ internal static class LoggingConfiguration
             _loggingLevelSwitch.LogLevel = logSettings.LogLevel.Default;
     }
 
-    internal static IServiceCollection ConfigureLogging(this IServiceCollection services, IConfiguration configuration)
+    internal static IServiceCollection ConfigureLogging(this IServiceCollection services,
+        IConfiguration configuration,
+        IFileSystem fileSystem,
+        InstanceOptions instanceOptions)
     {
         // this one is used to log on startup before service provider is ready
-        SetupStaticStartupLogger(configuration);
+        SetupStaticStartupLogger(configuration, fileSystem, instanceOptions);
 
         SetLoggingSwitchSwitchLogLevel(configuration);
 
@@ -66,7 +129,15 @@ internal static class LoggingConfiguration
         return services;
     }
 
-    private static LoggerConfiguration ApplyConfiguration(this LoggerConfiguration loggerConfiguration, IConfiguration configuration)
+    /// <summary>
+    /// Returns the reason the OpenTelemetry sink rejected the OTLP configuration, or
+    /// null when it was accepted or not configured at all. It cannot be logged here:
+    /// the logger is only created once this method returns.
+    /// </summary>
+    private static string? ApplyConfiguration(this LoggerConfiguration loggerConfiguration,
+        IConfiguration configuration,
+        IFileSystem fileSystem,
+        InstanceOptions instanceOptions)
     {
         loggerConfiguration
                 .OverrideMinimumLevel(configuration, "MassTransit", LogEventLevel.Warning)
@@ -80,65 +151,129 @@ internal static class LoggingConfiguration
                 .Enrich.FromLogContext()
                 .Enrich.WithModuleId();
 
+        var openTelemetrySinkError = loggerConfiguration
+            .AddLoggingTargets(configuration.GetLoggingSettings(), configuration, fileSystem, instanceOptions);
+
         loggerConfiguration
-            .AddLoggingTargets(configuration.GetLoggingSettings())
             .ReadFrom.Configuration(configuration)
             .MinimumLevel.ControlledBy(_loggingLevelSwitch.WrappedBaseLoggingLevelSwitch);
 
-        return loggerConfiguration;
+        return openTelemetrySinkError;
     }
 
-    private static LoggerConfiguration AddLoggingTargets(this LoggerConfiguration loggerConfiguration,
-        LoggingOptions logOptions)
+    private static string? AddLoggingTargets(this LoggerConfiguration loggerConfiguration,
+        LoggingOptions logOptions,
+        IConfiguration configuration,
+        IFileSystem fileSystem,
+        InstanceOptions instanceOptions)
     {
         var logTargets = logOptions.GetLogTargets().ToArray();
 
         if (logTargets.Contains(LogTarget.Console))
-        {
-            loggerConfiguration
-                .WriteTo.Console(
-                    theme: AnsiConsoleTheme.Code,
-                    outputTemplate: LogTemplate,
-                    formatProvider: CultureInfo.InvariantCulture
-                );
-        }
+            loggerConfiguration.AddConsoleSink();
 
-        // if suite is deployed via apt the LogTarget.LogFile is disabled by default
-        // systemd takes the logs from console and writes it to /var/logs/vicione-suite
         if (logTargets.Contains(LogTarget.LogFile))
-        {
-            if (string.IsNullOrEmpty(logOptions.LogPath))
-                throw new ConfigurationException(nameof(LoggingOptions.LogPath));
-
-            var logPath = logOptions.LogPath;
-
-            loggerConfiguration
-                .WriteTo.File(
-                    path: Path.Combine(logPath, LogFileNameTemplate),
-                    rollingInterval: RollingInterval.Day,
-                    outputTemplate: LogTemplate,
-                    formatProvider: CultureInfo.InvariantCulture
-                );
-        }
+            loggerConfiguration.AddFileSink(logOptions);
 
         if (logTargets.Contains(LogTarget.Journal))
-        {
-            if (!OperatingSystem.IsLinux())
-                throw new InvalidOperationException("Journal can only be configured for linux");
+            loggerConfiguration.AddJournalSink(logOptions);
 
-            var template = new ExpressionTemplate(JournalLogtemplate);
+        return logTargets.Contains(LogTarget.OpenTelemetry)
+            ? loggerConfiguration.AddOpenTelemetrySink(configuration, logOptions, fileSystem, instanceOptions)
+            : null;
+    }
+
+    private static void AddConsoleSink(this LoggerConfiguration loggerConfiguration)
+        => loggerConfiguration
+            .WriteTo.Console(
+                theme: AnsiConsoleTheme.Code,
+                outputTemplate: LogTemplate,
+                formatProvider: CultureInfo.InvariantCulture
+            );
+
+    // if suite is deployed via apt the LogTarget.LogFile is disabled by default
+    // systemd takes the logs from console and writes it to /var/logs/vicione-suite
+    private static void AddFileSink(this LoggerConfiguration loggerConfiguration, LoggingOptions logOptions)
+    {
+        if (string.IsNullOrEmpty(logOptions.LogPath))
+            throw new ConfigurationException(nameof(LoggingOptions.LogPath));
+
+        loggerConfiguration
+            .WriteTo.File(
+                path: Path.Combine(logOptions.LogPath, LogFileNameTemplate),
+                rollingInterval: RollingInterval.Day,
+                outputTemplate: LogTemplate,
+                formatProvider: CultureInfo.InvariantCulture
+            );
+    }
+
+    private static void AddJournalSink(this LoggerConfiguration loggerConfiguration, LoggingOptions logOptions)
+    {
+        if (!OperatingSystem.IsLinux())
+            throw new InvalidOperationException("Journal can only be configured for linux");
+
+        var template = new ExpressionTemplate(JournalLogtemplate);
 
 #pragma warning disable CA2000 // Serilog calls Dispose
-            loggerConfiguration.WriteTo.Sink(new JournalSink(null, template, true, true, new()
-            {
-                Enabled = logOptions.SpamGuard?.Enabled ?? true,
-                Window = TimeSpan.FromSeconds(logOptions.SpamGuard?.WindowSizeSeconds ?? 5),
-                SummaryCountThreshold = logOptions.SpamGuard?.SummaryCountThreshold ?? 1000,
-            }));
+        loggerConfiguration.WriteTo.Sink(new JournalSink(null, template, true, true, new()
+        {
+            Enabled = logOptions.SpamGuard?.Enabled ?? true,
+            Window = TimeSpan.FromSeconds(logOptions.SpamGuard?.WindowSizeSeconds ?? 5),
+            SummaryCountThreshold = logOptions.SpamGuard?.SummaryCountThreshold ?? 1000,
+        }));
 #pragma warning restore CA2000
-        }
+    }
 
-        return loggerConfiguration;
+    /// <summary>
+    /// A misconfigured endpoint must degrade to a startup warning instead of an
+    /// exception: this code runs before any logger exists, so throwing here puts
+    /// an edge device into an undiagnosable restart loop.
+    /// </summary>
+    private static bool IsValidOpenTelemetryEndpoint([NotNullWhen(true)] string? endpoint)
+        => Uri.TryCreate(endpoint, UriKind.Absolute, out var uri)
+            && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+
+    /// <summary>
+    /// Returns the reason the sink rejected the OTLP configuration, or null when it was accepted.
+    /// </summary>
+    private static string? AddOpenTelemetrySink(this LoggerConfiguration loggerConfiguration,
+        IConfiguration configuration,
+        LoggingOptions logOptions,
+        IFileSystem fileSystem,
+        InstanceOptions instanceOptions)
+    {
+        var exporterOptions = configuration.GetOtelExporterOptions();
+        if (!IsValidOpenTelemetryEndpoint(exporterOptions.Endpoint))
+            return null;
+
+        var sinkOptions = logOptions.OpenTelemetry ?? new LoggingOpenTelemetryOptions();
+
+        try
+        {
+            // The sink applies the standard OTLP variables (OTEL_EXPORTER_OTLP_*,
+            // OTEL_RESOURCE_ATTRIBUTES, OTEL_SERVICE_NAME) itself with spec-compliant
+            // parsing; they are looked up through IConfiguration instead of the raw
+            // process environment, so values from other configuration providers
+            // (e.g., instance configuration distributed by the master) are honored too.
+            loggerConfiguration.WriteTo.OpenTelemetry(options =>
+            {
+                options.ResourceAttributes = SuiteOtelResource.GetResourceAttributes(exporterOptions, fileSystem, instanceOptions);
+                options.RestrictedToMinimumLevel = SerilogLogLevelSwitch.ToLogEventLevel(sinkOptions.MinimumLevel);
+                // the logger is created before options validation runs, so an invalid
+                // configured limit must not be able to fail logger creation
+                options.BatchingOptions.QueueLimit = Math.Max(MinimumQueueLimit, sinkOptions.QueueLimit);
+            }, configuration.GetValue<string?>);
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            // the sink rejects malformed OTLP variables (headers, resource attributes,
+            // endpoint) with an exception at configuration time; the suite must still
+            // start with its remaining log targets instead of crash-looping, and no
+            // logger exists yet, so the reason is reported after logger creation
+            return ex.Message;
+        }
     }
 
     private static LoggerConfiguration OverrideMinimumLevel(this LoggerConfiguration loggerConfig,

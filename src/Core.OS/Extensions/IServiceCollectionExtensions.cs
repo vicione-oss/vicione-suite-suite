@@ -5,6 +5,7 @@ using Core.OS.Connections.Extensions;
 using Core.OS.DataProtection.Extensions;
 using Core.OS.DbContext;
 using Core.OS.Diagnostics;
+using Core.OS.Diagnostics.Extensions;
 using Core.OS.EnvironmentOverrides;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance;
@@ -170,12 +171,8 @@ internal static class IServiceCollectionExtensions
             InstanceOptions instanceOptions,
             IFileSystem fileSystem)
         {
-            const string OtelEndpoint = "OTEL_EXPORTER_OTLP_ENDPOINT";
-            const string OtelServiceName = "OTEL_SERVICE_NAME";
-            const string OtelAdditionalMeters = "OTEL_ADDITIONAL_METERS";
-            const string OtelAdditionalSources = "OTEL_ADDITIONAL_SOURCES";
-
-            if (IsDisabled())
+            var exporterOptions = configuration.GetOtelExporterOptions();
+            if (string.IsNullOrEmpty(exporterOptions.Endpoint))
                 return services;
 
             services
@@ -183,12 +180,10 @@ internal static class IServiceCollectionExtensions
                 .ConfigureResource(b =>
                 {
                     b.AddService(
-                            configuration.GetValue<string?>(OtelServiceName) ?? CoreActivitySource.SourceName,
-                            serviceNamespace: "vicione",
-                            serviceVersion: Assembly.GetExecutingAssembly()
-                                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                                ?.InformationalVersion,
-                            serviceInstanceId: fileSystem.File.ReadAllText(fileSystem.GetLocalInstanceIdFilePath(instanceOptions)).Trim(),
+                            SuiteOtelResource.GetServiceName(exporterOptions),
+                            serviceNamespace: SuiteOtelResource.ServiceNamespace,
+                            serviceVersion: SuiteOtelResource.GetServiceVersion(),
+                            serviceInstanceId: fileSystem.ReadLocalInstanceId(instanceOptions),
                             autoGenerateServiceInstanceId: false)
                         .AddAttributes(
                         [
@@ -196,34 +191,30 @@ internal static class IServiceCollectionExtensions
                             new("service.instance.type", instanceOptions.Type.ToString())
                         ]);
                 })
-                .WithTracing(b => ConfigureTracing(b, CoreActivitySource.SourceName, configuration))
-                .WithMetrics(b => ConfigureMetrics(b, configuration))
+                .WithTracing(b => ConfigureTracing(b, CoreActivitySource.SourceName, exporterOptions))
+                .WithMetrics(b => ConfigureMetrics(b, exporterOptions))
                 .UseOtlpExporter();
 
             return services;
 
-            bool IsDisabled() => string.IsNullOrEmpty(configuration.GetValue<string?>(OtelEndpoint));
-
-            static void ConfigureTracing(TracerProviderBuilder builder, string serviceName, IConfiguration configuration)
+            static void ConfigureTracing(TracerProviderBuilder builder, string serviceName, OtelExporterOptions exporterOptions)
             {
                 builder
                     .AddAspNetCoreInstrumentation()
                     .AddSource(serviceName)
                     .AddSource(DiagnosticHeaders.DefaultListenerName);
 
-                var additionalSources = configuration.GetSection(OtelAdditionalSources).Get<string[]>() ?? [];
-                builder.AddSource(additionalSources);
+                builder.AddSource(exporterOptions.AdditionalSources);
             }
 
-            static void ConfigureMetrics(MeterProviderBuilder builder, IConfiguration configuration)
+            static void ConfigureMetrics(MeterProviderBuilder builder, OtelExporterOptions exporterOptions)
             {
                 builder
                     .AddRuntimeInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddMeter(InstrumentationOptions.MeterName);
 
-                var additionalMeters = configuration.GetSection(OtelAdditionalMeters).Get<string[]>() ?? [];
-                foreach (var meter in additionalMeters)
+                foreach (var meter in exporterOptions.AdditionalMeters)
                     builder.AddMeter(meter);
             }
         }

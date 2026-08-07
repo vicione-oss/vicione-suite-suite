@@ -1,5 +1,5 @@
 # Local backing services for running a ViciOne Suite master/slave setup: the Postgres + RabbitMQ
-# (+ Jaeger + Aspire Dashboard) that the master/slave end-to-end tests (Category=E2E-MasterSlave) and local
+# (+ Aspire Dashboard) that the master/slave end-to-end tests (Category=E2E-MasterSlave) and local
 # master/slave development need. The standalone instance is self-contained (SQLite + in-memory bus) and
 # needs none of this. See docs/e2e-testing.md.
 #
@@ -44,8 +44,7 @@ services:
       retries: 10
 
   # Single OTLP ingest point: the instances export to :4317 (as the launch profiles already do) and the
-  # collector fans every trace out to both Jaeger and the Aspire Dashboard, so one run populates both
-  # UIs. Metrics/logs go to the Aspire Dashboard only (Jaeger is traces-only). Config below.
+  # collector forwards every signal (traces, metrics, logs) to the Aspire Dashboard. Config below.
   otel-collector:
     image: otel/opentelemetry-collector:latest
     container_name: vicione-otel-collector
@@ -56,20 +55,9 @@ services:
       - "4317:4317" # OTLP gRPC ingest (instances export here)
       - "4318:4318" # OTLP HTTP ingest
     depends_on:
-      - jaeger
       - aspire-dashboard
 
-  # Trace backend; receives from the collector over the compose network (jaeger:4317), not the host.
-  # Browse traces at http://localhost:16686.
-  jaeger:
-    image: jaegertracing/all-in-one:latest
-    container_name: vicione-jaeger
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
-    ports:
-      - "16686:16686" # The UI port
-
-  # A more polished OTLP UI than Jaeger (traces + logs + metrics); receives from the collector over the
+  # OTLP UI for traces, logs and metrics; receives from the collector over the
   # compose network (aspire-dashboard:18889). Browse at http://localhost:18888.
   aspire-dashboard:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:latest

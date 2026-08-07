@@ -6,6 +6,7 @@ using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Extensions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
+using Core.OS.Tests.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Sdk.Instance;
@@ -242,6 +243,41 @@ public class SuitePreparationPipelineTests
 
             // Assert
             await act.Should().ThrowAsync<OperationCanceledException>();
+        }
+    }
+
+    [Collection(StaticSerilogLogger.Name)]
+    public sealed class LogUnhandledExceptionEvent : SuitePreparationPipelineTests
+    {
+        [Fact]
+        public void Should_flush_the_static_logger_because_the_process_dies_right_after_the_handler()
+        {
+            // Arrange
+            using var staticLogger = new BufferedStaticLogger();
+            var args = new UnhandledExceptionEventArgs(new InvalidOperationException("background boom"), isTerminating: true);
+
+            // Act
+            SuitePreparationPipeline.LogUnhandledExceptionEvent(this, args);
+
+            // Assert
+            staticLogger.Delivered.Should().ContainSingle(e => e.Contains("background boom", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void Should_keep_the_static_logger_open_when_the_process_survives()
+        {
+            // Arrange
+            using var staticLogger = new BufferedStaticLogger();
+            var args = new UnhandledExceptionEventArgs(new InvalidOperationException("survivable boom"), isTerminating: false);
+
+            // Act
+            SuitePreparationPipeline.LogUnhandledExceptionEvent(this, args);
+            Serilog.Log.Error("logged after the handler");
+            Serilog.Log.CloseAndFlush();
+
+            // Assert
+            staticLogger.Delivered.Should().HaveCount(2);
+            staticLogger.Delivered.Should().Contain(e => e.Contains("logged after the handler", StringComparison.Ordinal));
         }
     }
 

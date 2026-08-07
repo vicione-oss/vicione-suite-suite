@@ -17,6 +17,26 @@ public sealed class LoggingOptions : ILogOptions
     public LoggingLogLevelOptions? LogLevel { get; set; }
     [ValidateObjectMembers]
     public LoggingSpamGuardOptions? SpamGuard { get; set; }
+    [ValidateObjectMembers]
+    public LoggingOpenTelemetryOptions? OpenTelemetry { get; set; }
+}
+
+public sealed class LoggingOpenTelemetryOptions
+{
+    public const string ConfigSection = "OpenTelemetry";
+
+    /// <summary>
+    /// Floor for events exported via OTLP. Keeps runtime log level changes
+    /// (e.g. enabling debug logging for local troubleshooting) from streaming
+    /// verbose logs over potentially metered edge device uplinks.
+    /// </summary>
+    public LogLevel MinimumLevel { get; set; } = LogLevel.Information;
+
+    /// <summary>
+    /// Bounds the events held in memory while the OTLP endpoint is unreachable,
+    /// which is a normal condition for edge devices with intermittent connectivity.
+    /// </summary>
+    public int QueueLimit { get; set; } = 10_000;
 }
 
 public sealed class LoggingSpamGuardOptions

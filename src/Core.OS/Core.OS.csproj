@@ -48,6 +48,7 @@
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Serilog.Expressions" />
     <PackageReference Include="Serilog.Sinks.Journal" />
+    <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
     <PackageReference Include="ViciOne.Journal" />
     <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
     <PackageReference Include="ViciOne.Ui.Localization" />

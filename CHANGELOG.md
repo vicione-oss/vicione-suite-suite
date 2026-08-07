@@ -18,6 +18,7 @@
 - Account lockout after 5 failed sign-in or current-password attempts; locked accounts auto-unlock after 5 minutes. Lockout is surfaced as the same generic credentials error as a wrong password to avoid disclosing account state.
 - Auto resolving module versions allows now fixed version parts (e.g. `1.*` or `1.2.*`) in addition to the `latest` keyword
 - `NavigateBackOnSaveSuccessResult`, a `SaveSuccessResult` a control panel save handler can return to have the settings navigate back to the previous panel after a successful save; the navigation is triggered by the `SettingsContainer` after the save completes, so the unsaved-changes guard does not interfere
+- OpenTelemetry (OTLP) as a log target, exporting logs through a Serilog sink under the same resource identity (`service.name`, `service.instance.id`, `service.version`) as traces and metrics. Disabled by default; enabled by adding `OpenTelemetry` to `Logging:LogTargets` and setting `OTEL_EXPORTER_OTLP_ENDPOINT`. `Logging:OpenTelemetry:MinimumLevel` caps the exported level and `Logging:OpenTelemetry:QueueLimit` bounds in-memory buffering while the endpoint is unreachable. A missing or invalid OTLP configuration degrades to a startup warning instead of crashing.
 
 ### Changed
 

@@ -34,6 +34,7 @@ internal static class TestExtensions
     {
         fileSystem.Path.IsPathRooted(appDirectory).Returns(true);
         fileSystem.Path.Combine(Arg.Any<string>(), OS.Instance.Extensions.IFileSystemExtensions.InstanceIdFileName).Returns(nameof(instanceId));
+        fileSystem.File.Exists(nameof(instanceId)).Returns(true);
         fileSystem.File.ReadAllText(nameof(instanceId)).Returns(instanceId.ToString());
     }
 

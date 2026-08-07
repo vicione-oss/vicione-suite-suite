@@ -16,11 +16,11 @@ public sealed class SerilogLogLevelSwitch(LoggingLevelSwitch loggingLevelSwitch)
         }
         set
         {
-            WrappedBaseLoggingLevelSwitch.MinimumLevel = Map(value);
+            WrappedBaseLoggingLevelSwitch.MinimumLevel = ToLogEventLevel(value);
         }
     }
 
-    private static LogEventLevel Map(LogLevel logLevel)
+    public static LogEventLevel ToLogEventLevel(LogLevel logLevel)
     {
         return logLevel switch
         {

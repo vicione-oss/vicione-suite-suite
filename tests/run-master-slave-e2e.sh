@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Spin up the master/slave backing services (Postgres, RabbitMQ, Jaeger) and a local
+# Spin up the master/slave backing services (Postgres, RabbitMQ, Aspire Dashboard) and a local
 # master + 2 slaves, then run the master/slave end-to-end tests (Category=E2E-MasterSlave).
 #
 # The instances run from a published layout (build/publish-suite.sh) — the same way the CI job and
@@ -74,7 +74,7 @@ if [[ "${KEEP}" -eq 0 ]]; then
   rm -rf "${PUB}"
 fi
 
-echo "==> Starting backing services (Postgres, RabbitMQ, Jaeger) ..."
+echo "==> Starting backing services (Postgres, RabbitMQ, Aspire Dashboard) ..."
 docker compose -f "${COMPOSE_FILE}" up -d --wait
 
 echo "==> Ensuring HTTPS dev certificate ..."

@@ -3,6 +3,8 @@ using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Services;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance.Extensions;
+using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Core.OS.Extensions;
 
@@ -55,6 +57,13 @@ internal static partial class WebApplicationBuilderExtensions
         catch (Exception ex)
         {
             LogStartupFailed(preparationContext.Logger, ex);
+        }
+        finally
+        {
+            // no part of the host lifecycle disposes the static Serilog logger, so every exit path
+            // ends the process with buffered events (e.g. the OpenTelemetry batch) still pending -
+            // for a crash-looping edge device the startup error is the one log that must be delivered
+            await Log.CloseAndFlushAsync();
         }
     }
 
