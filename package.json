@@ -6,7 +6,7 @@
         "src/Blazor.Shared"
     ],
     "scripts": {
-        "build": "npm run build -w src/Blazor.Shared",
+        "build": "npm --workspaces --if-present run build",
         "lint": "npm --workspaces --if-present run lint",
         "lint-with-fix": "npm --workspaces --if-present run lint-with-fix"
     }
