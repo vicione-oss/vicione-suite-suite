@@ -126,7 +126,4 @@
   <data name="RemoteSupport" xml:space="preserve">
     <value>Remote Support</value>
   </data>
-  <data name="VersionInformationTitle" xml:space="preserve">
-    <value>Version information</value>
-  </data>
 </root>

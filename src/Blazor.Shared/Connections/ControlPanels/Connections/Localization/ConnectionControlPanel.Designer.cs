@@ -80,15 +80,6 @@ namespace Blazor.Shared.Connections.ControlPanels.Connections.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The connection &quot;{0}&quot; was changed by another user. Your changes to the connection are not valid anymore. The connection is updated to the incoming changes. Please redo your changes if needed..
-        /// </summary>
-        internal static string ConnectionForUpdateUpdated {
-            get {
-                return ResourceManager.GetString("ConnectionForUpdateUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to creation.
         /// </summary>
         internal static string Creation {
@@ -107,56 +98,11 @@ namespace Blazor.Shared.Connections.ControlPanels.Connections.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The currently edited connection was deleted by another user. It is not possible to edit the connection anymore. Your changes are discarded..
-        /// </summary>
-        internal static string EditedConnectionDeleted {
-            get {
-                return ResourceManager.GetString("EditedConnectionDeleted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The currently edited connection was changed by another user. It is not possible to edit the connection anymore. Your changes are discarded. Please restart editing if needed..
-        /// </summary>
-        internal static string EditedConnectionUpdated {
-            get {
-                return ResourceManager.GetString("EditedConnectionUpdated", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Add new connection.
-        /// </summary>
-        internal static string EditFormHeadlineAdd {
-            get {
-                return ResourceManager.GetString("EditFormHeadlineAdd", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Edit connection &quot;{0}&quot;.
-        /// </summary>
-        internal static string EditFormHeadlineEdit {
-            get {
-                return ResourceManager.GetString("EditFormHeadlineEdit", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Managed.
         /// </summary>
         internal static string Managed {
             get {
                 return ResourceManager.GetString("Managed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to An error occurred during the {0} of connection &quot;{1}&quot;. Please try again or contact the system administrator..
-        /// </summary>
-        internal static string SaveConnectionErrorFormat {
-            get {
-                return ResourceManager.GetString("SaveConnectionErrorFormat", resourceCulture);
             }
         }
         

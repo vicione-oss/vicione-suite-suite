@@ -61,15 +61,6 @@ namespace Blazor.Shared.Logging.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Click on the magnify icon to display the selected logfile.
-        /// </summary>
-        internal static string ClickMagnifyToDisplayLogFile {
-            get {
-                return ResourceManager.GetString("ClickMagnifyToDisplayLogFile", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Log File.
         /// </summary>
         internal static string LogFile {
@@ -84,15 +75,6 @@ namespace Blazor.Shared.Logging.Localization {
         internal static string LogLevel {
             get {
                 return ResourceManager.GetString("LogLevel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Log memory footprint every.
-        /// </summary>
-        internal static string LogMemoryFootprintEvery {
-            get {
-                return ResourceManager.GetString("LogMemoryFootprintEvery", resourceCulture);
             }
         }
         

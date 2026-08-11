@@ -161,15 +161,6 @@ namespace Blazor.Shared.UserManagement.ControlPanels.User.Components.Localizatio
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No user name given..
-        /// </summary>
-        internal static string NoUserNameGiven {
-            get {
-                return ResourceManager.GetString("NoUserNameGiven", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Password expiration date.
         /// </summary>
         internal static string PasswordExpirationDate {

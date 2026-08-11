@@ -123,9 +123,6 @@
   <data name="ConnectTitle" xml:space="preserve">
     <value>mit ausgewähltem Broker verbinden</value>
   </data>
-  <data name="TopicSelection" xml:space="preserve">
-    <value>Topic Auswahl</value>
-  </data>
   <data name="SelectedMessages" xml:space="preserve">
     <value>Ausgewählte Nachrichten</value>
   </data>

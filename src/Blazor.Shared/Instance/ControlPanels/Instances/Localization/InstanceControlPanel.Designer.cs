@@ -20,15 +20,15 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class InstanceControlPanel {
-        
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal InstanceControlPanel() {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -42,7 +42,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -56,7 +56,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Details of the instance you are currently editing. If you change one of the editable values you need to confirm or cancel your changes to apply it to the system..
         /// </summary>
@@ -65,7 +65,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return ResourceManager.GetString("DescriptionBannerContent", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Edit instance.
         /// </summary>
@@ -74,16 +74,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return ResourceManager.GetString("DescriptionBannerTitle", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Display.
-        /// </summary>
-        internal static string Display {
-            get {
-                return ResourceManager.GetString("Display", resourceCulture);
-            }
-        }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Failed to fetch instance information.
         /// </summary>
@@ -92,7 +83,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return ResourceManager.GetString("FetchErrorContent", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to First Time Registered.
         /// </summary>
@@ -101,7 +92,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return ResourceManager.GetString("FirstTimeRegistered", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Formatted Name.
         /// </summary>
@@ -110,7 +101,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return ResourceManager.GetString("FormattedName", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Last Health Check.
         /// </summary>
@@ -119,7 +110,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return ResourceManager.GetString("LastHealthCheck", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Last Time Registered.
         /// </summary>
@@ -128,7 +119,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return ResourceManager.GetString("LastTimeRegistered", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Log-Level.
         /// </summary>
@@ -137,7 +128,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Instances.Localization {
                 return ResourceManager.GetString("LogLevel", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Instance.
         /// </summary>

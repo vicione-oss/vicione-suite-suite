@@ -187,9 +187,6 @@ Hinweis: Dies setzt das Betriebssystem nicht zurück. Dateien oder Änderungen, 
   <data name="BackupRestoreInProgress" xml:space="preserve">
     <value>Wiederherstellung aus Backup-Datei wird durchgeführt. Das System wird in Kürze neu gestartet.</value>
   </data>
-  <data name="BackupFileLimitReached" xml:space="preserve">
-    <value>Die Dateigröße ist auf 15 MB begrenzt.</value>
-  </data>
   <data name="UpdateTitle" xml:space="preserve">
     <value>System Update</value>
   </data>

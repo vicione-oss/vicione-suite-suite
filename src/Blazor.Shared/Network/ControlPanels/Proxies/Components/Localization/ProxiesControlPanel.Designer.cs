@@ -142,13 +142,5 @@ namespace Blazor.Shared.Network.ControlPanels.Proxies.Components.Localization {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to Socks proxy.
-        /// </summary>
-        internal static string SocksProxySettingsGroupTitle {
-            get {
-                return ResourceManager.GetString("SocksProxySettingsGroupTitle", resourceCulture);
-            }
-        }
     }
 }

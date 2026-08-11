@@ -120,9 +120,6 @@
   <data name="FeatureNotAvailable" xml:space="preserve">
     <value>Passkey sign-in is currently not available.</value>
   </data>
-  <data name="PasskeyTerm" xml:space="preserve">
-    <value>Passkey</value>
-  </data>
   <data name="PasskeyTermPlural" xml:space="preserve">
     <value>Passkeys</value>
   </data>

@@ -129,21 +129,6 @@
   <data name="GeneralInformationDescription" xml:space="preserve">
     <value>Hier werden die aktuellen Netzwerkeinstellungen angezeigt. Diese Informationen umfassen wichtige Verbindungs- und Netzwerkdetails. In diesem Bereich können keine Änderungen vorgenommen werden.</value>
   </data>
-  <data name="InformationHtml" xml:space="preserve">
-    <value>&lt;p&gt;Die Verbindungsprüfung beinhaltet die folgenden Prüfungen:&lt;/p&gt;
-
-&lt;ul&gt;
-    &lt;li&gt;Konfiguration der Standard-Route&lt;/li&gt;
-    &lt;li&gt;Verfügbarkeit des Gateways&lt;/li&gt;
-    &lt;li&gt;Internetverbindung&lt;/li&gt;
-    &lt;li&gt;Verfügbarkeit und Funktion des DNS-Servers&lt;/li&gt;
-    &lt;li&gt;Status der Netzwerkschnittstelle&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Falls für die Netzwerkschnittstelle ein VLAN konfiguriert ist, wird der Verbindungstest über die virtuelle VLAN-Schnittstelle durchgeführt.&lt;/p&gt;
-
-&lt;p&gt;Beim Rücksetzen der Schnittstelle auf Standardeinstellungen werden die IP-Adressen, Netzwerkmasken und der Standardgateway gelöscht sowie die Schnittstelle auf DHCP konfiguriert.&lt;/p&gt;</value>
-  </data>
   <data name="InterfaceEnabledSettingsGroupTitle" xml:space="preserve">
     <value>Schnittstelle aktiviert</value>
   </data>

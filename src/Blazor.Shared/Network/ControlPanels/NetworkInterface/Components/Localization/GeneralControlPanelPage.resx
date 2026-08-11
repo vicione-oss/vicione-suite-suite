@@ -129,21 +129,6 @@
   <data name="GeneralInformationDescription" xml:space="preserve">
     <value>The current network settings are displayed here. This information includes important connection and network details. No changes can be made in this area.</value>
   </data>
-  <data name="InformationHtml" xml:space="preserve">
-    <value>&lt;p&gt;The connection test includes the following checks:&lt;/p&gt;
-
-&lt;ul&gt;
-    &lt;li&gt;Configuration of the default route&lt;/li&gt;
-    &lt;li&gt;Availability of the gateway&lt;/li&gt;
-    &lt;li&gt;Internet connection&lt;/li&gt;
-    &lt;li&gt;Availability and function of the DNS server&lt;/li&gt;
-    &lt;li&gt;Status of the network interface&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If VLAN is configured on this network interface, the connection test takes place over the virtual VLAN network interface.&lt;/p&gt;
-
-&lt;p&gt;When resetting the interface to factory default, IP addresses, network masks and default gateway are deleted and the interface is configured to DHCP.&lt;/p&gt;</value>
-  </data>
   <data name="InterfaceEnabledSettingsGroupTitle" xml:space="preserve">
     <value>Interface enabled</value>
   </data>

@@ -123,12 +123,6 @@
   <data name="LogFile" xml:space="preserve">
     <value>Log Datei</value>
   </data>
-  <data name="LogMemoryFootprintEvery" xml:space="preserve">
-    <value>Speicherverbrauch erfassen alle</value>
-  </data>
-  <data name="ClickMagnifyToDisplayLogFile" xml:space="preserve">
-    <value>Zum Anzeigen der ausgewählten Logdatei auf die Lupe klicken</value>
-  </data>
   <data name="LogViewTitle" xml:space="preserve">
     <value>Protokollierung</value>
   </data>

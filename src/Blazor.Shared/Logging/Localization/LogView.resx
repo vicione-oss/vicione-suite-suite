@@ -123,12 +123,6 @@
   <data name="LogFile" xml:space="preserve">
     <value>Log File</value>
   </data>
-  <data name="LogMemoryFootprintEvery" xml:space="preserve">
-    <value>Log memory footprint every</value>
-  </data>
-  <data name="ClickMagnifyToDisplayLogFile" xml:space="preserve">
-    <value>Click on the magnify icon to display the selected logfile</value>
-  </data>
   <data name="LogViewTitle" xml:space="preserve">
     <value>Logging</value>
   </data>

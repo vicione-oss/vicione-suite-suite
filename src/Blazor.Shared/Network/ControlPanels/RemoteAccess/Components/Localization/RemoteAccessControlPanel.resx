@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -119,9 +119,6 @@
   </resheader>
   <data name="DescriptionBannerContent" xml:space="preserve">
     <value>Configure SSH (Secure Shell) access to your device to specifically enable or prevent remote access.</value>
-  </data>
-  <data name="DescriptionBannerTitle" xml:space="preserve">
-    <value>Remote Access</value>
   </data>
   <data name="DescriptionBannerContentMoneo" xml:space="preserve">
     <value>When enabling moneo|remoteConnect without previously onboarding to a moneo|cloud the device will be connected to a support instance.</value>

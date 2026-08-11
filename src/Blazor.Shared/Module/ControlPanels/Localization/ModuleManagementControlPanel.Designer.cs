@@ -123,22 +123,5 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to No modules available for installation.
-        /// </summary>
-        internal static string NoModulesAvailableToInstall {
-            get {
-                return ResourceManager.GetString("NoModulesAvailableToInstall", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No modules installed, yet.
-        /// </summary>
-        internal static string NoModulesInstalledYet {
-            get {
-                return ResourceManager.GetString("NoModulesInstalledYet", resourceCulture);
-            }
-        }
     }
 }

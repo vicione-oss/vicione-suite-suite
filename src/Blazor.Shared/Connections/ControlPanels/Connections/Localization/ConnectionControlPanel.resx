@@ -117,26 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ConnectionForUpdateUpdated" xml:space="preserve">
-    <value>The connection "{0}" was changed by another user. Your changes to the connection are not valid anymore. The connection is updated to the incoming changes. Please redo your changes if needed.</value>
-  </data>
   <data name="Creation" xml:space="preserve">
     <value>creation</value>
-  </data>
-  <data name="EditedConnectionDeleted" xml:space="preserve">
-    <value>The currently edited connection was deleted by another user. It is not possible to edit the connection anymore. Your changes are discarded.</value>
-  </data>
-  <data name="EditedConnectionUpdated" xml:space="preserve">
-    <value>The currently edited connection was changed by another user. It is not possible to edit the connection anymore. Your changes are discarded. Please restart editing if needed.</value>
-  </data>
-  <data name="EditFormHeadlineAdd" xml:space="preserve">
-    <value>Add new connection</value>
-  </data>
-  <data name="EditFormHeadlineEdit" xml:space="preserve">
-    <value>Edit connection "{0}"</value>
-  </data>
-  <data name="SaveConnectionErrorFormat" xml:space="preserve">
-    <value>An error occurred during the {0} of connection "{1}". Please try again or contact the system administrator.</value>
   </data>
   <data name="Update" xml:space="preserve">
     <value>update</value>

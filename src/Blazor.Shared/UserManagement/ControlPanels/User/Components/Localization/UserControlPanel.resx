@@ -171,7 +171,4 @@
   <data name="DevicesDescriptionBannerContent" xml:space="preserve">
     <value>Dolor sit amet</value>
   </data>
-  <data name="NoUserNameGiven" xml:space="preserve">
-    <value>No user name given.</value>
-  </data>
 </root>

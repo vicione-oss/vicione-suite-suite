@@ -120,9 +120,6 @@
   <data name="ProvideHttpAddress" xml:space="preserve">
     <value>Bitte geben Sie eine gültige HTTP-Adresse an.</value>
   </data>
-  <data name="ProvideAzureIoTHost" xml:space="preserve">
-    <value>Bitte geben Sie eine gültigen Azure IoT Hub Hostnamen an.</value>
-  </data>
   <data name="ProvideMqttBrokerAddress" xml:space="preserve">
     <value>Die Adresse des MQTT-Brokers muss ausgefüllt werden.</value>
   </data>

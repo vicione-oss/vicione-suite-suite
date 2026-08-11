@@ -98,27 +98,6 @@ namespace Blazor.Shared.Network.ControlPanels.NetworkInterface.Components.Locali
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;p&gt;The connection test includes the following checks:&lt;/p&gt;
-        ///
-        ///&lt;ul&gt;
-        ///    &lt;li&gt;Configuration of the default route&lt;/li&gt;
-        ///    &lt;li&gt;Availability of the gateway&lt;/li&gt;
-        ///    &lt;li&gt;Internet connection&lt;/li&gt;
-        ///    &lt;li&gt;Availability and function of the DNS server&lt;/li&gt;
-        ///    &lt;li&gt;Status of the network interface&lt;/li&gt;
-        ///&lt;/ul&gt;
-        ///
-        ///&lt;p&gt;If VLAN is configured on this network interface, the connection test takes place over the virtual VLAN network interface.&lt;/p&gt;
-        ///
-        ///&lt;p&gt;When resetting the interface to factory default, IP addresses, network m [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string InformationHtml {
-            get {
-                return ResourceManager.GetString("InformationHtml", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Interface enabled.
         /// </summary>
         internal static string InterfaceEnabledSettingsGroupTitle {

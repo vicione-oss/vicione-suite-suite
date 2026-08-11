@@ -195,13 +195,5 @@ namespace Blazor.Shared.Mqtt.Localization {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to Topic Seletion.
-        /// </summary>
-        internal static string TopicSelection {
-            get {
-                return ResourceManager.GetString("TopicSelection", resourceCulture);
-            }
-        }
     }
 }
