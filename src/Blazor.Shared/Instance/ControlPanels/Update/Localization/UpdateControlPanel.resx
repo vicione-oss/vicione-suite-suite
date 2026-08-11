@@ -187,9 +187,6 @@ Note: This does not reset the operating system. Files or changes made directly t
   <data name="BackupRestoreInProgress" xml:space="preserve">
     <value>Restoring backup file in progress. System will be restarted immediately.</value>
   </data>
-  <data name="BackupFileLimitReached" xml:space="preserve">
-    <value>The file size is limited to 15MB.</value>
-  </data>
   <data name="UpdateTitle" xml:space="preserve">
     <value>System update</value>
   </data>

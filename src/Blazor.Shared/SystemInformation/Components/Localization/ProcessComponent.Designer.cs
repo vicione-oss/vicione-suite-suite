@@ -61,15 +61,6 @@ namespace Blazor.Shared.SystemInformation.Components.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Core {0}.
-        /// </summary>
-        internal static string CoreNumber {
-            get {
-                return ResourceManager.GetString("CoreNumber", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to CPU usage (total).
         /// </summary>
         internal static string CpuUsage {

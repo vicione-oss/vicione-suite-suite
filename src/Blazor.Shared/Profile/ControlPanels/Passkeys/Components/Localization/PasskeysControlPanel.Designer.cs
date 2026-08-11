@@ -69,14 +69,6 @@ namespace Blazor.Shared.Profile.ControlPanels.Passkeys.Components.Localization {
             }
         }
         /// <summary>
-        ///   Looks up a localized string similar to Passkey.
-        /// </summary>
-        internal static string PasskeyTerm {
-            get {
-                return ResourceManager.GetString("PasskeyTerm", resourceCulture);
-            }
-        }
-        /// <summary>
         ///   Looks up a localized string similar to Passkeys.
         /// </summary>
         internal static string PasskeyTermPlural {

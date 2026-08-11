@@ -123,9 +123,6 @@
   <data name="HardwareInformationSettingsGroupTitle" xml:space="preserve">
     <value>Hardware information</value>
   </data>
-  <data name="MacAddress" xml:space="preserve">
-    <value>MAC address</value>
-  </data>
   <data name="MacAddressFieldPlaceholder" xml:space="preserve">
     <value>e. g. C5-0A-A6-74-77-20</value>
   </data>

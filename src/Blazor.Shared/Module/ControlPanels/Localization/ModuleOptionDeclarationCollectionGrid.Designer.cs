@@ -10,8 +10,8 @@
 
 namespace Blazor.Shared.Module.ControlPanels.Localization {
     using System;
-    
-    
+
+
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -23,15 +23,15 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ModuleOptionDeclarationCollectionGrid {
-        
+
         private static global::System.Resources.ResourceManager resourceMan;
-        
+
         private static global::System.Globalization.CultureInfo resourceCulture;
-        
+
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal ModuleOptionDeclarationCollectionGrid() {
         }
-        
+
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
@@ -46,7 +46,7 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
                 return resourceMan;
             }
         }
-        
+
         /// <summary>
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
@@ -60,7 +60,7 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
                 resourceCulture = value;
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Boolean.
         /// </summary>
@@ -69,22 +69,13 @@ namespace Blazor.Shared.Module.ControlPanels.Localization {
                 return ResourceManager.GetString("AddBooleanOptionButtonText", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Number.
         /// </summary>
         internal static string AddNumericOptionButtonText {
             get {
                 return ResourceManager.GetString("AddNumericOptionButtonText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Text.
-        /// </summary>
-        internal static string AddTextOptionButtonText {
-            get {
-                return ResourceManager.GetString("AddTextOptionButtonText", resourceCulture);
             }
         }
     }

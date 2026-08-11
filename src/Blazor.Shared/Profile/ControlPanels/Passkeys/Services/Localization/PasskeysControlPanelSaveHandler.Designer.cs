@@ -61,14 +61,6 @@ namespace Blazor.Shared.Profile.ControlPanels.Passkeys.Services.Localization {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Unknown error while deleting passkeys.
-        /// </summary>
-        internal static string UnknownErrorDuringDeletion {
-            get {
-                return ResourceManager.GetString("UnknownErrorDuringDeletion", resourceCulture);
-            }
-        }
-        /// <summary>
         ///   Looks up a localized string similar to No user is logged in.
         /// </summary>
         internal static string UserIsNotSet {

@@ -171,7 +171,4 @@
   <data name="DescriptionBannerContentOnEdit" xml:space="preserve">
     <value>Hier können Sie die Daten des Benutzers bearbeiten. Ändern Sie dazu die bisherigen Eingaben und bestätigen Sie anschließend Ihre Änderungen um diese für den Benutzer zu übernehmen.</value>
   </data>
-  <data name="NoUserNameGiven" xml:space="preserve">
-    <value>Es wurde kein Benutzername vorgegeben.</value>
-  </data>
 </root>

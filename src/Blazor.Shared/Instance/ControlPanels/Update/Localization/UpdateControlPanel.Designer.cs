@@ -115,15 +115,6 @@ namespace Blazor.Shared.Instance.ControlPanels.Update.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file size is limited to 15MB..
-        /// </summary>
-        internal static string BackupFileLimitReached {
-            get {
-                return ResourceManager.GetString("BackupFileLimitReached", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Manual backup.
         /// </summary>
         internal static string BackupGroupTitle {

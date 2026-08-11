@@ -70,15 +70,6 @@ namespace Blazor.Server.Backend.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your current password has expired. Please change it to continue using the application..
-        /// </summary>
-        internal static string PasswordExpiredMessage {
-            get {
-                return ResourceManager.GetString("PasswordExpiredMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to User not found..
         /// </summary>
         internal static string UserNotFound {

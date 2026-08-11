@@ -61,15 +61,6 @@ namespace Blazor.Shared.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please provide the address of the Azure IoT Hub host..
-        /// </summary>
-        internal static string ProvideAzureIoTHost {
-            get {
-                return ResourceManager.GetString("ProvideAzureIoTHost", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Please provide a valid HTTP address..
         /// </summary>
         internal static string ProvideHttpAddress {

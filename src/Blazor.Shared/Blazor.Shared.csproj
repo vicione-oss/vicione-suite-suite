@@ -126,20 +126,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>MessageBanner.resx</DependentUpon>
     </Compile>
-    <Compile Update="Components\Pages\Localization\IndexPage.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>IndexPage.resx</DependentUpon>
-    </Compile>
     <Compile Update="Module\ControlPanels\Localization\ModuleOptionDeclarationCollectionGrid.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ModuleOptionDeclarationCollectionGrid.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Module\ControlPanels\Localization\ModuleManagementControlPanelSaveHandler.Designer.cs">
-      <DependentUpon>ModuleManagementControlPanelSaveHandler.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
     </Compile>
     <Compile Update="Mqtt\Localization\MqttViewer.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -340,7 +330,7 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ProcessComponent.resx</DependentUpon>
-    </Compile>  
+    </Compile>
     <Compile Update="SystemInformation\NotificationArea\Localization\SystemInformationNotificationElementFlyoutContent.Designer.cs">
       <DependentUpon>SystemInformationNotificationElementFlyoutContent.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -575,14 +565,6 @@
       <LastGenOutput>MessageBanner.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Components\Pages\Localization\IndexPage.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>IndexPage.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleManagementControlPanelSaveHandler.resx">
-      <LastGenOutput>ModuleManagementControlPanelSaveHandler.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
     <EmbeddedResource Update="Network\ControlPanels\Dns\Components\Localization\DnsControlPanel.resx">
       <LastGenOutput>DnsControlPanel.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
@@ -738,7 +720,7 @@
     <EmbeddedResource Update="SystemInformation\Components\Localization\ProcessComponent.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ProcessComponent.Designer.cs</LastGenOutput>
-    </EmbeddedResource>  
+    </EmbeddedResource>
     <EmbeddedResource Update="SystemInformation\NotificationArea\Localization\SystemInformationNotificationElementFlyoutContent.resx">
       <LastGenOutput>SystemInformationNotificationElementFlyoutContent.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>

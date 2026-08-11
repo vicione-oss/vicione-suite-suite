@@ -21,7 +21,7 @@
             <AddGridActionButton Text="@Localization.ModuleOptionDeclarationCollectionGrid.AddNumericOptionButtonText"
                                  OnClick="@(async () => await AddButtonClickAsync(ModuleOptionType.Number))" />
 
-            <AddGridActionButton Text="@Localization.ModuleOptionDeclarationCollectionGrid.AddTextOptionButtonText"
+            <AddGridActionButton Text="@CommonVocabulary.Text"
                                  OnClick="@(async () => await AddButtonClickAsync(ModuleOptionType.Text))" />
 
             <DeleteGridActionButton Enabled="@_canDelete"
@@ -69,7 +69,7 @@
                     }
                     else if (_editContext is EditContext<string?> stringEditContext)
                     {
-                        <TextBox @bind-Value="stringEditContext.Value" 
+                        <TextBox @bind-Value="stringEditContext.Value"
                                  Password="@_editContext.ModuleOptionDeclaration.IsPassword" />
                     }
                 }
@@ -94,7 +94,7 @@
                         }
                         else
                         {
-                            @context.Value   
+                            @context.Value
                         }
                     }
                 }
@@ -111,8 +111,8 @@
                     {
                         <Button Enabled="@(context.Value != Core.Shared.Constants.SetByEnvironmentMarker)"
                                 IconCssClass="@s_editButtonIconCssClass"
-                                Size="ButtonSize.Small" 
-                                Title="@CommonVocabulary.EditVerb" 
+                                Size="ButtonSize.Small"
+                                Title="@CommonVocabulary.EditVerb"
                                 OnClick="@(() => EditButtonClick(context))" />
                     }
                 </div>

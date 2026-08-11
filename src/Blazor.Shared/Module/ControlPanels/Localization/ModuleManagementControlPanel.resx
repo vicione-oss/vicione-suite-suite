@@ -123,12 +123,6 @@
   <data name="InstalledModules" xml:space="preserve">
     <value>Installed Modules</value>
   </data>
-  <data name="NoModulesAvailableToInstall" xml:space="preserve">
-    <value>No modules available for installation</value>
-  </data>
-  <data name="NoModulesInstalledYet" xml:space="preserve">
-    <value>No modules installed, yet</value>
-  </data>
   <data name="InstalledModulesBanner" xml:space="preserve">
     <value>ViciOne is a modular system that can be expanded by installing additional modules. Here, you can manage the installed modules of the suite. You can install, uninstall, and update modules individually. If needed, access to pre-releases is also available. Please note: Changes to the modules take effect only after a system restart.</value>
   </data>

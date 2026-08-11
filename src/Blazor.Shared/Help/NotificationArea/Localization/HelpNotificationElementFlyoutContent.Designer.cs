@@ -88,13 +88,5 @@ namespace Blazor.Shared.Help.NotificationArea.Localization {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to Version information.
-        /// </summary>
-        internal static string VersionInformationTitle {
-            get {
-                return ResourceManager.GetString("VersionInformationTitle", resourceCulture);
-            }
-        }
     }
 }

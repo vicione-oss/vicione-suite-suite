@@ -35,6 +35,7 @@
 - The passkeys settings panel now provides a per-row navigation button to rename a passkey
 - The panel for renaming a passkey now uses the established edit wording (`Edit passkey`) instead of a dedicated rename wording
 - After successfully adding a passkey, the settings navigate back to the passkeys list
+- Removed unused / reuse existing localization resources
 
 ### Fixed
 

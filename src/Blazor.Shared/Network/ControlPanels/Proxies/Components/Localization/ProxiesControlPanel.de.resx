@@ -144,7 +144,4 @@
   <data name="SftpProxySettingsGroupTitle" xml:space="preserve">
     <value>Sicherer FTP-Proxy</value>
   </data>
-  <data name="SocksProxySettingsGroupTitle" xml:space="preserve">
-    <value>Socks-Proxy</value>
-  </data>
 </root>
