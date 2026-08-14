@@ -1,6 +1,6 @@
-﻿@use "../../Styles/design/colors";
+@use "../../Styles/design/animations/variables" as animations;
+@use "../../Styles/design/colors";
 @use "../../../../shared/styles/colors-staged";
-@use "../../../../shared/styles/animations/variables" as animations;
 
 .permisson-grid-container {
     display: contents;

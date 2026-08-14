@@ -1,4 +1,4 @@
-﻿@using Blazor.Shared.Profile.Components
+@using Blazor.Shared.Profile.Components
 @using Blazor.Shared.Profile.Extensions
 @using Blazor.Shared.Profile.NotificationArea.Enums
 @using Blazor.Shared.Profile.NotificationArea.Extensions
@@ -43,14 +43,20 @@
 
                         @if (_canEditUserData)
                         {
-                            var editButtonIconCssClasses = new List<string> { "icon" };
+                            var editButtonCssClasses = new List<string> { "edit-button" };
+                            
+                            if (_editUserDataStarted)
+                                editButtonCssClasses.Add("active");
+
+                            var editButtonAttributes = new Dictionary<string, object>();
+                            editButtonAttributes.Add("class", string.Join(" ", editButtonCssClasses));
 
                             if (_editUserDataStarted)
-                                editButtonIconCssClasses.Add("active");
+                                editButtonAttributes.Add("disabled", "disabled");
 
                             <div class="edit-button-container">
-                                <button class="edit-button" @onclick="@EditUserData">
-                                    <MonochromeIcon Name="@MonochromeIconName.Edit" Size="@MonochromeIconSize.SmallMedium" CssClass="@string.Join(" ", editButtonIconCssClasses)" />
+                                <button @attributes="editButtonAttributes" @onclick="@EditUserData">
+                                    <MonochromeIcon Name="@MonochromeIconName.Edit" Size="@MonochromeIconSize.SmallMedium" CssClass="icon" />
                                 </button>
                             </div>
                         }

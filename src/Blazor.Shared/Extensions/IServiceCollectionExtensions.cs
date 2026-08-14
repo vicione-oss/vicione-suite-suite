@@ -26,7 +26,6 @@ using ViciOne.Ui.Blazor.Components.SectionRail.Extensions;
 using ViciOne.Ui.Blazor.Components.Toolbar.Extensions;
 using ViciOne.Ui.Blazor.Components.Tooltip.Extensions;
 using ViciOne.Ui.MonochromeIcons.Assets.Extensions;
-using ViciOne.Ui.Shared.Dx.Components.Scrolling.Extensions;
 using ViciOne.Ui.TreeEditor.Builder;
 
 namespace Blazor.Shared.Extensions;
@@ -77,7 +76,6 @@ public static class IServiceCollectionExtensions
                 .AddTooltip()
                 .AddNotificationArea()
                 .AddScoped<ISuiteControlService, SuiteControlService>()
-                .AddScrolling()
                 .AddToolbar()
                 .AddSingleton<CopyrightYearProvider>();
 

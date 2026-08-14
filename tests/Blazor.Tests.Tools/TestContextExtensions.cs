@@ -6,7 +6,6 @@ using Sdk.Testing.Client;
 using ViciOne.Ui.Blazor.Components.CheckBox.Extensions;
 using ViciOne.Ui.Blazor.Components.SpinEdit.Extensions;
 using ViciOne.Ui.Blazor.Components.Toolbar.Extensions;
-using ViciOne.Ui.Shared.Dx.Components.Resizing;
 
 namespace Blazor.Tests.Tools;
 
@@ -20,7 +19,6 @@ public static class TestContextExtensions
             var env = Substitute.For<IEnvironmentInfo>();
             env.DeviceInfo.Returns(new DeviceInfo(false));
 
-            ctx.Services.AddScoped(s => Substitute.For<IResizeObserver>());
             ctx.Services.AddScoped(s => Substitute.For<IEnvironmentInfoFactory>());
             ctx.Services.AddScoped(s => Substitute.For<ISvgImagesLoader>());
             ctx.Services.AddScoped(s => env);

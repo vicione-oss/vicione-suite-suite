@@ -1,4 +1,5 @@
-﻿@use "../../Styles/design/colors";
+@use "../../Styles/design/colors";
+@use "../../Styles/design/tooltip";
 @use "../../../../shared/styles/colors-staged";
 
 .systeminfo-monitor-diagramm {
@@ -15,18 +16,27 @@
 
     #tooltip {
         position: absolute;
-        background-color: #333333;
-        color: colors.$font-light;
-        font-size: 10px;
-        letter-spacing: 0.06em;
+
+        box-shadow: tooltip.$box-shadow;
+
+        background-color: tooltip.$background-color;
+        color: tooltip.$content-text-color;
+
+        font-size: tooltip.$font-size;
+        font-weight: tooltip.$font-weight;
+        letter-spacing: tooltip.$letter-spacing;
+        line-height: tooltip.$line-height;
+
+        border-radius: tooltip.$border-radius;
+
         padding: 5px;
-        border-radius: 4px;
         display: none;
         z-index: 102;
         box-sizing: border-box;
     }
 
     #tooltip .tooltip-header {
+        color: tooltip.$header-text-color;
         font-weight: bold;
         text-align: center;
         margin-bottom: 4px;
@@ -39,7 +49,7 @@
         height: 0;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
-        border-bottom: 6px solid #333333;
+        border-bottom: 6px solid tooltip.$background-color;
     }
 
     #tooltip .tooltip-table {

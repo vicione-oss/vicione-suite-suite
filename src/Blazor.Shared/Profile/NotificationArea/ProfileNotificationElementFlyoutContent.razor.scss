@@ -1,8 +1,8 @@
+@use "../../Styles/buttons/mixins" as buttons;
 @use "../../Styles/design/colors";
 @use "../../../../shared/styles/colors-staged";
 @use "../../../../shared/styles/overflow";
 @use "../../Styles/mixins";
-@use "../../Styles/design/scrollbar";
 @use "../../Styles/typography/fonts/noto-sans/variables" as noto-sans;
 @use 'sass:color';
 
@@ -87,18 +87,16 @@
                     align-items: center;
 
                     .edit-button {
-                        display: flex;
-                        align-items: center;
+                        @include buttons.lucent-styling();
 
-                        ::deep .icon {
-                            color: color.adjust(colors.$font-light, $alpha: -0.7);
+                        color: color.adjust(colors.$font-light, $alpha: -0.7);
 
-                        }
-                        ::deep .active {
+                        &.active {
                             color: colors-staged.$color-orange;
                         }
-                        &:hover {
-                            ::deep .icon:not(.active) {
+
+                        &:not(.active) {
+                            &:hover, &:focus {
                                 color: colors.$font-light;
                             }
                         }
@@ -117,7 +115,6 @@
     }
 
     .center {
-        @include scrollbar.adjust-styles();
         overflow: auto;
 
         width: 100%;

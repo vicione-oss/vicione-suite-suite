@@ -1,3 +1,4 @@
+@use "../Styles/design/button";
 @use "../Styles/design/colors";
 @use "../../../shared/styles/colors-staged";
 @use "../../../shared/styles/typography";
@@ -5,7 +6,8 @@
 
 .account-button {
     background: #222222;
-    border-radius: 4px;
+    border: none;
+    border-radius: button.$border-radius;
     font-size: 14px;
     color: colors.$font-light;
     letter-spacing: 0.2px;

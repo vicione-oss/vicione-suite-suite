@@ -80,7 +80,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
 
             // Act
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
-            component.Find(".link").Click();
+            component.Find("a").Click();
             component.Find(".arrow-back").Click();
 
             // Assert
@@ -124,7 +124,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
 
             // Act
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
-            component.Find(".link").Click();
+            component.Find("a").Click();
             component.Find(".home").Click();
 
             // Assert
@@ -174,7 +174,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
 
             // Act
             component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.OrdinalIgnoreCase)).Click();
-            component.Find(".link").Click();
+            component.Find("a").Click();
 
             // Assert
             component.Markup.Should().NotContain("Help 1");
