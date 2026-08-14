@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>vicione-oss/tooling/renovate-orchestrator"
+  ],
+  "dependencyDashboard": true,
+  "dependencyDashboardApproval": true,
+  "enabledManagers": [ "nuget", "npm" ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "dependencyDashboardApproval": true
+  },
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "matchManagers": [ "nuget" ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [ "nuget" ],
+      "matchFileNames": [ "Directory.Packages.props" ],
+      "matchJsonata": [ "sharedVariableName = 'DotNetVersion'" ],
+      "enabled": true,
+      "rebaseWhen": "never",
+      "groupName": ".NET",
+      "separateMajorMinor": true,
+      "semanticCommits": "disabled",
+      "commitMessagePrefix": "",
+      "commitMessageAction": "Update to",
+      "commitMessageExtra": "{{newVersion}}",
+      "branchTopic": "update-to-net-{{newMajor}}-{{newMinor}}-{{newPatch}}",
+      "addLabels": [ "Dependencies", "Modernization" ]
+    },
+    {
+      "matchManagers": [ "npm" ],
+      "matchPackageNames": [ "@types/blazor__javascript-interop" ],
+      "groupName": "interop types",
+      "groupSlug": "interop-types"
+    },
+    {
+      "matchManagers": [ "npm" ],
+      "matchPackageNames": [
+        "^eslint($|-)",
+        "/^@typescript-eslint//"
+      ],
+      "groupName": "eslint",
+      "groupSlug": "eslint"
+    },
+    {
+      "matchManagers": [ "npm" ],
+      "matchPackageNames": [ "typescript" ],
+      "groupName": "typescript",
+      "groupSlug": "typescript"
+    },
+    {
+      "matchManagers": [ "npm" ],
+      "matchPackageNames": [ "/^@fontsource/" ],
+      "groupName": "fontsource",
+      "groupSlug": "fontsource"
+    }
+  ]
+}

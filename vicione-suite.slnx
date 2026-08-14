@@ -29,6 +29,7 @@
     <File Path="NuGet.Config" />
     <File Path="package.json" />
     <File Path="README.md" />
+    <File Path="renovate.json" />
     <File Path="tsconfig.json" />
     <File Path="VERSION" />
     <File Path="VERSION_HOSTMANAGEMENT" />
