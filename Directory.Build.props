@@ -68,8 +68,6 @@
         <!-- Use the Microsoft Testing Platform runner (instead of VSTest) to enable the MTP command-line experience -->
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
 
-        <!-- Emit test results per project to match with 'tests/**/TestResults/*.cobertura.xml' expected in CI -->
-        <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --results-directory "$(MSBuildProjectDirectory)/bin/$(Configuration)/$(TargetFramework)/TestResults"</TestingPlatformCommandLineArguments>
         <TestingPlatformConfigurationFilePath>$(MSBuildThisFileDirectory)/tests/testconfig.json</TestingPlatformConfigurationFilePath>
     </PropertyGroup>
 
