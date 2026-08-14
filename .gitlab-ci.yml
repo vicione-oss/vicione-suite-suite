@@ -108,6 +108,11 @@ include:
         - echo "APP_VERSION=$(cat VERSION)" >> version.env
         - echo "APP_TAG=${CI_COMMIT_TAG}" >> version.env
 
+  ### Renovate configuration validation
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/renovate/configuration-validation@v1.0.0
+    inputs:
+      rules: *rules_common
+
   # xUnit test job (both x64 and arm64 via parallel matrix)
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@2.6
     inputs:
@@ -161,13 +166,13 @@ include:
       hours: "4"
       rules:
         - if: '$CI_PIPELINE_SOURCE == "schedule"'
-  
+
   ### Pack
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-pack@2.6
     inputs:
       name: "Pack Core.Artifacts"
       stage: "packaging"
-      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable      
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
       project: "src/Core.Artifacts/Core.Artifacts.csproj"
       rules: *rules_common_manual
       before_script:
@@ -186,7 +191,7 @@ include:
       source: "JFrogViciOne"
       filename_pattern: "./src/Core.Artifacts/*"
       rules: *rules_common_manual
-      before_script: 
+      before_script:
         - *activate_mise
         - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_RW_JFrog -p $NuGet_PW_RW_JFrog --store-password-in-clear-text
 
