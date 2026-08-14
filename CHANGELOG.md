@@ -26,7 +26,7 @@
 - `JFrogArtifactRepository`
     - module archives are now streamed to a temporary file on disk and extracted from there instead of being buffered in memory.
     - artifact source endpoints are required to be secure HTTPs urls
-- `ModuleArtifactRepository` 
+- `ModuleArtifactRepository`
     - bulk module downloads are now capped with a sliding-window throttle
     - modules are now extracted into a staging directory, verified for completeness, and only then atomically promoted to their versioned folder
 - `Passkeys` feature flag is now enabled by default; the flag remains available to disable it via configuration
@@ -64,7 +64,7 @@
 
 - `AspNetCore.SassCompiler` packages, update to version `1.101.0`
 - `MailKit` packages, update to version `4.17.0`
-- `Microsoft` packages, update to version `10.0.10`
+- `Microsoft` packages, update to version `10.0.11`
 - `Microsoft.FeatureManagement` packages, update to version `4.6.0`
 - `MQTTnet` package, update version to `5.2.0.1603`
 - `System.IO.Abstractions` package, update version to `22.2.0`
