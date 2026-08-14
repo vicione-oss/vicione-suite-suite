@@ -1,4 +1,5 @@
 @use "../Styles/design/colors";
+@use "../Styles/design/scrollbar";
 @use "../../../shared/styles/colors-staged";
 @use "../../../shared/styles/typography";
 
@@ -12,7 +13,9 @@
 .jit-chat-messages {
     display: flex;
     flex-direction: column;
+
     overflow-y: scroll;
+    @include scrollbar.adjust-styles();
 }
 
 .jit-chat-timestamp {

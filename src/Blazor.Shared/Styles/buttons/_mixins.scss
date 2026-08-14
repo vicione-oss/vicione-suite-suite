@@ -1,5 +1,5 @@
-﻿@use "../design/colors";
-@use "./../../../../shared/styles/animations/mixins" as animations;
+@use "../design/animations/mixins" as animations;
+@use "../design/colors";
 
 // applies a lucent appearance with a transparent background, no borders and
 // accent coloring on hover / focus for text / icons displayed in the button

@@ -5,9 +5,9 @@
     <HostManagementVersion>1.3.0</HostManagementVersion>
     <OpenTelemetryVersion>1.16.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.10</MassTransitVersion>
-    <ViciOneUiBlazorComponentsVersion>5.19.0</ViciOneUiBlazorComponentsVersion>
+    <ViciOneUiBlazorComponentsVersion>5.20.0</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.15.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>2.2.0</ViciOneSuiteSdkVersion>
+    <ViciOneSuiteSdkVersion>2.3.0-ci2759833681</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
@@ -63,7 +63,7 @@
     <PackageVersion Include="ViciOne.Suite.Sdk.Client" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Deployment" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.SystemMonitoring" Version="1.0.1" />
-    <PackageVersion Include="ViciOne.Ui.Design" Version="2.1.0" />
+    <PackageVersion Include="ViciOne.Ui.Design" Version="2.4.0" />
     <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="$(ViciOneUiBlazorComponentsVersion)" />
     <PackageVersion Include="ViciOne.Ui.Localization" Version="3.5.0" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Assets" Version="$(ViciOneUiMonochromeIconsVersion)" />

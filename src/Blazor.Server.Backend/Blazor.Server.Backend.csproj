@@ -191,8 +191,9 @@
 
   <Target Name="ConfigureDesignTargets" BeforeTargets="BeforeDesignTargets">
     <PropertyGroup>
+      <AnimationsScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/animations</AnimationsScssOutputFolder>
+      <ButtonScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/button</ButtonScssOutputFolder>
       <ColorsScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/colors</ColorsScssOutputFolder>
-      <ScrollbarScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/scrollbar</ScrollbarScssOutputFolder>
     </PropertyGroup>
   </Target>
 
@@ -214,7 +215,7 @@
     <Message Text="Copying '$(_BlazorWebJsSource)' to '$(_BlazorWebJsDest)'" Importance="high" />
    
     <MakeDir Directories="$([System.IO.Path]::GetDirectoryName($(_BlazorWebJsDest)))" />
-    <Copy SourceFiles="$(_BlazorWebJsSource)" DestinationFiles="$(_BlazorWebJsDest)"/>
+    <Copy SourceFiles="$(_BlazorWebJsSource)" DestinationFiles="$(_BlazorWebJsDest)" />
 
     <ItemGroup>
       <!--
@@ -222,7 +223,7 @@
         This results in the build system / targets / tasks not knowing about the file copied.
         We fix this by adding a content item for the file copied.
       -->
-      <Content Include="$(_BlazorWebJsStaticWebAssetFile)" Condition="!@(Content->AnyHaveMetadataValue('Identity', $(_BlazorWebJsStaticWebAssetFile)))" />
+      <Content Include="$(_BlazorWebJsStaticWebAssetFile)" Condition="!@(Content-&gt;AnyHaveMetadataValue('Identity', $(_BlazorWebJsStaticWebAssetFile)))" />
     </ItemGroup>
   </Target>
 

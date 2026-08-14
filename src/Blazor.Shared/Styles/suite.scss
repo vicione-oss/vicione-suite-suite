@@ -1,10 +1,7 @@
-﻿@use 'typography';
+@use 'typography';
 
 /* base styles */
 @use 'base';
-
-/* overrides of devexpress styles */
-@use 'dx';
 
 /* login styles used by server */
 @use 'login';

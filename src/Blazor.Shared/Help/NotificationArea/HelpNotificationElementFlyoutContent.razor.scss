@@ -1,4 +1,5 @@
-﻿@use "../../Styles/design/colors";
+@use "../../Styles/buttons/mixins" as buttons;
+@use "../../Styles/design/colors";
 @use "../../../../shared/styles/typography.scss";
 
 .wrapper {
@@ -14,14 +15,16 @@
         margin-right: 24px;
         padding-bottom: 30px;
 
+        .arrow-back, .home {
+            @include buttons.lucent-styling();
+        }
+
         .arrow-back {
             margin-left: 24px;
             padding: 0px;
         }
 
         .home {
-            display: flex;
-            align-items: center;
             margin-left: 8px;
             margin-right: 12px;
             padding: 0px;

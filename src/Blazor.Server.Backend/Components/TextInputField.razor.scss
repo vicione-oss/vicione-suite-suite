@@ -1,3 +1,4 @@
+@use "../Styles/design/animations/mixins" as animations;
 @use "../Styles/design/colors";
 @use "../../../shared/styles/colors-staged";
 @use "../../../shared/styles/typography";
@@ -5,25 +6,18 @@
 
 .input-field {
     --vo-ui-bc-color-accent: #{colors-staged.$color-ifm-orange};
-    --vo-ui-bc-color-accent-hover: #{color.adjust(colors.$font-light, $alpha: -0.2)};
+    --vo-ui-bc-color-accent-hover: #{colors-staged.$color-ifm-orange};
     --vo-ui-bc-text-box-background-color: #{color.adjust(colors.$font-light, $alpha: -0.95)};
     --vo-ui-bc-text-box-color: #{color.adjust(colors.$font-light, $alpha: -0.2)};
+
     width: 320px;
     height: 32px;
-    border: 1px solid color.adjust(colors.$font-light, $alpha: -0.8);
-    border-radius: 3px;
     position: relative;
-
-    &.outline {
-        --vo-ui-bc-text-box-background-color: #{color.adjust(colors.$theme, $alpha: -0.95)};
-        background: color.adjust(colors.$theme, $alpha: -0.95);
-    }
 
     &:has(input.invalid):not(:focus-within) {
         ::deep input {
             color: colors.$font-light;
-            background: var(--vo-ui-bc-text-box-background-color);
-            outline: 1px solid colors.$error;
+            border-color: colors.$error;
 
             &::placeholder {
                 color: colors.$font-light;
@@ -40,15 +34,12 @@
     }
 
     ::deep input {
-        border: none;
-        border-radius: inherit;
         width: 100%;
         height: 100%;
         font-size: 11px;
         letter-spacing: 0.2px;
         font-weight: typography.$font-weight-light;
         padding: 7px 8px 9px;
-        border-radius: 3px;
 
         &:-webkit-autofill,
         &:-webkit-autofill:focus {
@@ -60,13 +51,12 @@
         }
 
         &:focus {
-            outline: 1px solid var(--vo-ui-bc-color-accent);
+            border-color: var(--vo-ui-bc-color-accent);
             color: colors.$font-light;
         }
 
         &:hover:not(:focus):not([disabled]) {
-            outline: 1px solid;
-            color: var(--vo-ui-bc-color-accent-hover);
+            --vo-ui-bc-color-accent-hover: #{color.adjust(colors.$font-light, $alpha: -0.2)};
         }
 
         &::-ms-reveal {
@@ -82,7 +72,11 @@
         height: 16px;
         padding: 0px;
         display: flex;
-        cursor: pointer;
+
+        background-color: transparent;
+        border: none;
+        color: colors.$font;
+        @include animations.color();
 
         &:hover {
             color: colors-staged.$color-ifm-orange !important;

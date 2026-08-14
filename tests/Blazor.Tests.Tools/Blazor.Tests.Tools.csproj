@@ -7,7 +7,6 @@
   <ItemGroup>
     <PackageReference Include="DevExpress.Blazor" />
     <PackageReference Include="ViciOne.Ui.Blazor.Components" />
-    <PackageReference Include="ViciOne.Ui.Shared.Dx" />
     <PackageReference Include="Bunit" />
     <PackageReference Include="ViciOne.Suite.Sdk.Testing" />
     <PackageReference Include="NSubstitute" />

@@ -1,18 +1,18 @@
 @using Blazor.Shared.Components
-@using Blazor.Shared.Enums
-@using Blazor.Shared.Extensions
 @using Sdk.Client.Components.Cards.Components
 @using ViciOne.Ui.Blazor.Components.SearchBox
 @using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 <div class="wrapper">
     <div class="search-area">
-        <button class="arrow-back" @onclick="async () => await OnArrowBackClick()">
-            <img src="@SvgIcon.ArrowBack.GetPath().OriginalString" />
+        <button class="arrow-back" @onclick="OnArrowBackClick">
+            <MonochromeIcon Name="MonochromeIconName.ArrowNavigationLightLeft" Size="MonochromeIconSize.SmallMedium" />
         </button>
 
-        <button class="home" @onclick="async () => await ShowCardView()">
-            <img src="@SvgIcon.Home.GetPath().OriginalString" />
+        <button class="home" @onclick="ShowCardView">
+            <MonochromeIcon Name="MonochromeIconName.HomeLight" Size="MonochromeIconSize.SmallMedium" />
         </button>
 
         <SearchBox Text="@_filter" TextChanging="@((value) => _filter = value)" Placeholder="@($"{CommonVocabulary.SearchVerb} ...")" />
@@ -24,16 +24,13 @@
             <CardList>
                 @foreach (var help in GetHelpItems())
                 {
-                    <Card CardModel="help"
-                          OnLinkClick="async (h) => await OnHelpClick(h)"
-                          OnCloseClick="async (h) => await OnCloseClick(h)" />
+                    <Card CardModel="help" OnLinkClick="OnHelpClick" OnCloseClick="OnCloseClick" />
                 }
             </CardList>
         }
         else
         {
-            <HelpDetail Help="_help"
-                        OnLinkClick="async (Guid id) => await OnLinkClick(id)"/>
+            <HelpDetail Help="_help" OnLinkClick="OnLinkClick"/>
         }
     </div>
 

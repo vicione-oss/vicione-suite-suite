@@ -24,8 +24,6 @@ public class DevelopmentFileProviderTests
         [InlineData("js/static-restart.js")]
         [InlineData("js/suite.js")]
         [InlineData("svg/table.svg")]
-        [InlineData("_content/ViciOne.Ui.Shared.Dx/scripts/vicione-ui-shared-dx.min.js")]
-        [InlineData("_content/ViciOne.Ui.Shared.Dx/css/bootstrap.min.css")]
         [InlineData("_content/ViciOne.Ui.Shared.Dx/css/dx-bootstrap-custom.css")]
         public void Should_resolve_static_client_asset_requests(string resource)
         {
@@ -65,8 +63,6 @@ public class DevelopmentFileProviderTests
         /// _content/{name}/ is matched directly against the JSON filename.
         /// </summary>
         [Theory]
-        [InlineData("_content/ViciOne.Ui.Shared.Dx/scripts/vicione-ui-shared-dx.min.js")]
-        [InlineData("_content/ViciOne.Ui.Shared.Dx/css/bootstrap.min.css")]
         [InlineData("_content/ViciOne.Ui.Shared.Dx/css/dx-bootstrap-custom.css")]
         public void Should_resolve_content_asset_when_all_jsons_are_loaded(string resource)
         {

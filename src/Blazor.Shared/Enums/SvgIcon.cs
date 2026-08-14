@@ -9,8 +9,6 @@ public enum SvgIcon
     Modules,
     History,
     ClusterOverview,
-    Home,
-    ArrowBack,
     IfmLogo,
     Vicione,
     VicioneLogo,

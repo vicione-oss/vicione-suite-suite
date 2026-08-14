@@ -883,7 +883,10 @@
 
   <Target Name="ConfigureDesignTargets" BeforeTargets="BeforeDesignTargets">
     <PropertyGroup>
+      <AnimationsScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/animations</AnimationsScssOutputFolder>
+      <BaselineScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/baseline</BaselineScssOutputFolder>
       <ColorsScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/colors</ColorsScssOutputFolder>
+      <TooltipScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/tooltip</TooltipScssOutputFolder>
       <TypographyScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/typography</TypographyScssOutputFolder>
       <PopupScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/popup</PopupScssOutputFolder>
       <ScrollbarScssOutputFolder>$(MSBuildProjectDirectory)/Styles/design/scrollbar</ScrollbarScssOutputFolder>

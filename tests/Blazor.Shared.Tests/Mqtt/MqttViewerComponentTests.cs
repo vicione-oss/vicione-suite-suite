@@ -108,7 +108,7 @@ public class MqttViewerComponentTests
 
             var component = ctx.Render<MqttViewerComponent>();
 
-            var input = component.Find(DxSelectors.TextEditCss);
+            var input = component.Find(".text-box");
             input.OuterHtml.Should().Contain("field-text=\"test Connection1\"");
         }
 
@@ -123,7 +123,7 @@ public class MqttViewerComponentTests
             var component = ctx.Render<MqttViewerComponent>();
 
             // Assert
-            component.WaitForElement(".dxbl-modal-content", _extraWaitTime).InnerHtml.Should().Contain("no_connections");
+            component.WaitForElement(".modal-content", _extraWaitTime).InnerHtml.Should().Contain("no_connections");
         }
     }
 
@@ -289,7 +289,7 @@ public class MqttViewerComponentTests
             component.FindAll("td").First(b => b.InnerHtml.Contains("test", StringComparison.InvariantCulture)).Click();
             component.WaitForAssertion(() =>
             {
-                var memoEditors = component.FindAll(DxSelectors.MemoEditor);
+                var memoEditors = component.FindAll(".message-details");
                 memoEditors[memoEditors.Count - 1].OuterHtml.Should().Contain($"field-text=\"Topic: {_message.Topic}");
             });
         }
@@ -332,7 +332,7 @@ public class MqttViewerComponentTests
             // Assert
             component.WaitForAssertion(() =>
             {
-                component.Find(DxSelectors.MemoEditor).OuterHtml.Should().Contain($"field-text=\"Topic: {message.Topic}");
+                component.Find(".message-details").OuterHtml.Should().Contain($"field-text=\"Topic: {message.Topic}");
             });
         }
     }
@@ -354,15 +354,15 @@ public class MqttViewerComponentTests
             var component = ctx.Render<MqttViewerComponent>();
 
             // open combobox
-            component.FindAll(DxSelectors.ComboBox)
+            component.FindAll(".combo-box")
                 .First(e => e.OuterHtml.Contains(MqttViewerComponent.DefaultReloadInterval.ToString(CultureInfo.InvariantCulture), StringComparison.InvariantCulture))
-                .TriggerEvent("ondxbl-dropdownbase.opendropdown", EventArgs.Empty);
+                .TriggerEvent("opendropdown", EventArgs.Empty);
 
             component.WaitForElements("td", _extraWaitTime)
                 .First(b => b.InnerHtml.Contains("test", StringComparison.InvariantCulture)).Click();
 
             // Assert
-            component.WaitForElement(".dxbl-dropdown-body", _extraWaitTime)
+            component.WaitForElement(".dropdown-body", _extraWaitTime)
                 .InnerHtml.Contains(MqttViewerComponent.MinReloadInterval.ToString(CultureInfo.InvariantCulture), StringComparison.InvariantCulture);
         }
     }

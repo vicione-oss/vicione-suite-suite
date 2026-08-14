@@ -29,7 +29,7 @@ public sealed class HelpDetailTests
             });
 
             // Act
-            component.Find(".link").Click();
+            component.Find("a").Click();
 
             // Assert
             invoked.Should().BeTrue();

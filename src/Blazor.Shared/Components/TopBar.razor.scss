@@ -45,12 +45,11 @@
     height: variables.$top-bar-height;
     justify-content: center;
     width: 52px;
-    text-decoration: none;
+    cursor: pointer; // needed because element has no href attribute
 
     &:hover {
         background-color: colors.$background-darker-hover;
         color: colors.$font;
-        text-decoration: none;
     }
 
     & ::deep svg {
@@ -72,12 +71,15 @@
 
     > a {
         color: colors.$font-light;
-        cursor: pointer;
-    }
+        cursor: pointer; // needed because element has no href attribute
 
-    > a:hover {
-        color: colors.$font-light;
-        text-decoration: none;
+        ::deep .text-accent {
+            color: colors.$accent
+        }
+
+        &:hover {
+            color: colors.$font-light;
+        }
     }
 
     > span {
