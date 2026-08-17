@@ -114,7 +114,7 @@ include:
       rules: *rules_common
 
   # xUnit test job (both x64 and arm64 via parallel matrix)
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@v2.6.0
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@v2.6.1
     inputs:
       name: 'xUnit'
       stage: 'test'
@@ -168,7 +168,7 @@ include:
         - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
   ### Pack
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-pack@v2.6.0
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-pack@v2.6.1
     inputs:
       name: "Pack Core.Artifacts"
       stage: "packaging"
@@ -182,7 +182,7 @@ include:
         - dotnet build src/Core.Artifacts/Core.Artifacts.csproj -c Release --no-restore
 
   ### Push
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-nuget-push@v2.6.0
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-nuget-push@v2.6.1
     inputs:
       pack_job_name: "Pack Core.Artifacts"
       name: "Push Core.Artifacts"
