@@ -7,14 +7,13 @@
     <MassTransitVersion>8.5.10</MassTransitVersion>
     <ViciOneUiBlazorComponentsVersion>5.20.0</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.15.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>2.3.0-ci2759833681</ViciOneSuiteSdkVersion>
+    <ViciOneSuiteSdkVersion>3.0.0</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.SassCompiler" Version="1.101.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
-    <PackageVersion Include="DevExpress.Blazor" Version="24.2.12" />
     <PackageVersion Include="Fluid.Core" Version="2.31.0" />
     <PackageVersion Include="HostManagement.Shared" Version="$(HostManagementVersion)" />
     <PackageVersion Include="HostManagement.Shared.Communication" Version="$(HostManagementVersion)" />
@@ -68,8 +67,6 @@
     <PackageVersion Include="ViciOne.Ui.Localization" Version="3.5.0" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Assets" Version="$(ViciOneUiMonochromeIconsVersion)" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Components" Version="$(ViciOneUiMonochromeIconsVersion)" />
-    <PackageVersion Include="ViciOne.Ui.Shared.Dx" Version="0.19.1" />
-    <PackageVersion Include="ViciOne.Ui.Shared.Extreme" Version="0.19.1" />
     <PackageVersion Include="ViciOne.Ui.TreeEditor" Version="2.0.1" />
     <!--Used for tests only:-->
     <PackageVersion Include="AutoFixture" Version="4.18.1" />

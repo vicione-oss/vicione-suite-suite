@@ -18,7 +18,7 @@ public sealed class JournalFollowViewTests
         timeProvider.LocalTimeZone.Returns(TimeZoneInfo.Utc);
 
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupBlazorUiComponents();
         ctx.Services.AddSingleton(Substitute.For<IJournalService>());
         ctx.Services.AddKeyedScoped(Sdk.Constants.ClientTimeProviderServiceKey, (_, __) => timeProvider);
 

@@ -1,4 +1,4 @@
-﻿using System.IO.Abstractions;
+using System.IO.Abstractions;
 using System.Reflection;
 using Core.Module;
 using Core.Module.Extensions;
@@ -32,6 +32,7 @@ internal static class CoreAnalyser
             Console.WriteLine($"lib{library}");
             Console.WriteLine($"lib{library}.so");
             Console.WriteLine($"{library}.so");
+            Console.WriteLine($"{library}.dll");
         }
 
         // asset libraries provided by uihost
@@ -154,7 +155,7 @@ internal static class CoreAnalyser
             .Select(Path.GetFileName)
             .Where(IsFrameworkAssembly);
 
-        bool IsFrameworkAssembly(string? fileName) => !string.IsNullOrWhiteSpace(fileName) &&
+        static bool IsFrameworkAssembly(string? fileName) => !string.IsNullOrWhiteSpace(fileName) &&
                 (fileName.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase)
                 || fileName.StartsWith("System.", StringComparison.OrdinalIgnoreCase)
                 || fileName.StartsWith("netstandard.dll", StringComparison.OrdinalIgnoreCase));
@@ -166,12 +167,8 @@ internal static class CoreAnalyser
     {
         var uiHostAssets = context.UiHost?.RuntimeAssets ?? [];
 
-        // this one gets packed to modules referencing Ui.Shared lib and needs to be removed (>20mb)
-        var manualLibraries = new[] { new AssetLibrary("DevExpress.Blazor.Themes", "") };
-
         return context.Core.RuntimeAssets
             .Union(uiHostAssets)
-            .Union(manualLibraries)
             .DistinctBy(k => k.Name)
             .OrderBy(k => k.Name);
     }

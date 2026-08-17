@@ -12,7 +12,6 @@ using Core.Shared;
 using Core.Shared.Messaging;
 using Core.Shared.UserManagement.Contracts;
 using Core.UiHosting;
-using DevExpress.Blazor;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -85,7 +84,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             sp => new CookieAuthConfigurator(sp.GetRequiredService<ITicketStore>()));
 
         services.AddSingleton<IAppRenderingProvider, ServerRenderingProvider>();
-        services.AddDevExpressBlazor(configure => configure.BootstrapVersion = BootstrapVersion.v5);
         services.AddTransient(typeof(IUiEventPublisher<>), typeof(UiEventPublisher<>));
         services.AddTransient(typeof(IUiEventSubscriptionHolder<>), typeof(UiEventPublisher<>));
         services.AddSingleton(typeof(IUiEventSubscriptionRegistry<>), typeof(UiEventSubscriptionRegistry<>));

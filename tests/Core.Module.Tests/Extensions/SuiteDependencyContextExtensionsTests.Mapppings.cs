@@ -1,6 +1,4 @@
 ﻿using Core.Module.Extensions;
-using AwesomeAssertions;
-using Xunit;
 
 namespace Core.Module.Tests.Extensions;
 

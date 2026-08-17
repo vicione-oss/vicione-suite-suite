@@ -3,10 +3,8 @@ using Burger.Backend.DbContext;
 using Burger.Backend.StateMachines;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Burger.Tests.Backend;
 

@@ -1,6 +1,5 @@
 using Core.OS.E2E.Tests.Infrastructure;
 using Core.Tests.Tools;
-using Xunit;
 using static Microsoft.Playwright.Assertions;
 
 namespace Core.OS.E2E.Tests.Availability;

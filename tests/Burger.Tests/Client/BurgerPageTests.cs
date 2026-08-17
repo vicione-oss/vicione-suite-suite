@@ -4,10 +4,8 @@ using Burger.Client;
 using Burger.Client.Pages;
 using Burger.Client.Services;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.Services;
 using Sdk.Testing.Client;
-using Xunit;
 
 namespace Burger.Tests.Client;
 

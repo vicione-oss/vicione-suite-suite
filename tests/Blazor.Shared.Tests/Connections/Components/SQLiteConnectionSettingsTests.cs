@@ -16,7 +16,7 @@ public class SQLiteConnectionSettingsTests
         // Arrange
         var connection = ConnectionFactory.SQLiteConnection.GetSQLiteConnection();
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupBlazorUiComponents();
 
         // Act
         var component = ctx.Render<SQLiteConnectionSettings>(parameters =>
@@ -35,7 +35,7 @@ public class SQLiteConnectionSettingsTests
         // Arrange
         var connection = ConnectionFactory.SQLiteConnection.GetSQLiteConnection();
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupBlazorUiComponents();
 
         // Act
         var component = ctx.Render<SQLiteConnectionSettings>(parameters =>

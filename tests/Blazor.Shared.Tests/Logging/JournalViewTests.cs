@@ -19,7 +19,7 @@ public sealed class JournalViewTests
         timeProvider.LocalTimeZone.Returns(TimeZoneInfo.Utc);
 
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupBlazorUiComponents();
         ctx.Services.AddToolbar();
         ctx.Services.AddSingleton(Substitute.For<IJournalService>());
         ctx.Services.AddKeyedScoped(Sdk.Constants.ClientTimeProviderServiceKey, (_, __) => timeProvider);

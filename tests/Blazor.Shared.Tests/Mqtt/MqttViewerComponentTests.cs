@@ -52,7 +52,7 @@ public class MqttViewerComponentTests
 
     private static void ConfigureTestServices(BunitContext ctx, List<Connection>? connections = null, List<MessageModel>? messages = null)
     {
-        ctx.SetupSuiteServicesWithBlazorDx(s =>
+        ctx.SetupBlazorUiComponents(s =>
         {
             s.ClientMediator
                 .Request<GetConnections, GetConnectionsResponse>(Arg.Any<GetConnections>(), Arg.Any<CancellationToken>())

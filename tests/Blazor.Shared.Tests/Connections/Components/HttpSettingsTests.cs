@@ -16,7 +16,7 @@ public class HttpSettingsTests
         // Arrange
         var connection = ConnectionFactory.HttpConnection.GetHttpConnection();
         await using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupBlazorUiComponents();
 
         // Act
         var component = ctx.Render<HttpSettings>(parameters =>
@@ -34,7 +34,7 @@ public class HttpSettingsTests
         // Arrange
         var connection = ConnectionFactory.HttpConnection.GetHttpConnection();
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupBlazorUiComponents();
 
         // Act
         var component = ctx.Render<HttpSettings>(parameters =>

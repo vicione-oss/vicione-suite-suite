@@ -19,12 +19,14 @@ public class DevelopmentFileProviderTests
     public sealed class GetFileInfo : DevelopmentFileProviderTests
     {
         [Theory]
-        [InlineData("bootstrap-external.bs5.min.css")]
         [InlineData("js/loadjs.js")]
         [InlineData("js/static-restart.js")]
         [InlineData("js/suite.js")]
         [InlineData("svg/table.svg")]
-        [InlineData("_content/ViciOne.Ui.Shared.Dx/css/dx-bootstrap-custom.css")]
+        [InlineData("_content/ViciOne.Suite.Blazor.Shared/css/suite.css")]
+        [InlineData("_content/ViciOne.Suite.Blazor.Shared/js/reconnect.js")]
+        [InlineData("_content/ViciOne.Suite.Blazor.Shared/js/loadjs.min.js")]
+        [InlineData("_content/ViciOne.Suite.Blazor.Shared/js/suite.js")]
         public void Should_resolve_static_client_asset_requests(string resource)
         {
             // Arrange
@@ -63,7 +65,8 @@ public class DevelopmentFileProviderTests
         /// _content/{name}/ is matched directly against the JSON filename.
         /// </summary>
         [Theory]
-        [InlineData("_content/ViciOne.Ui.Shared.Dx/css/dx-bootstrap-custom.css")]
+        [InlineData("_content/ViciOne.Suite.Blazor.Shared/js/suite.js")]
+        [InlineData("_content/ViciOne.Suite.Blazor.Shared/css/suite.css")]
         public void Should_resolve_content_asset_when_all_jsons_are_loaded(string resource)
         {
             // Arrange — simulate the real dev scenario where every project's JSON is loaded
@@ -87,7 +90,7 @@ public class DevelopmentFileProviderTests
     {
         [Theory]
         [InlineData("/_content/ViciOne.Suite.ClusterManagement.Client/icons/bundle.css", "ViciOne.Suite.ClusterManagement.Client")]
-        [InlineData("/_content/ViciOne.Ui.Shared.Dx/scripts/foo.js",                    "ViciOne.Ui.Shared.Dx")]
+        [InlineData("/_content/ViciOne.Suite.Blazor.Shared/js/suite.js",                 "ViciOne.Suite.Blazor.Shared")]
         [InlineData("_content/Some.Package/dir/file.css",                                "Some.Package")]   // no leading slash
         [InlineData("/_content/Single/file.js",                                          "Single")]         // single-segment name
         [InlineData("/js/suite.js",                                                      null)]             // not a _content/ path

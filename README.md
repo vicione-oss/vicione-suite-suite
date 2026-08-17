@@ -365,6 +365,6 @@ dotnet ef migrations add Application_FooBar -o Migrations\ApplicationDbContext\P
 
 Upon start, the application automatically creates required databases and executes pending migrations.
 
-### Update ViciOne.Ui.Shared.Dx | .NET-Framework
+### Update .NET-Framework
 
-When updating our Blazor-library, check whether the referenced DevExpress.Blazor-Nugets have undergone a Minor-Version update or greater (e.g. 22.1.x to 22.2.x). If so, make sure to update the list of [Suite-Assemblies](./src/Sdk.Deployment/Scripts/suite-libraries.txt) using [Dependency-Tools](./tools/Suite.Deps/README.md).
+When upgrading .NET to a new major version, make sure to update the list of [Suite-Assemblies](./src/Sdk.Deployment/Scripts/suite-libraries.txt) using [Dependency-Tools](./tools/Suite.Deps/README.md).

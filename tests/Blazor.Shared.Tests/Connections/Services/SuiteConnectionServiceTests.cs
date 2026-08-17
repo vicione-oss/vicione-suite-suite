@@ -392,7 +392,7 @@ public class SuiteConnectionServiceTests
         {
             var ctx = new BunitContext();
 
-            ctx.SetupSuiteServicesWithBlazorDx(setup =>
+            ctx.SetupBlazorUiComponents(setup =>
             {
                 setup.ClientMediator.Request<GetConnections, GetConnectionsResponse>(Arg.Any<GetConnections>(), Arg.Any<CancellationToken>())
                     .Returns(new GetConnectionsResponse(connection is not null ? [connection] : []));

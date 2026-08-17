@@ -37,6 +37,7 @@
 - After successfully adding a passkey, the settings navigate back to the passkeys list
 - Removed unused / reuse existing localization resources
 - Use of baseline styles from `ViciOne.Ui.Design`
+- Module CI versions are not considered for automatic update anymore
 
 ### Removed
 
@@ -73,7 +74,7 @@
 - `Microsoft.FeatureManagement` packages, update to version `4.6.0`
 - `MQTTnet` package, update version to `5.2.0.1603`
 - `System.IO.Abstractions` package, update version to `22.2.0`
-- `ViciOne.Suite.Sdk` packages, update to version `2.3.0-ci2759833681`
+- `ViciOne.Suite.Sdk` packages, update to version `3.0.0`
 - `ViciOne.Ui.Blazor.Components` package, update version to `5.20.0`
 - `ViciOne.Ui.Design` package, update version to `2.4.0`
 - `ViciOne.Ui.MonochromeIcons` package, update version to `4.15.0`

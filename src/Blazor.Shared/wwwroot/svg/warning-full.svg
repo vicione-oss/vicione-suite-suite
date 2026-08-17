@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>dark-theme/standard/32x32/warning full</title>
-    <g id="dark-theme/standard/32x32/warning-full" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M16,4 C22.627417,4 28,9.372583 28,16 C28,22.627417 22.627417,28 16,28 C9.372583,28 4,22.627417 4,16 C4,9.372583 9.372583,4 16,4 Z M17.5,14 L14.5,14 L14.5,23 L17.5,23 L17.5,14 Z M17.5,9 L14.5,9 L14.5,12 L17.5,12 L17.5,9 Z" id="Icon" fill="#DEDEDE" transform="translate(16, 16) scale(1, -1) translate(-16, -16)"></path>
-    </g>
-</svg>

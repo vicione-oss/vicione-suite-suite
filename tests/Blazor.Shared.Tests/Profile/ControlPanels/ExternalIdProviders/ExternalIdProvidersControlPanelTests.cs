@@ -179,7 +179,7 @@ public sealed class ExternalIdProvidersControlPanelTests
     {
         var ctx = new BunitContext();
 
-        ctx.SetupSuiteServicesWithBlazorDx()
+        ctx.SetupBlazorUiComponents()
             .AddAuthorization()
             .SetAuthorized(UserName);
 

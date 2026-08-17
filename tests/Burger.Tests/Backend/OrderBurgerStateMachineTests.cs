@@ -9,7 +9,6 @@ using Burger.Public.Events;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Burger.Tests.Backend;
 
