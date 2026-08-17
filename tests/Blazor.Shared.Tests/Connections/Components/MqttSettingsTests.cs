@@ -18,7 +18,6 @@ public class MqttSettingsTests
         // Arrange
         var connection = ConnectionFactory.MqttConnection.GetMqttConnection();
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
         ctx.SetupBlazorUiComponents();
 
         // Act + Assert
@@ -34,7 +33,6 @@ public class MqttSettingsTests
         // Arrange
         var connection = ConnectionFactory.MqttConnection.GetMqttConnection();
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
         ctx.SetupBlazorUiComponents();
 
         // Act
@@ -72,7 +70,7 @@ public class MqttSettingsTests
         connection.ClientCertificateKeyPassword = "ClientCertificateKeyPassword";
 
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupSuiteServices();
         ctx.SetupBlazorUiComponents();
 
         // Act
@@ -100,7 +98,7 @@ public class MqttSettingsTests
         connection.QualityOfService = MqttQualityOfServiceLevel.AtMostOnce;
 
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupSuiteServices();
         ctx.SetupBlazorUiComponents();
 
         // Act

@@ -6,7 +6,6 @@ using JiTChat.Client.Contracts;
 using JiTChat.Client.NotificationArea;
 using JiTChat.Public.Contracts;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Authorization;
 using Sdk.Modules;
 
@@ -21,7 +20,7 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
         var timeProvider = Substitute.For<TimeProvider>();
         timeProvider.LocalTimeZone.Returns(TimeZoneInfo.Utc);
 
-        ctx.SetupSuiteServicesWithBlazorDx(setup =>
+        ctx.SetupBlazorUiComponents(setup =>
             setup.Services.AddKeyedScoped(Sdk.Constants.ClientTimeProviderServiceKey, (_, _) => timeProvider));
 
         if (jitChatService is null)
@@ -70,7 +69,7 @@ public sealed class JiTChatNotificationElementFlyoutContentTests
             .SetClaims(new Claim(ModuleIdResolver.ResolveId<JiTChatClientModule>(), nameof(AccessLevel.Partial)));
 
         const string testMessage = "Hello World!";
-        
+
         // Act
         var cut = ctx.Render<JiTChatNotificationElementFlyoutContent>();
         cut.Instance.MessageText = testMessage;

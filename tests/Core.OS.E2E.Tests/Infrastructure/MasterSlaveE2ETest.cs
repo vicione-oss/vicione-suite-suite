@@ -1,6 +1,5 @@
 using Core.Tests.Tools;
 using Microsoft.Playwright;
-using Xunit;
 
 namespace Core.OS.E2E.Tests.Infrastructure;
 

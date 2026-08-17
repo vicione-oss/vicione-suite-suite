@@ -23,7 +23,7 @@ public class TagsControlPanelPageContentTests
         ctx.Services.AddControlPanelInfrastructure();
         ctx.Services.AddConnectionsControlPanel();
 
-        ctx.SetupSuiteServicesWithBlazorDx(setup =>
+        ctx.SetupBlazorUiComponents(setup =>
         {
             configure?.Invoke(setup);
         });

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>dark-theme/standard/32x32/close circle</title>
-    <g id="dark-theme/standard/32x32/close-circle" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <path d="M16,6 C21.5228474,6 26,10.4771526 26,16 C26,21.5228474 21.5228474,26 16,26 C10.4771526,26 6,21.5228474 6,16 C6,10.4771526 10.4771526,6 16,6 Z M20.4869726,11 L16.0000001,15.057167 L11.5130275,11 L10.1666667,12.5016062 L14.4964785,16.4166667 L10.1666667,20.3317273 L11.5130275,21.8333333 L16.0000001,17.7761664 L20.4869726,21.8333333 L21.8333333,20.3317273 L17.5035217,16.4166667 L21.8333333,12.5016062 L20.4869726,11 Z" id="Icon" fill="#2A2A2A"></path>
-    </g>
-</svg>

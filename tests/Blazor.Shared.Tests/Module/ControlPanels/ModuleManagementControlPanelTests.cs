@@ -19,7 +19,7 @@ public sealed class ModuleManagementControlPanelTests
     {
         var ctx = new BunitContext();
 
-        ctx.SetupSuiteServicesWithBlazorDx(setup =>
+        ctx.SetupBlazorUiComponents(setup =>
         {
             setup.Services.AddScoped(_ => Substitute.For<ISuiteControlService>())
                 .AddScoped(_ => moduleManagementService)

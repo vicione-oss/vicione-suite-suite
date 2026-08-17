@@ -1,4 +1,3 @@
-using System.Reactive.Disposables;
 using System.Security.Principal;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Http;
@@ -51,7 +50,15 @@ public sealed partial class BlazorServerUiMediator(ISuiteMediator suiteMediator,
         catch (ObjectDisposedException)
         {
             // In case the scope has already been disposed, we return a dummy disposable.
-            return Disposable.Empty;
+            return new DummyDisposable();
+        }
+    }
+
+    private class DummyDisposable : IDisposable
+    {
+        public void Dispose()
+        {
+            // No-op
         }
     }
 

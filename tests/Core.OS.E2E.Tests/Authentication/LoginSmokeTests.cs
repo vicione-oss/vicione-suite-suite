@@ -1,7 +1,6 @@
 using Core.OS.E2E.Tests.Infrastructure;
 using Core.OS.E2E.Tests.Pages;
 using Core.Tests.Tools;
-using Xunit;
 
 namespace Core.OS.E2E.Tests.Authentication;
 

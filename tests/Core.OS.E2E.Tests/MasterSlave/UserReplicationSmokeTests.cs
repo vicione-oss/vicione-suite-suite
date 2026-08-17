@@ -2,7 +2,6 @@ using Core.OS.E2E.Tests.Infrastructure;
 using Core.OS.E2E.Tests.Pages;
 using Core.Tests.Tools;
 using Microsoft.Playwright;
-using Xunit;
 
 namespace Core.OS.E2E.Tests.MasterSlave;
 

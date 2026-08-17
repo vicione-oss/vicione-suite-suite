@@ -192,11 +192,16 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
                 continue;
 
             var latest = bundle.AvailableVersions.First();
+            
+            // we only resolve to released versions - 
+            if (!SemVersion.TryParse(latest, out var latestSemVer))
+                continue;
 
             // if new artifact source was added but initial resolve has failed
-            // we want to display that it will be installed after next restart
+            // we want to display that it will be installed after next restart.
+            // ci versions are not considered for automatic update
             var removedError = bundle.Errors.RemoveAll(k => k.ErrorCode == ModuleErrorCodes.FoundNoVersion);
-            if (removedError > 0 && bundle.Metadata.Version == ModuleConstants.UnresolvedVersionMarker)
+            if (removedError > 0 && bundle.Metadata.Version == ModuleConstants.UnresolvedVersionMarker && !latestSemVer.IsPrerelease)
             {
                 var dependency = new ModuleDependencyPackage
                 {
@@ -208,7 +213,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
             }
 
             // if we have a newer version available and the module is not marked as unresolvable, we can update
-            bundle.CanUpdate = bundle.Metadata.Version != ModuleConstants.UnresolvedVersionMarker
+            bundle.CanUpdate = (bundle.Metadata.Version != ModuleConstants.UnresolvedVersionMarker || latestSemVer.IsPrerelease)
                 && bundle.Metadata.Version != latest;
         }
     }

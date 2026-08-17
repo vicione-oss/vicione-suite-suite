@@ -10,7 +10,6 @@ using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
 using Core.UiHosting;
-using DevExpress.Utils;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -680,7 +679,10 @@ public class ModuleHostTests
         // Fake loaded modules
         var bundles = modules.Select(m =>
         {
-            var assembly = m.GetType().GetAssembly();
+            var assembly = Assembly.GetAssembly(m.GetType());
+            if (assembly is null)
+                throw new InvalidOperationException($"Could not find assembly for module {m.GetType().FullName}");
+
             return new ModuleBundle<BackendModule>(m, assembly, assembly.Location);
         });
 

@@ -16,7 +16,7 @@ public class PostgresConnectionSettingsTests
         // Arrange
         var connection = ConnectionFactory.PostgresConnection.GetPostgresConnection();
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupBlazorUiComponents();
 
         // Act
         var component = ctx.Render<PostgresConnectionSettings>(parameters =>
@@ -35,7 +35,7 @@ public class PostgresConnectionSettingsTests
         // Arrange
         var connection = ConnectionFactory.PostgresConnection.GetPostgresConnection();
         using var ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx();
+        ctx.SetupBlazorUiComponents();
 
         // Act
         var component = ctx.Render<PostgresConnectionSettings>(parameters =>

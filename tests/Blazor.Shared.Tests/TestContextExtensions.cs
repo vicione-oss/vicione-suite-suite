@@ -42,7 +42,7 @@ internal static class TestContextExtensions
         {
             ctx.SetupInternal();
 
-            ctx.SetupSuiteServicesWithBlazorDx(setup);
+            ctx.SetupBlazorUiComponents(setup);
 
             ctx.SetupSettingsState(moduleState);
 

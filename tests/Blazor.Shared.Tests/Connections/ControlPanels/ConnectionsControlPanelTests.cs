@@ -23,7 +23,7 @@ public class ConnectionsControlPanelTests
     {
         var ctx = new BunitContext();
         ctx.SetupSuiteServices()
-            .SetupSuiteServicesWithBlazorDx()
+            .SetupBlazorUiComponents()
             .SetupControlPanelServices(setup =>
             {
                 _controlPanelRequest = setup;

@@ -41,8 +41,8 @@ public sealed class ProfileNotificationElementFlyoutContentTests
 
     private BunitContext MockContext()
     {
-        BunitContext ctx = new BunitContext();
-        ctx.SetupSuiteServicesWithBlazorDx()
+        var ctx = new BunitContext();
+        ctx.SetupBlazorUiComponents()
             .AddAuthorization()
             .SetAuthorized("MyDummy");
 

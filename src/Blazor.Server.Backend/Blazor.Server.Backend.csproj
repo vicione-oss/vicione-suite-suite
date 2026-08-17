@@ -167,23 +167,6 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <Target Name="DeleteDevExpressWwwrootContent" AfterTargets="Publish">
-    <ItemGroup>
-      <!-- it's worth removing it to save ~17MB -->
-      <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\devextreme\dx.all.debug.js" />
-      <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\analytics-core\dx-analytics-core.js" />
-      <FilesToDelete Include="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Resources\js\analytics-core\dx-querybuilder.js" />
-    </ItemGroup>
-
-    <RemoveDir Directories="$(PublishDir)\wwwroot\_content\DevExpress.Blazor.Themes" />
-
-    <Delete Files="@(FilesToDelete)">
-      <Output TaskParameter="DeletedFiles" ItemName="DeletedList" />
-    </Delete>
-
-    <Message Text="Deleted DexExpress themes and '@(DeletedList)'" Importance="high" />
-  </Target>
-
   <Target Name="DeleteWwwrootIdentityContent" AfterTargets="Publish">
     <RemoveDir Directories="$(PublishDir)\wwwroot\Identity" />
     <Message Text="Deleted identity web content" Importance="high" />

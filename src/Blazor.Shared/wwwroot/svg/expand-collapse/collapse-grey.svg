@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>Collapse grey - full size </title>
-    <g id="Collapse-grey---full-size-" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect id="area-full" x="0" y="0" width="100" height="100"></rect>
-        <path d="M69.0873666,1.90322581 L78.9032258,11.719085 L40.7187742,49.9032258 L78.9032258,88.0873666 L69.0873666,97.9032258 L21.0967742,49.9126334 L21.1057742,49.9032258 L21.0967742,49.8938182 L69.0873666,1.90322581 Z" id="Expand-big" fill="#D7D7D7" fill-rule="nonzero" transform="translate(50.000000, 49.903226) scale(1, -1) rotate(-90.000000) translate(-50.000000, -49.903226) "></path>
-    </g>
-</svg>

@@ -4,7 +4,6 @@ using JiTChat.Client.Services;
 using JiTChat.Public.Commands;
 using JiTChat.Public.Contracts;
 using JiTChat.Public.Events;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
 using Sdk.Testing.Client;
 

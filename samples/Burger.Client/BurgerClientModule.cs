@@ -9,6 +9,7 @@ using Sdk.Client.Connections;
 using Sdk.Client.Modules;
 using Sdk.Client.Modules.Localization.Extensions;
 using Sdk.Client.NavTiles.Extensions;
+using Sdk.Client.Services;
 
 namespace Burger.Client;
 
@@ -19,6 +20,7 @@ public sealed class BurgerClientModule : ClientModule
     public override Action<IServiceCollection> Configure => (services) =>
     {
         services.AddScoped<OrderBurgerService>();
+        services.AddTransient<IClientModuleResourceProvider, BurgerClientResourceProvider>();
 
         services.AddLocalization<BurgerClientModule, Localizer>();
         services.AddNavTiles<BurgerClientModule>();

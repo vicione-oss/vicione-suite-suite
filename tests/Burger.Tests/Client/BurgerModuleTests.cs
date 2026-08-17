@@ -4,7 +4,6 @@ using Burger.Client.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.NavTiles.Services;
 using Sdk.Testing.Client;
-using Xunit;
 
 namespace Burger.Tests.Client;
 

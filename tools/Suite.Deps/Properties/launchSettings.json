@@ -1,19 +1,19 @@
-﻿{
+{
   "profiles": {
     "Suite.Deps - CoreAssemblies": {
         "commandName": "Project",
         "commandLineArgs": "core -s \"path\\to\\deployed\\suite\"",
-        "workingDirectory": ".\\tools\\Suite.Deps\\bin\\Debug\\net10.0"
+        "workingDirectory": "$(TargetDir)"
     },
     "Suite.Deps - Modules": {
-      "commandName": "Project",
-      "commandLineArgs": "modules -r -s \"path\\to\\deployed\\suite\" -m ClusterManagement Burger JitChat Ping",
-      "workingDirectory": ".\\tools\\Suite.Deps\\bin\\Debug\\net10.0"
+        "commandName": "Project",
+        "commandLineArgs": "modules -r -s \"path\\to\\deployed\\suite\" -m ClusterManagement Burger JitChat Ping",
+        "workingDirectory": "$(TargetDir)"
     },
     "Suite.Deps - Mapping": {
-      "commandName": "Project",
-      "commandLineArgs": "mapping -s \"path\\to\\deployed\\suite\" -m ClusterManagement Burger JitChat Ping ",
-      "workingDirectory": ".\\tools\\Suite.Deps\\bin\\Debug\\net10.0"
+        "commandName": "Project",
+        "commandLineArgs": "mapping -s \"path\\to\\deployed\\suite\" -m ClusterManagement Burger JitChat Ping ",
+        "workingDirectory": "$(TargetDir)"
     }
   }
 }

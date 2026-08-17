@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Blazor.Shared.Profile.ControlPanels;
 using Blazor.Shared.Profile.ControlPanels.Passkeys.Components;
 using Blazor.Shared.Profile.ControlPanels.Passkeys.Services;
@@ -15,7 +16,7 @@ using Microsoft.FeatureManagement;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
-using System.Security.Claims;
+using Sdk.Testing.Client;
 using ViciOne.Ui.Blazor.Components.Grid.Extensions;
 
 namespace Blazor.Shared.Tests.Profile.ControlPanels.Passkeys;
@@ -79,9 +80,11 @@ public sealed class PasskeysControlPanelTests
     {
         var ctx = new BunitContext();
 
-        ctx.SetupSuiteServicesWithBlazorDx()
+        ctx.SetupSuiteServices()
             .AddAuthorization()
             .SetAuthorized(UserName);
+
+        ctx.JSInterop.ConfigureQuickGridJSInterop();
 
         ctx.Services
             .AddControlPanelInfrastructure()

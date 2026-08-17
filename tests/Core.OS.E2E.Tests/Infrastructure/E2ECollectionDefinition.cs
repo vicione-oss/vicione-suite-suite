@@ -1,5 +1,3 @@
-using Xunit;
-
 namespace Core.OS.E2E.Tests.Infrastructure;
 
 /// <summary>
