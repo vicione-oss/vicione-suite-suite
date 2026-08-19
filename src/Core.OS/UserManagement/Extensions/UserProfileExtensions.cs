@@ -1,6 +1,7 @@
 ﻿using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Extensions;
 using Microsoft.AspNetCore.Identity;
+using Sdk.UserManagement.Contracts;
 
 namespace Core.OS.UserManagement.Extensions;
 
@@ -34,6 +35,16 @@ public static class UserProfileExtensions
                 Mobile = user.Mobile,
                 PasswordExpirationDate = user.PasswordExpirationDate
             };
+
+        public UserInformation ToUserInformation()
+        {
+            // UserName and Email will always be filled except during creation,
+            // but the compiler does not know that, so we need to check for null here.
+            ArgumentNullException.ThrowIfNull(user.UserName);
+            ArgumentNullException.ThrowIfNull(user.Email);
+
+            return new(user.UserName, user.Email, user.FirstName, user.LastName);
+        }
 
         public void AssignOptionalData(UserProfile userProfile)
         {

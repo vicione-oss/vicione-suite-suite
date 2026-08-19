@@ -6,6 +6,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Authorization;
+using Sdk.UserManagement.Contracts;
 
 namespace Core.OS.Tests.UserManagement;
 
@@ -13,33 +14,39 @@ internal static class TestExtensions
 {
     public const string TestRoleName = "Tester";
 
-    public static UserProfile ToUserProfile(this SeedingExtensions.SeedUser seedUser, bool setCurrentPassword = false)
+    extension(SeedingExtensions.SeedUser seedUser)
     {
-        var suiteUser = SeedingExtensions.CreateSuiteUserWithDefaults(seedUser);
-        return new UserProfile
+        public UserProfile ToUserProfile(bool setCurrentPassword = false)
         {
-            // required:
-            UserName = suiteUser.UserName is not null ? new UserName(suiteUser.UserName) : UserName.Empty,
-            Email = suiteUser.Email!,
-            Roles = [TestRoleName],
+            var suiteUser = SeedingExtensions.CreateSuiteUserWithDefaults(seedUser);
+            return new UserProfile
+            {
+                // required:
+                UserName = suiteUser.UserName is not null ? new UserName(suiteUser.UserName) : UserName.Empty,
+                Email = suiteUser.Email!,
+                Roles = [TestRoleName],
 
-            // optional:
-            Firstname = suiteUser.FirstName,
-            Lastname = suiteUser.LastName,
-            Title = suiteUser.Title,
-            Occupation = suiteUser.Occupation,
-            Department = suiteUser.Department,
-            Language = suiteUser.Language,
-            TimeZone = suiteUser.TimeZone,
-            Street = suiteUser.Street,
-            StreetNumber = suiteUser.StreetNumber,
-            ZipCode = suiteUser.ZipCode,
-            City = suiteUser.City,
-            Country = suiteUser.Country,
-            PhoneNumber = suiteUser.PhoneNumber,
-            Mobile = suiteUser.Mobile,
-            CurrentPassword = setCurrentPassword ? seedUser.Password : null
-        };
+                // optional:
+                Firstname = suiteUser.FirstName,
+                Lastname = suiteUser.LastName,
+                Title = suiteUser.Title,
+                Occupation = suiteUser.Occupation,
+                Department = suiteUser.Department,
+                Language = suiteUser.Language,
+                TimeZone = suiteUser.TimeZone,
+                Street = suiteUser.Street,
+                StreetNumber = suiteUser.StreetNumber,
+                ZipCode = suiteUser.ZipCode,
+                City = suiteUser.City,
+                Country = suiteUser.Country,
+                PhoneNumber = suiteUser.PhoneNumber,
+                Mobile = suiteUser.Mobile,
+                CurrentPassword = setCurrentPassword ? seedUser.Password : null
+            };
+        }
+
+        public UserInformation ToUserInformation()
+            => new(seedUser.UserName, seedUser.Email, seedUser.FirstName, seedUser.LastName);
     }
 
     public static SqliteConnection CreateSqliteMemoryConnection() => new("Data Source=:memory:");
