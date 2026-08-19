@@ -6,6 +6,11 @@
 
 - Missing release date in `README.md` for version `1.3.0`
 
+### Updated
+
+- `AspNetCore.SassCompiler` packages, update to version `1.102.0`
+- `ViciOne.Suite.Sdk` packages, update to version `3.1.0-ci2772095645`
+
 ## 1.3.0 - 2026-08-17
 
 ### Added

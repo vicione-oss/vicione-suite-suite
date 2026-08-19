@@ -7,12 +7,12 @@
     <MassTransitVersion>8.5.10</MassTransitVersion>
     <ViciOneUiBlazorComponentsVersion>5.20.0</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.15.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>3.0.0</ViciOneSuiteSdkVersion>
+    <ViciOneSuiteSdkVersion>3.1.0-ci2772095645</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-    <PackageVersion Include="AspNetCore.SassCompiler" Version="1.101.0" />
+    <PackageVersion Include="AspNetCore.SassCompiler" Version="1.102.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="Fluid.Core" Version="2.31.0" />
     <PackageVersion Include="HostManagement.Shared" Version="$(HostManagementVersion)" />
