@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using Core.OS.Instance.Extensions;
+using Core.OS.Instance.Mappers;
 using Core.OS.Modules;
 using Core.Shared.Instance.Contracts;
 using Microsoft.Extensions.Options;
@@ -49,20 +50,7 @@ internal sealed class LocalInstanceInformationProvider(IServiceProvider serviceP
                 Id = info.Id
             };
 
-            _info.LastRegistered = info.LastRegistered;
-            _info.FirstTimeRegistered = info.FirstTimeRegistered;
-            _info.Name = info.Name;
-            _info.Description = info.Description;
-            _info.FormattedName = info.FormattedName;
-            _info.SerialNumber = info.SerialNumber;
-            _info.SystemType = info.SystemType;
-            _info.InstalledModules = [.. info.InstalledModules];
-
-            //Changing Types should be avoided, but if we want to prevent a change here it should be in a different place
-            _info.Type = info.Type;
-            _info.Version = info.Version;
-            _info.SdkVersion = info.SdkVersion;
-            _info.BranchName = info.BranchName;
+            info.ApplyTo(_info);
             _info.InRecoveryMode = RunningInRecoveryMode;
         }
     }

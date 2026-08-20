@@ -10,6 +10,7 @@ using Core.OS.Diagnostics;
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Contracts;
+using Core.OS.Instance.Mappers;
 using Core.OS.Instance.Services;
 using Core.OS.Logging;
 using Core.OS.MessageBus.MassTransit;
@@ -336,25 +337,10 @@ internal sealed partial class ApplicationWorker(
         var instanceInfo = dbContext.InstanceInfo.FirstOrDefault(k => k.Id == instanceId);
         if (instanceInfo == null)
         {
-            // initialized once
-            instanceInfo = new InstanceInformation
-            {
-                Id = instanceId,
-                Type = instanceOptions.Type,
-                SerialNumber = instanceOptions.SerialNumber ?? instanceId.ToString("N")
-            };
+            instanceInfo = instanceOptions.ToInstanceInformation(instanceId);
 
-            // optional
-            if (!string.IsNullOrEmpty(instanceOptions.NamePreload))
-                instanceInfo.Name = instanceOptions.NamePreload;
-            else if (string.IsNullOrEmpty(instanceInfo.Name))
+            if (string.IsNullOrEmpty(instanceInfo.Name))
                 instanceInfo.Name = Environment.MachineName;
-
-            if (!string.IsNullOrEmpty(instanceOptions.DescriptionPreload))
-                instanceInfo.Description = instanceOptions.DescriptionPreload;
-
-            if (!string.IsNullOrEmpty(instanceOptions.FormattedName))
-                instanceInfo.FormattedName = instanceOptions.FormattedName;
         }
 
         // update every startup because installed modules and versions might have changed
@@ -402,22 +388,11 @@ internal sealed partial class ApplicationWorker(
         // needs to be sent that way, because the bus is blocked to prevent messages being processed before sync is done
         var endPoint = await bus.GetSendEndpoint(
             MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
-        await endPoint.Send(new RegisterInstance
-        {
-            InstanceId = instanceInfo.Id,
-            InstalledModules = [.. loadedModules],
-            Type = instanceInfo.Type,
-            Name = instanceInfo.Name,
-            Description = instanceInfo.Description,
-            FormattedName = instanceInfo.FormattedName,
-            SerialNumber = instanceInfo.SerialNumber,
-            SystemType = instanceInfo.SystemType,
-            SdkVersion = instanceInfo.SdkVersion,
-            Configuration = config.AsEnumerable().Where(IsAllowed).ToList(),
-            Version = instanceInfo.Version,
-            BranchName = instanceInfo.BranchName,
-            LastAppliedSequences = lastAppliedSequences
-        },
+        await endPoint.Send(
+            instanceInfo.ToRegisterInstanceCommand(
+                loadedModules,
+                config.AsEnumerable().Where(IsAllowed).ToList(),
+                lastAppliedSequences),
             cancellationToken);
 
         logger.LogPublishedRegisterInstance(nameof(Instance.Commands.RegisterInstance), instanceInfo.Type);

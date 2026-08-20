@@ -4,6 +4,7 @@ using Core.OS.Connections.Mqtt;
 using Core.OS.DbContext;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Initialization;
+using Core.OS.Instance.Mappers;
 using Core.OS.Instance.Services;
 using Core.OS.MessageBus.Extensions;
 using Core.OS.Modules;
@@ -101,18 +102,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
 
         if (existing is not null)
         {
-            existing.InstalledModules = command.InstalledModules;
-            existing.Type = command.Type;
-            existing.Name = command.Name;
-            if (command.FormattedName is not null)
-                existing.FormattedName = command.FormattedName;
-            existing.Description = command.Description;
-            existing.SerialNumber = command.SerialNumber;
-            existing.SystemType = command.SystemType;
-            existing.SdkVersion = command.SdkVersion;
-            existing.LastRegistered = registrationTime;
-            existing.Version = command.Version;
-            existing.BranchName = command.BranchName;
+            command.ApplyTo(existing, registrationTime);
 
             LogUpdateExistingInstance(logger, existing.Id, existing.Version, branchInfo);
 
@@ -124,23 +114,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
             return existing;
         }
 
-        var newInfo = new InstanceInformation
-        {
-            Id = command.InstanceId,
-            Type = command.Type,
-            InstalledModules = command.InstalledModules,
-            Name = command.Name,
-            Description = command.Description,
-            SerialNumber = command.SerialNumber,
-            SystemType = command.SystemType,
-            SdkVersion = command.SdkVersion,
-            FirstTimeRegistered = registrationTime,
-            LastRegistered = registrationTime,
-            Version = command.Version,
-            BranchName = command.BranchName
-        };
-        if (command.FormattedName is not null)
-            newInfo.FormattedName = command.FormattedName;
+        var newInfo = command.ToInstanceInformation(registrationTime);
 
         _appDb.InstanceInfo.Add(newInfo);
 

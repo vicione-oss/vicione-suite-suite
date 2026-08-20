@@ -4,6 +4,7 @@ using System.Text.Json;
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Contracts;
+using Core.OS.Instance.Mappers;
 using Core.OS.Instance.Services;
 using MassTransit;
 using MassTransit.Configuration;
@@ -236,22 +237,11 @@ public sealed partial class DbChangeSetConsumer(
 
         var instanceInfo = localInstanceInfo.Local;
         var endPoint = await context.GetSendEndpoint(MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
-        await endPoint.Send(new RegisterInstance
-        {
-            InstanceId = instanceInfo.Id,
-            InstalledModules = [.. localInstanceInfo.LoadedModules],
-            Type = instanceInfo.Type,
-            Name = instanceInfo.Name,
-            Description = instanceInfo.Description,
-            SerialNumber = instanceInfo.SerialNumber,
-            SystemType = instanceInfo.SystemType,
-            SdkVersion = instanceInfo.SdkVersion,
-            Version = instanceInfo.Version,
-            BranchName = instanceInfo.BranchName,
-            ForceSync = true,
-            LastAppliedSequences = sequenceTracker.GetAllLastApplied()
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
-        }, context.CancellationToken);
+        await endPoint.Send(instanceInfo.ToRegisterInstanceCommand(
+            [.. localInstanceInfo.LoadedModules],
+            [],
+            sequenceTracker.GetAllLastApplied()
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)) with { ForceSync = true }, context.CancellationToken);
 
         // Reset tracker so the next message after full-sync completes is accepted
         sequenceTracker.Reset();
