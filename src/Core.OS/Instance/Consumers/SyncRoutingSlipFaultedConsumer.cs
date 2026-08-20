@@ -1,4 +1,5 @@
 using Core.OS.Instance.Commands;
+using Core.OS.Instance.Mappers;
 using Core.OS.Instance.Services;
 using MassTransit;
 using Sdk.Backend.Messaging;
@@ -57,20 +58,10 @@ public sealed partial class SyncRoutingSlipFaultedConsumer(
             var endpoint = await sendEndpointProvider.GetSendEndpoint(
                 MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
 
-            var localInfo = localInstanceInformationProvider.Local;
-            await endpoint.Send(new RegisterInstance
-            {
-                InstanceId = instanceId,
-                InstalledModules = [.. localInstanceInformationProvider.LoadedModules],
-                Type = localInfo.Type,
-                Name = localInfo.Name,
-                Description = localInfo.Description,
-                SerialNumber = localInfo.SerialNumber,
-                SystemType = localInfo.SystemType,
-                SdkVersion = localInfo.SdkVersion,
-                Version = localInfo.Version,
-                ForceSync = true
-            }, stopping);
+            await endpoint.Send(localInstanceInformationProvider.Local.ToRegisterInstanceCommand(
+                [.. localInstanceInformationProvider.LoadedModules],
+                [],
+                []) with { ForceSync = true }, stopping);
 
             LogReregistrationSent(logger, instanceId);
         }

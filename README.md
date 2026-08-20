@@ -365,6 +365,84 @@ dotnet ef migrations add Application_FooBar -o Migrations\ApplicationDbContext\P
 
 Upon start, the application automatically creates required databases and executes pending migrations.
 
+### Adding additional instance information
+
+#### 1. The data flow, at a glance
+
+There are **three distinct places** instance data lives, and **five mapping methods** in
+`InstanceInformationMapper` that move data between them:
+
+| Location | Type | Written by |
+|---|---|---|
+| Startup config | `InstanceOptions` | appsettings / deploy.sh |
+| Wire message | `RegisterInstance` (command) | `ApplicationWorker`, `DbChangeSetConsumer`, `SyncRoutingSlipFaultedConsumer` |
+| DB row (master) | `InstanceInformation` (EF entity) | `RegisterInstanceConsumer` |
+| In-memory local cache | `InstanceInformation` (via `ILocalInstanceInformationProvider`) | `RegisterInstanceConsumer.UpdateInstanceProviders`, `ApplicationWorker.InitializeLocalInstanceInformation` |
+
+#### 2. Checklist for a new field
+
+1. **Add the property to `InstanceInformation`** (`Core.Shared.Instance.Contracts`) and,
+   if other modules need to read it off `ILocalInstanceInformationProvider.Local`, add a
+   matching get-only property to `IInstanceInformation` (`Sdk.Instance`).
+
+2. **Persistence** — Add the EF Core
+   mapping/configuration and a migration.
+
+3. **Add it to the `RegisterInstance` command** (`Core.OS.Instance.Commands`) if the value
+   needs to travel from an instance to the master over the bus.
+
+4. **Update `InstanceInformationMapper`** — there are five methods, and a new field
+   typically needs to be threaded through most of them:
+
+   - **`ToInstanceInformation(this InstanceOptions, Guid)`**
+     Only relevant if the field can be *seeded* from startup config on first boot. Follow
+     the existing conditional pattern (`if (!string.IsNullOrEmpty(...)) info.X = ...`) —
+     don't overwrite a good default with an empty config value unless it is required to change when the config is updated.
+
+   - **`ToRegisterInstanceCommand(this IInstanceInformation, ...)`**
+
+   - **`ToInstanceInformation(this RegisterInstance, DateTimeOffset registrationTime)`**
+     Master-side/Standalone: builds a brand-new DB row for a never-before-seen instance. Map the
+     field from the command.
+
+   - **`ApplyTo(this RegisterInstance, InstanceInformation existing, DateTimeOffset registrationTime)`**
+     Master-side/Standalone: updates an *existing* DB row on every re-registration. Map the field
+     here too — but decide deliberately whether it should be unconditionally overwritten
+     (like `Type`, `Version`, `InstalledModules`) or only overwritten when present (like
+     `FormattedName`, which uses `if (command.FormattedName is not null)`).
+     `FirstTimeRegistered` is intentionally **not** touched here — it must survive
+     across re-registrations. Follow that pattern for any other "set-once" field.
+
+   - **`ApplyTo(this IInstanceInformation source, InstanceInformation target)`**
+     Used by `LocalInstanceInformationProvider.UpdateLocal` to refresh the in-memory
+     cache other modules read from (e.g. on `RegisterInstanceConsumer` completion, or at
+     startup before the first registration completes). Map the field here as well.
+     Note `InRecoveryMode` is deliberately **excluded** from this method and set
+     separately by the caller — if the new field is similarly "local-runtime-only" and
+     must never be clobbered by a value copied from elsewhere, follow that pattern
+     instead of adding it to `ApplyTo`.
+
+5. **Decide the field's overwrite semantics up front** — three existing patterns to
+   choose from:
+   - *Always overwrite* (`Type`, `Version`, `InstalledModules`, `SdkVersion`, ...).
+   - *Overwrite only if the incoming value is present* (`FormattedName`, `NamePreload` →
+     `Name`, `DescriptionPreload` → `Description`) — protects a previously-set value
+     from being blanked out by a message that didn't carry it.
+   - *Set once, never touched by later registrations* (`FirstTimeRegistered`).
+   - *Local-only, set outside the mapper* (`InRecoveryMode`).
+
+6. **If the field affects sync/replication decisions** (the way `LastAppliedSequences`
+   drives `RegisterInstanceConsumer.DetectSequenceMismatch`), also update:
+   - `RegisterInstanceConsumer.HandleSlaveInstanceSynchronization` / `DetectSequenceMismatch`
+   - Any full-sync trigger logic in `DbChangeSetConsumer`
+
+#### 3. Common mistake to avoid
+
+Adding a field to only `InstanceInformation` and `RegisterInstance` but forgetting one of
+the two `ApplyTo` overloads is the most common way a field silently stops updating —
+either the master DB row keeps a stale value on re-registration, or the local in-memory
+cache (`ILocalInstanceInformationProvider.Local`) diverges from what's on the master.
+
 ### Update .NET-Framework
 
 When upgrading .NET to a new major version, make sure to update the list of [Suite-Assemblies](./src/Sdk.Deployment/Scripts/suite-libraries.txt) using [Dependency-Tools](./tools/Suite.Deps/README.md).
