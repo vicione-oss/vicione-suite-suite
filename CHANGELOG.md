@@ -2,6 +2,10 @@
 
 ## 1.3.1 - Unreleased
 
+### Changed
+
+- Overflow effect in profile flyout allows mouse events to pass through to underlying elements
+
 ### Fixed
 
 - Missing release date in `README.md` for version `1.3.0`
@@ -9,7 +13,7 @@
 ### Updated
 
 - `AspNetCore.SassCompiler` packages, update to version `1.102.0`
-- `ViciOne.Suite.Sdk` packages, update to version `3.1.0-ci2796030156`
+- `ViciOne.Suite.Sdk` packages, update to version `3.1.0-ci2796454772`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.17.0`
 
 ## 1.3.0 - 2026-08-17

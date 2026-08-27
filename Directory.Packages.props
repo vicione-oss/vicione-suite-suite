@@ -7,7 +7,7 @@
     <MassTransitVersion>8.5.10</MassTransitVersion>
     <ViciOneUiBlazorComponentsVersion>5.20.0</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.17.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>3.1.0-ci2796030156</ViciOneSuiteSdkVersion>
+    <ViciOneSuiteSdkVersion>3.1.0-ci2796454772</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
