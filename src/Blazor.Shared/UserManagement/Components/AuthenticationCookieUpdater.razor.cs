@@ -24,6 +24,7 @@ public sealed partial class AuthenticationCookieUpdater : ComponentBase, IAsyncD
     [Inject] public required IJsInterop JsInterop { get; set; }
     [Inject] public required INonceStore NonceStore { get; set; }
     [Inject] public required ILogger<AuthenticationCookieUpdater> Logger { get; set; }
+    [Inject] public required NavigationManager NavigationManager { get; set; }
 
     protected override void OnInitialized()
     {
@@ -64,7 +65,9 @@ public sealed partial class AuthenticationCookieUpdater : ComponentBase, IAsyncD
         _jsModuleReference ??= await JsInterop.IncludeModuleScript<SharedClientModule>("authentication-cookie-updater.js", cancellationToken);
         if (_jsModuleReference is not null)
         {
-            _jsObjectReference ??= await _jsModuleReference.InvokeConstructorAsync("AuthenticationCookieUpdater");
+            var baseUri = NavigationManager.BaseUri;
+
+            _jsObjectReference ??= await _jsModuleReference.InvokeConstructorAsync("AuthenticationCookieUpdater", [baseUri]);
             if (_jsObjectReference is not null)
             {
                 var updateResult = await _jsObjectReference.InvokeAsync<bool>("updateAuthenticationCookie", nonce.Value);

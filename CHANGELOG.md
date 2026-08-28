@@ -14,6 +14,7 @@
 ### Fixed
 
 - Missing release date in `README.md` for version `1.3.0`
+- `AuthenticationCookieUpdater`, replaced `document.baseURI` with `NavigationManager.BaseUri` to remove attack vector for server-side request forgery (SSRF)
 
 ### Updated
 
