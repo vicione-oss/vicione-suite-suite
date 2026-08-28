@@ -1,7 +1,8 @@
 export class AuthenticationCookieUpdater {
+    constructor(readonly baseUri: string) {}
 
     public async updateAuthenticationCookie(nonce: string) {
-        const url = new URL('api/UpdateAuthenticationCookie', document.baseURI);
+        const url = new URL('api/UpdateAuthenticationCookie', this.baseUri);
         url.searchParams.append('nonce', nonce);
 
         const response = await fetch(url, {
