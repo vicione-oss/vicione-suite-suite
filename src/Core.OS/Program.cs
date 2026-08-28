@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Core.OS.EnvironmentOverrides;
+using Core.Shared.EnvironmentOverrides;
 using Core.OS.Extensions;
 using Core.OS.Hosting;
 using Core.OS.Hosting.Extensions;
@@ -44,7 +45,7 @@ if (environmentOverridesFailure is not null)
 else if (environmentOverridesPath is null)
     Log.Information(
         "Runtime environment overrides are off - set {Variable} to true to enable them",
-        EnvironmentOverridesFile.EnabledEnvironmentVariable);
+        EnvironmentOverridesSwitch.EnabledEnvironmentVariable);
 
 using var loggerFactory = new SerilogLoggerFactory(logger: null, dispose: false);
 var preparationContext = new SuitePreparationContext(fileSystem, instanceOptions, loggerFactory);

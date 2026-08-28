@@ -1,4 +1,10 @@
-# Testing Mail over SMTP
+# Integration Testing
+
+Tests carrying the trait `Category=Integration` talk to a real external service instead of a stand-in.
+They are excluded from the automatic unit-test run and execute in the manual `Integration tests` job, which
+provides those services as GitLab CI service containers.
+
+## Testing Mail over SMTP
 
 The mail integration tests live in `Core.OS.Tests.Mail.MailingTests` (trait `Category=Integration`)
 and send real mail over SMTP using STARTTLS + authentication against a [mailpit](https://mailpit.axllent.org/)
@@ -27,7 +33,7 @@ STARTTLS uses mailpit's [`sans:` syntax](https://mailpit.axllent.org/docs/config
 which generates a temporary self-signed certificate at startup, so no certificate has to be shipped
 or maintained in the repository (the tests accept any server certificate).
 
-## Running the tests locally
+### Running the mail tests locally
 
 mailpit is managed by [mise](https://mise.jdx.dev/) (see `mise.toml`), so `mise install` provides the
 `mailpit` binary. Start it (run from the repository root):
@@ -49,7 +55,7 @@ dotnet test tests/Core.OS.Tests/Core.OS.Tests.csproj --filter-query "/[Category=
 mailpit also offers a web UI at http://localhost:8025/ to inspect captured mail. Alternatively, run it via
 Docker — see https://mailpit.axllent.org/docs/install/.
 
-## Running in CI
+### Running the mail tests in CI
 
 The `Integration tests` job in `.gitlab-ci.yml` is a **manual** job — it does not run
 automatically alongside the unit tests; trigger it on demand (the play button) on a merge request, the
@@ -63,6 +69,45 @@ start-up scripting in the job. The tests resolve these via the same environment 
 
 > The previous shared instance at `mailpit.infra.ifm-sw.net` has been **decommissioned** — it was only
 > reachable inside the company network and became unavailable after the move to public GitLab.
+
+## Testing the replication Bus Outbox against PostgreSQL
+
+`Core.OS.Tests.Persistence.BusOutboxReplicationPublisherFacts` pins the guarantee ADR-003 Gap 1 asks for: a
+replication change set is delivered if and only if the module save that produced it was committed.
+`BusOutboxReplicationPublisher` achieves that by opening its `OutboxDbContext` on the module's own connection and
+enlisting it in the module's transaction, so a rolled-back save takes the staged outbox row with it.
+
+That shared transaction is the behaviour under test, which is why these are integration tests.
+No in-memory or SQLite provider can stand in for it: the publisher hands the module's live `DbConnection` to
+`UseNpgsql` and shares its `DbTransaction`, so the assertions only mean anything against a real server.
+The DB-free parts of the publisher — a commit or rollback for a save that staged nothing, and skipping a module
+that is not on PostgreSQL — are covered by the unit tests in `BusOutboxReplicationPublisherTests` and run with
+every pipeline.
+
+The connection is resolved from the environment, following the same pattern as the mail tests:
+
+| Variable            | Default     | Meaning         |
+|---------------------|-------------|-----------------|
+| `POSTGRES_HOST`     | `127.0.0.1` | PostgreSQL host |
+| `POSTGRES_PORT`     | `5432`      | PostgreSQL port |
+| `POSTGRES_USER`     | `postgres`  | Login role      |
+| `POSTGRES_PASSWORD` | `postgres`  | Login password  |
+
+`Core.OS.Tests.PostgresTestConnection` is the single place these defaults live, so a further PostgreSQL-backed test
+resolves its connection through it instead of hard-coding one.
+The defaults are the same credentials the rest of the repository uses for PostgreSQL — the `Master` launch profile,
+`tests/compose.master-slave.yaml`, and the CI jobs — so a developer running a stock local server needs no
+environment setup.
+
+The database name is chosen per test and is not configurable.
+The outbox facts use `replicationoutbox` and each drops and recreates it, so the role needs permission to create
+databases and the facts never touch a database anyone else is using.
+
+In CI, `postgres:17-alpine` runs as a service container.
+GitLab passes job variables into service containers, so the same `POSTGRES_USER`/`POSTGRES_PASSWORD` pair both
+configures the server and is what the facts log in with, and `POSTGRES_HOST` points them at the service alias.
+No `POSTGRES_DB` is set — the facts create their own database, and the image's default `postgres` database is what
+EF Core connects to in order to create and drop it.
 
 ## Pattern for other external-service integration tests
 

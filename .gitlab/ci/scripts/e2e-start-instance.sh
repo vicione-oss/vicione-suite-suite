@@ -23,4 +23,8 @@ export Kestrel__Endpoints__Https__Url="https://localhost:${https_port}"
 export Instance__HomeDirectory="AppData_${name}"
 export Instance__CacheDirectory="Cache_${name}"
 export Instance__BackupDirectory="Backup_${name}"
+# Runtime environment-variable overrides are off unless switched on, and the EnvironmentOverrides
+# tests need them on. Each instance keeps its own file without further setup: the location follows
+# Instance__HomeDirectory, which is per-instance above.
+export VICIONE_SUITE_ENV_OVERRIDES=true
 exec ./ViciOne.Suite.Core.OS > "${caller_dir}/${log}" 2>&1

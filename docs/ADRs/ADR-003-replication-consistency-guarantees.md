@@ -320,26 +320,31 @@ EF Core SaveChangesAsync
 | File | Change |
 |------|--------|
 | `Core.OS/DbContext/OutboxDbContext.cs` | New DbContext for outbox tables (schema: `outbox`) |
-| `Core.OS/Migrations/Outbox/Postgres/20260608132737_InitialOutbox.cs` | Migration creating `InboxState`, `OutboxMessage`, `OutboxState` tables |
+| `Core.OS/Migrations/OutboxDbContext/Postgres/20260608132737_InitialOutbox.cs` | Migration creating `InboxState`, `OutboxMessage`, `OutboxState` tables |
 | `Core.OS/Persistence/ChangeTrackingInterceptor.cs` | Moved publish from `SavedChangesAsync` to `SavingChangesAsync` |
-| `Core.OS/MessageBus/MassTransit/Configuration/MassTransitConfiguration.cs` | Registered `AddEntityFrameworkOutbox<OutboxDbContext>` + `UseBusOutbox()` |
+| `Core.OS/Persistence/BusOutboxReplicationPublisher.cs` | Stages the change set in the outbox on the module's own connection and transaction |
+| `Core.OS/MessageBus/MassTransit/Configuration/MassTransitConfiguration.cs` | Registered `AddEntityFrameworkOutbox<OutboxDbContext>` plus the delivery half of the Bus Outbox |
 
 **Configuration (master + RabbitMQ only):**
 
 ```csharp
 // MassTransitConfiguration.cs — inside UsingRabbitMq block
-if (instanceOptions.Type == InstanceType.Master)
+if (useBusOutbox) // master and not the in-memory bus
 {
     services.AddDbContext<OutboxDbContext>((sp, o) =>
         o.UseNpgsql(sp.GetRequiredService<IMasterDbConnectionStringProvider>().ConnectionString));
 
-    busConfig.AddEntityFrameworkOutbox<OutboxDbContext>(o =>
-    {
-        o.UsePostgres();
-        o.UseBusOutbox();
-    });
+    busConfig.AddEntityFrameworkOutbox<OutboxDbContext>(o => o.UsePostgres());
+    busConfig.AddBusOutboxDelivery();
 }
 ```
+
+`UseBusOutbox()` is deliberately not called.
+It registers the notification and the delivery service, but also replaces the scoped bus context with one that
+diverts every send and publish into the outbox change tracker whenever the scope carries no `ConsumeContext`.
+Replication is the only thing that stages into the outbox, and `BusOutboxReplicationPublisher` does so explicitly,
+so `AddBusOutboxDelivery()` takes just the delivery half and everything else keeps reaching the transport directly.
+`MasterBusOutboxTests` pins that split, including the delivery options `UseBusOutbox()` would have configured.
 
 **Outbox table schema (PostgreSQL, schema `outbox`):**
 
@@ -349,7 +354,12 @@ if (instanceOptions.Type == InstanceType.Master)
 | `OutboxState` | `OutboxId` (PK), `Created`, `Delivered`, `LastSequenceNumber` | Tracks per-scope delivery state |
 | `InboxState` | `Id` (PK), `MessageId`+`ConsumerId` (unique), `Received`, `Consumed` | Consumer-side deduplication |
 
-**Behavioral change:** `ChangeTrackingInterceptor` now publishes during `SavingChangesAsync` (transaction open). The Bus Outbox writes the message to `OutboxMessage` within the same DB transaction as the business data. MassTransit's background delivery service relays to RabbitMQ asynchronously. On standalone (in-memory bus), publish goes directly without outbox.
+**Behavioral change:** `ChangeTrackingInterceptor` now stages during `SavingChangesAsync` (transaction open).
+`BusOutboxReplicationPublisher` opens its `OutboxDbContext` on the module's own connection and enlists it in the
+module's transaction, so the `OutboxMessage` row is written within the same DB transaction as the business data and
+a rolled-back save takes the staged row with it.
+MassTransit's background delivery service relays to RabbitMQ asynchronously.
+On standalone (in-memory bus), publish goes directly without outbox.
 
 ---
 
@@ -541,7 +551,7 @@ InstanceSynchronizationFailed received
 | `Core.OS/Modules/Services/ApplicationWorker.cs` | Populates `LastAppliedSequences` from tracker; seeds counter on startup |
 | `Core.OS/Instance/Consumers/RegisterInstanceConsumer.cs` | Compares slave sequences against master counter; fixed `<` → `<=` boundary |
 | `Core.OS/Persistence/Consumers/DbChangeSetConsumer.cs` | `TriggerFullSync` includes `LastAppliedSequences` |
-| `Core.OS/Migrations/Outbox/Postgres/20260609120000_AddReplicationSequenceState.cs` | Migration for new table |
+| `Core.OS/Migrations/OutboxDbContext/Postgres/20260609120000_AddReplicationSequenceState.cs` | Migration for new table |
 
 **Counter persistence mechanism:**
 
@@ -612,7 +622,7 @@ ON CONFLICT ("ContextType") DO UPDATE SET "LastSequenceNumber" = @sequenceNumber
 - `Core.OS/Instance/Services/SyncRetryState.cs` — retry state tracking
 - `Core.OS/Instance/HealthCheck/ReplicationLagHealthCheck.cs` — lag health check
 - `Core.OS/Instance/HealthCheck/SyncRetryHealthCheck.cs` — sync retry health check
-- `Core.OS/Instance/Contracts/SynchronizationState.cs` — startup gate
+- `Core.OS/Instance/Services/SynchronizationState.cs` — startup gate
 - `Core.OS/Modules/Services/ApplicationWorker.cs` — startup seeding + sequence population
 - `Core.OS/MessageBus/MassTransit/Configuration/MassTransitConfiguration.cs` — transport config
 - `Core.OS/MessageBus/BackEndMediator.cs` — publish path

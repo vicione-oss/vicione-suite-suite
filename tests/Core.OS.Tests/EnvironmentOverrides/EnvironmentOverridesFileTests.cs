@@ -1,5 +1,6 @@
 using System.IO.Abstractions.TestingHelpers;
 using Core.OS.EnvironmentOverrides;
+using Core.Shared.EnvironmentOverrides;
 
 namespace Core.OS.Tests.EnvironmentOverrides;
 
@@ -12,12 +13,12 @@ public sealed class EnvironmentOverridesFileTests : IDisposable
         OperatingSystem.IsWindows() ? @"C:\var\lib\vicione-suite\AppData" : "/var/lib/vicione-suite/AppData";
 
     private readonly string? _previousEnv =
-        Environment.GetEnvironmentVariable(EnvironmentOverridesFile.EnabledEnvironmentVariable);
+        Environment.GetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable);
 
     private readonly MockFileSystem _fileSystem = new();
 
     public void Dispose()
-        => Environment.SetEnvironmentVariable(EnvironmentOverridesFile.EnabledEnvironmentVariable, _previousEnv);
+        => Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, _previousEnv);
 
     [Theory]
     [InlineData("true")]
@@ -117,5 +118,5 @@ public sealed class EnvironmentOverridesFileTests : IDisposable
     }
 
     private static void Enable(string? configured = "true")
-        => Environment.SetEnvironmentVariable(EnvironmentOverridesFile.EnabledEnvironmentVariable, configured);
+        => Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, configured);
 }

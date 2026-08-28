@@ -4,6 +4,7 @@
         "Components",
         "Connections",
         "Dialogs",
+        "EnvironmentOverrides",
         "Help",
         "Instance",
         "Logging",

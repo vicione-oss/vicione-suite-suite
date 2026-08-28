@@ -1,8 +1,8 @@
 namespace Core.OS.EnvironmentOverrides;
 
-internal interface IEnvironmentOverridesRepository
+public interface IEnvironmentOverridesRepository
 {
-    Task<IReadOnlyList<KeyValuePair<string, string>>> Get(CancellationToken cancellationToken = default);
+    Task<IReadOnlyDictionary<string, string>> Get(CancellationToken cancellationToken = default);
 
-    Task Store(IReadOnlyList<KeyValuePair<string, string>> overrides, CancellationToken cancellationToken = default);
+    Task Store(IReadOnlyDictionary<string, string> overrides, CancellationToken cancellationToken = default);
 }

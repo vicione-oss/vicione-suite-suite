@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.IO.Abstractions;
 using System.Text;
 using Core.OS.Instance;
@@ -13,17 +14,17 @@ internal sealed partial class EnvironmentOverridesRepository(
     ILogger<EnvironmentOverridesRepository> logger)
     : IEnvironmentOverridesRepository
 {
-    public async Task<IReadOnlyList<KeyValuePair<string, string>>> Get(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyDictionary<string, string>> Get(CancellationToken cancellationToken = default)
     {
         var path = RequirePath();
         if (!fileSystem.File.Exists(path))
-            return [];
+            return ReadOnlyDictionary<string, string>.Empty;
 
         var contents = await fileSystem.File.ReadAllTextAsync(path, cancellationToken);
         return EnvironmentOverridesFormat.Parse(contents);
     }
 
-    public async Task Store(IReadOnlyList<KeyValuePair<string, string>> overrides,
+    public async Task Store(IReadOnlyDictionary<string, string> overrides,
         CancellationToken cancellationToken = default)
     {
         AssertOnlyValidKeys(overrides);
@@ -36,7 +37,7 @@ internal sealed partial class EnvironmentOverridesRepository(
             stream => stream.WriteAsync(Encoding.UTF8.GetBytes(contents), cancellationToken).AsTask(),
             cancellationToken);
 
-        LogStoredCountEnvironmentOverridesKeys(overrides.Count, overrides.Select(o => o.Key));
+        LogStoredOverrides(logger, overrides.Count, overrides.Keys.Order(StringComparer.Ordinal));
     }
 
     private string RequirePath()
@@ -44,10 +45,9 @@ internal sealed partial class EnvironmentOverridesRepository(
 
     // The whole batch is refused rather than the offending entry dropped: the caller submits a
     // complete desired state, so a partial write would persist something nobody asked for.
-    private static void AssertOnlyValidKeys(IReadOnlyList<KeyValuePair<string, string>> overrides)
+    private static void AssertOnlyValidKeys(IReadOnlyDictionary<string, string> overrides)
     {
-        var invalidKey = overrides
-            .Select(o => o.Key)
+        var invalidKey = overrides.Keys
             .FirstOrDefault(key => !EnvironmentOverridesFile.IsValidKey(key));
 
         if (invalidKey is not null)
@@ -57,7 +57,7 @@ internal sealed partial class EnvironmentOverridesRepository(
 
     // Names the offending key but never its value: values are where secrets land, which is also
     // why the stored-overrides log line records keys only.
-    private static void EnsureValidValues(IReadOnlyList<KeyValuePair<string, string>> overrides)
+    private static void EnsureValidValues(IReadOnlyDictionary<string, string> overrides)
     {
         var keyWithInvalidValue = overrides
             .Where(o => !EnvironmentOverridesFile.IsValidValue(o.Value))
@@ -71,5 +71,6 @@ internal sealed partial class EnvironmentOverridesRepository(
     }
 
     [LoggerMessage(LogLevel.Information, "Stored {Count} environment overrides: {Keys}")]
-    partial void LogStoredCountEnvironmentOverridesKeys(int count, IEnumerable<string> keys);
+    private static partial void LogStoredOverrides(ILogger<EnvironmentOverridesRepository> logger, int count,
+        IEnumerable<string> keys);
 }

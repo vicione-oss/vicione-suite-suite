@@ -79,6 +79,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="EnvironmentOverrides\ControlPanels\Localization\EnvironmentOverridesControlPanel.Designer.cs">
+      <DependentUpon>EnvironmentOverridesControlPanel.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Instance\Localization\Common.Designer.cs">
       <DependentUpon>Common.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -521,6 +526,10 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Connections\Services\Localization\SuiteConnectionService.resx">
       <LastGenOutput>SuiteConnectionService.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="EnvironmentOverrides\ControlPanels\Localization\EnvironmentOverridesControlPanel.resx">
+      <LastGenOutput>EnvironmentOverridesControlPanel.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Instance\Localization\Common.resx">

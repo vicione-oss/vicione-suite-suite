@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using System.Reflection;
+using Core.Artifacts;
 using Core.Module.Options;
 using Core.OS.Connections.Extensions;
 using Core.OS.DataProtection.Extensions;
@@ -24,20 +25,19 @@ using Core.Shared.HostManagement;
 using Core.Shared.Logging;
 using Core.Shared.UserManagement.Configuration;
 using MassTransit.Logging;
-using Sdk.Backend.Persistence;
 using MassTransit.Monitoring;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
+using Microsoft.FeatureManagement;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Core.Artifacts;
-using Microsoft.FeatureManagement;
-using Constants = Core.Shared.Constants;
 using Sdk.Backend.IO;
 using Core.OS.Modules.Extensions;
 using Core.OS.Hosting;
+using Sdk.Backend.Persistence;
+using Constants = Core.Shared.Constants;
 
 namespace Core.OS.Extensions;
 

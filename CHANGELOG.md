@@ -6,6 +6,11 @@
 
 - Overflow effect in profile flyout allows mouse events to pass through to underlying elements
 
+### Added
+
+- Admin-only "Environment variables" settings panel (Settings → System) for editing the runtime overrides, offered where `VICIONE_SUITE_ENV_OVERRIDES` is on; entries are validated on save and take effect after a restart (see `docs/suite-startup.md`)
+- `FirstRunWizard` feature flag, enabled by default, gating the redirect to the first-run wizard
+
 ### Fixed
 
 - Missing release date in `README.md` for version `1.3.0`

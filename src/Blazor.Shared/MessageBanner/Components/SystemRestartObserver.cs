@@ -44,6 +44,7 @@ public sealed class SystemRestartObserver : ComponentBase, IDisposable,
                 break;
 
             case RestartReason.ModuleConfiguration:
+            case RestartReason.EnvironmentConfiguration:
                 message.Title = Localization.MessageBanner.SuiteRestartRequiredHeader;
                 message.Description = Localization.MessageBanner.SuiteRestartRequired;
                 break;
