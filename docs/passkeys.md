@@ -32,7 +32,7 @@ The check lives in `Core.Shared.Passkeys.IPasskeyHostSupport` (`IsPasskeyCapable
 > **Reverse-proxy caveat (edge S / nginx).** The login-side check is only correct if `Request.Host` reflects the *client's* host, not an upstream one. There are two ways a proxy can convey the client host, and the app must end up with one of them:
 >
 > - **Preserve the `Host` header** — the deployed nginx sets `proxy_set_header Host $host;`, so `Request.Host` is already the client host. This is what the edge S setup relies on, and it works regardless of forwarded-headers handling.
-> - **Forward it in `X-Forwarded-Host`** — if a proxy instead overwrites `Host` with the upstream and puts the original host in `X-Forwarded-Host`, the app only picks it up when forwarded-headers handling is enabled: `BlazorServerBackendModule.UseSecurity(app, useHeaderForwarding)` calls `UseForwardedHeaders` with `ForwardedHeaders.XForwardedHost`, gated on `InstanceOptions.UseHeaderForwarding`.
+> - **Forward it in `X-Forwarded-Host`** — if a proxy instead overwrites `Host` with the upstream and puts the original host in `X-Forwarded-Host`, the app picks it up through the forwarded-headers middleware (first in the pipeline, `ForwardedHeaders.XForwardedHost` included). By default the header is only honoured from loopback proxies; for a proxy on another host add it to the safelist with `Instance__TrustedProxies__0=<proxy-ip-or-cidr>` (see [oidc.md](oidc.md)).
 >
 > If neither holds — `Host` rewritten to the upstream **and** `X-Forwarded-Host` not honoured — `Request.Host` is the upstream host and login-side detection is wrong. The settings surface reads the browser origin and is unaffected.
 

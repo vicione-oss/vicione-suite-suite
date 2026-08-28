@@ -26,6 +26,11 @@ internal static class WebApplicationExtensions
     {
         try
         {
+            // Must run before anything that inspects scheme, host or client address
+            // (HSTS, https redirection, request logging, auth, antiforgery).
+            host.UseForwardedHeaders();
+            host.UseCookiePolicy();
+
             if (host.Environment.IsDevelopment())
             {
                 host.UseDeveloperExceptionPage();

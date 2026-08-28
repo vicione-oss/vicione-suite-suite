@@ -19,7 +19,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Routing;
@@ -164,22 +163,8 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
     public void ConfigureIdentity(IdentityBuilder builder) { }
 
     /// <inheritdoc/>
-    public void UseSecurity(IApplicationBuilder app, bool useHeaderForwarding)
+    public void UseSecurity(IApplicationBuilder app)
     {
-        if (useHeaderForwarding)
-        {
-            var forwardedHeaderOptions = new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor
-                                   | ForwardedHeaders.XForwardedProto
-                                   | ForwardedHeaders.XForwardedHost
-            };
-            forwardedHeaderOptions.KnownIPNetworks.Clear();
-            forwardedHeaderOptions.KnownProxies.Clear();
-
-            app.UseForwardedHeaders(forwardedHeaderOptions);
-        }
-
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseAntiforgery();

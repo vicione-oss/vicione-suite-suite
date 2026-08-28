@@ -36,10 +36,10 @@ public interface IUiHostModule
     void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccurred = null);
 
     /// <summary>
-    /// Configures the security middleware pipeline including header forwarding, authentication,
+    /// Configures the security middleware pipeline including authentication,
     /// authorization, antiforgery, and request localization.
     /// </summary>
-    void UseSecurity(IApplicationBuilder app, bool useHeaderForwarding);
+    void UseSecurity(IApplicationBuilder app);
 
     /// <summary>
     /// Configures the middleware pipeline for serving static web assets.
