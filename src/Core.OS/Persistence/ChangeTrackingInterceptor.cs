@@ -4,16 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Sdk.Backend.Messaging;
 using Sdk.Backend.Persistence;
 using Sdk.Messaging;
 
 namespace Core.OS.Persistence;
 
-public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator, ReplicationSequenceCounter sequenceCounter, TimeProvider timeProvider) : ISaveChangesInterceptor
+public sealed class ChangeTrackingInterceptor(IReplicationPublisher publisher, ReplicationSequenceCounter sequenceCounter, TimeProvider timeProvider)
+    : ISaveChangesInterceptor
 {
-    public ChangeTrackingInterceptor(ISuiteMediator mediator, ReplicationSequenceCounter sequenceCounter)
-        : this(mediator, sequenceCounter, TimeProvider.System) { }
+    public ChangeTrackingInterceptor(IReplicationPublisher publisher, ReplicationSequenceCounter sequenceCounter)
+        : this(publisher, sequenceCounter, TimeProvider.System) { }
 
     public async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
@@ -57,56 +57,39 @@ public sealed class ChangeTrackingInterceptor(ISuiteMediator mediator, Replicati
         if (contextType is null)
             return result;
 
-        // Publish within SavingChangesAsync so the Bus Outbox captures the message
-        // atomically. When the Bus Outbox is active (master + RabbitMQ), the message
-        // is written to the outbox table and delivered asynchronously by the delivery
-        // service. When using in-memory bus (standalone), the publish goes directly.
         var contextTypeName = contextType.FullName ?? contextType.Name;
-        var sequenceNumber = sequenceCounter.Next(contextTypeName);
+        var changeSet = new DbChangeSet(publishableChanges,
+            contextTypeName,
+            sequenceCounter.Next(contextTypeName),
+            timeProvider.GetUtcNow());
 
-        // Persist counter to outbox schema BEFORE publishing. This ensures the counter
-        // is always >= any delivered sequence number, even after master crash (ADR-003 Gap 4).
-        // If the subsequent business transaction fails, the counter is ahead by 1 (harmless —
-        // slaves handle gaps via the reorder buffer and timeout-triggered resync).
-        await PersistSequenceNumber(eventData.Context, contextTypeName, sequenceNumber, cancellationToken);
-
-        var message = new DbChangeSet(publishableChanges, contextTypeName, sequenceNumber, timeProvider.GetUtcNow());
-        await mediator.Publish(message, cancellationToken);
+        await publisher.Stage(changeSet, eventData.Context, cancellationToken);
 
         return result;
     }
 
-    private static async Task PersistSequenceNumber(
-        Microsoft.EntityFrameworkCore.DbContext dbContext,
-        string contextType,
-        long sequenceNumber,
-        CancellationToken cancellationToken)
-    {
-        // Only persist on PostgreSQL (master). Only module DbContexts implementing IPostgresDbContext
-        // are synchronized, and those run on PostgreSQL on the master.
-        if (dbContext is not IPostgresDbContext)
-            return;
-
-        // Uses the same database connection as the module's DbContext. Executes in auto-commit
-        // mode (outside the business transaction). On PostgreSQL, this is an atomic upsert.
-        await dbContext.Database.ExecuteSqlRawAsync("""
-            INSERT INTO outbox."ReplicationSequenceState" ("ContextType", "LastSequenceNumber")
-            VALUES ({0}, {1})
-            ON CONFLICT ("ContextType") DO UPDATE SET "LastSequenceNumber" = {1}
-            """, [contextType, sequenceNumber], cancellationToken);
-    }
-
-    public ValueTask<int> SavedChangesAsync(
+    public async ValueTask<int> SavedChangesAsync(
         SaveChangesCompletedEventData eventData,
         int result,
         CancellationToken cancellationToken = default)
-        => new(result);
+    {
+        if (eventData.Context is not null)
+            await publisher.Commit(eventData.Context, cancellationToken);
 
-    public Task SaveChangesFailedAsync(DbContextErrorEventData eventData, CancellationToken cancellationToken = default)
-        => Task.CompletedTask;
+        return result;
+    }
 
-    public Task SaveChangesCanceledAsync(DbContextEventData eventData, CancellationToken cancellationToken = default)
-        => Task.CompletedTask;
+    public async Task SaveChangesFailedAsync(DbContextErrorEventData eventData, CancellationToken cancellationToken = default)
+    {
+        if (eventData.Context is not null)
+            await publisher.Rollback(eventData.Context, cancellationToken);
+    }
+
+    public async Task SaveChangesCanceledAsync(DbContextEventData eventData, CancellationToken cancellationToken = default)
+    {
+        if (eventData.Context is not null)
+            await publisher.Rollback(eventData.Context, cancellationToken);
+    }
 
     public InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
         => throw new InvalidOperationException("Do not save changes synchronously. Use 'SaveChangesAsync' instead!");

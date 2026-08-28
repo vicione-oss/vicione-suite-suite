@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PanelTitle" xml:space="preserve">
+    <value>Umgebungsvariablen</value>
+  </data>
+  <data name="RiskBannerContent" xml:space="preserve">
+    <value>Umgebungsvariablen-Überschreibungen werden beim Start der Suite angewendet und haben Vorrang vor den vom Host bereitgestellten Werten; Änderungen werden erst nach einem Neustart wirksam. Ein Wert, mit dem die Suite nicht mehr startet, kann hier nicht mehr korrigiert werden: Die Überschreibungsdatei überdauert jeden Neustart, jedes Zurücksetzen und jede Wiederherstellung — es hilft dann nur noch, sie über einen Shell-Zugriff zu löschen.</value>
+  </data>
+  <data name="DuplicateKeyError" xml:space="preserve">
+    <value>Doppelte Variablennamen: {0}</value>
+  </data>
+  <data name="InvalidKeyError" xml:space="preserve">
+    <value>Ungültiger Variablenname „{0}“. Verwenden Sie ASCII-Buchstaben, Ziffern und Unterstriche und beginnen Sie nicht mit einer Ziffer.</value>
+  </data>
+  <data name="InvalidValueError" xml:space="preserve">
+    <value>Der Wert von „{0}“ kann nicht gespeichert werden: Er enthält ein NUL-Zeichen.</value>
+  </data>
+  <data name="ValueWithoutKeyError" xml:space="preserve">
+    <value>Es wurde ein Wert ohne Variablennamen eingegeben.</value>
+  </data>
+  <data name="LoadFailedTitle" xml:space="preserve">
+    <value>Die gespeicherten Überschreibungen konnten nicht gelesen werden</value>
+  </data>
+  <data name="SaveBlockedByLoadFailureError" xml:space="preserve">
+    <value>Speichern ist nicht möglich, solange die gespeicherten Überschreibungen nicht gelesen werden können.</value>
+  </data>
+</root>

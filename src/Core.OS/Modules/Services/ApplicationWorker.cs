@@ -373,9 +373,6 @@ internal sealed partial class ApplicationWorker(
     {
         logger.LogStartingRegistration(instanceInfo.Id);
 
-        // Resolve IBus (direct send) instead of the scoped, outbox-aware ISendEndpointProvider.
-        // On master the Bus Outbox would otherwise buffer this bootstrap registration until a
-        // SaveChanges that never happens here, so synchronization would never complete.
         var bus = scope.ServiceProvider.GetRequiredService<IBus>();
 
         // Collect last-applied sequence numbers from the replication tracker (slave only).

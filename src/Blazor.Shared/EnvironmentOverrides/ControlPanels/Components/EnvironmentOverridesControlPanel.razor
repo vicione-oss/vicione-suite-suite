@@ -1,0 +1,118 @@
+@using Blazor.Shared.EnvironmentOverrides.ControlPanels.Services
+@using ViciOne.Ui.Blazor.Components.Button
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Blazor.Components.TextBox
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
+@inherits ControlPanelBase<EnvironmentOverridesControlPanelState>
+
+<DescriptionBanner Title="@Localization.EnvironmentOverridesControlPanel.PanelTitle"
+                   IconCssClass="@MonochromeIconName.WarningLight.GetCssClasses().ToSpaceSeparated()">
+    @Localization.EnvironmentOverridesControlPanel.RiskBannerContent
+</DescriptionBanner>
+
+@if (State.LoadError is not null)
+{
+    <SettingsLayout>
+        <SettingsGroup Title="@Localization.EnvironmentOverridesControlPanel.LoadFailedTitle">
+            <SettingsInformation>
+                @State.LoadError
+            </SettingsInformation>
+        </SettingsGroup>
+    </SettingsLayout>
+}
+else
+{
+    <SettingsLayout>
+        <div class="environment-overrides-grid">
+            <Grid Items="_entriesQueryable">
+                <ActionButtons>
+                    <AddGridActionButton OnClick="@AddEntry" />
+                    <DeleteGridActionButton Enabled="@_deleteEnabled" OnClick="@DeleteSelectedEntries" />
+                </ActionButtons>
+
+                <Filter>
+                    <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+                </Filter>
+
+                <ChildContent>
+                    <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@GridItemSelection" />
+
+                    <TemplateColumn Title="@CommonVocabulary.Name" Class="name-column">
+                        @if (_editContext is { } editContext && editContext.Entry.Id == context.Id)
+                        {
+                            <TextBox Placeholder="@CommonVocabulary.Name"
+                                     @bind-Value="editContext.Name"
+                                     Valid="@editContext.NameValid" />
+                        }
+                        else
+                        {
+                            @context.Name
+                        }
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="@CommonVocabulary.Value" Class="value-column">
+                        @if (_editContext is { } editContext && editContext.Entry.Id == context.Id)
+                        {
+                            <TextBox Placeholder="@CommonVocabulary.Value"
+                                     @bind-Value="editContext.Value" />
+                        }
+                        else
+                        {
+                            <div class="value-text">@context.Value</div>
+                        }
+                    </TemplateColumn>
+
+                    <TemplateColumn>
+                        <div class="action-buttons">
+                            @if (_editContext is { } editContext && editContext.Entry.Id == context.Id)
+                            {
+                                <Button Size="ButtonSize.Small"
+                                        IconCssClass="@SaveButtonIconCssClass"
+                                        Title="@CommonVocabulary.Save"
+                                        OnClick="@SaveEditedEntry"></Button>
+
+                                <Button Size="ButtonSize.Small"
+                                        IconCssClass="@CancelButtonIconCssClass"
+                                        Title="@CommonVocabulary.Cancel"
+                                        OnClick="@CancelEntryEdit"></Button>
+                            }
+                            else
+                            {
+                                <Button Size="ButtonSize.Small"
+                                        IconCssClass="@EditButtonIconCssClass"
+                                        Title="@CommonVocabulary.EditVerb"
+                                        OnClick="@(() => EditEntry(context))"></Button>
+                            }
+                        </div>
+                    </TemplateColumn>
+                </ChildContent>
+
+                <Footer>
+                    <SelectionFooter GridSelection="GridItemSelection" />
+                </Footer>
+            </Grid>
+        </div>
+
+        @if (State.RestartRequired)
+        {
+            <SettingsField>
+                <SettingsFieldButton Text="@CommonVocabulary.Restart" OnClick="@(() => _dialogVisible = true)" />
+            </SettingsField>
+        }
+    </SettingsLayout>
+
+    <ConfirmCancelDialog HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
+                         OnConfirm="@RestartSuite"
+                         @bind-Visible="_dialogVisible">
+        <Body>
+            @Blazor.Shared.Localization.RestartSuite.DialogBody
+        </Body>
+    </ConfirmCancelDialog>
+}

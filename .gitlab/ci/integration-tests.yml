@@ -1,4 +1,5 @@
-# Integration tests that need external services (currently SMTP/mail via a mailpit service).
+# Integration tests that need external services: SMTP/mail via a mailpit service, and the replication
+# Bus Outbox facts via a PostgreSQL service.
 # Manual job, triggered on demand and separate from the automatic unit-test run.
 #
 # Shared snippets use `!reference`: YAML anchors (&/*) are file-local and don't cross `include`.
@@ -12,10 +13,18 @@
   services:
     - name: axllent/mailpit:v1.30.1
       alias: mailpit
+    - name: postgres:17-alpine
+      alias: postgres
   variables:
     RUNNER_ARCH: amd64
     # Share a network with the service so the job can reach it by alias.
     FF_NETWORK_PER_BUILD: "true"
+    # Doubles as the postgres service container's own configuration — job variables are passed to
+    # services — and as the connection settings the outbox facts resolve. The facts create and drop
+    # their own database, so no POSTGRES_DB is needed.
+    POSTGRES_HOST: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
     MAILPIT_SMTP_HOST: mailpit
     MAILPIT_SMTP_PORT: "1025"
     MAILPIT_API_URL: http://mailpit:8025

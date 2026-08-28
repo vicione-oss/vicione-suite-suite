@@ -1,4 +1,4 @@
-﻿using MassTransit;
+using MassTransit;
 using Sdk.Messaging;
 
 namespace Core.Shared.HostManagement.Events;
@@ -10,4 +10,5 @@ public enum RestartReason
 {
     SystemConfiguration,
     ModuleConfiguration,
+    EnvironmentConfiguration,
 }

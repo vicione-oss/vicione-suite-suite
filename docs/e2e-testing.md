@@ -18,10 +18,17 @@ tests/Core.OS.E2E.Tests/
     E2ETest.cs                    #   base class: a fresh, isolated Page per test
     TestUsers.cs                  #   seeded-user credentials
   Pages/                          # page objects (selectors + actions), e.g. LoginPage
+    SettingsPage.cs               #   the settings popup and its navigation tree
+    EnvironmentOverridesPanel.cs  #   the "Environment variables" control panel
+    EnvironmentOverridesUi.cs     #   one instance's panel, opened and ready to work with
+    MessageBanner.cs              #   the layout's message banner
   Availability/
     AvailabilitySmokeTests.cs     # "instance serves the UI"
   Authentication/                 # tests grouped by feature
     LoginSmokeTests.cs
+  EnvironmentOverrides/
+    EnvironmentOverridesSmokeTests.cs               # round trip, restart requirement, refused save
+    EnvironmentOverridesAuthorizationSmokeTests.cs  # admin-only panel stays hidden
 ```
 
 - **Page objects** (`Pages/`) own the selectors and actions for a screen, so tests read as intent and a
@@ -58,6 +65,16 @@ public sealed class MyFeatureSmokeTests(PlaywrightFixture fixture) : E2ETest(fix
 - **Backend state** — tests that *intentionally* fail authentication use a throwaway (non-existent) user,
   so lockout-on-failure can never affect the seeded accounts other tests rely on.
 
+## The first-run wizard
+
+A freshly initialized instance redirects **every** authenticated request to its first-run wizard, so the
+wizard covers the whole UI until someone leaves it — and only the wizard itself can end that state.
+The instances under test therefore run with it switched off:
+
+| Setting                                    | Why                                                                                                                                                                    |
+|--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `FeatureManagement__FirstRunWizard=false`  | The wizard ships **enabled** (`appsettings.json`). With the flag off `OnboardingMiddleware` redirects nothing, so the tests reach the UI of a fresh instance directly.  |
+
 ## Credentials
 
 Tests that log in (e.g. `LoginSmokeTests`) authenticate as a user seeded into the instance under test.
@@ -65,13 +82,18 @@ The credentials are **not** hard-coded — `TestUsers` resolves them from the en
 `Core.Tests.Tools.IntegrationServiceSettings.GetRequiredValue`, which throws a clear error when a
 variable is missing (there is no default):
 
-| Variable              | Meaning                                        |
-|-----------------------|------------------------------------------------|
-| `SUITE_TEST_USERNAME` | User name of the seeded account to log in with |
-| `SUITE_TEST_PASSWORD` | Password of that account                       |
+| Variable                        | Meaning                                                         |
+|---------------------------------|-----------------------------------------------------------------|
+| `SUITE_TEST_USERNAME`           | User name of the seeded account to log in with (full access)     |
+| `SUITE_TEST_PASSWORD`           | Password of that account                                        |
+| `SUITE_TEST_NONADMIN_USERNAME`  | User name of a seeded account **without** full access           |
+| `SUITE_TEST_NONADMIN_PASSWORD`  | Password of that account                                        |
 
-They must match an account the running instance actually seeds (it seeds the built-in test users when
+They must match accounts the running instance actually seeds (it seeds the built-in test users when
 started with `UserManagement__SeedTestUsers=true`).
+The non-admin account is what the tests for admin-only panels sign in as, so it must be a seeded user
+with `AccessLevel.Partial` — a user seeded with full access is put into the system-administrator role
+and would see everything.
 
 - **Locally**, export them in the environment the tests run in — the shell you run `dotnet test` (or
   the wrapper scripts) from, or the IDE's test run configuration:
@@ -79,10 +101,32 @@ started with `UserManagement__SeedTestUsers=true`).
   ```bash
   export SUITE_TEST_USERNAME=...
   export SUITE_TEST_PASSWORD=...
+  export SUITE_TEST_NONADMIN_USERNAME=...
+  export SUITE_TEST_NONADMIN_PASSWORD=...
   ```
 - **In CI**, they are defined as **masked** (and protected) project or group CI/CD variables
   (Settings → CI/CD → Variables). They are injected into the `E2E tests (standalone)` job
   automatically and are not stored in the YAML.
+
+## Environment-variable override tests
+
+The `EnvironmentOverrides` tests drive the "Environment variables" panel in the **System** settings
+category, which edits the instance's runtime environment-variable override file.
+They need one thing from whoever starts the instance: `VICIONE_SUITE_ENV_OVERRIDES=true`, exported
+for every instance by `e2e-start-instance.sh`.
+It is the whole switch — it makes the instance apply the override file at startup, and it is what
+the settings panel reads to decide whether to offer itself, so without it the tests have nothing to
+drive.
+The file follows each instance's `Instance__HomeDirectory`, so every instance of a master/slave
+topology keeps its own inside a single job container.
+
+Two consequences worth knowing before adding a test here:
+
+- **The file outlives the test run**, and it is applied to the process environment the next time that
+  instance starts. A leftover variable that means something to the Suite (`Instance__Type`,
+  `ConnectionStrings__*`, …) would silently change a later run — a broken value can even keep the
+  instance from starting, with no way back through the UI. Every test therefore uses a unique
+  `E2E_OVERRIDE_<guid>` name, which nothing reads, and deletes it again.
 
 ## The published layout
 
@@ -141,8 +185,11 @@ CI/CD variables (they are not in the YAML) — see [Credentials](#credentials).
 ## Running locally
 
 Create the dev certificate once (`dotnet dev-certs https --trust`), start a standalone instance
-(e.g. `dotnet run --project src/Core.OS --launch-profile Standalone-Ui`), install browsers
-(`pwsh tests/Core.OS.E2E.Tests/bin/Debug/net10.0/playwright.ps1 install chromium-headless-shell`),
+(e.g. `dotnet run --project src/Core.OS --launch-profile Standalone-Ui`, adding
+`UserManagement__SeedTestUsers=true` so the accounts the tests sign in with exist and
+`FeatureManagement__FirstRunWizard=false` so a fresh instance is not redirected to the wizard),
+install browsers (`pwsh tests/Core.OS.E2E.Tests/bin/Debug/net10.0/playwright.ps1 install
+chromium-headless-shell`),
 provide the seeded-user credentials (see [Credentials](#credentials)), then:
 
 ```bash
@@ -197,12 +244,15 @@ tests/Core.OS.E2E.Tests/
     MasterSlaveE2ETest.cs     # base class: opens an isolated page against a chosen instance
   MasterSlave/
     UserReplicationSmokeTests.cs
+    EnvironmentOverridesIsolationSmokeTests.cs
 ```
 
 - `MasterSlaveE2ETest` resolves the instance URLs from the environment — `SUITE_MASTER_URL`,
   `SUITE_SLAVE1_URL`, `SUITE_SLAVE2_URL` (defaults `https://localhost:5001` / `:6001` / `:7001`, matching
   the launch profiles) — and exposes `NewPage(url)` so a test drives a specific instance. The browser and
-  the page objects (`LoginPage`) are shared with the standalone tests.
+  the page objects (`LoginPage`) are shared with the standalone tests, as is switching the
+  [first-run wizard](#the-first-run-wizard) off — the wrapper script and the CI job set it for every
+  instance they start.
 - The first test, **`UserReplicationSmokeTests`**, logs in on **each slave** with the master-seeded user
   (with a bounded retry to absorb replication lag). Because slaves never seed, a successful slave login
   proves the account replicated.
@@ -245,8 +295,9 @@ docker compose -f tests/compose.master-slave.yaml up -d
 ```
 
 Then run the three instances from their launch profiles, each in its own terminal — `Master-Ui`,
-`Slave1-Ui`, `Slave2-Ui` (`dotnet run --project src/Core.OS --launch-profile <profile>`). With the
-instances on the default ports (`:5001` / `:6001` / `:7001`) and the seeded-user credentials available
+`Slave1-Ui`, `Slave2-Ui` (`dotnet run --project src/Core.OS --launch-profile <profile>`), each with
+`FeatureManagement__FirstRunWizard=false`. With the instances on the default ports
+(`:5001` / `:6001` / `:7001`) and the seeded-user credentials available
 (see [Credentials](#credentials)):
 
 ```bash

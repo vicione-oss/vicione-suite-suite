@@ -42,6 +42,7 @@ That variable is a switch, not a location: it is set like any other environment 
 The file is always `env-overrides.env` in the root of the instance home directory, because the suite's own data directory is the only place it can count on being allowed to write.
 The home directory is configuration, so `Instance:HomeDirectory` is read from `appsettings.json` and the process environment ahead of the host builder, where the file has to be resolved.
 An instance that does not switch the feature on has no override file: nothing is applied, and `EnvironmentOverridesRepository` refuses to read or write overrides rather than storing a file that nothing would ever apply.
+The same switch decides whether the settings panel is offered at all (`EnvironmentOverridesControlPanelGate`), so an instance that would not apply overrides does not present a UI for editing them.
 That case is logged once at info level, naming the variable, so an instance that was expected to carry overrides can be told apart in the journal from one where they simply had no effect.
 
 It runs before the host builder is created, so both the .NET options pipeline and libraries that read the environment directly at init (e.g. OpenTelemetry) see the same values.
@@ -55,10 +56,12 @@ Failing hard is not an option here, because this runs ahead of the fallback host
 
 The file holds one `NAME="value"` entry per line, written and read by [EnvironmentOverridesFormat](../src/Core.OS/EnvironmentOverrides/EnvironmentOverridesFormat.cs).
 The shape is `.env`-like, but the suite is the only writer and the reader accepts only what it writes — no comments, no `export`, no unquoted or single-quoted values.
+Entries are written ordered by name, so related variables end up grouped in the file and the same set of overrides always produces the same file.
+A name may be set only once: the panel stores a name and its value, not a sequence of assignments, so a file setting one twice is damaged rather than a last-one-wins instruction.
 Anything else is treated as a damaged file rather than a dialect to interpret, because guessing at a line would apply an override nobody stored.
 The settings panel is the supported way to change entries; a hand-edit that does not match the format costs the whole file (see Recovery).
 
-Variable names must consist of letters, digits and underscores and must not start with a digit (`Core.Shared.EnvironmentOverrides.Constants.KeyPattern`).
+Variable names must consist of ASCII letters, digits and underscores and must not start with a digit (`Core.Shared.EnvironmentOverrides.Constants.KeyPattern`).
 `EnvironmentOverridesRepository` rejects a batch containing any other name in full and writes nothing, because names are written verbatim: one containing a newline or `=` could append further lines and set variables that were never submitted.
 
 Values round-trip literally.
@@ -66,6 +69,10 @@ Quotes, backslashes, `$` and control characters are escaped on write and unescap
 A value containing NUL is rejected like an invalid name, because `Environment.SetEnvironmentVariable` truncates the value there without reporting anything, which would apply an override that differs from the stored one.
 
 ### Recovery
+
+The file belongs to the instance it sits on, so the panel reads and writes it on the instance whose UI is used.
+Both messages are instance-scoped (`IInstanceDependentRequest` / `IInstanceDependentCommand`, targeted at `IInstanceInformationProvider.Local.Id`), which means a slave is configured through the slave's own UI and never through the master's.
+The resulting "Suite restart required" banner is a global event and therefore shows on every node's UI, while only the edited instance actually needs the restart.
 
 This step sits outside every recovery mechanism below.
 A reset and a restore clear the child directories of the instance home directory plus a fixed set of files in its root; the override file is not one of them, and automatic recovery only disables modules.

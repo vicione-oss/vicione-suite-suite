@@ -13,8 +13,10 @@ using Core.OS.Instance.Services;
 using Core.OS.MessageBus.Extensions;
 using Core.OS.Persistence.Consumers;
 using MassTransit;
+using MassTransit.EntityFrameworkCoreIntegration;
 using MassTransit.Internals;
 using MassTransit.Metadata;
+using MassTransit.Middleware.Outbox;
 using MassTransit.Util;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -49,6 +51,9 @@ internal static class MassTransitConfiguration
 
             services.AddTransient<IRoutingSlipBuilder>(_ => new RoutingSlipBuilder(NewId.NextGuid()));
             services.AddTransient<IRoutingSlipBuilderFactory, RoutingSlipBuilderFactory>();
+
+            var busSettings = config.GetMessageBusOptions();
+            var useBusOutbox = instanceOptions.Type == InstanceType.Master && !busSettings.UseInMemoryBus;
 
             services.AddMassTransit(busConfig =>
             {
@@ -85,7 +90,6 @@ internal static class MassTransitConfiguration
 
                 busConfig.AddBusObserver<BusObserver>();
 
-                var busSettings = config.GetMessageBusOptions();
                 if (busSettings.UseInMemoryBus)
                 {
                     busConfig.UsingInMemory((context, cfg) =>
@@ -98,16 +102,13 @@ internal static class MassTransitConfiguration
                 else
                 {
                     // Configure Bus Outbox on master to guarantee atomic publish (ADR-003 Gap 1)
-                    if (instanceOptions.Type == InstanceType.Master)
+                    if (useBusOutbox)
                     {
                         services.AddDbContext<OutboxDbContext>((sp, o) =>
                             o.UseNpgsql(sp.GetRequiredService<IMasterDbConnectionStringProvider>().ConnectionString));
 
-                        busConfig.AddEntityFrameworkOutbox<OutboxDbContext>(o =>
-                        {
-                            o.UsePostgres();
-                            o.UseBusOutbox();
-                        });
+                        busConfig.AddEntityFrameworkOutbox<OutboxDbContext>(o => o.UsePostgres());
+                        busConfig.AddBusOutboxDelivery();
                     }
 
                     // ensure we can wait till bus got started
@@ -183,6 +184,15 @@ internal static class MassTransitConfiguration
         }
     }
 
+    // These are the values UseBusOutbox() would have passed on from the Entity Framework outbox configurator.
+    // OutboxDeliveryServiceOptions falls back to five seconds for both, so registering the delivery service
+    // without them would shorten the delivery timing rather than leave it as it was.
+    private static void MatchUseBusOutboxDeliveryTiming(OutboxDeliveryServiceOptions options)
+    {
+        options.QueryDelay = TimeSpan.FromSeconds(10);
+        options.MessageDeliveryTimeout = TimeSpan.FromSeconds(10);
+    }
+
     private static void Configure<T>(IRegistrationContext context, T cfg, InstanceType instanceType)
         where T : IBusFactoryConfigurator
     {
@@ -203,6 +213,21 @@ internal static class MassTransitConfiguration
 
     extension(IRegistrationConfigurator busConfig)
     {
+        /// <summary>
+        ///     Registers the delivery half of the Bus Outbox: the notification and the service that moves staged
+        ///     messages to the transport. <c>UseBusOutbox()</c> would register the same two, but also replace the
+        ///     scoped bus context with one that diverts every send and publish into the outbox change tracker
+        ///     whenever the scope carries no <c>ConsumeContext</c>. Only replication stages into the outbox, and it
+        ///     does so explicitly on the module's own transaction (see <c>BusOutboxReplicationPublisher</c>), so
+        ///     everything else keeps talking to the transport directly.
+        /// </summary>
+        private void AddBusOutboxDelivery()
+        {
+            busConfig.AddSingleton<IBusOutboxNotification, BusOutboxNotification>();
+            busConfig.AddHostedService<BusOutboxDeliveryService<OutboxDbContext>>();
+            busConfig.AddOptions<OutboxDeliveryServiceOptions>().Configure(MatchUseBusOutboxDeliveryTiming);
+        }
+
         private void AddUIForwardingConsumers()
         {
             var assemblies = AppDomain.CurrentDomain

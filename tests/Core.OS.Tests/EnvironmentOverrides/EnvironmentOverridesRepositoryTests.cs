@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using Core.OS.EnvironmentOverrides;
 using Core.OS.Instance;
 using Core.OS.Persistence;
+using Core.Shared.EnvironmentOverrides;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute.ExceptionExtensions;
@@ -17,26 +18,26 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
     private const string OverrideFilePath = "/data/env-overrides.env";
 
     private readonly string? _previousEnv =
-        Environment.GetEnvironmentVariable(EnvironmentOverridesFile.EnabledEnvironmentVariable);
+        Environment.GetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable);
 
     private readonly MockFileSystem _fileSystem = new();
 
     public EnvironmentOverridesRepositoryTests()
-        => Environment.SetEnvironmentVariable(EnvironmentOverridesFile.EnabledEnvironmentVariable, "true");
+        => Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, "true");
 
     public void Dispose()
-        => Environment.SetEnvironmentVariable(EnvironmentOverridesFile.EnabledEnvironmentVariable, _previousEnv);
+        => Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, _previousEnv);
 
     [Fact]
     public async Task Should_round_trip_overrides()
     {
         // Arrange
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> overrides =
-        [
-            new("OTEL_EXPORTER_OTLP_ENDPOINT", "http://collector:4317"),
-            new("SIMPLE_KEY", "simple value"),
-        ];
+        var overrides = new Dictionary<string, string>
+        {
+            ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "http://collector:4317",
+            ["SIMPLE_KEY"] = "simple value",
+        };
 
         // Act
         await repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -63,7 +64,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
     {
         // Arrange
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> overrides = [new("KEY", value)];
+        var overrides = new Dictionary<string, string> { ["KEY"] = value };
 
         // Act
         await repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -78,11 +79,11 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
     public async Task Should_round_trip_values_containing_a_control_character(int characterCode)
     {
         // Arrange — a value pasted from a terminal, a log line or a password manager can carry any
-        // control character. Written unescaped they produce a file the loader cannot parse, which
+        // control character. Written unescaped, they produce a file the loader cannot parse, which
         // discards every override on the next start, not just the offending one.
         var repository = CreateRepository();
         var value = "before" + (char)characterCode + "after";
-        IReadOnlyList<KeyValuePair<string, string>> overrides = [new("KEY", value)];
+        var overrides = new Dictionary<string, string> { ["KEY"] = value };
 
         // Act
         await repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -107,7 +108,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         // store something other than what was submitted.
         var repository = CreateRepository();
         var value = "before\u0008" + following + "after";
-        IReadOnlyList<KeyValuePair<string, string>> overrides = [new("KEY", value)];
+        var overrides = new Dictionary<string, string> { ["KEY"] = value };
 
         // Act
         await repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -123,8 +124,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         // Arrange — an operator inspects this file before deleting it, so no value may put a raw
         // tab, newline or escape character inside a line where nobody can see it.
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> overrides =
-            [new("KEY", "tab\there\nnewline\u001bescape")];
+        var overrides = new Dictionary<string, string> { ["KEY"] = "tab\there\nnewline\u001bescape" };
 
         // Act
         await repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -141,7 +141,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         // Arrange — Environment.SetEnvironmentVariable truncates at NUL without complaining, so a
         // stored override would apply a different value than the one submitted.
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> overrides = [new("KEY", "before\0after")];
+        var overrides = new Dictionary<string, string> { ["KEY"] = "before\0after" };
 
         // Act
         var act = () => repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -156,7 +156,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         // Arrange — values are where secrets land, which is why the stored-overrides log line
         // records keys only; a refusal must not undo that.
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> overrides = [new("KEY", "s3cr3t-p4ssw0rd\0")];
+        var overrides = new Dictionary<string, string> { ["KEY"] = "s3cr3t-p4ssw0rd\0" };
 
         // Act
         var act = () => repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -172,11 +172,14 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         // Arrange — as for keys, the caller submits a complete desired state, so a batch with one
         // unstorable value must not be written in part.
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> stored = [new("VALID_KEY", "kept")];
+        var stored = new Dictionary<string, string> { ["VALID_KEY"] = "kept" };
         await repository.Store(stored, TestContext.Current.CancellationToken);
 
-        IReadOnlyList<KeyValuePair<string, string>> batchWithInvalidValue =
-            [new("ALSO_VALID", "new"), new("WITH_NUL", "bad\0value")];
+        var batchWithInvalidValue = new Dictionary<string, string>
+        {
+            ["ALSO_VALID"] = "new",
+            ["WITH_NUL"] = "bad\0value",
+        };
 
         // Act
         var act = () => repository.Store(batchWithInvalidValue, TestContext.Current.CancellationToken);
@@ -185,6 +188,26 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         await act.Should().ThrowAsync<ArgumentException>();
         var result = await repository.Get(TestContext.Current.CancellationToken);
         result.Should().Equal(stored);
+    }
+
+    [Fact]
+    public async Task Should_clear_the_file_when_all_overrides_are_removed()
+    {
+        // Arrange
+        var repository = CreateRepository();
+        await repository.Store(new Dictionary<string, string> { ["MY_KEY"] = "my value" },
+            TestContext.Current.CancellationToken);
+
+        // Act
+        await repository.Store(new Dictionary<string, string>(), TestContext.Current.CancellationToken);
+
+        // Assert
+        var result = await repository.Get(TestContext.Current.CancellationToken);
+        result.Should().BeEmpty();
+
+        var fileContents =
+            await _fileSystem.File.ReadAllTextAsync(OverrideFilePath, TestContext.Current.CancellationToken);
+        fileContents.Should().BeEmpty();
     }
 
     [Fact]
@@ -205,7 +228,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
     {
         // Arrange — reporting "no overrides" instead would make an instance without the feature
         // look like one with an empty file, and the save that follows would never be applied.
-        Environment.SetEnvironmentVariable(EnvironmentOverridesFile.EnabledEnvironmentVariable, null);
+        Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, null);
         var repository = CreateRepository();
 
         // Act
@@ -220,9 +243,9 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
     {
         // Arrange — a file nothing reads at startup is worse than a refused save: the caller has to
         // learn that what it stored will never take effect.
-        Environment.SetEnvironmentVariable(EnvironmentOverridesFile.EnabledEnvironmentVariable, null);
+        Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, null);
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> overrides = [new("VALID_KEY", "value")];
+        var overrides = new Dictionary<string, string> { ["VALID_KEY"] = "value" };
 
         // Act
         var act = () => repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -272,8 +295,10 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         // Arrange — a key that closes its own quote and opens another line writes a file that
         // parses cleanly but sets a second variable never present in the submitted overrides.
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> smuggled =
-            [new("FOO=\"benign\"\nConnectionStrings__Default", "Host=attacker;Password=p")];
+        var smuggled = new Dictionary<string, string>
+        {
+            ["FOO=\"benign\"\nConnectionStrings__Default"] = "Host=attacker;Password=p",
+        };
 
         // Act
         var act = () => repository.Store(smuggled, TestContext.Current.CancellationToken);
@@ -305,7 +330,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
     {
         // Arrange
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> overrides = [new(key, "value")];
+        var overrides = new Dictionary<string, string> { [key] = "value" };
 
         // Act
         var act = () => repository.Store(overrides, TestContext.Current.CancellationToken);
@@ -320,11 +345,14 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         // Arrange — a rejected batch must not be written partially: the previously stored
         // overrides stay authoritative.
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> stored = [new("VALID_KEY", "kept")];
+        var stored = new Dictionary<string, string> { ["VALID_KEY"] = "kept" };
         await repository.Store(stored, TestContext.Current.CancellationToken);
 
-        IReadOnlyList<KeyValuePair<string, string>> batchWithInvalidKey =
-            [new("ALSO_VALID", "new"), new("IN VALID", "new")];
+        var batchWithInvalidKey = new Dictionary<string, string>
+        {
+            ["ALSO_VALID"] = "new",
+            ["IN VALID"] = "new",
+        };
 
         // Act
         var act = () => repository.Store(batchWithInvalidKey, TestContext.Current.CancellationToken);
@@ -346,7 +374,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
     {
         // Arrange
         var repository = CreateRepository();
-        IReadOnlyList<KeyValuePair<string, string>> overrides = [new(key, "value")];
+        var overrides = new Dictionary<string, string> { [key] = "value" };
 
         // Act
         await repository.Store(overrides, TestContext.Current.CancellationToken);

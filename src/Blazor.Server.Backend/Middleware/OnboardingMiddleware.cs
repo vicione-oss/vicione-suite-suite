@@ -2,14 +2,13 @@
 using Core.Shared.Instance.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.FeatureManagement;
 using Sdk.Instance;
 
 namespace Blazor.Server.Backend.Middleware;
 
 internal sealed class OnboardingMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next = next;
-
     public async Task InvokeAsync(HttpContext context)
     {
         // Redirect to onboarding page if neccessary
@@ -21,7 +20,7 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
         }
 
         // Call the next delegate/middleware in the pipeline.
-        await _next(context);
+        await next(context);
     }
 
     private static async Task<bool> NeedsOnboaringRedirect(HttpContext context)
@@ -46,6 +45,12 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
             return false;
         }
 
+        var isFeatureEnabled = await IsOnboardingFeatureEnabled(context);
+        if (!isFeatureEnabled)
+        {
+            return false;
+        }
+
         // Check instance onboarding state
         var instanceInformation = context.RequestServices.GetRequiredService<IInstanceInformationProvider>().Local;
         var onboardingStore = context.RequestServices.GetRequiredService<IOnboardingStateStore>();
@@ -66,5 +71,11 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
             // Nothing to do here, return gracefully
             return false;
         }
+    }
+
+    private static async Task<bool> IsOnboardingFeatureEnabled(HttpContext context)
+    {
+        var featureManager = context.RequestServices.GetRequiredService<IFeatureManager>();
+        return await featureManager.IsEnabledAsync(Core.Shared.Features.Constants.FirstRunWizardFeatureName);
     }
 }

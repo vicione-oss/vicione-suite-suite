@@ -38,11 +38,17 @@
     ModuleLoader__ModulesPath: Modules
     HostManagement__MockClient__DataSource: SystemConfigurationEmbedded
     Logging__LogTargets__0: Console
+    # The first-run wizard ships enabled and would cover the UI of a freshly initialized instance
+    # until someone signs in as an admin and leaves it; off, the tests reach the UI directly.
+    FeatureManagement__FirstRunWizard: "false"
     # SUITE_TEST_USERNAME / SUITE_TEST_PASSWORD — the seeded account the login test signs in
     # with — are supplied as masked project CI/CD variables (Settings -> CI/CD -> Variables), not
     # stored here. They must match a user seeded above. See docs/e2e-testing.md.
+    # SUITE_TEST_NONADMIN_* is a seeded account without full access
     SUITE_TEST_USERNAME:
     SUITE_TEST_PASSWORD:
+    SUITE_TEST_NONADMIN_USERNAME: Alice
+    SUITE_TEST_NONADMIN_PASSWORD: $SUITE_TEST_PASSWORD
   cache:
     - key:
         prefix: mise-${RUNNER_ARCH}-v2

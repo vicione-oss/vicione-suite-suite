@@ -1,6 +1,7 @@
 using Blazor.Shared.Authorization.Extensions;
 using Blazor.Shared.Connections.Extensions;
 using Blazor.Shared.Dialogs.Extensions;
+using Blazor.Shared.EnvironmentOverrides.ControlPanels.Extensions;
 using Blazor.Shared.Instance.Extensions;
 using Blazor.Shared.MessageBanner.Extensions;
 using Blazor.Shared.Module.Extensions;
@@ -51,7 +52,8 @@ public static class IServiceCollectionExtensions
                 .AddModuleManagement()
                 .AddUserManagement()
                 .AddUserInterfaceControlPanels()
-                .AddProfileManagement();
+                .AddProfileManagement()
+                .AddEnvironmentOverridesControlPanel();
 
             services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
 

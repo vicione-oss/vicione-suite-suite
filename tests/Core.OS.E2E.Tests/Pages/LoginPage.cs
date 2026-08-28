@@ -40,6 +40,14 @@ public sealed partial class LoginPage(IPage page)
         await PasswordField.PressAsync("Enter");
     }
 
+    /// <summary>Navigates to the login page, signs in and asserts the sign-in succeeded.</summary>
+    public async Task SignIn(string userName, string password)
+    {
+        await Goto();
+        await Login(userName, password);
+        await ExpectAuthenticated();
+    }
+
     /// <summary>Asserts the browser is on the login page (login did not succeed).</summary>
     public Task ExpectOnLoginPage()
         => Expect(page).ToHaveURLAsync(LoginUrl(), new PageAssertionsToHaveURLOptions { IgnoreCase = true });

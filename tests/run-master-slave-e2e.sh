@@ -15,8 +15,10 @@
 #   tests/run-master-slave-e2e.sh --keep   # reuse existing state and leave the services running afterwards
 #                                          # (binaries are re-published either way)
 #
-# The login test needs the credentials of the account the master seeds (see docs/e2e-testing.md):
-#   SUITE_TEST_USERNAME=... SUITE_TEST_PASSWORD=... tests/run-master-slave-e2e.sh
+# The login test needs the credentials of the account the master seeds, and the shared credential
+# check additionally requires a seeded non-admin account (see docs/e2e-testing.md):
+#   SUITE_TEST_USERNAME=... SUITE_TEST_PASSWORD=... \
+#   SUITE_TEST_NONADMIN_USERNAME=... SUITE_TEST_NONADMIN_PASSWORD=... tests/run-master-slave-e2e.sh
 
 set -euo pipefail
 
@@ -60,6 +62,9 @@ export ASPNETCORE_ENVIRONMENT=Development
 export ModuleLoader__ModulesPath=Modules
 export HostManagement__MockClient__DataSource=SystemConfigurationEmbedded
 export Logging__LogTargets__0=Console
+# The first-run wizard ships enabled and would cover the UI of every freshly initialized instance
+# until someone signs in as an admin and leaves it; off, the tests reach the UI directly.
+export FeatureManagement__FirstRunWizard=false
 export MessageBus__UseInMemoryBus=false
 export MessageBus__CleanVirtualHost=false
 export MessageBus__Connection__Host=localhost

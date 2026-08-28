@@ -11,10 +11,15 @@ namespace Core.OS.EnvironmentOverrides;
 /// </summary>
 internal static class EnvironmentOverridesFormat
 {
-    public static string Serialize(IReadOnlyList<KeyValuePair<string, string>> overrides)
+    /// <summary>
+    /// Writes the entries ordered by name so related variables end up grouped in the file and the
+    /// same set of overrides always produces the same bytes, independent of how the caller's
+    /// dictionary happens to enumerate.
+    /// </summary>
+    public static string Serialize(IReadOnlyDictionary<string, string> overrides)
     {
         var builder = new StringBuilder();
-        foreach (var (key, value) in overrides)
+        foreach (var (key, value) in overrides.OrderBy(o => o.Key, StringComparer.Ordinal))
         {
             builder.Append(key).Append('=').Append('"');
             AppendEscaped(builder, value);
@@ -30,12 +35,12 @@ internal static class EnvironmentOverridesFormat
     /// file rather than a dialect to accommodate, and guessing at it would apply an override
     /// nobody stored.
     /// </summary>
-    /// <returns>The entries in file order, fully materialized so a syntax error surfaces before
-    /// the caller applies any of them.</returns>
+    /// <returns>All entries, fully materialized so a syntax error surfaces before the caller
+    /// applies any of them.</returns>
     /// <exception cref="FormatException">The file is not in the format the suite writes.</exception>
-    public static IReadOnlyList<KeyValuePair<string, string>> Parse(string contents)
+    public static IReadOnlyDictionary<string, string> Parse(string contents)
     {
-        var entries = new List<KeyValuePair<string, string>>();
+        var entries = new Dictionary<string, string>(StringComparer.Ordinal);
 
         var lineNumber = 0;
         foreach (var rawLine in contents.Split('\n'))
@@ -46,7 +51,13 @@ internal static class EnvironmentOverridesFormat
             if (line.IsEmpty)
                 continue;
 
-            entries.Add(ParseEntry(line, lineNumber));
+            var (key, value) = ParseEntry(line, lineNumber);
+
+            // A name cannot appear twice: Serialize writes each one once, so a repeated name is a
+            // damaged file rather than a last-one-wins instruction. Silently keeping one of the two
+            // values would apply a configuration the operator cannot read off the file.
+            if (!entries.TryAdd(key, value))
+                throw Invalid(lineNumber, $"'{key}' is set more than once.");
         }
 
         return entries;

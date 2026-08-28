@@ -8,8 +8,7 @@ public sealed class EnvironmentOverridesFormatTests
     public void Should_write_one_quoted_entry_per_line()
     {
         // Arrange
-        IReadOnlyList<KeyValuePair<string, string>> overrides =
-            [new("FIRST", "one"), new("SECOND", "two")];
+        var overrides = new Dictionary<string, string> { ["FIRST"] = "one", ["SECOND"] = "two" };
 
         // Act
         var contents = EnvironmentOverridesFormat.Serialize(overrides);
@@ -22,8 +21,7 @@ public sealed class EnvironmentOverridesFormatTests
     public void Should_parse_back_what_was_written()
     {
         // Arrange
-        IReadOnlyList<KeyValuePair<string, string>> overrides =
-            [new("FIRST", "one"), new("SECOND", "two")];
+        var overrides = new Dictionary<string, string> { ["FIRST"] = "one", ["SECOND"] = "two" };
 
         // Act
         var result = EnvironmentOverridesFormat.Parse(EnvironmentOverridesFormat.Serialize(overrides));
@@ -33,18 +31,17 @@ public sealed class EnvironmentOverridesFormatTests
     }
 
     [Fact]
-    public void Should_preserve_entry_order()
+    public void Should_write_the_entries_ordered_by_name()
     {
-        // Arrange — the last entry for a name wins when the loader applies them, so the file order
-        // is part of the format rather than an incidental detail of the collection.
-        IReadOnlyList<KeyValuePair<string, string>> overrides =
-            [new("KEY", "first"), new("KEY", "last")];
+        // Arrange — names are grouped in the file so an operator can find one, and the same set of
+        // overrides has to produce the same bytes however the caller's dictionary enumerates.
+        var overrides = new Dictionary<string, string> { ["ZULU"] = "last", ["ALPHA"] = "first" };
 
         // Act
-        var result = EnvironmentOverridesFormat.Parse(EnvironmentOverridesFormat.Serialize(overrides));
+        var contents = EnvironmentOverridesFormat.Serialize(overrides);
 
         // Assert
-        result.Should().Equal(overrides);
+        contents.Should().Be("ALPHA=\"first\"\nZULU=\"last\"\n");
     }
 
     [Fact]
@@ -86,6 +83,8 @@ public sealed class EnvironmentOverridesFormatTests
     [InlineData("export KEY=\"value\"\n", "an 'export' prefix")]
     [InlineData("KEY = \"value\"\n", "whitespace around '='")]
     [InlineData("IN VALID=\"value\"\n", "a name the suite would refuse to write")]
+    // Serialize writes every name once, so a repeated name is not a last-one-wins instruction.
+    [InlineData("KEY=\"one\"\nKEY=\"two\"\n", "a name set more than once")]
     public void Should_reject(string contents, string because)
     {
         // Arrange — the suite is the only writer, so anything it would not have produced is a

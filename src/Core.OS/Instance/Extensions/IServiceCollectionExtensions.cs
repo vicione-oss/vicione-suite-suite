@@ -20,11 +20,14 @@ internal static class IServiceCollectionExtensions
         {
             if (instanceOptions.Type == InstanceType.Master)
             {
+                // A master without a real transport cannot reach a slave at all, so replication always has a
+                // Bus Outbox to stage into.
                 services
                     .AddTransient<IMasterDbConnectionStringProvider, MasterDbConnectionStringProvider>()
                     .AddTransient<IInstanceConfigurationRepository, InstanceConfigurationRepository>()
                     .AddSingleton<ReplicationSequenceCounter>()
-                    .AddScoped<ISaveChangesInterceptor, ChangeTrackingInterceptor>();
+                    .AddScoped<ISaveChangesInterceptor, ChangeTrackingInterceptor>()
+                    .AddScoped<IReplicationPublisher, BusOutboxReplicationPublisher>();
             }
 
             services.AddSingleton<MasterHealthInfo>();
