@@ -36,7 +36,10 @@ public sealed class InstanceOptions
 
     public string? FormattedName { get; set; }
 
+    [Obsolete($"Use {nameof(TrustedProxies)} instead; listing the proxy addresses keeps the source check intact. This flag will be removed in a future release.")]
     public bool UseHeaderForwarding { get; set; }
+
+    public IReadOnlyList<string> TrustedProxies { get; set; } = [];
 
     public string ServiceName { get; set; } = "vicione-suite.service";
 

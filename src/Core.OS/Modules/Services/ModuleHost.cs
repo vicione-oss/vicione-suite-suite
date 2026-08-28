@@ -172,7 +172,7 @@ internal sealed partial class ModuleHost : IModuleHost
 
         try
         {
-            UiHostModule.UseSecurity(app, _instanceOptions.UseHeaderForwarding);
+            UiHostModule.UseSecurity(app);
         }
         catch (Exception e)
         {

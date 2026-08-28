@@ -12,7 +12,7 @@
                 "Instance__BackupDirectory": "Backup_Standalone",
                 "VICIONE_SUITE_ENV_OVERRIDES": "true"
             },
-            "applicationUrl": "https://localhost:5001;http://localhost:5000"
+            "applicationUrl": "https://localhost:5001"
         },
         "Master-Ui": {
             "commandName": "Project",
@@ -43,13 +43,12 @@
 
                 "ConnectionStrings__Postgres": "Server=127.0.0.1;Port=5432;Database=vo-suite;User Id=postgres;Password=postgres"
             },
-            "applicationUrl": "https://localhost:5001;http://localhost:5000"
+            "applicationUrl": "https://localhost:5001"
         },
         "Slave1-Ui": {
             "commandName": "Project",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "Kestrel__Endpoints__Http__Url": "http://localhost:6000",
                 "Kestrel__Endpoints__Https__Url": "https://localhost:6001",
 
                 "Instance__Type": "Slave",
@@ -73,13 +72,12 @@
                 "MessageBus__Connection__Username": "guest",
                 "MessageBus__Connection__Password": "guest"
             },
-            "applicationUrl": "https://localhost:6001;http://localhost:6000"
+            "applicationUrl": "https://localhost:6001"
         },
         "Slave2-Ui": {
             "commandName": "Project",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "Kestrel__Endpoints__Http__Url": "http://localhost:7000",
                 "Kestrel__Endpoints__Https__Url": "https://localhost:7001",
 
                 "Instance__Type": "Slave",
@@ -103,7 +101,7 @@
                 "MessageBus__Connection__Username": "guest",
                 "MessageBus__Connection__Password": "guest"
             },
-            "applicationUrl": "https://localhost:7001;http://localhost:7000"
+            "applicationUrl": "https://localhost:7001"
         },
         "Docker": {
             "commandName": "Docker",

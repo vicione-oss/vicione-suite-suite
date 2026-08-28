@@ -53,20 +53,22 @@ Most providers (including GitLab) require `https` for any non-loopback host, so 
 ### Running behind a reverse proxy
 
 A common deployment terminates TLS at a reverse proxy (for example the bundled nginx) and forwards the request to the
-application over plain `http`. In that case the application sees the request as `http` and would build an
-`http://<host>/signin-oidc` redirect URI, which the provider rejects (see [Troubleshooting](#troubleshooting)).
+application over plain `http`. The application reconstructs the original scheme, host and client address from the
+proxy's forwarding headers (`X-Forwarded-Proto`, `X-Forwarded-Host`, `X-Forwarded-For`) — but by default it only
+believes those headers when the request was delivered by a proxy on **loopback**, because any client can send them.
 
-**In this setup, enabling `Instance:UseHeaderForwarding` is required** — without it external sign-in will always fail
-with a redirect URI mismatch. It makes the application reconstruct the original scheme and host from the proxy's
-forwarding headers:
+- **Proxy on the same host** (the bundled nginx, `proxy_pass http://127.0.0.1:5000`): works out of the box, no
+  configuration needed.
+- **Proxy on a different host**: the loopback safelist rejects it, the application keeps seeing `http`, builds an
+  `http://<host>/signin-oidc` redirect URI, and the provider rejects it (see [Troubleshooting](#troubleshooting)).
+  In this setup add the proxy's address (or network, in CIDR notation) to the safelist:
 
-```ini
-Instance__UseHeaderForwarding=true
-```
+  ```ini
+  Instance__TrustedProxies__0=10.0.0.5
+  Instance__TrustedProxies__1=192.168.178.0/24   # further entries as needed
+  ```
 
-With it enabled the application evaluates `X-Forwarded-Proto`, `X-Forwarded-Host` and `X-Forwarded-For`, so the
-redirect URI is built with the `https` scheme. The proxy must actually set these headers; for nginx the relevant
-directives are:
+The proxy must actually set the headers; for nginx the relevant directives are:
 
 ```nginx
 proxy_set_header Host              $host;
@@ -74,11 +76,15 @@ proxy_set_header X-Forwarded-Proto $scheme;
 proxy_set_header X-Forwarded-Host  $host;   # set explicitly so clients cannot inject it
 ```
 
-> **Security:** `UseHeaderForwarding` makes the application trust forwarding headers from any source. Only enable it
-> when the application is reachable *exclusively* through a trusted proxy (e.g. Kestrel bound to `127.0.0.1`). If
-> Kestrel is exposed directly, a client could spoof these headers (scheme, host, originating IP). For this reason the
-> option is disabled by default and must be enabled per deployment — deployments that do not run behind a reverse proxy
-> should leave it off.
+> **Security:** `TrustedProxies` *extends* the safelist — forwarding headers from senders not on the list (and not on
+> loopback) are still ignored, so a client reaching Kestrel directly cannot spoof scheme, host or originating IP.
+> List only addresses that actually are trusted proxies.
+
+> **Deprecated:** the earlier boolean `Instance__UseHeaderForwarding=true` is still honoured but deprecated and will be
+> removed in a future release. It removes the source safelist entirely, so the application trusts forwarding headers
+> from *any* sender — safe only when the application is reachable exclusively through the proxy. Migrate by replacing
+> the flag with `Instance__TrustedProxies__*` entries naming your proxy; when both are set, `TrustedProxies` wins and
+> the safelist stays active.
 
 ## Differences from Microsoft templates
 
@@ -111,17 +117,19 @@ such as *"The redirect URI included is not valid."* (GitLab/Doorkeeper) or a gen
 **Cause:** The `redirect_uri` the suite sent does not exactly match the one registered at the provider. Behind a
 TLS-terminating reverse proxy the most common cause is a scheme mismatch: the registered URI is
 `https://<host>/signin-oidc`, but the suite generated `http://<host>/signin-oidc`. This happens because the proxy
-terminates TLS and forwards the request to the application as plain `http`, so without header forwarding the
-application builds the redirect URI with the `http` scheme.
+terminates TLS and forwards the request to the application as plain `http`; if its forwarding headers are missing or
+not trusted (proxy neither on loopback nor listed in `TrustedProxies`), the application builds the redirect URI with
+the `http` scheme.
 
 **Diagnosis:** Open the authorization request URL the browser is redirected to and url-decode its `redirect_uri`
 query parameter. If it begins with `http://` while the registered URI uses `https://`, this is the cause.
 
 **Fix:**
 
-1. Enable header forwarding: set `Instance__UseHeaderForwarding=true` (see
-   [Running behind a reverse proxy](#running-behind-a-reverse-proxy)).
-2. Ensure the proxy forwards the scheme, e.g. nginx `proxy_set_header X-Forwarded-Proto $scheme;`.
+1. Ensure the proxy forwards the scheme, e.g. nginx `proxy_set_header X-Forwarded-Proto $scheme;`.
+2. If the proxy runs on a different host than the suite, add it to the safelist with
+   `Instance__TrustedProxies__0=<proxy-ip-or-cidr>` (see
+   [Running behind a reverse proxy](#running-behind-a-reverse-proxy)); a loopback proxy is trusted by default.
 3. Ensure the request actually reaches the proxy over `https`.
 4. Verify the registered redirect URI matches the suite's URL exactly (scheme, host, port and path).
 

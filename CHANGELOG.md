@@ -60,10 +60,17 @@
 - Removed unused / reuse existing localization resources
 - Use of baseline styles from `ViciOne.Ui.Design`
 - Module CI versions are not considered for automatic update anymore
+- Reverse-proxy forwarding headers (`X-Forwarded-For`/`-Proto`/`-Host`) are now processed by default, trusted from loopback proxies only. Behind the packaged nginx the suite therefore sees the original scheme, host and client address (correct login-redirect URLs, secure-cookie handling and WebAuthn origin on edge devices). For proxies on other hosts the new `Instance:TrustedProxies` option lists additional trusted proxy addresses or CIDR networks (see `docs/oidc.md`)
+- The application-level HSTS policy now matches the header the packaged nginx sends (one year, `includeSubDomains`, `preload`)
+- Development launch profiles and the development Kestrel configuration serve `https` only
 
 ### Removed
 
 - Removed include of now unused JavaScript provided by `ViciOne.Ui.Shared.Dx`
+
+### Deprecated
+
+- `Instance:UseHeaderForwarding` — replaced by `Instance:TrustedProxies`. The flag still disables the proxy source check entirely (trusting forwarding headers from any sender) but will be removed in a future release; `Instance:TrustedProxies` takes precedence when both are configured
 
 ### Fixed
 

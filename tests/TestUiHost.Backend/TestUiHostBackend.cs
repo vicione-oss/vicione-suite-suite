@@ -31,7 +31,7 @@ public class TestUiHostBackend : BackendModule, IUiHostModule
     public void ConfigureUiServices(IServiceCollection services, IUiHostEnvironment uiEnvironment, Action<string, Exception>? errorOccurred = null)
         => CallReceived?.Invoke(this, nameof(ConfigureUiServices));
 
-    public void UseSecurity(IApplicationBuilder app, bool useHeaderForwarding)
+    public void UseSecurity(IApplicationBuilder app)
         => CallReceived?.Invoke(this, nameof(UseSecurity));
 
     public void LoadUiDependencies(IServiceCollection services, IUiHostEnvironment uiEnvironment)
