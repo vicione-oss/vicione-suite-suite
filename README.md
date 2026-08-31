@@ -5,9 +5,6 @@ Welcome to the readme of ViciOne Suite. Questions and suggestions for improvemen
 * [Changelog](#changelog)
 * [Prerequisites](#prerequisites)
     * [Software](#software)
-    * [Certificates](#certificates)
-        * [Windows](#windows)
-        * [Linux](#linux)
     * [JFrog credentials](#package-api-credentials)
     * [npm packages](#npm-packages)
     * [Local development experience](#local-development-experience)
@@ -31,7 +28,6 @@ Welcome to the readme of ViciOne Suite. Questions and suggestions for improvemen
         * [Access to DigitalOcean Review Deployments](#access-to-digitalocean-review-deployments)
 * [Further information](#further-information)
     * [Database migration](#database-migration)
-    * [Update ViciOne.Ui.Shared.DX | .NET-Framework](#update-vicioneuishareddx--net-framework)
 
 ## Changelog
 The Changelog is created according to https://keepachangelog.com/en/1.0.0/.
@@ -41,20 +37,6 @@ The Changelog is created according to https://keepachangelog.com/en/1.0.0/.
 Prerequisites for development are:
 - [Visual Studio](https://visualstudio.microsoft.com/vs/) - Version 17.2 or newer incl. Workload "ASP .NET and Webdevelopment"
 - (optional) [nodeJS](https://nodejs.org/en/) Version 18.5 or newer
-
-### Certificates
-The repository's root-directory now contains the new Root-CA for our deployments. After installing it locally, all visited deployments will be green and marked as safe.
-
-#### Windows
-1. Double-Click the Certificate
-1. Click `Install Certificate...`
-1. Choose a Store Location. `Current user` should be sufficient, but `Local Machine` also works
-1. Choose `Place all certificates in the following store`, click `Browse` and set location to `Trusted Root Certification Authorities`
-1. Click through the remaining steps of the installation wizard
-
-#### Linux
-1. Copy Certificate **and** Key to `/usr/local/share/ca-certificates`
-1. Execute `update-ca-certificates` with **elevated privileges** (`sudo` or as admin)
 
 ### Package API Credentials
 To enable your development system to access these packages, you need to configure credentials so that _Core.OS_ can authenticate against the [JFrog Software Supply Chain Platform](https://system.update.ifm) API.
