@@ -25,6 +25,9 @@ public sealed partial class EnvironmentOverridesControlPanel : ControlPanelBase<
     private static readonly string CancelButtonIconCssClass
         = MonochromeIconName.Redo.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
 
+    private static readonly string RestartButtonIconCssClass
+        = MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+
     private bool _dialogVisible;
     private string? _filterText;
     private bool _deleteEnabled;

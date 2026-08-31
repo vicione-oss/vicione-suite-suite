@@ -35,6 +35,13 @@ else
                 <ActionButtons>
                     <AddGridActionButton OnClick="@AddEntry" />
                     <DeleteGridActionButton Enabled="@_deleteEnabled" OnClick="@DeleteSelectedEntries" />
+
+                    @if (State.RestartRequired)
+                    {
+                        <GridActionButton Text="@CommonVocabulary.Restart"
+                                          OnClick="@(() => _dialogVisible = true)"
+                                          IconCssClass="@RestartButtonIconCssClass" />
+                    }
                 </ActionButtons>
 
                 <Filter>
@@ -99,13 +106,6 @@ else
                 </Footer>
             </Grid>
         </div>
-
-        @if (State.RestartRequired)
-        {
-            <SettingsField>
-                <SettingsFieldButton Text="@CommonVocabulary.Restart" OnClick="@(() => _dialogVisible = true)" />
-            </SettingsField>
-        }
     </SettingsLayout>
 
     <ConfirmCancelDialog HeaderText="@Blazor.Shared.Localization.RestartSuite.DialogHeader"
