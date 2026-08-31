@@ -201,7 +201,8 @@ public sealed partial class EnvironmentOverridesControlPanel : ControlPanelBase<
         // Ordered for display rather than in the state: the queryable stays deferred over the
         // live list, so a row only moves into place once its editor is committed and never while
         // the name is being typed.
-        _entriesQueryable = entries.OrderBy(e => e.Name, StringComparer.Ordinal);
+        _entriesQueryable = entries.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(e => e.Name, StringComparer.Ordinal);
     }
 
     private async void GridItemSelectionChanged(GridItemSelectionChangedEventArgs<Guid> args)

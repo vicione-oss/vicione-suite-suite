@@ -263,6 +263,51 @@ public sealed class EnvironmentOverridesControlPanelTests
     }
 
     [Fact]
+    public async Task Should_order_the_rows_case_insensitively()
+    {
+        // Arrange
+        var state = new EnvironmentOverridesControlPanelState();
+        state.Initialize(new Dictionary<string, string>
+        {
+            ["CC"] = "third",
+            ["AA"] = "first",
+            ["bb"] = "second",
+        });
+
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = RenderPanel(ctx, state);
+
+        // Assert
+        var rows = FindRows(component);
+        rows.Select(r => r.QuerySelector("td.name-column")!.TextContent)
+            .Should().Equal("AA", "bb", "CC");
+    }
+
+    [Fact]
+    public async Task Should_order_two_names_that_differ_only_in_case_deterministically()
+    {
+        // Arrange
+        var state = new EnvironmentOverridesControlPanelState();
+        state.Initialize(new Dictionary<string, string>
+        {
+            ["Path"] = "mixed case",
+            ["PATH"] = "upper case",
+        });
+
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = RenderPanel(ctx, state);
+
+        // Assert
+        var rows = FindRows(component);
+        rows.Select(r => r.QuerySelector("td.name-column")!.TextContent)
+            .Should().Equal("PATH", "Path");
+    }
+
+    [Fact]
     public async Task Should_only_render_the_rows_matching_the_filter()
     {
         // Arrange
