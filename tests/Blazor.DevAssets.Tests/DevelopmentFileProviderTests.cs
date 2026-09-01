@@ -20,7 +20,6 @@ public class DevelopmentFileProviderTests
     {
         [Theory]
         [InlineData("js/loadjs.js")]
-        [InlineData("js/static-restart.js")]
         [InlineData("js/suite.js")]
         [InlineData("svg/table.svg")]
         [InlineData("_content/ViciOne.Suite.Blazor.Shared/css/suite.css")]

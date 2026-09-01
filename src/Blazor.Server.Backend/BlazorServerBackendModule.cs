@@ -141,10 +141,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             env.UseClientAssetsProduction(uiEnvironment, logger);
         }
 
-        var options = new DefaultFilesOptions();
-        options.DefaultFileNames.Add("static-restart.html");
-
-        app.UseDefaultFiles(options);
+        app.UseDefaultFiles();
 
         // include the files in the wwwroot folder as assets
         app.UseStaticFiles();
