@@ -40,8 +40,9 @@ public sealed class EnvironmentOverridesPanel(IPage page)
     // The panel's description banner is rendered into the popup's header section, outside the grid.
     private ILocator RiskBanner => page.Locator("aside.description-banner");
 
-    // The in-panel restart action, offered only once overrides were stored.
-    private ILocator RestartAction => page.Locator(".control-panel-container .settings-field button");
+    // The restart action, offered in the grid's toolbar only once overrides were stored.
+    private ILocator RestartAction =>
+        Grid.Locator(".action-buttons button.grid-action-button:has(.monochrome-icon-refresh)");
 
     private ILocator Row(string name) =>
         Rows.Filter(new LocatorFilterOptions
