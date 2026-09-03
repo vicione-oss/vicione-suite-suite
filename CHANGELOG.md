@@ -5,6 +5,7 @@
 ### Changed
 
 - Overflow effect in profile flyout allows mouse events to pass through to underlying elements
+- `IndexPage`, updated layout to ensure last navigation tile panel has a bottom margin (to unify with top margin of first navigation tile panel)
 
 ### Added
 

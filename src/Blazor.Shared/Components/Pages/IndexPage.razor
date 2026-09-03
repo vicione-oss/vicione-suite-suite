@@ -4,10 +4,10 @@
 
 @attribute [Route(Constants.IndexRoute)]
 
-<div class="index-container">
-    <NavTilePanel Heading="@TechnicalTerms.Application" Group="NavTileGroup.Applications" />
-
-    <NavTilePanel Heading="@CommonVocabulary.Administration" Group="NavTileGroup.Administration" />
-
-    <NavTilePanel Heading="@CommonVocabulary.FavoritePlural" Group="NavTileGroup.Favorites" />
+<div class="index-page">
+    <NavTilePanelGrid>
+        <NavTilePanel Heading="@TechnicalTerms.Application" Group="NavTileGroup.Applications" />
+        <NavTilePanel Heading="@CommonVocabulary.Administration" Group="NavTileGroup.Administration" />
+        <NavTilePanel Heading="@CommonVocabulary.FavoritePlural" Group="NavTileGroup.Favorites" />
+    </NavTilePanelGrid>
 </div>

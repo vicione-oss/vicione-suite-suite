@@ -1,21 +1,19 @@
-﻿@use "../../../../shared/styles/variables.scss";
+@use "../../../../shared/styles/nav-tiles/variables" as nav-tiles;
 @use "../../../../shared/styles/typography";
 @use "../../Styles/design/colors";
 
 .nav-tile-panel {
-    margin: 25px variables.$main-content-margin-left-right 0px variables.$main-content-margin-left-right;
-}
+    h4 {
+        font-size: 24px;
+        letter-spacing: 0.5px;
+        font-weight: typography.$font-weight-light;
+        color: colors.$font;
+        margin-bottom: 16px - nav-tiles.$container-margin;
+        line-height: revert;
+    }
 
-h4 {
-    font-size: 24px;
-    letter-spacing: 0.5px;
-    font-weight: typography.$font-weight-light;
-    color: colors.$font;
-    margin-bottom: 16px;
-    line-height: revert;
-}
-
-.nav-tile-panel-content {
-    display: flex;
-    flex-wrap: wrap
+    .nav-tile-panel-content {
+        display: flex;
+        flex-wrap: wrap
+    }
 }

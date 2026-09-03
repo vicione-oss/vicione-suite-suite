@@ -1,0 +1,7 @@
+@use "../../../../shared/styles/nav-tiles/variables" as nav-tiles;
+
+.nav-tile-panel-grid {
+    display: grid;
+    grid-auto-flow: row;
+    row-gap: 64px - nav-tiles.$container-margin;
+}
