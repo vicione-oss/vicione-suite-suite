@@ -8,6 +8,7 @@ using Sdk.Testing;
 using Core.Artifacts;
 using Core.Artifacts.Extensions;
 using Core.Module.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace Core.Module.Tests;
 
@@ -16,6 +17,7 @@ public class ModuleArtifactRepositoryTests
     private readonly Version _sdkVersion = new(2, 1, 0);
     private readonly string _packageName = "ViciOne.Suite.ClusterManagement";
     private readonly string _packageVersion = "2.1.0";
+    private readonly ILogger<ModuleArtifactRepository> _logger = Substitute.For<ILogger<ModuleArtifactRepository>>();
 
     private static ServiceProvider CreateServiceProvider()
     {
@@ -25,6 +27,7 @@ public class ModuleArtifactRepositoryTests
         return new ServiceCollection()
             .AddSingleton<IFileSystem>(new FileSystem())
             .AddSingleton<ModuleArtifactRepository>()
+            .AddSingleton(Substitute.For<ILogger<ModuleArtifactRepository>>())
             .AddSingleton(optionsProvider)
             .AddHttpClient()
             .AddArtifactRepository(s => optionsProvider)
@@ -158,7 +161,7 @@ public class ModuleArtifactRepositoryTests
                 Interlocked.Decrement(ref concurrent);
             }
 
-            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem);
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, _logger);
             var packages = Enumerable.Range(0, 12)
                 .Select(i => new ModuleDependencyPackage { Name = $"Module.{i}", Version = "1.0.0" })
                 .ToArray();
@@ -234,7 +237,7 @@ public class ModuleArtifactRepositoryTests
                     throw new IOException("There is not enough space on the disk.");
                 });
 
-            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem);
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, _logger);
 
             // Act
             var result = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);
@@ -269,7 +272,7 @@ public class ModuleArtifactRepositoryTests
                         throw new IOException("There is not enough space on the disk.");
                 });
 
-            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem);
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, _logger);
 
             // Act
             var first = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);

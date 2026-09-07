@@ -13,7 +13,7 @@ public interface IArtifactRepositoryStore
     /// Supports both the current <c>ArtifactRepository</c> section and the legacy <c>ModuleApi</c> section
     /// for backwards compatibility. Has no effect if repositories already exist.
     /// </summary>    
-    Task MigrateConfiguredRepositories(IConfiguration config, CancellationToken cancellationToken = default);
+    Task MigrateConfiguredRepositories(IConfiguration config, ILogger logger, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves all persisted repositories, optionally filtered by their identifiers provided by repositoryIds usage.

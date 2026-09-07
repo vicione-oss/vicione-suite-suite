@@ -40,7 +40,19 @@ internal partial class ArtifactRepositoryOptionsCache(IConfiguration configurati
                     TokenEndpoint = source.TokenEndpoint,
                 }).ToList();
 
+        logger.LogDebug("Reloaded {Count} artifactory sources: {SourceEndpoints}",
+            repositoryOptions.Sources.Count,
+            string.Join(", ", repositoryOptions.Sources.Select(FormatSourceOption)));
+
         lock (_lock) { _options = repositoryOptions; }
+
+        string FormatSourceOption(ArtifactRepositorySourceOption option)
+        {
+            var pwd = string.IsNullOrWhiteSpace(option.Password) ? "no" : "ok";
+            var token = string.IsNullOrWhiteSpace(option.TokenEndpoint) ? "no" : "ok";
+
+            return $"{option.Endpoint} (pwd={pwd};token={token})";
+        }
     }
 
     [LoggerMessage(LogLevel.Error, "Failed to update repository tokens on reloading source options")]

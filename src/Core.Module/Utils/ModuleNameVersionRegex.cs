@@ -14,9 +14,9 @@ public static partial class ModuleNameVersionRegex
     private static partial Regex Matcher();
 
     /// <summary>
-    /// https://regex101.com/r/gldEOw/2
+    /// https://regex101.com/r/gldEOw/3
     /// </summary>    
-    [GeneratedRegex(@"^(?<version>\d+\.\d+\.\d+(\-(\d+|\w+))*)-(?<arch>(arm64|amd64|win-x64)+)_(?'sdkversion'\d+\.\d+\.\d+)\.json$", RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"^(?<version>\d+\.\d+\.\d+(\-(\d+|\w+))*)-(?<arch>(arm64|amd64|linux-x64|win-x64)+)_(?'sdkversion'\d+\.\d+\.\d+)\.json$", RegexOptions.CultureInvariant)]
     private static partial Regex MetaMatcher();
 
     public static bool GetModuleVersion(string moduleName, [NotNullWhen(true)] out SemVersion? parsed)
