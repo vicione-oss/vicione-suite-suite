@@ -40,7 +40,7 @@ internal static partial class ModulePreparationPipelineExtensions
     public static ModulePreparationPipeline UseRepositoryOptions(this ModulePreparationPipeline pipeline)
         => pipeline.Use(async (ctx, ct) =>
         {
-            await ctx.RepositoryStore.MigrateConfiguredRepositories(ctx.Builder.Configuration, ct);
+            await ctx.RepositoryStore.MigrateConfiguredRepositories(ctx.Builder.Configuration, ctx.Logger, ct);
 
             // we need a temporary token service here because the repository source tokens need to be refreshed eventually
             var tokenService = new ArtifactRepositoryTokenService(pipeline.HttpClientFactory);

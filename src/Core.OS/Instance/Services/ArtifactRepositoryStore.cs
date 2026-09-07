@@ -28,11 +28,14 @@ internal partial class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<
             _enqueueLock.Dispose();
     }
 
-    public async Task MigrateConfiguredRepositories(IConfiguration config, CancellationToken cancellationToken = default)
+    public async Task MigrateConfiguredRepositories(IConfiguration config, ILogger logger, CancellationToken cancellationToken = default)
     {
         var repositories = await GetRepositories(null, cancellationToken);
         if (repositories.Count > 0)
+        {
+            LogSkipMigration(logger);
             return;
+        }
 
         var envOptions = GetEnvironmentOptions(config);
         var repoSources = envOptions.Sources.Select(s => new ArtifactRepository
@@ -49,6 +52,8 @@ internal partial class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<
         }).ToList();
 
         await SerializeToFile(repoSources, fileSystem, instanceOptions.Value, cancellationToken);
+
+        LogMigratedRepositories(logger, repoSources.Count);
 
         static string TryGuessEndpointName(string endpoint)
         {
@@ -197,4 +202,10 @@ internal partial class ArtifactRepositoryStore(IFileSystem fileSystem, IOptions<
 
     [LoggerMessage(LogLevel.Debug, "Clear artifact sources")]
     private static partial void LogClearArtifactSources(ILogger logger);
+
+    [LoggerMessage(LogLevel.Debug, "Skip artifact repository options migration.")]
+    private static partial void LogSkipMigration(ILogger logger);
+
+    [LoggerMessage(LogLevel.Debug, "Migrated {Count} artifact repository options.")]
+    private static partial void LogMigratedRepositories(ILogger logger, int count);
 }

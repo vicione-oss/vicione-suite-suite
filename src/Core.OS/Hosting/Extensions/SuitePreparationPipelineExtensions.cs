@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Runtime.InteropServices;
 using Core.OS.Extensions;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Instance;
@@ -21,8 +22,9 @@ internal static partial class SuitePreparationPipelineExtensions
 
             var version = context.FileSystem.EvaluateLocalVersionString(out var branchName);
             var branchInfo = branchName is null ? string.Empty : $" branch: '{branchName}'";
+            var runtimeId = RuntimeInformation.RuntimeIdentifier;
 
-            LogInstanceVersion(context.Logger, context.InstanceOptions.Type, version, branchInfo);
+            LogInstanceVersion(context.Logger, context.InstanceOptions.Type, runtimeId, version, branchInfo);
             return Task.CompletedTask;
         });
 
@@ -250,8 +252,8 @@ internal static partial class SuitePreparationPipelineExtensions
         }
     }
 
-    [LoggerMessage(LogLevel.Information, "Preparing '{Type}' application version '{Version}':{BranchInfo}")]
-    private static partial void LogInstanceVersion(ILogger logger, InstanceType type, string? version, string? branchInfo);
+    [LoggerMessage(LogLevel.Information, "Preparing '{Type} ({RuntimeIdentifier})' application version '{Version}':{BranchInfo}")]
+    private static partial void LogInstanceVersion(ILogger logger, InstanceType type, string runtimeIdentifier, string? version, string? branchInfo);
 
     [LoggerMessage(LogLevel.Warning, "Recovery mode - all modules disabled. Previous configuration stored within '{Path}'")]
     private static partial void LogRecoveryModeActive(ILogger logger, string path);

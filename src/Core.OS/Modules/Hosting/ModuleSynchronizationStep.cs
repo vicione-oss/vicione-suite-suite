@@ -37,8 +37,9 @@ internal static class ModuleSynchronizationStep
         var packages = ctx.Manifest.GetValidModulePackages([.. moduleIds], debugModuleVersions, ctx.Logger);
         var repositoryLogger = ctx.LoggerFactory.CreateLogger<JFrogArtifactRepository>();
         var repository = new JFrogArtifactRepository(ctx.FileSystem, httpClientFactory, ctx.RepositoryOptionsCache, repositoryLogger);
-        var moduleRepository = new ModuleArtifactRepository(repository, ctx.FileSystem);
-
+        var moduleRepositoryLogger = ctx.LoggerFactory.CreateLogger<ModuleArtifactRepository>();
+        var moduleRepository = new ModuleArtifactRepository(repository, ctx.FileSystem, moduleRepositoryLogger);
+        
         // we have everything to start synchronizing the module packages with the configured artifact repositories
         var synchronizer = new ModuleSynchronizer(ctx.FileSystem)
             .WithApiAdapter(moduleRepository)

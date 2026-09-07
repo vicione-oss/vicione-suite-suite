@@ -1,15 +1,17 @@
 using System.IO.Abstractions;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Core.Module.Contracts;
 using Core.Module.Extensions;
 using Core.Module.Utils;
+using Microsoft.Extensions.Logging;
 using Sdk.Backend.Artifacts;
 using Sdk.Modules;
 using Semver;
 
 namespace Core.Module;
 
-public sealed class ModuleArtifactRepository(IArtifactRepository artifactRepository, IFileSystem fileSystem) : IModuleArtifactRepository
+public sealed partial class ModuleArtifactRepository(IArtifactRepository artifactRepository, IFileSystem fileSystem, ILogger<ModuleArtifactRepository> logger) : IModuleArtifactRepository
 {
     private const string ModulesBaseFolder = "modules"; // Base folder in the repository
     private const int MaxConcurrentDownloads = 5;
@@ -219,7 +221,11 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
             .OrderByDescending("path", "name")
             .Build();
 
+        LogAqlQuery(logger, nameof(QueryModuleArtifacts), aqlQuery);
+
         var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+
+        LogQueryResultErrors(result);
 
         return [.. result.Artifacts];
     }
@@ -237,7 +243,12 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
 
         // e.g. items.find({"modified":{"$gt":"2026-04-13T03:59:57.57TZD"}},{"repo":"__repository__","$and":[{"path":{"$match":"modules/*"}},{"name":{"$match":"*win-x64*.json"}}]}).sort({"$desc":["path","name"]})
         var aqlQuery = queryBuilder.Build();
+
+        LogAqlQuery(logger, nameof(QueryModuleMetadataArtifacts), aqlQuery);
+
         var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+
+        LogQueryResultErrors(result);
 
         // our major version matches already by name filter
         if (sdkVersion is null)
@@ -257,7 +268,12 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
 
         // 0.28.0-ci1523472-linux-arm64_0.25.0.json        
         var aqlQuery = queryBuilder.Build();
+
+        LogAqlQuery(logger, nameof(QueryModuleArtifact), aqlQuery);
+
         var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+
+        LogQueryResultErrors(result);
 
         return result.Artifacts.FirstOrDefault();
     }
@@ -275,7 +291,12 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
             .OrderByDescending("name");
 
         var aqlQuery = queryBuilder.Build();
+
+        LogAqlQuery(logger, nameof(QueryLatestModuleMetadataArtifact), aqlQuery);
+
         var result = await artifactRepository.Query(aqlQuery, cancellationToken);
+
+        LogQueryResultErrors(result);
 
         return result.OrderModuleArtifactsByVersionDesc(k => !k.IsPrerelease &&
             (major is null || major == k.Major) &&
@@ -297,4 +318,27 @@ public sealed class ModuleArtifactRepository(IArtifactRepository artifactReposit
 
     private bool ModuleVersionExists(string modulePath)
         => fileSystem.File.Exists(fileSystem.Path.Combine(modulePath, ModuleHelpers.CompletenessMarkerFileName));
+
+
+    private void LogQueryResultErrors(IArtifactQueryResult result, [CallerMemberName] string? caller = "")
+    {
+        LogQueryResult(logger, caller, result.Artifacts.Count, result.Errors?.Count);
+
+        if (result.Errors?.Count > 0)
+        {
+            foreach (var error in result.Errors)
+            {
+                LogQueryResultError(logger, error.Source, error.Error.Message);
+            }
+        }
+    }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Aql '{Name}': {Query}")]
+    private static partial void LogAqlQuery(ILogger<ModuleArtifactRepository> logger, string name, string query);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Query='{Caller}' results: {Count}, errors: {Errors}")]
+    private static partial void LogQueryResult(ILogger<ModuleArtifactRepository> logger, string? caller, int count, int? errors);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Source='{Source}' result error: {Error}")]
+    private static partial void LogQueryResultError(ILogger<ModuleArtifactRepository> logger, string source, string? error);
 }

@@ -17,7 +17,7 @@ public class ArtifactRepositoryStoreTests
 {
     private readonly MockFileSystem _fileSystem = new();
     private readonly IOptions<InstanceOptions> _options;
-    private readonly ILogger<ArtifactRepositoryStore> _logger = NSubstitute.Substitute.For<ILogger<ArtifactRepositoryStore>>();
+    private readonly ILogger<ArtifactRepositoryStore> _logger = Substitute.For<ILogger<ArtifactRepositoryStore>>();
     private readonly ArtifactRepository _releaseSource = new()
     {
         Id = Guid.NewGuid(),
@@ -72,7 +72,7 @@ public class ArtifactRepositoryStoreTests
             var config = new TestConfig().BuildConfiguration();
 
             // Act
-            await repositoryStore.MigrateConfiguredRepositories(config, TestContext.Current.CancellationToken);
+            await repositoryStore.MigrateConfiguredRepositories(config, _logger, TestContext.Current.CancellationToken);
 
             // Assert
             var result = await repositoryStore.GetRepositories(null, TestContext.Current.CancellationToken);
@@ -93,7 +93,7 @@ public class ArtifactRepositoryStoreTests
             });
 
             // Act
-            await repositoryStore.MigrateConfiguredRepositories(builder.Build(), TestContext.Current.CancellationToken);
+            await repositoryStore.MigrateConfiguredRepositories(builder.Build(), _logger, TestContext.Current.CancellationToken);
 
             // Assert
             var repositories = await repositoryStore.GetRepositories(null, TestContext.Current.CancellationToken);
@@ -127,7 +127,7 @@ public class ArtifactRepositoryStoreTests
             });
 
             // Act
-            await repositoryStore.MigrateConfiguredRepositories(builder.Build(), TestContext.Current.CancellationToken);
+            await repositoryStore.MigrateConfiguredRepositories(builder.Build(), _logger, TestContext.Current.CancellationToken);
 
             // Assert
             var repositories = await repositoryStore.GetRepositories(null, TestContext.Current.CancellationToken);
@@ -160,7 +160,7 @@ public class ArtifactRepositoryStoreTests
             await repositoryStore.CreateOrUpdate(_releaseSource, TestContext.Current.CancellationToken);
 
             // Act
-            await repositoryStore.MigrateConfiguredRepositories(builder.Build(), TestContext.Current.CancellationToken);
+            await repositoryStore.MigrateConfiguredRepositories(builder.Build(), _logger, TestContext.Current.CancellationToken);
 
             // Assert
             var repositories = await repositoryStore.GetRepositories(null, TestContext.Current.CancellationToken);
