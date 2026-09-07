@@ -1,3 +1,4 @@
+using Core.OS.Configuration;
 using Core.OS.Extensions;
 using Core.OS.Logging;
 using Microsoft.AspNetCore.Builder;
@@ -24,7 +25,7 @@ public class LoggingOptionsTests
                 ["Logging:OpenTelemetry:QueueLimit"] = "0",
             });
 
-            builder.Services.AddSuiteOptions<LoggingOptions>(LoggingOptions.ConfigSection);
+            builder.Services.AddSuiteOptions<LoggingOptions, LoggingOptionsValidator>(LoggingOptions.ConfigSection);
             var host = builder.Build();
 
             // Act

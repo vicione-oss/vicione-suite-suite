@@ -75,9 +75,10 @@ public sealed class MessageBusOptions
     public ErrorQueueSettings ErrorQueue { get; set; } = new();
 
     /// <summary>
-    /// ConnectionOptions For RabbitMq
+    /// ConnectionOptions for RabbitMq. Deliberately not validated: MassTransit owns this type and carries no
+    /// validation attributes on it, and the suite does not annotate types it does not own. A wrong host, port or
+    /// credential surfaces as a broker connection failure at bus start. Recorded in ADR-004.
     /// </summary>
-    [ValidateObjectMembers]
     public RabbitMqTransportOptions Connection { get; set; } = new();
 
     /// <summary>

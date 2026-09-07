@@ -1,4 +1,7 @@
-﻿namespace Core.OS.Connections.Mqtt;
+﻿using Core.OS.Configuration;
+using Core.OS.Extensions;
+
+namespace Core.OS.Connections.Mqtt;
 
 internal static class MqttConfiguration
 {
@@ -14,9 +17,7 @@ internal static class MqttConfiguration
 
     internal static IServiceCollection AddMqttServices(this IServiceCollection services)
     {
-        services.AddOptions<MqttClientOptions>()
-            .BindConfiguration(MqttClientOptions.ConfigSection)
-            .ValidateDataAnnotations();
+        services.AddSuiteOptions<MqttClientOptions, MqttClientOptionsValidator>(MqttClientOptions.ConfigSection);
 
         return services;
     }

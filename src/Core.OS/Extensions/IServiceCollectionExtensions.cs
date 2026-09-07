@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using System.Reflection;
 using Core.Artifacts;
 using Core.Module.Options;
+using Core.OS.Configuration;
 using Core.OS.Connections.Extensions;
 using Core.OS.DataProtection.Extensions;
 using Core.OS.DbContext;
@@ -28,6 +29,7 @@ using MassTransit.Logging;
 using MassTransit.Monitoring;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
@@ -49,14 +51,18 @@ internal static class IServiceCollectionExtensions
     {
         public IServiceCollection ConfigureAndValidateOptions(InstanceOptions instanceOptions)
         {
-            services.AddSuiteOptions<InstanceOptions>(InstanceOptions.ConfigSection);
-            services.AddSuiteOptions<UserManagementOptions>(UserManagementOptions.ConfigSection);
-            services.AddSuiteOptions<ModuleLoaderOptions>(ModuleLoaderOptions.ConfigSection);
-            services.AddSuiteOptions<MessageBusOptions>(MessageBusOptions.ConfigSection);
-            services.AddSuiteOptions<LoggingOptions>(LoggingOptions.ConfigSection);
-            services.AddSuiteOptions<HostManagementOptions>(HostManagementOptions.ConfigSection);
-            services.AddSuiteOptions<ArtifactRepositoryOptions>(ArtifactRepositoryOptions.ConfigSection);
-            services.AddSuiteOptions<ExternalIdProviderOptions>(ExternalIdProviderOptions.ConfigSection);
+            services.AddSuiteOptions<InstanceOptions, InstanceOptionsValidator>(InstanceOptions.ConfigSection);
+            services.AddSuiteOptions<UserManagementOptions, UserManagementOptionsValidator>(UserManagementOptions.ConfigSection);
+            services.AddSuiteOptions<MessageBusOptions, MessageBusOptionsValidator>(MessageBusOptions.ConfigSection);
+            services.AddSuiteOptions<LoggingOptions, LoggingOptionsValidator>(LoggingOptions.ConfigSection);
+            services.AddSuiteOptions<ExternalIdProviderOptions, ExternalIdProviderOptionsValidator>(ExternalIdProviderOptions.ConfigSection);
+
+            services.AddUnvalidatedSuiteOptions<ModuleLoaderOptions>(ModuleLoaderOptions.ConfigSection,
+                "Paths and feature switches only - no bound value whose range the suite can state.");
+            services.AddUnvalidatedSuiteOptions<HostManagementOptions>(HostManagementOptions.ConfigSection,
+                "Pipe and service names plus a cache lifetime; the nested MockPipeClientOptions is a test seam.");
+            services.AddUnvalidatedSuiteOptions<ArtifactRepositoryOptions>(ArtifactRepositoryOptions.ConfigSection,
+                "Source endpoints are checked where they are used - JFrogArtifactRepository requires https - not at bind time.");
 
             services.AddTransient<ILogOptions>(s => s.GetRequiredService<IOptions<LoggingOptions>>().Value)
                 .Configure<HealthCheckPublisherOptions>(options =>
@@ -70,11 +76,50 @@ internal static class IServiceCollectionExtensions
             return services;
         }
 
-        public void AddSuiteOptions<T>(string sectionName) where T : class
-            => services.AddOptions<T>()
+        /// <summary>
+        /// Binds <typeparamref name="TOptions"/> to <paramref name="sectionName"/> and validates it with
+        /// <typeparamref name="TValidator"/> on start, so a bad value fails the host instead of binding silently.
+        /// </summary>
+        /// <remarks>
+        /// The validator is a required type argument rather than an optional call in a fluent chain, because a
+        /// silently unvalidated options type is the failure mode this method exists to design out.
+        /// <typeparamref name="TValidator"/> is a <c>[OptionsValidator]</c> partial class from
+        /// <see cref="Core.OS.Configuration"/>; unlike the <c>ValidateDataAnnotations()</c> this used to call, it
+        /// recurses into the nested settings classes marked <see cref="ValidateObjectMembersAttribute"/> and so
+        /// actually enforces their bounds. An options type with nothing to validate cannot supply a generated
+        /// validator and goes through <see cref="AddUnvalidatedSuiteOptions{TOptions}"/> instead, which states why.
+        /// </remarks>
+        public void AddSuiteOptions<TOptions, TValidator>(string sectionName)
+            where TOptions : class
+            where TValidator : class, IValidateOptions<TOptions>, new()
+        {
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<TOptions>, TValidator>());
+            services.AddOptions<TOptions>()
                 .BindConfiguration(sectionName)
-                .ValidateDataAnnotations()
                 .ValidateOnStart();
+        }
+
+        /// <summary>
+        /// Binds <typeparamref name="TOptions"/> to <paramref name="sectionName"/> without validating it, recording
+        /// <paramref name="justification"/> as the reason it is exempt.
+        /// </summary>
+        /// <remarks>
+        /// Only for types whose graph carries no validation attribute at all: the source generator emits no
+        /// <c>Validate</c> method for those (it reports <c>SYSLIB1203</c>), so an <c>[OptionsValidator]</c> partial
+        /// class would not compile. Annotating the type and using
+        /// <see cref="AddSuiteOptions{TOptions, TValidator}"/> is the better answer wherever a bound value has a
+        /// range the suite can state.
+        /// </remarks>
+        /// <param name="justification">Why this options type has nothing to validate.</param>
+        public void AddUnvalidatedSuiteOptions<TOptions>(string sectionName, string justification)
+            where TOptions : class
+        {
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<TOptions>>(
+                new UnvalidatedSuiteOptions<TOptions>(justification)));
+            services.AddOptions<TOptions>()
+                .BindConfiguration(sectionName)
+                .ValidateOnStart();
+        }
 
         internal IServiceCollection AddTransportSecurity(InstanceOptions instanceOptions)
         {

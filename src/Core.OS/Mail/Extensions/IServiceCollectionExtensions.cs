@@ -13,7 +13,11 @@ public static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddMailing(this IServiceCollection services)
     {
-        services.AddSuiteOptions<SmtpMailOptions>(SmtpMailOptions.ConfigSection);
+        // Every field is `required` but none is `[Required]`: the binder does not enforce `required`, and adding
+        // the attribute would stop every instance that does not configure mail at all. Checked where it is used
+        // (MailkitMailSender reports an unusable configuration through IMailSenderStatus) instead.
+        services.AddUnvalidatedSuiteOptions<SmtpMailOptions>(SmtpMailOptions.ConfigSection,
+            "Mail is optional; an unconfigured Smtp section must not stop the instance.");
         services.AddTransient<IMailClientConfigurator, StrictMailClientConfigurator>();
 
         services.AddTransient<IMailSender, MailkitMailSender>();
