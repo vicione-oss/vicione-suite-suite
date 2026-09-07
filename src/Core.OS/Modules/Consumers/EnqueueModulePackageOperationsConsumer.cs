@@ -1,4 +1,3 @@
-using Core.Shared.Modules;
 using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Events;
 using MassTransit;
@@ -35,14 +34,11 @@ public sealed partial class EnqueueModulePackageOperationsConsumer(
         }
         catch (Exception ex)
         {
-            LogError(logger, ex, context.Message.Operations.Count);
-
-            var error = new ErrorInfo(ModuleErrorCodes.EnqueueOperationsFailed, ex.Message);
-
-            await context.Publish(new ModulePackageOperationsEnqueued(instanceId, [], error) { CorrelationId = correlationId }, context.CancellationToken);
-
-            if (instanceInfoProvider.Local.Type != InstanceType.Slave)
-                await context.Publish(new ModulePackageOperationsChanged([], error) { CorrelationId = correlationId }, context.CancellationToken);
+            // ADR-004 (D6): log and rethrow so the retry ladder applies and the command finally dead-letters. The
+            // correlated failure feedback is published by EnqueueModulePackageOperationsFaultConsumer - publishing it
+            // from here is impossible, because the in-memory outbox discards everything a faulted consumer published.
+            LogError(logger, ex, correlationId, instanceId, context.Message.Operations.Count);
+            throw;
         }
     }
 
@@ -52,6 +48,11 @@ public sealed partial class EnqueueModulePackageOperationsConsumer(
     [LoggerMessage(Level = LogLevel.Information, Message = "Enqueued {OperationsCount} package operations correlated by {CorrelationId}")]
     private static partial void LogOperationsUpdated(ILogger<EnqueueModulePackageOperationsConsumer> logger, Guid correlationId, int operationsCount);
 
-    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to enqueue {OperationCount} operations.")]
-    private static partial void LogError(ILogger<EnqueueModulePackageOperationsConsumer> logger, Exception error, int operationCount);
+    // Where the transport discards faulted messages - the in-memory bus on Standalone - this line is the only
+    // post-mortem evidence of the failure, so it carries the ids needed to tie it back to the operation the user
+    // triggered. See ADR-004 (D5, D6).
+    [LoggerMessage(Level = LogLevel.Error,
+        Message = "Failed to enqueue {OperationCount} package operations on instance {InstanceId} correlated by {CorrelationId}")]
+    private static partial void LogError(ILogger<EnqueueModulePackageOperationsConsumer> logger, Exception error, Guid correlationId,
+        Guid instanceId, int operationCount);
 }

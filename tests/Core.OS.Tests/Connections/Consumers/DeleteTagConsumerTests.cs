@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Sdk.Connections.Commands;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Events;
+using Sdk.Messaging;
 using Sdk.Testing.Backend;
 
 namespace Core.OS.Tests.Connections.Consumers;
@@ -30,6 +31,35 @@ public sealed class DeleteTagConsumerTests : TestWithDbContextSqlite<ConnectionD
 
         // Act + Assert
         await tester.TestCommand<DeleteTag, DeleteTagConsumer>(new DeleteTag(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task Should_publish_success_event_when_delete_is_redelivered()
+    {
+        // Arrange — ADR-002: the tag has to exist and be deleted first, so the second delivery is a genuine
+        // redelivery of an already-applied command rather than a delete of an unknown id.
+        await using var tester = new MassTransitTester(_configureServices);
+        var dbContext = tester.Services.GetRequiredService<IConnectionDbContext>();
+
+        var tagId = Guid.NewGuid();
+        dbContext.Tags.Add(new Tag("test", tagId));
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var command = new DeleteTag(tagId);
+
+        // Act — TestCommands waits for the bus to go idle before collecting, so both deliveries are complete
+        var events = await tester.TestCommands<DeleteTag, DeleteTagConsumer, TagsChanged>([command, command]);
+
+        // Assert
+        dbContext.Tags.Should().BeEmpty("the terminal state has to be the same after the redelivery");
+
+        events.Should().HaveCount(2, "the delete and its redelivery each publish a completion");
+        events.Should().AllSatisfy(e =>
+        {
+            e.Action.Should().Be(CrudAction.Deleted);
+            e.Tags[0].Id.Should().Be(tagId);
+            e.ErrorInfo.Should().BeNull("a redelivered delete must not be reported as a failure");
+        });
     }
 
     [Fact]

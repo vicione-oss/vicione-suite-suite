@@ -61,6 +61,35 @@ public sealed class DeleteArtifactRepositoryConsumerTests
     }
 
     [Fact]
+    public async Task Should_publish_success_event_when_delete_is_redelivered()
+    {
+        // Arrange — ADR-002: the store returns the repository on the first delete and nothing on the second, so the
+        // second delivery is a genuine redelivery of an already-applied command rather than a delete of an unknown id.
+        var repo = new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo1.example.com", Name = "Repo 1" };
+        _repositoryStore.Delete(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult<IReadOnlyCollection<ArtifactRepository>>([repo]),
+                Task.FromResult<IReadOnlyCollection<ArtifactRepository>>([]));
+
+        await using var tester = new MassTransitTester(_configureServices);
+        var command = new DeleteArtifactRepository(repo.Id);
+
+        // Act — TestCommands waits for the bus to go idle before collecting, so both deliveries are complete
+        var events = await tester.TestCommands<DeleteArtifactRepository, DeleteArtifactRepositoryConsumer, ArtifactRepositoryChanged>([command, command]);
+
+        // Assert
+        events.Should().HaveCount(2, "the delete and its redelivery each publish a completion");
+        events.Should().AllSatisfy(e =>
+        {
+            e.Action.Should().Be(CrudAction.Deleted);
+            e.Repository.Id.Should().Be(repo.Id);
+            e.Error.Should().BeNull("a redelivered delete must not be reported as a failure");
+        });
+
+        await _repositoryStore.Received(2).Delete(Arg.Any<IReadOnlyCollection<Guid>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Should_publish_deleted_event_with_error_on_failure()
     {
         // Arrange

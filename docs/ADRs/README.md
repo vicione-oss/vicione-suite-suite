@@ -17,3 +17,4 @@ Suite ADRs are numbered independently from `suite-sdk`. Both sequences start at 
 | ADR-001 | [ADR Conventions](../../suite-sdk/docs/ADRs/ADR-001-adr-conventions.md) | Accepted | 2026-05-27 |
 | ADR-002 | [Consumer Idempotency Strategy](ADR-002-consumer-idempotency-strategy.md) | Accepted | 2026-05-27 |
 | ADR-003 | [Replication Consistency Guarantees](ADR-003-replication-consistency-guarantees.md) | Accepted | 2026-06-04 |
+| ADR-004 | [Error Handling Strategy](ADR-004-error-handling-strategy.md) | Accepted | 2026-08-03 |

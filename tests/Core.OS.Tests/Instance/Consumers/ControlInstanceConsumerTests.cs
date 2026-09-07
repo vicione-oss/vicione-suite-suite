@@ -8,6 +8,7 @@ using Core.OS.Tests.Extensions;
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Contracts;
+using Core.Shared.Instance.Events;
 using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
@@ -82,6 +83,39 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
 
             // Act + Assert
             await tester.TestInstanceDependentCommand<ControlInstance, ControlInstanceConsumer>(command);
+        }
+
+        [Fact]
+        public async Task Should_publish_completion_when_delete_is_redelivered()
+        {
+            // Arrange — ADR-002: the instance has to exist and be deleted first, so the second delivery is a
+            // genuine redelivery of an already-applied command rather than a delete of an unknown id.
+            await using var tester = new MassTransitTester(_configureServices);
+            var appDb = tester.Services.GetRequiredService<IApplicationDbContext>();
+            appDb.InstanceInfo.Add(_standaloneInstance);
+            await appDb.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+            var command = new ControlInstance
+            {
+                Action = InstanceCommand.Delete,
+                InstanceId = _standaloneInstance.Id
+            };
+
+            // Act — TestCommands waits for the bus to go idle before collecting, so both deliveries are complete
+            var events = await tester.Harness
+                .TestCommands<ControlInstance, ControlInstanceConsumer, ControlInstanceCompleted>([command, command]);
+
+            // Assert
+            appDb.InstanceInfo.Should().NotContain(i => i.Id == _standaloneInstance.Id,
+                "the terminal state has to be the same after the redelivery");
+
+            events.Should().HaveCount(2, "the delete and its redelivery each publish a completion");
+            events.Should().AllSatisfy(e =>
+            {
+                e.InstanceId.Should().Be(command.InstanceId);
+                e.Command.Should().Be(InstanceCommand.Delete);
+                e.Error.Should().BeNull("a redelivered delete must not be reported as a failure");
+            });
         }
     }
 

@@ -153,29 +153,21 @@ public class EnqueueModulePackageOperationsConsumerTests
     }
 
     [Fact]
-    public async Task Should_publish_error_events_on_store_failure()
+    public async Task Should_fault_on_store_failure()
     {
-        // Arrange
+        // Arrange: ADR-004 (D6) - the consumer rethrows so it is retried and finally dead-lettered
         await using var tester = new MassTransitTester(ConfigureServices(InstanceType.Master));
         var command = CreateCommand(Install("InvalidPackage", "1.0.0"));
         _packageStore.EnqueueOperations(Arg.Any<List<ModulePackageOperation>>(), Arg.Any<CancellationToken>())
             .ThrowsAsync(new InvalidOperationException("Failed to queue operations"));
 
         // Act
-        await tester.TestInstanceDependentCommand<EnqueueModulePackageOperations, EnqueueModulePackageOperationsConsumer>(command);
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => tester.TestInstanceDependentCommandFault<EnqueueModulePackageOperations, EnqueueModulePackageOperationsConsumer>(command));
 
-        // Assert
-        (await tester.Harness.Published.Any<ModulePackageOperationsEnqueued>(
-            k => k.Context.Message.CorrelationId == command.CorrelationId
-                && k.Context.Message.Error is not null
-                && k.Context.Message.Error.ErrorCode == 230,
-            TestContext.Current.CancellationToken)).Should().BeTrue();
-
-        (await tester.Harness.Published.Any<ModulePackageOperationsChanged>(
-            k => k.Context.Message.CorrelationId == command.CorrelationId
-                && k.Context.Message.Error is not null
-                && k.Context.Message.Error.ErrorCode == 230,
-            TestContext.Current.CancellationToken)).Should().BeTrue();
+        // Assert: the failure feedback is published by the fault consumer, never by the faulted consumer itself
+        (await tester.Harness.Published.Any<ModulePackageOperationsEnqueued>(TestContext.Current.CancellationToken)).Should().BeFalse();
+        (await tester.Harness.Published.Any<ModulePackageOperationsChanged>(TestContext.Current.CancellationToken)).Should().BeFalse();
     }
 
     [Fact]

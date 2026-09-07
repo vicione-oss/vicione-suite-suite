@@ -7,6 +7,9 @@
 - Overflow effect in profile flyout allows mouse events to pass through to underlying elements
 - `IndexPage`, updated layout to ensure last navigation tile panel has a bottom margin (to unify with top margin of first navigation tile panel)
 - Every dynamic response now sets an explicit no-cache policy (`Cache-Control: no-store, no-cache, must-revalidate`, `Pragma: no-cache`, `Expires: 0`); static assets stay cacheable
+- Message retry is now configured per receive endpoint and applies to **every** transport, so a standalone instance on the in-memory bus retries exactly like a clustered one. Each endpoint gets a retry ladder matching its role: request/response consumers retry for about 4 seconds so the caller sees the fault rather than a timeout, and the serialized instance queue (replication and instance-dependent commands) as well as the shared command and event queues retry for about 6 seconds so a failing message does not stall the message types queued behind it. Deterministic failures (`ArgumentException`, `NotSupportedException`) are no longer retried. See `docs/ADRs/ADR-004-error-handling-strategy.md`.
+- A receive endpoint now stops consuming for 60 seconds when at least half of the messages it handled in the last 5 minutes failed, instead of working through the backlog at full CPU while a dependency is down. It restarts itself. On a master or slave the waiting messages stay in their durable queue; on a standalone instance, which uses the in-memory transport, they are held in memory and are lost if the instance restarts within that window — which is still better than the alternative there, where every message that exhausts its retries is discarded outright. Configurable under `MessageBus:KillSwitch`
+- RabbitMQ `_error` and `_skipped` queues are now bounded (7-day message TTL, 7-day queue expiry, 250 messages, 2 MiB, oldest dropped first) instead of inheriting the input queue settings, which left them unbounded on a master. **Upgrading a broker that already has such queues requires deleting them first** — queue arguments are part of a RabbitMQ queue's identity, so redeclaring one with different arguments fails. They are only created when an endpoint actually dead-letters a message, so a broker that has never faulted is unaffected. Alternatively set `MessageBus__CleanVirtualHost=true` once, or set the `MessageBus__ErrorQueue__*` values to `0` to keep the previous behaviour
 
 ### Added
 
@@ -19,6 +22,8 @@
 - Passkey sign-in asked the server for a challenge for the literal user name `null`, because the sign-in element was pointed at an `Input.Email` field that the login form does not have (the Blazor template it was ported from identifies users by email). It now reads the entered user name and percent-encodes it, `+` being a legal user name character that otherwise reaches the server as a space. Signing in was never blocked by this, as the user is resolved from the credential itself.
 - `AuthenticationCookieUpdater`, replaced `document.baseURI` with `NavigationManager.BaseUri` to remove attack vector for server-side request forgery (SSRF)
 - `ModuleArtifactRepository`, fixed issue on requesting latest linux-x64 artifacts
+- A failed module package enqueue is no longer swallowed: the command is retried and finally dead-lettered, and the correlated failure is reported by a dedicated fault consumer instead of from the consumer's catch block
+- Retry intervals configured under `MessageBus` are no longer appended to the built-in defaults; a configured ladder now replaces the default one. Leaving a ladder unset keeps the default, while setting it to an empty value (`MessageBus__RetryIntervals=`, or `[]` in JSON) turns retry off for those endpoints
 
 ### Updated
 
