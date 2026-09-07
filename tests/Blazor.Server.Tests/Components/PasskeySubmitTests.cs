@@ -50,6 +50,24 @@ public sealed class PasskeySubmitTests
         component.Find("button").HasAttribute("disabled").Should().BeFalse();
     }
 
+    [Fact]
+    public void Should_point_the_interactive_element_at_the_form_field_holding_the_username()
+    {
+        // Arrange
+        using var ctx = CreateContext();
+
+        // Act
+        var component = ctx.Render<PasskeySubmit>(builder => builder
+            .Add(c => c.Operation, PasskeyOperation.Request)
+            .Add(c => c.Name, "Input.Passkey")
+            .Add(c => c.UsernameField, "Input.Username")
+            .Add(c => c.Text, "Login with passkey")
+            .Add(c => c.Disabled, false));
+
+        // Assert
+        component.Find("passkey-submit").GetAttribute("username-field").Should().Be("Input.Username");
+    }
+
     private static BunitContext CreateContext()
     {
         var ctx = new BunitContext();

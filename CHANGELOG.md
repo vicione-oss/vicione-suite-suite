@@ -15,6 +15,7 @@
 ### Fixed
 
 - Missing release date in `README.md` for version `1.3.0`
+- Passkey sign-in asked the server for a challenge for the literal user name `null`, because the sign-in element was pointed at an `Input.Email` field that the login form does not have (the Blazor template it was ported from identifies users by email). It now reads the entered user name and percent-encodes it, `+` being a legal user name character that otherwise reaches the server as a space. Signing in was never blocked by this, as the user is resolved from the credential itself.
 - `AuthenticationCookieUpdater`, replaced `document.baseURI` with `NavigationManager.BaseUri` to remove attack vector for server-side request forgery (SSRF)
 - `ModuleArtifactRepository`, fixed issue on requesting latest linux-x64 artifacts
 

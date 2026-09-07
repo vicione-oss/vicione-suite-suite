@@ -18,7 +18,7 @@ else
     <passkey-submit
         operation="@Operation"
         name="@Name"
-        email-name="@EmailName"
+        username-field="@UsernameField"
         request-token-name="@tokens?.HeaderName"
         request-token-value="@tokens?.RequestToken">
     </passkey-submit>
@@ -33,7 +33,7 @@ else
 
     [Parameter] [EditorRequired] public string Name { get; set; } = default!;
 
-    [Parameter] public string? EmailName { get; set; }
+    [Parameter] public string? UsernameField { get; set; }
 
     [Parameter] public string Text { get; set; } = null!;
 

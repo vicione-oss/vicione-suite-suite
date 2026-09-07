@@ -34,8 +34,9 @@ async function createCredential(headers, signal) {
     return await navigator.credentials.create({ publicKey: options, signal });
 }
 
-async function requestCredential(email, mediation, headers, signal) {
-    const optionsResponse = await fetchWithErrorHandling(`/account/passkey-request-options?username=${email}`, {
+async function requestCredential(username, mediation, headers, signal) {
+    const url = `/account/passkey-request-options?username=${encodeURIComponent(username)}`;
+    const optionsResponse = await fetchWithErrorHandling(url, {
         method: 'POST',
         headers,
         signal,
@@ -53,7 +54,7 @@ customElements.define('passkey-submit', class extends HTMLElement {
         this.attrs = {
             operation: this.getAttribute('operation'),
             name: this.getAttribute('name'),
-            emailName: this.getAttribute('email-name'),
+            usernameField: this.getAttribute('username-field'),
             requestTokenName: this.getAttribute('request-token-name'),
             requestTokenValue: this.getAttribute('request-token-value'),
         };
@@ -84,9 +85,9 @@ customElements.define('passkey-submit', class extends HTMLElement {
         if (this.attrs.operation === 'Create') {
             return await createCredential(headers, signal);
         } else if (this.attrs.operation === 'Request') {
-            const email = new FormData(this.internals.form).get(this.attrs.emailName);
+            const username = new FormData(this.internals.form).get(this.attrs.usernameField);
             const mediation = useConditionalMediation ? 'conditional' : undefined;
-            return await requestCredential(email, mediation, headers, signal);
+            return await requestCredential(username, mediation, headers, signal);
         } else {
             throw new Error(`Unknown passkey operation '${this.attrs.operation}'.`);
         }
