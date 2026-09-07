@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Frozen;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Core.Module;
@@ -6,7 +7,6 @@ using Core.OS.DbContext;
 using Core.OS.Diagnostics.MassTransit;
 using Core.OS.Instance;
 using Core.OS.Instance.Consumers;
-using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Initialization;
 using Core.OS.Instance.Services;
@@ -61,12 +61,49 @@ internal static class MassTransitConfiguration
                 busConfig.DisableUsageTelemetry();
 
                 registrationConfig.Invoke(busConfig);
+
+                FrozenSet<string>? requestEndpoints = null;
                 busConfig.AddConfigureEndpointsCallback((provider, queueName, configurator) =>
                 {
+                    var messageBusOptions = provider.GetRequiredService<IOptions<MessageBusOptions>>().Value;
+
+                    // ADR-004 (D1): retry is configured per endpoint and for every transport, so a standalone edge
+                    // device recovers the same way a clustered one does. Order is normative:
+                    // retry -> message scope -> outbox -> consumer.
+                    requestEndpoints ??= MessageRetryClassifier.FindRequestEndpoints(assembliesToScan,
+                        provider.GetRequiredService<ILocalInstanceInformationProvider>().ReadLocalInstanceId());
+
+                    var retryIntervals = MessageRetryClassifier.GetRetryIntervals(messageBusOptions,
+                        MessageRetryClassifier.Classify(queueName, requestEndpoints));
+
+                    // An explicitly empty ladder is the operator's "do not retry" (ADR-004 D2). Install no retry filter
+                    // at all rather than a policy with zero intervals, so the endpoint is left exactly as it would be
+                    // without the feature: one attempt, then the message faults.
+                    if (retryIntervals.Length > 0)
+                        configurator.UseMessageRetry(r =>
+                        {
+                            // ADR-004 (D2): deterministic failures are not worth a retry budget on a two core device.
+                            r.Ignore<ArgumentException>();
+                            r.Ignore<NotSupportedException>();
+                            r.Intervals(retryIntervals);
+                        });
+
+                    // ADR-004 (D1): the message scope has to sit inside the retry filter, so every attempt resolves a
+                    // fresh set of scoped dependencies. Configured on the bus it would wrap the endpoint filters
+                    // instead, and all attempts of one message would share a single DI scope - retrying a consumer
+                    // that failed inside SaveChangesAsync on the very same DbContext, change tracker still dirty,
+                    // which is precisely the transient-database case the ladders exist for.
+                    configurator.UseMessageScope(provider);
+
+                    // ADR-004 (D1): the in memory outbox buffers everything a consumer publishes and discards it when
+                    // that consumer throws. It has to sit inside the retry filter on every transport, so a retried
+                    // attempt starts with an empty publish buffer instead of repeating the publishes of the attempt
+                    // before it. Inside the message scope, so a scoped publish endpoint resolves to the buffered one.
+                    configurator.UseInMemoryOutbox(provider);
+
                     if (configurator is not IRabbitMqReceiveEndpointConfigurator raq)
                         return;
 
-                    var messageBusOptions = provider.GetRequiredService<IOptions<MessageBusOptions>>().Value;
                     if (instanceOptions.Type != InstanceType.Master)
                     {
                         raq.SetExchangeArgument("x-expires", (long)TimeSpan.FromDays(messageBusOptions.QueueLifetimeInDays).TotalMilliseconds);
@@ -123,12 +160,13 @@ internal static class MassTransitConfiguration
                     busConfig.UsingRabbitMq((context, cfg) =>
                     {
                         var messageBusOptions = context.GetRequiredService<IOptions<MessageBusOptions>>().Value;
-                        cfg.UseMessageRetry(r => r.Intervals(messageBusOptions.RetryIntervals));
 
                         Configure(context, cfg, instanceOptions.Type);
 
-                        // in memory outbox is only used with rabbit mq bus
-                        cfg.UseInMemoryOutbox(context);
+                        // ADR-004 (D5): the lazily declared _error and _skipped queues inherit the input queue settings,
+                        // which leaves them unbounded on a master. Bound them explicitly instead.
+                        cfg.SendTopology.ConfigureErrorSettings = queue => FaultQueueTopology.Configure(queue, messageBusOptions.ErrorQueue);
+                        cfg.SendTopology.ConfigureDeadLetterSettings = queue => FaultQueueTopology.Configure(queue, messageBusOptions.ErrorQueue);
 
                         if (messageBusOptions.PrefetchCount is not null)
                             cfg.PrefetchCount = messageBusOptions.PrefetchCount.Value;
@@ -155,8 +193,11 @@ internal static class MassTransitConfiguration
         private void AddLocalBus(Assembly[] assembliesToScan)
             => services.AddMassTransit<ILocalBus>(busConfig =>
             {
-                //Add all instance-independent endpoints
-                busConfig.AddConsumers(MessagingHelper.ConsumesRequest, assembliesToScan);// Maybe only requests?
+                // Request consumers only: the local bus answers a slave's own requests without a round trip to the
+                // master. ConsumesOnlyRequests rather than MessagingHelper.ConsumesRequest, which is vacuously true
+                // for a message-less type and would also put every IConsumer<Fault<T>> on this bus - ADR-004 (D6)
+                // registers fault consumers on master/standalone only.
+                busConfig.AddConsumers(ConsumerTypeExtensions.ConsumesOnlyRequests, assembliesToScan);
                 busConfig.UsingInMemory((context, cfg) =>
                 {
                     cfg.UseMessageScope(context);
@@ -204,8 +245,20 @@ internal static class MassTransitConfiguration
             return j;
         });
 
-        cfg.UseMessageScope(context);
+        // UseMessageScope is deliberately *not* configured here: a bus-level filter wraps the endpoint-level ones, so
+        // it would sit outside the retry filter and every attempt of a message would share one DI scope. It is applied
+        // per endpoint in AddConfigureEndpointsCallback instead. See ADR-004 (D1).
         cfg.UseExecuteActivityFilter(typeof(ExecuteActivityFilter<>), context);
+
+        // ADR-004 (D4): stop a receive-endpoint while its dependencies are failing instead of draining the queue into
+        // _error at full CPU. Installed as an observer, so it does not interfere with the retry/outbox ordering.
+        var killSwitch = context.GetRequiredService<IOptions<MessageBusOptions>>().Value.KillSwitch;
+        if (killSwitch.Enabled)
+            cfg.UseKillSwitch(k => k
+                .SetActivationThreshold(killSwitch.ActivationThreshold)
+                .SetTripThreshold(killSwitch.TripThresholdPercent)
+                .SetTrackingPeriod(TimeSpan.FromSeconds(killSwitch.TrackingPeriodInSeconds))
+                .SetRestartTimeout(TimeSpan.FromSeconds(killSwitch.RestartTimeoutInSeconds)));
 
         if (instanceType == InstanceType.Standalone)
             cfg.ConcurrentMessageLimit = 1;

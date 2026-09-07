@@ -3,7 +3,9 @@
 Shared test infrastructure and all test projects for ViciOne Suite.
 
 ## Conventions
-- Test method names: `Should_[tested_behaviour]` in `snake_case` (e.g. `Should_publish_change_event_for_new_connection`). The method name is reflected by the inner test class
+- Test method names: `snake_case` after a capitalised first word. Two forms are in use, and both are correct — pick one per test class and stay consistent within it:
+    - `Should_[tested_behaviour]` — the prevailing form. Use it when the enclosing class already says what is under test, either because the class covers a single member or because tests are grouped in an inner class named after the member (e.g. `RegisterInstanceConsumerTests.ErrorHandling.Should_propagate_exception_when_persistence_is_unavailable`)
+    - `[MemberName]_should_[tested_behaviour]` — the older form, without inner classes. Use it when one flat test class covers several members and the method name has to say which (e.g. `SavingChangesAsync_should_publish_added_entity`)
 - All tests structured with `// Arrange`, `// Act`, `// Assert` comments
 - Frameworks: xUnit, NSubstitute, AwesomeAssertions, bUnit
 

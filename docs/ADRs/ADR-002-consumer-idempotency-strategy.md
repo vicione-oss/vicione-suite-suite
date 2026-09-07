@@ -141,7 +141,9 @@ This generalises the Phase 1b/1c rules: a completion event may be *success-shape
 
 `EnqueueModulePackageOperationsConsumer` logged its failure through a `[LoggerMessage]` overload without an `Exception` parameter, discarding the stack trace of every enqueue failure. The overload now takes the exception, and the magic error code `230` was replaced by `ModuleErrorCodes.EnqueueOperationsFailed`.
 
-The consumer still reports the failure via `ModulePackageOperationsEnqueued`/`ModulePackageOperationsChanged` instead of rethrowing. Rethrowing is **not** an option here: `UseInMemoryOutbox` buffers everything published inside a consumer and discards it when the consumer throws, so "publish the error event and rethrow" would deliver nothing at all. Choosing between retry and correlated operator feedback is a general error-handling policy question, deferred to Phase 3a (ADR-004).
+At the time this was written the consumer still reported the failure via `ModulePackageOperationsEnqueued`/`ModulePackageOperationsChanged` instead of rethrowing, because `UseInMemoryOutbox` buffers everything published inside a consumer and discards it when the consumer throws — so "publish the error event **and** rethrow" would have delivered nothing at all. Choosing between retry and correlated operator feedback was deferred to Phase 3a.
+
+**Resolved by ADR-004 (D6).** The consumer now logs with the exception and rethrows, so the enqueue rides the retry ladder and finally dead-letters, and the correlated feedback is published by `EnqueueModulePackageOperationsFaultConsumer` from the fault pipe — which runs outside the faulted consumer's outbox scope, so it survives. The two are no longer mutually exclusive.
 
 #### Compliance backfill
 
