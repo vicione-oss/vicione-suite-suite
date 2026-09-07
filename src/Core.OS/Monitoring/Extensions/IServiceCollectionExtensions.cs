@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Core.OS.Connections.Mqtt;
+using Core.OS.Extensions;
 using Core.OS.Instance;
 using Core.Shared.Monitoring;
 using Microsoft.Extensions.Options;
@@ -42,9 +43,8 @@ internal static class IServiceCollectionExtensions
                 return journalMonitoring;
             });
 
-            services.AddOptions<SystemMonitoringOptions>()
-                .BindConfiguration(SystemMonitoringOptions.ConfigSection)
-                .ValidateDataAnnotations();
+            services.AddUnvalidatedSuiteOptions<SystemMonitoringOptions>(SystemMonitoringOptions.ConfigSection,
+                "A toggle, an interface name and journal filter strings - nothing with a range the suite can state.");
 
             if (OperatingSystem.IsLinux() && (options?.Enabled ?? true))
             {

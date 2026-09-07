@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using Core.Module;
 using Core.OS.DbContext;
 using Core.OS.Diagnostics.MassTransit;
+using Core.OS.Extensions;
 using Core.OS.Instance;
 using Core.OS.Instance.Consumers;
 using Core.OS.Instance.Extensions;
@@ -45,7 +46,12 @@ internal static class MassTransitConfiguration
             services.AddScoped<ISuiteMediator, BackEndMediator>();
 
             var instanceOptions = config.GetInstanceOptions();
-            services.AddOptions<RabbitMqTransportOptions>().BindConfiguration(MessageBusOptions.TransportOptionsConfigSection);
+            // MassTransit.RabbitMqTransportOptions is a third-party type and carries no validation attributes, so it
+            // cannot be given a source-generated validator and the suite will not annotate a type it does not own.
+            // Exempted deliberately: a wrong host, port or credential surfaces as a broker connection failure at bus
+            // start, which the transport already reports and retries - see ADR-004.
+            services.AddUnvalidatedSuiteOptions<RabbitMqTransportOptions>(MessageBusOptions.TransportOptionsConfigSection,
+                "Third-party type the suite must not annotate; a bad connection is reported by the transport at bus start.");
 
             services.AddSingleton<IEndpointNameFormatter, SuiteEndpointNameFormatter>();
 

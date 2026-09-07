@@ -13,11 +13,14 @@ public sealed class LoggingOptions : ILogOptions
     public string[]? LogTargets { get; set; }
     [ValidateObjectMembers]
     public LoggingResourceOptions? Resources { get; set; }
-    [ValidateObjectMembers]
+    // Two log level enums: an unparsable level already fails at bind time and neither has a range to state,
+    // so there is nothing here for the validator to recurse into.
     public LoggingLogLevelOptions? LogLevel { get; set; }
     [ValidateObjectMembers]
     public LoggingSpamGuardOptions? SpamGuard { get; set; }
-    [ValidateObjectMembers]
+    // Deliberately left unvalidated: QueueLimit is clamped by the sink rather than bounded here, because an
+    // out-of-range logging knob must not take an unattended device out of service.
+    // See LoggingConfiguration.AddOpenTelemetrySink and LoggingOptionsTests.
     public LoggingOpenTelemetryOptions? OpenTelemetry { get; set; }
 }
 
