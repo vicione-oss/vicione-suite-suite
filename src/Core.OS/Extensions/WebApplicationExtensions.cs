@@ -47,6 +47,8 @@ internal static class WebApplicationExtensions
             var moduleHost = host.Services.GetRequiredService<IModuleHost>();
             moduleHost.UseUiHost(host, host.Environment);
 
+            host.UseResponseCachePolicy();
+
             host.UseRouting();
             host.UseSerilogRequestLogging(options =>
             {
