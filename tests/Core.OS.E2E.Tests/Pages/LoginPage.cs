@@ -13,6 +13,9 @@ public sealed partial class LoginPage(IPage page)
 {
     public const string Route = "/account/login";
 
+    // The challenge endpoint the passkey element calls before navigator.credentials.get().
+    private const string PasskeyChallengeRoute = "/account/passkey-request-options";
+
     // The 'name' attributes are required for server-side model binding, so they are stable selectors.
     private ILocator UsernameField => page.Locator("input[name='Input.Username']");
     private ILocator PasswordField => page.Locator("input[name='Input.Password']");
@@ -67,4 +70,21 @@ public sealed partial class LoginPage(IPage page)
 
     /// <summary>Trigger passkey login; the virtual authenticator answers navigator.credentials.get().</summary>
     public Task LoginViaPasskey() => PasskeySignInButton.ClickAsync();
+
+    /// <summary>
+    /// Enters <paramref name="userName"/>, triggers passkey sign-in and returns the URL of the
+    /// challenge request the page issues, so a test can assert which identifier reached the server.
+    /// Only the request the click causes is observed, so the conditional-mediation autofill the page
+    /// runs on load (with an empty field) cannot be mistaken for it.
+    /// </summary>
+    public async Task<string> RequestPasskeyChallengeFor(string userName)
+    {
+        await UsernameField.FillAsync(userName);
+
+        var challengeRequest = await page.RunAndWaitForRequestAsync(
+            () => PasskeySignInButton.ClickAsync(),
+            request => request.Url.Contains(PasskeyChallengeRoute, StringComparison.OrdinalIgnoreCase));
+
+        return challengeRequest.Url;
+    }
 }
