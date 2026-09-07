@@ -139,6 +139,7 @@
 - Artifact repository sources are now cleared on reset
 - Fixed extraction of initials when the user entered first and last name with leading whitespaces in user profile
 - Fixed a caching issue when editing the description of a role
+- `npm`, vulnerabilities fixed
 
 ### Removed
 
