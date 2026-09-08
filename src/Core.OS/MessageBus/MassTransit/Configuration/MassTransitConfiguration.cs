@@ -200,9 +200,8 @@ internal static class MassTransitConfiguration
             => services.AddMassTransit<ILocalBus>(busConfig =>
             {
                 // Request consumers only: the local bus answers a slave's own requests without a round trip to the
-                // master. ConsumesOnlyRequests rather than MessagingHelper.ConsumesRequest, which is vacuously true
-                // for a message-less type and would also put every IConsumer<Fault<T>> on this bus - ADR-004 (D6)
-                // registers fault consumers on master/standalone only.
+                // master. ConsumesOnlyRequests, not MessagingHelper.ConsumesRequest, which in the pinned SDK package
+                // would put every IConsumer<Fault<T>> here too - ADR-004 (D6) keeps those on master/standalone.
                 busConfig.AddConsumers(ConsumerTypeExtensions.ConsumesOnlyRequests, assembliesToScan);
                 busConfig.UsingInMemory((context, cfg) =>
                 {

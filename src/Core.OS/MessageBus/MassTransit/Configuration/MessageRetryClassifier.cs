@@ -35,8 +35,9 @@ internal static class MessageRetryClassifier
     /// </summary>
     /// <remarks>
     /// The scan is seeded with <see cref="RegistrationMetadata.IsConsumerOrDefinition"/>, so it also yields consumer
-    /// definitions and consumers whose only message type is generic. See
-    /// <see cref="ConsumerTypeExtensions.ConsumesOnlyRequests"/> for why those must be filtered out here.
+    /// definitions and consumers whose only message type is generic. Neither is a request consumer and both must be
+    /// filtered out, or they take the shortest ladder in the table - see
+    /// <see cref="ConsumerTypeExtensions.ConsumesOnlyRequests"/>.
     /// </remarks>
     public static FrozenSet<string> FindRequestEndpoints(Assembly[] assembliesToScan, Guid instanceId)
     {
