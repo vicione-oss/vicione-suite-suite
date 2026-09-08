@@ -14,6 +14,7 @@
 
 ### Added
 
+- Failsafe debug page: when startup fails, the failsafe host now answers `/` with a grouped HTML page (failsafe status and messages, suite, SDK and data version, recovery state, environment overrides) instead of a JSON payload.
 - Admin-only "Environment variables" settings panel (Settings → System) for editing the runtime overrides, offered where `VICIONE_SUITE_ENV_OVERRIDES` is on; entries are validated on save and take effect after a restart (see `docs/suite-startup.md`)
 - `FirstRunWizard` feature flag, enabled by default, gating the redirect to the first-run wizard
 

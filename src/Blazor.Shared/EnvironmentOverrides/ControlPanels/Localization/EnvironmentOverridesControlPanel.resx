@@ -62,7 +62,7 @@
     <value>Environment variables</value>
   </data>
   <data name="RiskBannerContent" xml:space="preserve">
-    <value>Environment variable overrides are applied to the Suite at startup and take precedence over values provided by the host; changes take effect only after a restart. A value the Suite cannot start with can no longer be corrected here: the override file outlives every restart, reset and restore — the only way back is deleting it via shell access.</value>
+    <value>Environment variable overrides are applied to the Suite at startup and take precedence over values provided by the host; changes take effect only after a restart. A value the Suite cannot start with can no longer be corrected here: the override file outlives every restart, reset and restore — the failsafe page the Suite then starts offers to set the file aside and restart without it.</value>
   </data>
   <data name="DuplicateKeyError" xml:space="preserve">
     <value>Duplicate variable names: {0}</value>

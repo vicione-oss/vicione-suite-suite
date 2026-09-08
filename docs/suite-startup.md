@@ -76,9 +76,11 @@ The resulting "Suite restart required" banner is a global event and therefore sh
 
 This step sits outside every recovery mechanism below.
 A reset and a restore clear the child directories of the instance home directory plus a fixed set of files in its root; the override file is not one of them, and automatic recovery only disables modules.
-An override that keeps the suite from starting therefore survives every restart until the file is removed on the machine or the feature is switched off again.
+An override that keeps the suite from starting therefore survives every restart until the file is set aside, removed on the machine, or the feature is switched off again.
 
-Deleting the file is the recovery path, and it is enough: the instance comes back up on the inherited environment, and the settings panel can then be used to store a corrected set.
+Taking the file out of the picture is the recovery path, and it is enough: the instance comes back up on the inherited environment, and the settings panel can then be used to store a corrected set.
+An operator who cannot reach a shell does this from the failsafe debug page, which renames the file to `env-overrides.env.disabled` and restarts the instance (see [ADR-004](ADRs/ADR-004-failsafe-debug-surface.md)).
+Nothing resolves that name for reading, so the file stays on disk and readable while no longer being applied; the boot that follows logs a warning naming it, so the journal shows why the instance came back on the inherited environment.
 Repairing a malformed file by hand is not supported — the loader rejects the file as a whole rather than the offending line, so a partial fix still applies nothing.
 
 ## Suite Preparation Pipeline
@@ -148,9 +150,9 @@ Any exception thrown by a step (e.g. a failed synchronization or module load) is
 `TryRunCoreOs` ([WebApplicationBuilderExtensions.cs](../src/Core.OS/Extensions/WebApplicationBuilderExtensions.cs)) inspects the `IPreparationResult` returned by the suite pipeline and decides how to proceed:
 
 - `VersionDowngradePreparationResult` - starts a minimal downgrade web host serving a static downgrade page, then stops.
-- `RecoveryExhaustedPreparationResult` - starts a terminal fallback host in a degraded error state so the service manager does not keep restarting the process.
+- `RecoveryExhaustedPreparationResult` - starts a terminal fallback host in a degraded error state, serving the failsafe debug page, so the service manager does not keep restarting the process.
 - Any other `IPreparationAbortResult` (e.g. module host preparation failures) - logs the abort reason and stops startup.
-- Otherwise (success) - registers the remaining services (`ConfigureAndValidateOptions`, `AddSuiteOpenTelemetry`, `AddSuiteServices`), builds the host, and either starts a fallback host for invalid options or runs the full Core.OS application.
+- Otherwise (success) - registers the remaining services (`ConfigureAndValidateOptions`, `AddSuiteOpenTelemetry`, `AddSuiteServices`), builds the host, and either starts the same fallback host for invalid options or runs the full Core.OS application.
 
 ## Automatic Recovery
 

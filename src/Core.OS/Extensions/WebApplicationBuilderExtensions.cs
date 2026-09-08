@@ -25,7 +25,7 @@ internal static partial class WebApplicationBuilderExtensions
             // so the service manager does not trigger another restart loop.
             if (preparationResult is RecoveryExhaustedPreparationResult exhaustedResult)
             {
-                await RunExhaustedHost(exhaustedResult, args);
+                await RunExhaustedHost(builder, preparationContext, exhaustedResult, args);
                 return;
             }
 
@@ -47,7 +47,7 @@ internal static partial class WebApplicationBuilderExtensions
             var failures = host.GetInvalidOptions();
             if (failures is not null)
             {
-                await RunInvalidOptionsHost(failures, args);
+                await RunInvalidOptionsHost(builder, preparationContext, failures, args);
             }
             else
             {
@@ -85,25 +85,33 @@ internal static partial class WebApplicationBuilderExtensions
         await downgradeHost.RunAsync();
     }
 
-    private static async Task RunExhaustedHost(RecoveryExhaustedPreparationResult exhaustedResult, string[] args)
+    private static async Task RunExhaustedHost(WebApplicationBuilder builder, SuitePreparationContext preparationContext, RecoveryExhaustedPreparationResult exhaustedResult, string[] args)
     {
         var fallbackHost = FallbackHostBuilder.Build(args, new FallbackHostOptions
         {
             Status = FallbackHostStatus.RecoveryExhausted,
             Messages = [exhaustedResult.Reason],
             HttpStatusCode = 503,
-            LogLevel = Serilog.Events.LogEventLevel.Fatal,
+            LogLevel = LogLevel.Critical,
+            Logger = preparationContext.LoggerFactory.CreateLogger(nameof(FallbackHostBuilder)),
+            FileSystem = preparationContext.FileSystem,
+            Instance = preparationContext.InstanceOptions,
+            HostManagement = builder.Configuration.GetHostManagementOptions(),
         });
         await fallbackHost.RunAsync();
     }
 
-    private static async Task RunInvalidOptionsHost(IEnumerable<string> failures, string[] args)
+    private static async Task RunInvalidOptionsHost(WebApplicationBuilder builder, SuitePreparationContext preparationContext, IEnumerable<string> failures, string[] args)
     {
         var fallbackHost = FallbackHostBuilder.Build(args, new FallbackHostOptions
         {
             Status = FallbackHostStatus.InvalidOptions,
             Messages = [.. failures],
             HttpStatusCode = 500,
+            Logger = preparationContext.LoggerFactory.CreateLogger(nameof(FallbackHostBuilder)),
+            FileSystem = preparationContext.FileSystem,
+            Instance = preparationContext.InstanceOptions,
+            HostManagement = builder.Configuration.GetHostManagementOptions(),
         });
         await fallbackHost.RunAsync();
     }

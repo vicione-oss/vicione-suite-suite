@@ -8,6 +8,7 @@ namespace Core.OS.Tests.EnvironmentOverrides;
 public sealed class EnvironmentOverridesLoaderTests : IDisposable
 {
     private const string OverrideFilePath = "/data/env-overrides.env";
+    private const string DisabledOverrideFilePath = OverrideFilePath + ".disabled";
 
     private readonly string _key = "VICIONE_TEST_" + Guid.NewGuid().ToString("N");
     private readonly MockFileSystem _fileSystem = new();
@@ -53,6 +54,22 @@ public sealed class EnvironmentOverridesLoaderTests : IDisposable
 
         // Assert
         Environment.GetEnvironmentVariable(_key).Should().Be("inherited-value");
+    }
+
+    [Fact]
+    public async Task Should_not_apply_a_disabled_override_file()
+    {
+        // Arrange - what the failsafe debug page leaves behind: the entries are kept on disk for
+        // the operator to read, next to the name the loader is pointed at.
+        _fileSystem.AddFile(DisabledOverrideFilePath, new MockFileData($"{_key}=\"disabled-value\"\n"));
+
+        // Act
+        var failure = await EnvironmentOverridesLoader.Apply(_fileSystem, OverrideFilePath);
+
+        // Assert
+        failure.Should().BeNull();
+        Environment.GetEnvironmentVariable(_key).Should().BeNull();
+        _fileSystem.File.Exists(DisabledOverrideFilePath).Should().BeTrue();
     }
 
     [Fact]

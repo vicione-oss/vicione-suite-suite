@@ -20,6 +20,34 @@ public sealed class EnvironmentOverridesFileTests : IDisposable
     public void Dispose()
         => Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, _previousEnv);
 
+    [Fact]
+    public void Should_resolve_the_disabled_file_under_one_fixed_name_next_to_the_override_file()
+    {
+        // Arrange
+        Enable("true");
+
+        // Act
+        var path = EnvironmentOverridesFile.ResolvePath(_fileSystem, HomeDirectory);
+        var disabledPath = EnvironmentOverridesFile.ResolveDisabledPath(_fileSystem, HomeDirectory);
+
+        // Assert - nothing resolves the disabled name for reading, which is what keeps the file
+        // inert on the next boot.
+        disabledPath.Should().Be($"{path}.disabled");
+    }
+
+    [Fact]
+    public void Should_not_resolve_a_disabled_file_when_switched_off()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, null);
+
+        // Act
+        var disabledPath = EnvironmentOverridesFile.ResolveDisabledPath(_fileSystem, HomeDirectory);
+
+        // Assert
+        disabledPath.Should().BeNull();
+    }
+
     [Theory]
     [InlineData("true")]
     [InlineData("True")]
@@ -101,6 +129,71 @@ public sealed class EnvironmentOverridesFileTests : IDisposable
 
         // Assert
         path.Should().Be(Path.Combine(HomeDirectory, FileName));
+    }
+
+    [Fact]
+    public void Should_move_the_override_file_to_the_disabled_path()
+    {
+        // Arrange
+        Enable();
+        var path = EnvironmentOverridesFile.RequirePath(_fileSystem, HomeDirectory);
+        _fileSystem.AddFile(path, new MockFileData("A=b"));
+
+        // Act
+        var disabledPath = EnvironmentOverridesFile.Disable(_fileSystem, HomeDirectory);
+
+        // Assert - a rename rather than a delete, so what broke the boot stays readable.
+        disabledPath.Should().Be(EnvironmentOverridesFile.ResolveDisabledPath(_fileSystem, HomeDirectory));
+        _fileSystem.File.Exists(path).Should().BeFalse();
+        _fileSystem.File.ReadAllText(disabledPath).Should().Be("A=b");
+    }
+
+    [Fact]
+    public void Should_replace_a_disabled_file_left_by_an_earlier_attempt()
+    {
+        // Arrange - one fixed name means a second disable finds the first one still lying there.
+        Enable();
+        var path = EnvironmentOverridesFile.RequirePath(_fileSystem, HomeDirectory);
+        _fileSystem.AddFile(path, new MockFileData("A=broke-this-boot"));
+        _fileSystem.AddFile(
+            EnvironmentOverridesFile.ResolveDisabledPath(_fileSystem, HomeDirectory)!,
+            new MockFileData("A=left-by-an-earlier-attempt"));
+
+        // Act
+        var disabledPath = EnvironmentOverridesFile.Disable(_fileSystem, HomeDirectory);
+
+        // Assert - the current overrides are the ones that broke this boot, so they are the ones
+        // worth keeping around.
+        _fileSystem.File.Exists(path).Should().BeFalse();
+        _fileSystem.File.ReadAllText(disabledPath).Should().Be("A=broke-this-boot");
+    }
+
+    [Fact]
+    public void Should_report_a_missing_override_file_when_disabling()
+    {
+        // Arrange - the page only offers the action while the file is there, so this is the
+        // resubmitted POST after a first disable already moved it aside.
+        Enable();
+
+        // Act
+        var act = () => EnvironmentOverridesFile.Disable(_fileSystem, HomeDirectory);
+
+        // Assert - the caller on the failsafe page logs this and restarts anyway; the file being
+        // gone is the outcome it wanted.
+        act.Should().Throw<FileNotFoundException>();
+    }
+
+    [Fact]
+    public void Should_refuse_to_disable_when_not_switched_on()
+    {
+        // Arrange
+        Enable(null);
+
+        // Act
+        var act = () => EnvironmentOverridesFile.Disable(_fileSystem, HomeDirectory);
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Fact]

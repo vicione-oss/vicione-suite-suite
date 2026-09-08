@@ -48,6 +48,15 @@ else if (environmentOverridesPath is null)
         EnvironmentOverridesSwitch.EnabledEnvironmentVariable);
 
 using var loggerFactory = new SerilogLoggerFactory(logger: null, dispose: false);
+
+// An operator took the overrides away from the failsafe debug page. Reported so the journal of the
+// boot that follows shows why this instance came back on the inherited environment.
+var disabledOverridesPath = EnvironmentOverridesStartup.ResolveDisabledPath(fileSystem);
+if (disabledOverridesPath is not null)
+    loggerFactory.CreateLogger("Program").LogWarning(
+        "Environment overrides were disabled and are not applied - the previous file is kept at {Path}",
+        disabledOverridesPath);
+
 var preparationContext = new SuitePreparationContext(fileSystem, instanceOptions, loggerFactory);
 using var preparationPipeline = new SuitePreparationPipeline(preparationContext);
 
