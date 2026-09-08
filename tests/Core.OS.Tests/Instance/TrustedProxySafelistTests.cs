@@ -1,7 +1,5 @@
 using System.Net;
 using Core.OS.Instance;
-using AwesomeAssertions;
-using Xunit;
 using IPNetwork = System.Net.IPNetwork;
 
 namespace Core.OS.Tests.Instance;

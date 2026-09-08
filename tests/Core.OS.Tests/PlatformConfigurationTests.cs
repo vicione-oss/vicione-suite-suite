@@ -54,7 +54,7 @@ public class PlatformConfigurationTests
             RepositoryOptionsCache = Substitute.For<IArtifactRepositoryOptionsCache>()
         };
 
-    public class AddSuiteServices : PlatformConfigurationTests
+    public class AddCoreOs : PlatformConfigurationTests
     {
         [Fact]
         public async Task Should_configure_platform_services()
@@ -74,10 +74,9 @@ public class PlatformConfigurationTests
             context.ModuleContext = GetModulePreparationContext(fileSystem, instanceOptions);
 
             var services = new ServiceCollection()
-                .ConfigureAndValidateOptions(instanceOptions)
                 .AddLogging()
                 .AddSingleton<IConfiguration>(config)
-                .AddSuiteServices(config, context);
+                .AddCoreOs(config, context);
 
             fileSystem.EnsureInstanceIdFile(config.GetInstanceOptions());
 
@@ -131,11 +130,9 @@ public class PlatformConfigurationTests
                 .AddTestBackendClientModule()
                 .BuildConfiguration());
 
-            var instanceOptions = config.GetInstanceOptions();
             fileSystem.EnsureInstanceIdFile(config.GetInstanceOptions());
 
             var services = new ServiceCollection()
-                .ConfigureAndValidateOptions(instanceOptions)
                 .AddLogging()
                 .AddSingleton<IConfiguration>(config)
                 .AddSingleton<IFileSystem>(fileSystem)

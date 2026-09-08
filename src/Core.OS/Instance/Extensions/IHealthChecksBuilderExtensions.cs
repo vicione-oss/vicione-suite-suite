@@ -13,7 +13,15 @@ public static class IHealthChecksBuilderExtensions
     {
         public IHealthChecksBuilder AddInstanceHealthChecks(InstanceOptions instanceOptions)
         {
-            //Health checks (maybe more in the future): 
+            hcBuilder.Services.Configure<HealthCheckPublisherOptions>(options =>
+            {
+                options.Delay = TimeSpan.FromSeconds(instanceOptions.HealthChecks?.PublishDelayInSeconds ?? 30);
+                options.Timeout = options.Period
+                    = TimeSpan.FromSeconds(instanceOptions.HealthChecks?.PublishIntervalInSeconds ?? 60);
+                // Timeout is the same as the period
+            });
+
+            //Health checks (maybe more in the future):
             hcBuilder
                 .AddSynchronizationHealthCheck()
                 .AddCheck<MasterReachableHealthCheck>("MasterReachable");

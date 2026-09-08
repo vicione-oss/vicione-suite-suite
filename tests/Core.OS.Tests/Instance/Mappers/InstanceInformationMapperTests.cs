@@ -3,7 +3,6 @@ using Core.OS.Instance.Commands;
 using Core.OS.Instance.Mappers;
 using Core.Shared.Instance.Contracts;
 using Sdk.Instance;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Mappers;
 

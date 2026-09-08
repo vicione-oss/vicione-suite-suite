@@ -7,6 +7,7 @@ using Core.OS.Connections.Mqtt;
 using Core.OS.Extensions;
 using Core.OS.Instance;
 using Core.OS.Logging;
+using Core.OS.Logging.Extensions;
 using Core.OS.Mail;
 using Core.OS.Mail.Extensions;
 using Core.OS.MessageBus.MassTransit.Configuration;
@@ -19,12 +20,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Sdk.Instance;
 
 namespace Core.OS.Tests.Configuration;
 
 /// <summary>
-/// Covers the guarantee that <c>AddSuiteOptions</c> exists to give: a value outside the bounds an options type
+/// Covers the guarantee that <c>AddValidatedOptions</c> exists to give: a value outside the bounds an options type
 /// declares stops the instance at startup instead of binding silently. Before the source-generated validators the
 /// registration called <c>ValidateDataAnnotations()</c>, which only ever looked at the top-level properties, so
 /// every <c>[Range]</c> on a nested settings class was decorative — see ADR-004.
@@ -48,7 +48,7 @@ public class SuiteOptionsValidationTests
         {
             // Arrange
             var host = BuildHost(
-                services => services.AddSuiteOptions<MessageBusOptions, MessageBusOptionsValidator>(MessageBusOptions.ConfigSection),
+                services => services.AddValidatedOptions<MessageBusOptions, MessageBusOptionsValidator>(MessageBusOptions.ConfigSection),
                 new Dictionary<string, string?> { [key] = value });
 
             // Act
@@ -65,7 +65,7 @@ public class SuiteOptionsValidationTests
         {
             // Arrange — Logging:Resources:Memory sits two levels below the bound section
             var host = BuildHost(
-                services => services.AddSuiteOptions<LoggingOptions, LoggingOptionsValidator>(LoggingOptions.ConfigSection),
+                services => services.AddValidatedOptions<LoggingOptions, LoggingOptionsValidator>(LoggingOptions.ConfigSection),
                 new Dictionary<string, string?> { ["Logging:Resources:Memory:LimitInPercent"] = "150" });
 
             // Act
@@ -81,7 +81,7 @@ public class SuiteOptionsValidationTests
         {
             // Arrange
             var host = BuildHost(
-                services => services.AddSuiteOptions<MqttClientOptions, MqttClientOptionsValidator>(MqttClientOptions.ConfigSection),
+                services => services.AddValidatedOptions<MqttClientOptions, MqttClientOptionsValidator>(MqttClientOptions.ConfigSection),
                 new Dictionary<string, string?> { ["MqttClient:ServiceClient:Port"] = "70000" });
 
             // Act
@@ -97,7 +97,7 @@ public class SuiteOptionsValidationTests
         {
             // Arrange — [ValidateEnumeratedItems] was inert for the same reason [ValidateObjectMembers] was
             var host = BuildHost(
-                services => services.AddSuiteOptions<ExternalIdProviderOptions, ExternalIdProviderOptionsValidator>(
+                services => services.AddValidatedOptions<ExternalIdProviderOptions, ExternalIdProviderOptionsValidator>(
                     ExternalIdProviderOptions.ConfigSection),
                 new Dictionary<string, string?>
                 {
@@ -121,9 +121,9 @@ public class SuiteOptionsValidationTests
             var host = BuildHost(
                 services =>
                 {
-                    services.AddSuiteOptions<MessageBusOptions, MessageBusOptionsValidator>(MessageBusOptions.ConfigSection);
-                    services.AddSuiteOptions<LoggingOptions, LoggingOptionsValidator>(LoggingOptions.ConfigSection);
-                    services.AddSuiteOptions<MqttClientOptions, MqttClientOptionsValidator>(MqttClientOptions.ConfigSection);
+                    services.AddValidatedOptions<MessageBusOptions, MessageBusOptionsValidator>(MessageBusOptions.ConfigSection);
+                    services.AddValidatedOptions<LoggingOptions, LoggingOptionsValidator>(LoggingOptions.ConfigSection);
+                    services.AddValidatedOptions<MqttClientOptions, MqttClientOptionsValidator>(MqttClientOptions.ConfigSection);
                 },
                 new Dictionary<string, string?>
                 {
@@ -150,11 +150,11 @@ public class SuiteOptionsValidationTests
             var host = BuildHost(
                 services =>
                 {
-                    services.AddSuiteOptions<MessageBusOptions, MessageBusOptionsValidator>(MessageBusOptions.ConfigSection);
-                    services.AddSuiteOptions<LoggingOptions, LoggingOptionsValidator>(LoggingOptions.ConfigSection);
-                    services.AddSuiteOptions<MqttClientOptions, MqttClientOptionsValidator>(MqttClientOptions.ConfigSection);
-                    services.AddSuiteOptions<UserManagementOptions, UserManagementOptionsValidator>(UserManagementOptions.ConfigSection);
-                    services.AddSuiteOptions<ExternalIdProviderOptions, ExternalIdProviderOptionsValidator>(ExternalIdProviderOptions.ConfigSection);
+                    services.AddValidatedOptions<MessageBusOptions, MessageBusOptionsValidator>(MessageBusOptions.ConfigSection);
+                    services.AddValidatedOptions<LoggingOptions, LoggingOptionsValidator>(LoggingOptions.ConfigSection);
+                    services.AddValidatedOptions<MqttClientOptions, MqttClientOptionsValidator>(MqttClientOptions.ConfigSection);
+                    services.AddValidatedOptions<UserManagementOptions, UserManagementOptionsValidator>(UserManagementOptions.ConfigSection);
+                    services.AddValidatedOptions<ExternalIdProviderOptions, ExternalIdProviderOptionsValidator>(ExternalIdProviderOptions.ConfigSection);
                 },
                 []);
 
@@ -168,7 +168,7 @@ public class SuiteOptionsValidationTests
 
     /// <summary>
     /// Fitness checks on the registration convention itself. The compiler already makes an unvalidated options type
-    /// impossible to register through <c>AddSuiteOptions</c> — the validator is a required type argument — so what is
+    /// impossible to register through <c>AddValidatedOptions</c> — the validator is a required type argument — so what is
     /// left to guard is the two things a type argument cannot express: a type bound to configuration by some other
     /// route, and a nested settings class nobody marked <c>[ValidateObjectMembers]</c>.
     /// </summary>
@@ -232,7 +232,7 @@ public class SuiteOptionsValidationTests
 
             // Assert
             unvalidated.Should().BeEmpty(
-                "every options type bound to a configuration section must be registered through AddSuiteOptions "
+                "every options type bound to a configuration section must be registered through AddValidatedOptions "
                 + "or, with a stated reason, AddUnvalidatedSuiteOptions");
         }
 
@@ -269,22 +269,16 @@ public class SuiteOptionsValidationTests
                 + "it is marked [ValidateObjectMembers] (or [ValidateEnumeratedItems] for a collection)");
         }
 
-        private static IServiceCollection BuildSuiteRegistrations()
+        private static ServiceCollection BuildSuiteRegistrations()
         {
             var services = new ServiceCollection();
             services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
 
-            services.ConfigureAndValidateOptions(new InstanceOptions
-            {
-                HomeDirectory = "home",
-                CacheDirectory = "cache",
-                BackupDirectory = "backup",
-                Type = InstanceType.Standalone,
-            });
+            services.AddCoreOptions();
             services.AddMailing();
             services.AddMqttServices();
             services.AddSystemMonitoring(new ConfigurationBuilder().Build());
-
+            services.AddCoreLogging();
             return services;
         }
 

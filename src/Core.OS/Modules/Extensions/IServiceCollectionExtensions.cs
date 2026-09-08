@@ -25,6 +25,20 @@ internal static class IServiceCollectionExtensions
             return services;
         }
 
+        /// <summary>
+        /// Hosted services that drive module lifecycle. Registered after the message bus so
+        /// <see cref="ApplicationWorker"/> starts once the bus is ready.
+        /// </summary>
+        internal IServiceCollection AddModuleHosting()
+        {
+#if DEBUG
+            services.AddHostedService<ApplicationPartsLogger>();
+#endif
+            services.AddHostedService<ApplicationWorker>();
+
+            return services;
+        }
+
         public IServiceCollection AddModuleArtifactQueryApi(IArtifactRepositoryOptionsCache optionsCache)
         {
             services.AddSingleton(optionsCache);

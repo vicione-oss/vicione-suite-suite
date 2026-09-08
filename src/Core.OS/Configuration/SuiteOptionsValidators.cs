@@ -8,8 +8,8 @@ using Microsoft.Extensions.Options;
 
 namespace Core.OS.Configuration;
 
-// Every options type bound to a configuration section by AddSuiteOptions gets a validator here, and
-// AddSuiteOptions cannot be called without one - see Core.OS.Extensions.IServiceCollectionExtensions.
+// Every options type bound to a configuration section by AddValidatedOptions gets a validator here, and
+// AddValidatedOptions cannot be called without one - see Core.OS.Extensions.IServiceCollectionExtensions.
 //
 // The validators live in Core.OS rather than beside their options types because the [OptionsValidator]
 // source generator ships in the ASP.NET Core reference pack

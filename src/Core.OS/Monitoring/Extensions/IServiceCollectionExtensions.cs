@@ -33,7 +33,7 @@ internal static class IServiceCollectionExtensions
         [SuppressMessage("Interoperability", "CA1416:Plattformkompatibilität überprüfen")]
         internal IServiceCollection AddSystemMonitoring(IConfiguration configuration)
         {
-            var options = configuration.GetSection(SystemMonitoringOptions.ConfigSection).Get<SystemMonitoringOptions>();
+            var options = configuration.GetSystemMonitoringOptions();
 
             services.AddSingleton<IJournalMonitoring, JournalMonitoring>(_ =>
             {

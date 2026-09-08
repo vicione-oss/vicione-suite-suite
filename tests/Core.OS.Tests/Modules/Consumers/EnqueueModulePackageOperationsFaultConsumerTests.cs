@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.OS.Instance;
 using Core.OS.Modules;
 using Core.OS.Modules.Consumers;
@@ -9,12 +8,10 @@ using Core.Shared.Modules.Events;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Instance;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Modules.Consumers;
 

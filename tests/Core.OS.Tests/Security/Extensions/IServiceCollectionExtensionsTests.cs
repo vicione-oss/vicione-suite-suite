@@ -1,7 +1,6 @@
 using System.Net;
-using Core.OS.Extensions;
 using Core.OS.Instance;
-using AwesomeAssertions;
+using Core.OS.Security.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -10,10 +9,9 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sdk.Instance;
-using Xunit;
 using IPNetwork = System.Net.IPNetwork;
 
-namespace Core.OS.Tests.Extensions;
+namespace Core.OS.Tests.Security.Extensions;
 
 public class IServiceCollectionExtensionsTests
 {

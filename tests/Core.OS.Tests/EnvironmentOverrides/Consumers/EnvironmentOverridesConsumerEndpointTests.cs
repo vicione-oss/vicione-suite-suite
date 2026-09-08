@@ -1,7 +1,5 @@
-using AwesomeAssertions;
 using Core.OS.EnvironmentOverrides.Consumers;
 using Core.OS.MessageBus.MassTransit;
-using Xunit;
 
 namespace Core.OS.Tests.EnvironmentOverrides.Consumers;
 

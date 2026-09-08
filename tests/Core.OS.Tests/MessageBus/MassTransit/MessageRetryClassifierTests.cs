@@ -1,11 +1,9 @@
 using System.Collections.Frozen;
-using AwesomeAssertions;
 using Core.OS.Instance.Consumers;
 using Core.OS.MessageBus.MassTransit;
 using Core.OS.MessageBus.MassTransit.Configuration;
 using Core.OS.Modules.Consumers;
 using Core.OS.Persistence.Consumers;
-using Xunit;
 
 namespace Core.OS.Tests.MessageBus.MassTransit;
 
