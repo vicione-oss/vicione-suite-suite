@@ -10,12 +10,11 @@ internal static class ConsumerTypeExtensions
     /// Determines whether a type consumes request messages and nothing else.
     /// </summary>
     /// <remarks>
-    /// <see cref="MessagingHelper.ConsumesRequest"/> alone does not answer this. It is an <c>All</c> over
-    /// <see cref="MessagingHelper.FindMessageTypes"/>, so it is vacuously <see langword="true"/> for a type that
-    /// reports no message types at all — and two kinds of type do exactly that. A <c>ConsumerDefinition&lt;T&gt;</c>
-    /// implements no <c>IConsumer&lt;&gt;</c> in the first place, and <c>FindMessageTypes</c> skips generic message
-    /// types, so every <c>IConsumer&lt;Fault&lt;T&gt;&gt;</c> looks message-less too. Requiring at least one message
-    /// type keeps both of them out.
+    /// A shim over an SDK defect, not a permanent abstraction: in the pinned SDK package
+    /// <see cref="MessagingHelper.ConsumesRequest"/> is vacuously <see langword="true"/> for a type that reports no
+    /// message types, which covers every <c>IConsumer&lt;Fault&lt;T&gt;&gt;</c> and every
+    /// <c>ConsumerDefinition&lt;T&gt;</c>. Fixed in suite-sdk 3.1.0; this type and both of its call sites collapse
+    /// onto the SDK helper once the package is bumped. See ADR-004 (D2).
     /// </remarks>
     public static bool ConsumesOnlyRequests(this Type consumerType)
         => consumerType.FindMessageTypes().Any() && consumerType.ConsumesRequest();

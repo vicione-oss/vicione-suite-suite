@@ -85,8 +85,8 @@ public class MessageRetryClassifierTests
     [Fact]
     public void Should_classify_a_fault_consumer_endpoint_as_default()
     {
-        // Arrange: Fault<T> is generic, so MessagingHelper.FindMessageTypes skips it and the consumer reports no
-        // message types at all - which makes ConsumesRequest, an All over that empty set, vacuously true.
+        // Arrange: Fault<T> is generic, so the consumer reports no message types and the pinned SDK's ConsumesRequest
+        // is vacuously true for it. Must keep passing after the SDK bump collapses ConsumesOnlyRequests.
         var queueName = SuiteEndpointNameFormatter.GetConsumerName(typeof(EnqueueModulePackageOperationsFaultConsumer), InstanceId);
         var requestEndpoints = MessageRetryClassifier.FindRequestEndpoints([typeof(EnqueueModulePackageOperationsFaultConsumer).Assembly], InstanceId);
 
