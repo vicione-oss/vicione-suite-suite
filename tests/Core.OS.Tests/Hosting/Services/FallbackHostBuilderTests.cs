@@ -1,58 +1,132 @@
 using System.Net;
+using System.IO.Abstractions.TestingHelpers;
+using Core.OS.EnvironmentOverrides;
+using Core.OS.Hosting.Extensions;
 using Core.OS.Hosting.Services;
+using Core.OS.Instance;
+using Core.OS.HostManagement;
+using Core.OS.Instance.Extensions;
+using Core.OS.Tests.EnvironmentOverrides;
+using Core.Shared.EnvironmentOverrides;
+using Core.Shared.HostManagement;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.OS.Tests.Hosting.Services;
 
-public sealed class FallbackHostBuilderTests
+// The debug page reads the override switch from the process environment, which the whole assembly
+// shares.
+[Collection(EnvironmentOverridesCollectionDefinition.Name)]
+public sealed class FallbackHostBuilderTests : IDisposable
 {
-    private const string TestUrl = "http://localhost:5005";
-    private readonly TimeSpan _testTimeout = TimeSpan.FromMinutes(2);
+    private readonly string? _previousEnv =
+        Environment.GetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable);
+
+    public void Dispose()
+        => Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, _previousEnv);
 
     [Trait(Traits.Category, Traits.System)]
     [Fact]
-    public async Task Should_create_application_returning_json_with_version_information()
+    public async Task Should_render_the_debug_page_as_html_with_the_diagnostic_groups()
     {
-        // Arrange        
-        using var tokenSource = new CancellationTokenSource();
-        tokenSource.CancelAfter(_testTimeout);
+        // Arrange
+        var fileSystem = new MockFileSystem();
+        var instanceOptions = CreateInstanceOptions();
+        fileSystem.AddDirectory(instanceOptions.HomeDirectory);
+        fileSystem.AddFile(fileSystem.GetLocalDataVersionFilePath(instanceOptions), new MockFileData("1.2.9"));
+        fileSystem.AddFile(
+            fileSystem.GetLocalRecoveryFilePath(instanceOptions),
+            new MockFileData("{\"lastStartup\":\"2026-08-31T10:15:00+00:00\",\"startups\":4,\"recoveryApplied\":true}"));
 
-        string[] args = [
-            $"--urls={TestUrl}",
-            "--environment=Production"
-        ];
-
-        string[] failures = [
-            "OptionB is invalid",
-            "OptionA is invalid, because of ",
-        ];
-
-        // Act                
-        var thread = new Thread(async () =>
+        var options = new FallbackHostOptions
         {
-            var host = FallbackHostBuilder.Build(args, new FallbackHostOptions
-            {
-                Status = "invalid_options",
-                Messages = [.. failures],
-                HttpStatusCode = 500,
-            });
+            Status = FallbackHostStatus.InvalidOptions,
+            Messages = ["OptionA is invalid", "OptionB is invalid"],
+            Logger = NullLogger.Instance,
+            HttpStatusCode = 500,
+            FileSystem = fileSystem,
+            Instance = instanceOptions,
+        };
 
-            await host.RunAsync();
-        });
-
-        thread.Start();
-
-        await Task.Delay(5000, TestContext.Current.CancellationToken);
+        // Act
+        using var response = await Request(options, client => client.GetAsync(new Uri("/", UriKind.Relative), TestContext.Current.CancellationToken));
 
         // Assert
-        using var client = new HttpClient();
-        using var response = await client.GetAsync(new Uri(TestUrl), tokenSource.Token);
-        response.StatusCode.Should().Be(System.Net.HttpStatusCode.InternalServerError);
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("text/html");
+        response.Content.Headers.ContentType?.CharSet.Should().Be("utf-8");
 
-        var htmlResponse = await response.Content.ReadAsStringAsync(tokenSource.Token);
-        htmlResponse.Should().ContainAll(failures);
+        var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        html.Should().StartWith("<!DOCTYPE html>");
+        html.Should().ContainAll(
+            FallbackHostStatus.InvalidOptions,
+            "OptionA is invalid",
+            "OptionB is invalid",
+            "1.2.9",
+            "Recovery state");
+    }
 
-        thread.Join();
-        await tokenSource.CancelAsync();
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
+    public async Task Should_render_the_debug_page_for_the_recovery_exhausted_status()
+    {
+        // Arrange
+        var options = new FallbackHostOptions
+        {
+            Status = FallbackHostStatus.RecoveryExhausted,
+            Messages = ["Recovery was already applied and the suite keeps crashing"],
+            Logger = NullLogger.Instance,
+            HttpStatusCode = 503,
+        };
+
+        // Act
+        using var response = await Request(options, client => client.GetAsync(new Uri("/", UriKind.Relative), TestContext.Current.CancellationToken));
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+        response.Content.Headers.ContentType?.MediaType.Should().Be("text/html");
+
+        var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        html.Should().ContainAll(
+            FallbackHostStatus.RecoveryExhausted,
+            "Recovery was already applied and the suite keeps crashing");
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
+    public async Task Should_render_override_keys_without_their_values()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, "true");
+
+        var fileSystem = new MockFileSystem();
+        var instanceOptions = CreateInstanceOptions();
+        fileSystem.AddDirectory(instanceOptions.HomeDirectory);
+        fileSystem.AddFile(
+            EnvironmentOverridesFile.RequirePath(fileSystem, instanceOptions.HomeDirectory),
+            new MockFileData(EnvironmentOverridesFormat.Serialize(new Dictionary<string, string>
+            {
+                ["Authentication__ClientSecret"] = "s3cret-that-must-not-be-rendered",
+            })));
+
+        var options = new FallbackHostOptions
+        {
+            Status = FallbackHostStatus.InvalidOptions,
+            Messages = ["Authentication is incompletely configured"],
+            Logger = NullLogger.Instance,
+            HttpStatusCode = 500,
+            FileSystem = fileSystem,
+            Instance = instanceOptions,
+        };
+
+        // Act
+        using var response = await Request(options, client => client.GetAsync(new Uri("/", UriKind.Relative), TestContext.Current.CancellationToken));
+
+        // Assert
+        var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        html.Should().Contain("Authentication__ClientSecret");
+        html.Should().NotContain("s3cret-that-must-not-be-rendered");
     }
 
     [Trait(Traits.Category, Traits.System)]
@@ -60,44 +134,161 @@ public sealed class FallbackHostBuilderTests
     public async Task Should_return_unhealthy_health_check_status()
     {
         // Arrange
-        using var tokenSource = new CancellationTokenSource();
-        tokenSource.CancelAfter(_testTimeout);
+        var options = new FallbackHostOptions
+        {
+            Status = FallbackHostStatus.RecoveryExhausted,
+            Messages = ["Database unavailable", "Config missing"],
+            Logger = NullLogger.Instance,
+        };
 
+        // Act
+        using var response = await Request(options, client => client.GetAsync(new Uri("/health", UriKind.Relative), TestContext.Current.CancellationToken));
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        body.Should().Contain("Unhealthy");
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
+    public async Task Should_move_the_override_file_aside_and_request_a_restart_on_the_disable_action()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, "true");
+
+        var fileSystem = new MockFileSystem();
+        var instanceOptions = CreateInstanceOptions();
+        fileSystem.AddDirectory(instanceOptions.HomeDirectory);
+
+        var path = EnvironmentOverridesFile.RequirePath(fileSystem, instanceOptions.HomeDirectory);
+        var disabledPath = EnvironmentOverridesFile.ResolveDisabledPath(fileSystem, instanceOptions.HomeDirectory)!;
+        var contents = EnvironmentOverridesFormat.Serialize(new Dictionary<string, string>
+        {
+            ["Authentication__ClientSecret"] = "s3cret",
+        });
+        fileSystem.AddFile(path, new MockFileData(contents));
+
+        var options = new FallbackHostOptions
+        {
+            Status = FallbackHostStatus.InvalidOptions,
+            Messages = ["Authentication is incompletely configured"],
+            Logger = NullLogger.Instance,
+            HttpStatusCode = 500,
+            FileSystem = fileSystem,
+            Instance = instanceOptions,
+            HostManagement = new HostManagementOptions { MockClient = new MockPipeClientOptions { Enabled = true } },
+            StopApplicationDelayMs = 100,
+        };
+
+        // Act
+        await WithHost(options, async (host, client) =>
+        {
+            using var response = await client.PostAsync(
+                new Uri(FallbackHostBuilder.DisableEnvironmentOverridesRoute, UriKind.Relative),
+                content: null,
+                TestContext.Current.CancellationToken);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.Found);
+            response.Headers.Location?.OriginalString.Should().Be("/");
+
+            fileSystem.File.Exists(path).Should().BeFalse();
+            fileSystem.File.Exists(disabledPath).Should().BeTrue();
+            (await fileSystem.File.ReadAllTextAsync(disabledPath, TestContext.Current.CancellationToken)).Should().Be(contents);
+
+            // MockPipeClient answers a restart request by stopping the application, the way host
+            // management would have the service manager do it.
+            await WaitForStopRequest(host);
+        });
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
+    public async Task Should_not_offer_the_disable_action_without_host_management_options()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, "true");
+
+        var fileSystem = new MockFileSystem();
+        var instanceOptions = CreateInstanceOptions();
+        fileSystem.AddDirectory(instanceOptions.HomeDirectory);
+        fileSystem.AddFile(
+            EnvironmentOverridesFile.RequirePath(fileSystem, instanceOptions.HomeDirectory),
+            new MockFileData(EnvironmentOverridesFormat.Serialize(new Dictionary<string, string> { ["A"] = "b" })));
+
+        var options = new FallbackHostOptions
+        {
+            Status = FallbackHostStatus.InvalidOptions,
+            Messages = ["Authentication is incompletely configured"],
+            Logger = NullLogger.Instance,
+            HttpStatusCode = 500,
+            FileSystem = fileSystem,
+            Instance = instanceOptions,
+        };
+
+        // Act
+        using var response = await Request(options, client => client.PostAsync(
+            new Uri(FallbackHostBuilder.DisableEnvironmentOverridesRoute, UriKind.Relative),
+            content: null,
+            TestContext.Current.CancellationToken));
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    private static async Task WaitForStopRequest(WebApplication host)
+    {
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        while (!host.Lifetime.ApplicationStopping.IsCancellationRequested && !timeout.IsCancellationRequested)
+        {
+            await Task.Delay(50, timeout.Token);
+        }
+
+        host.Lifetime.ApplicationStopping.IsCancellationRequested.Should().BeTrue();
+    }
+
+    private static InstanceOptions CreateInstanceOptions() => new()
+    {
+        BackupDirectory = "backup",
+        CacheDirectory = "cache",
+        HomeDirectory = "./home",
+        Type = Sdk.Instance.InstanceType.Standalone,
+    };
+
+    /// <summary>
+    /// Runs the failsafe host on a port the OS picks and stops it again, so the cases here can run
+    /// next to each other.
+    /// </summary>
+    private static async Task<HttpResponseMessage> Request(FallbackHostOptions options, Func<HttpClient, Task<HttpResponseMessage>> request)
+    {
+        HttpResponseMessage? response = null;
+        await WithHost(options, async (_, client) => response = await request(client));
+
+        return response!;
+    }
+
+    private static async Task WithHost(FallbackHostOptions options, Func<WebApplication, HttpClient, Task> act)
+    {
         string[] args = [
-            $"--urls={TestUrl}",
+            "--urls=http://127.0.0.1:0",
             "--environment=Production"
         ];
 
-        string[] failures = [
-            "Database unavailable",
-            "Config missing",
-        ];
+        var host = FallbackHostBuilder.Build(args, options);
+        await host.StartAsync(TestContext.Current.CancellationToken);
 
-        // Act
-        var thread = new Thread(async () =>
+        try
         {
-            var host = FallbackHostBuilder.Build(args, new FallbackHostOptions
-            {
-                Status = "degraded",
-                Messages = [.. failures],
-            });
-
-            await host.RunAsync();
-        });
-
-        thread.Start();
-
-        await Task.Delay(5000, TestContext.Current.CancellationToken);
-
-        // Assert
-        using var client = new HttpClient();
-        using var response = await client.GetAsync(new Uri($"{TestUrl}/health"), tokenSource.Token);
-        response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
-
-        var body = await response.Content.ReadAsStringAsync(tokenSource.Token);
-        body.Should().Contain("Unhealthy");
-
-        thread.Join();
-        await tokenSource.CancelAsync();
+            using var handler = new HttpClientHandler { AllowAutoRedirect = false };
+            using var client = new HttpClient(handler) { BaseAddress = new Uri(host.Urls.First()) };
+            await act(host, client);
+        }
+        finally
+        {
+            await host.StopAsync(TestContext.Current.CancellationToken);
+            await host.DisposeAsync();
+        }
     }
 }

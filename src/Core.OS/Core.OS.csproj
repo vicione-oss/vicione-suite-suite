@@ -8,6 +8,16 @@
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!--
+      The failsafe debug page renders Razor components in static SSR only. The Web SDK otherwise
+      infers this from the .razor file and pulls Microsoft.AspNetCore.App.Internal.Assets implicitly
+      for blazor.web.js, which static SSR never loads - and an implicit reference cannot carry the
+      PackageVersion that central package management pins for it (NU1009).
+    -->
+    <RequiresAspNetWebAssets>false</RequiresAspNetWebAssets>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(IsWindows)'=='true'">
     <DefineConstants>Windows</DefineConstants>
   </PropertyGroup>

@@ -1,0 +1,239 @@
+@using Core.OS.Hosting.Contracts
+@using Core.OS.Hosting.Services
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ViciOne Suite — Failsafe Mode</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 2rem 1rem;
+            background-color: #2a2a2a;
+            color: #dedede;
+            font-family: 'Noto Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.5;
+        }
+
+        main {
+            max-width: 52rem;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #ff9600;
+            font-size: 1.75rem;
+            margin: 0 0 0.25rem;
+        }
+
+        p.lead {
+            margin: 0 0 2rem;
+            color: #aaaaaa;
+        }
+
+        section {
+            background-color: #333333;
+            border: 1px solid #555555;
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin: 0 0 0.75rem;
+            color: #ff9600;
+        }
+
+        dl {
+            display: grid;
+            grid-template-columns: minmax(8rem, 14rem) 1fr;
+            gap: 0.35rem 1rem;
+            margin: 0;
+        }
+
+        dt {
+            color: #aaaaaa;
+        }
+
+        dd {
+            margin: 0;
+            word-break: break-word;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+
+        li {
+            margin-bottom: 0.35rem;
+        }
+
+        code {
+            font-family: 'Cascadia Mono', 'Consolas', monospace;
+        }
+
+        .unavailable {
+            color: #888888;
+            font-style: italic;
+        }
+
+        button {
+            margin-top: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            font: inherit;
+            color: #dedede;
+            background-color: #4a4a4a;
+            border: 1px solid #777777;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #5c5c5c;
+        }
+
+        form {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            background-color: #4a2a2a;
+            border: 1px solid #7a4a4a;
+            font-family: 'Cascadia Mono', 'Consolas', monospace;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Suite is in failsafe mode</h1>
+    <p class="lead">
+        Startup did not complete. The information below is read from disk and describes why. For the
+        full startup log, log in to this machine over SSH and read the service journal.
+    </p>
+
+    <section>
+        <h2>Failsafe status</h2>
+        <dl>
+            <dt>Status</dt>
+            <dd><span class="status">@Diagnostics.Status</span></dd>
+            <dt>Reported</dt>
+            <dd>@Diagnostics.Timestamp.ToString("u")</dd>
+        </dl>
+        @if (Diagnostics.Messages.Count == 0)
+        {
+            <p class="unavailable">No failure messages were reported.</p>
+        }
+        else
+        {
+            <p>Failure messages:</p>
+            <ul>
+                @foreach (var message in Diagnostics.Messages)
+                {
+                    <li>@message</li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section>
+        <h2>Version</h2>
+        <dl>
+            <dt>Installed version</dt>
+            <dd>@Diagnostics.Version.LocalVersion</dd>
+            @if (Diagnostics.Version.BranchName is not null)
+            {
+                <dt>Branch</dt>
+                <dd>@Diagnostics.Version.BranchName</dd>
+            }
+            <dt>SDK version</dt>
+            <dd>@Diagnostics.Version.SdkVersion</dd>
+            <dt>Data version</dt>
+            <dd>@Value(Diagnostics.Version.DataVersion)</dd>
+        </dl>
+    </section>
+
+    @if (Diagnostics.Recovery is not null)
+    {
+        <section>
+            <h2>Recovery state</h2>
+            <dl>
+                <dt>Last startup</dt>
+                <dd>@Diagnostics.Recovery.LastStartup.ToString("u")</dd>
+                <dt>Startups in this cycle</dt>
+                <dd>@Diagnostics.Recovery.Startups</dd>
+                <dt>Recovery applied</dt>
+                <dd>@(Diagnostics.Recovery.RecoveryApplied ? "yes" : "no")</dd>
+            </dl>
+        </section>
+    }
+
+    <section>
+        <h2>Environment overrides</h2>
+        @if (!Diagnostics.EnvironmentOverrides.Enabled)
+        {
+            <p class="unavailable">Runtime environment overrides are switched off on this instance.</p>
+        }
+        else
+        {
+            <dl>
+                <dt>File</dt>
+                <dd>@Value(Diagnostics.EnvironmentOverrides.Path)</dd>
+                <dt>Present</dt>
+                <dd>@(Diagnostics.EnvironmentOverrides.FileExists ? "yes" : "no")</dd>
+            </dl>
+            @if (Diagnostics.EnvironmentOverrides.Error is not null)
+            {
+                <p>The file could not be read, so none of it was applied: @Diagnostics.EnvironmentOverrides.Error</p>
+            }
+            else if (Diagnostics.EnvironmentOverrides is { FileExists: true, Keys.Count: 0 })
+            {
+                <p>The file is present but sets no overrides.</p>
+            }
+            else if (Diagnostics.EnvironmentOverrides.FileExists)
+            {
+                <p>Applied overrides (values are masked):</p>
+                <ul>
+                    @foreach (var key in Diagnostics.EnvironmentOverrides.Keys)
+                    {
+                        <li><code>@key</code> = <code>@MaskedValue</code></li>
+                    }
+                </ul>
+            }
+
+            @if (Diagnostics.EnvironmentOverrides.CanDisable)
+            {
+                <p>
+                    If one of these values is what keeps the suite from starting, the file can be set
+                    aside and the suite restarted on the inherited environment. The file is kept, so
+                    its contents stay readable.
+                </p>
+                <form method="post" action="@FallbackHostBuilder.DisableEnvironmentOverridesRoute">
+                    <button type="submit">Disable overrides &amp; restart</button>
+                </form>
+            }
+        }
+    </section>
+</main>
+</body>
+</html>
+
+@code {
+
+    private const string MaskedValue = "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022";
+
+    [Parameter]
+    public FallbackDiagnostics Diagnostics { get; set; } = default!;
+
+    private static RenderFragment Value(string? value) => value is null
+        ? @<span class="unavailable">unavailable</span>
+        : @<text>@value</text>;
+
+}
