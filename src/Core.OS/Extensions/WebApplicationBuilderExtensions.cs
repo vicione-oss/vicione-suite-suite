@@ -36,10 +36,9 @@ internal static partial class WebApplicationBuilderExtensions
                 return;
             }
 
-            // validate appsettings, env vars etc.
-            builder.Services.ConfigureAndValidateOptions(preparationContext.InstanceOptions);
-            builder.Services.AddSuiteOpenTelemetry(builder.Configuration, preparationContext.InstanceOptions, preparationContext.FileSystem);
-            builder.Services.AddSuiteServices(builder.Configuration, preparationContext);
+            // AddCoreOs owns the ordering: diagnostics + option validation first, then services.
+            // The invalid-options gate below reports any binding/validation failure.
+            builder.Services.AddCoreOs(builder.Configuration, preparationContext);
 
             // all services have to be already registered to service collection!
             var host = builder.Build();

@@ -2,14 +2,11 @@ using Core.OS.Modules;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
 using Core.OS.UserManagement.Extensions;
-using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
-using Core.Shared.UserManagement.Requests;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sdk.Testing.Backend;
-using Sdk.UserManagement.Contracts;
 using Sdk.UserManagement.Requests;
 
 namespace Core.OS.Tests.UserManagement.Consumers;

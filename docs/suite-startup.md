@@ -152,7 +152,7 @@ Any exception thrown by a step (e.g. a failed synchronization or module load) is
 - `VersionDowngradePreparationResult` - starts a minimal downgrade web host serving a static downgrade page, then stops.
 - `RecoveryExhaustedPreparationResult` - starts a terminal fallback host in a degraded error state, serving the failsafe debug page, so the service manager does not keep restarting the process.
 - Any other `IPreparationAbortResult` (e.g. module host preparation failures) - logs the abort reason and stops startup.
-- Otherwise (success) - registers the remaining services (`ConfigureAndValidateOptions`, `AddSuiteOpenTelemetry`, `AddSuiteServices`), builds the host, and either starts the same fallback host for invalid options or runs the full Core.OS application.
+- Otherwise (success) - registers the remaining services (`AddCoreOptions`, `AddSuiteOpenTelemetry`, `AddSuiteServices`), builds the host, and either starts the same fallback host for invalid options or runs the full Core.OS application.
 
 ## Automatic Recovery
 

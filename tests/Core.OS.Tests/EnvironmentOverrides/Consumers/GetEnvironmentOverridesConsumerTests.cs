@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Core.OS.EnvironmentOverrides;
 using Core.OS.EnvironmentOverrides.Consumers;
 using Core.Shared.EnvironmentOverrides.Requests;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.EnvironmentOverrides.Consumers;
 

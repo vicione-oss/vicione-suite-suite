@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Core.Module;
 using Core.OS.DbContext;
 using Core.OS.MessageBus.MassTransit.Configuration;
@@ -9,12 +8,10 @@ using Core.Shared.Instance.HealthCheck;
 using MassTransit.EntityFrameworkCoreIntegration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
 using Sdk.Modules;
 using Sdk.Testing.Backend;
-using Xunit;
 using EfDbContext = Microsoft.EntityFrameworkCore.DbContext;
 
 namespace Core.OS.Tests.Persistence;

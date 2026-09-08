@@ -1,7 +1,7 @@
 # OpenTelemetry
 
 The suite exports **traces**, **metrics**, and **logs** over OTLP.
-Traces and metrics come from the OpenTelemetry SDK pipeline (`AddSuiteOpenTelemetry`).
+Traces and metrics come from the OpenTelemetry SDK pipeline (`AddCoreDiagnostics`).
 Logs are exported through a Serilog sink (`Serilog.Sinks.OpenTelemetry`) that runs alongside the other log targets (Console, LogFile, Journal).
 
 For the general OTLP environment variables, see the [OpenTelemetry SDK configuration reference](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/).

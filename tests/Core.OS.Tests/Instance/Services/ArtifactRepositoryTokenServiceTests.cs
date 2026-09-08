@@ -5,7 +5,7 @@ namespace Core.OS.Tests.Instance.Services;
 
 public sealed class ArtifactRepositoryTokenServiceTests
 {
-    private readonly Uri _baseAddress = new Uri("https://system.update.ifm");
+    private readonly Uri _baseAddress = new("https://system.update.ifm");
 
     [Fact]
     [Trait(Traits.Category, Traits.System)]
@@ -63,7 +63,7 @@ public sealed class ArtifactRepositoryTokenServiceTests
             .WithMessage("*not secure*");
     }
 
-    private Uri CreateTokenUri(Uri baseAddress)
+    private static Uri CreateTokenUri(Uri baseAddress)
     {
         var uriBuilder = new UriBuilder(baseAddress)
         {

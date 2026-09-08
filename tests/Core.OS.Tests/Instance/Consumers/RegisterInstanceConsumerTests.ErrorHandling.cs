@@ -5,16 +5,13 @@ using Core.OS.Instance.Consumers;
 using Core.OS.Instance.Services;
 using Core.OS.Persistence;
 using Core.Shared.Instance.Requests;
-using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Backend.Messaging;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
-using Xunit;
 
 namespace Core.OS.Tests.Instance.Consumers;
 

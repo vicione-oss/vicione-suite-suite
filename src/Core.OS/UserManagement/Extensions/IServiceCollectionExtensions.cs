@@ -1,9 +1,11 @@
 ﻿using System.Security.Claims;
 using Core.OS.DbContext;
-using Core.OS.Extensions;
+using Core.OS.Mail.Extensions;
 using Core.OS.Modules;
+using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Security;
+using Core.OS.UserManagement.Templates;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Comparers;
 using Core.Shared.UserManagement.Configuration;
@@ -27,6 +29,11 @@ internal static class IServiceCollectionExtensions
 
         services.AddScoped<IAdministratorNameProvider, AdministratorNameProvider>();
         services.AddScoped<IAdministratorInitialPasswordProvider, AdministratorInitialPasswordProvider>();
+
+        services.AddTransient<IAccountVerification, AccountVerification>();
+        services.AddTransient<ISecuritySettings, SecuritySettings>();
+        services.AddTransient<FluidTemplateRenderer>();
+        services.AddTransient<UserManagementTemplates>();
 
         services.Configure<SecurityStampValidatorOptions>(options =>
         {

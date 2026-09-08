@@ -1,8 +1,5 @@
-using AwesomeAssertions;
 using Core.OS.MessageBus.MassTransit.Configuration;
 using MassTransit;
-using NSubstitute;
-using Xunit;
 
 namespace Core.OS.Tests.MessageBus.MassTransit;
 

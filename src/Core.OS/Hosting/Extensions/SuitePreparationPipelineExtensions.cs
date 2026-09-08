@@ -89,15 +89,6 @@ internal static partial class SuitePreparationPipelineExtensions
             return PreparationResult.Success;
         });
 
-    public static SuitePreparationPipeline UseOptionsValidation(
-        this SuitePreparationPipeline pipeline, WebApplicationBuilder builder)
-        => pipeline.Use((context, _) =>
-        {
-            // validate appsettings, env vars etc.
-            builder.Services.ConfigureAndValidateOptions(context.InstanceOptions);
-            return Task.CompletedTask;
-        });
-
     public static SuitePreparationPipeline UseModulePreparation(
         this SuitePreparationPipeline pipeline, WebApplicationBuilder builder)
         => pipeline.Use(async (context, ct) =>

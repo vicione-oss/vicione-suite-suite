@@ -1,8 +1,6 @@
-using AwesomeAssertions;
 using Core.OS.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 using EfDbContext = Microsoft.EntityFrameworkCore.DbContext;
 
 namespace Core.OS.Tests.Persistence;
