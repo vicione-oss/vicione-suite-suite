@@ -1,4 +1,4 @@
-﻿[
+[
     {
         "Key": "_NO_DEBUG_HEAP",
         "Value": "1"
@@ -30,11 +30,7 @@
     {
         "Key": "URLS",
         "Value": "https://localhost:6001;http://localhost:6000"
-    },
-    {
-        "Key": "UATDATA",
-        "Value": "C:\\WINDOWS\\CCM\\UATData\\D9F8C395-CAB8-491d-B8AC-179A1FE1BE77"
-    },
+    },    
     {
         "Key": "TMP",
         "Value": "C:\\Users\\username\\AppData\\Local\\Temp"
@@ -86,11 +82,7 @@
     {
         "Key": "PUBLIC",
         "Value": "C:\\Users\\Public"
-    },
-    {
-        "Key": "PSModulePath",
-        "Value": "C:\\Program Files\\WindowsPowerShell\\Modules;C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules;C:\\Program Files (x86)\\Microsoft Azure Information Protection\\Powershell"
-    },
+    },    
     {
         "Key": "ProgramW6432",
         "Value": "C:\\Program Files"
@@ -126,19 +118,11 @@
     {
         "Key": "PATHEXT",
         "Value": ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC"
-    },
-    {
-        "Key": "Path",
-        "Value": "C:\\Program Files\\Microsoft\\jdk-11.0.12.7-hotspot\\bin;C:\\ProgramData\\Oracle\\Java\\javapath;C:\\WINDOWS\\system32;C:\\WINDOWS;C:\\WINDOWS\\System32\\Wbem;C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\;C:\\WINDOWS\\System32\\OpenSSH\\;C:\\Program Files\\Microsoft VS Code\\bin;C:\\Program Files\\Microsoft SQL Server\\150\\Tools\\Binn\\;C:\\Program Files\\Microsoft SQL Server\\Client SDK\\ODBC\\170\\Tools\\Binn\\;C:\\Program Files\\nodejs\\;C:\\Program Files\\PuTTY\\;C:\\Program Files\\dotnet\\;C:\\Program Files\\Git\\cmd;C:\\Users\\username\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\username\\AppData\\Roaming\\npm;C:\\Program Files (x86)\\Sophos\\Sophos SSL VPN Client\\bin;C:\\Users\\username\\.dotnet\\tools"
-    },
+    },    
     {
         "Key": "OS",
         "Value": "Windows_NT"
-    },
-    {
-        "Key": "OneDrive",
-        "Value": "C:\\Users\\username\\OneDrive - ifm electronic gmbh"
-    },
+    },    
     {
         "Key": "NUMBER_OF_PROCESSORS",
         "Value": "12"
@@ -223,16 +207,12 @@
     },
     {
         "Key": "MessageBus:RabbitMq:ConnectionString",
-        "Value": "amqp://guest:guest@localhost:5672"
+        "Value": "connection-string"
     },
     {
         "Key": "MessageBus:RabbitMq:AutoDeleteQueues",
         "Value": "True"
-    },
-    {
-        "Key": "LOGONSERVER",
-        "Value": "\\\\DETT8W003"
-    },
+    },    
     {
         "Key": "Logging"
     },
@@ -341,27 +321,11 @@
     {
         "Key": "Instance:CacheDirectory",
         "Value": "Cache"
-    },
-    {
-        "Key": "IDEA_INITIAL_DIRECTORY",
-        "Value": "D:\\Repos\\vo-suite"
-    },
+    },    
     {
         "Key": "HOMEPATH",
         "Value": "\\Users\\username"
-    },
-    {
-        "Key": "HOMEDRIVE",
-        "Value": "C:"
-    },
-    {
-        "Key": "FPS_BROWSER_USER_PROFILE_STRING",
-        "Value": "Default"
-    },
-    {
-        "Key": "FPS_BROWSER_APP_PROFILE_STRING",
-        "Value": "Internet Explorer"
-    },
+    },    
     {
         "Key": "ENVIRONMENT",
         "Value": "Development"
