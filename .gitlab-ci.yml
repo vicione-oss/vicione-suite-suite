@@ -112,7 +112,7 @@ include:
       rules: *rules_common
 
   # xUnit test job (both x64 and arm64 via parallel matrix)
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@v2.6.1
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@v2.7.1
     inputs:
       name: 'xUnit'
       stage: 'test'
@@ -124,6 +124,7 @@ include:
       image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
       filter: '/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)&(Category!=E2E)&(Category!=E2E-MasterSlave)]'
       coverage: true
+      config_file: "tests/testconfig.json"
       before_script:
         - *activate_mise
         - *update_nuget_source_ro
@@ -166,7 +167,7 @@ include:
         - if: '$CI_PIPELINE_SOURCE == "schedule"'
 
   ### Pack
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-pack@v2.6.1
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-pack@v2.7.1
     inputs:
       name: "Pack Core.Artifacts"
       stage: "packaging"
@@ -180,13 +181,14 @@ include:
         - dotnet build src/Core.Artifacts/Core.Artifacts.csproj -c Release --no-restore
 
   ### Push
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-nuget-push@v2.6.1
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-nuget-push@v2.7.1
     inputs:
       pack_job_name: "Pack Core.Artifacts"
       name: "Push Core.Artifacts"
       stage: "release"
       image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
-      source: "JFrogViciOne"
+      sources:
+        - "JFrogViciOne"
       filename_pattern: "./src/Core.Artifacts/*"
       rules: *rules_common_manual
       before_script:
