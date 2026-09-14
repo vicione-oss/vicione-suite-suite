@@ -2,10 +2,13 @@ using System.IO.Abstractions;
 using System.Net.Mime;
 using System.Text;
 using Core.OS.Hosting.Contracts;
+using Core.OS.Hosting.Pages;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
+using Core.OS.Security;
+using Core.OS.Security.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace Core.OS.Hosting.Services;
@@ -25,6 +28,7 @@ internal static class DowngradeWebApiHostBuilder
         // create the simplest host possible to display the errors
         var host = builder.Build();
         host.UseHttpsRedirection();
+        host.UseSecurityHeaders(ContentSecurityPolicy.ForStartupFailurePage(StartupFailurePageStyles.DowngradePage));
 
         // we have a page with to options (links -> reset or exit)
         host.MapGet("/", () => CreateVersionDowngradeDetectedHtml(options.DowngradeInformation.CurrentVersion, options.DowngradeInformation.DataVersion));
@@ -109,49 +113,7 @@ internal static class DowngradeWebApiHostBuilder
             <head>
                 <meta charset=""UTF-8"">
                 <title>Startup Error</title>
-                <style>
-                    body {{
-                        margin: 0;
-                        padding: 0;
-                        background-color: #2a2a2a;
-                        color: #dedede;
-                        font-family: 'Noto Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        min-height: 100vh;
-                    }}
-
-                    h1 {{
-                        color: #ff9600;
-                        font-size: 2rem;
-                        margin-bottom: 1rem;
-                    }}
-
-                    p {{
-                        max-width: 600px;
-                        text-align: center;
-                        line-height: 1.6;
-                        margin: 0.5rem 0;
-                    }}
-
-                    a {{
-                        display: inline-block;
-                        margin: 0.5rem;
-                        padding: 0.6rem 1.2rem;
-                        text-decoration: none;
-                        color: #dedede;
-                        background-color: #333333;
-                        border: 1px solid #555555;
-                        border-radius: 6px;
-                        transition: background-color 0.3s ease;
-                    }}
-
-                    a:hover {{
-                        background-color: #555555;
-                    }}
-                </style>
+                <style>{StartupFailurePageStyles.DowngradePage}</style>
             </head>
             <body>
                 <h1>Version mismatch detected</h1>

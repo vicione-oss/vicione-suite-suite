@@ -4,6 +4,7 @@ using Core.OS.Hosting.Services;
 using Core.OS.HostManagement;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
+using Core.OS.Tests.Security;
 using Core.Shared.HostManagement;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -160,5 +161,35 @@ public sealed class DowngradeWebApplicationBuilderTests
 
         thread.Join();
         await tokenSource.CancelAsync();
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
+    public async Task Should_send_the_startup_failure_policy_allowing_the_stylesheet_it_rendered()
+    {
+        // Arrange
+        var builder = WebApplication.CreateBuilder([]);
+
+        await using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, CreateDowngradeOptions());
+
+        // A port the OS picks, and started here rather than on a thread that is only cancelled, so
+        // this case neither waits for nor holds the fixed port the ones above share.
+        host.Urls.Add("http://127.0.0.1:0");
+        await host.StartAsync(TestContext.Current.CancellationToken);
+
+        using var client = new HttpClient { BaseAddress = new Uri(host.Urls.First()) };
+
+        // Act
+        using var response = await client.GetAsync(new Uri("/", UriKind.Relative), TestContext.Current.CancellationToken);
+
+        // Assert
+        var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var policy = response.Headers.GetValues("Content-Security-Policy").Single();
+
+        policy.Should().Contain($"style-src {InlineStyleSheet.HashOf(html)};");
+        policy.Should().Contain("script-src 'none';");
+        response.Headers.GetValues("X-Frame-Options").Should().Equal("DENY");
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
     }
 }

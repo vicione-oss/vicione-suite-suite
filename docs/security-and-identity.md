@@ -87,3 +87,24 @@ flowchart TD
     classDef user stroke:#00ff00
     class ClaimsPrincipal,User user;
 ```
+
+## Security Headers
+
+The Content Security Policy itself is decided in [ADR-006](ADRs/ADR-006-content-security-policy.md); this section only records which layer sends which header, and why.
+
+- **The Suite sends the policy and `X-Frame-Options`**, from `ContentSecurityPolicy` and `UseSecurityHeaders`.
+  It is the only layer present in every deployment — installations also run Kestrel directly or sit behind a customer-managed proxy — which is what decided it in the ADR.
+- **The failsafe and downgrade hosts send a stricter policy of their own**, because they answer when the Suite did not come up.
+  They carry no reporting directive — the app that would answer `/csp-report` is the one that failed.
+- **The packaged nginx sends HSTS, `X-Content-Type-Options` and `Referrer-Policy`**, and deliberately no CSP and no `X-Frame-Options`.
+  A duplicate `X-Frame-Options` may be ignored by the browser altogether, so exactly one sender is the point.
+- **`src/html/unavailable.html` in `deb-packaging` needs no CSP exception**, although it carries an inline `<style>` and `<script>`.
+  nginx serves it only when the upstream is unreachable, so no policy of the Suite's can be on that response, and nginx sends none of its own.
+- **Editing the nginx fragments carries one trap:** an `add_header` inside a `location` discards every server-level `add_header` for that location, so a location added later silently loses HSTS, `nosniff` and `Referrer-Policy` unless each is repeated there.
+  `src/nginx/header` carries the same note.
+
+### Deployment
+
+- **TLS is required for violation reporting.** `report-to` registers an endpoint only on a cryptographic origin, and a browser that supports it ignores `report-uri`, so an installation served over plain `http://` reports no violations at all.
+  TLS terminated at a proxy is enough, since what counts is the scheme the browser sees — see the remarks on `ContentSecurityPolicy.Baseline`.
+- **The policy is identical in every environment.** There is no Development variant, so what E2E exercises is the header a customer gets.

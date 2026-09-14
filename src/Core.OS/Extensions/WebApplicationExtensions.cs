@@ -1,5 +1,7 @@
 using System.Security.Cryptography;
 using Core.OS.Modules;
+using Core.OS.Security;
+using Core.OS.Security.Extensions;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -48,6 +50,7 @@ internal static class WebApplicationExtensions
             moduleHost.UseUiHost(host, host.Environment);
 
             host.UseResponseCachePolicy();
+            host.UseSecurityHeaders(ContentSecurityPolicy.Baseline, ContentSecurityPolicy.ReportingEndpoints);
 
             host.UseRouting();
             host.UseSerilogRequestLogging(options =>
@@ -62,6 +65,7 @@ internal static class WebApplicationExtensions
             host.UseEndpoints(moduleHost.MapModuleEndpoints);
 #pragma warning restore ASP0014
 
+            host.MapCspViolationReports();
             host.MapHealthChecks("/hc");
             host.MapGet("/liveness", () => StatusCodes.Status200OK);
 

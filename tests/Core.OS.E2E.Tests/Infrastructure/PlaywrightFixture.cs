@@ -13,10 +13,18 @@ public sealed class PlaywrightFixture : IAsyncLifetime
 
     public IBrowser Browser { get; private set; } = null!;
 
+    /// <summary>
+    /// The full Chromium build rather than Playwright's default headless shell. The shell never
+    /// delivers Reporting API reports, so the Content Security Policy violation that ADR-006 has
+    /// reported through <c>report-to</c> would be invisible to the test that asserts it arrives —
+    /// and invisible for a reason no customer's browser shares.
+    /// </summary>
+    private static BrowserTypeLaunchOptions FullChromium => new() { Channel = "chromium" };
+
     public async ValueTask InitializeAsync()
     {
         _playwright = await Playwright.CreateAsync();
-        Browser = await _playwright.Chromium.LaunchAsync();
+        Browser = await _playwright.Chromium.LaunchAsync(FullChromium);
     }
 
     public async ValueTask DisposeAsync()
