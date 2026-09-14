@@ -30,7 +30,8 @@
 ### Updated
 
 - `AspNetCore.SassCompiler` packages, update to version `1.102.0`
-- `ViciOne.Suite.Sdk` packages, update to version `3.1.0-ci2827070869`
+- `Microsoft` packages, update to version `10.0.12`
+- `ViciOne.Suite.Sdk` packages, update to version `3.1.0-ci2837188399`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.17.0`
 
 ## 1.3.0 - 2026-08-17
