@@ -3,6 +3,8 @@ using Core.OS.Hosting.Pages;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Instance;
+using Core.OS.Security;
+using Core.OS.Security.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
@@ -29,6 +31,7 @@ internal static partial class FallbackHostBuilder
 
         var host = builder.Build();
         host.UseHttpsRedirection();
+        host.UseSecurityHeaders(ContentSecurityPolicy.ForStartupFailurePage(StartupFailurePageStyles.FailsafePage));
         host.MapHealthChecks("/health");
         MapEndpoints(host, options);
 

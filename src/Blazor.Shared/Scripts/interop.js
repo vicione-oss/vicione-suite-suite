@@ -349,16 +349,16 @@
                     var request = new XMLHttpRequest();
                     request.open('POST', posturl, true);
                     request.upload.onloadstart = function (e) {
-                        progressinfo.innerHTML = file.name + ' 0%';
+                        progressinfo.textContent = file.name + ' 0%';
                         progressbar.value = 0;
                     };
                     request.upload.onprogress = function (e) {
                         var percent = Math.ceil((e.loaded / e.total) * 100);
-                        progressinfo.innerHTML = file.name + '[' + PartCount + '] ' + percent + '%';
+                        progressinfo.textContent = file.name + '[' + PartCount + '] ' + percent + '%';
                         progressbar.value = (percent / 100);
                     };
                     request.upload.onloadend = function (e) {
-                        progressinfo.innerHTML = file.name + ' 100%';
+                        progressinfo.textContent = file.name + ' 100%';
                         progressbar.value = 1;
                     };
                     request.send(data);

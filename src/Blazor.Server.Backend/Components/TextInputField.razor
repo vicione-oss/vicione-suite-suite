@@ -19,7 +19,7 @@
 
     @if (Password)
     {
-        <button type="button" class="show-button" onclick="togglePassword('@_inputId', this)">
+        <button type="button" class="show-button" data-toggle-password="@_inputId">
             <MonochromeIcon Name="MonochromeIconName.Show" Size="MonochromeIconSize.Small" CssClass="show-icon" />
 
             <MonochromeIcon Name="MonochromeIconName.Hide" Size="MonochromeIconSize.Small" CssClass="hide-icon" />

@@ -16,3 +16,19 @@ function togglePassword(inputId, button) {
         hideElement.style.display = isPassword ? 'inline-block' : 'none';
     }
 }
+
+function onPasswordToggleClick(event) {
+    const button = event.target.closest("[data-toggle-password]");
+    if (!button) return;
+
+    togglePassword(button.dataset.togglePassword, button);
+}
+
+function attachPasswordToggleOnce() {
+    if (window.passwordToggleAttached) return;
+
+    window.passwordToggleAttached = true;
+    document.addEventListener("click", onPasswordToggleClick);
+}
+
+attachPasswordToggleOnce();

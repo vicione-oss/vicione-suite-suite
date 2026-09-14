@@ -19,3 +19,4 @@ Suite ADRs are numbered independently from `suite-sdk`. Both sequences start at 
 | ADR-003 | [Replication Consistency Guarantees](ADR-003-replication-consistency-guarantees.md) | Accepted | 2026-06-04 |
 | ADR-004 | [Error Handling Strategy](ADR-004-error-handling-strategy.md) | Accepted | 2026-08-03 |
 | ADR-005 | [Failsafe Debug Surface](ADR-005-failsafe-debug-surface.md) | Accepted | 2026-08-31 |
+| ADR-006 | [Content Security Policy](ADR-006-content-security-policy.md) | Accepted | 2026-09-07 |

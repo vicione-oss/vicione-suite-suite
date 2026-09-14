@@ -28,6 +28,9 @@ public sealed partial class LoginPage(IPage page)
     // the 'Passkeys' feature is enabled, and disabled when the host is not DNS-capable.
     private ILocator PasskeySignInButton => page.Locator("button[name='__passkeySubmit']");
 
+    // TextInputField renders the show/hide button with the id of the input it drives.
+    private ILocator PasswordToggle => page.Locator("button[data-toggle-password]");
+
     [GeneratedRegex("/account/login")]
     private static partial Regex LoginUrl();
 
@@ -57,6 +60,13 @@ public sealed partial class LoginPage(IPage page)
 
     /// <summary>Asserts the login was rejected (a credential field is marked invalid).</summary>
     public Task ExpectRejected() => Expect(InvalidField.First).ToBeVisibleAsync();
+
+    /// <summary>Clicks the show/hide button of the password field.</summary>
+    public Task TogglePasswordVisibility() => PasswordToggle.ClickAsync();
+
+    /// <summary>Asserts whether the password field reveals its value.</summary>
+    public Task ExpectPasswordRevealed(bool revealed)
+        => Expect(PasswordField).ToHaveAttributeAsync("type", revealed ? "text" : "password");
 
     /// <summary>Asserts the user is authenticated (navigated away from the login page).</summary>
     public Task ExpectAuthenticated() => Expect(page).Not.ToHaveURLAsync(LoginUrl());

@@ -2,11 +2,14 @@ using System.Net;
 using System.IO.Abstractions.TestingHelpers;
 using Core.OS.EnvironmentOverrides;
 using Core.OS.Hosting.Extensions;
+using Core.OS.Hosting.Pages;
 using Core.OS.Hosting.Services;
 using Core.OS.Instance;
 using Core.OS.HostManagement;
 using Core.OS.Instance.Extensions;
+using Core.OS.Security;
 using Core.OS.Tests.EnvironmentOverrides;
+using Core.OS.Tests.Security;
 using Core.Shared.EnvironmentOverrides;
 using Core.Shared.HostManagement;
 using Microsoft.AspNetCore.Builder;
@@ -20,6 +23,8 @@ namespace Core.OS.Tests.Hosting.Services;
 [Collection(EnvironmentOverridesCollectionDefinition.Name)]
 public sealed class FallbackHostBuilderTests : IDisposable
 {
+    private const string ContentSecurityPolicyHeader = "Content-Security-Policy";
+
     private readonly string? _previousEnv =
         Environment.GetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable);
 
@@ -72,13 +77,7 @@ public sealed class FallbackHostBuilderTests : IDisposable
     public async Task Should_render_the_debug_page_for_the_recovery_exhausted_status()
     {
         // Arrange
-        var options = new FallbackHostOptions
-        {
-            Status = FallbackHostStatus.RecoveryExhausted,
-            Messages = ["Recovery was already applied and the suite keeps crashing"],
-            Logger = NullLogger.Instance,
-            HttpStatusCode = 503,
-        };
+        var options = CreateRecoveryExhaustedOptions();
 
         // Act
         using var response = await Request(options, client => client.GetAsync(new Uri("/", UriKind.Relative), TestContext.Current.CancellationToken));
@@ -238,6 +237,39 @@ public sealed class FallbackHostBuilderTests : IDisposable
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
+    public async Task Should_send_the_startup_failure_policy()
+    {
+        // Arrange
+        var options = CreateRecoveryExhaustedOptions();
+
+        // Act
+        using var response = await Request(options, client => client.GetAsync(new Uri("/", UriKind.Relative), TestContext.Current.CancellationToken));
+
+        // Assert
+        response.Headers.GetValues(ContentSecurityPolicyHeader).Should().Equal(
+            ContentSecurityPolicy.ForStartupFailurePage(StartupFailurePageStyles.FailsafePage));
+        response.Headers.GetValues("X-Frame-Options").Should().Equal("DENY");
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
+    public async Task Should_allow_the_stylesheet_it_rendered()
+    {
+        // Arrange
+        var options = CreateRecoveryExhaustedOptions();
+
+        // Act
+        using var response = await Request(options, client => client.GetAsync(new Uri("/", UriKind.Relative), TestContext.Current.CancellationToken));
+
+        // Assert
+        var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var policy = response.Headers.GetValues(ContentSecurityPolicyHeader).Single();
+
+        policy.Should().Contain($"style-src {InlineStyleSheet.HashOf(html)};");
+    }
+
     private static async Task WaitForStopRequest(WebApplication host)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -248,6 +280,14 @@ public sealed class FallbackHostBuilderTests : IDisposable
 
         host.Lifetime.ApplicationStopping.IsCancellationRequested.Should().BeTrue();
     }
+
+    private static FallbackHostOptions CreateRecoveryExhaustedOptions() => new()
+    {
+        Status = FallbackHostStatus.RecoveryExhausted,
+        Messages = ["Recovery was already applied and the suite keeps crashing"],
+        Logger = NullLogger.Instance,
+        HttpStatusCode = 503,
+    };
 
     private static InstanceOptions CreateInstanceOptions() => new()
     {

@@ -1,5 +1,6 @@
 ﻿using Blazor.Shared;
 using Core.Shared.Instance.Services;
+using Core.Shared.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.FeatureManagement;
@@ -36,11 +37,13 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
         var blazor = new PathString("/_blazor");
         var devTools = new PathString("/.well-known");
         var cookieUpdate = new PathString($"/{Constants.UpdateLanguageCookieRoute}");
+        var cspReport = new PathString(CspViolationReporting.Route);
 
         if (context.Request.Path.StartsWithSegments(framework, StringComparison.Ordinal)
             || context.Request.Path.StartsWithSegments(blazor, StringComparison.Ordinal)
             || context.Request.Path.StartsWithSegments(devTools, StringComparison.Ordinal)
-            || context.Request.Path.StartsWithSegments(cookieUpdate, StringComparison.Ordinal))
+            || context.Request.Path.StartsWithSegments(cookieUpdate, StringComparison.Ordinal)
+            || context.Request.Path.StartsWithSegments(cspReport, StringComparison.Ordinal))
         {
             return false;
         }

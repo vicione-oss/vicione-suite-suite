@@ -27,6 +27,8 @@
     <Content Remove="Modules\initial-modules.json" />
     <EmbeddedResource Include="HostManagement\Resources\GetSystemConfigurationResult.json" />
     <EmbeddedResource Include="Modules\initial-modules.json" />
+    <EmbeddedResource Include="Hosting\Pages\failsafe-page.css" />
+    <EmbeddedResource Include="Hosting\Pages\downgrade-page.css" />
   </ItemGroup>
 
   <!-- Prevent copying unnecessary file -->
