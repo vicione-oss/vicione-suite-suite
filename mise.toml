@@ -8,5 +8,5 @@
 # Then tools are available directly: node, npm, dotnet
 
 [tools]
-dotnet = "10.0.400" # Must match global.json requirement
+dotnet = "10.0.401" # Must match global.json requirement
 node = "26.7.0"

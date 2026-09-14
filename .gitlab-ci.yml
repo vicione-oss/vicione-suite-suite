@@ -128,6 +128,7 @@ include:
       before_script:
         - *activate_mise
         - *update_nuget_source_ro
+        - dotnet restore --packages packages
         - *install_npm_packages
         - *run_npm_scripts
       rules: *rules_common
@@ -373,8 +374,9 @@ Validation:
       fallback_keys:
         - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
       paths:
-        - .nuget/packages/
-        - ./**/obj/
+        - ./packages/ # NuGet packages
+        - ./**/obj/project.* # restore information per project
+        - ./**/obj/*.csproj.nuget.* # restore information per project
       policy: pull-push
 
 #################### Artifacts stage
