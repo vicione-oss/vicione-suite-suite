@@ -1,0 +1,56 @@
+# Nightly result posted to the project's GitLab alert endpoint: a failure opens an alert, a green run
+# resolves it again. Both jobs exist only while E2E_ALERT_URL and E2E_ALERT_KEY are set as project
+# CI/CD variables — see docs/e2e-testing.md
+.nightly-alert:
+  extends: .minimal
+  stage: notify
+  image: curlimages/curl:8.21.0
+  dependencies: []
+  variables:
+    GIT_STRATEGY: none
+    # One extra HTTP status to accept besides 2xx, because the endpoint reports "nothing to do" as an
+    # error — see docs/e2e-testing.md
+    ALERT_TOLERATED_STATUS: ""
+  script:
+    - |
+      cat > alert.json <<EOF
+      {
+        "title": "$ALERT_TITLE",
+        "description": "Pipeline #${CI_PIPELINE_ID} on ${CI_COMMIT_BRANCH} (${CI_COMMIT_SHORT_SHA})\nFailed jobs and logs: ${CI_PIPELINE_URL}/failures\nFailed tests: ${CI_PIPELINE_URL}/test_report\nPlaywright traces: ${CI_PIPELINE_URL}/builds",
+        "severity": "medium",
+        "monitoring_tool": "GitLab CI",
+        "service": "$CI_PROJECT_PATH",
+        "fingerprint": "nightly-e2e",
+        "$ALERT_TIME_FIELD": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      }
+      EOF
+      status=$(curl -sS -o alert-response.json -w '%{http_code}' -X POST \
+        -H "Authorization: Bearer $E2E_ALERT_KEY" -H 'Content-Type: application/json' \
+        -d @alert.json "$E2E_ALERT_URL")
+      echo "Alert endpoint returned HTTP $status: $(cat alert-response.json)"
+      case "$status" in
+        2*) ;;
+        "$ALERT_TOLERATED_STATUS") echo "Tolerated status - there was nothing to do." ;;
+        *) exit 1 ;;
+      esac
+
+# The shared fingerprint groups every failed nightly into one alert, so nobody is paged again before the
+# alert is resolved — which is what the counterpart job below does on the next green run.
+"Notify Nightly Failure":
+  extends: .nightly-alert
+  variables:
+    ALERT_TITLE: "Nightly E2E pipeline failed"
+    ALERT_TIME_FIELD: start_time
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true" && $E2E_ALERT_URL && $E2E_ALERT_KEY'
+      when: on_failure
+
+"Resolve Nightly Alert":
+  extends: .nightly-alert
+  variables:
+    ALERT_TITLE: "Nightly E2E pipeline recovered"
+    ALERT_TIME_FIELD: end_time
+    ALERT_TOLERATED_STATUS: "400"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true" && $E2E_ALERT_URL && $E2E_ALERT_KEY'
+      when: on_success

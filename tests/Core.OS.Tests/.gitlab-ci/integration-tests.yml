@@ -36,7 +36,6 @@
     MP_SMTP_TLS_CERT: sans:mailpit
     MP_SMTP_TLS_KEY: sans:mailpit
   cache:
-    # Pull-only: reuse the caches the automatic unit-test job seeds.
     - key:
         prefix: mise-${RUNNER_ARCH}-v2
         files:
@@ -55,11 +54,17 @@
         - .nuget/packages/
         - ./**/obj/
       policy: pull
+    - key:
+        prefix: node-${RUNNER_ARCH}-v1
+        files:
+          - package-lock.json
+      paths:
+        - node_modules/
+      policy: pull-push
   before_script:
     - !reference [.activate_mise]
     - !reference [.update_nuget_source_ro]
     - !reference [.install_npm_packages]
-    - !reference [.run_npm_scripts]
   script:
     - dotnet test tests/Core.OS.Tests/Core.OS.Tests.csproj --filter-query "/[Category=Integration]"
   rules: !reference [.rules_common_manual]

@@ -5,56 +5,8 @@ End-to-end tests drive a real browser ([Playwright](https://playwright.dev/dotne
 tagged `Category=E2E`. The project is black-box: it has **no reference to `Core.OS`** and reaches the
 running instance over HTTP/the browser only.
 
-The instance under test is resolved from `SUITE_BASE_URL` (default `https://localhost:5001`). Because the
-Suite enforces HTTPS redirection with a dev certificate, the tests run with `IgnoreHTTPSErrors`.
-
-## Structure
-
-```
-tests/Core.OS.E2E.Tests/
-  Infrastructure/                 # the harness
-    PlaywrightFixture.cs          #   shared browser, launched once per run
-    E2ECollectionDefinition.cs    #   xUnit collection: shared browser + serial execution
-    E2ETest.cs                    #   base class: a fresh, isolated Page per test
-    TestUsers.cs                  #   seeded-user credentials
-  Pages/                          # page objects (selectors + actions), e.g. LoginPage
-    SettingsPage.cs               #   the settings popup and its navigation tree
-    EnvironmentOverridesPanel.cs  #   the "Environment variables" control panel
-    EnvironmentOverridesUi.cs     #   one instance's panel, opened and ready to work with
-    MessageBanner.cs              #   the layout's message banner
-  Availability/
-    AvailabilitySmokeTests.cs     # "instance serves the UI"
-  Authentication/                 # tests grouped by feature
-    LoginSmokeTests.cs
-  EnvironmentOverrides/
-    EnvironmentOverridesSmokeTests.cs               # round trip, restart requirement, refused save
-    EnvironmentOverridesAuthorizationSmokeTests.cs  # admin-only panel stays hidden
-```
-
-- **Page objects** (`Pages/`) own the selectors and actions for a screen, so tests read as intent and a
-  markup change is fixed in one place.
-- Tests are grouped into per-feature folders/namespaces (e.g. `Authentication`) so they are easy to find.
-
-## Adding a smoke test
-
-Derive from `E2ETest`, opt into the collection, and tag the category:
-
-```csharp
-using Core.OS.E2E.Tests.Infrastructure;
-using Core.Tests.Tools;
-
-[Collection(E2ECollectionDefinition.Name)]
-[Trait(Traits.Category, Traits.E2E)]
-public sealed class MyFeatureSmokeTests(PlaywrightFixture fixture) : E2ETest(fixture)
-{
-    [Fact]
-    public async Task Does_the_thing()
-    {
-        await Page.GotoAsync("/...");   // Page is a fresh, isolated browser page
-        // assert via Playwright's Expect(...), ideally through a page object in Pages/
-    }
-}
-```
+The instance under test is resolved from `SUITE_BASE_URL` (default `https://localhost:5001`).
+Because the Suite enforces HTTPS behind a certificate the test machine does not trust — a dev certificate locally, nginx's self-signed one in CI — the tests run with `IgnoreHTTPSErrors`.
 
 ## Isolation
 
@@ -95,8 +47,8 @@ The non-admin account is what the tests for admin-only panels sign in as, so it 
 with `AccessLevel.Partial` — a user seeded with full access is put into the system-administrator role
 and would see everything.
 
-- **Locally**, export them in the environment the tests run in — the shell you run `dotnet test` (or
-  the wrapper scripts) from, or the IDE's test run configuration:
+- **Locally**, export them in the environment the tests run in — the shell you run `dotnet test`
+  from, or the IDE's test run configuration:
 
   ```bash
   export SUITE_TEST_USERNAME=...
@@ -104,21 +56,27 @@ and would see everything.
   export SUITE_TEST_NONADMIN_USERNAME=...
   export SUITE_TEST_NONADMIN_PASSWORD=...
   ```
-- **In CI**, they are defined as **masked** (and protected) project or group CI/CD variables
-  (Settings → CI/CD → Variables). They are injected into the `E2E tests (standalone)` job
-  automatically and are not stored in the YAML.
+- **In CI**, only the admin pair is a project CI/CD variable.
+  `SUITE_TEST_USERNAME` and `SUITE_TEST_PASSWORD` are defined **masked but unprotected**
+  (Settings → CI/CD → Variables) — a protected variable does not reach merge-request branches,
+  which is where the E2E jobs are started by hand.
+  They reach every E2E job automatically and are not stored in the YAML.
+  The non-admin pair is no secret and is set in the jobs themselves (`e2e-standalone.yml`,
+  `e2e-master-slave.yml`): `SUITE_TEST_NONADMIN_USERNAME: Alice`, and
+  `SUITE_TEST_NONADMIN_PASSWORD: $SUITE_TEST_PASSWORD`, because all built-in test users are seeded
+  with the same password.
+  `e2e-check-credentials.sh` fails the job in seconds when one of the four is missing or empty.
 
 ## Environment-variable override tests
 
 The `EnvironmentOverrides` tests drive the "Environment variables" panel in the **System** settings
 category, which edits the instance's runtime environment-variable override file.
-They need one thing from whoever starts the instance: `VICIONE_SUITE_ENV_OVERRIDES=true`, exported
-for every instance by `e2e-start-instance.sh`.
+They need one thing from the instance under test: `VICIONE_SUITE_ENV_OVERRIDES=true`, set for every
+instance by its role config in `tests/Core.OS.E2E.Tests/.gitlab-ci/conf/`.
 It is the whole switch — it makes the instance apply the override file at startup, and it is what
 the settings panel reads to decide whether to offer itself, so without it the tests have nothing to
 drive.
-The file follows each instance's `Instance__HomeDirectory`, so every instance of a master/slave
-topology keeps its own inside a single job container.
+The file follows each instance's `Instance__HomeDirectory`, so every instance keeps its own.
 
 Two consequences worth knowing before adding a test here:
 
@@ -128,59 +86,77 @@ Two consequences worth knowing before adding a test here:
   instance from starting, with no way back through the UI. Every test therefore uses a unique
   `E2E_OVERRIDE_<guid>` name, which nothing reads, and deletes it again.
 
-## The published layout
-
-The CI jobs (and the master/slave wrapper script) do **not** start the instances with `dotnet run`.
-A built (non-published) app serves its static web assets debug-style, through the
-`staticwebassets` manifest pointing back into the source tree, so HTTP resource requests can differ
-from what a production deployment serves. Instead, the production packaging script publishes the
-Suite into the production layout — the host, the UI host under `UiHosts/Blazor.Server`, and a
-`Modules/` directory:
-
-```bash
-PUBLISH_DIRECTORY=publish/e2e bash build/publish-suite.sh
-```
-
-The instances are started from inside that directory, exactly like production starts the Suite.
-The UI host then serves its **published `wwwroot`**.
-
-The script publishes Core.OS **self-contained** — that is required, not an implementation detail.
-The module load context defers shared-framework assemblies (e.g.
-`Microsoft.AspNetCore.Components.Forms`) to the default context by matching them against Core.OS's
-runtime files, which only list those assemblies in a self-contained publish. A framework-dependent
-Release Core.OS leaves them unmatched, so the dynamically-loaded UI host loads its own copies into a
-separate load context and breaks (`EditForm`/`EditContext` `InvalidCastException`).
-
-`PLATFORM` defaults to `linux-x64` (matching CI and production); on a local machine with a different
-RID, pass the host RID, as `tests/run-master-slave-e2e.sh` does — a self-contained publish for the
-wrong RID would not start. A re-publish overwrites the output in place but does not wipe it, so
-instance state directories (`AppData_*` etc.) living inside it survive.
-
-Two consequences to be aware of:
-
-- `appsettings.Development.json` is excluded from a publish, so everything the instances need is
-  passed as **explicit environment variables** in the CI YAML / wrapper script (module directory,
-  in-memory bus for standalone, mock host management, console logging, Kestrel endpoints, ...).
-- `ASPNETCORE_ENVIRONMENT` stays `Development` **only** because the sample modules (Burger, JiTChat)
-  are activated in Development; outside it, modules come from the artifact-repository/manifest
-  mechanism, where the samples don't exist. Static assets are served production-style regardless —
-  that is controlled by `UseDebugRoot`, which is only enabled by the (unpublished) Development
-  settings file. Don't "fix" the environment to Production without solving module activation.
-
 ## Running in CI
 
-The `E2E Smoke tests (standalone)` job (defined in `.gitlab/ci/e2e-standalone-tests.yml` and included from `.gitlab-ci.yml`)
-is **manual** — triggered with the play button — and non-blocking (`allow_failure` for now):
+Every E2E job lives next to this test project, in `tests/Core.OS.E2E.Tests/.gitlab-ci/`, included from `.gitlab-ci.yml`.
+They run **automatically and blocking on the nightly schedule** and stay **manual and non-blocking** everywhere else (tag / default branch / merge request / web).
 
-1. creates an HTTPS dev certificate (`dotnet dev-certs https`) and publishes the Suite into the
-   production-like layout (`build/publish-suite.sh`, see [The published layout](#the-published-layout));
-2. installs Chromium via Playwright's bundled node + CLI (no PowerShell required; browsers cached);
-3. starts a standalone instance in the background from the publish directory with seeded test users
-   (`UserManagement__SeedTestUsers=true`) and polls `/hc` until it is healthy;
-4. runs `dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --filter-query "/[Category=E2E]"`.
+The instance under test is not a process the job starts.
+`Build E2E Image` builds one device-like image — Debian + systemd with the Suite installed from the real `.deb`, nginx terminating TLS — and each E2E job runs that image as GitLab `services:`, every instance picking its role from a per-service `E2E_ROLE` variable and its settings from the matching `conf/<role>.conf`.
+The job container is only the test runner (Playwright + dotnet): it builds the test project, polls each instance's `/hc` until healthy (GitLab does not gate on service readiness), and runs the tests.
 
-The login test also needs `SUITE_TEST_USERNAME` / `SUITE_TEST_PASSWORD`, supplied as masked project
-CI/CD variables (they are not in the YAML) — see [Credentials](#credentials).
+`E2E Smoke tests (standalone)` needs a single instance (`E2E_ROLE=standalone`), runs on the **medium runner**, and filters `Category=E2E`.
+The seeded logins come from CI/CD variables — see [Credentials](#credentials).
+
+Three properties of that image are worth knowing before relying on a run:
+
+- **Which `.deb` goes in.** On the nightly it is the one this pipeline built itself, pinned by package version (`SUITE_DEB_VERSION=$CI_PIPELINE_ID`), so a packaging chain that did not run fails the image build instead of quietly installing a week-old build. Started by hand, it is the newest `.deb` the package registry holds.
+- **The image tag `:e2e` is shared.** It is scoped to neither pipeline nor branch, so concurrent image builds overwrite each other and the E2E jobs run whatever the last push left in the registry.
+- **The role configs are baked in.** An edit to `conf/*.conf` reaches the instances only after the image has been built again.
+
+Only infrastructure failures are retried (`runner_system_failure`, `stuck_or_timeout_failure`, one attempt).
+`script_failure` is deliberately absent: retrying a failing test would turn the nightly's signal into noise.
+The same applies to the image build, which is the most network-dependent job of the three.
+
+The timeouts are generous on purpose: 45 minutes for each test job, 20 for the image build, against real runs of about four and one minutes.
+They exist to cut off a hung download or a stuck `docker push`, not to bound a slow test.
+
+### The nightly schedule
+
+Nothing in the repository switches the nightly on.
+It is a **pipeline schedule on the default branch** (Build → Pipeline schedules) carrying the inputs below.
+The job rules read them, and that is the whole switch.
+
+The three switches are declared as [CI/CD inputs](https://docs.gitlab.com/ci/inputs/) in the `spec:` header of `.gitlab-ci.yml` and assigned to variables of the same name, so the rules keep reading plain `$RUN_E2E`.
+Inputs rather than schedule variables, because this project's schedule form offers no variables at all: **Minimum role to use pipeline variables** (Settings → CI/CD → Variables) is restricted, and once it is, only a project Owner can lift it.
+Inputs are not CI/CD variables and are not covered by that restriction.
+Where pipeline variables are allowed, a schedule variable of the same name still overrides the input, so the old setup keeps working.
+
+Every input defaults to `"false"`, which is required: a merge request, branch or tag pipeline passes no inputs, and a missing default fails the pipeline.
+
+| Name             | Set where                                           | What it does                                                                                                                                      | If it is missing                                                                                                                                                                     |
+|------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `RUN_E2E`        | nightly schedule input, value `true`                | Runs the image build and both E2E jobs automatically and **blocking** (`allow_failure: false`), and pins the image to this pipeline's `.deb`      | The jobs stay manual and non-blocking, as in any other pipeline                                                                                                                      |
+| `BUILD_PACKAGES` | nightly schedule input, value `true`                | Runs the chain that produces the `.deb` — `Build artifacts x64/arm64`, their uploads, `trigger deb packaging` — automatically instead of manually | The chain stays manual, and the image build then fails: it is pinned to this pipeline's package version and finds none. Deliberate — a red job beats an E2E run against an old build |
+| `CLEANUP`        | any schedule's input, `true` — none sets it today   | Runs `Cleanup old packages`, a retention job for `ci-artifacts` that predates the nightly and is unrelated to it                                  | The job does not run, which is the state today. It is opt-in on purpose: the nightly leaves it off, and whoever wants retention enables it on a schedule of their own                |
+| `E2E_ALERT_URL`  | project CI/CD variable                              | The project's alert endpoint. With `E2E_ALERT_KEY`, lets `Notify Nightly Failure` open a GitLab alert when the nightly goes red                   | Neither notify job exists at all. Adding or removing either variable is the whole switch — no pipeline change, no merge request                                                      |
+| `E2E_ALERT_KEY`  | project CI/CD variable                              | That endpoint's authorization key, sent as `Authorization: Bearer`                                                                                | As for `E2E_ALERT_URL`                                                                                                                                                               |
+
+- All three switches are compared against the exact string `"true"` instead of being checked for being set: a bare `$RUN_E2E` is also true for the value `"false"`. The input declares `options: ["true", "false"]`, so the schedule form offers both and `"false"` really does switch the nightly off. A typo is rejected when the pipeline is created, instead of quietly leaving the jobs manual.
+- The E2E jobs are **blocking on the nightly on purpose**. The nightly is informational, and a red pipeline is what does the informing: GitLab notifies the schedule's owner when a *pipeline* fails, and never when a job fails with `allow_failure: true`. The price is that a red nightly shows on the default branch's pipeline badge.
+
+### The alert
+
+`Notify Nightly Failure` posts to the project's own alert endpoint, and the alert *is* the notification: who gets emailed or paged is decided by the project's alert settings, not by anything in this repository.
+
+Both jobs send the same `fingerprint`, `nightly-e2e`.
+GitLab groups repeated failures under that fingerprint into one alert, so a nightly that stays red pages once instead of every night.
+`Resolve Nightly Alert` then sends that fingerprint with an `end_time` on the next green run, which closes the alert and re-arms the notification for the next real failure — without it, a grouped alert would stay open and the next failure would page nobody.
+
+A resolve for a fingerprint with no open alert is answered with `400`, not with a 2xx.
+GitLab never creates an alert from a resolving payload, so the request ends on `return bad_request unless alert.persisted?`.
+For a nightly that was already green that is the normal case, so `Resolve Nightly Alert` sets `ALERT_TOLERATED_STATUS: "400"` and reports it as nothing to do.
+`Notify Nightly Failure` leaves that variable empty and still fails on any non-2xx, which is what surfaces a wrong `E2E_ALERT_URL` or `E2E_ALERT_KEY`.
+
+GitLab's own *Notify only when pipeline status changes* option, on the Pipeline status emails and chat integrations, would give the same break/fix notification without any of this.
+It does not fit here because it tracks `broken` and `fixed` per branch — `Ci::Ref` is keyed by project and ref path alone.
+Every ordinary `master` pipeline would move that state, so a merge on the morning after a red nightly would report the nightly as recovered without re-running it.
+
+The alert body links to the pipeline's failed jobs, its test report and its Jobs tab.
+The Playwright traces are in the E2E job's artifact archive under `bin/Debug/net10.0/traces/`, so they are two clicks from the alert: the Jobs tab, then the artifacts download icon on the failed job.
+Those links die with the artifacts after a week (`expire_in: 1 week` in `e2e-base.yml`).
+
+The YAML files carry no more than a pointer back here; the reasoning lives in this document.
 
 ## Running locally
 
@@ -196,11 +172,8 @@ provide the seeded-user credentials (see [Credentials](#credentials)), then:
 dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --filter-query "/[Category=E2E]"
 ```
 
-A launch-profile instance serves debug-style static assets — fine for iterating on tests. To
-reproduce the CI setup exactly, publish and start from the publish directory instead (see
-[The published layout](#the-published-layout), then run `./publish/e2e/ViciOne.Suite.Core.OS` from
-that directory with the environment variables the standalone job sets in
-`.gitlab/ci/e2e-standalone-tests.yml`).
+A launch-profile instance serves its static assets debug-style, unlike the installed `.deb` behind nginx that CI tests.
+That is fine for iterating on tests, but it is not a reproduction of the CI setup, which has no local equivalent.
 
 
 # End-to-end master/slave tests (Playwright)
@@ -251,44 +224,20 @@ tests/Core.OS.E2E.Tests/
   `SUITE_SLAVE1_URL`, `SUITE_SLAVE2_URL` (defaults `https://localhost:5001` / `:6001` / `:7001`, matching
   the launch profiles) — and exposes `NewPage(url)` so a test drives a specific instance. The browser and
   the page objects (`LoginPage`) are shared with the standalone tests, as is switching the
-  [first-run wizard](#the-first-run-wizard) off — the wrapper script and the CI job set it for every
-  instance they start.
+  [first-run wizard](#the-first-run-wizard) off for every instance.
 - The first test, **`UserReplicationSmokeTests`**, logs in on **each slave** with the master-seeded user
   (with a bounded retry to absorb replication lag). Because slaves never seed, a successful slave login
   proves the account replicated.
 
 ## Running in CI
 
-The `E2E Smoke tests (master-slave)` job (defined in `.gitlab/ci/e2e-master-slave-tests.yml`, included from
-`.gitlab-ci.yml`) is **manual** and non-blocking (`allow_failure`):
-
-1. provides **Postgres** and **RabbitMQ** as GitLab `services:`;
-2. publishes the Suite into the production-like layout (`build/publish-suite.sh`), builds the test
-   project, and installs the Chromium headless shell;
-3. starts the **master** (`:5001`, Postgres, `SeedTestUsers=true`) from the publish directory and
-   waits for `/hc` healthy — so seeding is finished before any slave syncs;
-4. starts **slave1 (`:6001`)** and **slave2 (`:7001`)** (`SeedTestUsers=false`) and waits for each `/hc`;
-5. runs `dotnet test … --filter-query "/[Category=E2E-MasterSlave]"`.
-
-It runs on the **large runner** (master + 2 slaves + Postgres + RabbitMQ + a browser), and uses the same
-`SUITE_TEST_USERNAME` / `SUITE_TEST_PASSWORD` credentials as the standalone job (see [Credentials](#credentials)).
+`E2E Smoke tests (master/slave)` uses the same image, trigger and job shape as the standalone job (see [Running in CI](#running-in-ci) above) and differs only in its topology: three instances of that image as services — `E2E_ROLE=master`, `slave1`, `slave2` — next to **Postgres** (for the master) and **RabbitMQ** (for the replication), on the **large runner**, filtering `Category=E2E-MasterSlave`.
+A slave registers with the master exactly once at startup, so each slave container holds its own boot until the master's `/hc` answers, before the job's own readiness polling begins.
 
 ## Running locally
 
-The wrapper script `tests/run-master-slave-e2e.sh` does everything below in
-one go: backing services, publish, instance startup gated on `/hc`, test run, teardown.
-It needs the seeded-user credentials exported in the shell environment (see
-[Credentials](#credentials)).
-By default the run is ephemeral (state is reset first, services are stopped afterwards); pass
-`--keep` to reuse existing state and leave the services running (instance state lives inside
-`publish/e2e`, which a re-publish overwrites but does not wipe).
-
-```bash
-SUITE_TEST_USERNAME=... SUITE_TEST_PASSWORD=... tests/run-master-slave-e2e.sh
-```
-
-For quick interactive work (not the published CI setup), bring up the backing services (Postgres,
-RabbitMQ, Aspire Dashboard):
+There is no local equivalent of CI's `.deb`/systemd/nginx topology — locally the instances run from their launch profiles.
+Bring up the backing services (Postgres, RabbitMQ, Aspire Dashboard):
 
 ```bash
 docker compose -f tests/compose.master-slave.yaml up -d

@@ -1,0 +1,53 @@
+# End-to-end UI tests (Playwright) against a master + 2 slaves topology: three service containers from
+# the image e2e-suite-image.yml builds, Postgres for the master, RabbitMQ for the replication. The
+# shared job shape lives in e2e-base.yml — see docs/e2e-testing.md
+"E2E Smoke tests (master/slave)":
+  extends: .e2e-test-base
+  tags:
+    - saas-linux-large-amd64
+  services:
+    - name: postgres:17-alpine
+      alias: postgres
+    # Plain image, not the -management variant: nothing here reaches the management
+    # API — the suite's only consumer, RabbitMqCleaner, is off (MessageBus__CleanVirtualHost=false).
+    - name: rabbitmq:4.0-alpine
+      alias: rabbitmq
+    - name: $CI_REGISTRY_IMAGE/vicione-suite-e2e:e2e
+      alias: suite-service-master
+      variables:
+        E2E_ROLE: master
+    - name: $CI_REGISTRY_IMAGE/vicione-suite-e2e:e2e
+      alias: suite-service-slave1
+      variables:
+        E2E_ROLE: slave1
+        # One-shot registration: hold the boot until the master answers — see e2e-entrypoint.sh
+        E2E_WAIT_FOR_URL: https://suite-service-master/hc
+    - name: $CI_REGISTRY_IMAGE/vicione-suite-e2e:e2e
+      alias: suite-service-slave2
+      variables:
+        E2E_ROLE: slave2
+        # One-shot registration: hold the boot until the master answers — see e2e-entrypoint.sh
+        E2E_WAIT_FOR_URL: https://suite-service-master/hc
+  variables:
+    POSTGRES_DB: vo-suite
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+    RABBITMQ_DEFAULT_USER: suite
+    RABBITMQ_DEFAULT_PASS: suite
+    SUITE_MASTER_URL: "https://suite-service-master"
+    SUITE_SLAVE1_URL: "https://suite-service-slave1"
+    SUITE_SLAVE2_URL: "https://suite-service-slave2"
+    # SUITE_TEST_USERNAME / SUITE_TEST_PASSWORD come from project CI/CD variables —
+    # see docs/e2e-testing.md
+    SUITE_TEST_USERNAME:
+    SUITE_TEST_PASSWORD:
+    SUITE_TEST_NONADMIN_USERNAME: Alice
+    SUITE_TEST_NONADMIN_PASSWORD: $SUITE_TEST_PASSWORD
+  before_script:
+    - !reference [.e2e-test-setup, before_script]
+    # GitLab starts services with no health gating, so gate the tests on /hc here.
+    - bash tests/Core.OS.E2E.Tests/.gitlab-ci/wait-suite-healthy.sh master "$SUITE_MASTER_URL"
+    - bash tests/Core.OS.E2E.Tests/.gitlab-ci/wait-suite-healthy.sh slave1 "$SUITE_SLAVE1_URL"
+    - bash tests/Core.OS.E2E.Tests/.gitlab-ci/wait-suite-healthy.sh slave2 "$SUITE_SLAVE2_URL"
+  script:
+    - dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --no-build --results-directory TestResults --report-junit --filter-query "/[Category=E2E-MasterSlave]"

@@ -5,7 +5,13 @@
   ],
   "dependencyDashboard": true,
   "dependencyDashboardApproval": true,
-  "enabledManagers": [ "nuget", "npm" ],
+  "enabledManagers": [ "nuget", "npm", "gitlabci", "dockerfile" ],
+  "gitlabci": {
+    "managerFilePatterns": [
+      "/\\.gitlab-ci\\.ya?ml$/",
+      "/^tests/.+/\\.gitlab-ci/.+\\.ya?ml$/"
+    ]
+  },
   "vulnerabilityAlerts": {
     "enabled": true,
     "dependencyDashboardApproval": true

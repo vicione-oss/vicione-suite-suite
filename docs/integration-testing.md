@@ -57,7 +57,8 @@ Docker — see https://mailpit.axllent.org/docs/install/.
 
 ### Running the mail tests in CI
 
-The `Integration tests` job in `.gitlab-ci.yml` is a **manual** job — it does not run
+The `Integration tests` job (defined in `tests/Core.OS.Tests/.gitlab-ci/integration-tests.yml` and
+included from `.gitlab-ci.yml`) is a **manual** job — it does not run
 automatically alongside the unit tests; trigger it on demand (the play button) on a merge request, the
 default branch, or a web pipeline. Mailpit runs as a GitLab CI **service** (`axllent/mailpit`,
 pinned to the same version mise provides), configured entirely through `MP_*` environment variables —

@@ -5,11 +5,10 @@ namespace Core.OS.E2E.Tests.Infrastructure;
 /// <summary>
 /// Credentials of the users seeded into the instance under test. They are resolved from the
 /// environment so that no credentials live in source: the instance under test and the test
-/// run must agree on these values. CI seeds the accounts by starting the standalone instance
+/// run must agree on these values. CI seeds the accounts by starting the instance under test
 /// with <c>UserManagement__SeedTestUsers=true</c> and exposes the matching logins through
 /// <see cref="UserNameEnvVar"/> / <see cref="PasswordEnvVar"/> and
-/// <see cref="NonAdminUserNameEnvVar"/> / <see cref="NonAdminPasswordEnvVar"/>
-/// (see docs/e2e-testing.md).
+/// <see cref="NonAdminUserNameEnvVar"/> / <see cref="NonAdminPasswordEnvVar"/>.
 /// </summary>
 internal static class TestUsers
 {

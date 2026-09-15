@@ -1,0 +1,80 @@
+# Trigger and job shape shared by every E2E job: automatic and blocking on the nightly schedule,
+# manual everywhere else. RUN_E2E and SUITE_DEB_VERSION, and why the trigger is shaped this way —
+# see docs/e2e-testing.md
+.e2e-rules:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true"'
+      when: on_success
+      allow_failure: false
+      variables:
+        SUITE_DEB_VERSION: $CI_PIPELINE_ID
+    - !reference [.rules_common_manual]
+
+.e2e-test-base:
+  stage: e2e
+  image: mcr.microsoft.com/playwright:v1.61.0-noble
+  interruptible: true
+  timeout: 45m
+  needs:
+    - "Build E2E Image"
+  variables:
+    RUNNER_ARCH: amd64
+    # One network for the job and its services, so the runner reaches the instances by their alias
+    # hostnames (and, in the master/slave topology, the instances reach each other).
+    FF_NETWORK_PER_BUILD: "true"
+    JUNIT_REPORT_PATTERN: "TestResults/*.junit"
+  cache:
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      # pull only: this key is produced (pushed) by the always-running build/test jobs.
+      policy: pull
+    - key:
+        prefix: nuget-${RUNNER_ARCH}-v2
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
+      paths:
+        - .nuget/packages/
+        - ./**/obj/
+      # pull only: this key is produced (pushed) by the always-running build/test jobs.
+      policy: pull
+    - key:
+        prefix: node-${RUNNER_ARCH}-v1
+        files:
+          - package-lock.json
+      paths:
+        - node_modules/
+      policy: pull-push
+  artifacts:
+    # The traces below are written only on failure, so a successful run simply matches none.
+    when: always
+    paths:
+      # Playwright failure traces written by the E2E base classes, one per instance context.
+      # Open with `playwright show-trace` or trace.playwright.dev
+      - tests/Core.OS.E2E.Tests/bin/**/traces/*.zip
+    reports:
+      junit: ${JUNIT_REPORT_PATTERN}
+    expire_in: 1 week
+  # Infrastructure failures only, never script_failure — see docs/e2e-testing.md
+  retry:
+    max: 1
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+  rules: !reference [.e2e-rules, rules]
+
+.e2e-test-setup:
+  before_script:
+    - bash tests/Core.OS.E2E.Tests/.gitlab-ci/e2e-check-credentials.sh
+    - curl -fsSL https://mise.run | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - !reference [.activate_mise]
+    - !reference [.update_nuget_source_ro]
+    - !reference [.install_npm_packages]
+    - dotnet build tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj -p:PlaywrightPlatform=linux-x64
