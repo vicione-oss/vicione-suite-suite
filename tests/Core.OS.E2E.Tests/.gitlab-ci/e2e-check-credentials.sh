@@ -10,7 +10,8 @@ set -o nounset
 for var in SUITE_TEST_USERNAME SUITE_TEST_PASSWORD SUITE_TEST_NONADMIN_USERNAME SUITE_TEST_NONADMIN_PASSWORD; do
   if [ -z "${!var:-}" ]; then
     echo "FATAL: ${var} is not set or empty."
-    echo "Export the seeded login credentials first (in CI: a masked project CI/CD variable, Settings -> CI/CD -> Variables). See docs/e2e-testing.md."
+    echo "Export the seeded login credentials first (in CI: a masked, unprotected project CI/CD variable,"
+    echo "Settings -> CI/CD -> Variables — a protected one does not reach MR branches)."
     exit 1
   fi
 done

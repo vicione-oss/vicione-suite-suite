@@ -1,0 +1,58 @@
+# Edge-like runtime: a Debian + systemd container that installs the .deb exactly as an
+# edge device does (apt install -> unit enabled -> started by systemd at boot), with
+# nginx terminating TLS on :443 in front of the suite on :5000.
+#
+#   Expects suite.deb in the build context (bind-mounted to /tmp/suite.deb during the install step).
+#
+#   docker run -d --name suite-service --privileged -p 80:80 -p 443:443 vicione-service
+#   (--privileged alone is enough on a cgroup v2 host; systemd sets up its own /run tmpfs and
+#    cgroup hierarchy, so --cgroupns=host, --tmpfs, and the /sys/fs/cgroup mount are not needed.
+#    Without --privileged the image does not boot at all — verified with --cgroupns=host, both
+#    tmpfs mounts and the cgroup mount added: the container exits immediately. So do not retry
+#    those in the hope of dropping --privileged.)
+FROM debian:bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive container=docker
+
+# libicu (globalization) and libgdiplus (System.Drawing) are .NET runtime deps that the
+# .deb can't declare (loaded via dlopen, so shlibs:Depends misses them); a real device's
+# base OS provides them. libicu72 matches the debian:bookworm base.
+RUN apt-get update -qq && \
+    apt-get install -y -qq --no-install-recommends \
+      systemd systemd-sysv ca-certificates curl openssl nginx libgdiplus libicu72 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Units that try to touch real hardware/consoles and only spam logs in a container.
+RUN systemctl mask getty.target systemd-firstboot.service \
+      systemd-networkd-wait-online.service 2>/dev/null || true
+
+
+RUN --mount=type=bind,source=suite.deb,target=/tmp/suite.deb \
+    apt-get update -qq && \
+    apt-get install -y /tmp/suite.deb && \
+    rm -rf /var/lib/apt/lists/*
+
+# Reverse proxy: generate the local TLS cert the ssl fragment points at, wire the
+# package's own nginx fragments untouched, and drop Debian's default site (frees :80).
+# No suite config beyond what the package ships (in particular no forwarded-headers
+# processing): the container must behave exactly like a device so field bugs reproduce.
+RUN vicione_generate_local_certificate && \
+    rm -f /etc/nginx/sites-enabled/default && \
+    printf 'include /usr/share/vicione-suite/nginx/rev-proxy-https;\n' \
+      > /etc/nginx/conf.d/vicione-suite.conf
+
+RUN systemctl enable vicione-suite.service nginx.service
+
+# Per-instance E2E config: the systemd-managed suite reads config from EnvironmentFiles, not the
+# container environment, so the entrypoint activates the file selected by $E2E_ROLE (standalone /
+# master / slave1 / slave2) before starting systemd. Without E2E_ROLE the image boots as a plain
+# device.
+COPY tests/Core.OS.E2E.Tests/.gitlab-ci/conf/ /opt/e2e-conf/
+COPY tests/Core.OS.E2E.Tests/.gitlab-ci/e2e-entrypoint.sh /usr/local/sbin/e2e-entrypoint.sh
+RUN chmod +x /usr/local/sbin/e2e-entrypoint.sh
+
+EXPOSE 80 443
+STOPSIGNAL SIGRTMIN+3
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
+  CMD curl -fsS http://localhost:5000/hc || exit 1
+ENTRYPOINT ["/usr/local/sbin/e2e-entrypoint.sh"]

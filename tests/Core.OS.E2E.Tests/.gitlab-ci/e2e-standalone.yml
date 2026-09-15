@@ -1,0 +1,28 @@
+# End-to-end UI tests (Playwright) against a standalone instance, running as a service container from
+# the image e2e-suite-image.yml builds. The shared job shape lives in e2e-base.yml —
+# see docs/e2e-testing.md
+"E2E Smoke tests (standalone)":
+  extends: .e2e-test-base
+  # A single standalone instance plus one headless Chromium browser should fit a medium runner; revert to
+  # saas-linux-large-amd64 if the job OOMs (exit 137) or the browser crashes.
+  tags:
+    - saas-linux-medium-amd64
+  services:
+    - name: $CI_REGISTRY_IMAGE/vicione-suite-e2e:e2e
+      alias: suite-service-standalone
+      variables:
+        E2E_ROLE: standalone
+  variables:
+    SUITE_BASE_URL: "https://suite-service-standalone"
+    # SUITE_TEST_USERNAME / SUITE_TEST_PASSWORD come from project CI/CD variables —
+    # see docs/e2e-testing.md
+    SUITE_TEST_USERNAME:
+    SUITE_TEST_PASSWORD:
+    SUITE_TEST_NONADMIN_USERNAME: Alice
+    SUITE_TEST_NONADMIN_PASSWORD: $SUITE_TEST_PASSWORD
+  before_script:
+    - !reference [.e2e-test-setup, before_script]
+    # GitLab starts services with no health gating, so gate the tests on /hc here.
+    - bash tests/Core.OS.E2E.Tests/.gitlab-ci/wait-suite-healthy.sh standalone "$SUITE_BASE_URL"
+  script:
+    - dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --no-build --results-directory TestResults --report-junit --filter-query "/[Category=E2E]"
