@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using Core.OS.Security;
 using Core.OS.Security.Extensions;
@@ -23,6 +25,7 @@ public class CspViolationEndpointTests
 {
     private const string BlockedUri = "https://cdn.example.invalid/module.js";
     private const string DocumentUri = "https://suite.example.invalid/";
+    private const string ErrorRoute = "/Error";
 
     private static readonly string SingleReport =
         $$"""
@@ -133,6 +136,36 @@ public class CspViolationEndpointTests
         declared.Should().NotBeNull().And.BeLessThan(kestrelDefaultBytes);
     }
 
+    /// <summary>
+    /// The refusal itself, against a real Kestrel and behind an exception handler — the shape of a
+    /// deployed instance, which runs outside Development and so answers through
+    /// <see cref="ExceptionHandlerExtensions.UseExceptionHandler(IApplicationBuilder,string)"/>
+    /// rather than the developer exception page. A cap left to the server refuses by throwing, and a
+    /// thrown refusal belongs to whoever handles exceptions: the developer page reads the status off
+    /// it and answers 413, the error page does not and answered 400. The endpoint answers the
+    /// refusal itself now, so a deployed instance says 413 as well.
+    /// The report is well formed and only too large, so its size is the single thing to refuse:
+    /// whether a body that is also unreadable is refused for its size or for being unreadable
+    /// depends on how far the reader gets first, which is the server's to decide, not ours.
+    /// </summary>
+    [Theory]
+    [InlineData(BodyLength.Declared)]
+    [InlineData(BodyLength.Undeclared)]
+    public async Task Should_refuse_an_oversized_report(BodyLength length)
+    {
+        // Arrange
+        await using var suite = await StartKestrelHost();
+
+        // Act
+        var response = await suite.Post(ReportOfAtLeast(suite.DeclaredBodyLimit), length);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.RequestEntityTooLarge);
+    }
+
+    private static string ReportOfAtLeast(long bytes)
+        => $$"""{ "csp-report": { "blocked-uri": "{{new string('a', (int)bytes)}}" } }""";
+
     private static Endpoint ReportEndpointOf(IHost host)
         => host.Services.GetRequiredService<EndpointDataSource>().Endpoints
             .Single(endpoint => endpoint is RouteEndpoint route
@@ -151,12 +184,89 @@ public class CspViolationEndpointTests
         return app;
     }
 
+    private static async Task<KestrelHost> StartKestrelHost()
+    {
+        var builder = WebApplication.CreateSlimBuilder();
+        builder.WebHost.UseKestrel(server => server.Listen(IPAddress.Loopback, 0));
+
+        var app = builder.Build();
+        app.UseExceptionHandler(ErrorRoute);
+        app.Map(ErrorRoute, () => Results.StatusCode(StatusCodes.Status500InternalServerError));
+        app.MapCspViolationReports();
+
+        await app.StartAsync(TestContext.Current.CancellationToken);
+
+        return new KestrelHost(app);
+    }
+
     private static HttpContext RequestOf(string body)
     {
         var context = new DefaultHttpContext();
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
 
         return context;
+    }
+
+    /// <summary>
+    /// Whether a request states its <c>Content-Length</c> or arrives chunked. A client talking to
+    /// the Suite directly states it; a proxy forwarding a stream it has not finished reading does
+    /// not, and only then does the server learn the size by reading.
+    /// </summary>
+    public enum BodyLength
+    {
+        Declared,
+        Undeclared
+    }
+
+    private sealed class KestrelHost(WebApplication app) : IAsyncDisposable
+    {
+        private readonly HttpClient _client = new() { BaseAddress = new Uri(app.Urls.First()) };
+
+        public long DeclaredBodyLimit => ReportEndpointOf(app).Metadata
+            .GetMetadata<IRequestSizeLimitMetadata>()!.MaxRequestBodySize!.Value;
+
+        public async Task<HttpResponseMessage> Post(string body, BodyLength length)
+        {
+            using var content = ContentOf(body, length);
+
+            return await _client.PostAsync(CspViolationReporting.Route, content,
+                TestContext.Current.CancellationToken);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            _client.Dispose();
+            await app.DisposeAsync();
+        }
+
+        private static HttpContent ContentOf(string body, BodyLength length)
+        {
+            var content = length == BodyLength.Declared
+                ? new StringContent(body)
+                : (HttpContent)new UndeclaredLengthContent(body);
+
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/reports+json");
+
+            return content;
+        }
+    }
+
+    /// <summary>
+    /// Content that refuses to state its length, which is how <see cref="HttpClient"/> is made to
+    /// send a chunked body — the shape a proxy forwards when it passes a body on before it has read
+    /// all of it, and the one case where the server learns the size only by reading.
+    /// </summary>
+    private sealed class UndeclaredLengthContent(string body) : HttpContent
+    {
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+            => stream.WriteAsync(Encoding.UTF8.GetBytes(body)).AsTask();
+
+        protected override bool TryComputeLength(out long length)
+        {
+            length = 0;
+
+            return false;
+        }
     }
 
     private sealed class RecordingLoggerFactory : ILoggerFactory, ILogger

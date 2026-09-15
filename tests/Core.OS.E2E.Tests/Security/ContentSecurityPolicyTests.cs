@@ -63,6 +63,15 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
         """;
 
     /// <summary>
+    /// The same report, grown past the cap the mapping declares along the one field a browser fills
+    /// with a URL, so nothing but its size is out of the ordinary.
+    /// </summary>
+    private static readonly string OversizedViolationReport = BrowserViolationReport.Replace(
+        "https://example.invalid/",
+        "https://example.invalid/" + new string('a', 128 * 1024),
+        StringComparison.Ordinal);
+
+    /// <summary>
     /// One route per response class the policy has to cover: an authenticated page, an account page
     /// rendered without a circuit, the login page, and a route that matches nothing — the last one
     /// only passes if the error responses the suite produces carry the policy as well.
@@ -199,6 +208,10 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
     /// server enforces that cap, so this is the one place the refusal itself can be shown. Without
     /// it the route would take a body of the server's default size — thirty megabytes — from anyone
     /// who can reach the Suite.
+    /// The report sent is a well formed one that is only too large, so its size is the single thing
+    /// left to refuse. A body that is also unreadable would be refused either way, but for whichever
+    /// of the two the reader reaches first — and which that is depends on how the packaged nginx
+    /// hands the body on, which is not what this holds.
     /// </summary>
     [Fact]
     public async Task An_oversized_report_is_refused_by_the_server()
@@ -206,7 +219,7 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
         var response = await Context.APIRequest.PostAsync(ViolationReportRoute, new APIRequestContextOptions
         {
             Headers = new Dictionary<string, string> { ["content-type"] = "application/reports+json" },
-            Data = new string('x', 128 * 1024)
+            Data = OversizedViolationReport
         });
 
         response.Status.Should().Be(413);
