@@ -15,6 +15,18 @@ internal static partial class CspViolationEndpoint
 
     private static readonly JsonSerializerOptions ReportFormat = new(JsonSerializerDefaults.Web);
 
+    /// <summary>
+    /// Answers a report, and answers the two ways one can fail to be a report at all: unreadable,
+    /// and larger than the mapping's cap.
+    /// </summary>
+    /// <remarks>
+    /// The cap is the server's, and a server refuses a body it will not buffer by throwing while the
+    /// body is read — here, inside the reader. Left to travel, that throw is answered by whoever
+    /// handles exceptions for the host, and the two hosts answer differently: the developer exception
+    /// page of a Development instance reads the refusal's own status and says 413, while the error
+    /// page every deployed instance runs behind does not and says something else entirely. Caught
+    /// here, the refusal keeps its status wherever the endpoint is hosted.
+    /// </remarks>
     public static async Task<IResult> Receive(HttpContext context, ILoggerFactory loggerFactory)
     {
         var logger = loggerFactory.CreateLogger(typeof(CspViolationEndpoint));
@@ -31,6 +43,11 @@ internal static partial class CspViolationEndpoint
         {
             LogUnreadableReport(logger);
             return Results.BadRequest();
+        }
+        catch (BadHttpRequestException refusal)
+        {
+            LogRefusedReport(logger, refusal.Message);
+            return Results.StatusCode(refusal.StatusCode);
         }
 
         return Results.NoContent();
@@ -75,6 +92,9 @@ internal static partial class CspViolationEndpoint
 
     [LoggerMessage(LogLevel.Warning, "Received a Content Security Policy report that could not be read")]
     private static partial void LogUnreadableReport(ILogger logger);
+
+    [LoggerMessage(LogLevel.Warning, "Refused a Content Security Policy report: {Reason}")]
+    private static partial void LogRefusedReport(ILogger logger, string reason);
 
     private sealed record CspViolation(string? BlockedUri, string? DocumentUri, string? Directive);
 
