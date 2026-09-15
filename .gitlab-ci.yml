@@ -190,11 +190,13 @@ include:
       image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
       sources:
         - "JFrogViciOne"
+        - "GitLabRegistry"
       filename_pattern: "./src/Core.Artifacts/*"
       rules: *rules_common_manual
       before_script:
         - *activate_mise
         - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_RW_JFrog -p $NuGet_PW_RW_JFrog --store-password-in-clear-text
+        - dotnet nuget add source "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/nuget/index.json" --name GitLabRegistry --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text
 
   # Promote to staging
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/promote@v2.0.1
