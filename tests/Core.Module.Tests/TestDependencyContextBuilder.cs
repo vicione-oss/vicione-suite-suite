@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.DependencyModel;
 using Sdk.Modules;
 
 namespace Core.Module.Tests;
@@ -55,7 +55,7 @@ internal sealed class TestDependencyContextBuilder
     public const string VoCodeAnalysis = "ViciOne.CodeStyle";
     public const string ThirdPartyPackage = "ViciOne.Test.ThirdPartyPackage";
 
-    private class Options
+    private sealed class Options
     {
         public ModuleDependencyContext? CoreContext { get; set; }
 
@@ -153,6 +153,64 @@ internal sealed class TestDependencyContextBuilder
     /// <returns></returns>
     public TestDependencyContextBuilder SetupUiOnlyDependentClientModule(TestDependencyVersions? versions = null)
         => SetupModule(versions, null, CreateUiOnlyDependentClientContext);
+
+    /// <summary>
+    /// Simulates two unrelated backend modules (no dependency relation between them and no other
+    /// module depending on either) that both ship the same shared package unknown to core|host,
+    /// but at different versions. Used to characterize the "highest compatible version wins"
+    /// arbitration in <see cref="Core.Module.Extensions.SuiteDependencyContextExtensions"/>.
+    /// </summary>
+    /// <param name="moduleAVersion">Version of the shared package shipped by module A.</param>
+    /// <param name="moduleBVersion">Version of the shared package shipped by module B.</param>
+    public TestDependencyContextBuilder SetupUnrelatedModulesWithSharedPackage(string moduleAVersion, string moduleBVersion)
+    {
+        if (_options.CoreContext is null)
+            SetupCoreOS();
+
+        var options = new TestDependencyVersions();
+        _options.ModuleContexts.Add(CreateSharedPackageBackendContext(options, "ViciOne.Suite.SharedA", moduleAVersion));
+        _options.ModuleContexts.Add(CreateSharedPackageBackendContext(options, "ViciOne.Suite.SharedB", moduleBVersion));
+
+        return this;
+    }
+
+    private static ModuleDependencyContext CreateSharedPackageBackendContext(TestDependencyVersions versions, string moduleId, string sharedPackageVersion)
+    {
+        var moduleBackend = moduleId + Constants.ModuleSuffixBackend;
+
+        var libraries = CreateMicrosoftRuntimeLibraries(versions)
+            .Union(CreateSdkRuntimeLibraries(versions, client: false))
+            .Union(
+            [
+                new RuntimeLibrary("package",
+                    moduleBackend,
+                    versions.SuiteSdk,
+                    null,
+                    [],
+                    [],
+                    [],
+                    [
+                        new Dependency(SuiteSdkBackend, versions.SuiteSdk),
+                        new Dependency(ThirdPartyPackage, sharedPackageVersion),
+                    ],
+                    true),
+                new RuntimeLibrary("package",
+                    ThirdPartyPackage,
+                    sharedPackageVersion,
+                    null,
+                    [new RuntimeAssetGroup(null, $"lib/net9.0/{ThirdPartyPackage}.dll")],
+                    [],
+                    [],
+                    [
+                        new Dependency("Microsoft.Extensions.Logging.Abstractions", versions.DotNetVersion),
+                    ],
+                    true),
+            ]);
+
+        var dependencyContext = CreateDependencyContext(libraries);
+
+        return CreateModuleDependencyContext(dependencyContext, ModuleType.Backend, moduleId, moduleBackend);
+    }
 
     private TestDependencyContextBuilder SetupModule(TestDependencyVersions? versions,
         Func<TestDependencyVersions, ModuleDependencyContext>? backendCall = null,

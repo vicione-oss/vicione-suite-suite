@@ -256,6 +256,62 @@ public class JFrogArtifactRepositoryTests
             fileSystem.Directory.GetFiles(tempDirectory.Path, "*.download.tmp").Should().BeEmpty();
         }
 
+        [Fact]
+        public async Task Should_fail_when_archive_content_is_corrupt()
+        {
+            // Arrange - the download succeeds but the payload is not a valid zip archive
+            using var corruptStream = new MemoryStream("this is not a zip archive"u8.ToArray());
+
+            var artifact = Substitute.For<IArtifact>();
+            using var tempDirectory = new TemporaryDirectory();
+            var fileSystem = new FileSystem();
+
+            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(contentStream: corruptStream);
+            _httpClientFactory.BaseAddress = new Uri("https://host/");
+
+            var repository = CreateRepository(_httpClientFactory, fileSystem);
+
+            // Act
+            var act = () => repository.DownloadAndExtract(artifact, tempDirectory.Path, TestContext.Current.CancellationToken);
+
+            // Assert - opening the corrupt archive must fail and leave no temp download file behind
+            await act.Should().ThrowAsync<InvalidDataException>();
+            fileSystem.Directory.GetFiles(tempDirectory.Path, "*.download.tmp").Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Should_fail_when_archive_is_truncated()
+        {
+            // Arrange - build a valid zip then cut it off so the central directory is incomplete
+            using var fullZip = new MemoryStream();
+            await using (var archive = new ZipArchive(fullZip, ZipArchiveMode.Create, true))
+            {
+                var entry = archive.CreateEntry("test.txt");
+                await using var writer = new StreamWriter(await entry.OpenAsync(TestContext.Current.CancellationToken));
+                await writer.WriteAsync("content");
+            }
+
+            var fullBytes = fullZip.ToArray();
+            var truncatedBytes = fullBytes[..(fullBytes.Length / 2)];
+            using var truncatedStream = new MemoryStream(truncatedBytes);
+
+            var artifact = Substitute.For<IArtifact>();
+            using var tempDirectory = new TemporaryDirectory();
+            var fileSystem = new FileSystem();
+
+            _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(contentStream: truncatedStream);
+            _httpClientFactory.BaseAddress = new Uri("https://host/");
+
+            var repository = CreateRepository(_httpClientFactory, fileSystem);
+
+            // Act
+            var act = () => repository.DownloadAndExtract(artifact, tempDirectory.Path, TestContext.Current.CancellationToken);
+
+            // Assert - a truncated archive must fail extraction and clean up the temp download file
+            await act.Should().ThrowAsync<InvalidDataException>();
+            fileSystem.Directory.GetFiles(tempDirectory.Path, "*.download.tmp").Should().BeEmpty();
+        }
+
         [Theory]
         [InlineData("../evil.txt")]
         [InlineData("../../evil.txt")]

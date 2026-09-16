@@ -487,5 +487,29 @@ public partial class SuiteDependencyContextExtensionsTests
             var mapping = suiteContext.Mappings.First(k => k.AssemblyName == TestDependencyContextBuilder.ThirdPartyPackage);
             mapping.MapTo.Version.Should().Be("0.1.0.1183622-ci", "higher version wins");
         }
+
+        [Fact]
+        public void Unrelated_modules_should_resolve_highest_compatible_shared_version()
+        {
+            // Arrange
+            // Module A and module B have no dependency relation to each other and no other module
+            // depends on either. By semver convention the higher (compatible) version should win so
+            // that the module expecting the newer minor still gets the feature it relies on.
+            const string moduleAVersion = "1.1.0";
+            const string moduleBVersion = "1.2.0";
+
+            var suiteContext = new TestDependencyContextBuilder()
+                .SetupCoreOS()
+                .SetupUnrelatedModulesWithSharedPackage(moduleAVersion, moduleBVersion)
+                .Build();
+
+            // Act
+            suiteContext.UseAssemblyMapping();
+
+            // Assert
+            var mapping = suiteContext.Mappings.Single(k => k.AssemblyName == TestDependencyContextBuilder.ThirdPartyPackage);
+            mapping.MapTo.Version.Should().Be(moduleBVersion, "the highest compatible version wins for unrelated modules");
+            mapping.MapFrom.Should().Contain(k => k.Version == moduleAVersion, "the lower version is redirected to the winner");
+        }
     }
 }
