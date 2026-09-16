@@ -286,6 +286,43 @@ public class ModuleArtifactRepositoryTests
             second.Skipped.Should().BeFalse("a partial module must be re-acquired, not skipped");
             fileSystem.File.Exists(fileSystem.Path.Combine(targetPath, ".ready")).Should().BeTrue();
         }
+
+        [Fact]
+        public async Task Should_report_error_and_clean_up_when_archive_is_corrupt()
+        {
+            // Arrange
+            var fileSystem = new FileSystem();
+            using var tempDir = new TemporaryDirectory();
+            var (artifactRepository, _) = CreateArtifactRepositoryMock();
+            var package = new ModuleDependencyPackage { Name = "Module.Corrupt", Version = "1.0.0" };
+            var packageFolder = fileSystem.Path.Combine(tempDir.Path, package.Name);
+            var targetPath = fileSystem.Path.Combine(packageFolder, package.Version);
+
+            // Simulate a corrupt/truncated archive: extraction surfaces InvalidDataException
+            // just like ZipArchive does for an unreadable payload.
+            artifactRepository
+                .DownloadAndExtract(Arg.Any<IArtifact>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(async call =>
+                {
+                    var stagingPath = call.ArgAt<string>(1);
+                    fileSystem.Directory.CreateDirectory(stagingPath);
+                    await Task.Yield();
+                    throw new InvalidDataException("Central Directory corrupt.");
+                });
+
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, _logger);
+
+            // Act
+            var result = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);
+
+            // Assert - the failure is surfaced and nothing is promoted or left behind
+            result.Error.Should().BeOfType<InvalidDataException>();
+            result.Skipped.Should().BeFalse();
+            fileSystem.Directory.Exists(targetPath).Should().BeFalse("a corrupt module must not be promoted");
+
+            if (fileSystem.Directory.Exists(packageFolder))
+                fileSystem.Directory.GetDirectories(packageFolder, ".staging-*").Should().BeEmpty("staging must be cleaned up on failure");
+        }
     }
 
     public sealed class GetModuleDownloadStreamTest : ModuleArtifactRepositoryTests
