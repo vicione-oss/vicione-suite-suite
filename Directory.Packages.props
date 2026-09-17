@@ -3,21 +3,21 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <DotNetVersion>10.0.12</DotNetVersion>
     <HostManagementVersion>1.3.0</HostManagementVersion>
-    <OpenTelemetryVersion>1.16.0</OpenTelemetryVersion>
+    <OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.10</MassTransitVersion>
-    <ViciOneUiBlazorComponentsVersion>5.20.0</ViciOneUiBlazorComponentsVersion>
-    <ViciOneUiMonochromeIconsVersion>4.17.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>3.1.0-ci2837188399</ViciOneSuiteSdkVersion>
+    <ViciOneUiBlazorComponentsVersion>6.1.0</ViciOneUiBlazorComponentsVersion>
+    <ViciOneUiMonochromeIconsVersion>4.18.0</ViciOneUiMonochromeIconsVersion>
+    <ViciOneSuiteSdkVersion>3.1.0-ci2857724065</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
-    <PackageVersion Include="AspNetCore.SassCompiler" Version="1.102.0" />
+    <PackageVersion Include="AspNetCore.SassCompiler" Version="1.103.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <PackageVersion Include="Fluid.Core" Version="2.31.0" />
     <PackageVersion Include="HostManagement.Shared" Version="$(HostManagementVersion)" />
     <PackageVersion Include="HostManagement.Shared.Communication" Version="$(HostManagementVersion)" />
-    <PackageVersion Include="MailKit" Version="4.17.0" />
+    <PackageVersion Include="MailKit" Version="4.18.0" />
     <PackageVersion Include="MassTransit" Version="$(MassTransitVersion)" />
     <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="$(MassTransitVersion)" />
     <PackageVersion Include="MassTransit.RabbitMQ" Version="$(MassTransitVersion)" />
@@ -35,8 +35,8 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyModel" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Localization" Version="$(DotNetVersion)" />
     <PackageVersion Include="Microsoft.TypeScript.MSBuild" Version="5.9.3" />
-    <PackageVersion Include="Microsoft.FeatureManagement" Version="4.6.0" />
-    <PackageVersion Include="Microsoft.FeatureManagement.AspNetCore" Version="4.6.0" />
+    <PackageVersion Include="Microsoft.FeatureManagement" Version="4.7.0" />
+    <PackageVersion Include="Microsoft.FeatureManagement.AspNetCore" Version="4.7.0" />
     <PackageVersion Include="minisign-net" Version="1.0.0" />
     <PackageVersion Include="MQTTnet" Version="5.2.0.1603" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
@@ -62,7 +62,7 @@
     <PackageVersion Include="ViciOne.Suite.Sdk.Client" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Deployment" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.SystemMonitoring" Version="1.0.1" />
-    <PackageVersion Include="ViciOne.Ui.Design" Version="2.4.0" />
+    <PackageVersion Include="ViciOne.Ui.Design" Version="2.5.0" />
     <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="$(ViciOneUiBlazorComponentsVersion)" />
     <PackageVersion Include="ViciOne.Ui.Localization" Version="3.5.0" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Assets" Version="$(ViciOneUiMonochromeIconsVersion)" />
@@ -70,17 +70,17 @@
     <PackageVersion Include="ViciOne.Ui.TreeEditor" Version="2.0.1" />
     <!--Used for tests only:-->
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
-    <PackageVersion Include="AwesomeAssertions" Version="9.5.0" />
-    <PackageVersion Include="bunit" Version="2.8.6" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+    <PackageVersion Include="bunit" Version="2.11.3" />
     <PackageVersion Include="Extensions.Logging.NSubstitute" Version="1.0.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(DotNetVersion)" />
-    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.8.0" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.9.0" />
-    <PackageVersion Include="NSubstitute" Version="6.0.0" />
-    <PackageVersion Include="Microsoft.Playwright" Version="1.61.0" />
+    <PackageVersion Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.2" />
+    <PackageVersion Include="NSubstitute" Version="6.2.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.62.0" />
     <PackageVersion Include="System.IO.Abstractions.TestingHelpers" Version="22.2.0" />
-    <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="4.0.1" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Testing" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Ui.Blazor.Components.TestingHelpers" Version="$(ViciOneUiBlazorComponentsVersion)" />
     <!--Used for tools only:-->

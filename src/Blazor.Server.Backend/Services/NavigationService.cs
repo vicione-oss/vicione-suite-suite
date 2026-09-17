@@ -47,7 +47,7 @@ internal sealed class NavigationService : INavigationService, IDisposable
 
         NoActiveNotificationElement();
 
-        return _interop.SubmitForm(uriBuilder.Uri.ToString(), "");
+        return _interop.SubmitForm(uriBuilder.Uri.AbsoluteUri, "");
     }
 
     public void RedirectToSignIn()

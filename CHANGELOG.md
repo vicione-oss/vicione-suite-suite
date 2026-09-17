@@ -29,10 +29,15 @@
 
 ### Updated
 
-- `AspNetCore.SassCompiler` packages, update to version `1.102.0`
+- `AspNetCore.SassCompiler` packages, update to version `1.103.0`
 - `Microsoft` packages, update to version `10.0.12`
-- `ViciOne.Suite.Sdk` packages, update to version `3.1.0-ci2837188399`
-- `ViciOne.Ui.MonochromeIcons` packages, update to version `4.17.0`
+- `Microsoft.FeatureManagement` packages, update to version `4.7.0`
+- `MailKit`, update to version `4.18.0`
+- `OpenTelemetry` packages, update to version `1.18.0`
+- `ViciOne.Suite.Sdk` packages, update to version `3.1.0-ci2857724065`
+- `ViciOne.Ui.Blazor.Components` packages, update to version `6.1.0`
+- `ViciOne.Ui.Design`, update to version `2.5.0`
+- `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`
 
 ## 1.3.0 - 2026-08-17
 
