@@ -67,7 +67,7 @@ public sealed class NavigationServiceTests
         // Assert
         _activeNotificationElementPolicy.Received(1).NoneActive();
 
-        _jsInterOp.Received(1).SubmitForm(Arg.Is((string? uri) => uri!.Contains(BaseUri)), Arg.Any<string>(), Arg.Any<CancellationToken>());
+        _jsInterOp.Received(1).SubmitForm(Arg.Is((string uri) => uri.Contains(BaseUri)), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

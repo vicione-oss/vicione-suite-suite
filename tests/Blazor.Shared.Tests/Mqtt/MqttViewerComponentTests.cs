@@ -165,8 +165,8 @@ public class MqttViewerComponentTests
 
             var service = ctx.Services.GetRequiredService<IMqttService>();
             await service.Received(1)
-                .Connect(Arg.Is((MqttConnection? c)
-                    => c!.Address == mqtt.Address &&
+                .Connect(Arg.Is((MqttConnection c)
+                    => c.Address == mqtt.Address &&
                     c.Port == mqtt.Port &&
                     c.Protocol == mqtt.Protocol));
         }
