@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using Core.OS.EnvironmentOverrides;
-using Core.Shared.EnvironmentOverrides;
 using Core.OS.Extensions;
 using Core.OS.Hosting;
 using Core.OS.Hosting.Extensions;
@@ -39,29 +38,13 @@ builder.Services.ConfigureLogging(builder.Configuration, fileSystem, instanceOpt
 // add serilogs services like DiagnosticContext
 builder.Host.UseSerilog();
 
-if (environmentOverridesFailure is not null)
-    Log.Error(environmentOverridesFailure,
-        "Environment overrides were not applied - continuing with the inherited environment");
-else if (environmentOverridesPath is null)
-    Log.Information(
-        "Runtime environment overrides are off - set {Variable} to true to enable them",
-        EnvironmentOverridesSwitch.EnabledEnvironmentVariable);
-
 using var loggerFactory = new SerilogLoggerFactory(logger: null, dispose: false);
-
-// An operator took the overrides away from the failsafe debug page. Reported so the journal of the
-// boot that follows shows why this instance came back on the inherited environment.
-var disabledOverridesPath = EnvironmentOverridesStartup.ResolveDisabledPath(fileSystem);
-if (disabledOverridesPath is not null)
-    loggerFactory.CreateLogger("Program").LogWarning(
-        "Environment overrides were disabled and are not applied - the previous file is kept at {Path}",
-        disabledOverridesPath);
-
 var preparationContext = new SuitePreparationContext(fileSystem, instanceOptions, loggerFactory);
 using var preparationPipeline = new SuitePreparationPipeline(preparationContext);
 
 // filesystem / workspace preparation
 var result = await preparationPipeline
+    .UseEnvironmentOverridesLogging(environmentOverridesPath, environmentOverridesFailure)
     .UseInstanceIdentification()
     .UseDeviceImageCleanup()
     .UseResetIfRequested()
