@@ -25,4 +25,4 @@
     # GitLab starts services with no health gating, so gate the tests on /hc here.
     - bash tests/Core.OS.E2E.Tests/.gitlab-ci/wait-suite-healthy.sh standalone "$SUITE_BASE_URL"
   script:
-    - dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --no-build --results-directory TestResults --report-junit --filter-query "/[Category=E2E]"
+    - dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --no-build --results-directory TestResults --report-xunit-junit --report-xunit-junit-filename standalone.junit --filter-query "/[Category=E2E]"

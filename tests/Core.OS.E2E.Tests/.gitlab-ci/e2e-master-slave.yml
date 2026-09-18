@@ -50,4 +50,4 @@
     - bash tests/Core.OS.E2E.Tests/.gitlab-ci/wait-suite-healthy.sh slave1 "$SUITE_SLAVE1_URL"
     - bash tests/Core.OS.E2E.Tests/.gitlab-ci/wait-suite-healthy.sh slave2 "$SUITE_SLAVE2_URL"
   script:
-    - dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --no-build --results-directory TestResults --report-junit --filter-query "/[Category=E2E-MasterSlave]"
+    - dotnet test tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj --no-build --results-directory TestResults --report-xunit-junit --report-xunit-junit-filename master-slave.junit --filter-query "/[Category=E2E-MasterSlave]"
