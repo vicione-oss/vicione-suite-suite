@@ -1,6 +1,6 @@
 using System.IO.Abstractions;
 using System.Runtime.InteropServices;
-using Core.OS.Extensions;
+using Core.OS.EnvironmentOverrides;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
@@ -8,12 +8,32 @@ using Core.OS.Instance.Extensions;
 using Core.OS.Instance.Services;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Hosting;
+using Core.Shared.EnvironmentOverrides;
 using Sdk.Instance;
 
 namespace Core.OS.Hosting.Extensions;
 
 internal static partial class SuitePreparationPipelineExtensions
 {
+    public static SuitePreparationPipeline UseEnvironmentOverridesLogging(
+        this SuitePreparationPipeline pipeline, string? environmentOverridesPath, Exception? environmentOverridesFailure)
+        => pipeline.Use((context, _) =>
+        {
+            if (environmentOverridesFailure is not null)
+                LogEnvironmentOverridesFailure(context.Logger, environmentOverridesFailure);
+
+            else if (environmentOverridesPath is null)
+                LogEnvironmentOverridesPath(context.Logger, EnvironmentOverridesSwitch.EnabledEnvironmentVariable);
+
+            // An operator took the overrides away from the failsafe debug page. Reported so the journal of the
+            // boot that follows shows why this instance came back on the inherited environment.
+            var disabledOverridesPath = EnvironmentOverridesStartup.ResolveDisabledPath(context.FileSystem);
+            if (disabledOverridesPath is not null)
+                LogEnvironmentOverridesDisabled(context.Logger, disabledOverridesPath);
+
+            return Task.CompletedTask;
+        });
+
     public static SuitePreparationPipeline UseInstanceIdentification(
         this SuitePreparationPipeline pipeline)
         => pipeline.Use((context, _) =>
@@ -242,6 +262,15 @@ internal static partial class SuitePreparationPipelineExtensions
             fileSystem.DeleteRestoreTask(options);
         }
     }
+
+    [LoggerMessage(LogLevel.Error, "Environment overrides were not applied - continuing with the inherited environment")]
+    private static partial void LogEnvironmentOverridesFailure(ILogger logger, Exception error);
+
+    [LoggerMessage(LogLevel.Information, "Runtime environment overrides are off - set {Variable} to true to enable them")]
+    private static partial void LogEnvironmentOverridesPath(ILogger logger, string variable);
+
+    [LoggerMessage(LogLevel.Warning, "Environment overrides were disabled and are not applied - the previous file is kept at '{Path}'")]
+    private static partial void LogEnvironmentOverridesDisabled(ILogger logger, string? path);
 
     [LoggerMessage(LogLevel.Information, "Preparing '{Type} ({RuntimeIdentifier})' application version '{Version}':{BranchInfo}")]
     private static partial void LogInstanceVersion(ILogger logger, InstanceType type, string runtimeIdentifier, string? version, string? branchInfo);
