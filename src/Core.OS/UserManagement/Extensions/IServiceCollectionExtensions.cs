@@ -30,6 +30,11 @@ internal static class IServiceCollectionExtensions
         services.AddScoped<IAdministratorNameProvider, AdministratorNameProvider>();
         services.AddScoped<IAdministratorInitialPasswordProvider, AdministratorInitialPasswordProvider>();
 
+        // Registered here rather than next to the other external authentication services, which sit
+        // behind a UI host callback that does not run for every host: the security header
+        // middleware asks for this on every request regardless of whether identity was wired up.
+        services.AddSingleton<ExternalLoginFormActionOrigin>();
+
         services.AddTransient<IAccountVerification, AccountVerification>();
         services.AddTransient<ISecuritySettings, SecuritySettings>();
         services.AddTransient<FluidTemplateRenderer>();

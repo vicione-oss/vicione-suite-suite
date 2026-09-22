@@ -83,7 +83,7 @@ The alternative would leave an unknown share of clients silently running with no
 | `img-src` | `'self'` | every image the Suite renders is same-origin, the icons included. QuickGrid's own CSS draws the `Paginator` and `ColumnOptions` controls from `data:` images, so adding either means asking for `data:` |
 | `font-src` | `'self'` | local `noto-sans` woff2 only |
 | `connect-src` | **`'self' wss:`** | SignalR circuit and chunked upload are same-origin; module broker connections are not and cannot be enumerated, see below |
-| `form-action` | `'self'` | Identity and passkey endpoints are same-origin, and an OIDC challenge that stays a `302` redirect needs nothing more |
+| `form-action` | `'self'` **plus the configured OpenID provider** | Identity and passkey endpoints are same-origin; the external sign-in and account-linking endpoints answer with a redirect to the provider, and a browser enforces this directive on every hop of a submission, see below |
 | `frame-src` | `'none'` | no iframes |
 | `worker-src` | `'none'` | no web workers |
 | `object-src` | `'none'` | no `<object>` / `<embed>` |
@@ -105,6 +105,34 @@ A `connect-src` assembled from configuration would name one origin and block eve
 - `ws:` is not listed, so a broker reachable only over plaintext fails to connect. That is intended — the fix is TLS on the broker, not a relaxed policy.
 - Narrowing this is a work item of its own, see *What needs to be done*.
 
+### `form-action` and the external identity provider
+
+An earlier version of the table above read *"an OIDC challenge that stays a `302` redirect needs nothing more"*.
+That is wrong.
+A browser enforces `form-action` on **every hop of a form submission**, the redirect included, so the challenge that the external sign-in and account-linking endpoints answer with is refused by `'self'` alone.
+The symptom is a console message naming the Suite's own same-origin endpoint as the blocked URL, because Chromium reports the form's action rather than the redirect target it actually refused.
+
+The directive therefore carries the origin of the configured provider, derived from its authority.
+That value is read from the same `OpenIdConnectOptions` the challenge itself is built from, so the policy cannot name a provider the redirect does not go to, and it follows the `IOptionsMonitorCache` clear that `ExternalIdProviderChanged` triggers on every node — an administrator changing the authority in the settings panel gets a correct policy without a restart.
+An instance with no provider configured sends exactly `form-action 'self'`.
+
+Two alternatives were rejected.
+
+- **Turning the two endpoints into `GET` navigations**, which `form-action` does not govern at all.
+  It removes antiforgery protection from account linking, and link-CSRF is account-takeover-shaped: an attacker who can start a linking flow in a victim's browser attaches their own external identity to the victim's account.
+- **Scoping the relaxation to the documents that hold the forms.**
+  `form-action` is evaluated against the policy of the document containing the form, not against the response of the submission, so a per-endpoint header would change nothing.
+  The sign-in form sits on one known route, but the linking button lives in a control panel of the global settings dialog, which opens over any page without a navigation — there is no route to attach a wider policy to.
+
+- **What it costs:** injected script can post a form to the provider's origin.
+  The provider rejects it, but the request body leaves the origin, so this is an exfiltration channel of one administrator-chosen host — narrower than the `connect-src wss:` above, which permits a WebSocket to any host at all.
+- **What it does not cost:** the endpoints stay `POST` behind their antiforgery tokens.
+- **What it does not cover:** the redirect strictly goes to the discovery document's `authorization_endpoint`, which every provider we know of serves from the authority's own origin.
+  A provider that splits the two stays blocked, see *What needs to be done*.
+  Reading the document instead would be exact, at the price of a network call on the path that writes a response header.
+- **A blocked hop is hard to diagnose**, because the violation a browser reports names the pre-redirect URL rather than the origin it refused.
+  `/csp-report` will therefore not name the provider.
+
 ### Embedding
 
 `frame-ancestors 'none'` is a decision, not an assumption: the Suite is not embedded anywhere, and we do not intend to support it.
@@ -120,12 +148,13 @@ This is what makes module breakage diagnosable: nothing in `IClientModuleResourc
 
 | Layer | Responsibility |
 |-------|----------------|
-| Suite (middleware) | the policy and `X-Frame-Options`, as one constant identical in every environment; the primary and only guaranteed home |
+| Suite (middleware) | the policy and `X-Frame-Options`; the primary and only guaranteed home. Identical in every environment but for the configured provider's origin in `form-action`, which is a property of the instance |
 | Suite (failsafe and downgrade hosts) | their own, stricter policy: `script-src 'none'`, `style-src-attr 'none'` and `connect-src 'self'`, since neither page carries a script or a style attribute or talks to a broker, and their inline `<style>` block is allowed by a SHA-256 hashed at runtime over the stylesheet the page renders, so the two cannot drift apart. Neither carries a reporting directive — the app that would answer `/csp-report` is the one that failed to come up |
 | nginx (`deb-packaging`) | HSTS, `X-Content-Type-Options` and `Referrer-Policy`, the headers it still sends. No CSP and no `X-Frame-Options` |
 
-The policy is the same in every environment.
+The policy does not vary by environment.
 There is no Development variant to keep in step with the production one, so E2E exercises the header customers get, **enforcing**.
+What does vary is the provider origin in `form-action`, and that varies per instance rather than per environment; the instance under test configures no provider, so E2E pins the unwidened policy.
 The layer-by-layer detail, including what the packaged nginx must not send, is in [Security Headers](../security-and-identity.md#security-headers).
 
 ## Browser baseline
@@ -149,6 +178,7 @@ This ADR records the CSP requirement only; it does not set a product-wide browse
 | 3 | `suite` | Narrow `connect-src` from `wss:` towards named origins. The candidates are an explicitly configured origin list and reading the `Connections` table with the SDK's change event as the invalidation hook; the violation log decides whether the second is worth its cost. Either way a connection added while a page is open needs a reload, because a CSP is fixed at document load |
 | 4 | `blazor-components` | Raise the 8 inline `style` attributes with the maintainers. Low priority — `Virtualize` requires `style-src-attr 'unsafe-inline'` until .NET 11 regardless |
 | 5 | `suite-sdk` | Module client reach as an SDK contract question, see *Risks* — a separate ADR |
+| 6 | `suite` | Derive the `form-action` origin from the discovery document's `authorization_endpoint` rather than from the authority, once a provider turns up that serves the two from different origins. The cheap intermediate step is an explicitly configured list of extra origins; the resolution itself belongs on the `ExternalIdProviderChanged` handler, never on the path that writes a response header |
 
 ## Consequences
 
@@ -164,6 +194,7 @@ This ADR records the CSP requirement only; it does not set a product-wide browse
 - `style-src-attr 'unsafe-inline'` stays for the foreseeable future. CSS injection is the narrower risk, so this is accepted.
 - The policy is a constant with no switch to relax or disable it. If a module with wanted functionality breaks, the answer is to relax the directive for that resource in the baseline; making the policy configurable is reconsidered only if the baseline itself turns out not to be good enough.
 - `connect-src wss:` leaves WebSocket exfiltration open to any host. It buys module broker connections that no configuration can enumerate, and item 3 is what narrows it.
+- `form-action` is no longer one constant: an instance with a configured provider permits form posts to that one host. It is narrower than the `connect-src` exception, and the alternative was dropping antiforgery from account linking.
 - On a pre-CSP3 browser the component library's inline styles break visibly, see *Browser baseline*.
 - A browser's own report delivery is not observable from the test harness, because the Reporting API uploads out of band and never becomes a request Playwright can see. What E2E holds is that the Suite advertises the route and answers the payload posted to it.
 
@@ -172,7 +203,7 @@ This ADR records the CSP requirement only; it does not set a product-wide browse
 - **This is a breaking change for modules.** A module loading from a CDN (`IClientModuleResourceProvider`'s `Resource.Url` is an unrestricted `Uri` carrying `Integrity` and `CrossOrigin`), posting via `SubmitForm` to a foreign action, uploading via `UploadFiles` to a foreign URL, or embedding an iframe stops working the moment the header is set. We cannot tell from the outside which installed modules are affected — the violation log is what turns that into evidence.
 - Keeping `IncludeScript`'s inline-content path and arbitrary resource origins as SDK capabilities means eventually taking Option D and giving up origin control for scripts. Dropping them is what makes `script-src-elem 'self'` permanent. That decision, the per-module escape-hatch question, and whether removing off-origin support is a breaking SDK change needing a major version and a deprecation window, are module governance and are **not decided here**.
 - [`require-trusted-types-for 'script'`](https://developer.mozilla.org/en-US/docs/Web/API/Trusted_Types_API) is the only mechanism that constrains what module JavaScript may do to the DOM rather than only where it may load code from. It is not in the baseline: Firefox support arrived only in 148, and it has an unresolved compatibility question with Blazor's raw-HTML diffing for `MarkupString` and with the `innerHTML` write in `IncludeScript`'s inline-content path, which [Microsoft's CSP guidance for Blazor](https://learn.microsoft.com/en-us/aspnet/core/blazor/security/content-security-policy?view=aspnetcore-10.0) does not address either. It needs a report-only spike first.
-- Showing IdP logos or the `picture` claim, switching the OIDC challenge to `OpenIdConnectRedirectBehavior.FormPost` (whose generated auto-submit page carries an inline script), or adopting `check_session_iframe`, would each force provider hosts into the policy and make it per-provider. Keeping provider branding local and the challenge a redirect is a cheap guardrail worth committing to.
+- The policy already names the provider in `form-action`, so it is per-instance. Going further would widen three more directives to provider hosts: showing IdP logos or the `picture` claim (`img-src`), switching the challenge to `OpenIdConnectRedirectBehavior.FormPost`, whose generated auto-submit page carries an inline script (`script-src`), or adopting `check_session_iframe` (`frame-src`). Keeping provider branding local is a cheap guardrail worth committing to.
 - A strict-looking policy can still be bypassable through what it permits; `connect-src wss:` and the `'unsafe-inline'` on `style-src-attr` are the parts worth re-reading against [known bypass classes](https://portswigger.net/web-security/cross-site-scripting/content-security-policy) whenever they change.
 - [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy) is at `no-referrer-when-downgrade`, the weakest useful value, and `Permissions-Policy`, `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy` are unset. Same code paths, deliberately a second round.
 
@@ -182,5 +213,6 @@ This ADR records the CSP requirement only; it does not set a product-wide browse
 - The nginx fragments are the exception: `deb-packaging` runs no tests and no E2E job serves the Suite through nginx, so a change to `src/nginx/header` is verified by review and on an installed package.
 - `style-src-attr 'unsafe-inline'` is permanent, so the number of inline `style` attributes is not policed — a count would be a maintained list buying no protection. Inline event handlers are the opposite case: `script-src-attr` is `'none'`, so an inline handler added to the markup is a broken control, not a cosmetic slip.
 - MRs adding an inline event handler, an inline `<style>`, a `blob:` or `data:` consumer, or a new off-origin fetch, must state the directive they need.
+- The `form-action` origin is unit-tested against the unconfigured sentinel, an authority carrying a path, a non-default port and an authority equal to the Suite's own origin, and against a provider changing without a restart. E2E pins the unwidened policy, because the instance under test configures no provider.
 - A value rendered as raw HTML (`MarkupString`, `innerHTML`) is either encoded before it becomes markup, as the instance title is, or trusted by its origin — the `TopBar` icon is the only trusted case, and request, database or module input never joins it.
 - New SDK client APIs that reach the DOM or the network are reviewed against this ADR before they become public.

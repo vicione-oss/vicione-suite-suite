@@ -106,5 +106,7 @@ The Content Security Policy itself is decided in [ADR-006](ADRs/ADR-006-content-
 ### Deployment
 
 - **TLS is required for violation reporting.** `report-to` registers an endpoint only on a cryptographic origin, and a browser that supports it ignores `report-uri`, so an installation served over plain `http://` reports no violations at all.
-  TLS terminated at a proxy is enough, since what counts is the scheme the browser sees — see the remarks on `ContentSecurityPolicy.Baseline`.
-- **The policy is identical in every environment.** There is no Development variant, so what E2E exercises is the header a customer gets.
+  TLS terminated at a proxy is enough, since what counts is the scheme the browser sees.
+- **The policy does not vary by environment.** There is no Development variant, so what E2E exercises is the header a customer gets.
+  It does vary per instance in one directive: `form-action` names the origin of the configured OpenID provider, without which the browser refuses the challenge redirect.
+  The origin is read from the OpenID options themselves, so it follows a provider change without a restart.
