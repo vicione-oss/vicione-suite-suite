@@ -33,7 +33,29 @@ public class SecurityHeaderExtensionsTests
 
         // Assert
         response.Headers.GetValues(ContentSecurityPolicyHeader)
-            .Should().Equal(ContentSecurityPolicy.Baseline);
+            .Should().Equal(ContentSecurityPolicy.GetBaseline(null));
+    }
+
+    /// <summary>
+    /// The policy is not the same in every installation any more — the configured OpenID provider
+    /// joins <c>form-action</c> — so it has to be read per response rather than captured once when
+    /// the middleware is registered.
+    /// </summary>
+    [Fact]
+    public async Task Should_send_the_policy_resolved_for_the_request()
+    {
+        // Arrange
+        var resolved = new Queue<string>(["policy-for-the-first", "policy-for-the-second"]);
+        using var host = await StartHost(policy: _ => resolved.Dequeue());
+        var client = host.GetTestClient();
+
+        // Act
+        var first = await client.GetAsync("/", TestContext.Current.CancellationToken);
+        var second = await client.GetAsync("/", TestContext.Current.CancellationToken);
+
+        // Assert
+        first.Headers.GetValues(ContentSecurityPolicyHeader).Should().Equal("policy-for-the-first");
+        second.Headers.GetValues(ContentSecurityPolicyHeader).Should().Equal("policy-for-the-second");
     }
 
     [Fact]
@@ -48,7 +70,7 @@ public class SecurityHeaderExtensionsTests
         // Assert
         // Both are enforced by the browser, so the effective policy is their intersection.
         response.Headers.GetValues(ContentSecurityPolicyHeader)
-            .Should().Equal(FrameworkPolicy, ContentSecurityPolicy.Baseline);
+            .Should().Equal(FrameworkPolicy, ContentSecurityPolicy.GetBaseline(null));
     }
 
     [Fact]
@@ -112,13 +134,14 @@ public class SecurityHeaderExtensionsTests
 
     private static async Task<IHost> StartHost(
         Action<HttpResponse>? beforeResponseStarts = null,
-        string? reportingEndpoints = ContentSecurityPolicy.ReportingEndpoints)
+        string? reportingEndpoints = ContentSecurityPolicy.ReportingEndpoints,
+        Func<HttpContext, string>? policy = null)
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.WebHost.UseTestServer();
 
         var app = builder.Build();
-        app.UseSecurityHeaders(ContentSecurityPolicy.Baseline, reportingEndpoints);
+        app.UseSecurityHeaders(policy ?? (_ => ContentSecurityPolicy.GetBaseline(null)), reportingEndpoints);
         app.MapGet("/", (HttpContext context) => beforeResponseStarts?.Invoke(context.Response));
 
         await app.StartAsync(TestContext.Current.CancellationToken);

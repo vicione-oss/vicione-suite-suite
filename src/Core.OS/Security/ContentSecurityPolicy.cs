@@ -13,23 +13,18 @@ internal static class ContentSecurityPolicy
     private const string ViolationReportGroup = "csp-endpoint";
 
     /// <summary>
-    /// The policy of the running suite.
+    /// The <c>Reporting-Endpoints</c> header addressing <see cref="GetBaseline"/>'s
+    /// <c>report-to</c> group. Without it the group has no address, so the two are sent together.
     /// </summary>
-    /// <remarks>
-    /// A constant, not an assembled string: the policy is identical in every environment, and a
-    /// development variant would mean E2E proving a header customers never get.
-    /// <c>upgrade-insecure-requests</c> has no opt-out because <c>UseHttpsRedirection</c> and
-    /// <c>UseHsts</c> already rule out reaching the suite over plain HTTP.
-    /// Violations are reported through both reporting directives. <c>report-to</c> is the current
-    /// one and names the group <see cref="ReportingEndpoints"/> declares; <c>report-uri</c> is its
-    /// predecessor and is what browsers at the floor of ADR-006 still act on. A browser that
-    /// supports the successor ignores the predecessor, so no violation is reported twice.
-    /// <c>report-to</c> registers an endpoint only on a cryptographic origin: served over plain
-    /// <c>http://</c> a browser registers none and still ignores <c>report-uri</c>, so such an
-    /// installation reports nothing at all. TLS terminated at a proxy is enough, since what counts
-    /// is the scheme the browser sees.
-    /// </remarks>
-    public const string Baseline =
+    public const string ReportingEndpoints = $"{ViolationReportGroup}=\"{CspViolationReporting.Route}\"";
+
+    /// <summary>
+    /// The policy of the running suite, as decided in ADR-006.
+    /// <paramref name="externalFormActionOrigin"/> is the origin of the configured OpenID provider,
+    /// or <see langword="null"/> while none is configured. It is the one value that varies per
+    /// installation; there is no development variant.
+    /// </summary>
+    public static string GetBaseline(string? externalFormActionOrigin) =>
         "default-src 'self'; " +
         "base-uri 'self'; " +
         "script-src 'self'; " +
@@ -40,7 +35,7 @@ internal static class ContentSecurityPolicy
         "img-src 'self'; " +
         "font-src 'self'; " +
         "connect-src 'self' wss:; " +
-        "form-action 'self'; " +
+        $"form-action {GetFormAction(externalFormActionOrigin)}; " +
         "frame-src 'none'; " +
         "worker-src 'none'; " +
         "object-src 'none'; " +
@@ -50,15 +45,8 @@ internal static class ContentSecurityPolicy
         $"report-to {ViolationReportGroup}";
 
     /// <summary>
-    /// The <c>Reporting-Endpoints</c> header that gives <see cref="Baseline"/>'s <c>report-to</c>
-    /// group an address. A browser that receives the directive without this header has nowhere to
-    /// deliver to, so the two are sent together or not at all.
-    /// </summary>
-    public const string ReportingEndpoints = $"{ViolationReportGroup}=\"{CspViolationReporting.Route}\"";
-
-    /// <summary>
     /// The policy of the failsafe and downgrade pages, which their own hosts serve when the suite
-    /// did not come up. Same directives as <see cref="Baseline"/> with tighter values: neither page
+    /// did not come up. Same directives as <see cref="GetBaseline"/> with tighter values: neither page
     /// carries a script, and both are laid out entirely by one inline stylesheet, which is allowed
     /// by its hash rather than by <c>'unsafe-inline'</c>.
     /// </summary>
@@ -86,6 +74,9 @@ internal static class ContentSecurityPolicy
         "object-src 'none'; " +
         "frame-ancestors 'none'; " +
         "upgrade-insecure-requests";
+
+    private static string GetFormAction(string? externalOrigin)
+        => externalOrigin is null ? "'self'" : $"'self' {externalOrigin}";
 
     private static string Sha256Source(string content)
         => $"'sha256-{Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(content)))}'";

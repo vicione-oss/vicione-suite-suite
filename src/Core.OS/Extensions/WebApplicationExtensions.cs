@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using Core.OS.Modules;
 using Core.OS.Security;
 using Core.OS.Security.Extensions;
+using Core.OS.UserManagement.Security;
 using Microsoft.Extensions.Options;
 using Serilog;
 
@@ -50,7 +51,10 @@ internal static class WebApplicationExtensions
             moduleHost.UseUiHost(host, host.Environment);
 
             host.UseResponseCachePolicy();
-            host.UseSecurityHeaders(ContentSecurityPolicy.Baseline, ContentSecurityPolicy.ReportingEndpoints);
+            var formActionOrigin = host.Services.GetRequiredService<ExternalLoginFormActionOrigin>();
+            host.UseSecurityHeaders(
+                context => ContentSecurityPolicy.GetBaseline(formActionOrigin.Resolve(context)),
+                ContentSecurityPolicy.ReportingEndpoints);
 
             host.UseRouting();
             host.UseSerilogRequestLogging(options =>
