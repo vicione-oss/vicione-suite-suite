@@ -339,7 +339,7 @@ public class SuitePreparationPipelineTests
             // Arrange
             var builder = WebApplication.CreateBuilder();
 
-            // persist a higher version than running suite to simulate downgrade
+            // A persisted version higher than the running suite simulates a downgrade.
             var parts = SuiteVersionUtils.GetSuiteVersion().Split('.');
             var major = int.Parse(parts[0], CultureInfo.InvariantCulture);
             var minor = int.Parse(parts[1], CultureInfo.InvariantCulture) + 1;

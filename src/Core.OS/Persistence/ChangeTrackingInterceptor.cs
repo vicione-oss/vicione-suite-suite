@@ -112,7 +112,7 @@ public sealed class ChangeTrackingInterceptor(IReplicationPublisher publisher, R
 
                 if (navigation.CurrentValue is IEnumerable navigationCollection)
                 {
-                    // skip unidirectional relations like tag -> connection
+                    // Unidirectional relations such as tag -> connection are skipped.
                     if (navigation.Metadata is RuntimeSkipNavigation rt && !rt.IsLeftNavigation())
                         continue;
 

@@ -58,8 +58,6 @@ public static class BackupReader
     /// to <see cref="destinationPath"/>. It does not support IO.Abstractions and will extract the entries into
     /// the real filesystem.
     /// </summary>
-    /// <param name="archive"></param>
-    /// <param name="destinationPath"></param>
     public static async Task ExtractSystemModuleTo(ZipArchive archive, string destinationPath, CancellationToken cancellationToken)
     {
         var moduleEntry = GetSystemModuleEntry(archive);
@@ -86,7 +84,7 @@ public static class BackupReader
         if (entry is null)
             throw new InvalidOperationException("Could not find system configuration within backup.");
 
-        // if no HM is installed SystemConfiguration can be null
+        // Without HostManagement installed, SystemConfiguration is null.
         return await entry.DeserializeEntry<SystemConfiguration?>(cancellationToken);
     }
 
@@ -124,16 +122,13 @@ public static class BackupReader
     /// to <see cref="destinationPath"/>. It does not support IO.Abstractions and will extract the entries into
     /// the real filesystem.
     /// </summary>
-    /// <param name="archive"></param>
-    /// <param name="destinationPath"></param>
-    /// <param name="moduleNames"></param>
     private static async Task ExtractModulesTo(ZipArchive archive, string destinationPath, IReadOnlyCollection<string>? moduleNames = null, CancellationToken cancellationToken = default)
     {
         var moduleEntries = GetModuleEntries(archive);
 
         foreach (var moduleEntry in moduleEntries)
         {
-            // filter entries
+            // Only the entries belonging to the requested modules.
             if (moduleNames?.Contains(moduleEntry.Name) == true)
                 continue;
 

@@ -33,7 +33,7 @@ public sealed class RevalidatingIdentityAuthenticationStateProviderTests
         using var serviceProvider = services.BuildServiceProvider();
         scope.ServiceProvider.Returns(serviceProvider);
 
-        // return null for unknown user
+        // Returns null for an unknown user.
         _ = userManager.GetUserAsync(Arg.Any<ClaimsPrincipal>()).Returns(Task.FromResult<IdentityUser?>(null));
 
         var claimPrincipalUserAdmin = new ClaimsPrincipal(new ClaimsIdentity([
@@ -112,7 +112,7 @@ public sealed class RevalidatingIdentityAuthenticationStateProviderTests
         userManager.SupportsUserSecurityStamp.Returns(true);
         userManager.GetSecurityStampAsync(Arg.Any<IdentityUser>()).Returns(Task.FromResult(securityStamp));
 
-        // SecurityClaim für User erstellen
+        // Creates the security claim for the user.
         var claimIdentity = claimPrincipalUserAdmin.Identities.First();
         claimIdentity.AddClaim(new Claim(option.ClaimsIdentity.SecurityStampClaimType, securityStamp));
 

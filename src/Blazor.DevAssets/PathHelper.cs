@@ -17,14 +17,12 @@ internal static class PathHelper
         Debug.Assert(path is not null);
         Debug.Assert(path.Length > 0);
         path = path.Replace('/', DIR_SEPARATOR_CHAR);
-        path = path.TrimEnd(); // Remove extra spaces on the right (not on the left!)
+        path = path.TrimEnd(); // Trailing spaces only, not leading.
 
-        // EventuallyRemoveConsecutiveDirSeparator() ..
         if (path.StartsWith(TWO_DIR_SEPARATOR_STRING, StringComparison.Ordinal))
         {
-            // ... except if it is at the beginning of the pathStringNormalized, in which case it might be a URN pathStringNormalized!
-            // Subtility, if we begin with 3 or more dir separator, need to keep only two.
-            // Hence we eliminate just one dir separator before applying EventuallyRemoveConsecutiveSeparator().
+            // A leading double separator can be a UNC path, so keep two. Dropping one before collapsing
+            // the rest leaves exactly two when the path starts with three or more.
             var pathTmp = path[1..];
             pathTmp = EventuallyRemoveConsecutiveSeparator(pathTmp);
             path = DIR_SEPARATOR_STRING + pathTmp;
@@ -34,7 +32,7 @@ internal static class PathHelper
             path = EventuallyRemoveConsecutiveSeparator(path);
         }
 
-        // Eventually Transform ".\.." prefix into ".."
+        // Turn a ".\.." prefix into "..".
         const string PREFIX_TO_SIMPLIFY = @".\..";
         if (path.StartsWith(PREFIX_TO_SIMPLIFY, StringComparison.Ordinal))
         {
@@ -42,7 +40,7 @@ internal static class PathHelper
             path = path.Insert(0, PARENT_DIR_DOUBLEDOT);
         }
 
-        // EventuallyRemoveEndingDirSeparator
+        // Strip trailing separators.
         while (true)
         {
             var pathLength = path.Length;
@@ -88,7 +86,7 @@ internal static class PathHelper
     {
         Debug.Assert(path is not null);
         if (!HasParentDirectory(path))
-            // In case of directories like "." or "C:" return an empty string.
+            // Directories like "." or "C:" have no last name.
             return "";
         var index = path.LastIndexOf(DIR_SEPARATOR_CHAR);
         Debug.Assert(index != path.Length - 1);

@@ -55,9 +55,8 @@ internal static class RabbitMqCleaner
         {
 
             await using var channel = await connection.CreateChannelAsync(options: null, cancellationToken);
-            // RabbitMQ.Client >= 7.0.0 removed ConfirmSelect but added MaybeConfirmSelect within usage of CreateChannelAsync:
+            // RabbitMQ.Client 7.0.0 dropped ConfirmSelect; CreateChannelAsync calls MaybeConfirmSelect itself:
             // https://github.com/rabbitmq/rabbitmq-dotnet-client/blob/58ac94966d12ffbb88ccd03ea085b3516a544321/projects/RabbitMQ.Client/Impl/Channel.cs#L385
-            // channel.ConfirmSelect();
 
             var exchangeCount = 0;
             var queueCount = 0;

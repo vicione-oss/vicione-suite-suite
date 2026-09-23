@@ -39,12 +39,12 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
             Cooking,
             Delivery);
 
-        // Executed when a OrderBurgerCommand sent to the saga queue (Ping_OrderBurgerState)
+        // Runs when an OrderBurger command reaches the saga queue (Ping_OrderBurgerState).
         Initially(
             When(BurgerOrdered)
                 .Then(InitiallyWhenBurgerOrdered)
                 .Publish(ctx => new OrderBurgerReceived(ctx.Message.OrderId))
-                // send a command with the order details to the kitchen to start grill and dress activities
+                // Sends the order details to the kitchen, which starts the grill and dress activities.
                 .Send(MessagingHelper.GetCommandEndpointAddress<KitchenCommand>(),
                     ctx => new KitchenCommand(ctx.Saga.OrderId, ctx.Saga.Burgers))
                 .Then(ctx => LogTransition(ctx, nameof(Cooking)))
@@ -57,15 +57,15 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
                 {
                     logger.LogWarning("OrderBurgerStateMachine OrderId: {OrderId} (duplicate request)", context.Message.OrderId);
                 }),
-            // Kitchen has grilled a paddy and dressed the burger
+            // The kitchen has grilled a patty and dressed the burger.
             When(BurgerCompleted)
                 .Then(CookingWhenBurgerCompleted)
-                // send a command to start delivery of the ordered burgers
+                // Sends the command that starts delivery of the ordered burgers.
                 .Send(MessagingHelper.GetCommandEndpointAddress<DeliveryCommand>(), CreateDeliveryCommand)
                 .Then(ctx => LogTransition(ctx, nameof(Delivery)))
                 .TransitionTo(Delivery));
 
-        // Delivery will succeed when DeliveryCompleted event arrives
+        // Delivery succeeds when the DeliveryCompleted event arrives.
         During(Delivery,
             When(BurgerDelivered)
                 .Then(DeliveryWhenBurgerDelivered)
@@ -92,7 +92,7 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
     {
         _logger.LogInformation("Delivered order:{Id} {Burger}", context.Saga.CorrelationId, context.Saga.Burgers);
 
-        // update the saga with burgers from kitchen
+        // Updates the saga with the burgers from the kitchen.
         context.Saga.Burgers.Clear();
         context.Saga.Burgers.AddRange(context.Message.Burgers);
     }

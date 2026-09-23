@@ -20,7 +20,7 @@ internal static partial class IFileSystemExtensions
         {
             var dataVersionPath = fileSystem.GetLocalDataVersionFilePath(options);
 
-            // good for short strings
+            // Adequate for a short string.
             return fileSystem.File.WriteAllTextAsync(dataVersionPath, version, cancellationToken);
         }
 
@@ -28,7 +28,7 @@ internal static partial class IFileSystemExtensions
         {
             var dataVersionPath = fileSystem.GetLocalDataVersionFilePath(options);
 
-            // good for short strings
+            // Adequate for a short string.
             return fileSystem.File.ReadAllTextAsync(dataVersionPath, cancellationToken);
         }
 
@@ -39,9 +39,6 @@ internal static partial class IFileSystemExtensions
         /// An <see cref="InvalidOperationException"/> is thrown if the persisted version file exists but is empty,
         /// after restoring the file to the current version.
         /// </remarks>
-        /// <param name="options">Instance options used to locate the data-version file.</param>
-        /// <param name="logger">Logger for informational and warning messages about version transitions.</param>
-        /// <param name="cancellationToken">Token to cancel asynchronous file operations.</param>
         /// <returns>
         /// <see langword="null"/> when no downgrade action is required;
         /// otherwise a <see cref="VersionDowngradeInformation"/> describing the current and persisted versions.
@@ -60,7 +57,7 @@ internal static partial class IFileSystemExtensions
             var persistedVersionString = await fileSystem.ReadDataVersionFile(options, cancellationToken);
             if (string.IsNullOrWhiteSpace(persistedVersionString))
             {
-                // should never happen but for sanity we need try to fix it to current version
+                // Should not happen; the file is restored to the current version as a safeguard.
                 await fileSystem.WriteDataVersionFile(options, suiteVersionString, cancellationToken);
                 LogDataVersionEmptyRestored(logger, suiteVersionString);
                 throw new InvalidOperationException($"Empty data version. Try restore to {suiteVersionString}");
@@ -72,7 +69,7 @@ internal static partial class IFileSystemExtensions
             if (compareResult == 0)
                 return null;
 
-            // is persisted version higher than running one?
+            // A persisted version higher than the running one is a downgrade.
             if (compareResult > 0)
             {
                 await fileSystem.WriteDataVersionFile(options, suiteVersionString, cancellationToken);
@@ -80,7 +77,7 @@ internal static partial class IFileSystemExtensions
                 return null;
             }
 
-            // if we conform to Semver and do our releases that way we could ensure that patch versions would work
+            // Strict Semver releases would let patch versions pass, which is not guaranteed today.
             // because a data migration would lead to a minor version change at least
             if (SuiteVersionUtils.IsPatchUpdate(suiteVersion, persistedVersion))
             {

@@ -16,7 +16,7 @@ internal static class IConnectionDbContextExtensions
         /// if connection has tags that already exist in database there entity state will be Added. That leads to
         /// Npgsql.PostgresException (0x80004005): 23505: duplicate key value violates unique constraint "PK_Tags" or
         /// SQLite Error 19: 'UNIQUE constraint failed: Tags.Id' on SaveChangesAsync.
-        /// To avoid that we have to replace the message tags with existing tag entities  
+        /// To avoid that we have to replace the message tags with existing tag entities
         /// </summary>
         public async Task<HashSet<Tag>> ProcessTags(Connection connection, List<Tag> addedTags, List<Tag> changedTags, CancellationToken cancellationToken)
         {
@@ -48,7 +48,7 @@ internal static class IConnectionDbContextExtensions
             Guid instanceId,
             CancellationToken stoppingToken)
         {
-            // ensure we return the entity reference instead of the static one
+            // The entity reference is returned rather than the static one.
             // to prevent change tracker issues
             var systemDefault = dbContext.Tags.FirstOrDefault(k => k.Id == ConnectionConstants.Tags.SystemDefault.Id);
             if (systemDefault is null)
@@ -135,7 +135,7 @@ internal static class IConnectionDbContextExtensions
         Tag? systemDefault,
         CancellationToken stoppingToken)
     {
-        //cannot filter in database yet. Maybe in EF Core 7. See: https://github.com/dotnet/efcore/issues/4021 
+        // Cannot be filtered in the database yet, see: https://github.com/dotnet/efcore/issues/4021
         // todo: check if this was related to the sync issue
         var existing = (await dbContext.Connections.ToListAsync(stoppingToken))
             .FirstOrDefaultInstanceMqttConnection(instanceId, mqtt.Protocol);
@@ -161,7 +161,7 @@ internal static class IConnectionDbContextExtensions
         MqttConnectionType protocol,
         CancellationToken stoppingToken)
     {
-        //cannot filter in database yet. Maybe in EF Core 7. See: https://github.com/dotnet/efcore/issues/4021 
+        // Cannot be filtered in the database yet, see: https://github.com/dotnet/efcore/issues/4021
         var existing = (await dbContext.Connections.ToArrayAsync(stoppingToken))
             .FirstOrDefaultInstanceMqttConnection(instanceId, protocol);
         if (existing is not null)

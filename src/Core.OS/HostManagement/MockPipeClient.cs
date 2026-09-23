@@ -168,7 +168,7 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
 
     private string HandleRestartService(string content)
     {
-        // fake restart on our deployments without host management
+        // Fakes the restart on deployments without host management.
         // do it the same way as host management would do it
         // !before we get an answer, the service is already down
         if (content == instanceOptions.Value.ServiceName)
@@ -200,7 +200,7 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
 
     private static string HandleGetDCHPLease(string networkInterfaceName)
     {
-        // fake the error sent by HM when interface name is empty
+        // Fakes the error HostManagement sends for an empty interface name.
         if (string.IsNullOrWhiteSpace(networkInterfaceName))
         {
             return JsonSerializer.Serialize(new Response

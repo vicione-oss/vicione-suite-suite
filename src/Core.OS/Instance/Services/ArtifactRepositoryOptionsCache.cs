@@ -15,7 +15,7 @@ internal partial class ArtifactRepositoryOptionsCache(IConfiguration configurati
     {
         try
         {
-            // first update the tokens for the repositories, as they might be outdated
+            // Repository tokens are refreshed first, because they may be outdated.
             await repositoryStore.UpdateRepositoryTokens(tokenService, logger, cancellationToken);
         }
         catch (Exception ex)
@@ -23,7 +23,7 @@ internal partial class ArtifactRepositoryOptionsCache(IConfiguration configurati
             LogFailedToUpdateRepositoryTokens(logger, ex);
         }
 
-        // now load the update repositories from the store and update the options
+        // The updated repositories are then loaded from the store into the options.
         var repositories = await repositoryStore.GetRepositories(null, cancellationToken);
         var repositoryOptions = configuration.GetSection(ArtifactRepositoryOptions.ConfigSection)
             .Get<ArtifactRepositoryOptions>() ?? new ArtifactRepositoryOptions();

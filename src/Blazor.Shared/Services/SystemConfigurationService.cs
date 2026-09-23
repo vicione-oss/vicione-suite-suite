@@ -75,7 +75,7 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
         }
         catch (OperationCanceledException)
         {
-            // nothing to do. Will be logged by the mediator
+            // Nothing to do; the mediator logs it.
         }
     }
 

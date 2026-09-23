@@ -4,13 +4,13 @@ using Sdk.Modules;
 namespace Core.Module.Tests;
 
 /// <summary>
-/// Builder class to create a tests dependency context for suite. 
+/// Builder class to create a tests dependency context for suite.
 /// Use the SetupXXX calls to simulate modules with runtime libraries
 ///
 /// improvements:
 ///  - case that modules a,b reference a public lib from c
 ///  - case for module ref public lib and it's public lib gets referenced
-///  - case that module has only a client module and its public part gets referenced 
+///  - case that module has only a client module and its public part gets referenced
 /// </summary>
 internal sealed class TestDependencyContextBuilder
 {
@@ -106,10 +106,6 @@ internal sealed class TestDependencyContextBuilder
     /// Fake assembly context for Ping.Client|Backend to test the mappings
     /// Client|Backend depends on ThirdPartyPackage
     /// </summary>
-    /// <param name="versions"></param>
-    /// <param name="backend"></param>
-    /// <param name="client"></param>
-    /// <returns></returns>
     public TestDependencyContextBuilder SetupPingModule(TestDependencyVersions? versions = null, bool backend = true, bool client = true)
         => SetupModule(versions, backend ? CreatePingBackendContext : null, client ? CreatePingClientContext : null);
 
@@ -117,40 +113,24 @@ internal sealed class TestDependencyContextBuilder
     /// Fake assembly context for ClusterManagement.Client|Backend to test the mappings
     /// Client|Backend depends on Ping.Public and ThirdPartyPackage
     /// </summary>
-    /// <param name="versions"></param>
-    /// <param name="backend"></param>
-    /// <param name="client"></param>
-    /// <returns></returns>
     public TestDependencyContextBuilder SetupClusterManagement(TestDependencyVersions? versions = null, bool backend = true, bool client = true)
         => SetupModule(versions, backend ? CreateClusterManagementBackendContext : null, client ? CreateClusterManagementClientContext : null);
 
     /// <summary>
     /// DataCollectionWizard depends on ClusterManagement.Public
     /// </summary>
-    /// <param name="versions"></param>
-    /// <param name="backend"></param>
-    /// <param name="client"></param>
-    /// <returns></returns>
     public TestDependencyContextBuilder SetupDataCollectionWizard(TestDependencyVersions? versions = null, bool backend = true, bool client = true)
         => SetupModule(versions, backend ? CreateDataCollectionWizardBackendContext : null, client ? CreateDataCollectionWizardClientContext : null);
 
     /// <summary>
     /// A client module without backend
     /// </summary>
-    /// <param name="versions"></param>
-    /// <param name="backend"></param>
-    /// <param name="client"></param>
-    /// <returns></returns>
     public TestDependencyContextBuilder SetupUiOnlyClientModule(TestDependencyVersions? versions = null)
         => SetupModule(versions, null, CreateUiOnlyClientContext);
 
     /// <summary>
     /// Another client module without backend with dependency to SomeClient.Public
     /// </summary>
-    /// <param name="versions"></param>
-    /// <param name="backend"></param>
-    /// <param name="client"></param>
-    /// <returns></returns>
     public TestDependencyContextBuilder SetupUiOnlyDependentClientModule(TestDependencyVersions? versions = null)
         => SetupModule(versions, null, CreateUiOnlyDependentClientContext);
 
@@ -919,8 +899,6 @@ internal sealed class TestDependencyContextBuilder
     /// <summary>
     /// a fake package to simulate package not provided by core|host
     /// </summary>
-    /// <param name="versions"></param>
-    /// <returns></returns>
     private static RuntimeLibrary CreateThirdPartyLibRuntimeLibrary(TestDependencyVersions versions)
         => new("package",
             ThirdPartyPackage,

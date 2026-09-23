@@ -4,7 +4,7 @@ internal static partial class IArtifactRepositoryStoreExtensions
 {
     public static async Task UpdateRepositoryTokens(this IArtifactRepositoryStore repositoryStore, IArtifactRepositoryTokenService tokenService, ILogger logger, CancellationToken cancellationToken)
     {
-        // get all repositories and update tokens for those enabled and have token endpoint configured
+        // Tokens are refreshed for every enabled repository that has a token endpoint.
         var repositories = await repositoryStore.GetRepositories(null, cancellationToken);
         var updateTasks = repositories.Where(r => r.Enabled && !string.IsNullOrEmpty(r.TokenEndpoint) &&
             (r.TokenValidUntil is null || r.TokenValidUntil < DateTime.UtcNow))

@@ -14,7 +14,7 @@ internal static partial class WebApplicationBuilderExtensions
     {
         try
         {
-            // handle version downgrade case - we trigger a host with minimal api that only serves the downgrade endpoint and then stops the program workflow here.
+            // A version downgrade starts a minimal-api host serving only the downgrade endpoint, which ends the program workflow here.
             if (preparationResult is VersionDowngradePreparationResult downgradeResult)
             {
                 await builder.RunDowngradeHost(preparationContext, downgradeResult);
@@ -40,7 +40,7 @@ internal static partial class WebApplicationBuilderExtensions
             // The invalid-options gate below reports any binding/validation failure.
             builder.Services.AddCoreOs(builder.Configuration, preparationContext);
 
-            // all services have to be already registered to service collection!
+            // Every service has to be registered in the service collection by now.
             var host = builder.Build();
 
             var failures = host.GetInvalidOptions();
@@ -59,7 +59,7 @@ internal static partial class WebApplicationBuilderExtensions
         }
         finally
         {
-            // no part of the host lifecycle disposes the static Serilog logger, so every exit path
+            // No part of the host lifecycle disposes the static Serilog logger, so every exit path
             // ends the process with buffered events (e.g. the OpenTelemetry batch) still pending -
             // for a crash-looping edge device the startup error is the one log that must be delivered
             await Log.CloseAndFlushAsync();
@@ -79,7 +79,7 @@ internal static partial class WebApplicationBuilderExtensions
             DowngradeInformation = downgradeResult.DowngradeInformation
         };
 
-        // run the host that will stop the program workflow here
+        // Running the host ends the program workflow here.
         await using var downgradeHost = DowngradeWebApiHostBuilder.Build(builder, preparationContext.FileSystem, downgradeOptions);
         await downgradeHost.RunAsync();
     }

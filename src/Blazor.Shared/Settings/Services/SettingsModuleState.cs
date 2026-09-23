@@ -14,9 +14,8 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
     private SettingsCategory? _expandedSettingsCategory;
     private IControlPanelRegistryItem? _activeControlPanelRegistryItem;
 
-    // The following field does not use Stack<> as there is no IReadOnlyStack<> and enumeration
-    // from on the outside would overcomplicate things because it is done from the top-most element,
-    // meaning we woud have negative logic pretty much anywhere
+    // A List rather than a Stack: there is no IReadOnlyStack, and a stack enumerates from the top,
+    // which would invert the logic at every call site.
     private readonly List<IControlPanelRegistryItem> _requestedControlPanelRegistryItems = [];
     private readonly Dictionary<SettingsEntriesKey, IControlPanelRegistryItem> _lastActiveControlPanelRegistryItemMap = [];
 
@@ -25,9 +24,6 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
 
     public bool PreselectFirstSettingsEntryInFirstSettingsGroup { get; set; }
 
-    /// <summary>
-    /// Expanded settings category
-    /// </summary>
     public SettingsCategory? ExpandedSettingsCategory
     {
         get => _expandedSettingsCategory;
@@ -47,9 +43,6 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
     /// </summary>
     public IReadOnlyDictionary<SettingsEntriesKey, IControlPanelRegistryItem> LastActiveControlPanelRegistryItemMap => _lastActiveControlPanelRegistryItemMap;
 
-    /// <summary>
-    /// Registry item of the control panel that is currently active
-    /// </summary>
     public IControlPanelRegistryItem? ActiveControlPanelRegistryItem
     {
         get => _activeControlPanelRegistryItem;
@@ -77,9 +70,6 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
     /// <inheritdoc/>
     public int UpdateLock => _updateLock;
 
-    /// <summary>
-    /// <see langword="true"/> when a navigate back button should be displayed, otherwise <see langword="false"/>
-    /// </summary>
     public bool ShowNavigateBackButton
     {
         get => _showNavigateBackButton;
@@ -94,9 +84,6 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
         }
     }
 
-    /// <summary>
-    /// <see langword="true"/> when a loading overlay should be displayed, otherwise <see langword="false"/>
-    /// </summary>
     public bool IsLoadingOverlayVisible
     {
         get => _isLoadingOverlayVisible;

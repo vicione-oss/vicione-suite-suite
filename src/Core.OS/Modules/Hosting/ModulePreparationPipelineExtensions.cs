@@ -42,11 +42,11 @@ internal static partial class ModulePreparationPipelineExtensions
         {
             await ctx.RepositoryStore.MigrateConfiguredRepositories(ctx.Builder.Configuration, ctx.Logger, ct);
 
-            // we need a temporary token service here because the repository source tokens need to be refreshed eventually
+            // A temporary token service is needed, because the repository source tokens may need refreshing.
             var tokenService = new ArtifactRepositoryTokenService(pipeline.HttpClientFactory);
             var logger = ctx.LoggerFactory.CreateLogger<ArtifactRepositoryOptionsCache>();
 
-            // the cache gets added as singleton later on and keeps the store reference!            
+            // The cache is registered as a singleton later and keeps the store reference.
             ctx.RepositoryOptionsCache = new ArtifactRepositoryOptionsCache(ctx.Builder.Configuration, logger);
             await ctx.RepositoryOptionsCache.ReloadOptions(ctx.RepositoryStore, tokenService, ct);
         });
@@ -55,7 +55,7 @@ internal static partial class ModulePreparationPipelineExtensions
         new("Module manifest was not prepared before loading the module host");
 
     /// <summary>
-    /// Loads the module loader options into preparation context. Combines appsettings, environment etc. 
+    /// Loads the module loader options into preparation context. Combines appsettings, environment etc.
     /// with module manifest to produce the final module options.
     /// </summary>
     public static ModulePreparationPipeline UseModuleLoaderOptions(this ModulePreparationPipeline pipeline)
@@ -66,7 +66,7 @@ internal static partial class ModulePreparationPipelineExtensions
 
             ctx.ModuleLoaderOptions = ctx.Builder.Configuration.GetModuleLoaderOptions();
 
-            // combine appsettings, environment etc. with module manifest
+            // Combines appsettings and environment with the module manifest.
             var additionalModules = ctx.Builder.Environment.IsDevelopment() ? ModuleConstants.SampleModuleIds : [];
             ctx.ModuleOptions = ctx.Builder.Configuration.CreateModuleOptions(ctx.Manifest, additionalModules);
 
@@ -97,7 +97,7 @@ internal static partial class ModulePreparationPipelineExtensions
             if (ctx.ModuleLoaderOptions is null)
                 return new ModuleHostPreparationResult("Module loader options were not loaded before loading the module host");
 
-            // combine appsettings, environment etc. with module manifest
+            // Combines appsettings and environment with the module manifest.
             var additionalModules = ctx.Builder.Environment.IsDevelopment() ? ModuleConstants.SampleModuleIds : [];
             var moduleOptions = ctx.Builder.Configuration.CreateModuleOptions(ctx.Manifest, additionalModules);
             var uiHostOptions = ctx.Builder.Configuration.CreateUiHostOptions(ctx.ModuleLoaderOptions);

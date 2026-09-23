@@ -20,7 +20,7 @@ internal static class EditConnectionModelExtensions
 
         if (validationErrors.Count > 0)
         {
-            // we can't display more errors actually so take the first we have
+            // Only one error can be displayed, so the first one is taken.
             var firstError = validationErrors.First();
             var errorMessage = firstError.Value.FirstOrDefault() ?? CommonPhrases.AnUnknownErrorOccurred;
             throw new InvalidOperationException(errorMessage);

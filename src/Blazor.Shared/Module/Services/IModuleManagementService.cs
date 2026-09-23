@@ -27,19 +27,19 @@ public interface IModuleManagementService
     /// <summary>
     /// Retrieves the metadata for all available and installed modules.
     /// </summary>
-    /// <param name="forceReload">When <see langword="true"/>, bypasses any cache and reloads metadata from the source.</param>    
+    /// <param name="forceReload">When <see langword="true"/>, bypasses any cache and reloads metadata from the source.</param>
     Task<List<ModuleMetadataModel>> GetMetadata(bool forceReload = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sends a command to apply the given package operations and waits for the correlating
     /// <see cref="ModulePackageOperationsChanged"/> event to be consumed, or times out.
-    /// </summary>    
+    /// </summary>
     Task<IModuleManagementServiceResult> UpdateOperations(List<ModulePackageOperation> operations, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sends a command to update the options of the specified module and waits for the correlating
     /// <see cref="ModuleOptionsChanged"/> event to be consumed, or times out.
     /// Options with a value equal to the environment marker are excluded from the update.
-    /// </summary>    
+    /// </summary>
     Task<IModuleManagementServiceResult> UpdateOptions(string moduleId, IEnumerable<ModuleOptionDeclaration> options, CancellationToken cancellationToken = default);
 }

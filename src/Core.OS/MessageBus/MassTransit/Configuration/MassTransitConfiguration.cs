@@ -154,11 +154,11 @@ internal static class MassTransitConfiguration
                         busConfig.AddBusOutboxDelivery();
                     }
 
-                    // ensure we can wait till bus got started
+                    // Allows waiting until the bus has started.
                     busConfig.AddOptions<MassTransitHostOptions>()
                         .Configure(options =>
                         {
-                            // for multibus situation we can't wait because execution hangs in MT
+                            // A multibus setup cannot wait here, because MassTransit hangs;
                             // see ApplicationWorker comments in StartingAsync
                             options.WaitUntilStarted = instanceOptions.Type != InstanceType.Slave;
                         });
@@ -302,20 +302,20 @@ internal static class MassTransitConfiguration
 
             return;
 
-            // filtering out the known assemblies (especially dx) reduces the scan time significantly
+            // Filtering out known assemblies, dx in particular, cuts the scan time significantly.
             static bool IsOfInterest(string? name)
             {
                 if (string.IsNullOrEmpty(name))
                     return false;
 
-                // these we can exclude safely
+                // Safe to exclude.
                 if (name.StartsWith("Microsoft", StringComparison.OrdinalIgnoreCase)
                     || name.StartsWith("System", StringComparison.OrdinalIgnoreCase))
                     return false;
 
                 var sdkName = typeof(IModule).Assembly.GetName().Name;
 
-                // while we keep our naming convention these are the only ones of interest
+                // With the naming convention held, these are the only ones of interest.
                 if (name.EndsWith(Constants.ModuleSuffixPublic, StringComparison.OrdinalIgnoreCase)
                     || name.EndsWith(Constants.ModuleSuffixInternal, StringComparison.OrdinalIgnoreCase)
                     || name.EndsWith(Constants.ModuleSuffixBackend, StringComparison.OrdinalIgnoreCase)

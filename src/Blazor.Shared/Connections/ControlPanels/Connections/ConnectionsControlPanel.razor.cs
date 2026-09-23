@@ -224,7 +224,7 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
 
     private void UpdateGridSelection()
     {
-        // remove items from selection that are not contained in connections anymore (e.g. connection was deleted) 
+        // Selection entries whose connection is gone, e.g. after a delete, are dropped.
         var removed = GridItemSelection.Where(c => State.Connections.All(k => k.Connection.Id != c));
         foreach (var connectionId in removed)
         {

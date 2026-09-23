@@ -12,7 +12,7 @@ public interface IArtifactRepositoryStore
     /// Populates the store from the provided configuration when no repositories have been persisted yet.
     /// Supports both the current <c>ArtifactRepository</c> section and the legacy <c>ModuleApi</c> section
     /// for backwards compatibility. Has no effect if repositories already exist.
-    /// </summary>    
+    /// </summary>
     Task MigrateConfiguredRepositories(IConfiguration config, ILogger logger, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -20,7 +20,7 @@ public interface IArtifactRepositoryStore
     /// </summary>
     /// <param name="repositoryIds">
     /// An optional set of identifiers to filter by. When <see langword="null"/>, all sources are returned.
-    /// </param>    
+    /// </param>
     Task<List<ArtifactRepository>> GetRepositories(IReadOnlyCollection<Guid>? repositoryIds, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -30,12 +30,12 @@ public interface IArtifactRepositoryStore
 
     /// <summary>
     /// Creates a new repository or updates an existing one matched by <see cref="ArtifactRepository.Id"/>.
-    /// </summary>    
+    /// </summary>
     Task<CrudAction> CreateOrUpdate(ArtifactRepository source, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes the repositories identified by the provided identifiers.
-    /// </summary>    
+    /// </summary>
     Task<IReadOnlyCollection<ArtifactRepository>> Delete(IReadOnlyCollection<Guid> repositoryIds, CancellationToken cancellationToken = default);
 
     /// <summary>

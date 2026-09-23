@@ -21,7 +21,7 @@ public sealed partial class GetModuleMetadataBundlesConsumer(IModuleMetadataProv
     {
         LogError(logger, e);
 
-        // if we failed to request available modules we still can deliver installed ones        
+        // A failed request for available modules still delivers the installed ones.
         return Task.FromResult(new GetModuleMetadataBundlesResponse([], new(ModuleErrorCodes.RequestVersionsFailed, e.Message)));
     }
 

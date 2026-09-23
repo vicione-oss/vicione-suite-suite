@@ -26,7 +26,7 @@ public class MailingTests
     private static readonly string TestServer = IntegrationServiceSettings.GetHost("MAILPIT_SMTP_HOST");
     private static readonly int ServerPort = IntegrationServiceSettings.GetPort("MAILPIT_SMTP_PORT", 1025);
 
-    // mailpit HTTP API, used to verify the delivered message. Defaults to the local web UI port.
+    // The mailpit HTTP API verifies the delivered message; defaults to the local web UI port.
     private static readonly string MailpitApiUrl
         = IntegrationServiceSettings.GetValue("MAILPIT_API_URL", "http://localhost:8025");
 

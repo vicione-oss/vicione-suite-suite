@@ -78,7 +78,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
         services.AddTransient<ExternalLoginService>();
 
-        // The ITicketStore is implemented in Core.OS because it needs to access db context or other core parts
+        // ITicketStore lives in Core.OS because it needs the db context and other core parts.
         services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>>(
             sp => new CookieAuthConfigurator(sp.GetRequiredService<ITicketStore>()));
 
@@ -103,7 +103,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
         services.AddUiHostClientServices();
 
-        // we need to register the client modules services
         foreach (var module in _moduleHost.UiModules)
         {
             try
@@ -122,7 +121,6 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
             }
         }
 
-        // remove failed ui bundles from internal manager
         foreach (var moduleId in failedModuleIds)
             _moduleHost.RemoveUiModuleBundle(moduleId);
     }
@@ -137,13 +135,12 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         }
         else
         {
-            // this works for published client e.g. @"path\to\publish\Client\wwwroot"
+            // Works for the published client, e.g. path\to\publish\Client\wwwroot.
             env.UseClientAssetsProduction(uiEnvironment, logger);
         }
 
         app.UseDefaultFiles();
 
-        // include the files in the wwwroot folder as assets
         app.UseStaticFiles();
     }
 
@@ -182,23 +179,23 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
     {
         var logger = GetLogger(endpoints.ServiceProvider);
 
-        // map endpoints for e.g. DebugController
+        // Covers controllers such as DebugController.
         endpoints.MapControllers();
 
         endpoints.MapExternalIdentityEndpoints();
         endpoints.MapAdditionalIdentityEndpoints();
         endpoints.MapPasskeyEndpoints();
 
-        // add authentication pages /Account/*
+        // Adds the authentication pages under /Account/*.
         endpoints.MapRazorPages();
 
         logger.LogInformation("Mapping endpoints for {Modules}", string.Join(", ", _moduleHost.UiModules.Select(k => k.ModuleId)));
 
-        // map blazor endpoints blazor.web.js, / etc.
+        // Maps the blazor endpoints: blazor.web.js, / and the rest.
         endpoints.MapRazorComponents<App>()
-            // we need to add the blazor.backend and module routes so router can process them on deep link
+            // The blazor.backend and module routes are added so the router resolves a deep link.
             .AddAdditionalAssemblies(_moduleHost.GetAdditionalAssemblies())
-            // here we could add also support for the wasm render mode if we merge the hosts
+            // Merging the hosts would also allow the wasm render mode here.
             .AddInteractiveServerRenderMode();
     }
 
@@ -225,10 +222,9 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
     }
 
     /// <summary>
-    /// If <see cref="CookieRequestCultureProvider"/> does not provide a culture we'll fallback
-    /// to our default request culture provided by our <see cref="IUiHostModule"/>
+    /// Falls back to the default request culture from <see cref="IUiHostModule"/> when
+    /// <see cref="CookieRequestCultureProvider"/> supplies none.
     /// </summary>
-    /// <param name="uiHost"></param>
     private class DefaultRequestCultureProvider(IUiHostModule uiHost) : IRequestCultureProvider
     {
         public async Task<ProviderCultureResult?> DetermineProviderCultureResult(HttpContext httpContext)

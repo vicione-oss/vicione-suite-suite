@@ -24,7 +24,7 @@ internal static partial class SuiteArtifactNameParser
         // vicione-suite_1.0.4[~24343243]_arm64.deb[.minisig]
         var match = NameMatcher().Match(packageName);
 
-        // Actually we only support arm64 and amd64 so other architectures don't get accepted
+        // Only arm64 and amd64 are supported; the regex rejects other architectures.
         if (!match.Success)
             return false;
 
@@ -49,7 +49,7 @@ internal static partial class SuiteArtifactNameParser
         // vicione-suite_1.0.4[~24343243]_arm64_1.1.1.json
         var match = MetaMatcher().Match(packageName);
 
-        // Actually we only support arm64 and amd64 so other architectures don't get accepted
+        // Only arm64 and amd64 are supported; the regex rejects other architectures.
         if (!match.Success)
             return false;
 

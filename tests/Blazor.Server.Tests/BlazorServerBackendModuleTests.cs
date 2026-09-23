@@ -73,7 +73,7 @@ public class BlazorServerBackendModuleTests
 
             serviceCollection.AddWorkspaceService<BlazorServerBackendModule>(); // adopted from ModuleManager.AddModuleServices()
 
-            // substitute missing registrations resulting from missing calls to ...
+            // Substitutes registrations that the missing calls would have added.
             serviceCollection.AddSingleton(Substitute.For<ILogLevelSwitch>()); // ... LoggingConfiguration.ConfigureLogging()
             serviceCollection.AddSingleton(Substitute.For<IFileSystem>());
             serviceCollection.AddTransient(sp => Substitute.For<ILogOptions>()); // ...ConfigureAndValidateOptions()

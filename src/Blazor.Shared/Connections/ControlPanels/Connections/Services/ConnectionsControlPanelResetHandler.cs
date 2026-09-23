@@ -18,7 +18,7 @@ internal sealed class ConnectionsControlPanelResetHandler(ISuiteConnectionServic
             var connections = connectionService.Connections.Select(c => new EditConnectionModel(c, connectionRegistry));
             state.Connections = [.. connections];
 
-            // this will trigger StateChanged in ConnectionsControlPanel
+            // Triggers StateChanged in ConnectionsControlPanel.
             state.ResetSelectedConnections = true;
             state.ResetSelectedTags = true;
 

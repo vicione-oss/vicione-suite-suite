@@ -67,10 +67,10 @@ internal sealed class ModuleManagementService : CompletionSourceHandlerBase<IMod
             return;
         }
 
-        // we complete the command as soon as we receive the event
+        // The command completes as soon as the event arrives.
         CompleteWithSuccess(context.Message.CorrelationId);
 
-        // we propagate non error changes to the subscribers of the service
+        // Non-error changes reach the service's subscribers.
         await NotifyOperationsChanged(context.Message, cancellationToken);
     }
 
@@ -83,10 +83,10 @@ internal sealed class ModuleManagementService : CompletionSourceHandlerBase<IMod
             return;
         }
 
-        // we complete the command as soon as we receive the event
+        // The command completes as soon as the event arrives.
         CompleteWithSuccess(context.Message.CorrelationId);
 
-        // we propagate non error changes to the subscribers of the service
+        // Non-error changes reach the service's subscribers.
         await NotifyOptionsChanged(context.Message, cancellationToken);
     }
 

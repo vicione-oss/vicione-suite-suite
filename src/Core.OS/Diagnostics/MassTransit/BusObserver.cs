@@ -6,7 +6,7 @@ namespace Core.OS.Diagnostics.MassTransit;
 
 /// <summary>
 /// Logs the bus lifecycle events.
-/// Is intended to provide startup information, as the tracing might not be working during the bus initialization. 
+/// Is intended to provide startup information, as the tracing might not be working during the bus initialization.
 /// </summary>
 internal sealed class BusObserver(ILogger<BusObserver> logger) : IBusObserver
 {

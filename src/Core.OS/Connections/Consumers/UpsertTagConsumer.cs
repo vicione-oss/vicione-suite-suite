@@ -38,8 +38,8 @@ public sealed partial class UpsertTagConsumer(IConnectionDbContext dbContext, IL
 
             LogUpserted(logger, correlationId, tag.Id, crudAction);
 
-            // if we publish the existing tag it's the reference to the real entity
-            // therefore we make a copy to avoid event consumer issues!
+            // Publishing the existing tag would hand out the reference to the real entity, so a copy is
+            // published instead.
             var copy = new Tag
             {
                 Text = existingTag.Text,

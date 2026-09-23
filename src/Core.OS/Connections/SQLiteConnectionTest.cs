@@ -50,7 +50,7 @@ public sealed class SQLiteConnectionTest(IOptions<InstanceOptions> instanceOptio
         if (string.IsNullOrEmpty(optionsBuilder.DataSource))
             throw new InvalidOperationException($"{nameof(optionsBuilder.DataSource)} is empty");
 
-        // check for relative path
+        // Relative paths are resolved against the data directory.
         if (Path.IsPathFullyQualified(optionsBuilder.DataSource) || optionsBuilder.DataSource.Contains(":memory:", StringComparison.InvariantCultureIgnoreCase))
             return;
 

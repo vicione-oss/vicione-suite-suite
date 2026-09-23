@@ -45,10 +45,6 @@ internal static class TestFactory
     /// <summary>
     /// Create a suite context with Core, optional TestUiHostBackend, optional TestBackendModule, optional TestClientModule
     /// </summary>
-    /// <param name="enableUiHost"></param>
-    /// <param name="enableBackendModules"></param>
-    /// <param name="enableUiModules"></param>
-    /// <returns></returns>
     internal static SuiteDependencyContext CreateSuiteContext(bool enableUiHost = true, bool enableBackendModules = true, bool enableUiModules = true)
     {
         var manifest = new ModulePackageManifest();
@@ -101,10 +97,10 @@ internal static class TestFactory
         var path = ModuleHelpers.DllToDepsJson(assembly.Location);
         var module = new ModuleDependencyContext(moduleType, path, isDebugSource);
 
-        // fake main library
+        // A fake main library.
         module.RuntimeLibraries.Add(new RuntimeLibrary(mainAssemblyType.ToString(), assemblyName.Name, assemblyName.Version.ToString(), null, [], [], [], [], false));
 
-        // fake sdk library
+        // A fake sdk library.
         var sdkAssembly = Assembly.GetAssembly(typeof(ModuleMetadata));
         var sdkAssemblyName = sdkAssembly!.GetName();
 
@@ -204,7 +200,7 @@ internal static class TestFactory
         public IArtifactChecksum? Checksum { get; set; }
 
         [JsonPropertyName("modified")]
-        /// <inheritdoc />     
+        /// <inheritdoc />
         public DateTimeOffset? Modified { get; set; }
 
         [JsonPropertyName("name")]

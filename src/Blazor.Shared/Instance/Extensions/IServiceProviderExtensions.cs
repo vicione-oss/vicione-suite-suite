@@ -14,8 +14,6 @@ public static class IServiceProviderExtensions
     /// <summary>
     /// Adds <see cref="InstancesControlPanel">Instances</see> to settings <see cref="ControlPanelSystemCategoryDescriptor">category</see> if Core.OS is not a standalone system
     /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
     public static IServiceProvider UseInstanceManagement(this IServiceProvider services)
     {
         var informationProvider = services.GetRequiredService<IInstanceInformationProvider>();

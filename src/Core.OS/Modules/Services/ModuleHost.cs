@@ -57,7 +57,7 @@ internal sealed partial class ModuleHost : IModuleHost
 
     public void AddUiHostServices(IServiceCollection services, IMvcBuilder mvcBuilder, Func<IServiceCollection, IdentityBuilder?> getIdentity)
     {
-        // This will set up our SuiteUserContext and Role manager for headless or UiHost        
+        // This will set up our SuiteUserContext and Role manager for headless or UiHost
         var identityBuilder = getIdentity.Invoke(services);
         if (UiHostModule is null)
             return;
@@ -92,7 +92,7 @@ internal sealed partial class ModuleHost : IModuleHost
         // Register controllers within the module assembly
         mvcBuilder.AddApplicationPart(moduleType.Assembly);
 
-        // Register WorkspaceService 
+        // Register WorkspaceService
         services.AddWorkspaceProvider(moduleType);
     }
 
@@ -118,7 +118,7 @@ internal sealed partial class ModuleHost : IModuleHost
                 // todo init settings - load from json or throw?
                 module.ConfigureServices(services, _config, builder);
 
-                // Register WorkspaceService 
+                // Register WorkspaceService
                 services.AddWorkspaceProvider(type);
 
                 // Register controllers within the module assembly
@@ -130,7 +130,7 @@ internal sealed partial class ModuleHost : IModuleHost
             }
         }
 
-        // needs to be done after all modules registered their services
+        // Runs after every module has registered its services.
         builder.AddControllersAsServices();
     }
 
@@ -160,7 +160,7 @@ internal sealed partial class ModuleHost : IModuleHost
     }
 
     /// <summary>
-    /// Try to call <see cref="IUiHostModule.UseSecurity"/> if the UiHostModule is initialized.    
+    /// Try to call <see cref="IUiHostModule.UseSecurity"/> if the UiHostModule is initialized.
     /// </summary>
     public void UseSecurity(IApplicationBuilder app)
     {
@@ -181,7 +181,7 @@ internal sealed partial class ModuleHost : IModuleHost
     }
 
     /// <summary>
-    /// Try to call <see cref="IUiHostModule.UseUiHost"/> if the UiHostModule is initialized.    
+    /// Try to call <see cref="IUiHostModule.UseUiHost"/> if the UiHostModule is initialized.
     /// </summary>
     public void UseUiHost(IApplicationBuilder app, IWebHostEnvironment env)
     {
@@ -213,7 +213,7 @@ internal sealed partial class ModuleHost : IModuleHost
         {
             try
             {
-                //no good way for us to prevent a module from stealing or overriding services
+                // There is no good way to stop a module stealing or overriding services.
                 module.ConfigureMessageBus(busConfig, _instanceOptions.Type);
             }
             catch (Exception e)
@@ -226,7 +226,7 @@ internal sealed partial class ModuleHost : IModuleHost
     /// <summary>
     /// Try to call <see cref="BackendModule.UseServices" /> for each loaded module.
     /// Errors get logged
-    /// </summary>    
+    /// </summary>
     public void UseModuleServices(IApplicationBuilder app)
     {
         var logger = GetLogger(app.ApplicationServices);
@@ -382,12 +382,12 @@ internal sealed partial class ModuleHost : IModuleHost
 
         var uiHostOptions = config.BindSection<UiHostOptions>(UiHostModule.ModuleId);
 
-        // the ui host has to load the ui modules itself 
+        // The ui host loads the ui modules itself.
         var moduleBundle = _loadedModuleBundles.First(k => k.Module.ModuleKey.ModuleId == UiHostModule.ModuleId);
 
         return new UiHostEnvironment(_suiteContext, this)
         {
-            // use debug modules only in development mode 
+            // Debug modules apply in development only.
             IsDevelopment = uiHostOptions.UseDebugRoot,
             ModulePath = Path.GetDirectoryName(moduleBundle.AssemblyLocation),
         };
@@ -401,7 +401,7 @@ internal sealed partial class ModuleHost : IModuleHost
 
     public IReadOnlyCollection<ModuleMetadataBundle> GetManifestModules()
     {
-        // ensure we always return a new instance to keep original instance untouched ignoring the AvailableVersions
+        // A new instance is always returned so the original stays untouched, AvailableVersions aside.
         return _installedModules.Select(k => new ModuleMetadataBundle()
         {
             ModuleId = k.ModuleId,

@@ -28,7 +28,7 @@ internal sealed class UiHostEnvironment(SuiteDependencyContext suiteContext, IMo
         if (string.IsNullOrEmpty(moduleFolder))
             throw new InvalidOperationException($"Failed to get folder of {_suiteContext.UiHost.AssemblyPath}");
 
-        // in debug mode the debug folder is the wwwroot because there's the staticwebassets.json
+        // In debug the debug folder is the wwwroot, because staticwebassets.json lives there.
         if (IsDevelopment)
             return moduleFolder;
 
@@ -109,7 +109,7 @@ internal sealed class UiHostEnvironment(SuiteDependencyContext suiteContext, IMo
     {
         try
         {
-            // if we detected issues on sdk mismatch or missing options we skip loading the module
+            // A module with an sdk mismatch or missing options is not loaded.
             if (suiteContext.IsInvalidModule(moduleDllFile))
             {
                 return;

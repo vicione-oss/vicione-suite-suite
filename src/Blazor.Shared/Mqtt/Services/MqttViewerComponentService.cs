@@ -40,7 +40,7 @@ public sealed class MqttViewerComponentService
         if (filter == TopicFilterText)
             return Task.CompletedTask;
 
-        // all components will get filtered messages
+        // Every component receives the filtered messages.
         TopicFilterText = filter;
         return PageRefreshRequested?.Invoke() ?? Task.CompletedTask;
     }
@@ -159,7 +159,7 @@ public sealed class MqttViewerComponentService
         {
             try
             {
-                // prettify json
+                // Prettifies the json.
                 using var doc = JsonDocument.Parse(
                     jsonString,
                     new JsonDocumentOptions

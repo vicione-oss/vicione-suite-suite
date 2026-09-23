@@ -92,16 +92,14 @@ internal partial class BackupBuilder
         await using (source)
         await using (destination)
         {
-            //await using var destination = new SqliteConnection(destinationOptions.ConnectionString);
             await source.OpenAsync(cancellationToken);
             await destination.OpenAsync(cancellationToken);
 
-            // Perform the backup writing to destination
-            // See https://learn.microsoft.com/en-us/dotnet/api/microsoft.data.sqlite.sqliteconnection.backupdatabase?view=msdata-sqlite-9.0.0 about backup a sqlite database
+            // https://learn.microsoft.com/en-us/dotnet/api/microsoft.data.sqlite.sqliteconnection.backupdatabase
             source.BackupDatabase(destination);
         }
 
-        // we need to clear the connection cache to release the file locks from our temporary databases
+        // Clearing the connection cache releases the file locks on the temporary databases.
         // !! resets ALL pools application-wide
         SqliteConnection.ClearPool(source);
         SqliteConnection.ClearPool(destination);

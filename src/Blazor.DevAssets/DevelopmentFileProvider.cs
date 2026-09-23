@@ -5,7 +5,8 @@ using Microsoft.Extensions.Primitives;
 namespace Blazor.DevAssets;
 
 /// <summary>
-/// One issue with Backend.Login -> /Identity/js/site.js does not get published?!
+/// Resolves asset requests against the *staticwebassets.runtime.json files of the debug build output.
+/// Known gap: Backend.Login's /Identity/js/site.js is not published.
 /// </summary>
 internal sealed class DevelopmentFileProvider : IFileProvider
 {
@@ -36,9 +37,8 @@ internal sealed class DevelopmentFileProvider : IFileProvider
     }
 
     /// <summary>
-    /// parse the staticwebasset.json and add it so it can be used to resolve asset requests
+    /// Parses a staticwebassets.runtime.json and registers its entries for asset resolution.
     /// </summary>
-    /// <param name="jsonPath"></param>
     public void AddStaticWebAssetJson(string jsonPath)
     {
         var content = new StaticWebAssetContent(jsonPath);
@@ -50,23 +50,20 @@ internal sealed class DevelopmentFileProvider : IFileProvider
 
     public IDirectoryContents GetDirectoryContents(string subpath)
     {
-        // never noticed it gets called so far
+        // Not observed in practice; asset resolution goes through GetFileInfo.
         return NotFoundDirectoryContents.Singleton;
     }
 
     /// <summary>
-    /// resolves incoming asset requests to absolute file paths       
+    /// Resolves an incoming asset request to an absolute file path.
     /// </summary>
-    /// <param name="subpath"></param>
-    /// <returns></returns>
     public IFileInfo GetFileInfo(string subpath)
     {
         if (subpath.EndsWith(".br", StringComparison.OrdinalIgnoreCase))
         {
-            return new NotFoundFileInfo(subpath); // skip the brotli requests to speed up debug
+            return new NotFoundFileInfo(subpath); // Brotli variants are skipped to speed up debug.
         }
 
-        // using the infos from parsed webasset json we try to find asset for the request to get an absolute path
         var contentFilePath = FindAssetNormalizedPath(subpath);
         if (contentFilePath is null)
         {
@@ -79,20 +76,17 @@ internal sealed class DevelopmentFileProvider : IFileProvider
 
     private string? FindAssetNormalizedPath(string subpath)
     {
-        // we need to remove the trailing slash and normalize the path for comparison
         var search = PathHelper.NormalizePath(TrimStartDirectoryChar(subpath));
         var fileName = Path.GetFileName(subpath);
         var lastChance = GetRelativePathWithParent(subpath) ?? string.Empty;
 
-        // for assets of referenced nuget packages we need to resolve differently
-        // _content/ViciOne.Ui.ClusterEditor/assets/context_menu/SelectAll_16x16.png
+        // NuGet package assets resolve differently, e.g. _content/ViciOne.Ui.ClusterEditor/assets/icon.png.
         var match = WebAssetContentNuGetRegex.Match(search);
         if (match.Success)
         {
             var trimmedSearch = search[match.Value.Length..];
 
-            // use the full package name from _content/{packageName}/ to target the exact
-            // staticwebassets.runtime.json — e.g. ViciOne.Suite.ClusterManagement.Client
+            // The full package name targets the exact staticwebassets.runtime.json.
             var packageName = ExtractPackageNameFromContentPath(subpath);
             if (packageName is not null)
             {
@@ -105,7 +99,6 @@ internal sealed class DevelopmentFileProvider : IFileProvider
             search = trimmedSearch;
         }
 
-        // try to find an entry that contains the requested subpath
         var possibleAssetPaths = _webAssetFileContents
             .Select(c => c.FindAssetContentPath(search, fileName, lastChance))
             .Where(p => p is not null)
@@ -116,17 +109,15 @@ internal sealed class DevelopmentFileProvider : IFileProvider
     }
 
     /// <summary>
-    /// finds the StaticWebAssetContent whose JSON filename matches
-    /// {packageName}.staticwebassets.runtime.json
+    /// Finds the content parsed from {packageName}.staticwebassets.runtime.json.
     /// </summary>
     private StaticWebAssetContent? FindPackageContent(string packageName)
         => _webAssetFileContents.FirstOrDefault(c =>
             Path.GetFileName(c.JsonPath).StartsWith(packageName + ".", StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
-    /// extracts the package name from a _content/ subpath
-    /// e.g. /_content/ViciOne.Suite.ClusterManagement.Client/icons/bundle.css
-    ///   -> ViciOne.Suite.ClusterManagement.Client
+    /// Extracts the package name from a _content/ subpath:
+    /// /_content/ViciOne.Suite.ClusterManagement.Client/icons/bundle.css -> ViciOne.Suite.ClusterManagement.Client
     /// </summary>
     internal static string? ExtractPackageNameFromContentPath(string subpath)
     {
@@ -149,10 +140,8 @@ internal sealed class DevelopmentFileProvider : IFileProvider
     }
 
     /// <summary>
-    /// return parent\\filename.ext from a path
+    /// Returns parent\filename.ext, e.g. /_content/ViciOne.Suite.Ping.Client/svg/toolbox.svg yields svg\toolbox.svg.
     /// </summary>
-    /// <param name="path">e.g. /_content/ViciOne.Suite.Ping.Client/svg/toolbox.svg</param>
-    /// <returns>svg\\toolbox.svg</returns>
     private static string? GetRelativePathWithParent(string? path)
     {
         if (string.IsNullOrEmpty(path))

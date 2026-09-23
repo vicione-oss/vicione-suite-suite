@@ -35,7 +35,7 @@ public sealed partial class UpdateInstanceInformationConsumer(
             return;
         }
 
-        // update only properties with public setter
+        // Only properties with a public setter are updated.
         existingInfo.Name = updateInfo.Name;
         existingInfo.FormattedName = updateInfo.FormattedName;
         existingInfo.Description = updateInfo.Description;
@@ -59,7 +59,7 @@ public sealed partial class UpdateInstanceInformationConsumer(
 
             LogInstanceUpdated(logger, correlationId, updateInfo.Id);
 
-            // update memory instances
+            // Updates the in-memory instances.
             informationProvider.UpdateInstanceInformation(existingInfo);
             localInstanceInformationProvider.UpdateLocal(existingInfo);
 

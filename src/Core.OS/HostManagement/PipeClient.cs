@@ -72,7 +72,7 @@ public sealed partial class PipeClient(IOptions<HostManagementOptions> options, 
 
     private async Task<string> SendRequestInternal(string topic, string content, CancellationToken cancellationToken = default)
     {
-        // use cached response
+        // Uses the cached response.
         if (State != PipeState.Connected)
             await Connect(cancellationToken);
 

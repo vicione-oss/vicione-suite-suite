@@ -303,7 +303,7 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we return gracefully
+            // Nothing to do here.
         }
         catch (ObjectDisposedException)
         {

@@ -377,7 +377,6 @@ public class ModuleHostTests
             var module = new TestBackendModule();
             var config = CreateConfiguration();
             var manager = CreateModuleHost(module, config);
-            //var testAssembly = Assembly.GetExecutingAssembly();
 
             var fileSystem = Substitute.For<IFileSystem>();
             var pathSubstitute = Substitute.For<IPath>();

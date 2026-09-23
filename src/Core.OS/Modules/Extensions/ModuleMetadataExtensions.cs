@@ -41,7 +41,7 @@ internal static class ModuleMetadataExtensions
 
                 GetConfigurationOption(declaration, optionKey, configuration);
 
-                // good - it has a value - unvalidated
+                // A value or a default is present; validation happens elsewhere.
                 if (!string.IsNullOrWhiteSpace(optionValue) || !string.IsNullOrEmpty(declaration.DefaultValue))
                     continue;
 
@@ -53,7 +53,7 @@ internal static class ModuleMetadataExtensions
 
         /// <summary>
         /// Attempt to get the option value from configuration will throw if the option
-        /// is totally misconfigured and will result in StartupError of the module       
+        /// is totally misconfigured and will result in StartupError of the module
         /// </summary>
         private static void GetConfigurationOption(ModuleOptionDeclaration declaration, string optionKey, IConfiguration configuration)
         {
@@ -83,12 +83,12 @@ internal static class ModuleMetadataExtensions
                 var optionKey = declaration.GetOptionKey(metadata.Name);
                 var optionValue = envConf[optionKey];
 
-                // good - we have something
+                // A value is present.
                 if (!string.IsNullOrWhiteSpace(optionValue))
                     continue;
 
-                // settings were overriden in module_settings.json or env vars
-                // we should fail here 
+                // Overridden in module_settings.json or by env vars.
+                // we should fail here
                 if (!string.IsNullOrEmpty(declaration.DefaultValue))
                 {
                     declaration.Value = optionValue;

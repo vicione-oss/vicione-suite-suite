@@ -14,7 +14,7 @@ public sealed class OrderBurgerState : SagaStateMachineInstance
 
     public List<SuiteBurger> Burgers { get; } = [];
 
-    // If using Optimistic concurrency, this property is required
+    // Required for optimistic concurrency; remove the property if you do not use it.
     [Timestamp]
     public byte[]? RowVersion { get; set; }
 }

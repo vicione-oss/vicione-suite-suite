@@ -166,7 +166,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
             }
             catch (OperationCanceledException)
             {
-                // successful restart leads to service cancellation — expected
+                // A successful restart cancels the service, which is expected.
             }
             catch (Exception e)
             {

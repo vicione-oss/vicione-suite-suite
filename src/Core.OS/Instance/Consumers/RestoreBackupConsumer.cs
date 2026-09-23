@@ -36,7 +36,7 @@ public sealed partial class RestoreBackupConsumer(
             if (instanceInformationProvider.Local.Type != Sdk.Instance.InstanceType.Standalone)
                 throw new InvalidOperationException($"Restore is only supported on {Sdk.Instance.InstanceType.Standalone}");
 
-            // nothing to do at all
+            // Neither configuration was requested.
             if (context.Message is { SystemConfiguration: false, SuiteConfiguration: false })
                 return;
 
@@ -48,17 +48,17 @@ public sealed partial class RestoreBackupConsumer(
 
             await CallModuleRestore(context);
 
-            // we can't publish the event later because applying the system configuration
-            // can lead to immediate restart of the system
+            // Published before applying the system configuration, because that can restart the
+            // system immediately.
             LogPublishBackupPreparedEvent(logger, correlationId);
 
             await context.Publish(new RestoreBackupPrepared(context.Message.SuiteConfiguration)).ConfigureAwait(false);
 
-            // if we have to apply system configuration restart by HM gets triggered
+            // Applying the system configuration makes HostManagement trigger the restart.
             if (await ApplySystemConfiguration(context, systemConfiguration))
                 return;
 
-            // apply restore on suite will need a software restart
+            // A suite restore needs a software restart.
             if (context.Message.SuiteConfiguration)
             {
                 var controlCommand = new ControlInstance
@@ -77,12 +77,12 @@ public sealed partial class RestoreBackupConsumer(
 
             await context.Publish(new RestoreBackupPrepared(context.Message.SuiteConfiguration, new ErrorInfo(100, ex.Message)));
 
-            // something went wrong - don't try to restore suite from backup
+            // After a failure the suite is not restored from the backup.
             fileSystem.DeleteRestoreTask(options.Value);
         }
         finally
         {
-            // the uploaded backup file has been copied to the backup store (if needed) and is no longer required
+            // The upload has been copied to the backup store where needed, so it is no longer required.
             DeleteUploadedBackupFile(context.Message.BackupFilePath, correlationId);
         }
     }
@@ -102,7 +102,7 @@ public sealed partial class RestoreBackupConsumer(
 
     private async Task CallModuleRestore(ConsumeContext<RestoreBackup> context)
     {
-        // get implementations of IModuleHostRequestHandlers and call them
+        // Every IModuleHostRequestHandlers implementation gets the call.
         foreach (var moduleHandler in moduleHandlers)
         {
             try
@@ -120,7 +120,7 @@ public sealed partial class RestoreBackupConsumer(
     {
         await using Stream contentStream = fileSystem.File.OpenRead(context.Message.BackupFilePath);
 
-        // this will throw if metadata can't be extracted and it is no valid archive
+        // Throws when the metadata cannot be extracted, which means the archive is invalid.
         var comparer = new StringVersionComparer();
         var local = instanceInformationProvider.Local;
         var metadata = await BackupReader.GetBackupMetadata(contentStream, context.CancellationToken);
@@ -139,7 +139,7 @@ public sealed partial class RestoreBackupConsumer(
             var backupFile = await StoreBackupFile(contentStream, context.CancellationToken);
             var backupPath = fileSystem.Path.Combine(fileSystem.GetRootedBackupDirectory(options.Value), backupFile);
 
-            // we write a file flag to AppData and react on startup on it
+            // A flag file in AppData is picked up on the next startup.
             var restoreTask = new RestoreTask(backupPath, context.Message.SuiteConfiguration, context.Message.SystemConfiguration, DateTimeOffset.Now);
             await fileSystem.WriteRestoreTask(options.Value, restoreTask, context.CancellationToken);
 
@@ -157,7 +157,7 @@ public sealed partial class RestoreBackupConsumer(
 
     private async Task<bool> ApplySystemConfiguration(ConsumeContext<RestoreBackup> context, SystemConfiguration? systemConfiguration)
     {
-        // apply SystemConfiguration will need a machine restart
+        // Applying SystemConfiguration needs a machine restart.
         if (!context.Message.SystemConfiguration || systemConfiguration is null)
             return false;
 
@@ -165,8 +165,8 @@ public sealed partial class RestoreBackupConsumer(
 
         LogApplySystemConfigurationFromBackup(logger, context.Message.CorrelationId, systemConfiguration.Version, networkChanges);
 
-        // If we apply configuration from backup and we have network changes
-        // a restart of the system/suite will be triggered
+        // Applying configuration from a backup with network changes triggers a system or suite
+        // restart.
         var result = await pipeClient.SetSystemConfiguration(systemConfiguration, context.CancellationToken);
         if (result?.Status != OperationStatus.Success)
             throw new InvalidOperationException(result?.Message);
@@ -185,8 +185,8 @@ public sealed partial class RestoreBackupConsumer(
 
         var current = configurationResult.Configuration;
 
-        // configuration that modifies linux netplan config can trigger restart of network interface
-        // that will automatically trigger suite restart
+        // Configuration touching the linux netplan can restart the network interface, which in turn
+        // restarts the suite.
         if (current.NetworkDNSSettings.Equals(toBeRestored.NetworkDNSSettings) &&
             current.NetworkInterfacesSettings.Equals(toBeRestored.NetworkInterfacesSettings) &&
             current.NetworkNTPSettings.Equals(toBeRestored.NetworkNTPSettings) &&

@@ -9,10 +9,6 @@ internal static class TestFactory
     /// <summary>
     /// Create a suite context with Core, optional TestUiHostBackend, optional TestBackendModule, optional TestClientModule
     /// </summary>
-    /// <param name="enableUiHost"></param>
-    /// <param name="enableBackendModules"></param>
-    /// <param name="enableUiModules"></param>
-    /// <returns></returns>
     internal static SuiteDependencyContext CreateSuiteContext(bool enableUiHost = true, bool enableBackendModules = true, bool enableUiModules = true)
     {
         var setup = new TestConfig()

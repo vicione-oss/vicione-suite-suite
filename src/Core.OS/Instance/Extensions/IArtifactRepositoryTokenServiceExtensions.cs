@@ -11,7 +11,7 @@ internal static class IArtifactRepositoryTokenServiceExtensions
 
         try
         {
-            // if token endpoint is set, we assume it's a new token and update the token updated time to now
+            // A set token endpoint means a new token, so the update time moves to now.
             var tokenUri = new Uri(repo.TokenEndpoint);
             var token = await tokenService.GetToken(tokenUri, cancellationToken); // this will update the token updated time
 

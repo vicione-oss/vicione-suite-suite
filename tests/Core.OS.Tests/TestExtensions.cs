@@ -41,8 +41,6 @@ internal static class TestExtensions
     /// <summary>
     /// Setup up a local meta
     /// </summary>
-    /// <param name="fileSystem"></param>
-    /// <param name="moduleMetadata"></param>
     internal static void SetupModuleMetadataJson(this MockFileSystem fileSystem, ModuleMetadata moduleMetadata, string? targetPath = null)
     {
         var testAssembly = Assembly.GetExecutingAssembly();

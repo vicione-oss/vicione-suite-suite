@@ -25,22 +25,18 @@ internal partial class BackupBuilder
             });
 
     /// <summary>
-    /// We can't use <see cref="ZipFile.CreateFromDirectory(string,System.IO.Stream)"/> because it attempts to copy the open sqlite databases.
-    /// Fails with IO.Exceptions and therefore we need to create this archive on our own and give the db files special treatment
+    /// <see cref="ZipFile.CreateFromDirectory(string,System.IO.Stream)"/> is unusable here because it
+    /// copies the open sqlite databases and fails, so the archive is built by hand and the db files
+    /// get special treatment.
     /// </summary>
-    /// <param name="fileSystem"></param>
-    /// <param name="moduleArchive"></param>
-    /// <param name="sourceDirectory"></param>
-    /// <param name="summary"></param>
-    /// <param name="cancellationToken"></param>
-    /// <exception cref="IOException"></exception>
+    /// <exception cref="IOException">A zip entry could not be created.</exception>
     private static async Task AddModuleDirectoryToArchive(IFileSystem fileSystem, ZipArchive moduleArchive, string sourceDirectory, BackupModuleSummary summary, ILogger logger, CancellationToken cancellationToken)
     {
         string[] ignoreExtensions = [".db-wal", ".db-shm"];
         var directoryIsEmpty = true;
         var databaseFiles = new Dictionary<string, string>();
 
-        //add files and directories
+        // Files and directories.
         var di = new DirectoryInfo(sourceDirectory);
 
         var basePath = di.FullName;
@@ -60,11 +56,10 @@ internal partial class BackupBuilder
                     {
                         var extension = fileSystem.Path.GetExtension(fullPath);
 
-                        // ignore things
+                        // Ignored extensions and the database files, which are handled separately.
                         if (ignoreExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
                             continue;
 
-                        // create entry for file
                         var entryName = CreateEntryName(fileSystem, basePath, fullPath);
 
                         if (extension.Equals(SqliteDbExtensions, StringComparison.OrdinalIgnoreCase))
@@ -92,7 +87,7 @@ internal partial class BackupBuilder
             }
         }
 
-        // backup database files
+        // Database files get their own treatment.
         summary.Databases = await BackupSqliteDatabases(moduleArchive, fileSystem, databaseFiles, logger, cancellationToken);
 
         // If no entries create an empty root directory entry:

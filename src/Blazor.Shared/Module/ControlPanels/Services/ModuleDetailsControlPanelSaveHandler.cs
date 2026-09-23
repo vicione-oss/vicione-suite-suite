@@ -28,7 +28,7 @@ internal sealed class ModuleDetailsControlPanelSaveHandler(IModuleManagementServ
             && state.ModuleMetadata.Installed
             && state.VersionToInstall == state.ModuleMetadata.Version)
         {
-            return new SaveSuccessResult(); // Nothing todo
+            return new SaveSuccessResult(); // The requested version is already installed.
         }
 
         var updateResult = await UpdateOperations(state, cancellationToken);

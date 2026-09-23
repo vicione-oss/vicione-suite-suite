@@ -16,7 +16,7 @@ public sealed class GetCrossInstanceConfigurationConsumerTests : TestWithDbConte
     public GetCrossInstanceConfigurationConsumerTests()
         => _configureServices = cfg =>
         {
-            // consumer needs
+            // Required by the consumer.
             cfg.AddConsumer<GetCrossInstanceConfigurationConsumer>();
             cfg.AddSingleton(Substitute.For<ILogger<GetCrossInstanceConfigurationConsumer>>);
             cfg.AddSingleton<IApplicationDbContext>(_ => TestDbContext);

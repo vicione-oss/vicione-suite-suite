@@ -20,8 +20,7 @@ public static partial class ExternalLogin
     public const string BaseRoute = "/account";
 
     /// <summary>
-    /// Contains routing constants for managing the process of linking external login services
-    /// to an existing user account in the application.
+    /// Routes for linking an external login service to an existing user account.
     /// </summary>
     public static class LinkingFlow
     {
@@ -30,9 +29,7 @@ public static partial class ExternalLogin
     }
 
     /// <summary>
-    /// Contains routing constants for managing the external login process,
-    /// including initiating the login with an external provider and handling callbacks
-    /// after authentication.
+    /// Routes for the external login process: initiating it with a provider and handling the callback.
     /// </summary>
     public static class LoginFlow
     {

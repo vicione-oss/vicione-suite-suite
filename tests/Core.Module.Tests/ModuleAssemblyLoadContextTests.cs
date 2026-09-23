@@ -55,7 +55,7 @@ public class ModuleAssemblyLoadContextTests
         Assert.Equal(expectedVersionA, sharedFromA.GetName().Version);
         Assert.Equal(expectedVersionB, sharedFromB.GetName().Version);
 
-        // and the two contexts do not collapse onto a single shared instance/version
+        // The two contexts must not collapse onto a single shared instance or version.
         Assert.NotSame(sharedFromA, sharedFromB);
         Assert.NotEqual(sharedFromA.GetName().Version, sharedFromB.GetName().Version);
     }

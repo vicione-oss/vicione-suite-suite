@@ -49,18 +49,18 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
             availableMetadata = await _metadataCache.GetAvailableModuleMetadata(options.ForceRefresh, cancellationToken);
         }
 
-        // we merge the versions of the metadata to bundles and order them by the published date from metadata
+        // Metadata versions are merged into bundles, ordered by their published date.
         var bundles = CreateBundles(installedBundles, availableMetadata?.OrderByDescending(k => k.Published).ToList() ?? []);
 
-        // evaluate the versions and update the bundle states accordingly (can update, errors etc.)
+        // Versions drive the bundle state: can-update, errors and the rest.
         ApplyVersionEvaluation(bundles);
 
-        // we need to apply the pending operations before enriching the options
+        // Pending operations have to be applied before the options are enriched.
         // because they might change the options (e.g. pending uninstall should not allow modification)
         await ApplyEnqueuedPackageOperations(bundles, cancellationToken);
 
-        // apply the options from the environment and stored options - this will enrich the metadata with the current values
-        // and also set the flags for secrets/env vars so that the UI can handle them accordingly       
+        // Environment and stored options enrich the metadata with the current values.
+        // and also set the flags for secrets/env vars so that the UI can handle them accordingly
         await ApplyEnvironmentOptions(bundles, cancellationToken);
 
         return bundles;
@@ -85,7 +85,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
     {
         foreach (var module in modules)
         {
-            // if installation is disabled by config installed modules are not allowed to be modified
+            // With installation disabled by config, installed modules cannot be modified.
             module.CanBeModified = _loaderOptions.Value.AllowInstallation;
 
             if (!module.Installed)
@@ -93,14 +93,14 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
 
             try
             {
-                // now we have the metadata with the current option declarations
+                // The metadata now carries the current option declarations.
                 // we can't mix up env, secrets here!!! we need to flag them later
                 // !! options might change between requests so we need to enrich them again
                 await _optionsStore.ApplyStoredOptions(module.Metadata, _environmentConfig, cancellationToken);
             }
             catch (OperationCanceledException)
             {
-                // we can ignore this but stop the loop
+                // Ignored, but the loop stops here.
                 break;
             }
             catch (Exception ex)
@@ -114,16 +114,16 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
     {
         var result = new List<ModuleMetadataBundle>();
 
-        // handle the already installed ones
+        // Already installed modules.
         result.AddRange(installed);
 
-        // remove available packages of modules not installed if they can't be modified
+        // Available packages of uninstalled modules drop out when they cannot be modified.
         if (installed.Count > 0 && installed.All(k => !k.CanBeModified))
         {
             available.RemoveAll(k => installed.All(i => i.Metadata.Name != k.Name));
         }
 
-        // handle available ones - dependencies, versions -> todo: metadata for selected version
+        // Available modules: dependencies and versions.
         foreach (var metadata in available)
         {
             var existing = result.FirstOrDefault(k => k.Metadata.Name == metadata.Name);
@@ -140,24 +140,24 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
                 result.Add(existing);
             }
 
-            // if module is defined in manifest but not downloaded...
+            // Defined in the manifest but not downloaded.
             var existingVersionStr = existing.Metadata.Version != ModuleConstants.UnresolvedVersionMarker
                 ? existing.Metadata.Version : "0.0.0";
 
-            // parse both versions once for comparison and CI version check
+            // Both versions are parsed once, for comparison and the CI version check.
             if (!SemVersion.TryParse(existingVersionStr, out var existingSemVer))
                 continue;
 
             if (!SemVersion.TryParse(metadata.Version, out var availableSemVer))
                 continue;
 
-            // it's installed already so it also has the available versions - we don't allow downgrade
+            // Already installed, so the available versions are known; downgrades are not allowed.
             // because of migrations etc. - for installed ci-versions we allow downgrades
             if (existing.Installed && CompareSemVersions(availableSemVer, existingSemVer) < 0
                 && !IsSameBaseCiVersion(existingSemVer, availableSemVer))
                 continue;
 
-            // it happened that different packages contained the same version - this would
+            // Different packages have carried the same version before, which would
             // fail then on cbo binding. this is fixed within pipeline but to ensure it
             // won't break...
             if (existing.AvailableVersions.Any(k => k == metadata.Version))
@@ -175,7 +175,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
         {
             if (bundle.AvailableVersions.Count == 0)
             {
-                // for debug/test modules we don't have available versions
+                // Debug and test modules have no available versions.
                 bundle.AvailableVersions.Add(bundle.Metadata.Version);
                 continue;
             }
@@ -193,11 +193,11 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
 
             var latest = bundle.AvailableVersions.First();
             
-            // we only resolve to released versions - 
+            // Only released versions are resolved:
             if (!SemVersion.TryParse(latest, out var latestSemVer))
                 continue;
 
-            // if new artifact source was added but initial resolve has failed
+            // A new artifact source was added after the initial resolve failed.
             // we want to display that it will be installed after next restart.
             // ci versions are not considered for automatic update
             var removedError = bundle.Errors.RemoveAll(k => k.ErrorCode == ModuleErrorCodes.FoundNoVersion);
@@ -212,7 +212,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
                 continue;
             }
 
-            // if we have a newer version available and the module is not marked as unresolvable, we can update
+            // A newer version plus a resolvable module means an update is possible.
             bundle.CanUpdate = (bundle.Metadata.Version != ModuleConstants.UnresolvedVersionMarker || latestSemVer.IsPrerelease)
                 && bundle.Metadata.Version != latest;
         }
@@ -267,7 +267,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
         if (!SemVersion.TryParse(dependency.Version, out var dependencyVersion))
             return false;
 
-        // if major, minor fit it's compatible for sure - in our modules the version is not yet ready to
+        // Matching major and minor is certainly compatible; the module versions are not yet ready to
         // fully support SemVer
         return metaVersion.Major == dependencyVersion.Major && metaVersion.Minor == dependencyVersion.Minor;
     }

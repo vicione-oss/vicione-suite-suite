@@ -7,7 +7,7 @@ namespace Core.OS.Instance.HealthCheck;
 /// <summary>
 /// slave service publishing alive events to master and checking the last time it received a command
 /// from master to evaluate if it is alive - in case of master health changed a notification is sent to
-/// frontend 
+/// frontend
 /// </summary>
 internal sealed class InstanceHealthCheckPublisher(ILocalInstanceInformationProvider instanceInfo,
     IServiceProvider services,

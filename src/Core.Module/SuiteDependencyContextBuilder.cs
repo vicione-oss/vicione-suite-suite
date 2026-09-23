@@ -10,7 +10,7 @@ using ModuleOptions = Core.Module.Contracts.ModuleOptions;
 namespace Core.Module;
 
 /// <summary>
-/// Builder class to create <see cref="SuiteDependencyContext"/> containing assembly runtime references
+/// Builds a <see cref="SuiteDependencyContext"/> from the assembly runtime references of the configured modules.
 /// </summary>
 public class SuiteDependencyContextBuilder
 {
@@ -24,53 +24,41 @@ public class SuiteDependencyContextBuilder
         public Dictionary<string, ModuleOptions>? ClientModuleOptions { get; set; }
 
         /// <summary>
-        /// Resolved paths to client module dlls
+        /// Resolved paths to client module dlls.
         /// </summary>
         public List<ModulePathInfo> ClientModulePathInfos { get; init; } = [];
 
-        /// <summary>
-        /// Path to the Core.Os deps.json file
-        /// </summary>
         public string? CoreDepsJsonFile { get; set; }
 
-        /// <summary>
-        /// Loader options for backend modules
-        /// </summary>
         public ModuleLoaderOptions? BackendLoaderOptions { get; set; }
 
         /// <summary>
-        /// Module options for backend modules from appsettings, env, metadata etc. 
+        /// Backend module options from appsettings, environment and metadata.
         /// </summary>
         public Dictionary<string, ModuleOptions>? BackendModuleOptions { get; set; }
 
         /// <summary>
-        /// Resolved paths to backend module dlls
+        /// Resolved paths to backend module dlls.
         /// </summary>
         public List<ModulePathInfo> BackendModulePathInfos { get; init; } = [];
 
         /// <summary>
-        /// Use to validate matching sdk versions of modules (metadata once?)
-        /// startup error will be added on version mismatch
+        /// Validates matching SDK versions; a mismatch adds a startup error.
         /// </summary>
         public bool UseStartupValidation { get; internal set; }
 
         /// <summary>
-        /// If set true assembly mappings will be calculated within the context
-        /// to map assemblies by application priorities: Core, UiHost, Backend, ...
-        /// ignoring their specific version.
+        /// Maps assemblies by application priority (Core, UiHost, Backend, ...), ignoring their version.
         /// </summary>
         public bool UseAssemblyMapping { get; set; } = true;
 
         /// <summary>
-        /// If set true the context gets optimized for resolving assembly dependencies
-        /// modules will only have unique runtime libraries
-        /// contexts redundant libraries will be empty
+        /// Each module keeps only its unique runtime libraries; redundant ones are left empty.
         /// </summary>
         public bool UseRuntimeContext { get; set; }
 
         /// <summary>
-        /// If set true the module dlls will get loaded using a MetadataLoadContext
-        /// to ensure they contain a backend or client module implementation. 
+        /// Loads module dlls in a MetadataLoadContext to confirm they contain a backend or client module.
         /// </summary>
         public bool UseModuleTypeValidation { get; set; }
     }
@@ -87,11 +75,8 @@ public class SuiteDependencyContextBuilder
         => WithCore(ModuleHelpers.DllToDepsJson(Path.GetFullPath(coreAssembly.Location)));
 
     /// <summary>
-    /// Add options for the core <see cref="ModuleDependencyContext"/>. It's takes the dependency information
-    /// directly from <paramref name="coreDepsJsonFilePath"/> file
+    /// Takes the core dependency information directly from the given deps.json file.
     /// </summary>
-    /// <param name="coreDepsJsonFilePath"></param>
-    /// <returns></returns>
     public SuiteDependencyContextBuilder WithCore(string coreDepsJsonFilePath)
     {
         _options.CoreDepsJsonFile = coreDepsJsonFilePath;
@@ -99,16 +84,17 @@ public class SuiteDependencyContextBuilder
     }
 
     /// <summary>
-    /// Add options to include an UiHost module. It is required if you want to add client modules to the context.
-    /// </summary>    
-    /// <exception cref="InvalidOperationException"></exception>
+    /// Includes a UiHost module, which client modules require.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// No settings for the UiHost, settings of the wrong type, or an unset UiHostsPath.
+    /// </exception>
     public SuiteDependencyContextBuilder WithUiHost(ModuleLoaderOptions loaderOptions, Dictionary<string, ModuleOptions> moduleOptions)
     {
-        // uihost is disabled by loader
+        // The loader disables the UiHost by leaving it empty.
         if (string.IsNullOrEmpty(loaderOptions.UiHost))
             return this;
 
-        // no configuration section
         if (!moduleOptions.TryGetValue(loaderOptions.UiHost, out var options))
             throw new InvalidOperationException($"No settings found for UiHost '{loaderOptions.UiHost}'.");
 
@@ -125,8 +111,8 @@ public class SuiteDependencyContextBuilder
     }
 
     /// <summary>
-    /// Add options to include backend modules. Backend modules don't require any UiHost to be available
-    /// </summary>    
+    /// Includes backend modules, which do not require a UiHost.
+    /// </summary>
     public SuiteDependencyContextBuilder WithBackendModules(ModuleLoaderOptions loaderOptions, Dictionary<string, ModuleOptions> moduleOptions)
     {
         _options.BackendLoaderOptions = loaderOptions;
@@ -135,12 +121,11 @@ public class SuiteDependencyContextBuilder
     }
 
     /// <summary>
-    /// Add options to include client modules. It requires UiHost, so either it was already setup by <see cref="WithUiHost"/>
-    /// otherwise the call will try to setup UiHost with available loader options
-    /// </summary>    
+    /// Includes client modules; sets up the UiHost from the loader options if <see cref="WithUiHost"/> has not run.
+    /// </summary>
     public SuiteDependencyContextBuilder WithClientModules(ModuleLoaderOptions loaderOptions, Dictionary<string, ModuleOptions> moduleOptions)
     {
-        // if we have set an uiHost we need to ensure it's added to the setup
+        // A configured UiHost has to be in the setup before the client modules.
         if (!string.IsNullOrEmpty(loaderOptions.UiHost) && _options.UiHostOptions is null)
         {
             WithUiHost(loaderOptions, moduleOptions);
@@ -152,9 +137,8 @@ public class SuiteDependencyContextBuilder
     }
 
     /// <summary>
-    /// Enables the validation of used sdk versions and dependencies. Failed validation will result
-    /// in errors contained in modules StartupErrors list
-    /// </summary>    
+    /// Validates SDK versions and dependencies; failures land in the module's StartupErrors list.
+    /// </summary>
     public SuiteDependencyContextBuilder WithStartupValidation()
     {
         _options.UseStartupValidation = true;
@@ -168,17 +152,14 @@ public class SuiteDependencyContextBuilder
     }
 
     /// <summary>
-    /// Create the dependency context based on the configured options and the *.deps.json contents of
-    /// the included assemblies
+    /// Creates the context from the configured options and the *.deps.json of the included assemblies.
     /// </summary>
-    /// <param name="fileSystem">The abstract filesystem to access configured assemblies</param>
-    /// <returns>The created context including all configured <see cref="ModuleDependencyContext"/></returns>
     public SuiteDependencyContext Build(IFileSystem? fileSystem = null)
     {
         fileSystem ??= new FileSystem();
 
 #if DEBUG
-        // on deployment the path should be configured and throw if it does not exist
+        // On deployment the path is configured, so a missing folder is an error.
         if (!string.IsNullOrEmpty(_options.BackendLoaderOptions?.ModulesPath))
             EnsureModuleFolderExists(fileSystem, _options.BackendLoaderOptions?.ModulesPath);
 #endif
@@ -186,10 +167,9 @@ public class SuiteDependencyContextBuilder
         ResolveUiHostPathInfo(fileSystem, _options.UiHostOptions);
         ResolveUiModules(fileSystem, _options.ClientLoaderOptions, _options.ClientModuleOptions);
 
-        // cleanup the lists
         CleanupOptions();
 
-        // contains also possible ui hosts
+        // The suite context also carries possible ui hosts.
         var context = CreateSuiteContext(fileSystem, _options);
 
         if (_options.UseRuntimeContext)
@@ -204,7 +184,7 @@ public class SuiteDependencyContextBuilder
             context.ValidateDependencies();
         }
 
-        // map assemblies to core os ones overriding module versions
+        // Maps module assemblies onto the Core.OS ones, overriding module versions.
         if (_options.UseAssemblyMapping)
             context.UseAssemblyMapping();
 
@@ -218,19 +198,17 @@ public class SuiteDependencyContextBuilder
 
         var infos = new HashSet<ModulePathInfo>();
 
-        // the debug paths
         var debugBackends = fileSystem.GetDebugBackendModuleAssemblyPaths(loaderOptions.ModuleDebugPaths)
             .Where(p => loaderOptions.IsValidModuleLocation(fileSystem, p))
             .Where(p => loaderOptions.AllowInclude(p, true));
 
         infos.UnionWith(CreateModulePathInfos(debugBackends, true));
 
-        // the deployed ones from modules directory
         var deployedBackends = fileSystem.GetBackendModuleAssemblyPaths(loaderOptions.ModulesPath)
             .Where(p => loaderOptions.AllowInclude(p))
             .Where(k => IsEnabled(moduleOptions, k));
 
-        // ignore deployed assemblies if we have them from debug
+        // A debug assembly wins over the deployed one of the same module.
         var pathInfos = infos.UnionBy(CreateModulePathInfos(deployedBackends), k => fileSystem.Path.GetFileNameWithoutExtension(k.AssemblyPath)).ToArray();
 
         _options.BackendModulePathInfos.Clear();
@@ -244,7 +222,7 @@ public class SuiteDependencyContextBuilder
 
         var uiHostAssemblyName = $"{_options.UiHostModuleId}{Constants.ModuleSuffixBackend}";
 
-        // first search for debug modules if it is set
+        // Debug modules take precedence when configured.
         if (_options.UiHostDirectory is not null)
         {
             var paths = fileSystem
@@ -259,13 +237,13 @@ public class SuiteDependencyContextBuilder
             }
         }
 
-        // if we found nothing take it from fixed suite folder
+        // Nothing found in the debug paths, so fall back to the fixed suite folder.
         if (_options.UiHostPathInfo is null)
         {
             var uiHostsFolderPath = _options.UiHostDirectory;
             if (uiHostsFolderPath is null)
             {
-                // fallback to default if no uihost path is set
+                // The default folder applies when no uihost path is set.
                 var assemblyLocation = Assembly.GetExecutingAssembly().Location;
                 var assemblyFolder = fileSystem.Path.GetDirectoryName(assemblyLocation);
                 uiHostsFolderPath = fileSystem.Path.Combine(assemblyFolder!, Constants.DefaultUiHostsDirectory);
@@ -284,19 +262,16 @@ public class SuiteDependencyContextBuilder
         if (loaderOptions is null || moduleOptions is null || _options.UiHostPathInfo is null)
             return;
 
-        // when we use deployed modules they don't have e.g. ViciOne.Suite.Sdk.Client on their own
-        // because it was removed on deployment cleanup.
-        // to resolve these dependencies for ui modules we add the ui host as additional resolver source.
+        // Deployment cleanup strips shared assemblies such as ViciOne.Suite.Sdk.Client from a deployed
+        // module, so the ui host is added as an additional resolver source for ui modules.
         var infos = new HashSet<ModulePathInfo>();
 
-        // the debug paths
         var debugUis = fileSystem.GetDebugClientModuleAssemblyPaths(loaderOptions.ModuleDebugPaths)
             .Where(p => loaderOptions.IsValidModuleLocation(fileSystem, p))
             .Where(p => loaderOptions.AllowInclude(p, true));
 
         infos.UnionWith(CreateModulePathInfos(debugUis, true));
 
-        // the deployed ones from modules directory
         var uiHostDepsJson = ModuleHelpers.DllToDepsJson(_options.UiHostPathInfo.AssemblyPath);
         var deployedUis = fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath, uiHostDepsJson)
             .Where(p => loaderOptions.AllowInclude(p))
@@ -325,13 +300,13 @@ public class SuiteDependencyContextBuilder
 
         List<ModulePathInfo> uiHostPathInfos = options.UiHostPathInfo is not null ? [options.UiHostPathInfo] : [];
 
-        // core context provides libraries that can be shared with backend|ui host modules 
+        // The core context provides the libraries shareable with backend and ui host modules.
         var coreContext = ModuleDependencyContextFactory.CreateCoreContext(
             fileSystem,
             options.CoreDepsJsonFile);
 
-        // depending on the ui host we can identify provided assets and client libraries
-        // till we deploy both hosts we have to ensure we don't remove too many files
+        // The ui host identifies the provided assets and client libraries. While both hosts are still
+        // deployed, this must not remove too many files.
         var uiHostContexts = ModuleDependencyContextFactory.CreateUiHostContexts(
             fileSystem,
             uiHostPathInfos,
@@ -344,15 +319,15 @@ public class SuiteDependencyContextBuilder
             options.UseRuntimeContext)
             .ToList();
 
-        // actually we deploy wasm ui/backend into same folder. wasm.backend references wasm.client
-        // and therefore the backend.deps.json is sufficient to filter out redundancies
+        // The wasm ui and backend deploy into the same folder and wasm.backend references wasm.client,
+        // so backend.deps.json alone is enough to filter out the redundancies.
         var frontendContexts = ModuleDependencyContextFactory.CreateUiModuleContexts(
             fileSystem,
             options.ClientModulePathInfos,
             uiHostContexts,
             options.UseRuntimeContext);
 
-        // contexts get ordered by the count of their reference to other modules
+        // Contexts are ordered by how many other modules they reference.
         var allContexts = backendContexts
             .Concat(frontendContexts)
             .OrderBy(k => backendContexts.GetDependencyContexts(k).Count())
@@ -364,10 +339,12 @@ public class SuiteDependencyContextBuilder
     private static IEnumerable<ModulePathInfo> CreateModulePathInfos(IEnumerable<string> assemblyPaths, bool isDebug = false)
         => assemblyPaths.Select(p => new ModulePathInfo(p, isDebug));
 
-    // a quite bad check that only works because of the current naming conventions
+    /// <summary>
+    /// Works only as long as the module naming conventions hold.
+    /// </summary>
     private static bool IsEnabled(Dictionary<string, ModuleOptions> moduleOptions, string filePath)
     {
-        // filepath like '/some/path/to/ViciOne.Module.Backend.dll' we should get 'ViciOne.Module' as id 
+        // '/some/path/to/ViciOne.Module.Backend.dll' yields 'ViciOne.Module' as the id.
         var fileName = Path.GetFileNameWithoutExtension(filePath);
         try
         {
@@ -378,7 +355,7 @@ public class SuiteDependencyContextBuilder
         }
         catch (InvalidOperationException)
         {
-            // can happen in tests - Assembly 'ViciOne.Suite.Blazor.Shared' does not fit suite module naming conventions 
+            // Happens in tests, where an assembly such as ViciOne.Suite.Blazor.Shared is not a module.
         }
 
         return false;

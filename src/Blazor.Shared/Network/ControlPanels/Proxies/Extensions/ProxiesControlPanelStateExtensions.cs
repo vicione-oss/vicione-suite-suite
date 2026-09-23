@@ -18,7 +18,7 @@ internal static class ProxiesControlPanelStateExtensions
         ResetProxySettings(state.FtpProxySettings, networkProxySettings.FTP);
         ResetProxySettings(state.SftpProxySettings, networkProxySettings.SFTP);
 
-        // do not use proxy settings
+        // Proxy settings are not applied.
         {
             state.DoNotProxyListEnabled = networkProxySettings.DoNotProxyListEnabled;
 

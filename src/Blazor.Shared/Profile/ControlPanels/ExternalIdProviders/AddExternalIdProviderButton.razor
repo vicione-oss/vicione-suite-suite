@@ -9,11 +9,8 @@
     public string ExternalIdProvider { get; set; }
 
 }
-@*
-`LinkButton` currently does not offer to set the type on the button.
-Hence it cannot be used as a submit button in a form.
-This is why we need to submit the form in `OnClick`.
-*@
+@* `LinkButton` cannot set the button type, so it cannot act as a form submit button and the form is
+   submitted from `OnClick` instead. *@
 <LinkButton IconName="@MonochromeIconName.ExternalIdProviderLight"
             CssClass="add-external-login-button"
             Text="@Labels.AddExternalLogin"

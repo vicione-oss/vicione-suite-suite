@@ -120,13 +120,13 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
 
     /// <summary>
     /// Will request backend controller to append language cookie to http header and redirect to ~/ afterwards
-    /// </summary>    
+    /// </summary>
     private void UpdateCookie(string language, Guid nonceValue)
         => NavigationManager.NavigateTo($"{Constants.UpdateLanguageCookieRoute}/Update?language={language}&nonce={nonceValue}", true);
 
     /// <summary>
     /// Will request backend controller to remove language cookie from http header and redirect to ~/ afterwards
-    /// </summary>    
+    /// </summary>
     private void RemoveCookie(Guid nonceValue)
         => NavigationManager.NavigateTo($"{Constants.UpdateLanguageCookieRoute}/Remove?nonce={nonceValue}", true);
 

@@ -6,7 +6,6 @@ namespace Core.Module.Extensions;
 
 public static partial class SuiteDependencyContextExtensions
 {
-    /// <param name="context"></param>
     extension(SuiteDependencyContext context)
     {
         internal void ValidateAssemblyModuleType()
@@ -21,22 +20,19 @@ public static partial class SuiteDependencyContextExtensions
 
                     List<string> components = [module.AssemblyPath];
 
-                    // include deps json to provide additional resolver for dlls we removed on publish
-                    // e.g. ViciOne.Suite.Sdk.Client to find the ClientModule implementations. It's not loaded
-                    // yet by Core so we need to add the serving ui host resolver
+                    // Publishing removes dlls such as ViciOne.Suite.Sdk.Client, and Core has not loaded it
+                    // yet, so the serving ui host is added as an additional resolver.
                     if (context.UiHost != null && module.ModuleType == ModuleType.Client)
                     {
                         components.Add(context.UiHost.AssemblyPath);
                     }
 
-                    // use metadata load context with resolvers for all our module dlls
                     using var loadContext = new ModuleMetadataLoadContext(components);
 
-                    // load them into the context
                     loadContext.LoadAssemblies([module.AssemblyPath]);
 
-                    // if we can't load the metadata we won't be able to load the assembly by suite load context
-                    // could cause a ReflectionTypeLoadException or just can't match the types
+                    // Metadata that fails to load here would fail in the suite load context too, either as a
+                    // ReflectionTypeLoadException or as types that never match.
                     var loaded = loadContext.Assemblies.FirstOrDefault(assembly => assembly.IsSuiteModule(typeName))
                                  ?? throw new InvalidOperationException($"Assembly '{module.AssemblyPath}' does not contain implementations for '{typeName}'");
                 }
@@ -48,9 +44,8 @@ public static partial class SuiteDependencyContextExtensions
         }
 
         /// <summary>
-        /// Validates sdk major + minor version matches referenced modules sdk 
+        /// Validates that the sdk major and minor version match the sdk referenced by the modules.
         /// </summary>
-        /// <exception cref="InvalidOperationException"></exception>
         internal void ValidateSdkVersion()
         {
             var sdkVersionString = context.Core.GetSdkVersion();
@@ -75,18 +70,15 @@ public static partial class SuiteDependencyContextExtensions
             if (context.UiHost?.AssemblyPath == moduleAssemblyPath)
                 return false;
 
-            // we assume that context is already validated!
             if (!context.AreDependenciesValidated)
                 context.ValidateDependencies();
 
-            // e.g. module has an direct error like wrong sdk or is not part of the context
+            // A direct error such as a wrong sdk, or the module is not part of the context at all.
             var moduleContext = context.Modules.FirstOrDefault(k => k.AssemblyPath == moduleAssemblyPath);
             if (moduleContext is null || moduleContext.StartupErrors.Count > 0)
                 return true;
 
-            // get backend for client or client for backend
-            // backend has issues client has issues too
-            // otherwise the same - one module!
+            // The backend and client of one module share a fate: if one has errors, so does the other.
             var linkedContext = context.Modules
                 .FirstOrDefault(k => k.AssemblyFolder == moduleContext.AssemblyFolder
                                      && k.ModuleType != moduleContext.ModuleType);
@@ -103,7 +95,7 @@ public static partial class SuiteDependencyContextExtensions
             {
                 try
                 {
-                    // get references to *.Public projects of other modules
+                    // References to the *.Public projects of other modules.
                     var dependencies = moduleContext.GetExternalPublicDependencies();
 
                     foreach (var dependency in dependencies)
@@ -112,7 +104,7 @@ public static partial class SuiteDependencyContextExtensions
                         if (!ModuleHelpers.TryGetFamilyNamePart(dependency.Name, out var commonNamePart))
                             throw new InvalidOperationException($"Can't get dependency key from {dependency.Name}");
 
-                        // required contexts ViciOne.Suite.ClusterManagement.Backend|Client
+                        // Required contexts: ViciOne.Suite.ClusterManagement.Backend and .Client
                         var dependencyContexts = context.Modules
                             .Where(k => k.AssemblyName == $"{commonNamePart}{Constants.ModuleSuffixBackend}"
                                         || k.AssemblyName == $"{commonNamePart}{Constants.ModuleSuffixClient}")
@@ -131,8 +123,7 @@ public static partial class SuiteDependencyContextExtensions
                 }
             }
 
-            // e.g. Backend.B references Backend.A -> Backend.A has an StartupError
-            // so also Client.B can't work!
+            // If Backend.B references a failing Backend.A, Client.B cannot work either.
             foreach (var backendContext in context.Modules.Where(k => k.ModuleType == ModuleType.Backend))
             {
                 var clientModule = context.Modules.FirstOrDefault(k => k.ModuleId == backendContext.ModuleId && k.ModuleType == ModuleType.Client);

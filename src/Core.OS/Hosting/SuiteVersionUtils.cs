@@ -8,17 +8,15 @@ namespace Core.OS.Hosting;
 internal static class SuiteVersionUtils
 {
     /// <summary>
-    /// Returns Major.Minor.Build from core assembly name
+    /// Returns Major.Minor.Build from the core assembly name.
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException">The assembly carries no version.</exception>
     public static string GetSuiteVersion()
         => ModuleHelpers.GetNormalizedVersion(Assembly.GetExecutingAssembly());
 
     /// <summary>
-    /// Gets the version from SDK assembly as [major].[minor].[build] string
+    /// Returns the SDK assembly version as major.minor.build, e.g. 0.20.0.0 yields 0.20.0.
     /// </summary>
-    /// <returns>0.20.0.0 -> 0.20.0</returns>
     public static string GetSuiteSdkVersion()
         => ModuleHelpers.GetNormalizedVersion(ModuleHelpers.GetSdkAssemblyVersion());
 
@@ -29,7 +27,6 @@ internal static class SuiteVersionUtils
     /// </summary>
     /// <param name="version">Version string by SemVer specs 2.0.0</param>
     /// <param name="update">Version string by SemVer specs 2.0.0</param>
-    /// <returns></returns>
     /// <exception cref="FormatException">Thrown if one of the versions can't be parsed</exception>
     public static bool IsVersionCompatible(string version, string update)
     {
@@ -40,7 +37,7 @@ internal static class SuiteVersionUtils
         if (origVersion.Major != updateVersion.Major)
             return false;
 
-        // is update equal or higher?
+        // An update has to be equal or higher.
         return SemVersion.ComparePrecedence(origVersion, updateVersion) <= 0;
     }
 
@@ -50,7 +47,6 @@ internal static class SuiteVersionUtils
     /// </summary>
     /// <param name="version">Version string by SemVer specs 2.0.0</param>
     /// <param name="update">Version string by SemVer specs 2.0.0</param>
-    /// <returns></returns>
     /// <exception cref="FormatException">Thrown if one of the versions can't be parsed</exception>
     public static bool IsPatchUpdate(string version, string update)
     {

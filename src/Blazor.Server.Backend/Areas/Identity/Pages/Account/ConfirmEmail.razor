@@ -2,11 +2,8 @@
 
 
 @*
-This page must be accessible without prior authentication ([AllowAnonymous]).
-When 'RequireAccountVerificationToLogIn' is enabled, users must verify their
-email address before they can log in. This means the email confirmation page
-must be reachable without an active session, as the user has not yet been
-able to complete the login process.
+Must stay reachable without a session: with 'RequireAccountVerificationToLogIn' enabled the user has to
+confirm their email before they can log in at all.
 *@
 @attribute [AllowAnonymous]
 

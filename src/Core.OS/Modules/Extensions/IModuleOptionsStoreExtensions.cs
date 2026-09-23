@@ -8,19 +8,19 @@ internal static class IModuleOptionsStoreExtensions
     {
         public async Task ApplyStoredOptions(ModuleMetadata metadata, IConfiguration configuration, CancellationToken cancellationToken)
         {
-            // enrich the options with already stored ones
+            // Stored options are merged in.
             // for now we only take options that are defined within metadata but custom ones need to be added soon
             if (metadata.Options is null || metadata.Options.Count == 0)
                 return;
 
-            // json options - we expect it exists
+            // The json options are expected to exist.
             var options = await optionsStore.LoadJsonDictionary(metadata.Name, cancellationToken);
 
             foreach (var option in metadata.Options)
             {
                 var optionKey = option.GetOptionKey(metadata.Name);
 
-                // first check environment - it overrides json settings
+                // The environment is checked first, because it overrides the json settings.
                 var envValue = configuration.GetValue<string?>(optionKey);
                 if (!string.IsNullOrWhiteSpace(envValue))
                 {
@@ -28,10 +28,10 @@ internal static class IModuleOptionsStoreExtensions
                     continue;
                 }
 
-                // do we have matching key in json config?
+                // A matching key in the json config.
                 if (options.TryGetValue(optionKey, out var value))
                 {
-                    // we don't can take the default value of metadata here because it isn't part of the 
+                    // The metadata default cannot be used here, because it is not part of the
                     // effective configuration
                     option.Value = value;
                 }

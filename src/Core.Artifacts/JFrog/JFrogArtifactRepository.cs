@@ -60,7 +60,7 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
 
         LogDownloadingArtifactToPatch(logger, sourceUri, targetFolderPath);
 
-        // Stream the archive to a temporary file on disk instead
+        // Streamed to a temp file rather than buffered in memory.
         var tempFilePath = fileSystem.Path.Combine(targetFolderPath, $".{Guid.NewGuid():N}.download.tmp");
 
         try
@@ -218,10 +218,8 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
     {
         var sourceConfig = GetSourceConfig(artifact);
 
-        // Ensure no double slashes and correct joining
         var repo = !string.IsNullOrWhiteSpace(artifact.Repository) ? artifact.Repository : sourceConfig.RepositoryKey;
 
-        // Construct relative path carefully
         var fullPath = !string.IsNullOrWhiteSpace(artifact.Name) ? $"{artifact.Path}/{artifact.Name}" : artifact.Path;
         var relativePath = $"{repo}{UriSeparator}{fullPath}".TrimStart(UriSeparator);
 
@@ -249,7 +247,6 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
 
     private ApiSourceConfig GetSourceConfig(string? sourceKey)
     {
-        // If we have only one source and source key is empty we take the available one
         var sources = CreateSourceConfigurations();
         var sourceConfig = string.IsNullOrEmpty(sourceKey) || sources.Count == 1
             ? sources.First()
@@ -266,9 +263,8 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
     }
 
     /// <summary>
-    /// Ensure using it without <langword>using</langword>
+    /// The returned client is owned by the factory and must not be wrapped in a <c>using</c>.
     /// </summary>
-    /// <param name="sourceConfig"></param>    
     private HttpClient CreateSourceClient(ApiSourceConfig sourceConfig)
     {
         if (!string.Equals(sourceConfig.BaseAddress.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
@@ -330,8 +326,7 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
                              ?? throw new InvalidOperationException(
                                  "Could not determine repository key from endpoint URL.");
 
-            // Set BaseAddress for HttpClient to the Artifactory root
-            // Ensures relative paths like /api/search/aql work correctly
+            // The Artifactory root, so relative paths like /api/search/aql resolve correctly.
             var absolutePath = endpointUri.AbsolutePath.Replace($"/{RepositoryKey}", "", StringComparison.Ordinal);
             var uriBuilder = new UriBuilder(endpointUri)
             {
@@ -340,13 +335,13 @@ public sealed partial class JFrogArtifactRepository(IFileSystem fileSystem,
 
             BaseAddress = uriBuilder.Uri;
 
-            // Host:Port is not enough we need to take the whole uri + port to have a difference
+            // Host:port alone is not unique; the full URI, port and repository key together are.
             SourceKey = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{uriBuilder.Uri.AbsoluteUri}:{uriBuilder.Port}:{RepositoryKey}"));
         }
     }
 
     /// <summary>
-    /// This maps the real results from JFrog source before we accumulate to ArtifactQueryResult
+    /// Raw JFrog response, accumulated into <see cref="ArtifactQueryResult"/> afterwards.
     /// </summary>
     internal class JFrogQueryResult
     {

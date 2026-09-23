@@ -41,7 +41,7 @@ public sealed class MasterHealthObserver : ComponentBase, IDisposable, IEventCon
     {
         if (message != _message)
         {
-            // dialog does not display own message anymore, therefore we should not close it when master is reachable again
+            // The dialog no longer shows its own message, so it stays open when the master returns.
             _canCloseDialog = false;
         }
     }

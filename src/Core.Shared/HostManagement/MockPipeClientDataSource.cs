@@ -1,23 +1,20 @@
 ﻿
 namespace Core.Shared.HostManagement;
 
-/// <summary>
-/// Possible data sources for MockPipeClient
-/// </summary>
 public enum MockPipeClientDataSource
 {
     /// <summary>
-    /// MockPipeClient should read initial data from <see cref="MockPipeClientOptions.SystemConfiguration"/>
+    /// Initial data from <see cref="MockPipeClientOptions.SystemConfiguration"/>.
     /// </summary>
     SystemConfiguration,
 
     /// <summary>
-    /// MockPipeClient should read initial data from <see cref="MockPipeClientOptions.SystemConfigurationJsonFile"/>
+    /// Initial data from <see cref="MockPipeClientOptions.SystemConfigurationJsonFile"/>.
     /// </summary>
     SystemConfigurationJsonFile,
 
     /// <summary>
-    /// MockPipeClient should read initial data from embedded resource
+    /// Initial data from an embedded resource.
     /// </summary>
     SystemConfigurationEmbedded
 }

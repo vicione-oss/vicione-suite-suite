@@ -11,8 +11,8 @@ public sealed record DressBurgerArguments : IActivityArgument
     public Guid BurgerId { get; init; }
 
     /// <summary>
-    /// this will trigger an exception in the DressBurgerActivity and should lead to
-    /// compensate grill activity
+    /// Setting this throws in <see cref="DressBurgerActivity"/>, which sends the routing slip down
+    /// its compensation path and compensates the grill activity.
     /// </summary>
     public bool Lettuce { get; init; }
     public bool Pickle { get; set; }

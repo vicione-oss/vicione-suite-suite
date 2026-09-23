@@ -14,7 +14,7 @@ public sealed class OrderBurgerClassMap : SagaClassMap<OrderBurgerState>
         entity.Property(e => e.CurrentState);
         entity.Property(e => e.Burgers).PersistAsJson();
 
-        // If using Optimistic concurrency, otherwise remove this property
+        // Required for optimistic concurrency; remove the property if you do not use it.
         entity.Property(x => x.RowVersion).IsRowVersion();
     }
 }

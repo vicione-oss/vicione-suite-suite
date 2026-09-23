@@ -50,18 +50,11 @@
         <Footer>
             <AuthorizeView Policy="@SysAdminPolicy">
                 <Authorized>
-                    @*restart and shutdown section*@
                     <div class="restart-and-shutdown">
                         @*
                         05.06.2026: Shutdown is removed for now. It should either become a feature per deployment type,
                         or edgeS must get actual shutdown AND wake-on-lan functionality.
-                        Set ".restart-and-shutdown.height" back to 118px, when re-enabled
-
-                        <div>
-                            <LinkButton IconName="@MonochromeIconName.SwitchOff"
-                                        Text="@Localization.SystemInformationNotificationElementFlyoutContent.ShutdownSystem"
-                                        OnClick="@(() => _shutdownDialogVisible = true)" />
-                        </div>
+                        Set ".restart-and-shutdown.height" back to 118px when re-enabled.
                         *@
                         <div>
                             <LinkButton IconName="@MonochromeIconName.Refresh"

@@ -24,8 +24,8 @@ public sealed partial class UiEventPublisher<T>(IMemoryCache cache, IUiEventSubs
         var defaultCulture = CultureInfo.CurrentCulture;
         var eventFullName = eventToPublish.GetType().FullName;
 
-        // Because we trigger the event subscription call in backend we are not linked to any circuit
-        // and therefore the culture is not set for user. We have to do that manually per subscription
+        // The event subscription is triggered in the backend, outside any circuit, so no user culture is
+        // in place and it has to be set per subscription.
         await registry.ForEachAsync(async (consumer, identity) =>
         {
             try
@@ -36,7 +36,7 @@ public sealed partial class UiEventPublisher<T>(IMemoryCache cache, IUiEventSubs
 
                     if (cache.TryGetValue<string>(cacheKey, out var cultureString) && !string.IsNullOrEmpty(cultureString))
                     {
-                        // Set specific user culture to render correct language
+                        // The user's own culture renders the correct language.
                         var culture = new CultureInfo(cultureString);
                         if (culture != CultureInfo.CurrentCulture)
                         {
@@ -46,7 +46,7 @@ public sealed partial class UiEventPublisher<T>(IMemoryCache cache, IUiEventSubs
                     }
                     else
                     {
-                        // Users without a specific language settings will be rendered with default language
+                        // Without a language setting the default culture applies.
                         CultureInfo.CurrentUICulture = defaultUiCulture;
                         CultureInfo.CurrentCulture = defaultCulture;
                     }
@@ -66,7 +66,7 @@ public sealed partial class UiEventPublisher<T>(IMemoryCache cache, IUiEventSubs
             }
         }).ConfigureAwait(false);
 
-        // ensure we don't change the culture after handling the last event
+        // The culture must not change after the last event has been handled.
         CultureInfo.CurrentUICulture = defaultUiCulture;
         CultureInfo.CurrentCulture = defaultCulture;
     }

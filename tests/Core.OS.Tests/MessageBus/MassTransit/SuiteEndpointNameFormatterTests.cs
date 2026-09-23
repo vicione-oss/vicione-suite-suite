@@ -118,7 +118,6 @@ public class SuiteEndpointNameFormatterTests
         public void Should_return_correct_consumer_command_name_for_own_endpoint()
         {
             // Arrange
-            //var consumerType = typeof(ValidOwnEndpointCommandConsumer);
 
             // Act
             var consume = SuiteEndpointNameFormatter.GetConsumerName(typeof(ValidOwnEndpointCommandConsumer), _instanceId);

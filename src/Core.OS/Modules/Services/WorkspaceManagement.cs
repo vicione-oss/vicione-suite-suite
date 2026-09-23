@@ -34,7 +34,7 @@ internal partial class WorkspaceManagement(IFileSystem fileSystem, IOptions<Inst
         }
         catch (UnauthorizedAccessException e)
         {
-            // this is fatal!
+            // Fatal: the workspace cannot be prepared.
             LogInsufficientPermissions(logger, e);
             throw;
         }

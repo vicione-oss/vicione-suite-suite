@@ -15,12 +15,10 @@ public interface ILocalInstanceInformationProvider
     /// Read instance id from file <see cref="Extensions.IFileSystemExtensions.InstanceIdFileName"/>
     /// Id gets cached reading the id successfully the first time
     /// </summary>
-    /// <returns></returns>
     Guid ReadLocalInstanceId();
 
     /// <summary>
     /// Update local instance information cache
     /// </summary>
-    /// <param name="info"></param>
     void UpdateLocal(IInstanceInformation info);
 }

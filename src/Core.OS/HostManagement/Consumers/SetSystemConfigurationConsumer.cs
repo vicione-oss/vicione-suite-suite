@@ -20,11 +20,11 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
 
         try
         {
-            // try to get previous config from cache
+            // The previous configuration comes from the cache when present.
             var previousConfig = cache.Get();
             if (previousConfig is null)
             {
-                // and only query it from HostManagement if not in cache
+                // HostManagement is queried only on a cache miss.
                 var responseConfig = await pipeClient.GetSystemConfiguration(context.CancellationToken);
                 if (responseConfig?.Status == OperationStatus.Success && responseConfig.Configuration is not null)
                 {

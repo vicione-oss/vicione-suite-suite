@@ -118,15 +118,15 @@ public sealed class MasterHealthObserverTests
 
         // Act
         {
-            // master goes offline
+            // The master goes offline.
             await renderedComponent.Instance.Consume(
                 new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(false), Guid.NewGuid()),
                 Xunit.TestContext.Current.CancellationToken);
 
-            // external call
+            // An external call.
             messageBannerMediator.ShowMessageBanner(new DummyMessage());
 
-            // master comes online again
+            // The master comes back online.
             await renderedComponent.Instance.Consume(
                 new ClientContext<MasterHealthInfoChanged>(new MasterHealthInfoChanged(true), Guid.NewGuid()),
                 Xunit.TestContext.Current.CancellationToken);

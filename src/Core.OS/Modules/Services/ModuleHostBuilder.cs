@@ -35,7 +35,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
     /// <summary>
     /// Build <see cref="SuiteDependencyContext"/> for modules available through configuration
-    /// </summary>    
+    /// </summary>
     public ModuleHostBuilder WithSuiteDependencyContext()
     {
         _buildDependencyContext = true;
@@ -50,7 +50,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
     /// <summary>
     /// Use given <see cref="SuiteDependencyContext"/> for building module host
-    /// </summary>    
+    /// </summary>
     public ModuleHostBuilder WithSuiteDependencyContext(SuiteDependencyContext suiteContext)
     {
         _suiteContext = suiteContext;
@@ -60,7 +60,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
     /// <summary>
     /// Add validation for module options provided by metadata, environment settings or user secrets.
     /// Add <see cref="IModuleOptionsStore"/> to service collection. Depends on <see cref="WithSuiteDependencyContext"/>
-    /// </summary>    
+    /// </summary>
     internal ModuleHostBuilder WithOptionsSupport(IConfigurationManager configurationManager, IModuleOptionsStore optionsStore)
     {
         _configurationManager = configurationManager;
@@ -73,33 +73,33 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         _modules.Clear();
         _moduleOptionsStore = null;
 
-        // if we have synchronization results we need to process them and add errors to _modules
+        // Synchronization results are processed and their errors land in _modules.
         ProcessSynchronizationResults();
 
-        // regarding these options we build a context that contains all assembly information based on deps.json
+        // These options drive a context holding every assembly detail from deps.json.
         // we have about core, uihost and modules available on disk
         BuildSuiteDependencyContext();
 
-        // add modules from suite context to _modules
+        // Modules from the suite context go into _modules.
         await AddSuiteContextModules(cancellationToken);
 
-        // now validate the options we have from json, env, secrets or metadata
+        // Options from json, env, secrets or metadata are validated here.
         // here we can intercept - modules that will be loaded are known now
         await AddModuleOptionsSupport(cancellationToken);
 
-        // has to be added before loading ui host module because of necessary services as NavigationManager 
+        // Added before the ui host module, which needs services such as NavigationManager.
         var mvBuilder = addMvcBuilder.Invoke();
 
-        // load the modules depending on suite context
+        // Modules load against the suite context.
         // based on the context we load the module assemblies into the application
         var loadedBundles = LoadBackendModuleBundles();
 
-        // we need to provide a fallback dependency context
+        // A fallback dependency context is required.
         _suiteContext ??= new SuiteDependencyContextBuilder()
             .WithCore(typeof(SystemBackendModule).Assembly)
             .Build();
 
-        // combine all needed parts to create a ModuleHost
+        // Combines every part into a ModuleHost.
         var hostOptions = new ModuleHostOptions
         {
             Configuration = configuration,
@@ -115,11 +115,11 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         // -> WithOptionsSupport
         if (_moduleOptionsStore is not null)
         {
-            // add module options available as configuration source
+            // Module options become a configuration source.
             _configurationManager?.AddModuleConfigurationSource(moduleHost, _moduleOptionsStore);
         }
 
-        // errors occurred on loading or options are available in suite context
+        // Loading and option errors are available in the suite context.
         // and need to be added to modules
         UpdateModuleErrorsFromContext(_suiteContext);
 
@@ -133,7 +133,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         if (_suiteContext is null)
             return new();
 
-        // load the modules depending on suite context
+        // Modules load against the suite context.
         // based on the context we load the module assemblies into the application
         return ModuleAssemblyLoader.LoadBackendModuleBundles<BackendModule>(_suiteContext);
     }
@@ -209,7 +209,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
         foreach (var moduleContext in _suiteContext.Modules)
         {
-            // handle/backend client
+            // Backend and client of the same module.
             var existing = _modules.FirstOrDefault(k => k.ModuleId == moduleContext.ModuleId);
             if (existing is not null)
             {
@@ -222,7 +222,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
                 continue;
             }
 
-            // skip modules loaded by debug path
+            // Modules loaded from a debug path are skipped.
             if (moduleContext.IsDebugSource)
             {
                 _modules.Add(await ModuleMetadataBundleFactory.CreateDebugBundle(fileSystem, moduleContext, cancellationToken));
@@ -246,7 +246,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
     /// <summary>
     /// Assigns startup errors kept in context to the installed module metadata
-    /// </summary>    
+    /// </summary>
     private void UpdateModuleErrorsFromContext(SuiteDependencyContext suiteContext)
     {
         if (_suiteContext is null)
@@ -254,12 +254,12 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
         foreach (var module in _modules)
         {
-            // backend/client have same errors
+            // Backend and client carry the same errors.
             var modContext = suiteContext.Modules.FirstOrDefault(k => k.ModuleId == module.ModuleId);
             if (modContext is null)
                 continue;
 
-            // only add errors that are not already 
+            // Only errors not already recorded are added.
             var modErrors = modContext.GetErrorInfos()
                 .Where(k => module.Errors.All(m => k.ErrorCode != m.ErrorCode));
 
@@ -298,7 +298,6 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
         if (!string.IsNullOrEmpty(_loaderOptions.DumpMappingFilePath))
         {
-            // mapping
             var summary = suiteContext.CreateMappingSummary();
             fileSystem.File.WriteAllText(_loaderOptions.DumpMappingFilePath, JsonSerializer.Serialize(summary, ModuleSerializerOptions.GetOptions()));
         }
@@ -308,7 +307,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
         {
             foreach (var path in _loaderOptions.ModuleDebugPaths)
             {
-                // ignore our local repo paths
+                // Local repo paths are ignored.
                 if (string.Equals(path, "src", StringComparison.OrdinalIgnoreCase) || string.Equals(path, "samples", StringComparison.OrdinalIgnoreCase))
                     continue;
 

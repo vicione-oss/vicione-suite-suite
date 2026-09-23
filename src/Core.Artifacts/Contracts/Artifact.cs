@@ -8,7 +8,7 @@ namespace Core.Artifacts.Contracts;
 [DebuggerDisplay("Repo = {Repository,nq}, Path = {Path,nq}, Name = {Name,nq}")]
 internal class Artifact : IArtifact
 {
-    /// <inheritdoc />  
+    /// <inheritdoc />
     [JsonPropertyName("modified")]
     public DateTimeOffset? Modified { get; set; }
 

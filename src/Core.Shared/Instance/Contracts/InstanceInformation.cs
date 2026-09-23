@@ -9,8 +9,7 @@ public sealed class InstanceInformation : IInstanceInformation
     public string? Name { get; set; }
 
     /// <summary>
-    /// The text within the brackets will get highlighted. The brackets will get
-    /// replaced by a markup string like span
+    /// Text inside the braces is highlighted; the braces are replaced by markup such as a span.
     /// </summary>
     public string FormattedName { get; set; } = "{ViciOne} Suite";
     public string? Description { get; set; }

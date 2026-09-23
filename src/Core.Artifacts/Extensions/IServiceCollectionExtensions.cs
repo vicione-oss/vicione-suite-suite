@@ -7,11 +7,8 @@ namespace Core.Artifacts.Extensions;
 public static class IServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers the artifact repository and its dependencies in the service collection.
+    /// Registers the artifact repository and its dependencies.
     /// </summary>
-    /// <typeparam name="TOptionsProvider">The type that provides options for the artifact repository.</typeparam>
-    /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
-    /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
     public static IServiceCollection AddArtifactRepository<TOptionsProvider>(this IServiceCollection services)
         where TOptionsProvider : class, IArtifactRepositoryOptionsProvider
     {
@@ -23,12 +20,8 @@ public static class IServiceCollectionExtensions
     }
 
     /// <summary>
-    /// Registers the artifact repository and its dependencies in the service collection using a factory to create the options provider.
+    /// Registers the artifact repository and its dependencies, with the options provider built by a factory.
     /// </summary>
-    /// <typeparam name="TOptionsProvider">The type that provides options for the artifact repository.</typeparam>
-    /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
-    /// <param name="implementationFactory">A factory that creates the <typeparamref name="TOptionsProvider"/> instance.</param>
-    /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
     public static IServiceCollection AddArtifactRepository<TOptionsProvider>(this IServiceCollection services, Func<IServiceProvider, TOptionsProvider> implementationFactory)
         where TOptionsProvider : class, IArtifactRepositoryOptionsProvider
     {

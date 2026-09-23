@@ -59,7 +59,7 @@ public sealed partial class TestConnectionConsumer(IConnectionTypeRegistry conne
 
             await context.Publish(new TestConnectionDoneEvent(correlationId, new() { ConnectionId = connection.Id, ErrorInfo = result.ErrorInfo, }), context.CancellationToken);
         }
-        // avoid repeats through error queue for the test
+        // Keeps the test from repeating through the error queue.
         catch (Exception e)
         {
             LogUnexpectedError(logger, e, correlationId, connection.Id);

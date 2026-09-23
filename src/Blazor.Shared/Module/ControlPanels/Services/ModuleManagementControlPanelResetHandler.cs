@@ -14,7 +14,7 @@ internal sealed class ModuleManagementControlPanelResetHandler(IModuleManagement
         {
             await state.CancelEditInOptionGrids();
 
-            // load metadata assets and jsons in one step
+            // Loads the metadata assets and jsons in one step.
             var metadataModels = await moduleManagementService.GetMetadata(false, cancellationToken);
             state.UpdateModules(metadataModels);
         }

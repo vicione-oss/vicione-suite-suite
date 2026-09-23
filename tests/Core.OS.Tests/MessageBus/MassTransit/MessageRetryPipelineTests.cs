@@ -138,7 +138,7 @@ public class MessageRetryPipelineTests
             (await Completes(probe.Succeeded)).Should().BeTrue("the third attempt has to succeed");
             (await Completes(probe.SideEffectReceived)).Should().BeTrue("the successful attempt has to flush its publish buffer");
 
-            // the two failed attempts published before they threw - give their side effects time to arrive if they were not discarded
+            // The two failed attempts published before they threw, so their side effects get time to arrive.
             await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
 
             probe.Attempts.Should().Be(3, "two configured intervals add two attempts to the initial one");
@@ -474,7 +474,7 @@ public class MessageRetryPipelineTests
         {
             var shouldSucceed = probe.RecordAttempt();
 
-            // publish first, fail afterwards - the shape the in-memory outbox exists to protect
+            // Publish first, fail afterwards: the shape the in-memory outbox exists to protect.
             await context.Publish(new OutboxProbeSideEffect(), context.CancellationToken);
 
             if (!shouldSucceed)

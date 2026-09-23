@@ -175,13 +175,13 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
     {
         try
         {
-            // this will go away because backups will be made with interval
+            // Goes away once backups run on an interval.
             // and downloaded directly from grid!
             // todo: allow backup file selection instead only allow loading last one
             _errorMessage = null;
             _isExportInProgress = true;
 
-            // we send a command to create a new backup - on correlating backup created event
+            // A command creates the backup; the correlating backup-created event carries the result.
             // we'll trigger request this backup and start the download
             var command = new CreateBackup();
             _exportCorrelationId = command.CorrelationId;
@@ -197,8 +197,8 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
 
     public Task Consume(ClientContext<RestoreBackupPrepared> context, CancellationToken cancellationToken)
     {
-        // suite will be restarted soon after receiving this message
-        // we don't correlate it because it's relevant for all users
+        // The suite restarts shortly after this message arrives.
+        // Not correlated, because it is relevant for every user.
         _isRestoreInProgress = false;
 
         if (context.Message.ErrorInfo is not null)
@@ -209,7 +209,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
             BannerService.ShowMessageBanner(MessageType.Information, Localization.UpdateControlPanel.BackupRestoreInProgress);
 
         return Task.CompletedTask;
-        // restore prepared we'll receive a ControlSystemCompleted if restart got triggered
+        // Once the restore is prepared, a ControlSystemCompleted arrives if a restart was triggered.
     }
 
     public async Task Consume(ClientContext<ControlSystemCompleted> context, CancellationToken cancellationToken)
@@ -226,7 +226,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
             return;
         }
 
-        // we don't correlate it because it's relevant for all users
+        // Not correlated, because it is relevant for every user.
         _errorMessage = null;
         _isResetInProgress = false;
         BannerService.ShowMessageBanner(MessageType.Information, Localization.UpdateControlPanel.ResetInProgressMessage);

@@ -17,7 +17,6 @@ internal static partial class IFileSystemExtensions
     private const string RestoreFlagFile = ".restore-backup";
     private const string ResetFlagFile = ".reset-suite";
 
-    /// <param name="fileSystem"></param>
     extension(IFileSystem fileSystem)
     {
         /// <summary>
@@ -25,7 +24,6 @@ internal static partial class IFileSystemExtensions
         /// On master instance a constant is used. For others, it's either generated or
         /// can be defined by <see cref="InstanceOptions.IdPreload"/>
         /// </summary>
-        /// <param name="instanceOptions"></param>
         internal void EnsureInstanceIdFile(InstanceOptions instanceOptions)
         {
             var localInfoFilePath = fileSystem.GetLocalInstanceIdFilePath(instanceOptions);
@@ -51,7 +49,7 @@ internal static partial class IFileSystemExtensions
             var recoveryFilePath = fileSystem.GetLocalRecoveryFilePath(instanceOptions);
             if (!fileSystem.File.Exists(recoveryFilePath))
             {
-                // file did not exist so we start the counter...
+                // The file was missing, so the counter starts here.
                 await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken: cancellationToken);
                 return RecoveryDecision.Continue;
             }
@@ -66,14 +64,14 @@ internal static partial class IFileSystemExtensions
             var timeElapsed = DateTimeOffset.UtcNow.Subtract(existingState.LastStartup);
             var checkTimespan = TimeSpan.FromMinutes(instanceOptions.Recovery.TimespanMinutes);
 
-            // the last startup is long time ago...reset
+            // The last startup is long past, so the counter resets.
             if (timeElapsed > checkTimespan)
             {
                 await fileSystem.WriteRecoveryStateReset(recoveryFilePath, cancellationToken: cancellationToken);
                 return RecoveryDecision.Continue;
             }
 
-            // we fail but we can try again once again...
+            // This attempt fails, but another one follows.
             if (existingState.Startups <= instanceOptions.Recovery.MaxStartupAttempts)
             {
                 existingState.Startups++;
@@ -186,7 +184,7 @@ internal static partial class IFileSystemExtensions
         /// <summary>
         /// Writes a reset file to indicate that the instance should reset its modules on next startup if the file does not already exist.
         /// File name is <see cref="ResetFlagFile"/> within the instance suite home directory.
-        /// </summary>    
+        /// </summary>
         public void WriteResetFile(InstanceOptions options)
         {
             if (fileSystem.ResetFileExists(options))
@@ -231,18 +229,14 @@ internal static partial class IFileSystemExtensions
             => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(options), ResetFlagFile);
 
         /// <summary>
-        /// Deletes each directory recursively contained in <see cref="InstanceOptions.CacheDirectory"/> 
+        /// Deletes each directory recursively contained in <see cref="InstanceOptions.CacheDirectory"/>
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="logger"></param>
         public void DeleteCacheDirectories(InstanceOptions options, ILogger? logger = null)
             => fileSystem.DeleteChildDirectories(fileSystem.GetRootedCacheDirectory(options), "cache", logger);
 
         /// <summary>
-        /// Deletes each directory recursively contained in <see cref="InstanceOptions.HomeDirectory"/> 
+        /// Deletes each directory recursively contained in <see cref="InstanceOptions.HomeDirectory"/>
         /// </summary>
-        /// <param name="options"></param>
-        /// <param name="logger"></param>
         public void DeleteHomeDirectories(InstanceOptions options, ILogger? logger = null)
             => fileSystem.DeleteChildDirectories(fileSystem.GetRootedHomeDirectory(options), "home", logger);
 

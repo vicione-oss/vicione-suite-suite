@@ -20,7 +20,7 @@ public sealed partial class NavTilePanel : ComponentBase, IDisposable
     {
         public int Compare(string? x, string? y)
         {
-            // tiles with no route should come last
+            // Tiles without a route come last.
             if (x is null && y is null)
                 return 0;
 
@@ -50,7 +50,7 @@ public sealed partial class NavTilePanel : ComponentBase, IDisposable
 
         await UpdateNavTiles(user);
 
-        // this one triggers a a lot of refresh cycles
+        // This triggers a lot of refresh cycles.
         // because it's triggered on add nav tile
         foreach (var r in NavTileRegistries)
             r.Changed += NavTileRegistryChanged;
@@ -168,7 +168,7 @@ public sealed partial class NavTilePanel : ComponentBase, IDisposable
                 }
                 catch (OperationCanceledException)
                 {
-                    // nothing to do here, we just return gracefully
+                    // Nothing to do here.
                 }
 
                 if (!CancellationToken.IsCancellationRequested)

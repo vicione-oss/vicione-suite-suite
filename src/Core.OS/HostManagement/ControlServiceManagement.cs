@@ -50,7 +50,7 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
         if (response.Configuration is null)
             throw new InvalidOperationException("Failed to fetch system configuration.");
 
-        // check for existing ones or add new one
+        // Existing entries are reused, otherwise a new one is added.
         var serviceToControl = GetOrAddServiceToControl(response.Configuration, serviceName);
 
         ApplyServiceCommand(serviceToControl, command);
@@ -68,7 +68,7 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
 
     private static ServiceDetail GetOrAddServiceToControl(SystemConfiguration? configuration, string serviceName)
     {
-        // we have no configuration at all so no services!
+        // No configuration means no services.
         if (configuration is null)
             throw new InvalidOperationException("SystemConfiguration does not exist");
 

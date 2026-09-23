@@ -21,9 +21,8 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     private int? _offset;
 
     /// <summary>
-    /// adds "path":{"$match":"expression"} to $and list
+    /// Adds "path":{"$match":"expression"} to the $and list, e.g. /some/path/to or /some/path*.
     /// </summary>
-    /// <param name="expression">e.g. /some/path/to or /some/path*</param>
     public IArtifactQueryBuilder AndPathMatches(string expression)
     {
         _query.Criteria ??= [];
@@ -37,9 +36,8 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// adds "name":{"$match":"expression"}
+    /// Adds "name":{"$match":"expression"} to the $and list, e.g. NameXyz or NameXy*.
     /// </summary>
-    /// <param name="expression">e.g. NameXyz or NameXy*</param>
     public IArtifactQueryBuilder AndNameMatches(string expression)
     {
         _query.Criteria ??= [];
@@ -53,9 +51,8 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// adds "name":{"$match":"expression"}
+    /// Adds "name":{"$nmatch":"expression"} to the $and list, e.g. NameXyz or NameXy*.
     /// </summary>
-    /// <param name="expression">e.g. NameXyz or NameXy*</param>
     public IArtifactQueryBuilder AndNameNotMatches(string expression)
     {
         _query.Criteria ??= [];
@@ -69,7 +66,7 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// adds "modified":{"$gt":"datetime:O"}
+    /// Adds "modified":{"$gt":"datetime:O"}.
     /// </summary>
     public IArtifactQueryBuilder ModifiedAfter(DateTimeOffset value)
     {
@@ -82,7 +79,7 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// adds .include("item1", "item2") to query string
+    /// Adds .include("item1", "item2") to the query string.
     /// </summary>
     public IArtifactQueryBuilder IncludeFields(params string[] includes)
     {
@@ -94,7 +91,7 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// .sort({"$asc" : ["field1", "field2",... ]})
+    /// Adds .sort({"$asc" : ["field1", "field2", ...]}).
     /// </summary>
     public IArtifactQueryBuilder OrderBy(params string[] fields)
     {
@@ -104,7 +101,7 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// .sort({"$desc" : ["field1", "field2",... ]})
+    /// Adds .sort({"$desc" : ["field1", "field2", ...]}).
     /// </summary>
     public IArtifactQueryBuilder OrderByDescending(params string[] fields)
     {
@@ -114,11 +111,10 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// .find("type" : "folder")
+    /// Adds .find("type" : "folder"). Files are the JFrog default and need no filter.
     /// </summary>
     public IArtifactQueryBuilder FilterBy(ArtifactKind artifactType)
     {
-        // file is the default
         if (artifactType == ArtifactKind.Folder)
         {
             _typeFilter = new AqlTypeMatch { Type = "folder" };
@@ -128,7 +124,7 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// .offset(100).limit(50)
+    /// Adds .offset(100).limit(50).
     /// </summary>
     public IArtifactQueryBuilder Limit(int itemLimit, int offset = 0)
     {
@@ -141,7 +137,7 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     /// <inheritdoc />
     public string Build()
     {
-        // ensure we don't serialize it if we don't have criteria
+        // An empty criteria list must not reach the serializer.
         if (_query.Criteria != null && _query.Criteria.Count == 0)
             _query.Criteria = null;
 
@@ -190,15 +186,13 @@ internal class JFrogArtifactQueryBuilder : IArtifactQueryBuilder
     }
 
     /// <summary>
-    /// Replaces <see cref="RepositoryPlaceholder" /> with <paramref name="repository"/> within
-    /// <paramref name="aqlQuery"/> if contained in the query.
+    /// Replaces <see cref="RepositoryPlaceholder"/> in <paramref name="aqlQuery"/> with <paramref name="repository"/>.
     /// </summary>
     public static string InjectRepository(string aqlQuery, string repository)
     {
-        // We need to inject the repository filter here to hide our multiple sources from the user
-        // If multiple repositories are configured for the same host e.g. igm.jfrog.io this it the
-        // key to filter get the matching artifacts. If we want to do it better we'll need to change
-        // the API to expose the AQL
+        // Injected here to keep the multiple configured sources out of the public API. With several
+        // repositories on one host, e.g. igm.jfrog.io, this filter is the only way to select the
+        // matching artifacts; exposing the AQL on the API would be the better fix.
         return aqlQuery.Replace(RepositoryPlaceholder, repository, StringComparison.Ordinal);
     }
 

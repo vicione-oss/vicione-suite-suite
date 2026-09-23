@@ -14,8 +14,7 @@ public sealed class HostManagementOptions
     public PipeOptions? PipeOptions { get; set; }
 
     /// <summary>
-    /// Set the lifetime of the package cache in ms - after this period the cache gets invalid and
-    /// will be refreshed on next request
+    /// The cache is invalidated after this period and refreshed on the next request, not on a timer.
     /// </summary>
     public long ConfigurationCacheLifetimeMs { get; set; } = 30_000;
 }

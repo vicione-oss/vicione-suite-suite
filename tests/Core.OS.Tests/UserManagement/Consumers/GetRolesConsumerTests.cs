@@ -1,8 +1,10 @@
 using Core.OS.Modules;
 using Core.OS.UserManagement.Consumers;
 using Core.OS.UserManagement.Extensions;
+using Core.Shared.UserManagement;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using Sdk.Authorization;
 using Sdk.Testing.Backend;
 using Sdk.UserManagement.Requests;
 
@@ -47,6 +49,7 @@ public class GetRolesConsumerTests
         var response = await tester.TestRequest<GetRolesResponse, GetRoles>(request);
 
         // Assert
-        //response.Roles.Select(r => r.Name).Should().BeEquivalentTo(Enum.GetValues<AccessLevel>().Select(a => SeedingExtensions.GetRoleNameByConvention(Sdk.Constants.SystemModuleId, a)));
+        response.Roles.Should().HaveCount(1);
+        response.Roles.Single().Name.Should().Be(AuthorizationConstants.AdminRoleName);
     }
 }

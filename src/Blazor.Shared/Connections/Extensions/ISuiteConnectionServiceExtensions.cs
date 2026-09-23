@@ -45,11 +45,8 @@ internal static class ISuiteConnectionServiceExtensions
     }
 
     /// <summary>
-    /// Returns true if a connection with another id has already the same name
+    /// Returns true when another connection already uses the same name.
     /// </summary>
-    /// <param name="service"></param>
-    /// <param name="connection"></param>
-    /// <returns></returns>
     internal static bool IsNameAlreadyUsed(this ISuiteConnectionService service, Connection connection)
         => service.Connections.Any(c => connection.Id != c.Id && string.Equals(c.Name, connection.Name, StringComparison.Ordinal));
 }

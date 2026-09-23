@@ -27,9 +27,8 @@ public class WebApplicationExtensionsTests
             // Assert
             Assert.NotNull(failures);
 
-            // These assertions supposed to be .HaveCount(1) and .Should.Contain instead!
-            // Changed them to have at least a test for the status quo.
-            // TODO adjust accordingly when solving https://gitlab.com/vicione-oss/vicione/suite/suite/-/issues/2664
+            // TODO(#2664): these assertions pin the status quo. Restore them to HaveCount(1) and
+            // Should().Contain once the issue is solved.
             failures.Should().HaveCount(0);
             failures.FirstOrDefault().Should().NotContain(nameof(TestOptions.Option));
         }

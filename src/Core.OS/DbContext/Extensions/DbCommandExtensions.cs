@@ -111,7 +111,7 @@ public static class DbCommandExtensions
                     else if (dataTypeName.Equals("uuid", StringComparison.OrdinalIgnoreCase))
                     {
                         sb.Append('\'');
-                        // if guids are lowercase inserted into SQLite comparison on guids fail!
+                        // A lowercase guid inserted into SQLite makes guid comparisons fail.
                         sb.Append(valueReader.GetGuid(i).ToString().ToUpperInvariant());
                         sb.Append('\'');
                     }

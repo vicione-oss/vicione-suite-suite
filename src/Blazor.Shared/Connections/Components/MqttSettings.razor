@@ -17,7 +17,7 @@
                           @bind-Value:after="NotifyChanged" />
 </SettingsField>
 
-<!-- disable for websocket connection -->
+@* Disabled for a websocket connection *@
 <SettingsField Label="@TechnicalTerms.Port">
     <SpinEdit @bind-Value="@Connection.Port"
               @bind-Value:after="NotifyChanged"

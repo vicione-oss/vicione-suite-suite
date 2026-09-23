@@ -21,7 +21,7 @@ internal sealed class NotificationElementRegistry<TClientModule> : INotification
 
     public event Action<RegistryChangedEventArgs<INotificationElementRegistryItem>>? Changed;
 
-    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentException">The given id is already registered.</exception>
     public INotificationElementRegistryItem Add<TElement, TState>(TState state, int? position = null, Guid? id = null, IAuthorizationRequirement? authorizationRequirement = null)
         where TElement : NotificationElementBase<TState>
         where TState : INotificationElementState

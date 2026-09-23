@@ -47,11 +47,11 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
             }
             catch (OperationCanceledException)
             {
-                // Nothing to do here, we return gracefully
+                // Cancellation needs no handling.
             }
             catch (ObjectDisposedException)
             {
-                // Semaphore or other object already disposed, nothing we can do, return gracefully
+                // The semaphore is already disposed; nothing left to release.
             }
         }
     }
@@ -90,16 +90,13 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
 
             fileSystem.Directory.CreateDirectory(stagingPath);
 
-            // try to find the matching artifact on the repository                      
             var moduleArtifact = await QueryModuleArtifact(package, cancellationToken)
                 ?? throw new InvalidOperationException($"Can't find artifact for package='{package.Name}' version='{package.Version}'");
 
-            // download the module zip and extract it into the staging directory
             await artifactRepository.DownloadAndExtract(moduleArtifact, stagingPath, cancellationToken);
 
-            // because the metadata is not part of the zip we try download it and put it into module directory.            
-            // we don't know with which sdk version the module got published
-            // we have to query a matching one by package version                       
+            // The metadata is not part of the zip and the publishing sdk version is unknown, so it is
+            // downloaded separately by querying for a match on the package version.
             var metadataPath = fileSystem.Path.Combine(stagingPath, ModuleHelpers.GetLocalMetadataFileName(package.Name));
             await using (var metadataDownloadStream = await GetMetadataDownloadStream(package, cancellationToken))
             await using (var metadataFileStream = fileSystem.FileStream.New(metadataPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
@@ -191,7 +188,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
     public async Task<Stream> GetMetadataDownloadStream(ModuleDependencyPackage package,
         CancellationToken cancellationToken = default)
     {
-        // Find the specific metadata asset using AQL
+        // Finds the metadata asset by AQL:
         // 0.33.0-ci1632286-win-x64_0.28.0.json
         // -> .../vicione-suite/modules/ViciOne.Suite.ClusterManagement/0.32.1-linux-arm64.zip
         var aqlQuery = artifactRepository.CreateQueryBuilder()
@@ -250,7 +247,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
 
         LogQueryResultErrors(result);
 
-        // our major version matches already by name filter
+        // The name filter has already matched the major version.
         if (sdkVersion is null)
             return [.. result.Artifacts];
 
@@ -266,7 +263,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
             .AndPathMatches($"{ModulesBaseFolder}/{package.Name}")
             .AndNameMatches($"{package.Version}-{RuntimeInformation.RuntimeIdentifier}.zip");
 
-        // 0.28.0-ci1523472-linux-arm64_0.25.0.json        
+        // e.g. 0.28.0-ci1523472-linux-arm64_0.25.0.json
         var aqlQuery = queryBuilder.Build();
 
         LogAqlQuery(logger, nameof(QueryModuleArtifact), aqlQuery);
@@ -312,7 +309,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
         if (sdkVersion is null)
             return $"*{RuntimeInformation.RuntimeIdentifier}*.json";
 
-        // We limit to major.minor version and allow different patch versions
+        // Limited to major.minor; any patch version is accepted.
         return $"*{RuntimeInformation.RuntimeIdentifier}*_{sdkVersion.Major}.*.json";
     }
 

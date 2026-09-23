@@ -9,7 +9,7 @@ public sealed class ProfileCategoryDescriptor : IControlPanelCategoryDescriptor
 {
     public string Title => CommonVocabulary.Profile;
 
-    // TODO https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2675
+    // TODO(#2675): use a profile icon rather than the generic user-interface one.
     public string? IconCssClass
         => MonochromeIconName.UserInterfaceLight.GetCssClasses(MonochromeIconSize.SmallMedium)
             .ToSpaceSeparated();

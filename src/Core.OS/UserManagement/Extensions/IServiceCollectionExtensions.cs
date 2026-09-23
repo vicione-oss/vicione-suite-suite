@@ -55,7 +55,7 @@ internal static class IServiceCollectionExtensions
     {
         var userManagementOptions = config.GetUserManagementOptions();
         var smtpOptions = config.GetSmtpOptions();
-        // ui host might not know identity or suite user
+        // The ui host may know neither identity nor the suite user.
         moduleHost.AddUiHostServices(services,
             (svc) =>
             {
@@ -96,7 +96,7 @@ internal static class IServiceCollectionExtensions
         services.AddAuthentication()
             .AddOpenIdConnect(DynamicExternalIdProviderOptions.OptionsName, _ =>
             {
-                // will be handled by DynamicExternalIdProviderOptions
+                // Handled by DynamicExternalIdProviderOptions.
             });
     }
 }

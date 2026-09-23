@@ -25,22 +25,21 @@ internal static class ModuleSynchronizationStep
         if (ctx.ModuleOptions is null || ctx.ModuleLoaderOptions is null)
             return new ModuleHostPreparationResult("Module options were not loaded before loading the module host");
 
-        // get versions of loaded debug modules
+        // Versions of the loaded debug modules.
         var debugModuleVersions = await ctx.FileSystem.GetDebugModuleVersions(ctx.ModuleLoaderOptions, ct);
 
-        // contains package versions with dependencies from AppData/modules.json
+        // Package versions with their dependencies, from AppData/modules.json.
         var moduleIds = ctx.ModuleOptions
             .Where(k => k.Value.Enable)
             .Select(k => k.Key);
 
-        // prevent downloading packages that are not enabled by configuration
+        // A package not enabled by configuration must not be downloaded.
         var packages = ctx.Manifest.GetValidModulePackages([.. moduleIds], debugModuleVersions, ctx.Logger);
         var repositoryLogger = ctx.LoggerFactory.CreateLogger<JFrogArtifactRepository>();
         var repository = new JFrogArtifactRepository(ctx.FileSystem, httpClientFactory, ctx.RepositoryOptionsCache, repositoryLogger);
         var moduleRepositoryLogger = ctx.LoggerFactory.CreateLogger<ModuleArtifactRepository>();
         var moduleRepository = new ModuleArtifactRepository(repository, ctx.FileSystem, moduleRepositoryLogger);
         
-        // we have everything to start synchronizing the module packages with the configured artifact repositories
         var synchronizer = new ModuleSynchronizer(ctx.FileSystem)
             .WithApiAdapter(moduleRepository)
             .WithPackages(packages)
@@ -48,7 +47,6 @@ internal static class ModuleSynchronizationStep
             .WithPackageSdkValidation()
             .WithOrphanedVersionCleanup();
 
-        // start synchronisation with configured options
         ctx.SynchronizationResults = await synchronizer.ProcessSynchronization(ct);
         ctx.SynchronizationResults.LogSynchronizationResults(ctx.Logger);
 
@@ -56,11 +54,11 @@ internal static class ModuleSynchronizationStep
                 .Where(k => k.Error == null)
                 .ToDictionary(k => k.Name, v => v.Version);
 
-        // when we no resolved modules we don't need to update the manifest
+        // Without resolved modules the manifest needs no update.
         if (resolvedModules.Count == 0)
             return PreparationResult.Success;
 
-        // manifest could contain a module that is only disabled by env or appsettings
+        // The manifest may hold a module that is merely disabled by env or appsettings.
         // we don't want to modify these but need to update the resolved package versions
         var update = ctx.Manifest.UpdatePackageVersions(resolvedModules);
         if (update is not null)
@@ -69,7 +67,7 @@ internal static class ModuleSynchronizationStep
             ctx.Manifest.Packages.AddRange(packages);
             ctx.Manifest.LastModified = DateTimeOffset.UtcNow;
 
-            // persist the resolved package versions so next synchronization won't resolve them again
+            // Persisting the resolved versions keeps the next synchronization from resolving them again.
             await ModulePackageManifestStore.Store(ctx.Manifest, ctx.FileSystem, ctx.InstanceOptions, ct);
         }
 

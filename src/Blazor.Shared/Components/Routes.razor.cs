@@ -23,7 +23,7 @@ public sealed partial class Routes
 
     protected override async Task OnInitializedAsync()
     {
-        // here the service provider is injected scoped so we initialize our shared scope
+        // The service provider is injected scoped, so the shared scope is initialized here.
         await ModuleService.InitializeServices(ServiceProvider);
 
         _initialized = true;

@@ -24,8 +24,6 @@ public static class UserMessageExtensions
         /// Used to pass error state from minimal API endpoints to the login page,
         /// since Blazor components don't support <c>[TempData]</c> attribute binding.
         /// </remarks>
-        /// <param name="context">The current HTTP context.</param>
-        /// <param name="message">The error value to store (typically <see cref="ExternalLoginError"/>).</param>
         public void AddExternalError(HttpContext context,
             object message)
         {

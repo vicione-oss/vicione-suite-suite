@@ -13,10 +13,10 @@ internal static class ModuleManagementControlPanelStateExtensions
         {
             state.EnqueuedOperations.Clear();
 
-            // no module allows modification so installation is not allowed
+            // No module allows modification, so installation is disallowed.
             state.AllowInstallation = models.Any(k => k.CanBeModified);
 
-            // split them for the tabs
+            // Split for the tabs.
             state.InstalledModules = models.Where(k => k.Installed).OrderBy(k => k.Title).AsQueryable();
             state.AvailableModules = models.Where(k => !k.Installed).OrderBy(k => k.Title).AsQueryable();
         }

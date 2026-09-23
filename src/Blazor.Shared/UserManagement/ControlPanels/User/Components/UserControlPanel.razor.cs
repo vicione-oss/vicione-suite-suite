@@ -23,7 +23,6 @@ namespace Blazor.Shared.UserManagement.ControlPanels.User.Components;
 public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanelState>,
     IEventConsumer<UserCreatedEvent>, IEventConsumer<UserUpdatedEvent>, IEventConsumer<RoleDeletedEvent>
 {
-    // private bool _twoFactorAuthenticationEnabled;
     private readonly AutoDisposeList<IDisposable> _subscriptionHandle = [];
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private bool _selfEdit;
@@ -101,8 +100,7 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
     {
         if (errorInfo is not null)
         {
-            // Optional: hook UI error handling here (dialog/toast/banner), then return.
-            // Example (pseudo): State.SetError(userUpdatedEvent.ErrorInfo);
+            // The error is not surfaced to the user yet; the panel only re-renders.
             await InvokeAsync(StateHasChanged);
             return;
         }

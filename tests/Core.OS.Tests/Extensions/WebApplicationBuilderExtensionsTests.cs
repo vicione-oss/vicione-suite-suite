@@ -2,6 +2,7 @@ using System.IO.Abstractions.TestingHelpers;
 using Core.OS.Extensions;
 using Core.OS.Hosting;
 using Core.OS.Hosting.Contracts;
+using Core.OS.Hosting.Extensions;
 using Core.OS.Instance;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
@@ -62,7 +63,7 @@ public class WebApplicationBuilderExtensionsTests
             // Arrange
             using var staticLogger = new BufferedStaticLogger();
             var builder = WebApplication.CreateBuilder();
-            // the module context is missing, so the service registration throws and startup ends in the catch block
+            // The module context is missing, so service registration throws and startup ends in the catch.
             var preparationContext = new SuitePreparationContext(_fileSystem, _instanceOptions, staticLogger.LoggerFactory);
 
             // Act
@@ -95,7 +96,9 @@ public class WebApplicationBuilderExtensionsTests
             SetupTestFiles(_fileSystem, cacheDirectory);
 
             // Act
-            //await RestoreProcessor.HandleSuiteRestore(_fileSystem, instanceOptions, _loggerFactory);
+            using var pipeline = new SuitePreparationPipeline(
+                new SuitePreparationContext(_fileSystem, _instanceOptions, _loggerFactory));
+            await pipeline.UseRestoreIfRequested().RunAsync(TestContext.Current.CancellationToken);
 
             // Assert
             _fileSystem.Directory.GetDirectories(homeDirectory).Should().BeEmpty();

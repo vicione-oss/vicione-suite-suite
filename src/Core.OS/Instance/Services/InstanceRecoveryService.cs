@@ -8,17 +8,13 @@ internal sealed class InstanceRecoveryService(IFileSystem fileSystem, IOptions<I
     IHostedService
 {
     /// <summary>
-    /// not used...recovery analyzer has to run before any service registration 
+    /// not used...recovery analyzer has to run before any service registration
     /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     /// <summary>
     /// on graceful shutdown like sigterm 0, restart etc.
     /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
     public Task StopAsync(CancellationToken cancellationToken)
     {
         try

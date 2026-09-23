@@ -23,7 +23,7 @@ public sealed class EventForwardToUiConsumer<T>(IEnumerable<IUiEventPublisher<T>
         {
             foreach (var publisher in publisherList)
             {
-                // if the event does not implement CorrelatedBy<Guid?> the CorrelationId gets lost if event gets published
+                // An event that does not implement CorrelatedBy<Guid?> loses its CorrelationId when published.
                 // inside an activity because ExecuteContext is different
                 try
                 {

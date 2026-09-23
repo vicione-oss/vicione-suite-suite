@@ -12,7 +12,7 @@ public partial class ModulePackageManifestStore(IFileSystem fileSystem, IOptions
 {
     /// <summary>
     /// Static version of <see cref="ModulePackageManifestStore.Load"/> method, used in scenarios where dependency injection is not available (e.g. during instance initialization before the service container is built)
-    /// </summary>    
+    /// </summary>
     public static async Task<ModulePackageManifest> Load(IFileSystem fileSystem, InstanceOptions options, ILogger logger, CancellationToken cancellationToken)
     {
         try

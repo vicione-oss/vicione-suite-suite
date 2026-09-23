@@ -259,7 +259,7 @@ public sealed partial class ModuleArtifactCache : IDisposable, IModuleArtifactCa
         }
         catch (OperationCanceledException)
         {
-            // ignore this one, we don't want to log errors on cancellation
+            // Cancellation is not logged as an error.
             return null;
         }
         catch (Exception ex)
@@ -295,7 +295,7 @@ public sealed partial class ModuleArtifactCache : IDisposable, IModuleArtifactCa
                 return;
 
             // Discard the persisted cache when it was produced by a different SDK. A changed SDK can alter
-            // module compatibility and metadata semantics, so a full re-fetch is safer than the stale snapshot.            
+            // module compatibility and metadata semantics, so a full re-fetch is safer than the stale snapshot.
             if (!IsSdkCompatible(data.SdkVersion))
             {
                 LogDiscardedPersistedCacheSdkVersion(_logger, data.SdkVersion, _sdkVersion);

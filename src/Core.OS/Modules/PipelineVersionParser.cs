@@ -18,7 +18,6 @@ internal static partial class PipelineVersionParser
     /// <param name="version">0.38.1 (40454a3e)</param>
     /// <param name="parsed">0.38.1</param>
     /// <param name="commitId">40454a3e</param>
-    /// <returns></returns>
     public static bool TryParse(string? version, [NotNullWhen(true)] out string? parsed, out string? commitId)
     {
         parsed = null;

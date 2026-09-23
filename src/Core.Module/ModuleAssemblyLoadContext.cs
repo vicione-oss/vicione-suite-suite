@@ -29,11 +29,11 @@ internal sealed class ModuleAssemblyLoadContext : AssemblyLoadContext
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        // if we return null we let the default resolver handle the libs
+        // Returning null hands the assembly to the default resolver.
         if (assemblyName.Name is null)
-            return null; // not sure how to handle this case. It's technically possible.
+            return null;
 
-        // suite is published self-contained and ships many NET.Core assemblies it does not directly reference
+        // The suite is published self-contained and ships many .NET Core assemblies it does not reference.
         if (_suiteContext.Core.RuntimeFiles.Any(k => assemblyName.Name == Path.GetFileNameWithoutExtension(k.Path)))
             return null;
 
@@ -51,15 +51,15 @@ internal sealed class ModuleAssemblyLoadContext : AssemblyLoadContext
         }
 #endif
 
-        // for all assemblies provided by a module requested by another one we have a mapping to resolve it from the right context
+        // An assembly one module provides and another requests is resolved from the owning context.
         var mapping = _suiteContext.Mappings.FirstOrDefault(k => k.AssemblyName == assemblyName.Name);
         if (mapping is not null && mapping.MapTo.Module != Name)
         {
             // e.g. Mediator, Sdk etc.
             if (mapping.MapTo.Module == _suiteContext.Core.AssemblyName)
             {
-                // here our source is the default context that would resolve to exact assembly version                 
-                // if Ms.Ef.Relational in 8.0.6 is requested but suite provides 8.0.5 we need to reuse the loaded 
+                // The default context would resolve an exact version, so the already loaded one is reused:
+                // a request for Ms.Ef.Relational 8.0.6 has to accept the 8.0.5 the suite provides.
                 return Default.Assemblies.FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
             }
 
@@ -69,30 +69,28 @@ internal sealed class ModuleAssemblyLoadContext : AssemblyLoadContext
                 return assembly;
         }
 
-        // maybe the assembly was already loaded by suite
+        // The suite may have loaded it already.
         if (Default.Assemblies.Any(a => a.GetName().Name == assemblyName.Name))
         {
             return null;
         }
 
-        // try to get already loaded assembly from this context
         var loadedAssembly = Assemblies.FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
         if (loadedAssembly is not null)
         {
             return loadedAssembly;
         }
 
-        // resolve using main deps json - the normal way
+        // The normal path: resolve through the main deps.json.
         var resolvedPath = Resolver.ResolveAssemblyToPath(assemblyName);
         if (string.IsNullOrEmpty(resolvedPath) || !File.Exists(resolvedPath))
         {
-            // here we have a situation where an assembly is requested that is not mapped.
-            // this affects assemblies referenced by a single module like DevExpress with a direct
-            // reference to e.g. DevExpress.Drawing.v24.2.Skia
+            // An unmapped assembly referenced by a single module, e.g. DevExpress referencing
+            // DevExpress.Drawing.v24.2.Skia directly.
             var moduleContext = _suiteContext.ResolveModuleContext(assemblyName);
             if (moduleContext is not null && moduleContext.DepsJsonFilePath != _mainAssemblyPath)
             {
-                // now we have the context that owns the assembly so we let the module context resolve it
+                // The owning context resolves it.
                 var assembly = LoadAssemblyByDependencyContext(_suiteContext, moduleContext, assemblyName);
                 if (assembly is not null)
                     return assembly;
@@ -113,35 +111,33 @@ internal sealed class ModuleAssemblyLoadContext : AssemblyLoadContext
         var context = All.FirstOrDefault(c => c.Name == contextName);
         if (context is null)
         {
-            // it's possible that backend requests a dll from client but it's context is not yet loaded
-            // therefore we need to create it and use it to resolve the assembly path.            
+            // A backend can request a dll from a client whose context is not loaded yet, so the context is
+            // created here and used to resolve the assembly path.
             var modContext = Create(suiteContext, sourceContext.AssemblyPath);
             var path = modContext.Resolver.ResolveAssemblyToPath(assemblyName);
             if (string.IsNullOrEmpty(path))
                 return null;
 
-            // the assembly gets loaded into the modContext to be reused later on
+            // Loaded into the modContext so it can be reused later.
             return modContext.LoadAssemblyFromFilePath(path);
         }
 
-        // try to get already loaded assembly
+        // An already loaded assembly, if there is one.
         var assembly = context.Assemblies.FirstOrDefault(a => a.GetName().Name == assemblyName.Name);
         if (assembly is not null)
         {
-            //Debug.WriteLine("ModuleAssemblyLoadContext[{0}]:: {1} is shared. use existing requested by {2}", context.Name, assemblyName, _mainAssemblyPath);
             return assembly;
         }
 
-        //Debug.WriteLine("ModuleAssemblyLoadContext[{0}]:: {1} is shared. load it directly requested by {2}", context.Name, assemblyName, _mainAssemblyPath);
         try
         {
-            // prevent multiple load attempts seen on arm64 tests
+            // Prevents the repeated load attempts seen on arm64 tests.
             if (_alreadyLoadedFromName.Contains(assemblyName.Name))
                 return null;
 
             _alreadyLoadedFromName.Add(assemblyName.Name);
 
-            // we know we have it!
+            // The context is known to hold it.
             return context.LoadFromAssemblyName(assemblyName);
         }
         catch (FileNotFoundException ex)
@@ -169,7 +165,7 @@ internal sealed class ModuleAssemblyLoadContext : AssemblyLoadContext
     // todo: unify usage and ModuleAssemblyLoadResult for logging
     internal static ModuleAssemblyLoadContext Create(SuiteDependencyContext suiteContext, string assemblyPath)
     {
-        // ensure the context name is unique
+        // The context name has to be unique.
         var contextName = Path.GetFileNameWithoutExtension(assemblyPath);
         var existingContext = All.FirstOrDefault(a => a.Name == contextName) as ModuleAssemblyLoadContext;
         if (existingContext is not null)
@@ -177,7 +173,7 @@ internal sealed class ModuleAssemblyLoadContext : AssemblyLoadContext
 
         var context = new ModuleAssemblyLoadContext(suiteContext, assemblyPath);
 
-        // load the main assembly into the context
+        // Loads the main assembly into the context.
         context.LoadAssemblyFromFilePath(assemblyPath);
 
         return context;

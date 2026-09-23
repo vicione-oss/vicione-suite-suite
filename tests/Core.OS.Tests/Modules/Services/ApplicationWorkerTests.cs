@@ -42,7 +42,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
     {
         _appFactory = appFactory.WithWebHostBuilder(builder =>
         {
-            // base setup done in factory - add/override services needed for the test
+            // The factory does the base setup; this adds or overrides what the test needs.
             builder.ConfigureTestServices(services =>
             {
                 services
@@ -158,7 +158,7 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
             await worker.StartingAsync(TestContext.Current.CancellationToken);
 
             // Assert
-            await nonceStore.Received().DeletedOrphaned(Arg.Any<CancellationToken>());
+            await nonceStore.Received().DeleteOrphaned(Arg.Any<CancellationToken>());
         }
 
         [Fact]

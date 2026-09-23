@@ -8,14 +8,12 @@ internal static class IEnumerableExtensions
     /// Reduces <paramref name="items"/> beginning at <paramref name="start"/>, then moving to
     /// the next item, then to the previous item, then repeating the process until all items
     /// have been touched.
-    /// 
     /// If <paramref name="maximumItems"/> is reached and move to next / previous item is
     /// still possible, then the last collected item is discarded and replaced with
     /// the next / previous item.
     /// </summary>
     /// <remarks>
     /// Example: (1), 2, 3, 4, [5], 6, 7, 8, 9, 10, 11, (12) is reduced to (1), 4, [5], 6, 7, (12)</remarks>
-    /// <returns>Reduced items</returns>
     /// <exception cref="ArgumentException"/>
     public static HashSet<T> Reduce<T>(this IEnumerable<T> items, T start, int maximumItems)
     {
@@ -27,7 +25,7 @@ internal static class IEnumerableExtensions
         // State of result from start to finish:
         //  5
         //  5 6
-        //  4 5 6 
+        //  4 5 6
         //  4 5 6 7
         //  3 4 5 6 7
         //  3 4 5 6 7 8 <- maximum items reached

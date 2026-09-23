@@ -48,7 +48,7 @@ internal sealed class NetworkInterfaceControlPanelSaveHandler(
 
         newNetworkInterface.IPv4.DHCPEnabled = state.IpV4ConfigurationMode == IpConfigurationMode.AutomaticDhcp;
 
-        // filter out fieldsets not filled and remove duplicates
+        // Unfilled fieldsets and duplicates are dropped.
         var ipV4Details = new List<NetworkInterfaceIPv4Detail> { state.FirstIpV4Detail };
         ipV4Details.AddRange(state.AdditionalIpV4Details);
 
@@ -67,8 +67,6 @@ internal sealed class NetworkInterfaceControlPanelSaveHandler(
             newNetworkInterface.IPv4.Gateway = null;
         else
             newNetworkInterface.IPv4.Gateway = IPAddress.Parse(state.DefaultGateway);
-
-        // ... = _macAddressManually ? _macAddress : string.Empty;
 
         newNetworkInterface.IPv4.VLANEnabled = state.VLanEnabled;
 

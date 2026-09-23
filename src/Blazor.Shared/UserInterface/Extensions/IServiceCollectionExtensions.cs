@@ -11,9 +11,7 @@ public static class IServiceCollectionExtensions
         services.AddDateAndTimeControlPanel()
             .AddLanguageControlPanel();
 
-        // Currently disabled as functionality is tbd:
-        //.AddThemeControlPanel();
-
+        // The theme control panel stays unregistered while its functionality is tbd.
         return services;
     }
 }

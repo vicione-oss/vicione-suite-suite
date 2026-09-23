@@ -4,7 +4,7 @@ using Sdk.Modules;
 namespace TestUiHost.Services;
 
 /// <summary>
-/// To test what happens if 2 Backend-Modules register implementations of the same interface 
+/// To test what happens if 2 Backend-Modules register implementations of the same interface
 /// </summary>
 internal class TestInstanceInformationProvider : IInstanceInformationProvider
 {

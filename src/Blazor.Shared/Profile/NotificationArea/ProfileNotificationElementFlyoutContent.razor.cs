@@ -24,8 +24,6 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
     private UserProfile? _userProfile;
     private UserProfile? _userProfileBaseline;
     private bool _editUserDataStarted;
-    //private bool _absence = true;
-    //private bool _notifications = true;
     private readonly UserProfileMapper _userProfileMapper = new();
     private CrossInstanceConfiguration? _crossInstanceConfiguration;
     private List<UserProfile> _users = [];
@@ -187,14 +185,12 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
 
     private void ChangeStateAbsence(bool value)
     {
-        //_absence = value;
-        // TODO - any action
+        // The toggle is display-only; absence has no backing state yet.
     }
 
     private void ChangeStateNotification(bool value)
     {
-        //_notifications = value;
-        // TODO - any action
+        // The toggle is display-only; notifications have no backing state yet.
     }
 
     private void CultureChanged()

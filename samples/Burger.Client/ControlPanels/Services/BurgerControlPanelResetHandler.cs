@@ -9,7 +9,7 @@ internal sealed class BurgerControlPanelResetHandler() : IControlPanelResetHandl
         state.BeginLoading();
         try
         {
-            // do some stuff
+            // A real reset handler repopulates the control panel state here.
             await Task.Delay(1000, cancellationToken);
         }
         finally

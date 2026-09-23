@@ -158,32 +158,31 @@ public sealed partial class DbChangeSetConsumer(
 
     private static void FixConnectionRelation(Microsoft.EntityFrameworkCore.DbContext dbContext)
     {
-        // what happens on creating a connection with tag is that 2 changes got tracked and published
+        // Creating a connection with a tag tracks and publishes two changes.
         // after connection got added change tracker has 3 changes already:
         // [0] connection added
         // [1] tag added    (ALREADY EXISTS!)
         // [2] connection tag added
 
-        // if adding an entity that's already tracked needs special treatment 
+        // Adding an already tracked entity needs special treatment.
         var tagsAdded = dbContext.ChangeTracker.Entries().Where(e => e is { State: EntityState.Added, Entity: Tag });
         foreach (var entry in tagsAdded)
         {
             if (entry.Entity is not Tag tag)
                 continue;
 
-            // ensure that already existing tags don't get added again
+            // An existing tag must not be added a second time.
             if (dbContext.Find<Tag>(tag.Id) is not null)
                 entry.State = EntityState.Unchanged;
         }
 
-        // dbContext.Find<ConnectionTag>(connectionTag.ConnectionId, connectionTag.TagId)
-        // should return null if the connection tag does not exist, but it returns an entity
+        // Should return null when the connection tag does not exist, but it returns an entity.
         // with state unchanged that does not exist in the database.
         // to ensure we really get the existing item dbset is used with SingleOrDefault
         var connectionTagSet = dbContext.Set<ConnectionTag>();
         var cleanedUp = false;
 
-        // modification of a connection triggers relation change - skip if existing                
+        // Modifying a connection triggers a relation change, which is skipped when it exists.
         var connectionTagsAdded = dbContext.ChangeTracker.Entries().Where(e => e is { State: EntityState.Added, Entity: ConnectionTag });
         foreach (var entry in connectionTagsAdded)
         {
@@ -192,8 +191,8 @@ public sealed partial class DbChangeSetConsumer(
 
             if (!cleanedUp)
             {
-                // if a tag was modified it's not modified but removed and added again
-                // if connection had 2 tags and 1 was removed we get 1 added (0->1) here!  
+                // A modified tag arrives as a remove followed by an add.
+                // if connection had 2 tags and 1 was removed we get 1 added (0->1) here!
                 // so we remove all 'old' connection tags except the added one
                 var existing = connectionTagSet.Where(k => k.ConnectionId == connectionTag.ConnectionId && k.TagId != connectionTag.TagId);
                 foreach (var existingEntry in existing)
@@ -203,7 +202,7 @@ public sealed partial class DbChangeSetConsumer(
                 cleanedUp = true;
             }
 
-            // ensure that already existing tags don't get added again
+            // An existing tag must not be added a second time.
             var alreadyAdded = connectionTagSet.SingleOrDefault(k => k.ConnectionId == connectionTag.ConnectionId && k.TagId == connectionTag.TagId);
             if (alreadyAdded is not null)
                 entry.State = EntityState.Unchanged;

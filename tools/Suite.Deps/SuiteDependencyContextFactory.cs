@@ -23,7 +23,7 @@ internal static class SuiteDependencyContextFactory
         if (uiHostOptions is null)
             throw new InvalidOperationException($"No UiHost options found for {loaderOptions.UiHost}");
 
-        // these list contains the modules that should get loaded
+        // The modules that should get loaded.
         var moduleOptions = manifest.ToDictionary(k => k, k => new ModuleOptions());
         moduleOptions.Add(loaderOptions.UiHost, uiHostOptions);
 

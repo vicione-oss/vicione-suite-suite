@@ -3,7 +3,7 @@
 public interface ISecuritySettings
 {
     /// <summary>
-    /// If true, login will only be allowed if the users mail was confirmed. 
+    /// Login requires a confirmed email address.
     /// </summary>
     bool RequireAccountVerification { get; }
 }

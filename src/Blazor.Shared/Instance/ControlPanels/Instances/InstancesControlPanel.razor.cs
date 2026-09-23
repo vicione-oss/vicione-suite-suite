@@ -33,9 +33,6 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
 
     [Inject] private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
 
-    // todo - activate on next sdk v0.23.0
-    //[Inject] private IInstanceInformationProvider InformationProvider { get; set; } = default!;
-
     [Inject(Key = typeof(InstancesControlPanelServiceKey))] private IGridItemSelection<Guid> InstanceGridItemSelection { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
@@ -50,10 +47,9 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
         State.ResetSelectedInstances = false;
         State.Changed += StateChanged;
 
+        // TODO(#2895): subscribe to IClusterInformationProvider.HealthStatusChanged so the grid updates
+        // live; HealthStatus currently only reflects the state at load time.
         UpdateInstancesQueryable();
-
-        // todo - activate on next sdk v0.23.0
-        //InformationProvider.HealthStatusChanged += OnHealthStatusChanged;
     }
 
     private async void StateChanged(ControlPanelStateChangedEventArgs obj)
@@ -255,9 +251,6 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
         State.Changed -= StateChanged;
         InstanceGridItemSelection.Changed -= InstanceGridItemSelectionChanged;
 
-        // todo - activate on next sdk v0.23.0
-        //InformationProvider.HealthStatusChanged -= OnHealthStatusChanged;
-
         await base.DisposeAsyncCore();
     }
 
@@ -283,17 +276,4 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
 
     private async Task EditInstance(InstanceInformationModel model)
         => await ControlPanelRequest.Send<InstanceControlPanel, InstanceControlPanelState>(s => s.InstanceId = model.Id);
-
-    // todo - activate on next sdk v0.23.0
-    //private async Task OnHealthStatusChanged(Guid id, HealthStatus status, DateTimeOffset lastSend)
-    //{
-    //    var instance = _instances.FirstOrDefault(i => i.Id == id);
-    //    if (instance is null)
-    //        return;
-
-    //    instance.HealthStatus = status;
-    //    instance.LastSent = lastSend;
-
-    //    await InvokeAsync(StateHasChanged);
-    //}
 }

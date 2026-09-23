@@ -28,9 +28,8 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
 
     public IEnumerable<string> GetAllModuleStylesheets()
     {
-        // Blazor.Server.Backend is our special assembly that contains also the client module
-        // to be able to register frontend things but its stylesheet is directly referenced in _Host.cshtml
-        // therefore it's filtered out here
+        // Blazor.Server.Backend also contains the client module so it can register frontend services,
+        // but _Host.cshtml references its stylesheet directly, so it is filtered out here.
         var serverAssembly = typeof(BlazorServerBackendModule).Assembly;
 
         return (from assembly in uiModuleManager.UiModuleAssemblies
@@ -41,10 +40,9 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
     }
 
     /// <summary>
-    /// This is called for every browser[tab] connection and initializes the shared services. Try to call
-    /// <see cref="ClientModule.InitializeServices"/> for each loaded client module and log errors.
+    /// Called for every browser tab connection. Calls <see cref="ClientModule.InitializeServices"/> for
+    /// each loaded client module and logs any error without failing the connection.
     /// </summary>
-    /// <returns></returns>
     public async Task InitializeServices(IServiceProvider serviceProvider)
     {
         var logger = serviceProvider.GetRequiredService<ILogger<BlazorServerModuleService>>();
@@ -58,7 +56,7 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
         }
         catch (ObjectDisposedException)
         {
-            // ignore gracefully
+            // The circuit is already gone; there is nothing left to initialize.
         }
         catch (Exception e)
         {
@@ -97,10 +95,8 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
     }
 
     /// <summary>
-    /// 
+    /// Returns /_content/Assembly.Name/Assembly.Name.styles.css.
     /// </summary>
-    /// <param name="assemblyName"></param>
-    /// <returns>/_content/Assembly.Name/Assembly.Name.styles.css</returns>
     private static string GetRelativeModuleBundleStylesheetPath(string assemblyName)
         => $"/{ModuleAssetHelper.ContentPrefix}/{assemblyName}/{assemblyName}.styles.css";
 }

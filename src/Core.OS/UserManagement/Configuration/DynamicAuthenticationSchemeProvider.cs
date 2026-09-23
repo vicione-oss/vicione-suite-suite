@@ -27,23 +27,10 @@ public class DynamicAuthenticationSchemeProvider(
     IOptions<AuthenticationOptions> options) :
     AuthenticationSchemeProvider(options)
 {
-    // No override needed yet — the base implementation handles all currently registered schemes.
-    //
-    // When multiple OIDC providers need to be supported, override GetSchemeAsync here, e.g.:
-    //
-    //   public override async Task<AuthenticationScheme?> GetSchemeAsync(string name)
-    //   {
-    //       var existing = await base.GetSchemeAsync(name);
-    //       if (existing is not null) return existing;
-    //
-    //       using var scope = serviceProvider.CreateScope();
-    //       var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    //       var provider = await db.ExternalIdProviders.FirstOrDefaultAsync(p => p.Name == name);
-    //       if (provider is null) return null;
-    //
-    //       return new AuthenticationScheme(name, displayName: provider.Name, typeof(OpenIdConnectHandler));
-    //   }
-    //
-    // IMPORTANT: IOptionsMonitor caches options by name after first access. If provider settings can
-    // change at runtime, a cache invalidation strategy will also be needed.
+    // The base implementation handles every scheme registered today. Supporting multiple OIDC
+    // providers means overriding GetSchemeAsync to look the provider up in ExternalIdProviders and
+    // return an AuthenticationScheme bound to OpenIdConnectHandler.
+
+    // IOptionsMonitor caches options by name after first access, so provider settings that can
+    // change at runtime will need a cache invalidation strategy too.
 }

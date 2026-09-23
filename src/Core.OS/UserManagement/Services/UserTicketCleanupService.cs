@@ -25,7 +25,7 @@ internal sealed partial class UserTicketCleanupService(IServiceProvider serviceP
             }
             catch (OperationCanceledException)
             {
-                // ignore gracefully
+                // Cancellation during shutdown needs no handling.
             }
             catch (Exception ex)
             {

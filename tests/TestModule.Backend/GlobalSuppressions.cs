@@ -5,6 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "IDE0040:Zugriffsmodifizierer hinzufügen", Justification = "<Ausstehend>", Scope = "member", Target = "~F:TestModule.Backend.DbContext.DateTimeToIso8601StringConverter._serialize")]
-[assembly: SuppressMessage("Naming", "CA1707:Bezeichner dürfen keine Unterstriche enthalten", Justification = "<Ausstehend>", Scope = "namespaceanddescendants", Target = "~N:TestModule.Backend.Contracts")]
-[assembly: SuppressMessage("Style", "IDE1006:Benennungsstile", Justification = "<Ausstehend>", Scope = "namespaceanddescendants", Target = "~N:TestModule.Backend.Contracts")]
+[assembly: SuppressMessage("Style", "IDE0040:Add accessibility modifiers", Scope = "member", Target = "~F:TestModule.Backend.DbContext.DateTimeToIso8601StringConverter._serialize")]
+[assembly: SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Scope = "namespaceanddescendants", Target = "~N:TestModule.Backend.Contracts")]
+[assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Scope = "namespaceanddescendants", Target = "~N:TestModule.Backend.Contracts")]

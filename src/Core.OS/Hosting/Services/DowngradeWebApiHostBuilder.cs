@@ -25,12 +25,12 @@ internal static class DowngradeWebApiHostBuilder
         builder.Services.AddSingleton<EventCallbackRegistry>();
         builder.Services.AddPipeClient(options.HostManagement);
 
-        // create the simplest host possible to display the errors
+        // The simplest host that can display the errors.
         var host = builder.Build();
         host.UseHttpsRedirection();
         host.UseSecurityHeaders(ContentSecurityPolicy.ForStartupFailurePage(StartupFailurePageStyles.DowngradePage));
 
-        // we have a page with to options (links -> reset or exit)
+        // The page offers two links: reset or exit.
         host.MapGet("/", () => CreateVersionDowngradeDetectedHtml(options.DowngradeInformation.CurrentVersion, options.DowngradeInformation.DataVersion));
         host.MapGet("/reset", (HttpContext _) => DowngradeReset(host.Services));
         host.MapGet("/exit", (HttpContext _) => DowngradeExit(host.Services));
@@ -42,7 +42,7 @@ internal static class DowngradeWebApiHostBuilder
 
     /// <summary>
     /// Trigger application shutdown delayed http request can be finished before stopping
-    /// </summary>    
+    /// </summary>
     private static void RestartDelayed(IServiceProvider services)
         => Task.Run(async () =>
         {
@@ -57,7 +57,7 @@ internal static class DowngradeWebApiHostBuilder
                 await Task.Delay(StopDelay);
                 logger.Information("Stop delay passed by. Requesting restart by hostmanagement now...");
 
-                // this will restart the Core.OS immediately
+                // Restarts Core.OS immediately.
                 await pipeClient.RestartSuite(instanceOptions.Value);
             }
             catch (Exception ex)
@@ -67,9 +67,8 @@ internal static class DowngradeWebApiHostBuilder
         }).ConfigureAwait(false);
 
     /// <summary>
-    /// Sets the reset file and stops the application
+    /// Writes the reset file and stops the application.
     /// </summary>
-    /// <param name="services"></param>
     private static IResult DowngradeReset(IServiceProvider services)
     {
         var logger = services.GetRequiredService<Serilog.ILogger>();
@@ -95,7 +94,6 @@ internal static class DowngradeWebApiHostBuilder
     /// <summary>
     /// Just stops the application
     /// </summary>
-    /// <param name="services"></param>
     private static IResult DowngradeExit(IServiceProvider services)
     {
         var logger = services.GetRequiredService<Serilog.ILogger>();

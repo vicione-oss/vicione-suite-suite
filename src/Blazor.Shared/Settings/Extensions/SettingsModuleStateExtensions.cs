@@ -37,7 +37,7 @@ internal static class SettingsModuleStateExtensions
 
         /// <remarks>
         /// This method only supports requests for control panels configured to be displayed in settings categories.
-        /// 
+        ///
         /// Deeper navigation levels will be supported with https://gitlab.com/vicione-oss/vicione/suite/suite-sdk/-/work_items/324.
         /// </remarks>
         public void AdoptToControlPanelRequest(ControlPanelRequestedEventArgs args, ILogger logger)

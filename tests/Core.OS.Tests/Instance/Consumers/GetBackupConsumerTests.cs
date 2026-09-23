@@ -18,7 +18,7 @@ public sealed class GetBackupConsumerTests
     public GetBackupConsumerTests()
         => _configureServices = cfg =>
         {
-            // consumer needs
+            // Required by the consumer.
             cfg.AddConsumer<GetBackupConsumer>();
             cfg.AddSingleton(Substitute.For<ILogger<GetBackupConsumer>>);
             cfg.AddSingleton(_backupStore);

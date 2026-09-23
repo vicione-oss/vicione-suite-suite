@@ -40,16 +40,16 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
         var options = BuildOptions();
         var results = new ModuleSynchronizationResults();
 
-        // Validation uses local metadata or tries to download it from api        
+        // Validation uses local metadata or tries to download it from api
         await ValidateSdkVersionCompatibility(results, options, cancellationToken);
 
-        // Resolve versions
+
         await ResolveModuleVersions(results, options, cancellationToken);
 
-        // Update manifest could be extracted
+        // Could be extracted into the manifest update.
         DeleteOrphanedModuleVersions(results, options);
 
-        // Download modules
+
         await DownloadAndExtractModulePackages(results, options, cancellationToken);
 
         return results;
@@ -66,7 +66,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
         foreach (var package in options.Packages)
         {
-            // Ignore packages that will be resolved anyway
+            // A package that will be resolved anyway needs no check here.
             if (package.HasUnresolvedVersion())
                 continue;
 
@@ -82,7 +82,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
                     Error = new ErrorInfo(ModuleErrorCodes.SdkVersionIncompatible, iex.Message)
                 });
 
-                // Sdk is incompatible - set version to be resolved                
+                // An incompatible sdk forces the version back to unresolved.
                 package.Version = ModuleConstants.LatestVersionKey;
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
     /// <summary>
     /// Validates sdk compatibility of the given package by local metadata, if available, otherwise
     /// metadata gets downloaded from artifact API using <see cref="SynchronizationOptions.ModuleRepository"/>.
-    /// </summary>    
+    /// </summary>
     /// <exception cref="InvalidOperationException">Thrown if metadata can't be retrieved locally nor from API</exception>
     private async Task ValidateSdkVersionCompatibility(ModuleDependencyPackage package, SynchronizationOptions options, CancellationToken cancellationToken = default)
     {
@@ -108,12 +108,12 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
         if (fileSystem.File.Exists(metadataPath))
         {
-            // Module is already downloaded so metadata is available locally
+            // Already downloaded, so the metadata is on disk.
             metadata = await fileSystem.DeserializeModuleMetadata(metadataPath, cancellationToken);
         }
         else
         {
-            // Try to download the metadata via api
+            // Not downloaded yet, so the metadata comes from the api.
             metadata = await options.ModuleRepository.GetModuleMetadata(package, cancellationToken);
         }
 
@@ -125,14 +125,14 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
     private static async Task ResolveModuleVersions(ModuleSynchronizationResults result, SynchronizationOptions options, CancellationToken cancellationToken)
     {
-        // packages with version=='latest' or version ending with '.*' need to be resolved
+        // Packages with version 'latest' or ending in '.*' still need resolving.
         var toBeResolved = GetUnresolvedPackages(options.Packages).ToList();
         if (toBeResolved.Count == 0)
             return;
 
         try
         {
-            // We try to resolve these packages to an available version for current sdk
+            // Each is resolved to a version available for the current sdk.
             foreach (var package in toBeResolved)
             {
                 result.Resolved.Add(await ResolveLatestVersion(package, options, cancellationToken));
@@ -140,10 +140,10 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
         }
         catch (HttpRequestException ex)
         {
-            // If something is misconfigured within package settings or network is unavailable            
+            // Misconfigured package settings, or the network is unavailable.
             result.HttpResolveError = ex;
 
-            // We need this these later on
+            // Recorded so the caller can report them.
             var stillUnresolved = toBeResolved.Where(k => result.Resolved.All(r => r.Name != k.Name))
                 .Select(k => new ModuleSynchronizationResult(k.Name)
                 {
@@ -156,12 +156,10 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
     }
 
     /// <summary>
-    /// Try to resolve latest package version via module API
+    /// Resolves the latest package version via the module API, against the SDK version in
+    /// <paramref name="options"/>.
     /// </summary>
-    /// <param name="package">The package to be resolved</param>
-    /// <param name="options">Required SDK is used from options</param>
-    /// <param name="cancellationToken">Cancellation token to cancel async tasks</param>
-    /// <returns>Returns resolve result containing the resolved version if Error is null</returns>
+    /// <returns>The resolved version when Error is <see langword="null"/>.</returns>
     /// <remarks>
     /// Exceptions will be wrapped into <see cref="ModuleSynchronizationResult.Error" /> but HttpRequestException will bubble
     /// </remarks>
@@ -216,7 +214,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
     /// <summary>
     /// Delete module package versions from modules path that are not contained in <see cref="SynchronizationOptions.Packages"/>
-    /// </summary>    
+    /// </summary>
     private void DeleteOrphanedModuleVersions(ModuleSynchronizationResults results, SynchronizationOptions options)
     {
         if (!_deleteOrphanedVersions)
@@ -228,7 +226,7 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
 
         foreach (var module in existingModules)
         {
-            // skip used ones
+            // Already used versions are skipped.
             var package = options.Packages.FirstOrDefault(k => k.Name == module.Name && k.Version == module.Version);
             if (package is not null)
                 continue;

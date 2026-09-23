@@ -37,7 +37,7 @@ internal static class IServiceCollectionExtensions
         {
             services.AddScoped(services =>
             {
-                // resolve items registered by SetupControlPanelRegistry()
+                // Resolves the items registered by SetupControlPanelRegistry().
                 var registryItems = services.GetRequiredService<IEnumerable<IControlPanelRegistryItem<SharedClientModule>>>();
 
                 var result = Substitute.For<IControlPanelRegistryItemCache>();

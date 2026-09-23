@@ -18,6 +18,6 @@ public static class Constants
     public const string ModuleSuffixBackend = ".Backend";
     public const string ModuleSuffixClient = ".Client";
 
-    // can only occur on development or error in ci-pipeline
+    // Only reachable in development or through a ci-pipeline error.
     public const string ModuleCiVersionKey = "__VERSION__";
 }

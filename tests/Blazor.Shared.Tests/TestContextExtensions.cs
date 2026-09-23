@@ -76,14 +76,14 @@ internal static class TestContextExtensions
             if (index >= pages.Length)
                 throw new InvalidOperationException($"No page with index {index} provided.");
 
-            // we need to setup services to allow rendering the page associated with index as active page
+            // The services have to be set up before the page at this index can render as the active one.
             state.ActivePageIndex = index;
 
             activePageProvider
                 .GetActiveControlPanelPage(Arg.Any<IControlPanelRegistryItem>())
                 .Returns(pages[index]);
 
-            // render active page
+            // Renders the active page.
             component.Render();
 
             return component;

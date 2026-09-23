@@ -47,7 +47,7 @@ internal static class ConfigurationUtils
                 UiHost = Constants.BlazorServerModuleId,
             };
 
-        // we have to set it rooted because we do it from another workspace
+        // Rooted, because this runs from another workspace.
         options.ModulesPath = Path.Combine(suitePath, options.ModulesPath ?? "Modules");
 
         if (!string.IsNullOrEmpty(options.UiHostsPath) && !string.IsNullOrEmpty(options.UiHost))

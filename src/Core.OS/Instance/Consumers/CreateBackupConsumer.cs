@@ -19,7 +19,7 @@ public sealed partial class CreateBackupConsumer(IBackupFactory backupFactory, I
 
         try
         {
-            // we write directly to the stream but know of errors only afterwards
+            // Written straight to the stream, so errors only surface afterwards.
             await using var fileStream = backupStore.CreateBackupFile(out var filename);
             var summary = await backupFactory.CreateBackup(fileStream, context.CancellationToken);
 
@@ -45,7 +45,7 @@ public sealed partial class CreateBackupConsumer(IBackupFactory backupFactory, I
         {
             LogUnexpectedError(logger, ex, correlationId);
 
-            // cleanup store on failure?
+            // The store is not cleaned up on failure.
             await context.Publish(new BackupFinished(correlationId, null, new ErrorInfo(100, ex.Message)));
         }
     }

@@ -22,7 +22,7 @@ internal static class UserManagerExtensions
         {
             var userRoles = (await userManager.GetRolesAsync(user)).Select(r => new SuiteRole(r));
 
-            // is it an sys admin at all?
+            // System administrators are exempt.
             if (userRoles.All(r => r.Name != AuthorizationConstants.AdminRoleName))
                 return false;
 

@@ -79,10 +79,9 @@ public sealed partial class ChangePasswordContent
             messageStore.Add(() => Input.Username, ChangePassword.UserNotFound);
         }
 
-        // This section is for the case, when the password of the user expires in a running session.
-        // If this happens and the user clicks on 'Change password' they will be logged out to force them to change it and
-        // ensure that the user can't access the Suite with an expired password.
-        // After that the page gets reloaded with the appropriate parameters to ensure the user search without an authorized user.
+        // A password that expires mid-session: clicking 'Change password' signs the user out, so the
+        // suite cannot be reached with an expired password, then reloads the page with the parameters
+        // needed to look the user up without an authorized session.
         if (SignInManager.IsSignedIn(SignInManager.Context.User) && _passwordExpired)
         {
             await SignInManager.SignOutAsync();

@@ -13,8 +13,8 @@ public sealed class DressBurgerActivity(ILogger<DressBurgerActivity> logger) : I
     {
         var nameofPatty = nameof(IGrillBurgerLog.Patty);
 
-        // the grill activity completed with variables -> key:patty val:BurgerPatty so we
-        // get it from context to continue with dressing
+        // The grill activity completed with variables (key: patty, value: BurgerPatty), so the patty
+        // is read back from the routing slip context to continue with dressing.
         var patty = context.GetVariable<BurgerPatty>(nameof(IGrillBurgerLog.Patty)) ??
             throw new ArgumentNullException(nameofPatty);
 
@@ -28,19 +28,12 @@ public sealed class DressBurgerActivity(ILogger<DressBurgerActivity> logger) : I
 
         if (arguments.OnionRing)
         {
-            // Guid? onionRingId = arguments.OnionRingId ?? NewId.NextGuid();
-            //
-            // _logger.LogDebug("Ordering Onion Ring: {OrderId}", onionRingId);
-
-            // Response<OnionRingsCompleted> response = await _onionRingClient.GetResponse<OnionRingsCompleted>(new
-            // {
-            //     arguments.OrderId,
-            //     OrderLineId = onionRingId,
-            //     Quantity = 1
-            // }, context.CancellationToken);
+            // An activity that needs something from another service asks for it here, with an
+            // IRequestClient<T> and an awaited GetResponse call. The onion ring side is left out so
+            // the sample stays focused on the routing slip.
         }
 
-        // dressing takes some time too
+        // Dressing takes some time too.
         await Task.Delay(2000);
 
         var burger = new SuiteBurger
