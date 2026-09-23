@@ -101,7 +101,7 @@ internal sealed class SuiteEndpointNameFormatter(ILocalInstanceInformationProvid
 
         return MessagingHelper.CleanName(messageType.IsInstanceDependent() ? $"{endpoint}_{instanceId}" : $"{endpoint}");
 
-        //fullname = true is long - especially with id added. But it has to be unique.
+        // A full name is long, especially with the id appended, but it has to be unique.
         //Otherwise, two consumers with the same name would compete
         string GetDefaultConsumerName(bool fullName = false)
         {

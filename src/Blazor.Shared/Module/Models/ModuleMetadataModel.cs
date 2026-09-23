@@ -6,7 +6,7 @@ using Sdk.Modules;
 namespace Blazor.Shared.Module.Models;
 
 /// <summary>
-/// UI wrapper for <see cref="ModuleMetadataBundle"/> 
+/// UI wrapper for <see cref="ModuleMetadataBundle"/>
 /// </summary>
 [DebuggerDisplay("Name = {Name,nq}, Version = {Version,nq}, Installed = {Installed,nq}")]
 public sealed class ModuleMetadataModel

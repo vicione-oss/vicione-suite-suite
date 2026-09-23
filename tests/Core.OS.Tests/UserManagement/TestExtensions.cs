@@ -21,12 +21,12 @@ internal static class TestExtensions
             var suiteUser = SeedingExtensions.CreateSuiteUserWithDefaults(seedUser);
             return new UserProfile
             {
-                // required:
+                // Required:
                 UserName = suiteUser.UserName is not null ? new UserName(suiteUser.UserName) : UserName.Empty,
                 Email = suiteUser.Email!,
                 Roles = [TestRoleName],
 
-                // optional:
+                // Optional:
                 Firstname = suiteUser.FirstName,
                 Lastname = suiteUser.LastName,
                 Title = suiteUser.Title,

@@ -115,12 +115,12 @@ public class ArtifactRepositoryStoreTests
             var builder = new ConfigurationBuilder();
             builder.AddInMemoryCollection(new Dictionary<string, string?>()
             {
-                // compatibility v0.40.0
+                // Compatibility with v0.40.0.
                 { "ModuleApi:Endpoint", migrateEndpoint },
                 { "ModuleApi:UserName", "wildman" },
                 { "ModuleApi:Password", "pa$$w0rd" },
 
-                // compatibility v1.1.0
+                // Compatibility with v1.1.0.
                 { "ArtifactRepository:Sources:0:Endpoint", currentEndpoint },
                 { "ArtifactRepository:Sources:0:UserName", "hammerer" },
                 { "ArtifactRepository:Sources:0:Password", "d00dle" },

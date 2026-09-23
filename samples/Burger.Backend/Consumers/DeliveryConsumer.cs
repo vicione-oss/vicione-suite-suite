@@ -10,10 +10,10 @@ public sealed class DeliveryConsumer(ILogger<DeliveryConsumer> logger) : IConsum
     {
         logger.LogInformation("Starting delivery of order {OrderId}", context.Message.OrderId);
 
-        // delivery will take some time
+        // Delivery takes some time.
         await Task.Delay(3000);
 
-        // trigger saga state transition to finalize
+        // Publishing the event moves the saga to its final state.
         await context.Publish(new DeliveryCompleted(context.Message.OrderId));
     }
 }

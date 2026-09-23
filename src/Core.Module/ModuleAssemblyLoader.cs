@@ -5,20 +5,19 @@ using Sdk.Modules;
 namespace Core.Module;
 
 /// <summary>
-/// if we could find a base for IUiModuleBundle|ModuleBundle we could get rid of Sdk.Backend here
+/// A common base for IUiModuleBundle and ModuleBundle would remove the Sdk.Backend dependency here.
 /// </summary>
 internal static class ModuleAssemblyLoader
 {
     public static ModuleBundleLoadResult<ModuleBundle<TModule>> LoadBackendModuleBundles<TModule>(SuiteDependencyContext suiteContext) where TModule : IModule
     {
-        // system bundle is always needed
+        // The system bundle is always needed.
         var result = new ModuleBundleLoadResult<ModuleBundle<TModule>>();
 
-        // second ui host to ensure right load order
+        // The ui host comes second to keep the load order correct.
         if (suiteContext.UiHost is not null)
             AddModuleBundle(result, suiteContext, suiteContext.UiHost.AssemblyPath);
 
-        // now load all the configured backend modules
         AddModuleBundles(result, suiteContext);
 
         return result;
@@ -38,8 +37,8 @@ internal static class ModuleAssemblyLoader
     {
         try
         {
-            // if we detected issues on sdk mismatch or missing options we skip loading the module
-            // the issues are kept with the context StartupErrors            
+            // A module with an sdk mismatch or missing options is skipped; the reasons stay in the
+            // context's StartupErrors.
             if (suiteContext.IsInvalidModule(moduleDllFile))
                 return;
 
@@ -53,8 +52,8 @@ internal static class ModuleAssemblyLoader
         }
         catch (Exception e)
         {
-            // if we have an error loading the module, we want to keep track of it in the context.
-            // Context is used to identify module dependency issues before loading the assembly
+            // The context records load errors, and is what identifies dependency issues before the
+            // assembly is loaded.
             var moduleContext = (suiteContext.UiHost?.AssemblyPath == moduleDllFile ? suiteContext.UiHost : null)
                                 ?? suiteContext.Modules.FirstOrDefault(k => k.AssemblyPath == moduleDllFile);
 

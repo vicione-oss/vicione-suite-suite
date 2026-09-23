@@ -12,22 +12,22 @@ internal static class ModuleLoaderOptionsExtensions
         {
             Matcher callMatcher = new();
 
-            // add the excludes from the options
+            // Adds the excludes from the options.
             var patterns = options.ExcludedPathParts.Select(part => $"**/{part}/**").ToArray();
             callMatcher.AddExcludePatterns(patterns);
 
             if (debugOnly)
             {
-                // force the debug module to contain "Debug" within its path - could be extended once
+                // A debug module has to carry "Debug" in its path.
                 callMatcher.AddInclude("**/Debug/**");
             }
             else
             {
-                // we need at least one include to match
+                // At least one include has to match.
                 callMatcher.AddInclude("**/*.dll");
             }
 
-            // the path is rooted but...
+            // The path is rooted, but not necessarily normalized.
             var root = Path.IsPathRooted(assemblyPath) ? Path.GetPathRoot(assemblyPath)! : "\\";
 
             return callMatcher.Match(root, assemblyPath).HasMatches;

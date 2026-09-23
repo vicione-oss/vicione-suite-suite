@@ -24,7 +24,7 @@ internal static class IServiceProviderExtensions
             }
             catch (ObjectDisposedException)
             {
-                // this happens...
+                // Can happen during shutdown.
             }
         }
     }

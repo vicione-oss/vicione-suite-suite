@@ -160,7 +160,7 @@ internal sealed partial class ControlPanelRegistryItemCache : IControlPanelRegis
                     }
                     catch (OperationCanceledException)
                     {
-                        // nothing to do here, we just return gracefully
+                        // Nothing to do here.
                     }
 
                     if (!cancellationToken.IsCancellationRequested)

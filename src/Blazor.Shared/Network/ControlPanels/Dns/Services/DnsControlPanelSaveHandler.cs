@@ -24,11 +24,11 @@ internal sealed class DnsControlPanelSaveHandler(IUiMediator mediator, ISystemCo
             MulticastDNSEnabled = state.MulticastDnsEnabled
         };
 
-        // name servers
+        // Name servers.
         {
             networkDnsSettings.NameServersEnabled = state.DnsEnabled;
 
-            // filter out fieldsets not filled and remove duplicates
+            // Unfilled fieldsets and duplicates are dropped.
             state.DnsDetails = [.. state.DnsDetails.Where(d => !string.IsNullOrWhiteSpace(d.IpAddress)).Distinct()];
 
             networkDnsSettings.NameServers.Clear();
@@ -37,11 +37,11 @@ internal sealed class DnsControlPanelSaveHandler(IUiMediator mediator, ISystemCo
             state.DnsDetails.EnsureAtLeastOneItemExists();
         }
 
-        // search domains
+        // Search domains.
         {
             networkDnsSettings.SearchDomainsEnabled = state.SearchDomainsEnabled;
 
-            // filter out fieldsets not filled and remove duplicates
+            // Unfilled fieldsets and duplicates are dropped.
             state.SearchDomainDetails = [.. state.SearchDomainDetails.Where(d => !string.IsNullOrWhiteSpace(d.IpAddress)).Distinct()];
 
             networkDnsSettings.SearchDomains.Clear();
@@ -50,11 +50,11 @@ internal sealed class DnsControlPanelSaveHandler(IUiMediator mediator, ISystemCo
             state.SearchDomainDetails.EnsureAtLeastOneItemExists();
         }
 
-        // static hosts
+        // Static hosts.
         {
             networkDnsSettings.StaticHostsEnabled = state.StaticHostsEnabled;
 
-            // filter out fieldsets not filled and remove duplicates
+            // Unfilled fieldsets and duplicates are dropped.
             state.StaticHostDetails = [.. state.StaticHostDetails
                 .Where(d => !string.IsNullOrWhiteSpace(d.IpAddress) || !string.IsNullOrWhiteSpace(d.Hostname))
                 .Distinct()];

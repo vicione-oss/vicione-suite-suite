@@ -38,7 +38,7 @@ public class TestModuleDbContext(DbContextOptions options, List<SimpleDataTypes>
 
         // Keine Lösung, wie sich ein Datetime-Value als Date-Value in der DB lässt.
         // TestModuleSource.db, Werte mittels EF-API abgespeichert
-        // sqlite > select * from SimpleDataTypes; 
+        // sqlite > select * from SimpleDataTypes;
         // 4 | 666B4E88 - F076 - 4B72 - AEFE - B18637C5C78C | Presse XP1 | Presse für Stoßfänger -XP1 | 4 | 2001 - 04 - 01 00:00:00 | 2023 - 01 - 24 08:25:55.4904443
         // 5 | A85D794C - 9F7D - 465F - 88CE - BB8113501045 | Presse XP2 | Presse für Stoßfänger -XP2 | 3 | 2010 - 06 - 10 00:00:00 | 2023 - 01 - 24 08:25:55.4904679
         // 6 | 457229A9 - AA49 - 439A - A898 - 76D479853E9F | Presse XP5 | Presse für Stoßfänger -XP5 | 1 | 2011 - 11 - 30 00:00:00 | 2023 - 01 - 24 08:25:55.4904682

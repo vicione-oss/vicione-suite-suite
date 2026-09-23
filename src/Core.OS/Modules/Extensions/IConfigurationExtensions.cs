@@ -12,7 +12,7 @@ internal static class IConfigurationExtensions
     {
         /// <summary>
         /// Bind section <see cref="Sdk.Constants.ModuleLoaderSection"/> to <see cref="ModuleLoaderOptions"/>
-        /// </summary>    
+        /// </summary>
         internal ModuleLoaderOptions GetModuleLoaderOptions()
             => config.GetSection(ModuleLoaderOptions.ConfigSection).Get<ModuleLoaderOptions>() ??
                 throw new ConfigurationException(ModuleLoaderOptions.ConfigSection);
@@ -28,7 +28,7 @@ internal static class IConfigurationExtensions
         /// <summary>
         /// All modules provided by the <see cref="ModulePackageManifest"/> are enabled per default except their <see cref="ModuleOptions.Enable"/> flag is overriden
         /// in the settings. The same way modules from the debug manifest are treated
-        /// </summary>    
+        /// </summary>
         /// <returns>{{ModuleId, ModuleOptions}, ..}</returns>
         internal Dictionary<string, ModuleOptions> CreateModuleOptions(ModulePackageManifest manifest, params string[] additionalModuleIds)
         {
@@ -38,12 +38,12 @@ internal static class IConfigurationExtensions
                 .Select(p => p.Name)
                 .Union(additionalModuleIds); // for the samples modules
 
-            // by default modules in manifest are enabled
+            // Modules in the manifest are enabled by default.
             foreach (var packageName in packageNames)
             {
                 var moduleOptions = new ModuleOptions();
 
-                // it can be disabled by config so check the section
+                // Config can disable one, so the section is checked.
                 var section = config.GetSection(packageName);
                 if (section.Value != null)
                 {
@@ -51,7 +51,7 @@ internal static class IConfigurationExtensions
                     continue;
                 }
 
-                // try to bind the section
+                // Binds the section when present.
                 var val = section.Get<ModuleOptions>();
                 if (val != null)
                 {
@@ -59,7 +59,7 @@ internal static class IConfigurationExtensions
                     continue;
                 }
 
-                // no overrides so module is enabled
+                // No overrides, so the module stays enabled.
                 results[packageName] = moduleOptions;
             }
 

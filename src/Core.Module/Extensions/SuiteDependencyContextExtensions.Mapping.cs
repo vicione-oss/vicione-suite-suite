@@ -65,17 +65,17 @@ public static partial class SuiteDependencyContextExtensions
             if (mapToContext is null)
                 yield break;
 
-            // the assembly versions of mapToContext libraries will override the module versions
+            // The mapToContext library versions override the module versions.
             foreach (var mapToLibrary in mapToContext.RuntimeLibraries)
             {
 #if DEBUG
-                // only on debugging the project references are listed separately
+                // Project references are listed separately only in a debug build.
                 if (mapToLibrary.Name.EndsWith(".Reference", StringComparison.Ordinal))
                     continue;
 #endif
                 if (optionalMapFromContext is not null)
                 {
-                    // we ignore the version and redirect to whatever core has
+                    // The version is ignored; the request is redirected to whatever core provides.
                     var mapping = CreateRuntimeMapping(optionalMapFromContext, mapToLibrary);
                     if (mapping is not null)
                         yield return mapping;
@@ -87,7 +87,7 @@ public static partial class SuiteDependencyContextExtensions
 
                 foreach (var moduleContext in suiteContext.Modules)
                 {
-                    // we ignore the version and redirect to whatever core has
+                    // The version is ignored; the request is redirected to whatever core provides.
                     var mapping = CreateRuntimeMapping(moduleContext, mapToLibrary);
                     if (mapping is not null)
                         yield return mapping;
@@ -106,13 +106,13 @@ public static partial class SuiteDependencyContextExtensions
                 if (mapFromLibrary is null)
                     return null;
 
-                // e.g. DevExpress.Blazor will be requested as DevExpress.Blazor.v23.2
+                // e.g. DevExpress.Blazor is requested as DevExpress.Blazor.v23.2
                 var realAssemblyName = mapFromContext.GetDefaultAssemblyName(mapFromLibrary.Name, mapFromLibrary.Version, false) ?? mapFromLibrary.Name;
 
-                // move the runtime library to redundancy list
+                // The module copy becomes redundant.
                 mapFromContext.MarkRendundantLibrary(mapFromLibrary);
 
-                // now we have a library that exists in module and core, but we'll take it from core
+                // The library exists in both module and core; core wins.
                 return new(
                     realAssemblyName,
                     mapFromContext.AssemblyName,
@@ -127,7 +127,7 @@ public static partial class SuiteDependencyContextExtensions
                 if (dependency is null)
                     return null;
 
-                // now we have a library that exists in module and core, but we'll take it from core
+                // The library exists in both module and core; core wins.
                 return new(
                     mapToLibrary.Name,
                     mapFromContext.AssemblyName,
@@ -139,26 +139,25 @@ public static partial class SuiteDependencyContextExtensions
 
         private IEnumerable<FlatMapping> UsePublicModuleAssemblyMapping()
         {
-            // the assembly versions might differ from assemblies provided by modules it depends on
-            // they will be mapped to these
+            // Assembly versions may differ from those of the modules depended on, and are mapped onto them.
             foreach (var moduleContext in suiteContext.Modules.Where(k => k.StartupErrors.Count == 0))
             {
-                // direct dependencies -> runtime library. indirect dependencies need no mapping
+                // Direct dependencies become runtime libraries; indirect ones need no mapping.
                 var publicDependencies = moduleContext.RuntimeLibraries
                     .Where(rt => rt.Name.EndsWith(Constants.ModuleSuffixPublic, StringComparison.Ordinal))
                     .Where(rt => !string.IsNullOrEmpty(rt.Name));
 
-                // ".Public" modules will me mapped to their origin backend|client project
+                // A .Public module maps to its originating backend or client project.
                 foreach (var dependency in publicDependencies)
                 {
                     // e.g. ViciOne.Suite.Module.Public -> ViciOne.Suite.Module
                     var dependencyContextFamily = dependency.Name.Replace(Constants.ModuleSuffixPublic, string.Empty, StringComparison.Ordinal);
 
-                    // prefer backend module as mapping target
+                    // The backend module is the preferred mapping target.
                     var mapToBackendContext = suiteContext.Modules.FirstOrDefault(ctx => ctx.AssemblyName == $"{dependencyContextFamily}{Constants.ModuleSuffixBackend}");
                     if (mapToBackendContext is not null)
                     {
-                        // prevent mapping on itself
+                        // A context must not map onto itself.
                         if (mapToBackendContext.AssemblyName == moduleContext.AssemblyName)
                             continue;
 
@@ -172,11 +171,11 @@ public static partial class SuiteDependencyContextExtensions
                         continue;
                     }
 
-                    // might be a module without backend part
+                    // A module may have no backend part.
                     var mapToClientContext = suiteContext.Modules.FirstOrDefault(ctx => ctx.AssemblyName == $"{dependencyContextFamily}{Constants.ModuleSuffixClient}");
                     if (mapToClientContext is not null)
                     {
-                        // prevent mapping on itself
+                        // A context must not map onto itself.
                         if (mapToClientContext.AssemblyName == moduleContext.AssemblyName)
                             continue;
 
@@ -194,10 +193,10 @@ public static partial class SuiteDependencyContextExtensions
 
         private IEnumerable<FlatMapping> UseSharedAssemblyMapping()
         {
-            // handle libraries that are unknown to suite but used by different modules like the
-            // ClusterEditor, ScreenDesigner using ViciOne.Ui.TreeEditor.Interface
+            // Libraries unknown to the suite but shared between modules, e.g. ClusterEditor and
+            // ScreenDesigner both using ViciOne.Ui.TreeEditor.Interface.
 
-            // all doubles in modules without context relation
+            // Every duplicate across modules that have no context relation.
             var doubles = suiteContext.GetAllContexts()
                 .Where(k => k.StartupErrors.Count == 0)
                 .SelectMany(ctx => ctx.RuntimeLibraries.Select(rt => new RuntimeLibraryGroupMapper(rt, ctx)))
@@ -206,13 +205,13 @@ public static partial class SuiteDependencyContextExtensions
 
             foreach (var module in doubles)
             {
-                // here we have e.g. key: "FastDeepCloner"
+                // e.g. key "FastDeepCloner"
                 //  -> FastDeepCloner, 1.36.2, ViciOne.Suite.DevExpress.Backend
                 //  -> FastDeepCloner, 1.36.2, ViciOne.Suite.ScreenDesigner.Client
                 //  -> FastDeepCloner, 1.36.1, ViciOne.Suite.ConnectorEditor.Client
-                // the winner will be 1.36.2, ViciOne.Suite.DevExpress.Backend
+                // The winner is 1.36.2, ViciOne.Suite.DevExpress.Backend.
 
-                // we choose "highest" version but this could fail on code differences between the versions
+                // The highest version wins, which can break if the versions differ in behaviour.
                 var maxVersion = module.MaxBy(k => k.Library.ParseVersion());
                 var minVersion = module.MinBy(k => k.Library.ParseVersion());
                 var mappingTarget = maxVersion?.Library.Version == minVersion?.Library.Version
@@ -220,11 +219,11 @@ public static partial class SuiteDependencyContextExtensions
 
                 foreach (var item in module)
                 {
-                    // don't map source context to itself
+                    // A context must not map onto itself.
                     if (item.Context.AssemblyName == mappingTarget.Context.AssemblyName)
                         continue;
 
-                    // move libraries to redundant list
+                    // The losing copies become redundant.
                     item.Context.MarkRendundantLibrary(item.Library);
 
                     foreach (var runtimeGroup in item.Library.RuntimeAssemblyGroups)
@@ -238,7 +237,7 @@ public static partial class SuiteDependencyContextExtensions
                             if (rtFileName == item.Library.Name)
                                 continue;
 
-                            // runtime mappings like MassTransit.EntityFrameworkCore -> MassTransit.EntityFrameworkCoreIntegration
+                            // e.g. MassTransit.EntityFrameworkCore -> MassTransit.EntityFrameworkCoreIntegration
                             yield return new(
                                 rtFileName,
                                 item.Context.AssemblyName,
@@ -268,7 +267,7 @@ public static partial class SuiteDependencyContextExtensions
                     if (clientItem is not null)
                         return clientItem;
 
-                    // prefer backend over client
+                    // Fall back to a backend module when no client matched.
                     var backendFallback = module.FirstOrDefault(k => k.Context.ModuleType == ModuleType.Backend);
                     if (backendFallback is not null)
                         return backendFallback;

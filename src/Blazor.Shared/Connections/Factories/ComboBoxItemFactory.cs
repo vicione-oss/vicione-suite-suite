@@ -9,7 +9,6 @@ internal static class ComboBoxItemFactory
     /// <summary>
     /// According to https://gitlab.com/vicione-oss/vicione/runtime-libs/dp-mqtt/-/blob/main/src/Mqtt/MqttDataPortProperties.cs?ref_type=heads
     /// </summary>
-    /// <returns></returns>
     public static List<ComboBoxItem<MqttSslProtocol?, string>> GetSupportedMqttSslProtocols()
     {
         var noneItem = new ComboBoxItem<MqttSslProtocol?, string> { Value = null, Text = "None" };

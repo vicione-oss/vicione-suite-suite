@@ -10,7 +10,7 @@ internal static class IArtifactQueryResultExtensions
     {
         public IEnumerable<IArtifact> OrderModuleArtifactsByVersionDesc(Func<SemVersion, bool>? where = null)
         {
-            // we get a list of items with Name like:
+            // Item names look like:
             // 0.28.0-linux-arm64_0.25.0.json
             // 0.28.1-ci1523472-linux-arm64_0.25.0.json
             // 0.28.0-ci1523472-linux-arm64_0.25.0.json
@@ -29,7 +29,7 @@ internal static class IArtifactQueryResultExtensions
 
         public IEnumerable<IArtifact> FilterCompatibleModuleArtifactsBySdkVersion(SemVersion sdkVersion)
         {
-            // we get a list of items with Name like:
+            // Item names look like:
             // 0.28.0-linux-arm64_0.25.0.json
             // 0.28.1-ci1523472-linux-arm64_0.25.0.json
             // 0.28.0-ci1523472-linux-arm64_0.25.0.json

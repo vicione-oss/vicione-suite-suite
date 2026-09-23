@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
                 workspaceManagement.GetHomeDirectory(option.Value.Name).Returns(option.Key);
             }
 
-            // system module special - it's not an installed module (maybe add a hide option to it once)
+            // The system module is not an installed module.
             var metadataProvider = Substitute.For<IModuleMetadataProvider>();
             var installedModules = moduleOptions
                 .Where(d => d.Value.Name != Shared.Constants.SystemModuleId)

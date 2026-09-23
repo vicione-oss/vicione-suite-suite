@@ -45,7 +45,7 @@ public sealed class DynamicExternalIdProviderOptions(
 
         options.Events.OnRedirectToIdentityProvider = context =>
         {
-            // context.HandleResponse() tells the framework we handled it and to stop processing
+            // context.HandleResponse() tells the framework the response is handled and to stop processing.
             context.HandleResponse();
 
             // Return a clean error instead of attempting a network request
@@ -92,11 +92,11 @@ public sealed class DynamicExternalIdProviderOptions(
         connectOptions.CallbackPath = "/signin-oidc";
         connectOptions.SignedOutCallbackPath = "/signout-callback-oidc";
 
-        // try to read extended user information as not every IdP will send it per default.
+        // Extended user information is optional; not every IdP sends it by default.
         connectOptions.GetClaimsFromUserInfoEndpoint = true;
         connectOptions.ClaimActions.MapUniqueJsonKey("preferred_username", "preferred_username");
 
-        // sticking closer to the actual OpenID Connect and JWT specifications
+        // Sticks closer to the OpenID Connect and JWT specifications.
         connectOptions.MapInboundClaims = false;
     }
 }

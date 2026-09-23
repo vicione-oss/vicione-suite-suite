@@ -355,9 +355,9 @@ public sealed class EnvironmentOverridesControlPanelTests
 
         // Assert
         
-        // check state did not update with invalid name
+        // The state must not update for an invalid name.
         state.Entries.Should().ContainSingle().Which.Name.Should().Be("MY_KEY");
-        // check input is still there -> we are still in edit mode and did not commit the update
+        // The input is still present, so edit mode held and the update was not committed.
         FindRows(component)[0].QuerySelector("td.name-column input").Should().NotBeNull();
     }
 }

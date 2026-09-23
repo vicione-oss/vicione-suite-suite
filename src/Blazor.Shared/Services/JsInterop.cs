@@ -152,7 +152,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            // happens if ModuleComponentBase wants to cleanup
+            // Happens when ModuleComponentBase cleans up.
             logger.LogDebug(ex, nameof(RemoveElementsById));
         }
     }
@@ -167,7 +167,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            // happens if ModuleComponentBase wants to cleanup
+            // Happens when ModuleComponentBase cleans up.
             logger.LogDebug(ex, nameof(RemoveScriptsBySource));
         }
     }

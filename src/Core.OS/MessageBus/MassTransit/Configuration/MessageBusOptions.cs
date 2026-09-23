@@ -20,7 +20,7 @@ public sealed class MessageBusOptions
     public int QueueLifetimeInDays { get; set; } = 5;
 
     /// <summary>
-    /// Gets or sets the retry intervals in milliseconds for commands, events and everything that is not classified
+    /// Retry intervals in milliseconds for commands, events and everything that is not classified
     /// otherwise. See ADR-004 (D2). Kept short because those messages share the serialized <c>Commands</c> and
     /// <c>Events</c> queues, so every retry stalls the other message types queued behind it.
     /// </summary>
@@ -39,7 +39,7 @@ public sealed class MessageBusOptions
     public int[]? RetryIntervals { get; set; }
 
     /// <summary>
-    /// Gets or sets the retry intervals in milliseconds for the single serialized instance queue, which carries the
+    /// Retry intervals in milliseconds for the single serialized instance queue, which carries the
     /// replication stream and every instance-dependent command. See ADR-004 (D2). Kept short because that queue is
     /// consumed one message at a time, so every retry blocks the whole node.
     /// <see langword="null"/> means <see cref="MessageRetryClassifier.SerializedInstanceIntervals"/>, an empty array
@@ -48,7 +48,7 @@ public sealed class MessageBusOptions
     public int[]? InstanceQueueRetryIntervals { get; set; }
 
     /// <summary>
-    /// Gets or sets the retry intervals in milliseconds for request/response consumers. See ADR-004 (D2). Must stay
+    /// Retry intervals in milliseconds for request/response consumers. See ADR-004 (D2). Must stay
     /// well below the caller's request timeout so a fault is reported instead of a timeout.
     /// <see langword="null"/> means <see cref="MessageRetryClassifier.RequestIntervals"/>, an empty array disables
     /// retry — see <see cref="RetryIntervals"/>.
@@ -56,7 +56,7 @@ public sealed class MessageBusOptions
     public int[]? RequestRetryIntervals { get; set; }
 
     /// <summary>
-    /// Gets or sets the maximal amount of unacked messages a consumer can prefetch
+    /// Maximum number of unacked messages a consumer can prefetch.
     /// </summary>
     public ushort? PrefetchCount { get; set; }
 

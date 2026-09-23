@@ -21,7 +21,7 @@ internal sealed class ModuleDependencyContextComparer(SuiteDependencyContext sui
         if (x == null && y != null)
             return -1;
 
-        // now use the mappings to determine the dependencies
+        // The mappings determine the dependencies.
         var xMap = _suiteContext.Mappings.FirstOrDefault(k => k.MapTo.Module == x!.AssemblyName);
         var yMap = _suiteContext.Mappings.FirstOrDefault(k => k.MapTo.Module == y!.AssemblyName);
 
@@ -34,7 +34,7 @@ internal sealed class ModuleDependencyContextComparer(SuiteDependencyContext sui
         if (xMap == null && yMap != null)
             return -1;
 
-        // both have mappings from others
+        // Both carry mappings from other modules.
         if (xMap!.MapFrom.Any(k => k.Module == y!.AssemblyName))
             return 1;
 

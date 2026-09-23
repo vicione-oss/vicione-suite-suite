@@ -24,7 +24,7 @@ public partial class ArtifactRepositoryTokenUpdateService(IServiceProvider servi
             }
             catch (OperationCanceledException)
             {
-                // ignore gracefully
+                // Cancellation during shutdown needs no handling.
             }
             catch (Exception ex)
             {

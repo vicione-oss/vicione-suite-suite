@@ -5,15 +5,8 @@ namespace Core.OS.Connections.Mqtt;
 
 internal static class MqttConfiguration
 {
-    // this is done in backend directly because we can't access webbuilder here! (yet?) 
-    //public static IWebHostBuilder UseKestrelMqtt(this IWebHostBuilder builder)
-    //{
-    //    builder.UseKestrel(options =>
-    //    {
-    //        options.Listen(IPAddress.Loopback, 1883, listenOptions => listenOptions.UseMqtt());
-    //    });
-    //    return builder;
-    //}
+    // The Kestrel MQTT listener is set up in the backend instead, because the web builder is not
+    // reachable from here.
 
     internal static IServiceCollection AddMqttServices(this IServiceCollection services)
     {

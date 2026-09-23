@@ -25,7 +25,7 @@ public sealed class UpsertConnectionConsumerTests : TestWithDbContextSqlite<Conn
     public UpsertConnectionConsumerTests()
         => _configureServices = cfg =>
         {
-            // consumer needs
+            // Required by the consumer.
             cfg.AddConsumer<UpsertConnectionConsumer>();
             cfg.AddSingleton(Substitute.For<ILogger<UpsertConnectionConsumer>>());
             cfg.AddSingleton<IConnectionDbContext>(_ => TestDbContext);

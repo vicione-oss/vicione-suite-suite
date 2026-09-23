@@ -11,9 +11,8 @@ public static class DevelopmentExtensions
     extension(IWebHostEnvironment hostEnvironment)
     {
         /// <summary>
-        /// adds all *staticwebassets.runtime.json files to DevelopmentFileProvider and extends the 
-        /// WebRootFileProvider with it to be able to resolve all file requests by the webserver
-        /// all file requests by the webserver
+        /// Extends the WebRootFileProvider with the published wwwroot and one provider per module, so the
+        /// web server resolves every asset request.
         /// </summary>
         public IWebHostEnvironment UseClientAssetsProduction(IUiHostEnvironment uiEnvironment, ILogger logger)
         {
@@ -30,7 +29,7 @@ public static class DevelopmentExtensions
                 new PhysicalFileProvider(wwwRootFolder)
             };
 
-            // add providers for the modules to resolve /_content/ModuleDllName    
+            // Each module provider serves /_content/{ModuleDllName}.
             foreach (var pathInfo in uiEnvironment.GetModulesContentPathInfos())
             {
                 var moduleName = Path.GetFileNameWithoutExtension(pathInfo.Key.AssemblyPath);
@@ -39,7 +38,7 @@ public static class DevelopmentExtensions
                 logger.LogDebug("Added module provider key:{Key} from {Folder}", pathInfo.Key, pathInfo.Value);
             }
 
-            // this works for published client e.g. @"path\to\publish\Client\wwwroot"
+            // Works for the published client, e.g. path\to\publish\Client\wwwroot.
             hostEnvironment.WebRootFileProvider = new CompositeFileProvider(fileProviders);
 
             logger.LogInformation("Using client production wwwroot '{Folder}' (+ {Count} module content paths)", wwwRootFolder, fileProviders.Count - 2);
@@ -48,9 +47,8 @@ public static class DevelopmentExtensions
         }
 
         /// <summary>
-        /// adds all *staticwebassets.runtime.json files to DevelopmentFileProvider and extends the 
-        /// WebRootFileProvider with it to be able to resolve all file requests by the webserver
-        /// all file requests by the webserver for debug modules
+        /// Extends the WebRootFileProvider with a <see cref="DevelopmentFileProvider"/> built from the
+        /// *staticwebassets.runtime.json files, so assets resolve from the debug build output.
         /// </summary>
         public IWebHostEnvironment UseClientAssetsDevelopment(IUiHostEnvironment uiEnvironment,
             ILogger logger)
@@ -70,7 +68,7 @@ public static class DevelopmentExtensions
                 contentProvider
             };
 
-            // for wasm it's client- and for server ui host debug folder 
+            // wwwRoot is the client folder under WASM and the UI host debug folder under Server.
             contentProvider.AddStaticWebAssetJsonsFromPath(wwwRootFolder);
 
             foreach (var pathInfo in uiEnvironment.GetModulesContentPathInfos().Where(k => k.Key.IsDebugSource))
@@ -80,7 +78,7 @@ public static class DevelopmentExtensions
                 logger.LogDebug("Added static module webassets for {Key} from {Folder}", pathInfo.Key, pathInfo.Value);
             }
 
-            // add providers for the modules to resolve /_content/ModuleDllName    
+            // Each module provider serves /_content/{ModuleDllName}.
             foreach (var item in uiEnvironment.GetModulesContentPathInfos().Where(k => !k.Key.IsDebugSource))
             {
                 var moduleName = Path.GetFileNameWithoutExtension(item.Key.AssemblyPath);
@@ -89,7 +87,6 @@ public static class DevelopmentExtensions
                 logger.LogDebug("Added module provider key:{Key} from {Folder}", item.Key, item.Value);
             }
 
-            // add our development provider as a composite provider beside the existing one
             hostEnvironment.WebRootFileProvider = new CompositeFileProvider(fileProviders);
 
             return hostEnvironment;
@@ -99,7 +96,7 @@ public static class DevelopmentExtensions
         {
             string? uiHostModulePath = null;
 
-            // bin/Debug/netX.0
+            // ModulePath is bin/Debug/netX.0, so the project folder is two levels up.
             if (uiEnv.ModulePath?.Contains("Debug", StringComparison.Ordinal) == true)
             {
                 var debug = Directory.GetParent(uiEnv.ModulePath);

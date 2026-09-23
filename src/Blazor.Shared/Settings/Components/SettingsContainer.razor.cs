@@ -227,7 +227,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
 
         if (activeControlPanelRegistryItem is not null)
         {
-            // check whether active ControlPanelRegistryItem is still the same
+            // Whether the active ControlPanelRegistryItem is still the same.
             if (!controlPanelRegistryItems.Contains(activeControlPanelRegistryItem))
                 activeControlPanelRegistryItem = null;
 
@@ -508,7 +508,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
 
     private void OnBeforeCollapseAccordionItem(AccordionItemCancelEventArgs args, SettingsEntriesKey settingsEntriesKey)
     {
-        // prevent collapse of expanded category
+        // Keeps an expanded category from collapsing.
         if (State.ExpandedSettingsCategory == settingsEntriesKey.SettingsCategory &&
             State.ExpandedSettingsCategory?.GroupPosition == settingsEntriesKey.SettingsGroup.Position)
         {

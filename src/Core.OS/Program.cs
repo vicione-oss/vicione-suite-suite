@@ -27,22 +27,22 @@ builder.Services.Configure<HostOptions>(c =>
 
 var instanceOptions = builder.Configuration.GetInstanceOptions();
 
-// the logger stamps the instance id on every exported event, so the device identity has to exist
+// The logger stamps the instance id on every exported event, so the device identity has to exist
 // before it is created - otherwise the logs of a first boot report no instance while the traces do.
 // The preparation pipeline repeats this call; writing the file is idempotent.
 fileSystem.EnsureInstanceIdFile(instanceOptions);
 
-// add ILogLevelSwitch and configure serilogs sinks etc.
+// ILogLevelSwitch plus the serilog sinks.
 builder.Services.ConfigureLogging(builder.Configuration, fileSystem, instanceOptions);
 
-// add serilogs services like DiagnosticContext
+// Serilog services such as DiagnosticContext.
 builder.Host.UseSerilog();
 
 using var loggerFactory = new SerilogLoggerFactory(logger: null, dispose: false);
 var preparationContext = new SuitePreparationContext(fileSystem, instanceOptions, loggerFactory);
 using var preparationPipeline = new SuitePreparationPipeline(preparationContext);
 
-// filesystem / workspace preparation
+// Filesystem and workspace preparation.
 var result = await preparationPipeline
     .UseEnvironmentOverridesLogging(environmentOverridesPath, environmentOverridesFailure)
     .UseInstanceIdentification()
@@ -54,5 +54,5 @@ var result = await preparationPipeline
     .UseModulePreparation(builder)
     .RunWithProcessSignalsAsync();
 
-// build host and validate options
+// Builds the host and validates the options.
 await builder.TryRunCoreOs(preparationContext, result, args);

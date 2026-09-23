@@ -1,9 +1,6 @@
 namespace Core.Artifacts;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Setter properties are required for deserialisation")]
-/// <summary>
-/// Represents the configuration options for the artifact repository API.
-/// </summary>
 public class ArtifactRepositoryOptions
 {
     /// <summary>
@@ -11,20 +8,15 @@ public class ArtifactRepositoryOptions
     /// </summary>
     public const string ConfigSection = "ArtifactRepository";
 
-    /// <summary>
-    /// Gets or sets the list of repository sources where artifacts are retrieved from.
-    /// </summary>
     public List<ArtifactRepositorySourceOption> Sources { get; set; } = [];
 
     /// <summary>
-    /// Gets or sets the list of public keys (base64 encoded) used to verify the digital signatures
-    /// of artifact packages when interacting with <see cref="Sdk.Backend.Artifacts.IArtifactRepository"/>.
+    /// Base64-encoded public keys used to verify artifact package signatures.
     /// </summary>
     public List<string> PublicKeys { get; set; } = [];
 
     /// <summary>
-    /// Gets or set the interval in days for refreshing the source tokens. 
-    /// After this period, the tokens will be refreshed upon the next request.
+    /// Tokens older than this are refreshed on the next request, not on a timer.
     /// </summary>
     public long SourceTokenRefreshIntervalDays { get; set; } = 7;
 }

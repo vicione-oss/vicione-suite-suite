@@ -8,7 +8,7 @@ public static class ModuleAssemblyMappingExtensions
 {
     internal static ModuleMappingSummary GetMappingSummary(this ModuleAssemblyMapping mapping)
     {
-        // all mappings that match to x.x.x (additional versioning ignored - )
+        // All mappings matching x.x.x, ignoring any additional versioning.
         var matches = mapping.MapFrom
             .Where(k =>
             {
@@ -21,7 +21,7 @@ public static class ModuleAssemblyMappingExtensions
             })
             .ToList();
 
-        // mappings that match to x.x except patchMappings
+        // Mappings matching x.x, excluding patchMappings.
         var buildDiff = mapping.MapFrom.Except(matches)
             .Where(k =>
             {
@@ -33,7 +33,7 @@ public static class ModuleAssemblyMappingExtensions
             })
             .ToList();
 
-        // mappings that match to x except patchMappings
+        // Mappings matching x, excluding patchMappings.
         var minorDiffs = mapping.MapFrom.Except(matches)
             .Except(buildDiff)
             .Where(k =>
@@ -45,7 +45,7 @@ public static class ModuleAssemblyMappingExtensions
             })
             .ToList();
 
-        // here the version is totally different like 3.x.x and 7.x.x
+        // The versions differ entirely here, e.g. 3.x.x against 7.x.x.
         var majorDiffs = mapping.MapFrom
             .Except(matches)
             .Except(buildDiff)

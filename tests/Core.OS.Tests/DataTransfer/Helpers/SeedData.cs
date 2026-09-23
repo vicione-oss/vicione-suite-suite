@@ -214,7 +214,6 @@ internal class SeedData
 
     private static DateTimeOffset ToDateTimeUtc(string date)
     {
-        // var truncdate = TruncateTime(cd.LogTimestamp);
         var dateTimeParse = DateTime.Parse(date, new CultureInfo("de-DE"));
         var datetime = new DateTimeOffset(dateTimeParse.Year, dateTimeParse.Month, dateTimeParse.Day, 0, 0, 0, new());
         return datetime;

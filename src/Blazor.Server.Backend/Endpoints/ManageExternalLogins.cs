@@ -65,8 +65,7 @@ public static class ManageExternalLogins
         // Clear the existing external cookie to ensure a clean login process
         await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
 
-        // TODO https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2786:
-        // Replace "/" with deep link to settings > profile > external-accounts
+        // TODO(#2786): replace "/" with a deep link to settings > profile > external-accounts.
         return RootUrl.ToLocalRedirect();
     }
 }

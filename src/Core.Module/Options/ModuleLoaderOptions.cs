@@ -6,28 +6,27 @@ public sealed class ModuleLoaderOptions
     public const string ConfigSection = "ModuleLoader";
 
     /// <summary>
-    /// Prevent user from un-/installing modules if set to false
+    /// When false, the user cannot install or uninstall modules.
     /// </summary>
     public bool AllowInstallation { get; set; } = true;
 
     /// <summary>
-    /// If the path is set to a valid module manifest json and there's no
-    /// module manifest within appdata this file is seeded to be used on startup
+    /// Manifest json seeded on startup when appdata holds no manifest of its own.
     /// </summary>
     public string? ManifestSeedPath { get; set; }
 
     /// <summary>
-    /// Folder to load published modules from
+    /// Folder to load published modules from.
     /// </summary>
     public string? ModulesPath { get; set; }
 
     /// <summary>
-    /// Folders to load modules to debug 
+    /// Folders to load modules to debug.
     /// </summary>
     public List<string>? ModuleDebugPaths { get; set; }
 
     /// <summary>
-    /// Folders to exclude from module search
+    /// Folders to exclude from the module search.
     /// </summary>
     public List<string> ExcludedPathParts { get; set; } =
     [
@@ -36,12 +35,12 @@ public sealed class ModuleLoaderOptions
     ];
 
     /// <summary>
-    /// Filepath to instruct Core.OS to write the assembly dependency mapping as json to the path
+    /// When set, Core.OS writes the assembly dependency mapping as json to this path.
     /// </summary>
     public string? DumpMappingFilePath { get; set; }
 
     /// <summary>
-    /// Specify ui host that should be loaded by its ModuleId 
+    /// ModuleId of the ui host to load.
     /// </summary>
     public string? UiHost { get; set; }
 
@@ -49,8 +48,7 @@ public sealed class ModuleLoaderOptions
 
 
     /// <summary>
-    /// Validate if module can be loaded correctly by using the MetadataLoadContext
-    /// before loading it into the assembly load context of the suite
+    /// Checks a module in a MetadataLoadContext before it enters the suite's assembly load context.
     /// </summary>
-    public bool UseTypeValidation { get; set; } = true;// keep it for safety
+    public bool UseTypeValidation { get; set; } = true;
 }

@@ -11,13 +11,10 @@ public partial class JournalViewPage
     [Inject] private IJournalMonitoring JournalMonitoring { get; set; } = default!;
 
     /// <summary>
-    /// Filter string is based on systemd journalctl. Field=Value entries separated by comma (logical AND) or plus (logical OR).
+    /// Filter string in systemd journalctl form: Field=Value entries separated by comma (AND) or plus (OR),
+    /// e.g. Field1=Value,Field2=Value+Field3=Value. Matches on different fields must all apply; matches on
+    /// the same field accept any of the given values.
     /// <see href="https://github.com/systemd/systemd/blob/1f5d8a6132f12574f524cef72dbda0f7408c4217/man/sd_journal_add_match.xml#L76"/>
-    /// If a match is applied, only entries with this field set will be iterated. Multiple matches may be active at the
-    /// same time: If they apply to different fields, only entries with both fields set like this will be iterated. If
-    /// they apply to the same fields, only entries where the field takes one of the specified values will be iterated.
-    ///
-    /// e.g. Field1=Value,Field2=Value+Field3=Value
     /// </summary>
     [SupplyParameterFromQuery]
     public string Filter { get; set; } = string.Empty;

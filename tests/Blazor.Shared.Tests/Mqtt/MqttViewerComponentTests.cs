@@ -353,7 +353,7 @@ public class MqttViewerComponentTests
             // Act
             var component = ctx.Render<MqttViewerComponent>();
 
-            // open combobox
+            // Opens the combobox.
             component.FindAll(".combo-box")
                 .First(e => e.OuterHtml.Contains(MqttViewerComponent.DefaultReloadInterval.ToString(CultureInfo.InvariantCulture), StringComparison.InvariantCulture))
                 .TriggerEvent("opendropdown", EventArgs.Empty);

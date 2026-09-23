@@ -27,12 +27,11 @@ internal sealed class ModuleFileProvider : IFileProvider, IDisposable
 
     public IFileInfo GetFileInfo(string subpath)
     {
-        // handle resource calls like /_content/Module.Dll.Name/svg/thing.svg
+        // Resource calls like /_content/Module.Dll.Name/svg/thing.svg.
         if (subpath.StartsWith(_moduleMatch, StringComparison.Ordinal))
             return _fileProvider.GetFileInfo(subpath.Remove(0, _moduleMatch.Length));
 
-        // handle request to additional resources published in rootPath/_content where
-        // referenced nuget resources get published
+        // Fallthrough for nuget resources published under rootPath/_content.
         return _fileProvider.GetFileInfo(subpath);
     }
 

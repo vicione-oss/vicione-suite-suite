@@ -9,7 +9,7 @@ internal static class NtpServerDetailExtensions
     {
         public void Save(List<string>? ntpServers)
         {
-            // filter out fieldsets not filled and remove duplicates
+            // Unfilled fieldsets and duplicates are dropped.
             var filteredNptServerDetails = nptServerDetails.Where(d => !string.IsNullOrWhiteSpace(d.IpAddressOrHostname))
                 .Distinct()
                 .ToList();

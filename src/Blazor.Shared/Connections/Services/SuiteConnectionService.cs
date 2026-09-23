@@ -102,7 +102,7 @@ internal sealed class SuiteConnectionService : CompletionSourceHandlerBase<ISuit
             return;
         }
 
-        // let awaiting command know that event was processed successfully, so it can complete
+        // Signals the awaiting command that the event was processed, so it can complete.
         CompleteWithSuccess(context.Message.CorrelationId);
 
         if (ApplyConnectionChange(context.Message))

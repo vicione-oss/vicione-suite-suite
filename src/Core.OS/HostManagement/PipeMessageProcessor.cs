@@ -24,7 +24,6 @@ internal sealed class PipeMessageProcessor(
     /// <summary>
     /// Processes the next message on the input stream.
     /// </summary>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
     protected override async Task ProcessMessage(CancellationToken cancellationToken)
     {
         var message = await PipeStreamWrapper.ReadMessage(cancellationToken).ConfigureAwait(false);

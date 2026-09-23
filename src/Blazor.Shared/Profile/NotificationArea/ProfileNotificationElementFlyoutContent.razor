@@ -133,20 +133,7 @@
                         </div>
                     </div>
                 }
-@* Removed until functionality implemented
-                <div class="flags">
-                    <label class="flag-label">@CommonVocabulary.Absence</label>
-                    <Switch Size="SwitchSize.Large"
-                            CssClass="flag-switch"
-                            @bind-Value:get="@_absence"
-                            @bind-Value:set="@ChangeStateAbsence" />
-                    <label class="flag-label">@CommonVocabulary.NotificationPlural</label>
-                    <Switch Size="SwitchSize.Large"
-                            CssClass="flag-switch"
-                            @bind-Value:get="@_notifications"
-                            @bind-Value:set="@ChangeStateNotification" />
-                </div>
-*@
+                @* The absence and notification switches are designed but have no functionality yet. *@
                 <div class="ticket-center">
                     <TicketCenterComponent Urgent=@TicketCenterUrgentProvider.GetUrgent()
                                            Today=@TicketCenterTodayProvider.GetToday()
@@ -158,10 +145,7 @@
             </div>
             <div class="bottom">
                 <div class="change-password">
-                    @*
-                    TODO https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2692 
-                    If the user does not have a password yet, they must be able to set one.
-                    *@
+                    @* TODO(#2692): a user without a password must be able to set one. *@
                     <LinkButton IconName="@MonochromeIconName.LockActive"
                                 CssClass="change-password-button"
                                 Text="@Localization.ProfileNotificationElementFlyoutContent.ChangePassword"

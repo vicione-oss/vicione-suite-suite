@@ -58,7 +58,7 @@ internal static class IServiceCollectionExtensions
             services.AddModuleServices(context.ModuleContext.ModuleHost, context.ModuleContext.ModuleOptionsStore);
             services.AddSingleton(context.FileSystem);
 
-            // bind and validate appsettings, env vars etc. before anything consumes them
+            // Binds and validates appsettings, env vars and the rest before anything consumes them.
             services.AddCoreOptions();
             services.AddCoreLogging();
 
@@ -89,7 +89,7 @@ internal static class IServiceCollectionExtensions
 
             services.AddIdentityAndExternalAuth(config, moduleHost);
 
-            // here we should have a valid configuration and loaded assemblies
+            // Configuration is valid and the assemblies are loaded by this point.
             moduleHost.AddModuleServices(services);
 
             // MessageBus

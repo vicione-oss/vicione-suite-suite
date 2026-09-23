@@ -12,13 +12,13 @@ public static class UserProfileExtensions
         public async Task<UserProfile> CreateUserProfile(UserManager<SuiteUser> userManager)
             => new()
             {
-                // required:
+                // Required:
                 UserName = user.UserName is not null ? new UserName(user.UserName) : UserName.Empty,
                 Email = user.Email!,
                 Roles = [.. await userManager.GetRolesAsync(user)],
                 Claims = [.. (await userManager.GetClaimsAsync(user)).Select(claim => claim.ToUserManagementClaim())],
 
-                // optional:
+                // Optional:
                 Firstname = user.FirstName,
                 Lastname = user.LastName,
                 Title = user.Title,

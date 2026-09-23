@@ -63,7 +63,7 @@ internal sealed class TimeZoneDescriptorProvider : ITimeZoneDescriptorProvider
     /// </summary>
     /// <remarks>
     /// We need to filter time zones to ensure display name is always localized.
-    /// 
+    ///
     /// A disadvantage of this approach is that the provider will not return all
     /// .NET time zones available, but it will cover at least the well known time zones.
     /// </remarks>

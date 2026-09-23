@@ -47,7 +47,6 @@ internal sealed partial class ApplicationWorker(
 
             using var activity = CoreActivitySource.Source.StartActivity();
 
-            // migrate our core contexts (application, user etc.)
             await MigrateCoreData(scope, cancellationToken);
             activity?.AddEvent(new ActivityEvent("app.lifecycle.core_data.migrated"));
 
@@ -70,7 +69,7 @@ internal sealed partial class ApplicationWorker(
             await DeleteOrphanedNonces(scope.ServiceProvider.GetRequiredService<INonceStore>(), cancellationToken);
             activity?.AddEvent(new ActivityEvent("app.lifecycle.nonces.deleted"));
 
-            // in slave scenario, synchronized with master on second+ start migration SystemModule leads to:
+            // On a slave synchronized with the master, the second and later starts hit:
             // Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'table "AspNetRoles" already exists'.
             await MigrateAndSeedModuleData(scope, configuration, cancellationToken);
             activity?.AddEvent(new ActivityEvent("app.lifecycle.module_data.seeded"));
@@ -108,8 +107,8 @@ internal sealed partial class ApplicationWorker(
 
         if (instanceInformation.Type == InstanceType.Slave)
         {
-            // we send the registration before waiting for the bus to start.
-            // this will work because the message is sent directly to the endpoint, not using the bus.
+            // The registration is sent before the bus starts, because it goes straight to the
+            // endpoint rather than through the bus.
             await RegisterInstance(scope,
                 instanceInformation,
                 loadedModules,
@@ -174,10 +173,9 @@ internal sealed partial class ApplicationWorker(
     private async Task StartMessageBusDepot(IServiceScope scope,
         CancellationToken cancellationToken)
     {
-        // clean the rabbit mq before the bus gets started
+        // RabbitMQ is cleaned before the bus starts.
         await RabbitMqCleaner.CleanVirtualHost(scope.ServiceProvider, logger, cancellationToken);
 
-        // start the message bus in a background task
         var busDepot = scope.ServiceProvider.GetRequiredService<IBusDepot>();
         var task = Task.Run(() => busDepot.Start(cancellationToken), cancellationToken);
 
@@ -206,11 +204,11 @@ internal sealed partial class ApplicationWorker(
         {
             logger.LogDeletingOrphanedNonces();
 
-            await nonceStore.DeletedOrphaned(cancellationToken);
+            await nonceStore.DeleteOrphaned(cancellationToken);
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we simply do a graceful exit
+            // Cancellation is a graceful exit.
         }
         catch (Exception e)
         {
@@ -239,7 +237,7 @@ internal sealed partial class ApplicationWorker(
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we simply do a graceful exit
+            // Cancellation is a graceful exit.
         }
         catch (Exception e)
         {
@@ -289,7 +287,7 @@ internal sealed partial class ApplicationWorker(
             }
         }
 
-        // force regeneration of users security stamps to invalidate current logins
+        // Regenerating the security stamps invalidates every active login.
         if (InstanceStartupState.InvalidateLoginsAfterMigration)
         {
             logger.LogInvalidatingActiveLogins();
@@ -330,10 +328,9 @@ internal sealed partial class ApplicationWorker(
 
         logger.LogInitializingLocalInstanceInformation();
 
-        // accessing the dbcontext should happen after RegisterInstanceCommand was consumed
+        // The dbcontext must not be touched before RegisterInstanceCommand has been consumed.
         var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
 
-        // try to get it from application db
         var instanceInfo = dbContext.InstanceInfo.FirstOrDefault(k => k.Id == instanceId);
         if (instanceInfo == null)
         {
@@ -343,7 +340,7 @@ internal sealed partial class ApplicationWorker(
                 instanceInfo.Name = Environment.MachineName;
         }
 
-        // update every startup because installed modules and versions might have changed
+        // Updated on every startup, because installed modules and versions may have changed.
         instanceInfo.InstalledModules = moduleHost.GetModules()
             .Select(m => m.ModuleKey.ModuleId)
             .OrderBy(id => id)
@@ -354,8 +351,8 @@ internal sealed partial class ApplicationWorker(
         instanceInfo.SdkVersion = moduleHost.GetSdkVersion();
         instanceInfo.SystemType = instanceOptions.SystemType ?? "not set";
 
-        // update local instance info to what we have already because modules might access it
-        // on their init process e.g. ClusterManagement on PostMigrate
+        // The local instance info is filled with what is known already, because a module may read
+        // it during init, e.g. ClusterManagement on PostMigrate.
         // Extra State for module process to start?
         localInfoProvider.UpdateLocal(instanceInfo);
     }
@@ -382,7 +379,7 @@ internal sealed partial class ApplicationWorker(
         var lastAppliedSequences = sequenceTracker?.GetAllLastApplied()
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value) ?? [];
 
-        // needs to be sent that way, because the bus is blocked to prevent messages being processed before sync is done
+        // Sent through the endpoint directly: the bus is blocked until sync completes.
         var endPoint = await bus.GetSendEndpoint(
             MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
         await endPoint.Send(
@@ -397,8 +394,8 @@ internal sealed partial class ApplicationWorker(
 
     private static bool IsAllowed(KeyValuePair<string, string?> keyValuePair)
     {
-        // in development there are more than 700 lines of configuration
-        // therefore we filter to get reduced subset.
+        // Development carries more than 700 lines of configuration, so the dump is reduced to a
+        // useful subset.
         string[] knownKeys =
         [
             "AllowedHosts",

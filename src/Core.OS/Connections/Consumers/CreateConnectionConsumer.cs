@@ -10,7 +10,7 @@ using Sdk.Messaging;
 namespace Core.OS.Connections.Consumers;
 
 /// <summary>
-/// this is used by modules to seed connections - only new connections will be added! 
+/// this is used by modules to seed connections - only new connections will be added!
 /// </summary>
 public sealed partial class CreateConnectionConsumer(IConnectionDbContext dbContext, ILogger<CreateConnectionConsumer> logger) : IConsumer<CreateConnection>
 {
@@ -51,7 +51,7 @@ public sealed partial class CreateConnectionConsumer(IConnectionDbContext dbCont
 
             existingConn = dbContext.Connections.Add(connection).Entity;
 
-            // add the new tags
+            // The new tags.
             foreach (var addedTag in addedTags)
                 dbContext.Tags.Add(addedTag);
 

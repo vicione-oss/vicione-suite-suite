@@ -16,13 +16,11 @@ internal sealed class StaticWebAssetEntry
         // e.g. Root.Children.js.dashboard-blazor.js
         foreach (var item in entry.Value.EnumerateObject())
         {
-            // e.g. Root.Children.js.dashboard-blazor.js.Children
             if (item.Name == StaticWebAssetContent.ChildrenPropertyName)
             {
                 AddChildrenR(item);
             }
 
-            // e.g. Root.Children.js.dashboard-blazor.js.Asset
             if (item.Name == StaticWebAssetContent.AssetPropertyName)
             {
                 AddEntryContent(item);
@@ -40,7 +38,7 @@ internal sealed class StaticWebAssetEntry
             var fileEntry = child.Value.Deserialize<EntryContentWrapper>();
             if (fileEntry?.Asset is null)
             {
-                // try to get to the leaves
+                // Recurse to the leaves.
                 AddChildrenR(child);
                 continue;
             }
@@ -60,9 +58,7 @@ internal sealed class StaticWebAssetEntry
 
     public StaticWebAssetEntryContent? FindAssetContent(string subpath, string fallbackFileName, string lastChance)
     {
-        // 1. try to get subpath match first (best chance!)
-        // 2. module scoped css is different -> try the filename
-        // 3. the last chance to try to get stuff like svg/some.svg 
+        // Match on subpath first, then the filename for module-scoped css, then a parent\file fallback.
         var assets = Assets
             .Where(k => !string.IsNullOrEmpty(k.SubPath) &&
                         (Equals(k.SubPathNormalized, subpath) || Equals(k.SubPath, fallbackFileName) || Equals(k.SubPathNormalized, lastChance)))
@@ -71,13 +67,11 @@ internal sealed class StaticWebAssetEntry
         if (assets.Length == 0)
             return null;
 
-        // the default case
         if (assets.Length == 1)
             return assets[0];
 
-        // now we have multiple assets for a subpath is like /_content/DevExpress.Blazor/modules/dx-blazor-750968d4.js
-        // assets[0] -> dx-blazor-750968d4.js
-        // assets[1] -> modules/dx-blazor-750968d4.js   -> this is the one with better match            
+        // Multiple matches, e.g. dx-blazor-750968d4.js and modules/dx-blazor-750968d4.js. The one whose
+        // normalized subpath includes the parent folder is the better match.
         var betterMatch = assets.FirstOrDefault(k => Equals(k.SubPathNormalized, lastChance));
         if (betterMatch is not null)
             return betterMatch;
@@ -87,9 +81,6 @@ internal sealed class StaticWebAssetEntry
 
     public override string ToString() => string.Format(CultureInfo.InvariantCulture, "{0} Key:{1}", nameof(StaticWebAssetEntry), Key);
 
-    /// <summary>
-    /// only a wrapper for deserialize
-    /// </summary>
     private class EntryContentWrapper
     {
         public StaticWebAssetEntryContent? Asset { get; set; }
@@ -101,7 +92,7 @@ internal record StaticWebAssetEntryContent
     public string? SubPath { get; init; }
 
     /// <summary>
-    /// reference to the referenced content folder
+    /// Index into <see cref="StaticWebAssetContent.ContentRoots"/>.
     /// </summary>
     public int ContentRootIndex { get; init; }
 

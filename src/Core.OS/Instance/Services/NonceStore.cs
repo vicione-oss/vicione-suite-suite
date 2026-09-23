@@ -33,7 +33,7 @@ internal sealed class NonceStore(IApplicationDbContext dbContext) : INonceStore
         return affectedRows == 1;
     }
 
-    public async Task DeletedOrphaned(CancellationToken cancellationToken = default)
+    public async Task DeleteOrphaned(CancellationToken cancellationToken = default)
     {
         var expiredAt = DateTimeOffset.UtcNow.AddMinutes(-5);
 

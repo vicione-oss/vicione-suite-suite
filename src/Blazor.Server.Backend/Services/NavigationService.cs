@@ -52,12 +52,11 @@ internal sealed class NavigationService : INavigationService, IDisposable
 
     public void RedirectToSignIn()
     {
-        // issues with NavigationManager redirecting between blazor and razor (cshtml)
-        // https://github.com/dotnet/aspnetcore/issues/18849
         var uriBuilder = new UriBuilder($"{NavManager.BaseUri}account/login");
 
-        // now if we call this sync or return the Task.Completed it does not work like said in
-        // the issue link. if we do it that way it is working but why?
+        // Routes renders with prerender:false, so this runs in the circuit and NavigateTo goes through JS
+        // rather than throwing NavigationException. The 404 in aspnetcore#18849 no longer applies: since
+        // .NET 8 an unmatched URI falls back to a real browser navigation, which reaches the Razor Page.
         NavManager.NavigateTo(uriBuilder.Uri.ToString());
     }
 

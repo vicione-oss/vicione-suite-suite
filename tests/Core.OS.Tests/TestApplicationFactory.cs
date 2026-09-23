@@ -12,9 +12,8 @@ using Sdk.Testing.Backend;
 namespace Core.OS.Tests;
 
 /// <summary>
-/// provides a test host containing all required services that can be modified or extended in the test classes  
+/// provides a test host containing all required services that can be modified or extended in the test classes
 /// </summary>
-/// <typeparam name="TStartup"></typeparam>
 public class TestApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
 {
     /// <summary>
@@ -40,7 +39,7 @@ public class TestApplicationFactory<TStartup> : WebApplicationFactory<TStartup> 
     {
         builder.UseContentRoot(".");
 
-        // called before test web host extension
+        // Called before the test web host extension.
         builder.ConfigureServices(services =>
         {
             var assemblies = new[]
@@ -55,7 +54,7 @@ public class TestApplicationFactory<TStartup> : WebApplicationFactory<TStartup> 
             MvcBuilder = services.AddTestSetupMvc(assemblies);
         });
 
-        // only called if test does not configure itself
+        // Called only when the test does not configure itself.
         builder.Configure(app =>
         {
             app.ConfigureTestSetup();

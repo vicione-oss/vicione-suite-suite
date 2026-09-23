@@ -15,7 +15,7 @@ public static partial class ModuleNameVersionRegex
 
     /// <summary>
     /// https://regex101.com/r/gldEOw/3
-    /// </summary>    
+    /// </summary>
     [GeneratedRegex(@"^(?<version>\d+\.\d+\.\d+(\-(\d+|\w+))*)-(?<arch>(arm64|amd64|linux-x64|win-x64)+)_(?'sdkversion'\d+\.\d+\.\d+)\.json$", RegexOptions.CultureInvariant)]
     private static partial Regex MetaMatcher();
 
@@ -23,7 +23,7 @@ public static partial class ModuleNameVersionRegex
     {
         parsed = null;
 
-        // We expect names like:
+        // Expected names:
         // 1.24.3-win-x64_0.19.0.json
         // 0.35.0-ci1733049-win-x64.zip
         // 0.35.1-rc1-win-x64.zip
@@ -31,7 +31,7 @@ public static partial class ModuleNameVersionRegex
         if (!match.Success)
             return false;
 
-        // The ci part is optional so we have to check if it exists before we can parse the version.
+        // The ci part is optional, so it is checked before the version is parsed.
         if (!match.Groups["civersion"].Success)
         {
             return SemVersion.TryParse(match.Groups["version"].Value, out parsed);
@@ -51,7 +51,7 @@ public static partial class ModuleNameVersionRegex
         // e.g. 1.0.4[-ci24343243]_arm64_1.0.1.json
         var match = MetaMatcher().Match(moduleName);
 
-        // Actually we only support arm64, amd64 and win-x64 and so other architectures don't get accepted
+        // Only arm64, amd64 and win-x64 are supported; the regex rejects other architectures.
         if (!match.Success)
             return false;
 

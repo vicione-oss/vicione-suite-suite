@@ -49,17 +49,17 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
         string? signaturePath = null;
         try
         {
-            // We need the *.deb + *.deb.minisig file to validate signage
+            // Validating the signature needs both the *.deb and the *.deb.minisig file.
             packagePath = await DownloadArtifact(suiteBundle.Package, downloadPath, cancellationToken);
             signaturePath = await DownloadArtifact(suiteBundle.PackageSignature, downloadPath, cancellationToken);
 
             var signature = Minisign.Core.LoadSignatureFromFile(signaturePath);
             var signatureIsValid = false;
 
-            // We have multiple public keys and we are satisfied if one succeeds
+            // One matching key out of the configured set is enough.
             foreach (var key in options.Value.PublicKeys)
             {
-                // To ingore misconfiguration
+                // Tolerates a misconfigured empty entry.
                 if (string.IsNullOrEmpty(key))
                     continue;
 
@@ -71,7 +71,7 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
                 }
             }
 
-            // No public key was able to validate our package signature
+            // No configured public key validated the signature.
             if (!signatureIsValid)
                 throw new InvalidOperationException($"Suite package '{suiteBundle.Package.Name}' signature is invalid.");
         }
@@ -79,7 +79,7 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
         {
             LogFailedToDownloadSuitePackage(logger, ex, suiteBundle.Package.Name);
 
-            // Cleanup suite package when something went wrong
+            // A partial download must not be left behind.
             TryDeleteFile(packagePath);
             TryDeleteFile(signaturePath);
 
@@ -132,7 +132,7 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
             .AndPathMatches(SuitesBaseFolder)
             .AndNameMatches(artifactName);
 
-        // vicione-suite_1.0.0_amd64_1.1.0.deb[.minisig]    
+        // e.g. vicione-suite_1.0.0_amd64_1.1.0.deb[.minisig]
         var aqlQuery = queryBuilder.Build();
         var result = await repository.Query(aqlQuery, cancellationToken);
 
@@ -153,10 +153,10 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
 
     public async Task<IReadOnlyCollection<SuiteArtifactBundle>> QuerySuiteArtifactBundles(Version minimumHostManagementVersion, bool includeUnsignedPackages = false, CancellationToken cancellationToken = default)
     {
-        // We have 3 artifacts per suite-version and architecture where only the json metadata contains the hm-version:
+        // Three artifacts per suite version and architecture; only the json carries the hm-version:
         // - vicione-suite_1.0.3_arm64.deb
         // - vicione-suite_1.0.3_arm64.deb.minisig
-        // - vicione-suite_1.0.3_arm64_1.1.0.json        
+        // - vicione-suite_1.0.3_arm64_1.1.0.json
         var aqlQuery = repository.CreateQueryBuilder()
             .AndPathMatches($"{SuitesBaseFolder}")
             .AndNameMatches($"{GetOSArchitectureFilter()}")
@@ -165,7 +165,7 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
 
         var minHostMgmtSemVer = SemVersion.FromVersion(minimumHostManagementVersion);
 
-        // Results could contain versions that have a lower HM minor version!
+        // The results may still contain a lower HM minor version.
         var result = await repository.Query(aqlQuery, cancellationToken);
 
         // -> vicione-suite_<suite-version>_<architecture>_<hm-version>.json
@@ -186,7 +186,7 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
                 continue;
             }
 
-            // vicione-suite_1.0.3_arm64 -> vicione-suite_1.0.3_arm64.deb[.minisig]            
+            // vicione-suite_1.0.3_arm64 -> vicione-suite_1.0.3_arm64.deb[.minisig]
             var package = TryGetPackage(result.Artifacts, suiteVersion, architecture);
             if (package is null)
             {
@@ -217,14 +217,13 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
 
     public string GetOSArchitectureFilter()
     {
-        // We have no packages for Windows so for debugging we take arm64
-        // There's no host management on Windows too so we can't break anything
-        // return $"*_arm64*";
+        // There are no Windows packages and no host management on Windows, so debugging falls back
+        // to arm64 without affecting anything.
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable CA1308 // Normalize strings to uppercase
-        // We limit to major version and have to filter lower minor versions from result
-        // Supported architectures are: amd64, arm64
+        // Limited to the major version, so lower minor versions are filtered from the result.
+        // Supported architectures: amd64, arm64.
         return $"*_{RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant()}*";
 #pragma warning restore CA1308 // Normalize strings to uppercase
 #pragma warning restore IDE0079 // Remove unnecessary suppression

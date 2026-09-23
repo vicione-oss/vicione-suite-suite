@@ -10,7 +10,7 @@ using Sdk.Backend.Messaging;
 namespace Burger.Backend.Consumers;
 
 /// <summary>
-/// This is the kitchen that produces burgers consuming a kitchen command
+/// The kitchen: consumes a kitchen command and produces burgers.
 /// </summary>
 public sealed class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<KitchenConsumer> logger) :
     TrackingConsumerBase, IConsumer<KitchenCommand>
@@ -35,14 +35,14 @@ public sealed class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<
 
         builder.AddActivity<DressBurgerActivity, DressBurgerArguments>(CreateDressArguments(context.Message.OrderId, context.Message.Burgers.First()));
 
-        // will execute the activities -> RoutingSlipCompleted|Faulted
+        // Executing the routing slip raises RoutingSlipCompleted or RoutingSlipFaulted.
         await ExecuteTracked(context, builder).ConfigureAwait(false);
     }
 
     protected override async Task ConsumeCompleted(ConsumeContext<RoutingSlipCompleted> context)
     {
-        // we need the order id from the activity variables to correlate the BurgerCompleted event
-        // back to our saga - there's for sure a more elegant way to do this
+        // The order id comes from the activity variables, which is what correlates the
+        // BurgerCompleted event back to the saga.
         var orderId = context.GetVariable<Guid>(nameof(KitchenCommand.OrderId));
         if (!orderId.HasValue)
         {
@@ -58,7 +58,7 @@ public sealed class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<
             return;
         }
 
-        // trigger state transition in our saga
+        // Publishing the event advances the saga.
         await context.Publish(new BurgerCompleted
         {
             OrderId = orderId.Value,

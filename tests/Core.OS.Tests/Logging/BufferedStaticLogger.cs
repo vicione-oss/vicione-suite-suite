@@ -33,7 +33,7 @@ internal sealed class BufferedStaticLogger : IDisposable
             })
             .CreateLogger();
 
-        // as in Program.cs: loggers created by this factory bind to the static logger set above
+        // As in Program.cs: loggers from this factory bind to the static logger set above.
         LoggerFactory = new SerilogLoggerFactory(logger: null, dispose: false);
     }
 

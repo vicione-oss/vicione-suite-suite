@@ -45,7 +45,7 @@ public static class ModuleHelpers
         if (string.IsNullOrEmpty(assemblyName))
             return false;
 
-        // skip libraries like e.g. ViciOne.TreeBuilder 
+        // Skips libraries such as ViciOne.TreeBuilder.
         if (!(assemblyName.EndsWith(Constants.ModuleSuffixBackend, StringComparison.Ordinal)
             || assemblyName.EndsWith(Constants.ModuleSuffixClient, StringComparison.Ordinal)
             || assemblyName.EndsWith(Constants.ModuleSuffixPublic, StringComparison.Ordinal)
@@ -72,9 +72,8 @@ public static class ModuleHelpers
         => GetSdkAssemblyName().Version ?? throw new InvalidOperationException("Failed to get SDK assembly version");
 
     /// <summary>
-    /// Returns the version parts as string separated by '.'
-    /// </summary>    
-    /// <returns>Major.Minor.Build</returns>
+    /// Returns the version as Major.Minor.Build.
+    /// </summary>
     public static string GetNormalizedVersion(Version version)
         => $"{version.Major}.{version.Minor}.{version.Build}";
 

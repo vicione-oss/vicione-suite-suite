@@ -12,7 +12,7 @@ internal static partial class ModuleSynchronizationResultsExtension
             LogHttpError(logger, result.HttpResolveError);
         }
 
-        // sdk version mismatch - we set package to be resolved to latest
+        // An sdk version mismatch sends the package back to be resolved to latest.
         foreach (var synchronizeResult in result.Incompatible.Where(k => k.Error is null))
         {
             LogAutomaticUpgrade(logger, synchronizeResult.Name, synchronizeResult.Version);

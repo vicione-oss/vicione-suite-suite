@@ -45,7 +45,7 @@ public sealed class SuiteSynchronizationHealthCheckTests
         using var server = host.GetTestServer();
         using var client = server.CreateClient();
 
-        // executed in RegisterInstanceConsumer
+        // Executed in RegisterInstanceConsumer.
         host.Services.GetRequiredService<SynchronizationState>().CompleteSynchronization();
 
         var response = await client.GetAsync(HealthPath, HttpCompletionOption.ResponseContentRead, TestContext.Current.CancellationToken);
@@ -89,7 +89,7 @@ public sealed class SuiteSynchronizationHealthCheckTests
         var client = server.CreateClient();
 
         var firstResponse = await client.GetAsync(HealthPath, TestContext.Current.CancellationToken);
-        // executed in RegisterInstanceConsumer
+        // Executed in RegisterInstanceConsumer.
         host.Services.GetRequiredService<SynchronizationState>().CompleteSynchronization();
         var secondResponse = await client.GetAsync(HealthPath, TestContext.Current.CancellationToken);
 

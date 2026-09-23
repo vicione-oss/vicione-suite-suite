@@ -21,13 +21,13 @@ public class SynchronizeDataSqlite2SqliteFacts
     public async Task FirstStep_CheckSimpleData()
     {
         // Arrange
-        // Konfiguration für Quell-DB
+        // Source database configuration.
         var localSqliteConnection = $"{_pathDbSqlite}TestModuleSource.db";
         await using var dbSourceContext =
             InitializeTestModuleDbContextSqlite(localSqliteConnection, DefaultSeedDataSimpleDataTypes());
         await using var serviceProvider = CreateServiceProvider(null, dbSourceContext);
 
-        // Konfiguration für Ziel-DB
+        // Target database configuration.
         localSqliteConnection = $"{_pathDbSqlite}TestModuleDest.db";
         await using var dbDestContext = InitializeTestModuleDbContextSqlite(localSqliteConnection);
         await using var serviceProviderSlave = CreateServiceProvider(null, dbDestContext);
@@ -59,13 +59,13 @@ public class SynchronizeDataSqlite2SqliteFacts
     public async Task SynchronizeSuccessful_EmployeeSmallDB()
     {
         // Arrange
-        // Konfiguration für Quell-DB
+        // Source database configuration.
         var localSqliteConnection = $"{_pathDbSqlite}MasterEmployeeSmall.db";
         await using var dbSourceContext =
             InitializeAndSeedingReferenceDbContextSqlite(localSqliteConnection);
         await using var serviceProviderMaster = CreateServiceProviderReferenceDb(null, dbSourceContext);
 
-        // Konfiguration für Ziel-DB
+        // Target database configuration.
         localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
         await using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
         await using var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);
@@ -111,13 +111,13 @@ public class SynchronizeDataSqlite2SqliteFacts
         // Ein gefundenes Single-Quote in einer TEXT-Spalte wird mit weiterem Single-Quote maskiert.
         // Dieses Single-Quote interpretiert die sqlite-DB als Escape-Zeichen.
         // Arrange
-        // Konfiguration für Quell-DB
+        // Source database configuration.
         var localSqliteConnection = $"{_pathDbSqlite}EmployeeInjectionExecute.db";
         await using var dbSourceContext =
             InitializeAndSeedingReferenceDbContextSqlite(localSqliteConnection, TitleCase.Execute);
         await using var serviceProvider = CreateServiceProviderReferenceDb(null, dbSourceContext);
 
-        // Konfiguration für Ziel-DB
+        // Target database configuration.
         localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
         await using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
         await using var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);
@@ -149,7 +149,7 @@ public class SynchronizeDataSqlite2SqliteFacts
         // Assert
         Assert.NotNull(argumentsCollection);
 
-        // Tabelle "DepartmentManager" ist mit Werten befüllt, SQL-Injection wurde nicht ausgeführt.
+        // The DepartmentManager table still holds its values, so the SQL injection did not run.
         Assert.Equal(dbSourceContext.DepartmentManagers.Count(), dbDestContext.DepartmentManagers.Count());
 
         // Anzahl Datensätze von Tabelle "Title" vergleichen
@@ -162,13 +162,13 @@ public class SynchronizeDataSqlite2SqliteFacts
     {
         // Bei einigen Datensätzen der Tabelle "Titles" wurden in der Spalte "Title" SQL-Injection-Werte eingetragen.
         // Arrange
-        // Konfiguration für Quell-DB
+        // Source database configuration.
         var localSqliteConnection = $"{_pathDbSqlite}EmployeeInjectionCancelInsert.db";
         await using var dbSourceContext =
             InitializeAndSeedingReferenceDbContextSqlite(localSqliteConnection, TitleCase.CancelInsert);
         await using var serviceProvider = CreateServiceProviderReferenceDb(null, dbSourceContext);
 
-        // Konfiguration für Ziel-DB
+        // Target database configuration.
         localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
         await using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
         await using var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);

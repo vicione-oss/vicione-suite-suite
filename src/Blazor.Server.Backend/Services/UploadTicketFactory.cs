@@ -35,7 +35,7 @@ public class UploadTicketFactory : IUploadTicketFactory
             }
             catch (ObjectDisposedException)
             {
-                // CancellationTokenSource already disposed, return gracefully
+                // Already disposed, so there is nothing left to cancel.
             }
         }
     }

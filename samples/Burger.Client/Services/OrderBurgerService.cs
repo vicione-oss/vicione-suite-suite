@@ -40,8 +40,8 @@ public sealed class OrderBurgerService : IDisposable,
         var order = new OrderViewModel { OrderId = Guid.NewGuid() };
         var orderCommand = new OrderBurger(order.OrderId, [burger.ToSuiteBurger()]);
 
-        // should trigger the state machines initially but does not :(
-        // we would have to publish it
+        // The saga listens on its own queue, so this Send does not start the state machine. The
+        // message would have to be published for that.
         await _mediator.Send(orderCommand).ConfigureAwait(false);
         Orders.Add(order);
     }

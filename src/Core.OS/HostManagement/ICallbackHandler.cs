@@ -8,10 +8,7 @@ public interface ICallbackHandler
     string Topic { get; }
 
     /// <summary>
-    ///     The method handling a message
+    /// Handles a message whose content is the JSON-serialized payload.
     /// </summary>
-    /// <param name="messageContent">Json-serialized message content</param>
-    /// <param name="cancellationToken">The cancellation token</param>
-    /// <returns></returns>
     Task Handle(string messageContent, CancellationToken cancellationToken);
 }

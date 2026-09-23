@@ -5,7 +5,7 @@ namespace Blazor.Shared;
 
 /// <summary>
 /// Module implementing client functionality in shared scope.
-/// 
+///
 /// The class is implementing <see cref="IClientModule"/> instead of inheriting from base class <see cref="ClientModule"/> to
 /// hide the class from ModuleFinder. This is needed to ensure the Shared assembly is not recognized as an actual UI module.
 /// </summary>

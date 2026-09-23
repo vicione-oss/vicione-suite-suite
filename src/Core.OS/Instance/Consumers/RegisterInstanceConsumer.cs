@@ -42,16 +42,16 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
 
             LogRegisteringInstance(logger, correlationId, isNewInstance ? "Registering" : "Updating registration of", context.Message.Type, instanceId);
 
-            // Attention: for slave synchronization we have to ensure that db changes are only triggered after routing slip has completed
-            // otherwise we'll run into concurrency issues (modify not existing rows etc.)
-            // In this case the db updates will be done on RoutingSlipCompleted
+            // Slave synchronization must not touch the db until the routing slip has completed, or it
+            // runs into concurrency issues such as modifying rows that do not exist yet. The db updates
+            // happen in RoutingSlipCompleted instead.
             if (context.Message.Type == InstanceType.Slave)
             {
                 var config = await HandleSlaveInstanceConfiguration(correlationId, instanceId, context.Message.Configuration);
                 var factory = services.GetRequiredService<IRoutingSlipBuilderFactory>();
                 var builder = factory.Create(context.CorrelationId ?? Guid.NewGuid());
 
-                // add the sync activities before any other data changing activity
+                // The sync activities have to run before anything that changes data.
                 await HandleSlaveInstanceSynchronization(builder,
                     instanceId,
                     context.Message.InstalledModules,
@@ -61,7 +61,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
                     config,
                     context.CancellationToken);
 
-                // e.g. string variable won't be added if its value is null or empty
+                // A string variable is omitted when its value is null or empty.
                 var commandSerialized = JsonSerializer.Serialize(context.Message, Sdk.Messaging.DefaultJsonSerializerSettings.Default);
 
                 builder.AddVariable(SyncDataHelpers.InstanceCommandKey, commandSerialized);
@@ -71,18 +71,15 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
                     SyncCompleted = true,
                 }, instanceId);
 
-                // routing slip gets executed on leaving the consume call -> handle tracked result!
+                // The routing slip runs when the consume call returns, so the tracked result matters.
                 await ExecuteTracked(context, builder);
                 return;
             }
 
-            // update master information
             var info = await UpsertInstanceInfo(context.Message, isNewInstance, context.CancellationToken);
 
-            // update local instance info caches
             await UpdateInstanceProviders(info, context.CancellationToken);
 
-            // trigger synchronization state completion
             services.GetRequiredService<SynchronizationState>().CompleteSynchronization();
         }
         catch (Exception e)
@@ -204,7 +201,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
 
     private async Task<IConfiguration> HandleSlaveInstanceConfiguration(Guid correlationId, Guid instanceId, List<KeyValuePair<string, string?>> configuration)
     {
-        // only master can access this one - stores the slave instance config
+        // Master only: stores the slave instance configuration.
         var configRepository = services.GetRequiredService<IInstanceConfigurationRepository>();
         var instanceConfig = await configRepository.StoreConfiguration(instanceId, [.. configuration]);
 
@@ -260,13 +257,13 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
             return connection;
         }
 
-        // if the mqtt json and tags mat
+        // Identical mqtt json and tags mean nothing changed.
         if (!string.IsNullOrEmpty(connection.Json)
             && connection.Json.Equals(existing.Json, StringComparison.Ordinal)
             && connection.Tags.SequenceEqual(existing.Tags))
             return null;
 
-        // keep the id and update the rest
+        // The id is kept; everything else is overwritten.
         existing.Assign(connection);
 
         LogUpdateInstanceConnection(logger, instanceId, connection.Name, connection.Id,
@@ -290,7 +287,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
 
             await UpsertInstanceInfo(command, isNewInstance, context.CancellationToken);
 
-            // only master can access this one - stores the slave instance config
+            // Master only: stores the slave instance configuration.
             var configRepository = services.GetRequiredService<IInstanceConfigurationRepository>();
             var config = await configRepository.GetConfiguration(command.InstanceId);
 

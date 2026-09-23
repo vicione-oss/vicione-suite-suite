@@ -19,7 +19,6 @@ internal static class IFileSystemExtensions
 {
     private const string PipelineVersionKey = "##VERSION_REF##";
 
-    /// <param name="fileSystem"></param>
     extension(IFileSystem fileSystem)
     {
         public async Task EnsureModuleVersionsFile(InstanceOptions instanceOptions, string? manifestSeedingPath, ILogger logger, CancellationToken cancellationToken = default)
@@ -68,7 +67,7 @@ internal static class IFileSystemExtensions
                 Options = FileOptions.Asynchronous,
             });
 
-            // validate the seeded manifest
+            // Deserialized only to validate the seeded manifest; the result is discarded.
             _ = await JsonSerializer.DeserializeAsync<ModulePackageManifest>(fs, DefaultJsonSerializerSettings.Default, cancellationToken)
                 ?? throw new InvalidOperationException($"Failed to deserialize modules versions file '{modulesFilePath}'.");
 
@@ -112,7 +111,6 @@ internal static class IFileSystemExtensions
 
         public string GetOrCreateRootedModulesPath(ModuleLoaderOptions loaderOptions)
         {
-            // ensure the download path exists
             var rootedModulesPath = fileSystem.GetRootedModulesPath(loaderOptions);
             if (!fileSystem.Directory.Exists(rootedModulesPath))
                 fileSystem.Directory.CreateDirectory(rootedModulesPath);
@@ -155,25 +153,17 @@ internal static class IFileSystemExtensions
         }
 
         /// <summary>
-        /// Writes a file atomically so a crash or power-loss mid-write can never leave a
-        /// truncated/corrupt file: the content is written to a temporary sibling file first
-        /// and then atomically moved into place, keeping the previous valid file intact until
-        /// the new one is fully persisted.
-        /// <para>
-        /// Because the move replaces the target's directory entry, the temp file's metadata becomes the
-        /// metadata of the target. The unix file permissions of an already existing target are therefore
-        /// captured beforehand and re-applied to the temp file, so a custom mode (e.g. <c>0600</c>) is not
-        /// silently reset to the process default. A newly created file keeps the default permissions.
-        /// Ownership (uid/gid) and windows ACLs are not preserved.
-        /// </para>
-        /// <para>
-        /// If writing fails the temp file is removed (best effort) and the original exception is rethrown,
-        /// leaving the previous file and its permissions untouched.
-        /// </para>
+        /// Writes a file atomically: the content goes to a temporary sibling and is then moved into
+        /// place, so a crash mid-write cannot leave a truncated file.
         /// </summary>
+        /// <remarks>
+        /// The move replaces the target's directory entry, so the temp file's metadata becomes the
+        /// target's. An existing target's unix permissions are captured and re-applied, keeping a custom
+        /// mode such as <c>0600</c>; a new file keeps the defaults. Ownership and windows ACLs are not
+        /// preserved. On failure the temp file is removed best-effort and the original is left untouched.
+        /// </remarks>
         /// <param name="filePath">Target file path. Missing parent directories are created.</param>
         /// <param name="writeContent">Callback receiving the writable stream of the temporary file.</param>
-        /// <param name="cancellationToken"></param>
         public async Task WriteFileAtomic(string filePath, Func<Stream, Task> writeContent, CancellationToken cancellationToken = default)
         {
             var directory = fileSystem.Path.GetDirectoryName(filePath);
@@ -207,7 +197,7 @@ internal static class IFileSystemExtensions
             }
             catch
             {
-                // don't leave a partially written temp file behind
+                // A partially written temp file must not be left behind.
                 fileSystem.TryDeleteFile(tempPath);
                 throw;
             }
@@ -223,7 +213,7 @@ internal static class IFileSystemExtensions
                 }
                 catch
                 {
-                    // ignored - cleanup is best effort
+                    // Ignored: the cleanup is best effort.
                 }
             }
         }
@@ -252,8 +242,8 @@ internal static class IFileSystemExtensions
         }
 
         /// <summary>
-        /// Try to get full path to <see cref="ModuleConstants.MetadataFileName"/> in module debug folder or one of its ancestors
-        /// </summary>    
+        /// Finds <see cref="ModuleConstants.MetadataFileName"/> in the module debug folder or an ancestor.
+        /// </summary>
         public string? FindModuleMetadataPath(string moduleSrcPath)
         {
             var parentFolder = fileSystem.GetPathContains(moduleSrcPath, [ModuleConstants.MetadataFileName]);
@@ -267,10 +257,6 @@ internal static class IFileSystemExtensions
         /// Starts to search first file matching an item from fileNames and matching the fileFilter within startPath.
         /// If startPath does not contain a matching file its parents get searched upwards.
         /// </summary>
-        /// <param name="startPath"></param>
-        /// <param name="fileNames"></param>
-        /// <param name="fileFilter"></param>
-        /// <returns></returns>
         private string? GetPathContains(string startPath, IList<string> fileNames, string fileFilter = "*.json")
         {
             for (var directory = fileSystem.DirectoryInfo.New(startPath); directory.Parent is not null; directory = directory.Parent)
@@ -298,7 +284,7 @@ internal static class IFileSystemExtensions
             if (!fileSystem.Directory.Exists(appPath))
                 return ModuleHelpers.GetNormalizedVersion(assembly);
 
-            // path should exist because this file gets deployed by apt
+            // The file is deployed by apt, so the path exists.
             var versionPath = fileSystem.Path.Combine(appPath, "version.json");
             if (!fileSystem.File.Exists(versionPath))
                 return ModuleHelpers.GetNormalizedVersion(assembly);
@@ -310,7 +296,7 @@ internal static class IFileSystemExtensions
                 if (resDict is null || resDict.Count == 0 || !resDict.TryGetValue("Version", out var versionString))
                     return ModuleHelpers.GetNormalizedVersion(assembly);
 
-                // we can't get any useful version from e.g. 4c3b3a3d-1276-directory-build-props
+                // A name such as 4c3b3a3d-1276-directory-build-props carries no usable version.
                 if (!PipelineVersionParser.TryParse(versionString, out var parsed, out _))
                 {
                     branchName = versionString == PipelineVersionKey ? "local development" : versionString;
@@ -328,7 +314,7 @@ internal static class IFileSystemExtensions
 
         public IEnumerable<ModulePackageVersionPath> GetModulePackageVersionPaths(string rootedModulesPath)
         {
-            // get all module directories and versions
+            // All module directories and their versions:
             // module-path/{Module}/{Version} e.g. suite-modules/ViciOne.Suite.DataCollectionWizard/0.10.0
             var moduleVersionDirectories = fileSystem.Directory
                 .GetDirectories(rootedModulesPath, "*.*", SearchOption.AllDirectories)
@@ -347,7 +333,7 @@ internal static class IFileSystemExtensions
                 var name = split[0];
                 var version = split[1];
 
-                // eg. 0.21.1-ci2132312
+                // e.g. 0.21.1-ci2132312
                 if (!SemVersion.TryParse(version, out _))
                     continue;
 

@@ -27,7 +27,7 @@ public sealed class SettingsNotificationElement : NotificationElement<Notificati
 
     public SettingsNotificationElement()
     {
-        //RegisterFlyout<SettingsNotificationElementFlyout>();
+        // No flyout is registered; the settings element navigates instead of opening one.
     }
 
     protected override async Task OnInitializedAsync()

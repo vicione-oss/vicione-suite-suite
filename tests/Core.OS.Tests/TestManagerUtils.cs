@@ -28,7 +28,7 @@ internal static class TestManagerUtils
             moduleManager.GetModule<TestBackendModule>().Returns(modules.First().Module);
             moduleManager.GetModules().Returns(modules.Select(k => k.Module));
             moduleManager.GetModuleAssemblies().Returns(modules.Select(k => k.Assembly));
-            // the following is usually done in ModuleHost.AddModuleServices
+            // Normally done by ModuleHost.AddModuleServices.
             var name = ModuleIdResolver.GetModuleName(TestBackendModule.Id);
             services.AddModuleFeature(_ => new ModuleFeature(TestBackendModule.Id, name, $"The default permission for {name}."));
 
@@ -64,9 +64,8 @@ internal static class TestManagerUtils
                     {
                         optionsBuilder.UseApplicationServiceProvider(serviceProvider);
 
-                        // ignoring these warnings is currently the only way to avoid the ApplicationWorkerTest
-                        // from failing sporadically, see:
-                        // TODO https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2695
+                        // TODO(#2695): ignoring these warnings is currently the only way to keep ApplicationWorkerTest
+                        // from failing sporadically.
                         optionsBuilder.ConfigureWarnings(warnings
                             => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
                     });

@@ -34,11 +34,11 @@ internal sealed class ProxiesControlPanelSaveHandler(IUiMediator mediator, ISyst
         if (SaveProxySettings(state.SftpProxySettings, networkProxySettings.SFTP) is SaveErrorResult sftpProxySaveErrorResult)
             return Task.FromResult<ISaveInternalResult>(new SaveInternalErrorResult(sftpProxySaveErrorResult.Message, sftpProxySaveErrorResult.ErrorCode));
 
-        // do not use proxy settings
+        // Proxy settings are not applied.
         {
             networkProxySettings.DoNotProxyListEnabled = state.DoNotProxyListEnabled;
 
-            // filter out fieldsets not filled and remove duplicates
+            // Unfilled fieldsets and duplicates are dropped.
             state.DoNotProxyDetails = [.. state.DoNotProxyDetails.Where(d => !string.IsNullOrWhiteSpace(d.HostnameOrIp)).Distinct()];
 
             networkProxySettings.DoNotProxyList.Clear();

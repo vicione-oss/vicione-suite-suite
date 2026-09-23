@@ -125,10 +125,10 @@ public sealed partial class ModuleManagementControlPanel : ControlPanelBase<Modu
         {
             await State.CancelEditInOptionGrids();
 
-            // load metadata assets and jsons in one step
+            // Loads the metadata assets and jsons in one step.
             var response = await ManagementService.GetMetadata(forceReload);
 
-            // will trigger StateChanged which will update the queryables and clear the selections
+            // Triggers StateChanged, which updates the queryables and clears the selections.
             State.UpdateModules(response);
         }
         catch (Exception ex)

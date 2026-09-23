@@ -26,6 +26,7 @@ Welcome to the readme of ViciOne Suite. Questions and suggestions for improvemen
         * [RabbitMQ](#rabbitmq)
         * [ttyd](#ttyd)
         * [Access to DigitalOcean Review Deployments](#access-to-digitalocean-review-deployments)
+* [Code comments](./docs/code-style-guide.md)
 * [Further information](#further-information)
     * [Database migration](#database-migration)
 
@@ -324,6 +325,10 @@ Furthermore, while connected as the `debug`-user, you can use the following comm
 - To __restart__ the application use `sudo restart-suite`
 - To __delete__ content from the `./AppData`-directory use `sudo delete-appdata`
 - To __stop docker containers__ use `sudo kill-container`. Afterwards, during the **next** deployment the pipeline will create new containers. Until then, they will not be available.
+
+## Code comments
+
+Comment rules for hand-written `*.cs` and `*.razor` files live in [Code Style Guide → Code comments](./docs/code-style-guide.md#code-comments).
 
 ## Further information
 ### Database migration

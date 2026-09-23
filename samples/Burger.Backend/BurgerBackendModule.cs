@@ -27,12 +27,11 @@ public sealed class BurgerBackendModule : BackendModule
 
     public override void ConfigureMessageBus(IServiceCollection busConfig, InstanceType instanceType)
     {
-        // skip saga registration because only master or standalone are allowed to handle it
+        // Only master and standalone may handle the saga, so registration is skipped otherwise.
         if (instanceType == InstanceType.Slave)
             return;
 
-        // the state will be persisted while saga execution
-        // after saga is finished its record gets removed from database
+        // The saga state is persisted while the saga runs; its record is removed once it finishes.
         ((IBusRegistrationConfigurator)busConfig).AddSagaStateMachine<OrderBurgerStateMachine, OrderBurgerState>()
             .EntityFrameworkRepository(r =>
             {

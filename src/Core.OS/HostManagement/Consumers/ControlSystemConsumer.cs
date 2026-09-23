@@ -81,7 +81,7 @@ public sealed partial class ControlSystemConsumer(
 
     private async Task<OperationResult?> ProcessResetSystem(ConsumeContext<ControlSystem> context)
     {
-        // what to do now set reset for suite
+        // Resets the system through HostManagement.
         var result = await pipeClient.ResetSystem(context.CancellationToken);
         if (result?.Status != OperationStatus.Success)
             return result;

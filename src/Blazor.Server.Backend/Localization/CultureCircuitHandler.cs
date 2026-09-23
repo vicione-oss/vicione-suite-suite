@@ -62,11 +62,11 @@ public sealed class CultureCircuitHandler(IServiceProvider serviceProvider) : Ci
         }
         catch (TaskCanceledException)
         {
-            // Ignore gracefully
+            // The circuit is gone; the culture no longer matters.
         }
         catch (OperationCanceledException)
         {
-            // Ignore gracefully
+            // The circuit is gone; the culture no longer matters.
         }
         catch (Exception ex)
         {

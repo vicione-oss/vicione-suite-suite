@@ -47,7 +47,7 @@ public static class IFileSystemExtensions
                 if (!fileSystem.Path.IsPathRooted(debugPath))
                 {
                     var rootPath = fileSystem.GetRepositoryRootPath();
-                    // transform relative repository path to absolute path
+                    // A relative repository path becomes absolute.
                     debugPath = fileSystem.Path.Combine(rootPath, path.TrimStart(fileSystem.Path.DirectorySeparatorChar));
                 }
 
@@ -66,9 +66,8 @@ public static class IFileSystemExtensions
         }
 
         /// <summary>
-        /// returns all module dll (with .deps.json) paths recursive from searchPath 
-        /// </summary>    
-        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// All module dll paths with a .deps.json, searched recursively.
+        /// </summary>
         private string[] GetModuleDlls(string? searchPath)
         {
             if (string.IsNullOrEmpty(searchPath))
@@ -104,11 +103,11 @@ public static class IFileSystemExtensions
 
             if (!fileSystem.Path.IsPathRooted(path) || !fileSystem.Path.IsPathFullyQualified(path))
             {
-                // get path of executable not the working directory
+                // The executable's path, not the working directory.
                 var location = Assembly.GetExecutingAssembly().Location;
                 var folder = fileSystem.Path.GetDirectoryName(location) ?? throw new DirectoryNotFoundException(location);
 
-                // transform relative repository path to absolute path
+                // A relative repository path becomes absolute.
                 return fileSystem.Path.Combine(folder, TrimPath(fileSystem, path));
             }
 
@@ -161,7 +160,7 @@ public static class IFileSystemExtensions
                 if (!fileSystem.Path.Exists(versionFile))
                     continue;
 
-                // The VERSION file might contain linebreaks etc. We'll filter them out
+                // The VERSION file may contain line breaks and other control characters.
                 var version = await fileSystem.File.ReadAllTextAsync(versionFile, cancellationToken);
                 var cleaned = new string([.. version.Where(c => !char.IsControl(c) && (char.IsLetterOrDigit(c) || char.IsPunctuation(c)))]);
 

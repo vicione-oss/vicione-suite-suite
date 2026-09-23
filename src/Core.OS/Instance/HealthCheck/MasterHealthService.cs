@@ -60,7 +60,7 @@ public sealed class MasterHealthService(MasterHealthInfo masterHealthInfo, IServ
             return;
         }
 
-        // can be null if the instance is not yet in the table
+        // Null while the instance is not in the table yet.
         _masterId = (await instanceProvider.GetInstancesInCluster(token))
             .FirstOrDefault(i => i.Type == InstanceType.Master)?.Id;
     }

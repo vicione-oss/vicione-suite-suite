@@ -140,7 +140,7 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here.
 
             return new SaveSuccessResult();
         }
@@ -183,7 +183,7 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here.
         }
         catch (ObjectDisposedException)
         {

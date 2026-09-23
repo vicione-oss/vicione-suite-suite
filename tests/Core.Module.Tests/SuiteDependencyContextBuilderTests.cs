@@ -376,7 +376,7 @@ public class SuiteDependencyContextBuilderTests
 
         foreach (var moduleContext in context.Modules)
         {
-            // modules have no dependencies that are provided by core
+            // No module depends on anything core provides.
             if (moduleContext.RuntimeLibraries.Count > 0)
             {
                 moduleContext.RuntimeLibraries.Select(k => k.Name)
@@ -384,7 +384,7 @@ public class SuiteDependencyContextBuilderTests
                     .NotBeSubsetOf(context.Core.RuntimeAssets.Select(rtl => rtl.Name));
             }
 
-            // modules have no dependencies that are provided by ui hosts
+            // No module depends on anything a ui host provides.
             if (moduleContext.RuntimeLibraries.Count > 0)
             {
                 moduleContext.RuntimeLibraries.Select(k => k.Name)
@@ -392,7 +392,7 @@ public class SuiteDependencyContextBuilderTests
                     .NotBeSubsetOf(context.UiHost != null ? context.UiHost?.RedundantLibraries.Select(rtl => rtl.Name) : []);
             }
 
-            // modules have no assets that are provided by ui hosts
+            // No module carries an asset a ui host provides.
             if (moduleContext.RuntimeAssets.Count > 0)
             {
                 moduleContext.RuntimeAssets.Select(k => k.Name)
@@ -400,7 +400,7 @@ public class SuiteDependencyContextBuilderTests
                     .NotBeSubsetOf(context.UiHost?.RuntimeAssets.Select(rtl => rtl.Name));
             }
 
-            // modules have marked assets redundant that are provided by ui hosts
+            // Assets a ui host provides are marked redundant on the modules.
             if (moduleContext.RedundantAssets.Count > 0)
             {
                 moduleContext.RedundantAssets.Select(k => k.Name)
@@ -410,7 +410,7 @@ public class SuiteDependencyContextBuilderTests
 
             if (runtimeMode && moduleContext.ModuleType == ModuleType.Backend)
             {
-                // assert that modules have only unique runtime libraries
+                // Each module keeps only its unique runtime libraries.
                 moduleContext.RuntimeLibraries.Select(k => ModuleHelpers.GetNameVersionKey(k.Name, k.Version))
                     .Should()
                     .NotBeSubsetOf(context.Modules

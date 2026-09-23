@@ -22,7 +22,7 @@ public sealed class CreateConnectionConsumerTests : TestWithDbContextSqlite<Conn
     public CreateConnectionConsumerTests()
         => _configureServices = cfg =>
         {
-            // consumer needs
+            // Required by the consumer.
             cfg.AddConsumer<CreateConnectionConsumer>();
             cfg.AddSingleton(Substitute.For<ILogger<CreateConnectionConsumer>>());
             cfg.AddSingleton<IConnectionDbContext>(_ => TestDbContext);

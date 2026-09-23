@@ -8,7 +8,6 @@ namespace Core.Module.Extensions;
 
 public static class ModuleDependencyContextExtensions
 {
-    /// <param name="context"></param>
     extension(ModuleDependencyContext context)
     {
         public bool HasRuntimeLibrary(string name, string version)
@@ -19,9 +18,8 @@ public static class ModuleDependencyContextExtensions
             ?? throw new KeyNotFoundException(context.AssemblyName);
 
         /// <summary>
-        /// Returns first available sdk library version that is referenced by the module context runtime libraries.
+        /// First sdk library version referenced by the module's runtime libraries, as {major}.{minor}.{patch}.
         /// </summary>
-        /// <returns>{major}.{minor}.{patch}</returns>
         public string GetSdkVersion()
         {
             var sdkAssembly = ModuleHelpers.GetSdkAssemblyName();
@@ -36,7 +34,7 @@ public static class ModuleDependencyContextExtensions
             if (sdkVersions.Count == 0)
                 throw new SdkIncompatibilityException("No referenced SDK version found");
 
-            // if we use a sdk pre-release version we have e.g. 0.20.0-ci1447880        
+            // An sdk pre-release carries a suffix, e.g. 0.20.0-ci1447880.
             if (!SemVersion.TryParse(sdkVersions.First(), out var version))
                 throw new SdkIncompatibilityException("Referenced SDK version is invalid");
 
@@ -45,14 +43,13 @@ public static class ModuleDependencyContextExtensions
         }
 
         /// <summary>
-        /// returns direct project dependencies of main like *.Internal|Public
+        /// Direct project dependencies of main, such as *.Internal and *.Public.
         /// </summary>
-        /// <returns></returns>
         public IEnumerable<Dependency> GetModuleDependencies()
         {
             var moduleRt = context.GetMainLibrary();
 
-            // filter by naming convention e.g. ViciOne.Suite.XXX[.Internal|.Public]
+            // Filtered by naming convention, e.g. ViciOne.Suite.XXX[.Internal|.Public].
             if (ModuleHelpers.TryGetFamilyNamePart(moduleRt.Name, out var commonNamePart))
             {
                 var deps = moduleRt.Dependencies.SelectMany(context.GetModuleDependenciesInternal).Concat(moduleRt.Dependencies);
@@ -63,14 +60,13 @@ public static class ModuleDependencyContextExtensions
         }
 
         /// <summary>
-        /// gets all *.Public dependencies from other modules
+        /// All *.Public dependencies from other modules.
         /// </summary>
-        /// <returns></returns>
         public IEnumerable<Dependency> GetExternalPublicDependencies()
         {
             var moduleRt = context.GetMainLibrary();
 
-            // filter by naming convention e.g. ViciOne.Suite.XXX[.Internal|.Public]
+            // Filtered by naming convention, e.g. ViciOne.Suite.XXX[.Internal|.Public].
             if (!ModuleHelpers.TryGetFamilyNamePart(moduleRt.Name, out var commonNamePart))
                 return [];
 
@@ -139,11 +135,8 @@ public static class ModuleDependencyContextExtensions
     }
 
     /// <summary>
-    /// gets all contexts referenced by moduleContext  
+    /// All contexts referenced by <paramref name="moduleContext"/>.
     /// </summary>
-    /// <param name="contexts"></param>
-    /// <param name="moduleContext"></param>
-    /// <returns></returns>
     internal static IEnumerable<ModuleDependencyContext> GetDependencyContexts(this List<ModuleDependencyContext> contexts, ModuleDependencyContext moduleContext)
     {
         var moduleRt = moduleContext.GetMainLibrary();
@@ -151,15 +144,14 @@ public static class ModuleDependencyContextExtensions
 
         foreach (var dependency in moduleRt.Dependencies)
         {
-            // in: ViciOne.Suite.XXX.Public out: ViciOne.Suite.XXX  
+            // ViciOne.Suite.XXX.Public -> ViciOne.Suite.XXX
             if (!ModuleHelpers.TryGetFamilyNamePart(dependency.Name, out var commonName))
                 continue;
 
-            // exclude dependencies from same module like ViciOne.Suite.XXX.Internal|Public
+            // Dependencies of the same module, e.g. its own .Internal or .Public, are excluded.
             if (moduleRt.Name.StartsWith(commonName, StringComparison.Ordinal))
                 continue;
 
-            // now try to add all contexts that belong to ViciOne.Suite.XXX
             ret.AddRange(contexts.Where(k => k.AssemblyName.StartsWith(commonName, StringComparison.Ordinal)));
         }
 

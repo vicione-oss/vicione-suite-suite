@@ -5,7 +5,7 @@ using Sdk.Modules;
 namespace Core.Shared.Modules.Contracts;
 
 /// <summary>
-/// Wrapper for ModuleMetadata with extended information 
+/// <see cref="ModuleMetadata"/> plus installation and availability state.
 /// </summary>
 [DebuggerDisplay("ModuleId = {ModuleId,nq}, Version = {Metadata.Version,nq}")]
 public sealed class ModuleMetadataBundle
@@ -15,49 +15,46 @@ public sealed class ModuleMetadataBundle
     public required ModuleMetadata Metadata { get; set; }
 
     /// <summary>
-    /// If true the module is already installed and loaded
+    /// The module is installed and loaded.
     /// </summary>
     public bool Installed { get; set; }
 
     public List<ModuleDependencyPackage> MissingDependencies { get; set; } = [];
 
     /// <summary>
-    /// If the flag is false the module can't be un-/installed by UI 
+    /// When false, the UI cannot install or uninstall the module.
     /// </summary>
     public bool CanBeModified { get; set; } = true;
 
     /// <summary>
-    /// If true there's an update available for the module
+    /// An update is available.
     /// </summary>
     public bool CanUpdate { get; set; }
 
     /// <summary>
-    /// Versions available for installation, empty if no compatible version is available in the repository
+    /// Installable versions; empty when the repository has no compatible version.
     /// </summary>
     public List<string> AvailableVersions { get; set; } = [];
 
-    /// <summary>
-    /// Contains the pending operation for this package if any otherwise <see langword="null"/>
-    /// </summary>
     public ModulePackageOperation? PendingOperation { get; set; }
 
     /// <summary>
-    /// List of errors that occurred on init process of the module like missing optios etc.
+    /// Errors from the module init process, e.g. missing options.
     /// </summary>
     public List<ErrorInfo> Errors { get; set; } = [];
 
     /// <summary>
-    /// If true the module has a valid *.Backend part
+    /// The module has a valid *.Backend part.
     /// </summary>
     public bool HasBackend { get; set; }
 
     /// <summary>
-    /// If true the module has a valid *.Client part
+    /// The module has a valid *.Client part.
     /// </summary>
     public bool HasFrontend { get; set; }
 
     /// <summary>
-    /// Set to <see langword="true"/> if the module was loaded from a debug path
+    /// The module was loaded from a debug path.
     /// </summary>
     public bool IsDebugSource { get; set; }
 }

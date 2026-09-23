@@ -60,7 +60,7 @@ public class SessionManagerTests
                 ["level"],
                 StringComparer.Ordinal);
 
-            // call once to _lastCursor set
+            // Called once so _lastCursor is set.
             await sut.Process(DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
 
             // Act
@@ -92,7 +92,7 @@ public class SessionManagerTests
                 ["level"],
                 StringComparer.Ordinal);
 
-            // call once to _lastCursor set
+            // Called once so _lastCursor is set.
             await sut.Process(DateTimeOffset.UtcNow, TestContext.Current.CancellationToken);
             sut.GetCurrentCounts();
 

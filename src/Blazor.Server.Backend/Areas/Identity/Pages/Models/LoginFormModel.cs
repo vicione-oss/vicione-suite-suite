@@ -27,8 +27,7 @@ public sealed class LoginFormModel
         get;
         set
         {
-            // when the checkbox is not checked, no value is posted back. To ensure that the value for remember me is correctly set,
-            // we check if we get a value after the form post.
+            // An unchecked checkbox posts no value at all, so presence of a value is what sets RememberMe.
             RememberMe = !string.IsNullOrEmpty(value);
             field = value;
         }

@@ -103,7 +103,6 @@ public sealed class TestConnectionConsumerTests
         doneEvent.CorrelationId.Should().Be(command.CorrelationId);
         doneEvent.TestResult.Success.Should().BeTrue();
         doneEvent.TestResult.ErrorInfo.Should().BeNull();
-        // var mqttConnection = command.Connection.GetMqttConnection() ?? throw new ArgumentException();
         // VerifyMqttConnect(command, mqttConnection, false);
     }
 
@@ -124,7 +123,6 @@ public sealed class TestConnectionConsumerTests
         doneEvent.TestResult.Success.Should().BeTrue();
         doneEvent.TestResult.ErrorInfo.Should().BeNull();
 
-        // var mqttConnection = command.Connection.GetMqttConnection() ?? throw new ArgumentException();
         // VerifyMqttConnect(command, mqttConnection, true);
     }
 
@@ -145,7 +143,6 @@ public sealed class TestConnectionConsumerTests
         doneEvent.TestResult.Success.Should().BeTrue();
         doneEvent.TestResult.ErrorInfo.Should().BeNull();
 
-        // var mqttConnection = command.Connection.GetMqttConnection() ?? throw new ArgumentException();
         // _mqttClientMock.Verify(mc => mc.ConnectAsync(
         //     It.Is<MqttClientOptions>(mco =>
         //         (mco.ChannelOptions as MqttClientWebSocketOptions) is not null &&

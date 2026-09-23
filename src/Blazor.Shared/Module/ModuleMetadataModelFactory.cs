@@ -24,14 +24,14 @@ internal static class ModuleMetadataModelFactory
             if (bundle.Metadata.Options is null)
                 return [];
 
-            // options for installed modules are already enriched with current values
+            // Installed modules already carry their current option values.
             if (!bundle.Installed)
             {
-                // available modules have the options directly from metadata...
+                // Available modules take their options straight from the metadata, so the defaults are
                 foreach (var option in bundle.Metadata.Options
                     .Where(option => string.IsNullOrEmpty(option.Value) && !string.IsNullOrEmpty(option.DefaultValue)))
                 {
-                    // therefore we preset the default values here
+                    // preset here.
                     option.Value = option.DefaultValue;
                 }
             }

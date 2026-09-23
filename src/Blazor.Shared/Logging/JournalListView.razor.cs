@@ -46,8 +46,6 @@ public sealed partial class JournalListView : ComponentBase, IDisposable
     /// <summary>
     /// https://wiki.archlinux.org/title/Systemd/Journal
     /// </summary>
-    /// <param name="priority"></param>
-    /// <returns></returns>
     private static string GetClassFromPriority(int priority)
         => priority switch
         {

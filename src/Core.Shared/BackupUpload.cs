@@ -1,6 +1,6 @@
 namespace Core.Shared;
 
 /// <summary>
-/// Marker type to match the SettingsFieldFileUpload to the Upload handler for the backup restore upload.
+/// Marker type binding SettingsFieldFileUpload to the backup restore upload handler.
 /// </summary>
 public class BackupUpload;

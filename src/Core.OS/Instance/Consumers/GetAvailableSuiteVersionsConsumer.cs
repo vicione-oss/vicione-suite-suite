@@ -48,7 +48,7 @@ public sealed partial class GetAvailableSuiteVersionsConsumer(
             });
         }
 
-        // Sort the list by real version instead of string        
+        // Sort the list by real version instead of string
         filteredVersions.Sort((package, versionPackage) => SemVersion.ComparePrecedence(package.Version, versionPackage.Version));
 
         var suiteVersions = filteredVersions.Select(b => new SuiteVersionPackage
@@ -68,7 +68,7 @@ public sealed partial class GetAvailableSuiteVersionsConsumer(
     {
         // After installing a ci version like 1.1.0~1231231 the current version will be again 1.1.0
         // therefore we can't use the normal version check here, but we need to ensure that no lower
-        // minor version gets installed        
+        // minor version gets installed
         if (!packageVersion.IsPrerelease)
             return currentVersion.ComparePrecedenceTo(packageVersion) <= 0;
 

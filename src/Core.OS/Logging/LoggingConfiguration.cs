@@ -77,7 +77,7 @@ internal static class LoggingConfiguration
                 OtelEnvironment.Endpoint,
                 exporterOptions.Endpoint);
 
-        // the sink matches protocol names case-sensitively, so the check here must too
+        // The sink matches protocol names case-sensitively, so this check must too.
         var protocol = exporterOptions.Protocol;
         if (!string.IsNullOrEmpty(protocol)
             && !string.Equals(protocol, GrpcProtocolName, StringComparison.Ordinal)
@@ -112,12 +112,11 @@ internal static class LoggingConfiguration
         IFileSystem fileSystem,
         InstanceOptions instanceOptions)
     {
-        // this one is used to log on startup before service provider is ready
+        // Used to log during startup, before the service provider is ready.
         SetupStaticStartupLogger(configuration, fileSystem, instanceOptions);
 
         SetLoggingSwitchSwitchLogLevel(configuration);
 
-        // configure serilog
         services.AddLogging(loggingBuilder =>
         {
             loggingBuilder.ClearProviders(); // clear default providers, otherwise we would have double entries in console
@@ -191,8 +190,8 @@ internal static class LoggingConfiguration
                 formatProvider: CultureInfo.InvariantCulture
             );
 
-    // if suite is deployed via apt the LogTarget.LogFile is disabled by default
-    // systemd takes the logs from console and writes it to /var/logs/vicione-suite
+    // A suite deployed via apt has LogTarget.LogFile disabled by default;
+    // systemd takes the console logs and writes them to /var/logs/vicione-suite.
     private static void AddFileSink(this LoggerConfiguration loggerConfiguration, LoggingOptions logOptions)
     {
         if (string.IsNullOrEmpty(logOptions.LogPath))
@@ -259,7 +258,7 @@ internal static class LoggingConfiguration
             {
                 options.ResourceAttributes = SuiteOtelResource.GetResourceAttributes(exporterOptions, fileSystem, instanceOptions);
                 options.RestrictedToMinimumLevel = SerilogLogLevelSwitch.ToLogEventLevel(sinkOptions.MinimumLevel);
-                // the logger is created before options validation runs, so an invalid
+                // The logger is created before options validation runs, so an invalid
                 // configured limit must not be able to fail logger creation
                 options.BatchingOptions.QueueLimit = Math.Max(MinimumQueueLimit, sinkOptions.QueueLimit);
             }, configuration.GetValue<string?>);
@@ -268,7 +267,7 @@ internal static class LoggingConfiguration
         }
         catch (Exception ex)
         {
-            // the sink rejects malformed OTLP variables (headers, resource attributes,
+            // The sink rejects malformed OTLP variables (headers, resource attributes,
             // endpoint) with an exception at configuration time; the suite must still
             // start with its remaining log targets instead of crash-looping, and no
             // logger exists yet, so the reason is reported after logger creation

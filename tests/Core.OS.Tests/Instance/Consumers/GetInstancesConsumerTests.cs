@@ -16,7 +16,7 @@ public sealed class GetInstancesConsumerTests : TestWithDbContextSqlite<Applicat
     public GetInstancesConsumerTests()
         => _configureServices = cfg =>
         {
-            // consumer needs
+            // Required by the consumer.
             cfg.AddConsumer<GetInstancesConsumer>();
             cfg.AddSingleton<IApplicationDbContext>(_ => TestDbContext);
         };

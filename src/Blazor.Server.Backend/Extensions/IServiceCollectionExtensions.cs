@@ -25,8 +25,7 @@ internal static class IServiceCollectionExtensions
             // https://learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
             services.AddHttpClient<ILocalHttpClient, LocalHttpClient>((provider, client) =>
             {
-                // AddressFeature is set once when kestrel is running. Before it is running, it is empty.
-                // So we need to wait until kestrel is running to get the address.
+                // AddressFeature is empty until kestrel is running, so the address is read lazily.
                 var server = provider.GetRequiredService<IServer>();
                 var addressFeature = server.Features.Get<IServerAddressesFeature>();
                 var baseAddress = addressFeature?.Addresses.FirstOrDefault(k => k.StartsWith("https", StringComparison.OrdinalIgnoreCase))
@@ -49,7 +48,7 @@ internal static class IServiceCollectionExtensions
             services.AddKeyedScoped<TimeProvider, ClientTimeProvider>(Sdk.Constants.ClientTimeProviderServiceKey, (sp, _) => sp.GetRequiredService<ClientTimeProvider>());
             services.AddBlazorShared();
 
-            // the special ones
+            // Server-specific implementations of the shared UI abstractions.
             services
                 .AddSingleton<IClientModuleService, BlazorServerModuleService>()
                 .AddScoped<IUiMediator, BlazorServerUiMediator>()

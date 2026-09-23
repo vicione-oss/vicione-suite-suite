@@ -72,11 +72,11 @@ public sealed partial class ConnectionControlPanel(IConnectionTypeRegistry conne
         if (State.IsLoading || State.EditConnectionModel is null)
             return;
 
-        // change callback from DxTagBox
+        // Change callback from DxTagBox.
         State.EditModelTagTexts = tags;
         var check = State.EditModelTagTexts.ToList();
 
-        // simple change check
+        // A simple change check.
         if (State.EditConnectionModel.Tags.Count != check.Count)
         {
             await BeginEdit();

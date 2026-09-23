@@ -8,13 +8,13 @@ internal static class IConfigurationBuilderExtensions
 {
     internal static IConfigurationBuilder AddModuleConfigurationSource(this IConfigurationBuilder configurationBuilder, IModuleHost moduleHost, IModuleOptionsStore optionsStore)
     {
-        // in some tests we don't use appsettings.json so it's optional
+        // Optional, because some tests run without appsettings.json.
         var appsettingsSource = configurationBuilder.Sources.FirstOrDefault(k => k is JsonConfigurationSource { Path: "appsettings.json" });
         var appsettingsIndex = 2;
         if (appsettingsSource != null)
             appsettingsIndex = configurationBuilder.Sources.IndexOf(appsettingsSource);
 
-        // add module options before appsettings so it should be overrideable
+        // Module options come before appsettings so appsettings can override them.
         configurationBuilder.Sources.Insert(appsettingsIndex, new ModuleOptionsSource(moduleHost, optionsStore));
 
         return configurationBuilder;

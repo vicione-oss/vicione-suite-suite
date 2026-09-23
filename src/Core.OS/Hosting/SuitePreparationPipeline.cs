@@ -33,7 +33,7 @@ internal sealed class SuitePreparationPipeline(SuitePreparationContext preparati
         Console.CancelKeyPress += OnConsoleCancel;
         AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
-        // unlike the two signal handlers above this one is deliberately left attached: it stays the
+        // Unlike the two signal handlers above, this one is deliberately left attached: it stays the
         // process-wide crash logger after preparation has finished. It therefore has to flush the
         // static logger itself - see LogUnhandledExceptionEvent.
         AppDomain.CurrentDomain.UnhandledException -= LogUnhandledExceptionEvent;
@@ -61,7 +61,7 @@ internal sealed class SuitePreparationPipeline(SuitePreparationContext preparati
     {
         Serilog.Log.Error("Unhandled error! {Error}", e.ExceptionObject);
 
-        // when the process dies the runtime terminates it as soon as this handler returns - neither a
+        // When the process dies the runtime terminates it as soon as this handler returns, so neither a
         // finally block nor AppDomain.ProcessExit runs afterwards, so this is the last chance to export
         // the crash to a batching sink (e.g. OpenTelemetry). Closing the logger while the process keeps
         // running would leave the device without any logging at all for the rest of its uptime.

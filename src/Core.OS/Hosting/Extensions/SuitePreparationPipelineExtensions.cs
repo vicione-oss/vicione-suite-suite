@@ -128,7 +128,7 @@ internal static partial class SuitePreparationPipelineExtensions
 
             context.ModuleContext.Result = await modulePipeline.RunAsync(ct);
 
-            // propagate a module-host abort so the outer pipeline / TryRunCoreOs can fall back gracefully
+            // A module-host abort is propagated so the outer pipeline and TryRunCoreOs can fall back.
             return context.ModuleContext.Result;
         });
 
@@ -171,10 +171,10 @@ internal static partial class SuitePreparationPipelineExtensions
 
         try
         {
-            // we'll have to reset our home, caches and backups
+            // Home, caches and backups all have to be reset.
             fileSystem.DeleteCacheDirectories(options, logger);
 
-            // actually user has no way to only restore some modules - we'll remove everything
+            // There is no way to restore only some modules, so everything is removed.
             fileSystem.DeleteHomeDirectories(options, logger);
 
             fileSystem.ClearBackupFiles(options, logger);
@@ -209,7 +209,7 @@ internal static partial class SuitePreparationPipelineExtensions
         string? restoreFile = null;
         try
         {
-            // check if we have the task set
+            // Only when the restore task is set.
             var restoreTask = await fileSystem.ReadRestoreTask(options, cancellationToken);
             if (restoreTask is null)
                 return;// nothing to be done
@@ -224,21 +224,21 @@ internal static partial class SuitePreparationPipelineExtensions
 
             LogRestoringBackup(logger, restoreTask.BackupPath);
 
-            // metadata - do some insanity checks (again?!)
+            // Metadata sanity checks, repeated here.
             await using var archiveStream = fileSystem.FileStream.New(restoreTask.BackupPath, FileMode.Open, FileAccess.Read);
             var metadata = await BackupReader.GetBackupMetadata(archiveStream, cancellationToken);
 
             LogBackupMetadata(logger, metadata.SuiteVersion, metadata.SdkVersion, metadata.Modules.Count);
 
-            // on importing a backup various things might happen like in ClusterManagement `packages.json` was
+            // Importing a backup can go wrong in many ways; in ClusterManagement, packages.json was
             // changed but in cache we have still other FB versions so nothing will fit together :(
             // best possible way is to also clear the caches.
             fileSystem.DeleteCacheDirectories(options, logger);
 
-            // actually user has no way to only restore some modules we'll remove everything
+            // There is no way to restore only some modules, so everything is removed.
             fileSystem.DeleteHomeDirectories(options, logger);
 
-            // backup is already validated - this will be recreated later on 
+            // The backup is already validated and gets recreated later.
             var dataVersionPath = fileSystem.GetLocalDataVersionFilePath(options);
             fileSystem.File.Delete(dataVersionPath);
 
@@ -258,7 +258,7 @@ internal static partial class SuitePreparationPipelineExtensions
         }
         finally
         {
-            // remove restore flag so we won't try multiple times on failure
+            // The restore flag is removed so a failure is not retried indefinitely.
             fileSystem.DeleteRestoreTask(options);
         }
     }

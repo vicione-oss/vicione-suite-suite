@@ -15,8 +15,8 @@ public static class AssemblyExtensions
 
                 if (Equals(type.BaseType!.FullName, fullName))
                 {
-                    // there's the special case that blazor server ui host has a client module within the backend assembly
-                    // till we have a better solution the naming convention has to filter it out
+                    // The Blazor server UI host carries a client module inside its backend assembly; until
+                    // that is resolved, the naming convention has to filter it out.
                     if (skipAssemblyFilter is not null && skipAssemblyFilter.Invoke(moduleAssembly.GetName().Name))
                         return false;
 
@@ -26,7 +26,7 @@ public static class AssemblyExtensions
         }
         catch (ReflectionTypeLoadException)
         {
-            // On linux test: 
+            // On linux this throws:
             // Could not load type 'WebAssembly.JSInterop.JSCallInfo' from assembly 'Microsoft.JSInterop.WebAssembly, Version=6.0.5.0, Culture=neutral, PublicKeyToken=adb9793829ddae60'
             // because it contains an object field at offset 4 that is incorrectly aligned or overlapped by a non-object field.
             return false;
@@ -39,14 +39,13 @@ public static class AssemblyExtensions
     {
         try
         {
-            // Accessing the BaseType will trigger reflection to load the assembly of the type.
-            // For any type that can't be resolved we'll catch the FileNotFoundException and ignore it
+            // Accessing BaseType triggers an assembly load; an unresolvable type throws FileNotFoundException.
             if (type.BaseType is null)
                 return false;
         }
         catch (FileNotFoundException)
         {
-            // these are thrown if we access an unknown type - we don't care about them!
+            // Thrown when an unknown type is accessed.
             return false;
         }
 

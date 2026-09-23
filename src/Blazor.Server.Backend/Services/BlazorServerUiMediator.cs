@@ -63,7 +63,7 @@ public sealed partial class BlazorServerUiMediator(ISuiteMediator suiteMediator,
     }
 
     /// <summary>
-    /// Because the service is scoped it's enough to initialize the identity of the scope once
+    /// The service is scoped, so the scope's identity only has to be initialized once.
     /// </summary>
     private void TryScopeIdentityInitialization()
     {

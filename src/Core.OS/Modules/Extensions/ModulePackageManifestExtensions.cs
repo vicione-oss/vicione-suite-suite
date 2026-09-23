@@ -13,18 +13,17 @@ internal static partial class ModulePackageManifestExtensions
 
             foreach (var package in manifest.Packages)
             {
-                // skip disabled packages
+                // Disabled packages are skipped.
                 if (!string.IsNullOrEmpty(package.Name) && !moduleIds.Contains(package.Name))
                     continue;
 
-                // check dependencies
                 if (HasMissingDependency(manifest, package, debugModules, logger))
                     continue;
 
                 validPackages.Add(package);
             }
 
-            // prevent downloading packages that are not enabled by configuration
+            // A package not enabled by configuration must not be downloaded.
             return [.. validPackages];
 
             static bool HasMissingDependency(ModulePackageManifest manifest, ModuleDependencyPackage dependencyPackage, Dictionary<string, string> debug, ILogger logger)
@@ -59,7 +58,7 @@ internal static partial class ModulePackageManifestExtensions
                 return hasMissingDependencies;
             }
 
-            // ci package naming like 0.28.0-ci1523472
+            // ci package naming, e.g. 0.28.0-ci1523472
             static bool SupportsDependency(ModulePackageManifest manifest, ModuleDependencyPackage dependency)
             {
                 var package = manifest.Packages.FirstOrDefault(p => p.Name == dependency.Name);
@@ -72,11 +71,11 @@ internal static partial class ModulePackageManifestExtensions
                 if (!SemVersion.TryParse(dependency.Version, out var dependencyVersion))
                     return false;
 
-                // major version difference contains breaking changes
+                // A differing major version means breaking changes.
                 if (packageVersion.Major != dependencyVersion.Major)
                     return false;
 
-                // check if the package version is equal or higher than the dependency version
+                // The package version has to be at least the dependency version.
                 return SemVersion.ComparePrecedence(packageVersion, dependencyVersion) >= 0;
             }
         }
@@ -93,7 +92,7 @@ internal static partial class ModulePackageManifestExtensions
                 if (package.DependingOn is null)
                     continue;
 
-                // also update dependencies to new package version
+                // Dependencies move to the new package version too.
                 foreach (var dependency in package.DependingOn)
                 {
                     if (packageVersions.TryGetValue(dependency.Name, out var dependencyVersion) && dependencyVersion != null)

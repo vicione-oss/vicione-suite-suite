@@ -21,7 +21,7 @@ public class OrderBurgerStateMachineTests : TestWithDbContextSqlite<BurgerDbCont
         _configureServices = cfg =>
         {
             cfg.AddSingleton(_ => TestDbContext);
-            // saga needs
+            // Required by the saga.
             cfg.AddSagaStateMachine<OrderBurgerStateMachine, OrderBurgerState>()
                 .EntityFrameworkRepository(r =>
                 {

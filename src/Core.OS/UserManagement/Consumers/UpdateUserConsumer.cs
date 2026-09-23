@@ -171,7 +171,7 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
         var existingClaims = await userManager.GetClaimsAsync(suiteUser);
         var intendedClaims = profile.Claims.Select(userProfileClaim => userProfileClaim.ToClaim()).ToArray();
 
-        // remove obsolete claims
+        // Obsolete claims are removed.
         {
             foreach (var existingClaim in existingClaims)
             {
@@ -182,7 +182,7 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
             }
         }
 
-        // add new claims
+        // New claims are added.
         {
             foreach (var intendedClaim in intendedClaims)
             {

@@ -31,7 +31,7 @@ public class InstancesControlPanelTests
             Id = guid,
             FirstTimeRegistered = DateTimeOffset.Now,
             LastRegistered = DateTimeOffset.Now,
-            Name = "TestInstance" + guid.ToString(),
+            Name = "TestInstance" + guid,
             Type = InstanceType.Slave,
         };
     }
@@ -160,9 +160,10 @@ public class InstancesControlPanelTests
 
             // Assert
             mediator.Should().NotBeNull();
-            //await mediator.Received(1).Send(
-            //    Arg.Is((ControlInstance c) => c.InstanceId == info.Id &&
-            //    c.Action == InstanceCommand.Synchronize));
+            await mediator!.Received(1).Send(
+                Arg.Is<ControlInstance>(c => c.InstanceId == info.Id && c.Action == InstanceCommand.Synchronize),
+                info.Id,
+                Arg.Any<CancellationToken>());
         }
     }
 
@@ -247,23 +248,6 @@ public class InstancesControlPanelTests
         }
     }
 
-    // todo - activate on next sdk v0.23.0
-    //public class OnHealthStatusChanged : InstancesControlPanelTests
-    //{
-    //    [Fact]
-    //    public void Changes_health_status_on_health_status_changed()
-    //    {
-    //        // Arrange
-    //        var info = CreateSlaveInstanceInfo();
-    //        using var ctx = SetupTestContext([info]);
-
-    //        // Act
-    //        var component = ctx.Render<InstancesControlPanel>();
-
-    //        _informationProvider.HealthStatusChanged += Raise.Event<Func<Guid, HealthStatus, DateTimeOffset, Task>>(info.Id, HealthStatus.Healthy, DateTimeOffset.Now);
-
-    //        // Assert
-    //        component.Markup.Should().Contain(HealthStatus.Healthy.ToString());
-    //    }
-    //}
+    // TODO(#2895): cover the live health status update once the panel subscribes to
+    // IClusterInformationProvider.HealthStatusChanged.
 }

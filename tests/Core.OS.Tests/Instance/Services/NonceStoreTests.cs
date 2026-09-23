@@ -107,7 +107,7 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
         }
     }
 
-    public sealed class DeletedOrphaned : NonceStoreTests
+    public sealed class DeleteOrphaned : NonceStoreTests
     {
         [Fact]
         public async Task Should_remove_and_save_orphaned_nonces()
@@ -123,7 +123,7 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
             await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
-            await store.DeletedOrphaned(TestContext.Current.CancellationToken);
+            await store.DeleteOrphaned(TestContext.Current.CancellationToken);
 
             // Assert
             TestDbContext.Nonces.Should().Contain(newNonce);
@@ -142,7 +142,7 @@ public class NonceStoreTests : TestWithDbContextSqlite<ApplicationDbContextSqlit
             await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             // Act
-            await store.DeletedOrphaned(TestContext.Current.CancellationToken);
+            await store.DeleteOrphaned(TestContext.Current.CancellationToken);
 
             // Assert
             TestDbContext.Nonces.Should().Contain(newNonce);

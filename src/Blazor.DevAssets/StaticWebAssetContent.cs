@@ -5,8 +5,8 @@ using MassTransit.Metadata;
 namespace Blazor.DevAssets;
 
 /// <summary>
-/// Parse staticwebassets.runtime.json to be able to resolve requests from the debug webserver
-/// to absolute file paths. Was not able to find a default reader for it.
+/// Parses staticwebassets.runtime.json to resolve debug web server requests to absolute file paths.
+/// Hand-rolled because the framework exposes no reader for the format.
 /// </summary>
 internal sealed class StaticWebAssetContent(string webassetJsonPath)
 {
@@ -24,7 +24,6 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
 
     public string? FindAssetContentPath(string subpath, string fallbackFileName, string lastChance)
     {
-        // try to find a matching asset inside our entries
         foreach (var entry in _entries)
         {
             var content = entry.FindAssetContent(subpath, fallbackFileName, lastChance);
@@ -41,11 +40,8 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
     }
 
     /// <summary>
-    /// maps the content root paths from the staticwebassets.json to corresponding paths 
-    /// on the docker container. Mapping only in DEBUG
+    /// Maps content root paths from staticwebassets.json onto their docker container paths. DEBUG only.
     /// </summary>
-    /// <param name="contentRoots"></param>
-    /// <returns></returns>
     public static IEnumerable<string> FixDockerDebugContentRootPaths(IEnumerable<string>? contentRoots)
     {
 
@@ -67,11 +63,11 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
                 continue;
             }
 
-            // Group[0] D:\\path\\to\\repo\\[src|.nuget]\\relative\\project\\path
+            // Group[0] D:\path\to\repo\[src|.nuget]\relative\project\path
             // Group[1] D:
-            // Group[2] \\path\\to\\repo\\
+            // Group[2] \path\to\repo\
             // Group[3] .nuget|src
-            // Group[4] \\relative\\project\\path
+            // Group[4] \relative\project\path
             var groups = WebAssetContentRegex.Matches(contentRoot)[0].Groups;
             var projectParts = groups[4].Value.Split('\\');
             string projectPath;
@@ -84,13 +80,13 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
                     projectParts = projectParts[1..];
                 }
 
-                // nuget package reference -> /root/.nuget/fallbackpages/path/to/project
+                // Nuget package reference -> /root/.nuget/fallbackpackages/path/to/project.
                 sourcePath = Path.Combine(["/root", ".nuget", "fallbackpackages"]);
                 projectPath = Path.Combine(projectParts);
             }
             else
             {
-                // project reference -> /src/src/path/to/project/output
+                // Project reference -> /src/src/path/to/project/output.
                 sourcePath = Path.Combine(["/src", "src"]);
                 projectPath = Path.Combine(projectParts);
             }
@@ -112,7 +108,7 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
 
         foreach (var child in doc.RootElement.EnumerateObject())
         {
-            // array of paths that used by asset.rootindex to build an absolute path 
+            // Indexed by asset.rootindex to build an absolute path.
             if (child.Name == "ContentRoots")
             {
                 var array = child.Value.Deserialize<string[]>();
@@ -121,7 +117,7 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
                 continue;
             }
 
-            // recursive contents like js, svg, css, _content...
+            // Recursive contents: js, svg, css, _content.
             if (child.Name == "Root")
             {
                 AddRootFolderContentAssets(child);
@@ -131,14 +127,14 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
 
     private void AddRootFolderContentAssets(JsonProperty root)
     {
-        // Root -> Children, Asset, Patterns
+        // Root has Children, Asset and Patterns.
         foreach (var child in root.Value.EnumerateObject())
         {
-            // skip Asset, Pattern
+            // Only Children; Asset and Patterns are skipped.
             if (child.Name != ChildrenPropertyName || child.Value.ValueKind != JsonValueKind.Object)
                 continue;
 
-            // folders like svg, js, ..
+            // Folders such as svg and js.
             foreach (var folder in child.Value.EnumerateObject())
             {
                 AddFolderContentEntries(folder);
@@ -156,7 +152,7 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
         if (folder is null || folder.Value.ValueKind != JsonValueKind.Object)
             return;
 
-        // e.g. folder -> Root.Children.js
+        // e.g. Root.Children.js
         foreach (var child in folder.Value.EnumerateObject())
         {
             if (child.Value.ValueKind != JsonValueKind.Object)
@@ -171,19 +167,19 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
 
             if (child.Name == ChildrenPropertyName)
             {
-                // Root.Children.js.Children
+                // e.g. Root.Children.js.Children
                 foreach (var entry in child.Value.EnumerateObject())
                 {
-                    // this is a special case dotnet.6.0.0-rc.1.21451.13.js -> dotnet.js
+                    // Special case: dotnet.6.0.0-rc.1.21451.13.js -> dotnet.js.
                     if (WebAssetDotnetRegex.IsMatch(entry.Name))
                     {
                         var key = WebAssetDotnetRegex.Replace(entry.Name);
 
                         _entries.Add(new StaticWebAssetEntry(entry.Value) { Key = key });
-                        // afterwards it will be added a second time with the version info
+                        // Added again below with the version info.
                     }
 
-                    // "DevExpress.Blazor.Dashboard": { .. }
+                    // e.g. "DevExpress.Blazor.Dashboard": { .. }
                     _entries.Add(new StaticWebAssetEntry(entry.Value) { Key = entry.Name });
                 }
             }

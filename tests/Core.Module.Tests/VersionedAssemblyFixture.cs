@@ -158,11 +158,11 @@ internal sealed class VersionedAssemblyFixture : IDisposable
         }
         catch (IOException)
         {
-            // best-effort cleanup: loaded assemblies may keep files locked on some platforms
+            // Best-effort cleanup: a loaded assembly can keep files locked on some platforms.
         }
         catch (UnauthorizedAccessException)
         {
-            // best-effort cleanup
+            // Best-effort cleanup.
         }
     }
 }

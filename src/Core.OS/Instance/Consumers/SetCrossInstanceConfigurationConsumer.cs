@@ -36,7 +36,7 @@ public sealed partial class SetCrossInstanceConfigurationConsumer(IApplicationDb
             {
                 crossInstanceConfiguration.CultureName = context.Message.CultureName;
 
-                // if we change it globally we have to provide this to our UI host managing the culture for the Blazor Server,
+                // A global change has to reach the UI host, which manages the culture for Blazor Server,
                 // so we set the default request culture to the new value
                 moduleHost.SetUiHostCulture(context.Message.CultureName);
             }

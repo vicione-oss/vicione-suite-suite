@@ -12,7 +12,6 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context)
     {
-        // Redirect to onboarding page if neccessary
         var needsRedirect = await NeedsOnboaringRedirect(context);
         if (needsRedirect)
         {
@@ -20,19 +19,18 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
             return;
         }
 
-        // Call the next delegate/middleware in the pipeline.
         await next(context);
     }
 
     private static async Task<bool> NeedsOnboaringRedirect(HttpContext context)
     {
-        // User not logged -> no onboarding possible
+        // Onboarding needs a signed-in user.
         if (context.User.Identity is null || !context.User.Identity.IsAuthenticated)
         {
             return false;
         }
 
-        // These are internal framework calls and we don't interfere
+        // Internal framework calls are left alone.
         var framework = new PathString("/_framework");
         var blazor = new PathString("/_blazor");
         var devTools = new PathString("/.well-known");
@@ -54,7 +52,6 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
             return false;
         }
 
-        // Check instance onboarding state
         var instanceInformation = context.RequestServices.GetRequiredService<IInstanceInformationProvider>().Local;
         var onboardingStore = context.RequestServices.GetRequiredService<IOnboardingStateStore>();
 
@@ -71,7 +68,7 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
         }
         catch (OperationCanceledException)
         {
-            // Nothing to do here, return gracefully
+            // A cancelled request needs no redirect.
             return false;
         }
     }

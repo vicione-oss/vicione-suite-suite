@@ -25,7 +25,7 @@ public sealed partial class MqttSettings : ConnectionSettingsComponentBase<MqttC
 
         if (firstRender)
         {
-            // we can't use on parameter set because the control is rendered
+            // OnParametersSet is unusable because the control is already rendered
             // as dynamic component and the parameters are set after each property change
             var showWillFields = !string.IsNullOrWhiteSpace(Connection.WillTopic)
                 || !string.IsNullOrWhiteSpace(Connection.WillMessage);
@@ -76,7 +76,7 @@ public sealed partial class MqttSettings : ConnectionSettingsComponentBase<MqttC
     {
         if (!_showWillFields)
         {
-            // active disable clears the related fields
+            // Disabling clears the related fields.
             Connection.WillMessage = string.Empty;
             Connection.WillTopic = string.Empty;
             Connection.WillRetain = false;

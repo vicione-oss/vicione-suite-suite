@@ -90,7 +90,7 @@ public sealed partial class UpdateRoleConsumer(RoleManager<SuiteRole> roleManage
         var existingClaims = await roleManager.GetClaimsAsync(role);
         var intendedClaims = claims.Select(userProfileClaim => userProfileClaim.ToClaim()).ToArray();
 
-        // remove obsolete claims
+        // Obsolete claims are removed.
         {
             foreach (var existingClaim in existingClaims)
             {
@@ -101,7 +101,7 @@ public sealed partial class UpdateRoleConsumer(RoleManager<SuiteRole> roleManage
             }
         }
 
-        // add new claims
+        // New claims are added.
         {
             foreach (var intendedClaim in intendedClaims)
             {

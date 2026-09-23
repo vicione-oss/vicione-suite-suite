@@ -68,12 +68,12 @@ internal static class ModuleDependencyContextFactory
         var context = reader.Read(file);
         var module = new ModuleDependencyContext(options.ContextType, moduleDepsJson, info.IsDebugSource);
 
-        // these are the libraries that can be resolved for our deps json
+        // The libraries resolvable for this deps.json.
         // backend and ui deployed into the same folder so we'll have same file referenced by two deps.json
 
         module.AddRuntimeLibraries(context);
 
-        // this is used for the components in wwwroot/_content
+        // Used for the components under wwwroot/_content.
         var assets = GetAssetLibraries(moduleDepsJson).ToArray();
         module.RuntimeAssets.AddRange(assets.Where(a => IsGoodAsset(a.Name)));
 

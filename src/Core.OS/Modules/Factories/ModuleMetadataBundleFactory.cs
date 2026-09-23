@@ -32,7 +32,7 @@ internal static class ModuleMetadataBundleFactory
         if (string.IsNullOrEmpty(debugMetadataPath) || !fileSystem.Path.Exists(debugMetadataPath))
             return CreateFallbackBundle(fileSystem, moduleContext);
 
-        // if we can't deserialize we'll throw
+        // Failure to deserialize throws.
         var debugMetadata = await fileSystem.DeserializeModuleMetadata(debugMetadataPath, cancellationToken)
             ?? throw new InvalidOperationException($"Failed to load '{moduleContext.ModuleId}' debug metadata from '{debugMetadataPath}'.");
 

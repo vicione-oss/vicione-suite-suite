@@ -11,8 +11,8 @@ namespace Core.Shared.Extensions;
 public static class MqttClientOptionsBuilderExtensions
 {
     /// <summary>
-    ///     Used for testing Mqtt-connections or connecting the mqtt-viewer (development-) tool.
-    ///     Will accept any certificate including self-signed without validating the certificate chain
+    /// For testing MQTT connections and the mqtt-viewer development tool. Accepts any certificate,
+    /// including self-signed, without validating the chain.
     /// </summary>
     public static MqttClientOptionsBuilder WithSuiteConnection(this MqttClientOptionsBuilder builder,
         MqttConnection connection, IFileSystem fileSystem)
@@ -76,10 +76,10 @@ public static class MqttClientOptionsBuilderExtensions
             AllowUntrustedCertificates = connection.AllowUntrustedCertificates,
         };
 
-        // prefer certificate over tls
+        // A client certificate takes precedence over plain TLS.
         if (connection.ClientCertificate is not null)
         {
-            // Accept all certs. This is not very secure, but necessary for self-signed certs
+            // Accepting all certificates is insecure but required for self-signed ones.
             if (tlsOptions.AllowUntrustedCertificates && !string.IsNullOrWhiteSpace(connection.ClientCertificate))
             {
                 tlsOptions.CertificateValidationHandler = _ => true;
@@ -112,7 +112,7 @@ public static class MqttClientOptionsBuilderExtensions
             return builder;
         }
 
-        // We have no ClientCertificate here but tls selection
+        // No client certificate, but a TLS version was selected.
         if (connection.SslProtocol is MqttSslProtocol.Tls12 or MqttSslProtocol.Tls13)
         {
             builder.WithTlsOptions(tls =>

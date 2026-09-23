@@ -1,7 +1,7 @@
 ﻿namespace Core.Shared.Persistence.Contracts;
 
 /// <summary>
-/// Provides information about a single archive entry within <see cref="BackupSummary"/> 
+/// A single archive entry within <see cref="BackupSummary"/>.
 /// </summary>
 public class BackupEntrySummary
 {

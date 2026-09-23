@@ -17,7 +17,7 @@ public class PublishMessageConsumerTests
     {
         _configureServices = cfg =>
         {
-            // consumer needs
+            // Required by the consumer.
             cfg.AddConsumer<PublishMessageConsumer>();
             cfg.AddSingleton<IRoutingSlipBuilder>(new RoutingSlipBuilder(NewId.NextGuid()));
         };

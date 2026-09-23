@@ -19,13 +19,13 @@ internal static class CoreAnalyser
 
         WriteHeader(context, options);
 
-        // all the runtime libraries provided by core or uihost
+        // Every runtime library provided by core or a uihost.
         foreach (var library in GetSuiteModels(context, fileSystem, options))
         {
             Console.WriteLine(options.Version ? $"{library.FileName}:{library.Version}" : library.FileName);
         }
 
-        // native libraries shipped by Cores.OS on linux
+        // Native libraries Core.OS ships on linux.
         foreach (var library in NativeExtraLibs)
         {
             // https://learn.microsoft.com/en-us/dotnet/standard/native-interop/native-library-loading#library-name-variations
@@ -35,7 +35,7 @@ internal static class CoreAnalyser
             Console.WriteLine($"{library}.dll");
         }
 
-        // asset libraries provided by uihost
+        // Asset libraries a uihost provides.
         foreach (var assets in GetAssetLibraries(context))
         {
             Console.WriteLine($"/wwwroot/_content/{assets.Name}");
@@ -53,7 +53,7 @@ internal static class CoreAnalyser
         if (sdkAssembly is null)
             throw new MissingMemberException(nameof(sdkAssembly));
 
-        // use sdk version that suite uses
+        // The sdk version the suite itself uses.
         var sdkAssemblyName = sdkAssembly.GetName();
         var sdkVersion = context.Core.RuntimeLibraries.First(k => k.Name == sdkAssemblyName.Name);
 
@@ -69,7 +69,7 @@ internal static class CoreAnalyser
         var coreDepsJsonFile = ConfigurationUtils.GetCoreDepsJsonFilePath(rootedSuitePath);
         var loaderOptions = ConfigurationUtils.GetSuiteModuleLoaderOptions(config, rootedSuitePath);
 
-        // we only need to check core and blazor.server        
+        // Only core and blazor.server need checking.
         var moduleOptions = new Dictionary<string, Core.Module.Contracts.ModuleOptions>
         {
             {
@@ -92,8 +92,8 @@ internal static class CoreAnalyser
     }
 
     /// <summary>
-    /// Join core and uihost runtime libraries with framework assemblies shipped with the suite
-    /// </summary>    
+    /// Joins the core and uihost runtime libraries with the framework assemblies the suite ships.
+    /// </summary>
     private static IEnumerable<FileVersionModel> GetSuiteModels(SuiteDependencyContext context, IFileSystem fileSystem, CoreAnalyserOptions options)
     {
         var coreAndHostLibraries = GetRuntimeLibraryModels(context);
@@ -107,19 +107,19 @@ internal static class CoreAnalyser
     }
 
     /// <summary>
-    /// Join core and uihost runtime libraries
-    /// </summary>   
+    /// Joins the core and uihost runtime libraries.
+    /// </summary>
     private static IEnumerable<FileVersionModel> GetRuntimeLibraryModels(SuiteDependencyContext context)
     {
         var uiHostLibraries = context.UiHost?.RuntimeLibraries ?? [];
 
-        // remove the dll reference files - they are not of interest
+        // Dll reference files are not of interest.
         var coreAndHostLibraries = context.Core.RuntimeLibraries.Union(uiHostLibraries)
             .Where(k => k.Type != "reference")
             .DistinctBy(k => k.Name);
 
-        // the runtime libraries defined in deps.json do not match the published assemblies
-        // ms libs are added because --self-contained flag is used on dotnet publish
+        // The runtime libraries in deps.json do not match the published assemblies: the ms libs come
+        // from publishing with --self-contained.
         return coreAndHostLibraries
             .Select(k => new FileVersionModel(GetExistingAssemblyPath(k), k.Version))
             .Where(k => !string.IsNullOrEmpty(k.FileName))
@@ -143,11 +143,8 @@ internal static class CoreAnalyser
     }
 
     /// <summary>
-    /// Get framework assemblies shipped with the suite because it gets published self-contained
+    /// Framework assemblies the suite ships, because it is published self-contained.
     /// </summary>
-    /// <param name="fileSystem"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
     private static IEnumerable<string?> GetFrameworkAssemblies(IFileSystem fileSystem, CoreAnalyserOptions options)
     {
         var rootedSuitePath = fileSystem.GetRootedPath(options.SuitePath);

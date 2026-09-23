@@ -63,8 +63,7 @@ public partial class ExternalIdProvidersControlPanel
             return;
         }
 
-        // TODO https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2786:
-        // Replace "/" with deep link to settings > profile > external-accounts
+        // TODO(#2786): replace "/" with a deep link to settings > profile > external-accounts.
         NavigationService.NavManager.NavigateTo(
             $"{IdentityRoutes.LoginRoute}?returnUrl={Uri.EscapeDataString("/")}",
             forceLoad: true);

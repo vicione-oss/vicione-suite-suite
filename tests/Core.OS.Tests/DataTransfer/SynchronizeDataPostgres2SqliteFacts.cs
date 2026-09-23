@@ -21,13 +21,13 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
     public async Task FirstStep_CheckSimpleData()
     {
         // Arrange
-        // Konfiguration für Quell-DB
+        // Source database configuration.
         var localPostgresConnection = @"Host=127.0.0.1; Port=5432; Database=testmodulesource; User Id=postgres; Password=admin; Include Error Detail=true";
         await using var dbSourceContext =
             InitializeTestModuleDbContextPg(localPostgresConnection, DefaultSeedDataSimpleDataTypes());
         await using var serviceProvider = CreateServiceProvider(null, dbSourceContext);
 
-        // Konfiguration für Ziel-DB
+        // Target database configuration.
         var localSqliteConnection = $"{_pathDbSqlite}TestModuleDest.db";
         await using var dbDestContext = InitializeTestModuleDbContextSqlite(localSqliteConnection);
         await using var serviceProviderSlave = CreateServiceProvider(null, dbDestContext);
@@ -59,12 +59,12 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
     public async Task SynchronizeSuccessful_EmployeeSmallDB()
     {
         // Arrange
-        // Konfiguration für Quell-DB
+        // Source database configuration.
         var localPostgresConnection = @"Host=127.0.0.1; Port=5432; Database=masteremployeesmall; User Id=postgres; Password=admin; Include Error Detail=true";
         await using var dbSourceContext = InitializeReferenceDbContextPg(localPostgresConnection);
         await using var serviceProvider = CreateServiceProviderReferenceDb(null, dbSourceContext);
 
-        // Konfiguration für Ziel-DB
+        // Target database configuration.
         var localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
         await using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
         await using var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);
@@ -110,12 +110,12 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
         // Ein gefundenes Single-Quote in einer TEXT-Spalte wird mit weiterem Single-Quote maskiert.
         // Dieses Single-Quote interpretiert die sqlite-DB als Escape-Zeichen.
         // Arrange
-        // Konfiguration für Quell-DB
+        // Source database configuration.
         var localPostgresConnection = @"Host=127.0.0.1; Port=5432; Database=EmployeeSqlInjectionExecute; User Id=postgres; Password=admin; Include Error Detail=true";
         await using var dbSourceContext = InitializeReferenceDbContextPg(localPostgresConnection, TitleCase.Execute);
         await using var serviceProvider = CreateServiceProviderReferenceDb(null, dbSourceContext);
 
-        // Konfiguration für Ziel-DB
+        // Target database configuration.
         var localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
         await using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
         await using var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);
@@ -146,7 +146,7 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
         // Assert
         Assert.NotNull(argumentsCollection);
 
-        // Tabelle "DepartmentManager" ist mit Werten befüllt, SQL-Injection wurde nicht ausgeführt.
+        // The DepartmentManager table still holds its values, so the SQL injection did not run.
         Assert.Equal(dbSourceContext.DepartmentManagers.Count(), dbDestContext.DepartmentManagers.Count());
 
         /*
@@ -163,14 +163,14 @@ public sealed class SynchronizeDataPostgres2SqliteFacts
     {
         // Bei einigen Datensätzen der Tabelle "Titles" wurden in der Spalte "Title" SQL-Injection-Werte eingetragen.
         // Arrange
-        // Konfiguration für Quell-DB
+        // Source database configuration.
         var localPostgresConnection = @"Host=127.0.0.1; Port=5432; Database=EmployeeSqlInjectionCancelInsert; User Id=postgres; Password=admin; Include Error Detail=true";
         await using var dbSourceContext = InitializeReferenceDbContextPg(localPostgresConnection, TitleCase.CancelInsert);
         await using var serviceProvider = CreateServiceProviderReferenceDb(null, dbSourceContext);
 
         var installedModules = new List<string> { ModuleIdResolver.ResolveId<TestBackendModule>() };
 
-        // Konfiguration für Ziel-DB
+        // Target database configuration.
         var localSqliteConnection = $"{_pathDbSqlite}ReferenceDest.db";
         await using var dbDestContext = InitializeReferenceDbContextSqlite(localSqliteConnection);
         await using var serviceProviderSlave = CreateServiceProviderReferenceDb(null, dbDestContext);

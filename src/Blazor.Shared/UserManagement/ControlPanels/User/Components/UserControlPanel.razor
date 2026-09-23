@@ -66,45 +66,19 @@
                     <SettingsFieldTextBox Placeholder="@Labels.RepeatNewPassword" Password="true" @bind-Value="@State.RepeatNewPassword" @bind-Value:after="BeginEdit" />
                 </SettingsField>
             </SettingsGroup>
-            @*
-            <SettingsGroup Title="@Localization.UserControlPanel.ActiveTwoFactorAuthentification" Expanded="@_twoFactorAuthenticationEnabled">
-                <Expander>
-                    <SwitchExpander Enabled="false" @bind-Value="@_twoFactorAuthenticationEnabled" @bind-Value:after="BeginEdit" />
-                </Expander>
 
-                <ChildContent>
-                </ChildContent>
-            </SettingsGroup>
-            *@
             <SettingsGroup Title="@CommonVocabulary.Company" @bind-Expanded="@State.CompanySettingsGroupExpanded">
-                @*
-                <SettingsField Label="@CommonVocabulary.Company">
-                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Company" Enabled="false" />
-                </SettingsField>
-                <SettingsField Label="@CommonVocabulary.Site">
-                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Site" Enabled="false" />
-                </SettingsField>
-                *@
                 <SettingsField Label="@CommonVocabulary.Department">
                     <SettingsFieldTextBox Placeholder="@CommonVocabulary.Department" @bind-Value="@State.UserProfile.Department" @bind-Value:after="BeginEdit" />
                 </SettingsField>
                 <SettingsField Label="@CommonVocabulary.Occupation">
                     <SettingsFieldTextBox Placeholder="@CommonVocabulary.Occupation" @bind-Value="@State.UserProfile.Occupation" @bind-Value:after="BeginEdit" />
                 </SettingsField>
-                @*
-                <SettingsField Label="@Localization.UserControlPanel.ReportsTo">
-                    <SettingsFieldTextBox Placeholder="@Localization.UserControlPanel.ReportsTo" Enabled="false" />
-                </SettingsField>
-                <SettingsField Label="@CommonVocabulary.Representative">
-                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Representative" Enabled="false" />
-                </SettingsField>
-                *@
             </SettingsGroup>
 
             <SettingsGroup Title="@CommonVocabulary.Localization" @bind-Expanded="@State.LocalizationSettingsGroupExpanded">
                 <SettingsField Label="@CommonVocabulary.Language">
                     <SettingsFieldTextBox ReadOnly="true" Value="@(State.SelectedCulture?.DisplayName ?? CommonVocabulary.Default)" />
-                    @* <SettingsFieldCultureComboBox Items="@Constants.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="BeginEdit"/> *@
                 </SettingsField>
                 <SettingsField Label="@CommonVocabulary.TimeZone">
                     <SettingsFieldTextBox ReadOnly="true" Value="@(State.SelectedTimeZone?.DisplayName ?? CommonVocabulary.Default)" />
@@ -116,24 +90,7 @@
 
 <UserRolesControlPanelPage State="State" OnEdit="BeginEdit" />
 
-@* Commented-out sections are part of the UI design, but have no functionality until implemented *@
-
-@* <ControlPanelPage Title="@TechnicalTerms.AppPlural"> *@
-@*     <DescriptionBanner Title="@Localization.UserControlPanel.AppsDescriptionBannerTitle"> *@
-@*         @Localization.UserControlPanel.AppsDescriptionBannerContent *@
-@*     </DescriptionBanner> *@
-@* </ControlPanelPage> *@
+@* The Apps, Devices, Time, two-factor and company reporting sections are part of the UI design but
+   have no functionality yet, so their markup is not carried here. *@
 
 <UserPermissionsControlPanelPage State="State" OnEdit="BeginEdit" />
-
-@* <ControlPanelPage Title="@CommonVocabulary.DevicePlural"> *@
-@*     <DescriptionBanner Title="@Localization.UserControlPanel.DevicesDescriptionBannerTitle"> *@
-@*         @Localization.UserControlPanel.DevicesDescriptionBannerContent *@
-@*     </DescriptionBanner> *@
-@* </ControlPanelPage> *@
-
-@* <ControlPanelPage Title="@CommonVocabulary.Time"> *@
-@*     <DescriptionBanner Title="@Localization.UserControlPanel.TimeDescriptionBannerTitle"> *@
-@*         @Localization.UserControlPanel.TimeDescriptionBannerContent *@
-@*     </DescriptionBanner> *@
-@* </ControlPanelPage> *@

@@ -13,7 +13,7 @@ internal sealed class ModuleManagementControlPanelSaveHandler(IModuleManagementS
         if (!state.HasPendingChanges())
             return new SaveSuccessResult();
 
-        // pending changes
+        // Pending changes.
         var result = await mgmtService.UpdateOperations([.. state.EnqueuedOperations], cancellationToken);
         if (result is ModuleManagementServiceErrorResult error)
             return new SaveErrorResult(error.ErrorMessage, error.ErrorCode);

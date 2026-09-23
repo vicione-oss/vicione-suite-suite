@@ -76,7 +76,7 @@ internal sealed class UserControlPanelSaveHandler(IUserService userService, IUse
         {
             if (!string.IsNullOrEmpty(state.CurrentPassword) || !string.IsNullOrEmpty(state.NewPassword) || !string.IsNullOrEmpty(state.RepeatNewPassword))
             {
-                // no validation of _currentPassword, this is done by the backend whereas potential errors then arrive in Consume()
+                // _currentPassword is validated by the backend; its errors arrive in Consume().
 
                 return ValidateNewPasswordAndRepetition(state, out errorMessage);
             }

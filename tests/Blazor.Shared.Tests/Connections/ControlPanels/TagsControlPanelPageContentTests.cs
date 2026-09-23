@@ -165,7 +165,7 @@ public class TagsControlPanelPageContentTests
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
-            // select first row in the grid  - click on checkbox
+            // Selects the first grid row by clicking its checkbox.
             SelectCheckbox(component, 1);
 
             var editButton = FindEditButton(component);
@@ -205,7 +205,7 @@ public class TagsControlPanelPageContentTests
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
-            // first and second row in grid select - click on checkbox
+            // Selects the first and second grid rows by clicking their checkboxes.
             SelectCheckbox(component, 1);
             SelectCheckbox(component, 2);
 
@@ -244,7 +244,7 @@ public class TagsControlPanelPageContentTests
 
             var gridValues = FindValuesGrid(component);
 
-            // first row in grid edit
+            // Edits the first grid row.
             var secondRow = gridValues[1];
             var arrowButton = secondRow.QuerySelector(".navigate-button");
 
@@ -284,13 +284,13 @@ public class TagsControlPanelPageContentTests
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
-            // select a tag where protected = false (second row in the grid)  - click on checkbox
+            // Selects an unprotected tag, the second grid row.
             SelectCheckbox(component, 2);
 
             // Act + Assert
             var deleteButton = FindDeleteButton(component);
 
-            // delete-Button is enabled
+            // The delete button is enabled.
             var disabledDeleteButton = deleteButton.HasAttribute("disabled");
             Assert.False(disabledDeleteButton);
 
@@ -326,13 +326,13 @@ public class TagsControlPanelPageContentTests
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask));
 
-            // select a tag where protected = true (first row in the grid)  - click on checkbox
+            // Selects a protected tag, the first grid row.
             SelectCheckbox(component, 1);
 
             // Act + Assert
             var deleteButton = FindDeleteButton(component);
 
-            // delete-Button is disabled
+            // The delete button is disabled.
             var disabledDeleteButton = deleteButton.HasAttribute("disabled");
             Assert.True(disabledDeleteButton);
         }

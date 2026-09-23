@@ -98,10 +98,10 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
 
             using var zipArchive = new ZipArchive(destinationStream, ZipArchiveMode.Create, false);
 
-            // modules appdata compressed entries
+            // Compressed entries for each module's appdata.
             if (_addModuleIds is not null)
             {
-                // system module is not an 'installed' module
+                // The system module is not an installed module.
                 summary.SystemModule = await AddSystemModuleBackup(zipArchive, _workspaceManagement!, cancellationToken);
 
                 var moduleSummaries = await AddModuleBackupEntries(zipArchive, _metadataProvider!, _workspaceManagement!, [.. _addModuleIds], cancellationToken);
@@ -114,13 +114,12 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
                 })];
             }
 
-            // system configuration retrieved from HostManagement
+            // System configuration comes from HostManagement.
             if (_addSystemConfiguration)
             {
                 summary.SystemConfiguration = await AddSystemConfigurationBackupEntry(zipArchive, _serviceProvider!, cancellationToken);
             }
 
-            // metadata of created backup
             await AddMetadataEntry(zipArchive, metadata, cancellationToken);
         }
         catch (Exception e)
@@ -134,7 +133,7 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
     }
 
     private static BackupMetadata CreateMetadataEntry(ILocalInstanceInformationProvider informationProvider) =>
-        // keep a separate class for it to stay independent
+        // A separate class keeps this independent of the sdk types.
         new()
         {
             InstanceId = informationProvider.Local.Id,
@@ -170,13 +169,13 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
 
     private async Task<List<BackupModuleSummary>> AddModuleBackupEntries(ZipArchive zipArchive, IModuleMetadataProvider metadataProvider, IWorkspaceManagement workspaceManagement, string[] moduleIds, CancellationToken cancellationToken)
     {
-        // early return so tests don't need to setup these services
+        // Returns early so tests need not set these services up.
         var options = new Dictionary<string, ModuleMetadata>();
         var result = new List<BackupModuleSummary>();
         var getOptions = new GetModuleMetadataOptions(true, false);
         var installedModules = await metadataProvider.GetModuleMetadata(getOptions, cancellationToken);
 
-        // build called without module ids passed - take all
+        // No module ids passed, so every installed module is taken.
         if (moduleIds.Length == 0)
         {
             LogAddingInstalledModules(logger);
@@ -190,10 +189,9 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
         {
             LogAddingExplicitModules(logger);
 
-            // add only specified modules
             foreach (var moduleId in moduleIds)
             {
-                // if the module id is not installed, we ignore it
+                // An id that is not installed is ignored.
                 var metadataBundle = installedModules.FirstOrDefault(k => k.ModuleId == moduleId);
                 if (metadataBundle is null)
                     continue;
@@ -206,7 +204,6 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
         {
             LogAddingModuleOptions(logger, option.Key);
 
-            // add one entry per module
             var moduleEntry = new ModuleEntry(option.Value.Name, option.Value.Version, option.Key, true);
             var moduleSummary = await AddModuleBackupEntry(zipArchive, fileSystem, moduleEntry, logger, cancellationToken);
             result.Add(moduleSummary);
@@ -217,7 +214,7 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
 
     private static async Task<BackupModuleSummary> AddModuleBackupEntry(ZipArchive zipArchive, IFileSystem fileSystem, ModuleEntry entryOptions, ILogger logger, CancellationToken cancellationToken)
     {
-        // wrap ModuleMetadata to stay independent of sdk changes here
+        // Wrapped so sdk changes to ModuleMetadata do not leak into the backup format.
         var prefix = entryOptions.AddPrefix ? ModuleEntryPrefix : string.Empty;
         var summary = new BackupModuleSummary
         {
@@ -261,7 +258,7 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
         if (response.Configuration is null)
             throw new InvalidOperationException("Failed to retrieve system configuration from HostManagement. Response was successful but configuration was null.");
 
-        // if no HM is installed SystemConfiguration can be null
+        // Without HostManagement installed, SystemConfiguration is null.
         return await AddSystemConfigurationBackupEntry(zipArchive, response.Configuration, cancellationToken);
     }
 

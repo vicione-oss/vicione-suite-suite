@@ -15,14 +15,14 @@
                 <SettingsFieldCultureComboBox Items="@Constants.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="AfterSelectedCultureChange" />
             </SettingsField>
 
-            <!-- optional -->
+            @* Shown only after a language change *@
             <InformationBannerSettingsField Text="@Localization.LanguageControlPanel.LanguageChangeSavedBannerText" Visible="@State.ShowPageRefreshInformation">
                 <Button>
                     <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.RefreshVerb" OnClick="RefreshButtonClick" />
                 </Button>
             </InformationBannerSettingsField>
 
-            <!-- optional -->
+            @* Shown only when the change does not affect the current user *@
             <InformationBannerSettingsField Text="@Localization.LanguageControlPanel.LanguageChangeDoesNotAffectUser" Visible="@State.ShowLanguageDoesNotAffectCurrentUser" />
         </SettingsGroup>
     </SettingsLayout>

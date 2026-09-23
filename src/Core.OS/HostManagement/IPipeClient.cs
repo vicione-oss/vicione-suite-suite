@@ -5,17 +5,13 @@ namespace Core.OS.HostManagement;
 public interface IPipeClient : IDisposable
 {
     /// <summary>
-    /// Gets the state of the pipe.
+    /// State of the pipe.
     /// </summary>
     PipeState State { get; }
 
     /// <summary>
     /// Waits for a client to connect to the pipe.
     /// </summary>
-    /// <remarks>
-    /// Throws exceptions when something fails.
-    /// </remarks>
-    /// <param name="cancellationToken">A token to cancel the request.</param>
     Task Connect(CancellationToken cancellationToken = default);
 
     /// <summary>

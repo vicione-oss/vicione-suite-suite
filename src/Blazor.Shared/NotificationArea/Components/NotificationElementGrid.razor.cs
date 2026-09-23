@@ -172,7 +172,7 @@ public sealed partial class NotificationElementGrid : ComponentBase, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here.
         }
 
         if (!CancellationToken.IsCancellationRequested)

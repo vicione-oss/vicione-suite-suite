@@ -58,25 +58,24 @@ public static partial class SuiteDependencyContextExtensions
         internal IEnumerable<string> GetBackendModulesAssemblyPaths()
             => suiteContext.Modules
                 .Where(k => k.ModuleType == ModuleType.Backend)
-                // ensure modules get ordered by their dependencies
+                // Ordered by dependency so a module loads after what it depends on.
                 .OrderDescending(new ModuleDependencyContextComparer(suiteContext))
                 .Select(k => k.AssemblyPath);
 
         internal IEnumerable<ModulePathInfo> GetUiModulesAssemblyPathInfos()
             => suiteContext.Modules
                 .Where(k => k.ModuleType == ModuleType.Client)
-                // relevant for client only modules with referenced public lib
+                // Matters for client-only modules that reference a public lib.
                 .OrderDescending(new ModuleDependencyContextComparer(suiteContext))
                 .Select(k => new ModulePathInfo(k.AssemblyPath, k.IsDebugSource));
 
         internal Dictionary<string, string> GetAllUiRuntimeDependencies(Func<string, bool>? isGoodAssembly)
         {
-            // the problem -> in published version the deployed assemblies are available as their runtime dependencies describe it
-            // but in debug the ms libraries come from default paths that needs to be resolved differently
+            // A published deployment provides assemblies exactly as their runtime dependencies describe,
+            // but in debug the ms libraries come from default paths and need resolving differently.
             var uiAssemblies = new List<string>();
             var uiContexts = suiteContext.Modules.Where(k => k.ModuleType == ModuleType.Client);
 
-            // to pack
             foreach (var moduleContext in uiContexts)
             {
                 var moduleRuntimeAssemblyPaths = moduleContext.RuntimeLibraries
@@ -86,7 +85,7 @@ public static partial class SuiteDependencyContextExtensions
 
                 uiAssemblies.AddRange(moduleRuntimeAssemblyPaths!);
 
-                // there a indirect dependencies that come with core.os like MQTTNet these we need to take from core.os and find
+                // Indirect dependencies shipped with Core.OS, such as MQTTNet, are taken from there.
                 foreach (var rtDependency in moduleContext.RuntimeLibraries.SelectMany(k => k.Dependencies))
                 {
                     if (isGoodAssembly is not null && !isGoodAssembly.Invoke(rtDependency.Name))
@@ -100,15 +99,14 @@ public static partial class SuiteDependencyContextExtensions
                     }
 
 #if DEBUG
-                    // on debug these assemblies are not available in the debug folders but on
-                    // ms cache etc. therefore we try to take get it's location from loaded assembly
+                    // In a debug build these live in the ms cache rather than the debug folders, so the
+                    // location is taken from the already loaded assembly.
                     var loadContext = AssemblyLoadContext.All.FirstOrDefault(k
                         => k.Assemblies.Any(a => a.GetName().Name == rtDependency.Name));
 
                     var assembly = loadContext?.Assemblies.FirstOrDefault(a => a.GetName().Name == rtDependency.Name);
                     if (assembly is not null && !string.IsNullOrEmpty(assembly.Location))
                         uiAssemblies.Add(assembly.Location);
-                    // todo: maybe other ways..?
 #endif
                 }
             }
@@ -139,7 +137,7 @@ public static partial class SuiteDependencyContextExtensions
             if (suiteContext.Core.IsGoodAssembly(name, version, out var coreAssemblyPath))
                 return coreAssemblyPath;
 
-            // only one host can be loaded so only one can provide assemblies
+            // Only one host is ever loaded, so only one can provide assemblies.
             if (suiteContext.UiHost is not null && suiteContext.UiHost.IsGoodAssembly(name, version, out var uiAssemblyPath))
                 return uiAssemblyPath;
 

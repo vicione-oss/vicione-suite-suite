@@ -22,7 +22,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
         if (!Guid.TryParse(key, out var id))
             return;
 
-        // try removing existing ticket on e.g. logout
+        // An existing ticket is removed, e.g. on logout.
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IUserDbContext>();
 
@@ -46,7 +46,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
         if (ticket is null)
             return;
 
-        // if we have found a ticket renew it's data
+        // A found ticket has its data renewed.
         ticket.Value = SerializeToBytes(authTicket);
         ticket.LastActivity = DateTimeOffset.UtcNow;
         ticket.Expires = authTicket.Properties.ExpiresUtc;
@@ -77,7 +77,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
         await using var scope = services.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IUserDbContext>();
 
-        // check if we have a ticket for the key (browser-session-id)
+        // A ticket for the key, which is the browser session id.
         var ticket = await dbContext.Tickets
             .AsNoTracking()
             .FirstOrDefaultAsync(t => t.Id == id);
@@ -118,7 +118,7 @@ internal sealed partial class UserTicketStore(IServiceProvider services) : ITick
 
         LogMethodWithKey(_logger, nameof(StoreAsync), userId ?? string.Empty);
 
-        // just to ensure there's nothing bad
+        // Guards against a missing user id.
         if (string.IsNullOrWhiteSpace(userId))
         {
             StoreWithoutUserId(_logger);

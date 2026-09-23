@@ -115,12 +115,8 @@ internal sealed partial class WizardPageEdit<TWizardPageState>(TWizardPageState 
 
     public async Task<ISaveResult> Save()
     {
-        // No check for _isRunning as we need to execute save also for steps
-        // that represent a finish step AND nothing is editable in these steps
-        //
-        //if (!_isRunning)
-        //    return new SaveErrorResult("Cannot finish an edit that has not yet begun.");
-
+        // Deliberately no IsRunning check: a finish step has nothing editable, so its save would
+        // never have begun an edit, yet it still has to run.
         var saveHandler = _saveHandler.Value;
         if (saveHandler == null)
             return new SaveSuccessResult(); // handle missing handler as if save was successful as otherwise handler should be mandatory
@@ -138,7 +134,7 @@ internal sealed partial class WizardPageEdit<TWizardPageState>(TWizardPageState 
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here.
 
             return new SaveSuccessResult();
         }
@@ -179,7 +175,7 @@ internal sealed partial class WizardPageEdit<TWizardPageState>(TWizardPageState 
         }
         catch (OperationCanceledException)
         {
-            // nothing to do here, we just return gracefully
+            // Nothing to do here.
         }
         catch (ObjectDisposedException)
         {

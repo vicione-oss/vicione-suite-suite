@@ -17,16 +17,16 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
 
     public async Task ValidateModuleOptions(SuiteDependencyContext context, CancellationToken cancellationToken)
     {
-        // the context contains all modules (backend|client) to be loaded        
+        // The context holds every module to be loaded, backend and client alike.
         HashSet<string> handled = [];
 
         foreach (var moduleContext in context.Modules)
         {
-            // handle client or backend modules that share same module id only once
+            // A client and backend sharing a module id are handled once.
             if (handled.Contains(moduleContext.ModuleId))
                 continue;
 
-            // ignore our sample modules - they don't have metadata
+            // Sample modules have no metadata.
             if (ModuleConstants.SampleModuleIds.Contains(moduleContext.ModuleId))
                 continue;
 
@@ -42,15 +42,15 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
     {
         try
         {
-            // without metadata we can't validate anything
+            // Nothing can be validated without metadata.
             var metadata = await LoadMetadataOptions(moduleContext, cancellationToken);
             if (metadata is null || metadata.Options is null)
                 return;
 
-            // this will throw if the json stream is invalid
+            // Throws on an invalid json stream.
             var configBuilder = new ConfigurationBuilder();
 
-            // add the module json if available
+            // The module json is added when present.
             var moduleConfig = GetModuleSettingsJson(moduleContext);
             if (moduleConfig is not null)
             {
@@ -58,13 +58,13 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
             }
             else
             {
-                // here we have no settings yet so we take the ones from metadata
+                // No settings yet, so the metadata defaults apply.
                 var defaultOptions = await StoreDefaultOptions(metadata, cancellationToken);
 
                 configBuilder.AddInMemoryCollection(defaultOptions.AsConfiguration(moduleContext.ModuleId));
             }
 
-            // merge the different sources together - env vars and user secrets might
+            // Sources are merged; env vars and user secrets may
             // contain required options that are not in the json
             var config = configBuilder
                 .AddEnvironmentVariables()
@@ -85,17 +85,17 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
 
     private IConfiguration? GetModuleSettingsJson(ModuleDependencyContext moduleContext)
     {
-        // try to get existing settings
+        // Existing settings, if any.
         ArgumentException.ThrowIfNullOrEmpty(moduleContext.ModuleId, nameof(moduleContext.ModuleId));
 
         var moduleAppDataPath = fileSystem.CreateModuleAppDataDirectory(_instanceOptions, moduleContext.ModuleId);
         var moduleSettingsPath = fileSystem.Path.Combine(moduleAppDataPath, ModuleSettingsFileName);
 
-        // we have no json settings - continue with metadata
+        // No json settings, so metadata carries on.
         if (!fileSystem.Path.Exists(moduleSettingsPath))
             return null;
 
-        // if we have a valid settings json we try to build a config with it
+        // A valid settings json is built into a configuration.
         using var fs = fileSystem.FileStream.New(moduleSettingsPath, new FileStreamOptions()
         {
             Mode = FileMode.Open,
@@ -103,7 +103,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
             Share = FileShare.Read,
         });
 
-        // load the module_settings.json as configuration - this will throw if the json is invalid
+        // Loads module_settings.json as configuration; throws when the json is invalid.
         return new ConfigurationBuilder()
                     .AddJsonStream(fs)
                     .Build();
@@ -111,16 +111,16 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
 
     private static void ThrowOnMissingOptions(ModuleMetadata metadata, IConfiguration configuration)
     {
-        // now we need the metadata of the module
+        // The module metadata is needed here.
         if (metadata.Options is null)
             return;
 
-        // no required option, no validation
+        // Nothing to validate without a required option.
         if (metadata.Options.All(k => !k.IsRequired))
             return;
 
-        // special case now - we have required options but no settings.json file here
-        // the env_settings/user secrets might contain the required parameters       
+        // Required options but no settings.json.
+        // the env_settings/user secrets might contain the required parameters
         var missing = metadata.GetMissingConfigurationKeys(configuration, true);
         if (missing.Count == 0)
             return;
@@ -140,7 +140,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
                 ?? throw new InvalidOperationException($"Failed to load '{moduleContext.ModuleId}' debug metadata from '{debugMetadataPath}'.");
         }
 
-        // now we need the metadata of the module
+        // The module metadata is needed here.
         return await fileSystem.DeserializeModuleMetadata(moduleContext, cancellationToken);
     }
 
@@ -148,7 +148,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
     {
         var configFilePath = CreateModuleWorkspaceConfigFilePath(moduleId);
 
-        // module does not have settings
+        // The module has no settings.
         if (!fileSystem.File.Exists(configFilePath))
             return null;
 
@@ -162,7 +162,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
 
         var loaded = await JsonSerializer.DeserializeAsync<Dictionary<string, string?>>(fs, ModuleSerializerOptions.GetOptions(), cancellationToken: cancellationToken);
 
-        // to be able to restore a valid configuration...
+        // Kept so a valid configuration can be restored.
         return new ConfigurationBuilder()
             .AddInMemoryCollection(loaded)
             .Build();
@@ -185,7 +185,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
 
         var loaded = JsonSerializer.Deserialize<Dictionary<string, string?>>(fs, ModuleSerializerOptions.GetOptions());
 
-        // to be able to restore a valid configuration...
+        // Kept so a valid configuration can be restored.
         return new ConfigurationBuilder()
             .AddInMemoryCollection(loaded)
             .Build();
@@ -223,7 +223,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
             option.Value = option.DefaultValue;
         }
 
-        // store the defaults in module workspace
+        // Defaults are stored in the module workspace.
         await Store(metadata.Name, defaultOptions, cancellationToken);
 
         return defaultOptions;
@@ -241,7 +241,7 @@ internal class ModuleOptionsStore(IFileSystem fileSystem, IConfiguration config)
 
         var configFilePath = CreateModuleWorkspaceConfigFilePath(moduleId);
 
-        // we need to tranform IConfiguration to be able to store it
+        // IConfiguration has to be transformed before it can be stored.
         //https://stackoverflow.com/questions/62713523/using-system-text-json-to-serialize-an-iconfiguration-back-to-json
         var dictionary = configuration.AsEnumerable().ToDictionary(c => c.Key, c => c.Value);
 

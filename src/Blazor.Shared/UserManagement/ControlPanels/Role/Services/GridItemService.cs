@@ -30,7 +30,7 @@ internal class GridItemService(IModuleAuthorizationClaimParser moduleAuthorizati
 
             module = gridItem.ModuleId;
 
-            // insert grouping row for new module
+            // Inserts the grouping row for a new module.
             gridItems.Insert(i, new PermissionGridItem
             {
                 AccessLevel = PermissionGridAccessLevel.None,

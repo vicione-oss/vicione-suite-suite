@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace Blazor.Server.Backend.Services;
 
 /// <summary>
-/// Applies hardened cookie settings and sets session store if the auth schema matches
+/// Applies hardened cookie settings and the session store when the auth scheme matches.
 /// </summary>
 internal sealed class CookieAuthConfigurator(ITicketStore store) : IPostConfigureOptions<CookieAuthenticationOptions>
 {
@@ -26,7 +26,7 @@ internal sealed class CookieAuthConfigurator(ITicketStore store) : IPostConfigur
         options.SlidingExpiration = true;
         options.ExpireTimeSpan = TimeSpan.FromDays(14);
 
-        // Keep user ticket server-side - store needs to be singleton!
+        // The user ticket stays server-side, so the store has to be a singleton.
         options.SessionStore = store;
     }
 }

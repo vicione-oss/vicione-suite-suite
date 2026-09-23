@@ -6,18 +6,12 @@ namespace Blazor.Shared.Module.Services;
 
 public interface IClientModuleService
 {
-    /// <summary>
-    /// Gets a list of all registered client modules.
-    /// </summary>
     List<ClientModule> GetModules();
 
-    /// <summary>
-    /// Gets the assemblies of all registered client modules.
-    /// </summary>
     IEnumerable<Assembly> GetModuleAssemblies();
 
     /// <summary>
-    /// Gets the paths to all stylesheets registered by the client modules.
+    /// Stylesheet paths registered by the client modules.
     /// </summary>
     IEnumerable<string> GetAllModuleStylesheets();
 

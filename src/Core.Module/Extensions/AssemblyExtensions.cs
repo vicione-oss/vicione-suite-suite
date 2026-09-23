@@ -31,7 +31,7 @@ internal static class AssemblyExtensions
         }
         catch (FileNotFoundException)
         {
-            // these are thrown if we access an unknown type - we don't care about them!
+            // Thrown when an unknown type is accessed.
             return false;
         }
 

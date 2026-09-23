@@ -54,9 +54,8 @@
                 <Grid Items="@ViewerService.GetMessagesByTextFilter()" CssClass="mqtt-grid alternating-rows">
                     <ChildContent>
                         <TemplateColumn Title="@CommonVocabulary.Action">
-                            @* <div class="@( VisibleIndex % 2 == 0 ? "mqtt-row" : "mqtt-row-alt")"> *@
                             <div class="mqtt-row">
-                                <!-- first row -->
+                                @* first row *@
                                 <div class="mqtt-row-message">@("Topic: " + context?.Topic)</div>
                                 <div class="mqtt-row-cell">
                                     @if (context?.Retained == true)
@@ -66,7 +65,7 @@
                                     <div class="me-4">@(context?.Timestamp.ToString("dd.MM.yyyy hh:mm:ss"))</div>
                                     <div>@("QoS: " + Convert.ToInt32(context?.Qos))</div>
                                 </div>
-                                <!-- second row -->
+                                @* second row *@
                                 <div class="grid-row-message me-4">@(context?.Message)</div>
                                 <div>@(context?.MessageId)</div>
                             </div>

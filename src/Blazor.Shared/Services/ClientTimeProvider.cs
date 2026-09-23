@@ -95,7 +95,7 @@ public sealed class ClientTimeProvider : TimeProvider,
         }
         catch (ObjectDisposedException)
         {
-            // ignore
+            // Ignored.
         }
 
         _cancellationTokenSource.Dispose();
