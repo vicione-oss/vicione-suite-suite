@@ -192,12 +192,12 @@ include:
       package_name: $PACKAGE_NAME
       rules: *rules_packages
 
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/cleanup@v0.1.2
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/cleanup@v0.2.1
     inputs:
       name: "Cleanup old packages"
       stage: cleanup
       package_name: $PACKAGE_NAME
-      hours: "4"
+      hours: "720"
       # Package retention that predates the nightly and is unrelated to it. It stays off unless a
       # schedule sets CLEANUP, so nobody inherits it by adding a schedule — see docs/e2e-testing.md
       rules:
