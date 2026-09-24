@@ -141,7 +141,7 @@ include:
         - echo "APP_TAG=${CI_COMMIT_TAG}" >> version.env
 
   ### Renovate configuration validation
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/renovate/configuration-validation@v1.0.0
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/renovate/configuration-validation@v1.1.0
     inputs:
       rules: *rules_common
 
