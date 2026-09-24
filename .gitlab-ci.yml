@@ -170,7 +170,7 @@ include:
   # Cache configuration component
   # Caches: .mise-data/installs/, .nuget/packages/, node_modules/
   # MISE_DOTNET_ROOT configured to install dotnet inside .mise-data/installs/
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/cache/cache-config@v0.1.1
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/cache/cache-config@v0.1.2
 
   # Registry components for artifact storage
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.1.2
