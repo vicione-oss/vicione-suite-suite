@@ -173,21 +173,23 @@ include:
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/cache/cache-config@v0.1.2
 
   # Registry components for artifact storage
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.1.2
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.2.1
     inputs:
       name: "Upload artifacts arm64"
       stage: artifacts
       file: "artifacts.tar.gz"
+      build_job_name: "Build artifacts arm64"
       remote_name: "${ARTIFACT_PREFIX}-${CI_PIPELINE_ID}-linux-arm64.tar.gz"
       package_name: $PACKAGE_NAME
       rules: *rules_packages
       tags: ["saas-linux-large-arm64"]
 
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.1.2
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.2.1
     inputs:
       name: "Upload artifacts x64"
       stage: artifacts
       file: "artifacts.tar.gz"
+      build_job_name: "Build artifacts x64"
       remote_name: "${ARTIFACT_PREFIX}-${CI_PIPELINE_ID}-linux-x64.tar.gz"
       package_name: $PACKAGE_NAME
       rules: *rules_packages
