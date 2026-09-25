@@ -29,7 +29,7 @@ internal static class ContentSecurityPolicy
         "base-uri 'self'; " +
         "script-src 'self'; " +
         "script-src-elem 'self'; " +
-        "script-src-attr 'none'; " +
+        "script-src-attr 'unsafe-inline'; " +
         "style-src 'self'; " +
         "style-src-attr 'unsafe-inline'; " +
         "img-src 'self'; " +
