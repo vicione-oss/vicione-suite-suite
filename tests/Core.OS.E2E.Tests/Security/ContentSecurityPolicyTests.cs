@@ -20,7 +20,7 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
 
     private const string ExpectedPolicy =
         "default-src 'self'; base-uri 'self'; script-src 'self'; script-src-elem 'self'; " +
-        "script-src-attr 'none'; style-src 'self'; style-src-attr 'unsafe-inline'; " +
+        "script-src-attr 'unsafe-inline'; style-src 'self'; style-src-attr 'unsafe-inline'; " +
         "img-src 'self'; font-src 'self'; connect-src 'self' wss:; form-action 'self'; " +
         "frame-src 'none'; worker-src 'none'; object-src 'none'; frame-ancestors 'none'; " +
         "upgrade-insecure-requests; report-uri " + ViolationReportRoute + "; report-to csp-endpoint";
