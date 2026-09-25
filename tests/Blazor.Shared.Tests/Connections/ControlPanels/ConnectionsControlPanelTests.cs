@@ -135,7 +135,7 @@ public class ConnectionsControlPanelTests
 
             _connectionService.ConnectionStateChanged += Raise.Event<Func<IReadOnlyList<Connection>, Task>?>(connections);
 
-            component.TriggerGridFirstRowSelectionChange(true);
+            component.SelectFirstGridRow();
 
             // Act
             component.FindGridActionButton(MonochromeIconName.Delete).Click();

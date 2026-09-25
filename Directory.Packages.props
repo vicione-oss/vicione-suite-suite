@@ -5,9 +5,9 @@
     <HostManagementVersion>1.3.0</HostManagementVersion>
     <OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.10</MassTransitVersion>
-    <ViciOneUiBlazorComponentsVersion>6.1.0</ViciOneUiBlazorComponentsVersion>
+    <ViciOneUiBlazorComponentsVersion>6.1.1</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.18.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>3.1.0-ci2857724065</ViciOneSuiteSdkVersion>
+    <ViciOneSuiteSdkVersion>3.1.0</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
@@ -40,7 +40,7 @@
     <PackageVersion Include="minisign-net" Version="1.0.0" />
     <PackageVersion Include="MQTTnet" Version="5.2.0.1603" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.2" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="NSubstitute.Analyzers.CSharp" Version="1.0.17" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="$(OpenTelemetryVersion)" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="$(OpenTelemetryVersion)" />
@@ -64,7 +64,7 @@
     <PackageVersion Include="ViciOne.SystemMonitoring" Version="1.0.1" />
     <PackageVersion Include="ViciOne.Ui.Design" Version="2.5.0" />
     <PackageVersion Include="ViciOne.Ui.Blazor.Components" Version="$(ViciOneUiBlazorComponentsVersion)" />
-    <PackageVersion Include="ViciOne.Ui.Localization" Version="3.5.0" />
+    <PackageVersion Include="ViciOne.Ui.Localization" Version="3.6.0" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Assets" Version="$(ViciOneUiMonochromeIconsVersion)" />
     <PackageVersion Include="ViciOne.Ui.MonochromeIcons.Components" Version="$(ViciOneUiMonochromeIconsVersion)" />
     <PackageVersion Include="ViciOne.Ui.TreeEditor" Version="2.0.1" />

@@ -123,7 +123,7 @@ public class InstancesControlPanelTests
 
             // Act
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
-            component.TriggerGridFirstRowSelectionChange(true);
+            component.SelectFirstGridRow();
 
             await component.FindGridActionButton(MonochromeIconName.Delete).ClickAsync();
 
@@ -154,7 +154,7 @@ public class InstancesControlPanelTests
 
             // Act
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
-            component.TriggerGridFirstRowSelectionChange(true);
+            component.SelectFirstGridRow();
 
             await component.FindGridActionButton(MonochromeIconName.Reload).ClickAsync();
 
@@ -215,7 +215,7 @@ public class InstancesControlPanelTests
             component.Markup.Should().Contain(info.Name);
 
             // Act
-            component.TriggerGridFirstRowSelectionChange(true);
+            component.SelectFirstGridRow();
             await component.FindGridActionButton(MonochromeIconName.Delete).ClickAsync();
             await component.Instance.Consume(clientContext, TestContext.Current.CancellationToken);
 
