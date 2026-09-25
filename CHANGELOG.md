@@ -34,10 +34,12 @@
 - `Microsoft` packages, update to version `10.0.12`
 - `Microsoft.FeatureManagement` packages, update to version `4.7.0`
 - `MailKit`, update to version `4.18.0`
+- `Npgsql.EntityFrameworkCore.PostgreSQL`, update to version `10.0.3`
 - `OpenTelemetry` packages, update to version `1.18.0`
-- `ViciOne.Suite.Sdk` packages, update to version `3.1.0-ci2857724065`
-- `ViciOne.Ui.Blazor.Components` packages, update to version `6.1.0`
+- `ViciOne.Suite.Sdk` packages, update to version `3.1.0`
+- `ViciOne.Ui.Blazor.Components` packages, update to version `6.1.1`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
+- `ViciOne.Ui.Localization`, update to version `3.6.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`
 
 ## 1.3.0 - 2026-08-17
