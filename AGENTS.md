@@ -223,6 +223,30 @@ ViciOne Suite aims to be a robust, scalable platform easily adapted to brownfiel
 
 The Suite SDK follows semantic versioning strictly. Any change to SDK contracts must respect semver guarantees. Breaking changes require a major version bump.
 
+## Changelog
+
+`CHANGELOG.md` tells the people who install, operate and extend the suite what an upgrade changes for them. It follows
+[Keep a Changelog](https://keepachangelog.com/en/1.0.0/); these rules decide what an entry says.
+
+- **Where:** under the topmost `## x.y.z - Unreleased` header. Released sections are never edited.
+- **Sections:** `### Added`, `### Changed`, `### Deprecated`, `### Removed`, `### Fixed`, `### Updated` (dependency versions).
+- **Form:** one line per change, starting with what the reader knows - a page, setting, feature or type - as in
+  ``- `IndexPage`, what changed`` or `- Passkey sign-in …`. Dependency updates read
+  ``- `Name` packages, update to version `x.y.z` ``.
+- **Content:** the result as a user, operator or module developer sees it, in the present tense and in one sentence.
+  Aim for 120 characters; a longer entry usually explains something that belongs elsewhere.
+- **Leave out** what the MR and the commit message carry: how the defect came about, how the fix works ("it compared …",
+  "because …", "instead of …"), internal types, tests, and reasoning about the issue. When readers need more, link the
+  doc or ADR that has it. A change nobody outside the team can notice gets no entry.
+- **Upgrade steps and behaviour changes:** append `**Upgrade:**` with the action an operator has to take, or
+  `**Behaviour change:**` with what someone relying on the old behaviour notices - one sentence each.
+- Entries of older releases predate these rules; do not copy their length.
+
+| Too much | Enough |
+|---|---|
+| A failed module package enqueue is no longer swallowed: the command is retried and finally dead-lettered, and the correlated failure is reported by a dedicated fault consumer instead of from the consumer's catch block | A failed module package enqueue is retried and then reported instead of being dropped |
+| RabbitMQ `_error` and `_skipped` queues are now bounded (7-day message TTL, 7-day queue expiry, 250 messages, 2 MiB, oldest dropped first) instead of inheriting the input queue settings, which left them unbounded on a master. **Upgrading a broker that already has such queues requires deleting them first** - queue arguments are part of a RabbitMQ queue's identity, … | RabbitMQ `_error` and `_skipped` queues are bounded to 7 days, 250 messages and 2 MiB. **Upgrade:** delete existing ones first, see ADR-004 |
+
 ## Skills
 
 Reusable skill definitions located in `.claude/skills/` following the [Agent Skills](https://agentskills.io/) open standard. Supported by GitHub Copilot and Claude Code.

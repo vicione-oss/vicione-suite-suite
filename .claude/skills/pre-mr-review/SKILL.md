@@ -85,7 +85,9 @@ For every new or modified consumer on the branch, check the rules for its messag
 
 ## 5. Changelog
 
-Check if `CHANGELOG.md` needs an update based on the branch changes. Follow [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format.
+Check that every change a user, operator or module developer can notice has an entry in `CHANGELOG.md`, and that each
+entry follows the *Changelog* rules in `AGENTS.md`: under the unreleased header, one line from the reader's view, no
+implementation details. Report entries that explain a cause or a mechanism.
 
 ---
 
