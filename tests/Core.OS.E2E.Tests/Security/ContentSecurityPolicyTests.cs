@@ -7,7 +7,7 @@ using Microsoft.Playwright;
 namespace Core.OS.E2E.Tests.Security;
 
 /// <summary>
-/// Pins the Content Security Policy of ADR-006 as it reaches the browser, and drives the suite
+/// Pins the Content Security Policy the suite sends as it reaches the browser, and drives the suite
 /// under it. The policy is emitted by the suite rather than by the packaged nginx, so it is present
 /// in every deployment, and it is enforced rather than report-only — a report-only run would prove
 /// only that the browser saw a header, not that the application works with it.
@@ -19,9 +19,11 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
     private const string ViolationReportRoute = "/csp-report";
 
     private const string ExpectedPolicy =
-        "default-src 'self'; base-uri 'self'; script-src 'self'; script-src-elem 'self'; " +
-        "script-src-attr 'unsafe-inline'; style-src 'self'; style-src-attr 'unsafe-inline'; " +
-        "img-src 'self'; font-src 'self'; connect-src 'self' wss:; form-action 'self'; " +
+        "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; " +
+        "script-src-elem 'self' 'unsafe-inline'; script-src-attr 'unsafe-inline'; " +
+        "style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com; style-src-attr 'unsafe-inline'; " +
+        "img-src 'self' data: https:; font-src 'self' https://maxcdn.bootstrapcdn.com; " +
+        "connect-src 'self' wss:; form-action 'self'; " +
         "frame-src 'none'; worker-src 'none'; object-src 'none'; frame-ancestors 'none'; " +
         "upgrade-insecure-requests; report-uri " + ViolationReportRoute + "; report-to csp-endpoint";
 
@@ -159,9 +161,10 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
     }
 
     /// <summary>
-    /// The same <c>blob:</c> URL as a resource, which <c>img-src 'self'</c> refuses. It says the
-    /// download above passes because a download is not a fetch the policy governs rather than
-    /// because <c>blob:</c> is allowed somewhere, and it is why no export may preview off one.
+    /// The same <c>blob:</c> URL as a resource, which <c>img-src</c> refuses, since it lists no
+    /// <c>blob:</c>. It says the download above passes because a download is not a fetch the policy
+    /// governs rather than because <c>blob:</c> is allowed somewhere, and it is why no export may
+    /// preview off one.
     /// </summary>
     [Fact]
     public async Task A_blob_url_rendered_as_an_image_is_refused()

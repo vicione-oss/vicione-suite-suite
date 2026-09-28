@@ -4,10 +4,6 @@ using Core.Shared.Security;
 
 namespace Core.OS.Security;
 
-/// <summary>
-/// The Content Security Policies the suite sends, as decided in ADR-006 — one directive per line,
-/// in the order of the ADR's baseline table, so header and record can be read against each other.
-/// </summary>
 internal static class ContentSecurityPolicy
 {
     private const string ViolationReportGroup = "csp-endpoint";
@@ -19,7 +15,7 @@ internal static class ContentSecurityPolicy
     public const string ReportingEndpoints = $"{ViolationReportGroup}=\"{CspViolationReporting.Route}\"";
 
     /// <summary>
-    /// The policy of the running suite, as decided in ADR-006.
+    /// The policy of the running suite, which relaxes ADR-006 for the time being (suite#2897).
     /// <paramref name="externalFormActionOrigin"/> is the origin of the configured OpenID provider,
     /// or <see langword="null"/> while none is configured. It is the one value that varies per
     /// installation; there is no development variant.
@@ -27,13 +23,13 @@ internal static class ContentSecurityPolicy
     public static string GetBaseline(string? externalFormActionOrigin) =>
         "default-src 'self'; " +
         "base-uri 'self'; " +
-        "script-src 'self'; " +
-        "script-src-elem 'self'; " +
+        "script-src 'self' 'unsafe-eval'; " +
+        "script-src-elem 'self' 'unsafe-inline'; " +
         "script-src-attr 'unsafe-inline'; " +
-        "style-src 'self'; " +
+        "style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com; " +
         "style-src-attr 'unsafe-inline'; " +
-        "img-src 'self'; " +
-        "font-src 'self'; " +
+        "img-src 'self' data: https:; " +
+        "font-src 'self' https://maxcdn.bootstrapcdn.com; " +
         "connect-src 'self' wss:; " +
         $"form-action {GetFormAction(externalFormActionOrigin)}; " +
         "frame-src 'none'; " +
