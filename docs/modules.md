@@ -100,8 +100,8 @@ _Core.OS_ itself does not supply a user interface, but by loading `ViciOne.Suite
 }
 ```
 
-While developing the Suite, set `UiHost:UseDebugRoot=true` to resolve local assets (CSS, JS, ...) using `staticwebassets.json`.
-When loading an UiHost module in _Core.OS_, a FileProvider for their static.webassets is provided for all activated client modules. During `Debug` mode, all resource requests are resolved using the `static.webassets.json` in the respective output directory of the client module.
+The UiHost serves the static assets (CSS, JS, ...) of each loaded client module below `/_content/{ModuleAssemblyName}/`, from the module's published `wwwroot`.
+While developing, set `UseDebugRoot` in the UiHost's section, as `appsettings.Development.json` does with `"ViciOne.Suite.Blazor.Server": { "UseDebugRoot": true }`, to serve them from the build output instead: requests are then resolved by their route in the `*.staticwebassets.runtime.json` files of the UiHost and of each module found in `ModuleLoader:ModuleDebugPaths`, the way ASP.NET Core does in development. A request below `/_content/{ModuleAssemblyName}/` is looked up in that module's file first, which mirrors where a published module serves it from.
 
 ## Publish/Cleanup Modules
 [Here](https://gitlab.com/vicione-oss/vicione/suite/suite-sdk/-/tree/master/src/Sdk.Deployment/Scripts?ref_type=heads) are bash scripts to publish and cleanup a Suite-Module.

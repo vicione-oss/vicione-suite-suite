@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Blazor.DevAssets\Blazor.DevAssets.csproj" />
     <!-- needed to get the static.webassets.json from client -->
     <ProjectReference Include="..\TestModule.Client\TestModule.Client.csproj" />

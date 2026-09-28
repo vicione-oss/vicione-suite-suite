@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
+using Sdk.Client.Modules;
+using IFileSystem = System.IO.Abstractions.IFileSystem;
 
 namespace Blazor.DevAssets;
 
@@ -8,7 +10,7 @@ namespace Blazor.DevAssets;
 /// Resolves asset requests against the *staticwebassets.runtime.json files of the debug build output.
 /// Known gap: Backend.Login's /Identity/js/site.js is not published.
 /// </summary>
-internal sealed class DevelopmentFileProvider : IFileProvider
+internal sealed class DevelopmentFileProvider(IFileSystem fileSystem) : IFileProvider
 {
     private const string StaticWebAssetsExtensions = "*staticwebassets.runtime.json";
 
@@ -20,7 +22,7 @@ internal sealed class DevelopmentFileProvider : IFileProvider
         if (!_loadedAssets.Add(assetPath))
             return;
 
-        var jsonAssets = Directory.GetFiles(assetPath, StaticWebAssetsExtensions, SearchOption.TopDirectoryOnly);
+        var jsonAssets = fileSystem.Directory.GetFiles(assetPath, StaticWebAssetsExtensions, SearchOption.TopDirectoryOnly);
 
         foreach (var jsonPath in jsonAssets)
         {
@@ -41,7 +43,7 @@ internal sealed class DevelopmentFileProvider : IFileProvider
     /// </summary>
     public void AddStaticWebAssetJson(string jsonPath)
     {
-        var content = new StaticWebAssetContent(jsonPath);
+        var content = new StaticWebAssetContent(fileSystem, jsonPath);
 
         content.ParseWebAssetContents();
 
@@ -64,100 +66,48 @@ internal sealed class DevelopmentFileProvider : IFileProvider
             return new NotFoundFileInfo(subpath); // Brotli variants are skipped to speed up debug.
         }
 
-        var contentFilePath = FindAssetNormalizedPath(subpath);
+        var contentFilePath = FindAssetPath(subpath);
         if (contentFilePath is null)
         {
             Debug.WriteLine("{0} failed to resolve {1}", nameof(GetFileInfo), subpath);
             return new NotFoundFileInfo(subpath);
         }
 
-        return !File.Exists(contentFilePath) ? new NotFoundFileInfo(contentFilePath) : new WebAssetFileInfo(contentFilePath);
+        return !fileSystem.File.Exists(contentFilePath)
+            ? new NotFoundFileInfo(contentFilePath)
+            : new WebAssetFileInfo(fileSystem.FileInfo.New(contentFilePath));
     }
 
-    private string? FindAssetNormalizedPath(string subpath)
+    /// <summary>
+    /// Looks the request up as a route of the loaded manifests, first in the manifest of the project a
+    /// /_content/{Name}/ request addresses, then in all of them.
+    /// </summary>
+    /// <remarks>
+    /// The project manifest comes first because a published module serves its own assets, and the imports of its
+    /// stylesheet bundle, e.g. /_content/{Module}/_content/{Library}/..., from its wwwroot below that prefix.
+    /// </remarks>
+    private string? FindAssetPath(string subpath)
     {
-        var search = PathHelper.NormalizePath(TrimStartDirectoryChar(subpath));
-        var fileName = Path.GetFileName(subpath);
-        var lastChance = GetRelativePathWithParent(subpath) ?? string.Empty;
+        var route = subpath.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-        // NuGet package assets resolve differently, e.g. _content/ViciOne.Ui.ClusterEditor/assets/icon.png.
-        var match = WebAssetContentNuGetRegex.Match(search);
-        if (match.Success)
+        if (route.Length > 2 && route[0] == ModuleAssetHelper.ContentPrefix)
         {
-            var trimmedSearch = search[match.Value.Length..];
-
-            // The full package name targets the exact staticwebassets.runtime.json.
-            var packageName = ExtractPackageNameFromContentPath(subpath);
-            if (packageName is not null)
+            var projectRoute = route.AsSpan(2);
+            foreach (var content in _webAssetFileContents)
             {
-                var packageContent = FindPackageContent(packageName);
-                var directPath = packageContent?.FindAssetContentPath(trimmedSearch, fileName, lastChance);
-                if (directPath is not null)
-                    return directPath;
+                if (string.Equals(content.Name, route[1], StringComparison.OrdinalIgnoreCase)
+                    && content.FindAssetPath(projectRoute) is { } projectPath)
+                    return projectPath;
             }
-
-            search = trimmedSearch;
         }
 
-        var possibleAssetPaths = _webAssetFileContents
-            .Select(c => c.FindAssetContentPath(search, fileName, lastChance))
-            .Where(p => p is not null)
-            .Distinct()
-            .ToList();
-
-        return possibleAssetPaths.FirstOrDefault();
-    }
-
-    /// <summary>
-    /// Finds the content parsed from {packageName}.staticwebassets.runtime.json.
-    /// </summary>
-    private StaticWebAssetContent? FindPackageContent(string packageName)
-        => _webAssetFileContents.FirstOrDefault(c =>
-            Path.GetFileName(c.JsonPath).StartsWith(packageName + ".", StringComparison.OrdinalIgnoreCase));
-
-    /// <summary>
-    /// Extracts the package name from a _content/ subpath:
-    /// /_content/ViciOne.Suite.ClusterManagement.Client/icons/bundle.css -> ViciOne.Suite.ClusterManagement.Client
-    /// </summary>
-    internal static string? ExtractPackageNameFromContentPath(string subpath)
-    {
-        const string contentPrefix = "_content/";
-        var contentIndex = subpath.IndexOf(contentPrefix, StringComparison.OrdinalIgnoreCase);
-        if (contentIndex < 0)
-            return null;
-
-        var afterContent = subpath[(contentIndex + contentPrefix.Length)..];
-        var separatorIndex = afterContent.IndexOfAny(['/', '\\']);
-        return separatorIndex >= 0 ? afterContent[..separatorIndex] : afterContent;
-    }
-
-    private static string TrimStartDirectoryChar(string path)
-    {
-        if (path.StartsWith(Path.DirectorySeparatorChar) || path.StartsWith(Path.AltDirectorySeparatorChar))
-            return path[1..];
-
-        return path;
-    }
-
-    /// <summary>
-    /// Returns parent\filename.ext, e.g. /_content/ViciOne.Suite.Ping.Client/svg/toolbox.svg yields svg\toolbox.svg.
-    /// </summary>
-    private static string? GetRelativePathWithParent(string? path)
-    {
-        if (string.IsNullOrEmpty(path))
-            return null;
-
-        try
+        foreach (var content in _webAssetFileContents)
         {
-            var normalized = PathHelper.NormalizePath(path);
-            var parent = Directory.GetParent(normalized);
+            if (content.FindAssetPath(route) is { } path)
+                return path;
+        }
 
-            return Path.Combine(parent!.Name, Path.GetFileName(normalized));
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        return null;
     }
 
     public IChangeToken Watch(string filter) => new ChangeToken();

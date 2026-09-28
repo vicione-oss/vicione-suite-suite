@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using System.Reflection;
 using Blazor.DevAssets;
 using Blazor.Server.Backend.Extensions;
@@ -22,6 +23,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -131,7 +133,7 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         var logger = GetLogger(app.ApplicationServices);
         if (uiEnvironment.IsDevelopment)
         {
-            env.UseClientAssetsDevelopment(uiEnvironment, logger);
+            env.UseClientAssetsDevelopment(uiEnvironment, app.ApplicationServices.GetRequiredService<IFileSystem>(), logger);
         }
         else
         {
@@ -141,8 +143,15 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
         app.UseDefaultFiles();
 
-        app.UseStaticFiles();
+        app.UseStaticFiles(new StaticFileOptions { OnPrepareResponse = RevalidateStaticFile });
     }
+
+    /// <summary>
+    /// Makes the browser check a cached static file for a change before using it: a stylesheet kept from before an update
+    /// would import scoped CSS bundles by a fingerprint that no longer exists.
+    /// </summary>
+    internal static void RevalidateStaticFile(StaticFileResponseContext context)
+        => context.Context.Response.Headers.CacheControl = "no-cache";
 
     private IUiModuleBundle CreateBundle(string assemblyPath, Assembly assembly)
     {
