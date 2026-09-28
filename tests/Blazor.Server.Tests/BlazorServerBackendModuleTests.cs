@@ -6,6 +6,8 @@ using Blazor.Server.Tests.Helpers;
 using Blazor.Shared.Services;
 using Core.UiHosting;
 using Core.Shared.Logging;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Testing.Backend;
 using TestModule.Client;
@@ -92,6 +94,23 @@ public class BlazorServerBackendModuleTests
 
             var clientService = serviceProvider.GetRequiredService<IBackendLogService>();
             clientService.Should().NotBeNull();
+        }
+    }
+
+    public sealed class RevalidateStaticFile : BlazorServerBackendModuleTests
+    {
+        [Fact]
+        public void Should_make_the_browser_revalidate_a_cached_static_file()
+        {
+            // Arrange
+            var httpContext = new DefaultHttpContext();
+            var context = new StaticFileResponseContext(httpContext, Substitute.For<Microsoft.Extensions.FileProviders.IFileInfo>());
+
+            // Act
+            BlazorServerBackendModule.RevalidateStaticFile(context);
+
+            // Assert
+            httpContext.Response.Headers.CacheControl.ToString().Should().Be("no-cache");
         }
     }
 }

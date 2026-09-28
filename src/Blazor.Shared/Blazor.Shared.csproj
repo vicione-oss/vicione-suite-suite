@@ -7,14 +7,6 @@
     <CompressionEnabled>false</CompressionEnabled>
   </PropertyGroup>
 
-  <!--
-    Disable fingerprinting as wrong fingerprints are applied in this project
-    https://github.com/dotnet/aspnetcore/issues/58976#issuecomment-2478995005
-  -->
-  <PropertyGroup>
-    <StaticWebAssetFingerprintingEnabled>false</StaticWebAssetFingerprintingEnabled>
-  </PropertyGroup>
-
   <PropertyGroup>
     <!-- https://github.com/koenvzeijl/AspNetCore.SassCompiler/issues/160 -->
     <SassCompilerEnableWatcher>false</SassCompilerEnableWatcher>

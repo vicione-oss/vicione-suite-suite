@@ -1,9 +1,13 @@
+using System.IO.Abstractions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Blazor.DevAssets.Tests;
 
-public class DevelopmentFileProviderTests
+public partial class DevelopmentFileProviderTests
 {
+    private const string TestModuleName = "ViciOne.Suite.TestModule.Client";
+
     private static string GetBlazorSharedStaticWebAssetJson()
     {
         const string file = "ViciOne.Suite.Blazor.Shared.staticwebassets.runtime.json";
@@ -16,8 +20,15 @@ public class DevelopmentFileProviderTests
         return Directory.GetFiles(binPath!, "*staticwebassets.runtime.json", SearchOption.TopDirectoryOnly);
     }
 
+    [GeneratedRegex("@import '([^']+)';")]
+    private static partial Regex CssImport();
+
     public sealed class GetFileInfo : DevelopmentFileProviderTests
     {
+        private const string FingerprintedBundleRoute = "_content/Library/Library.abcdef1234.bundle.scp.css";
+
+        private readonly MockManifests _manifests = new();
+
         [Theory]
         [InlineData("js/loadjs.js")]
         [InlineData("js/suite.js")]
@@ -30,7 +41,7 @@ public class DevelopmentFileProviderTests
         {
             // Arrange
             var webassetsJson = GetBlazorSharedStaticWebAssetJson();
-            var provider = new DevelopmentFileProvider();
+            var provider = new DevelopmentFileProvider(new FileSystem());
 
             // Act
             provider.AddStaticWebAssetJson(webassetsJson);
@@ -49,7 +60,7 @@ public class DevelopmentFileProviderTests
         {
             // Arrange
             var clientWebAssetsFile = GetAllStaticWebAssetJsons();
-            var provider = new DevelopmentFileProvider();
+            var provider = new DevelopmentFileProvider(new FileSystem());
 
             // Act
             provider.AddStaticWebAssetJsons(clientWebAssetsFile);
@@ -69,7 +80,7 @@ public class DevelopmentFileProviderTests
         public void Should_resolve_content_asset_when_all_jsons_are_loaded(string resource)
         {
             // Arrange — simulate the real dev scenario where every project's JSON is loaded
-            var provider = new DevelopmentFileProvider();
+            var provider = new DevelopmentFileProvider(new FileSystem());
             provider.AddStaticWebAssetJsons(GetAllStaticWebAssetJsons());
 
             // Act
@@ -79,28 +90,125 @@ public class DevelopmentFileProviderTests
             Assert.NotNull(asset);
             Assert.True(File.Exists(asset.PhysicalPath), $"Physical file not found: {asset.PhysicalPath}");
         }
-    }
 
-    /// <summary>
-    /// Unit tests for the package-name extraction from a _content/ subpath.
-    /// This is the core logic that replaces the old broad .Client string marker.
-    /// </summary>
-    public sealed class ExtractPackageNameFromContentPath : DevelopmentFileProviderTests
-    {
-        [Theory]
-        [InlineData("/_content/ViciOne.Suite.ClusterManagement.Client/icons/bundle.css", "ViciOne.Suite.ClusterManagement.Client")]
-        [InlineData("/_content/ViciOne.Suite.Blazor.Shared/js/suite.js",                 "ViciOne.Suite.Blazor.Shared")]
-        [InlineData("_content/Some.Package/dir/file.css",                                "Some.Package")]   // no leading slash
-        [InlineData("/_content/Single/file.js",                                          "Single")]         // single-segment name
-        [InlineData("/js/suite.js",                                                      null)]             // not a _content/ path
-        [InlineData("/index.html",                                                       null)]             // not a _content/ path
-        public void Should_return_correct_package_name(string subpath, string? expected)
+        [Fact]
+        public void Should_resolve_a_route_whose_file_has_another_name()
         {
+            // Arrange
+            var provider = new DevelopmentFileProvider(_manifests.FileSystem);
+            provider.AddStaticWebAssetJson(_manifests.Write("Host", (FingerprintedBundleRoute, "Library.bundle.scp.css")));
+
             // Act
-            var result = DevelopmentFileProvider.ExtractPackageNameFromContentPath(subpath);
+            var asset = provider.GetFileInfo($"/{FingerprintedBundleRoute}");
 
             // Assert
-            Assert.Equal(expected, result);
+            Assert.True(asset.Exists);
+            Assert.Equal("Library.bundle.scp.css", asset.Name);
+        }
+
+        [Fact]
+        public void Should_not_resolve_a_file_name_that_is_no_route()
+        {
+            // Arrange
+            var provider = new DevelopmentFileProvider(_manifests.FileSystem);
+            provider.AddStaticWebAssetJson(_manifests.Write("Host", (FingerprintedBundleRoute, "Library.bundle.scp.css")));
+
+            // Act
+            var asset = provider.GetFileInfo("/_content/Library/Library.bundle.scp.css");
+
+            // Assert
+            Assert.False(asset.Exists);
+        }
+
+        [Theory]
+        [InlineData("/_content/Module/Module.styles.css")]
+        [InlineData($"/_content/Module/{FingerprintedBundleRoute}")]
+        public void Should_resolve_a_request_below_a_project_folder_in_the_project_manifest(string resource)
+        {
+            // Arrange
+            var provider = new DevelopmentFileProvider(_manifests.FileSystem);
+            provider.AddStaticWebAssetJson(_manifests.Write("Module",
+                ("Module.styles.css", "Module.styles.css"),
+                (FingerprintedBundleRoute, "Library.bundle.scp.css")));
+
+            // Act
+            var asset = provider.GetFileInfo(resource);
+
+            // Assert
+            Assert.True(asset.Exists);
+        }
+
+        [Fact]
+        public void Should_prefer_the_manifest_of_the_addressed_project()
+        {
+            // Arrange
+            var provider = new DevelopmentFileProvider(_manifests.FileSystem);
+            provider.AddStaticWebAssetJson(_manifests.Write("ModuleA", ("js/module.js", "module-a.js")));
+            provider.AddStaticWebAssetJson(_manifests.Write("ModuleB", ("js/module.js", "module-b.js")));
+
+            // Act
+            var asset = provider.GetFileInfo("/_content/ModuleB/js/module.js");
+
+            // Assert
+            Assert.Equal("module-b.js", asset.Name);
+        }
+
+        [Fact]
+        public void Should_load_every_manifest_of_a_folder()
+        {
+            // Arrange
+            _manifests.Write("ModuleA", ("js/module-a.js", "module-a.js"));
+            _manifests.Write("ModuleB", ("js/module-b.js", "module-b.js"));
+            var provider = new DevelopmentFileProvider(_manifests.FileSystem);
+
+            // Act
+            provider.AddStaticWebAssetJsonsFromPath(_manifests.Folder);
+
+            // Assert
+            Assert.True(provider.GetFileInfo("/_content/ModuleA/js/module-a.js").Exists);
+            Assert.True(provider.GetFileInfo("/_content/ModuleB/js/module-b.js").Exists);
+        }
+
+        [Fact]
+        public void Should_read_the_resolved_file_from_the_file_system()
+        {
+            // Arrange
+            var provider = new DevelopmentFileProvider(_manifests.FileSystem);
+            provider.AddStaticWebAssetJson(_manifests.Write("Host", (FingerprintedBundleRoute, "Library.bundle.scp.css")));
+            var asset = provider.GetFileInfo($"/{FingerprintedBundleRoute}");
+
+            // Act
+            using var reader = new StreamReader(asset.CreateReadStream());
+            var content = reader.ReadToEnd();
+
+            // Assert
+            Assert.Equal(FingerprintedBundleRoute, content);
+        }
+
+        /// <summary>
+        /// The UI host serves its bundle at the site root and a module below /_content/{Module}/, which is where the
+        /// relative imports of each bundle point to. Blazor.Shared is a project reference of the test module, so its
+        /// import carries a fingerprint that only exists as a route.
+        /// </summary>
+        [Theory]
+        [InlineData("")]
+        [InlineData($"_content/{TestModuleName}/")]
+        public void Should_resolve_every_import_of_a_stylesheet_bundle(string importBase)
+        {
+            // Arrange
+            var provider = new DevelopmentFileProvider(new FileSystem());
+            provider.AddStaticWebAssetJsons(GetAllStaticWebAssetJsons());
+            var bundle = provider.GetFileInfo($"/_content/{TestModuleName}/{TestModuleName}.styles.css");
+            var imports = bundle.Exists
+                ? CssImport().Matches(File.ReadAllText(bundle.PhysicalPath!)).Select(match => match.Groups[1].Value).ToList()
+                : [];
+
+            // Act
+            var unresolved = imports.Where(import => !provider.GetFileInfo($"/{importBase}{import}").Exists).ToList();
+
+            // Assert
+            Assert.NotEmpty(imports);
+            Assert.Empty(unresolved);
         }
     }
 }

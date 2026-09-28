@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IO.Abstractions" />
     <PackageReference Include="ViciOne.Suite.Sdk.Backend" />
     <PackageReference Include="ViciOne.Suite.Sdk.Client" />
   </ItemGroup>

@@ -1,4 +1,5 @@
-﻿using Core.UiHosting;
+﻿using System.IO.Abstractions;
+using Core.UiHosting;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,7 @@ using Sdk.Client.Modules;
 
 namespace Blazor.DevAssets;
 
-public static class DevelopmentExtensions
+public static partial class DevelopmentExtensions
 {
     extension(IWebHostEnvironment hostEnvironment)
     {
@@ -35,13 +36,13 @@ public static class DevelopmentExtensions
                 var moduleName = Path.GetFileNameWithoutExtension(pathInfo.Key.AssemblyPath);
                 fileProviders.Add(new ModuleFileProvider(moduleName, pathInfo.Value, ModuleAssetHelper.ContentPrefix));
 
-                logger.LogDebug("Added module provider key:{Key} from {Folder}", pathInfo.Key, pathInfo.Value);
+                LogModuleProviderAdded(logger, pathInfo.Key, pathInfo.Value);
             }
 
             // Works for the published client, e.g. path\to\publish\Client\wwwroot.
             hostEnvironment.WebRootFileProvider = new CompositeFileProvider(fileProviders);
 
-            logger.LogInformation("Using client production wwwroot '{Folder}' (+ {Count} module content paths)", wwwRootFolder, fileProviders.Count - 2);
+            LogUsingProductionWwwRoot(logger, wwwRootFolder, fileProviders.Count - 2);
 
             return hostEnvironment;
         }
@@ -50,18 +51,18 @@ public static class DevelopmentExtensions
         /// Extends the WebRootFileProvider with a <see cref="DevelopmentFileProvider"/> built from the
         /// *staticwebassets.runtime.json files, so assets resolve from the debug build output.
         /// </summary>
-        public IWebHostEnvironment UseClientAssetsDevelopment(IUiHostEnvironment uiEnvironment,
+        public IWebHostEnvironment UseClientAssetsDevelopment(IUiHostEnvironment uiEnvironment, IFileSystem fileSystem,
             ILogger logger)
         {
             hostEnvironment.SetWebPaths(uiEnvironment);
 
             var wwwRootFolder = uiEnvironment.GetWwwRootFolder();
-            if (!Directory.Exists(wwwRootFolder))
+            if (!fileSystem.Directory.Exists(wwwRootFolder))
                 throw new DirectoryNotFoundException($"WwwRoot-Path:{wwwRootFolder}");
 
-            logger.LogInformation("Using client development wwwroot '{Folder}'", wwwRootFolder);
+            LogUsingDevelopmentWwwRoot(logger, wwwRootFolder);
 
-            var contentProvider = new DevelopmentFileProvider();
+            var contentProvider = new DevelopmentFileProvider(fileSystem);
             var fileProviders = new List<IFileProvider>
             {
                 hostEnvironment.WebRootFileProvider,
@@ -75,7 +76,7 @@ public static class DevelopmentExtensions
             {
                 contentProvider.AddStaticWebAssetJsonsFromPath(pathInfo.Value);
 
-                logger.LogDebug("Added static module webassets for {Key} from {Folder}", pathInfo.Key, pathInfo.Value);
+                LogModuleWebAssetsAdded(logger, pathInfo.Key, pathInfo.Value);
             }
 
             // Each module provider serves /_content/{ModuleDllName}.
@@ -84,7 +85,7 @@ public static class DevelopmentExtensions
                 var moduleName = Path.GetFileNameWithoutExtension(item.Key.AssemblyPath);
                 fileProviders.Add(new ModuleFileProvider(moduleName, item.Value, ModuleAssetHelper.ContentPrefix));
 
-                logger.LogDebug("Added module provider key:{Key} from {Folder}", item.Key, item.Value);
+                LogModuleProviderAdded(logger, item.Key, item.Value);
             }
 
             hostEnvironment.WebRootFileProvider = new CompositeFileProvider(fileProviders);
@@ -109,4 +110,16 @@ public static class DevelopmentExtensions
     }
 
     private static string GetUiHostModulePath(string? modulePath) => modulePath ?? throw new InvalidOperationException("UiHost - content root path is invalid.");
+
+    [LoggerMessage(LogLevel.Debug, "Added module provider key:{Key} from {Folder}")]
+    private static partial void LogModuleProviderAdded(ILogger logger, ModulePathInfo key, string folder);
+
+    [LoggerMessage(LogLevel.Debug, "Added static module webassets for {Key} from {Folder}")]
+    private static partial void LogModuleWebAssetsAdded(ILogger logger, ModulePathInfo key, string folder);
+
+    [LoggerMessage(LogLevel.Information, "Using client production wwwroot '{Folder}' (+ {Count} module content paths)")]
+    private static partial void LogUsingProductionWwwRoot(ILogger logger, string folder, int count);
+
+    [LoggerMessage(LogLevel.Information, "Using client development wwwroot '{Folder}'")]
+    private static partial void LogUsingDevelopmentWwwRoot(ILogger logger, string folder);
 }

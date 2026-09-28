@@ -1,3 +1,5 @@
+using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 
 namespace Blazor.DevAssets.Tests;
@@ -17,14 +19,40 @@ public class StaticWebAssetContentTests
         {
             // Arrange
             var clientWebAssetsFile = GetBlazorSharedStaticWebAssetJson();
-            var provider = new StaticWebAssetContent(clientWebAssetsFile);
+            var provider = new StaticWebAssetContent(new FileSystem(), clientWebAssetsFile);
 
             // Act
             provider.ParseWebAssetContents();
 
             // Assert
-            Assert.NotEmpty(provider.Entries);
             Assert.NotEmpty(provider.ContentRoots);
+            Assert.True(File.Exists(provider.FindAssetPath(["js", "suite.js"])));
+        }
+
+        [Fact]
+        public void Should_throw_when_the_manifest_does_not_exist()
+        {
+            // Arrange
+            var provider = new StaticWebAssetContent(new MockFileSystem(), GetBlazorSharedStaticWebAssetJson());
+
+            // Act
+            var parse = provider.ParseWebAssetContents;
+
+            // Assert
+            Assert.Throws<FileNotFoundException>(parse);
+        }
+
+        [Fact]
+        public void Should_name_the_content_after_the_manifest_file()
+        {
+            // Arrange
+            var provider = new StaticWebAssetContent(new MockFileSystem(), GetBlazorSharedStaticWebAssetJson());
+
+            // Act
+            var name = provider.Name;
+
+            // Assert
+            Assert.Equal("ViciOne.Suite.Blazor.Shared", name);
         }
     }
 

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using System.IO.Abstractions;
 using System.Text.Json;
 using MassTransit.Metadata;
 
@@ -8,35 +8,47 @@ namespace Blazor.DevAssets;
 /// Parses staticwebassets.runtime.json to resolve debug web server requests to absolute file paths.
 /// Hand-rolled because the framework exposes no reader for the format.
 /// </summary>
-internal sealed class StaticWebAssetContent(string webassetJsonPath)
+internal sealed class StaticWebAssetContent(IFileSystem fileSystem, string webassetJsonPath)
 {
-    public const string ChildrenPropertyName = "Children";
-    public const string AssetPropertyName = "Asset";
-    public const string PatternsPropertyName = "Patterns";
+    private const string ManifestSuffix = ".staticwebassets.runtime.json";
 
-    private readonly List<StaticWebAssetEntry> _entries = [];
+    /// <summary>
+    /// Matches route segments the way the framework's own development file provider does.
+    /// </summary>
+    private static readonly StringComparer RouteComparer =
+        OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+
     private readonly List<string> _contentRoots = [];
     private readonly string _jsonPath = webassetJsonPath;
+    private Node? _root;
 
-    public IReadOnlyList<StaticWebAssetEntry> Entries => _entries;
     public IReadOnlyList<string> ContentRoots => _contentRoots;
-    internal string JsonPath => _jsonPath;
 
-    public string? FindAssetContentPath(string subpath, string fallbackFileName, string lastChance)
+    /// <summary>
+    /// The project the manifest describes, e.g. ViciOne.Suite.Blazor.Shared for ViciOne.Suite.Blazor.Shared.staticwebassets.runtime.json.
+    /// </summary>
+    public string Name { get; } = GetName(fileSystem, webassetJsonPath);
+
+    /// <summary>
+    /// Returns the file served at <paramref name="route"/>, or <see langword="null"/> when the manifest has no such route.
+    /// </summary>
+    /// <remarks>
+    /// A route can differ from the file it serves: the fingerprint in a scoped CSS bundle URL of a project reference only
+    /// reaches the file name on publish.
+    /// </remarks>
+    public string? FindAssetPath(ReadOnlySpan<string> route)
     {
-        foreach (var entry in _entries)
+        var node = _root;
+        foreach (var segment in route)
         {
-            var content = entry.FindAssetContent(subpath, fallbackFileName, lastChance);
-            if (content is null || string.IsNullOrEmpty(content.SubPath))
-                continue;
-
-            if (content.ContentRootIndex >= ContentRoots.Count)
-                continue;
-
-            return Path.Combine(ContentRoots[content.ContentRootIndex], content.SubPath);
+            if (node?.Children is null || !node.Children.TryGetValue(segment, out node))
+                return null;
         }
 
-        return null;
+        if (node?.Asset is not { } asset || asset.ContentRootIndex >= _contentRoots.Count)
+            return null;
+
+        return fileSystem.Path.Combine(_contentRoots[asset.ContentRootIndex], asset.SubPath);
     }
 
     /// <summary>
@@ -100,102 +112,47 @@ internal sealed class StaticWebAssetContent(string webassetJsonPath)
 
     public void ParseWebAssetContents()
     {
-        if (!File.Exists(_jsonPath))
+        if (!fileSystem.File.Exists(_jsonPath))
             throw new FileNotFoundException(_jsonPath);
 
-        var json = File.ReadAllText(_jsonPath);
-        var doc = JsonDocument.Parse(json);
+        using var doc = JsonDocument.Parse(fileSystem.File.ReadAllText(_jsonPath));
 
-        foreach (var child in doc.RootElement.EnumerateObject())
-        {
-            // Indexed by asset.rootindex to build an absolute path.
-            if (child.Name == "ContentRoots")
-            {
-                var array = child.Value.Deserialize<string[]>();
+        // Indexed by asset.rootindex to build an absolute path.
+        if (doc.RootElement.TryGetProperty("ContentRoots", out var contentRoots))
+            _contentRoots.AddRange(FixDockerDebugContentRootPaths(contentRoots.EnumerateArray().Select(contentRoot => contentRoot.GetString()!)));
 
-                _contentRoots.AddRange(FixDockerDebugContentRootPaths(array));
-                continue;
-            }
-
-            // Recursive contents: js, svg, css, _content.
-            if (child.Name == "Root")
-            {
-                AddRootFolderContentAssets(child);
-            }
-        }
+        // Each segment of a route names a child node; Patterns, which match files added after the build, are skipped.
+        if (doc.RootElement.TryGetProperty("Root", out var root))
+            _root = ParseNode(root);
     }
 
-    private void AddRootFolderContentAssets(JsonProperty root)
+    private static Node ParseNode(JsonElement element)
     {
-        // Root has Children, Asset and Patterns.
-        foreach (var child in root.Value.EnumerateObject())
+        Dictionary<string, Node>? children = null;
+        if (element.TryGetProperty("Children", out var childElements) && childElements.ValueKind == JsonValueKind.Object)
         {
-            // Only Children; Asset and Patterns are skipped.
-            if (child.Name != ChildrenPropertyName || child.Value.ValueKind != JsonValueKind.Object)
-                continue;
-
-            // Folders such as svg and js.
-            foreach (var folder in child.Value.EnumerateObject())
-            {
-                AddFolderContentEntries(folder);
-            }
+            children = new Dictionary<string, Node>(RouteComparer);
+            foreach (var child in childElements.EnumerateObject())
+                children[child.Name] = ParseNode(child.Value);
         }
+
+        Asset? asset = null;
+        if (element.TryGetProperty("Asset", out var match) && match.ValueKind == JsonValueKind.Object
+            && match.GetProperty("SubPath").GetString() is { Length: > 0 } subPath)
+            asset = new Asset(match.GetProperty("ContentRootIndex").GetInt32(), subPath);
+
+        return new Node(children, asset);
     }
 
-    private void AddFolderContentEntries(JsonProperty folder)
+    private static string GetName(IFileSystem fileSystem, string jsonPath)
     {
-        AddRootFolderContentEntries(folder.Value, folder.Name);
+        var fileName = fileSystem.Path.GetFileName(jsonPath);
+        return fileName.EndsWith(ManifestSuffix, StringComparison.OrdinalIgnoreCase) ? fileName[..^ManifestSuffix.Length] : fileName;
     }
 
-    private void AddRootFolderContentEntries(JsonElement? folder, string? folderName = null)
-    {
-        if (folder is null || folder.Value.ValueKind != JsonValueKind.Object)
-            return;
+    private sealed record Node(Dictionary<string, Node>? Children, Asset? Asset);
 
-        // e.g. Root.Children.js
-        foreach (var child in folder.Value.EnumerateObject())
-        {
-            if (child.Value.ValueKind != JsonValueKind.Object)
-                continue;
-
-            // e.g. Root.Children.index.html.Asset
-            if (child.Name == AssetPropertyName)
-            {
-                _entries.Add(new StaticWebAssetEntry(folder) { Key = folderName });
-                continue;
-            }
-
-            if (child.Name == ChildrenPropertyName)
-            {
-                // e.g. Root.Children.js.Children
-                foreach (var entry in child.Value.EnumerateObject())
-                {
-                    // Special case: dotnet.6.0.0-rc.1.21451.13.js -> dotnet.js.
-                    if (WebAssetDotnetRegex.IsMatch(entry.Name))
-                    {
-                        var key = WebAssetDotnetRegex.Replace(entry.Name);
-
-                        _entries.Add(new StaticWebAssetEntry(entry.Value) { Key = key });
-                        // Added again below with the version info.
-                    }
-
-                    // e.g. "DevExpress.Blazor.Dashboard": { .. }
-                    _entries.Add(new StaticWebAssetEntry(entry.Value) { Key = entry.Name });
-                }
-            }
-        }
-    }
-
-    public void DebugDump()
-    {
-        foreach (var item in Entries)
-        {
-            Debug.WriteLine("Entry.Key: {0} -> asset.count={1}", item.Key, item.Assets.Count);
-
-            foreach (var asset in item.Assets)
-            {
-                Debug.WriteLine("subpath={0} normalized={1}", asset.SubPath, asset.SubPathNormalized);
-            }
-        }
-    }
+    /// <param name="ContentRootIndex">Index into <see cref="ContentRoots"/>.</param>
+    /// <param name="SubPath">Path of the file relative to that content root.</param>
+    private sealed record Asset(int ContentRootIndex, string SubPath);
 }
