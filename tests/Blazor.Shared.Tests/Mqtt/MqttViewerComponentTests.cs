@@ -3,6 +3,7 @@ using System.Text.Json;
 using AngleSharp.Dom;
 using Blazor.Shared.Mqtt;
 using Blazor.Shared.Mqtt.Contracts;
+using Blazor.Shared.Mqtt.Enums;
 using Blazor.Shared.Mqtt.Helpers;
 using Blazor.Shared.Mqtt.Services;
 using Blazor.Tests.Tools;
@@ -11,6 +12,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Extensions;
 using Sdk.Connections.Requests;
+using LibraryButton = ViciOne.Ui.Blazor.Components.Button.Button;
+using ViciOne.Ui.Blazor.Components.Popup.Extensions;
+using ViciOne.Ui.Blazor.Components.SectionRail.Extensions;
 
 namespace Blazor.Shared.Tests.Mqtt;
 
@@ -50,6 +54,9 @@ public class MqttViewerComponentTests
     private static IElement FindConnectButton(IRenderedComponent<MqttViewerComponent> component)
         => component.Find(ConnectButtonSelector);
 
+    private static IRenderedComponent<LibraryButton> FindToggleConnectionButton(IRenderedComponent<MqttViewerComponent> component)
+        => component.FindComponents<LibraryButton>().Single(button => button.Instance.CssClass?.Contains("toggle-connection-button") == true);
+
     private static void ConfigureTestServices(BunitContext ctx, List<Connection>? connections = null, List<MessageModel>? messages = null)
     {
         ctx.SetupBlazorUiComponents(s =>
@@ -67,8 +74,11 @@ public class MqttViewerComponentTests
             return mqttService;
         });
 
+        ctx.Services.AddPopup();
+        ctx.Services.AddSectionRail<SectionId>();
         ctx.Services.AddScoped<MqttViewerComponentService>();
         ctx.Services.AddTransient<ViciOne.Ui.TreeEditor.Builder.ITreeBuilder, ViciOne.Ui.TreeEditor.Builder.TreeBuilder>();
+        ctx.Services.AddKeyedScoped<ViciOne.Ui.TreeEditor.Builder.ITreeBuilder, ViciOne.Ui.TreeEditor.Builder.TreeBuilder>(typeof(MqttTopicTreeServiceKey));
         ctx.Services.AddScoped<MqttTopicTreeAdapter>();
     }
 
@@ -196,6 +206,42 @@ public class MqttViewerComponentTests
             {
                 component.Find(".content-container").InnerHtml.Should().Contain("Test Message");
             });
+        }
+
+        [Fact]
+        public async Task Should_show_the_connect_button_as_busy_while_connecting()
+        {
+            // Arrange
+            await using var ctx = new BunitContext();
+            ConfigureTestServices(ctx,
+                [
+                    _localMqttConnection,
+                ]);
+
+            TaskCompletionSource connecting = new();
+
+            var service = ctx.Services.GetRequiredService<IMqttService>();
+            service.Connect(Arg.Any<MqttConnection>()).Returns(connecting.Task);
+
+            var component = ctx.Render<MqttViewerComponent>();
+
+            // Act
+            var click = FindToggleConnectionButton(component).Find("button").ClickAsync();
+
+            // Assert
+            component.WaitForAssertion(() =>
+            {
+                var button = FindToggleConnectionButton(component).Instance;
+
+                button.Busy.Should().BeTrue();
+                button.Enabled.Should().BeTrue();
+            }, _extraWaitTime);
+
+            connecting.SetResult();
+
+            await click;
+
+            component.WaitForAssertion(() => FindToggleConnectionButton(component).Instance.Busy.Should().BeFalse(), _extraWaitTime);
         }
     }
 

@@ -1,10 +1,13 @@
-﻿@using ViciOne.Ui.Localization.Resources
+﻿@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Localization.Resources
 
 <SettingsGroup Title="@Localization.TestSettings.GroupTitle">
-    <SettingsField Label="@CommonVocabulary.Action" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+    <SettingsField Label="@CommonVocabulary.Action">
         <SettingsFieldButton Text="@Localization.TestSettings.TestConnection"
                              IconCssClass="@_refreshIconCssClasses"
-                             Enabled="@Model.CanBeTested"
+                             Enabled="@(Model.CanBeTested || _testConnectionRunning)"
+                             Busy="@_testConnectionRunning"
+                             BusyIndication="ButtonBusyIndication.SweepAndSpinningIcon"
                              OnClick="@TestConnectionButtonClick" />
     </SettingsField>
 

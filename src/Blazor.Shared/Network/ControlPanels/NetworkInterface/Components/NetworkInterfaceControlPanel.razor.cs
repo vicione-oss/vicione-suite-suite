@@ -30,6 +30,7 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     }
 
     private bool _testConnectionRunning;
+    private bool _renewingDhcpLease;
     private TestConnectionResult? _testConnectionResult;
     private bool _testConnectionExecutedAtLeastOnce;
     private bool _showErrorDialog;
@@ -54,6 +55,8 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         base.OnInitialized();
 
         SetDhcpLeaseInformation();
+
+        State.DhcpLeaseFetching = false;
     }
 
     protected override async ValueTask DisposeAsyncCore()
@@ -148,6 +151,7 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         {
             SetDhcpLeaseInformation();
 
+            State.DhcpLeaseFetching = false;
             State.DhcpLeaseSettingsGroupExpanded = true;
         }
     }
@@ -166,10 +170,11 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         await BeginEdit();
     }
 
-    private bool CanRenewDhcpLease() => !State.DhcpLeaseFetching && !State.HasUnsavedChanges;
+    private bool CanRenewDhcpLease() => !State.HasUnsavedChanges;
 
     private async Task RenewDhcpLease()
     {
+        _renewingDhcpLease = true;
         State.DhcpLeaseFetching = true;
 
         try
@@ -197,6 +202,7 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
             await RenderLoadingIndication();
 
             State.DhcpLeaseFetching = false;
+            _renewingDhcpLease = false;
         }
     }
 
@@ -224,8 +230,6 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
             _dhcpLeaseDuration = _dhcpLeaseEnd.Value - _dhcpLeaseStart.Value;
         else
             _dhcpLeaseDuration = null;
-
-        State.DhcpLeaseFetching = false;
     }
 
     private async Task RenderLoadingIndication()

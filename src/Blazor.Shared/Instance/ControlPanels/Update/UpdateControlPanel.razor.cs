@@ -93,7 +93,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
     }
 
     private bool CanExecuteExportButton()
-        => !_isRestoreInProgress && !_isExportInProgress;
+        => !_isRestoreInProgress;
 
     private void RestoreFileUploadStart(IUploadTicket uploadTicket)
     {
@@ -192,6 +192,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
             Logger.LogError(ex, "Failed to restore backup");
             _errorMessage = ex.Message;
             _exportCorrelationId = null;
+            _isExportInProgress = false;
         }
     }
 
