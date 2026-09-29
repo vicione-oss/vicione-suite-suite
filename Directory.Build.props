@@ -28,7 +28,7 @@
         <!-- General information -->
         <Description>-</Description>
         <Product>ViciOne Suite</Product>
-        <Company>ifm software</Company>
+        <Company>ViciOne open automation gmbh</Company>
         <Year>$([System.DateTime]::Now.Year)</Year>
         <Copyright>Copyright © $(Company) $(Year)</Copyright>
         <NeutralLanguage>en-US</NeutralLanguage>
