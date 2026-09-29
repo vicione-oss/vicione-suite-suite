@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PanelTitle" xml:space="preserve">
+    <value>OpenID provider</value>
+  </data>
+  <data name="RiskBannerContent" xml:space="preserve">
+    <value>Changing the authority or the client id disconnects every existing external login: the link pointed at the old provider, and that provider is gone. Clearing both fields removes the provider and does the same. Users who signed up through the provider have no password and lose access. Changing only the client secret leaves the existing logins untouched.</value>
+  </data>
+  <data name="Authority" xml:space="preserve">
+    <value>Authority</value>
+  </data>
+  <data name="AuthorityHint" xml:space="preserve">
+    <value>Base URL of the provider's OpenID issuer, for example https://gitlab.com. Must be an https URL.</value>
+  </data>
+  <data name="ClientId" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="ClientSecret" xml:space="preserve">
+    <value>Client secret</value>
+  </data>
+  <data name="ClientSecretStoredHint" xml:space="preserve">
+    <value>A client secret is stored. Leave this field empty to keep it.</value>
+  </data>
+  <data name="ClientSecretNotStoredHint" xml:space="preserve">
+    <value>No client secret is stored. Leave this field empty for a public PKCE client.</value>
+  </data>
+  <data name="ClientSecretRemovalPendingHint" xml:space="preserve">
+    <value>The stored client secret is removed when you save. Enter a new one to keep a confidential client.</value>
+  </data>
+  <data name="RemoveStoredClientSecret" xml:space="preserve">
+    <value>Remove stored secret</value>
+  </data>
+  <data name="InvalidAuthorityError" xml:space="preserve">
+    <value>The authority must be an absolute https URL.</value>
+  </data>
+  <data name="IncompleteProviderError" xml:space="preserve">
+    <value>An OpenID provider needs both an authority and a client ID. Clear both to remove the provider.</value>
+  </data>
+  <data name="LoadFailedTitle" xml:space="preserve">
+    <value>The stored OpenID provider could not be read</value>
+  </data>
+  <data name="SaveBlockedByLoadFailureError" xml:space="preserve">
+    <value>Saving is not possible while the stored OpenID provider cannot be read.</value>
+  </data>
+</root>

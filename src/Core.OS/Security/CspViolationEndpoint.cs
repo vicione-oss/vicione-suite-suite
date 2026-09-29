@@ -37,7 +37,7 @@ internal static partial class CspViolationEndpoint
                 context.Request.Body, ReportFormat, context.RequestAborted);
 
             foreach (var violation in ViolationsIn(payload))
-                LogViolation(logger, violation.BlockedUri, violation.DocumentUri, violation.Directive);
+                LogViolation(logger, violation);
         }
         catch (JsonException)
         {
@@ -77,18 +77,36 @@ internal static partial class CspViolationEndpoint
     }
 
     private static CspViolation Violation(ReportBody body)
-        => new(body.BlockedUrl, body.DocumentUrl, body.EffectiveDirective);
+        => new(body.BlockedUrl, body.DocumentUrl, body.EffectiveDirective,
+            body.SourceFile, body.LineNumber, body.ColumnNumber);
 
     /// <summary>
     /// <c>report-uri</c> predates the split of the two directives, so browsers that only support it
     /// may report the value the policy carries rather than the directive it was checked against.
     /// </summary>
     private static CspViolation Violation(ReportedViolation reported)
-        => new(reported.BlockedUri, reported.DocumentUri, reported.EffectiveDirective ?? reported.ViolatedDirective);
+        => new(reported.BlockedUri, reported.DocumentUri,
+            reported.EffectiveDirective ?? reported.ViolatedDirective,
+            reported.SourceFile, reported.LineNumber, reported.ColumnNumber);
+
+    private static void LogViolation(ILogger logger, CspViolation violation)
+    {
+        if (violation.SourceFile is null)
+            LogViolation(logger, violation.BlockedUri, violation.DocumentUri, violation.Directive);
+        else
+            LogLocatedViolation(logger, violation.BlockedUri, violation.DocumentUri, violation.SourceFile,
+                violation.LineNumber, violation.ColumnNumber, violation.Directive);
+    }
 
     [LoggerMessage(LogLevel.Warning,
         "Content Security Policy refused {BlockedUri} on {DocumentUri}, violating {Directive}")]
     private static partial void LogViolation(ILogger logger, string? blockedUri, string? documentUri, string? directive);
+
+    [LoggerMessage(LogLevel.Warning,
+        "Content Security Policy refused {BlockedUri} on {DocumentUri} at "
+        + "{SourceFile}:{LineNumber}:{ColumnNumber}, violating {Directive}")]
+    private static partial void LogLocatedViolation(ILogger logger, string? blockedUri, string? documentUri,
+        string? sourceFile, int? lineNumber, int? columnNumber, string? directive);
 
     [LoggerMessage(LogLevel.Warning, "Received a Content Security Policy report that could not be read")]
     private static partial void LogUnreadableReport(ILogger logger);
@@ -96,7 +114,13 @@ internal static partial class CspViolationEndpoint
     [LoggerMessage(LogLevel.Warning, "Refused a Content Security Policy report: {Reason}")]
     private static partial void LogRefusedReport(ILogger logger, string reason);
 
-    private sealed record CspViolation(string? BlockedUri, string? DocumentUri, string? Directive);
+    private sealed record CspViolation(
+        string? BlockedUri,
+        string? DocumentUri,
+        string? Directive,
+        string? SourceFile,
+        int? LineNumber,
+        int? ColumnNumber);
 
     private sealed record SingleReport([property: JsonPropertyName("csp-report")] ReportedViolation? Violation);
 
@@ -104,9 +128,18 @@ internal static partial class CspViolationEndpoint
         [property: JsonPropertyName("blocked-uri")] string? BlockedUri,
         [property: JsonPropertyName("document-uri")] string? DocumentUri,
         [property: JsonPropertyName("violated-directive")] string? ViolatedDirective,
-        [property: JsonPropertyName("effective-directive")] string? EffectiveDirective);
+        [property: JsonPropertyName("effective-directive")] string? EffectiveDirective,
+        [property: JsonPropertyName("source-file")] string? SourceFile,
+        [property: JsonPropertyName("line-number")] int? LineNumber,
+        [property: JsonPropertyName("column-number")] int? ColumnNumber);
 
     private sealed record Report(string? Type, ReportBody? Body);
 
-    private sealed record ReportBody(string? BlockedUrl, string? DocumentUrl, string? EffectiveDirective);
+    private sealed record ReportBody(
+        string? BlockedUrl,
+        string? DocumentUrl,
+        string? EffectiveDirective,
+        string? SourceFile,
+        int? LineNumber,
+        int? ColumnNumber);
 }

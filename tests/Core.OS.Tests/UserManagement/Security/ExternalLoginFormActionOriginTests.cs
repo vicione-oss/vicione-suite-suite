@@ -7,10 +7,6 @@ using NSubstitute;
 
 namespace Core.OS.Tests.UserManagement.Security;
 
-/// <summary>
-/// The origin the Content Security Policy has to name so the challenge redirect survives
-/// <c>form-action</c>, read from the very options the challenge itself is built from.
-/// </summary>
 public class ExternalLoginFormActionOriginTests
 {
     [Theory]
@@ -18,48 +14,92 @@ public class ExternalLoginFormActionOriginTests
     [InlineData("https://idp.example.com/realms/suite", "https://idp.example.com")]
     [InlineData("https://idp.example.com:8443/realms/suite", "https://idp.example.com:8443")]
     public void Should_name_the_origin_of_the_configured_authority(string authority, string expected)
-        => Resolve(Configured(authority)).Should().Be(expected);
+    {
+        // Arrange
+        var provider = Configured(authority);
+
+        // Act
+        var origin = Resolve(provider);
+
+        // Assert
+        origin.Should().Be(expected);
+    }
 
     /// <summary>
-    /// The unconfigured case is a sentinel rather than an absent value, so a policy built from the
-    /// authority alone would advertise <c>https://unconfigured.local</c> to every browser.
+    /// Kestrel fails a response whose headers are not ASCII, so a Unicode host would break every page.
     /// </summary>
+    [Fact]
+    public void Should_name_an_internationalised_host_in_its_ascii_form()
+    {
+        // Arrange
+        var provider = Configured("https://bücher.example/realms/suite");
+
+        // Act
+        var origin = Resolve(provider);
+
+        // Assert
+        origin.Should().Be("https://xn--bcher-kva.example");
+    }
+
     [Fact]
     public void Should_name_no_origin_while_no_provider_is_configured()
     {
+        // Arrange
         var unconfigured = new OpenIdConnectOptions
         {
             Authority = "https://unconfigured.local",
             ClientId = Constants.UnconfiguredClient
         };
 
-        Resolve(unconfigured).Should().BeNull();
+        // Act
+        var origin = Resolve(unconfigured);
+
+        // Assert
+        origin.Should().BeNull();
     }
 
     [Fact]
     public void Should_name_no_origin_when_the_authority_is_the_suite_itself()
-        => Resolve(Configured("https://suite.example.com/oidc")).Should().BeNull();
+    {
+        // Arrange
+        var provider = Configured("https://suite.example.com/oidc");
+
+        // Act
+        var origin = Resolve(provider);
+
+        // Assert
+        origin.Should().BeNull();
+    }
 
     [Fact]
     public void Should_name_no_origin_when_the_authority_is_not_a_usable_url()
-        => Resolve(Configured("not-a-url")).Should().BeNull();
+    {
+        // Arrange
+        var provider = Configured("not-a-url");
 
-    /// <summary>
-    /// Changing the provider clears <see cref="IOptionsMonitorCache{TOptions}"/> on every node and
-    /// nothing else, so the policy has to follow that cache rather than hold a copy — this is the
-    /// no-restart guarantee of the settings panel, seen from the header.
-    /// </summary>
+        // Act
+        var origin = Resolve(provider);
+
+        // Assert
+        origin.Should().BeNull();
+    }
+
     [Fact]
     public void Should_follow_the_provider_when_it_changes_without_a_restart()
     {
+        // Arrange
         var options = Substitute.For<IOptionsMonitor<OpenIdConnectOptions>>();
         options.Get(DynamicExternalIdProviderOptions.OptionsName)
             .Returns(Configured("https://first.example.com"), Configured("https://second.example.com"));
-
         var sut = new ExternalLoginFormActionOrigin(options);
 
-        sut.Resolve(Request()).Should().Be("https://first.example.com");
-        sut.Resolve(Request()).Should().Be("https://second.example.com");
+        // Act
+        var first = sut.Resolve(Request());
+        var second = sut.Resolve(Request());
+
+        // Assert
+        first.Should().Be("https://first.example.com");
+        second.Should().Be("https://second.example.com");
     }
 
     private static OpenIdConnectOptions Configured(string authority)

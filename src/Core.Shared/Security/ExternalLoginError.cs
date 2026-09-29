@@ -12,5 +12,6 @@ public enum ExternalLoginError
     NoLocalUser,
     UnknownExternalUser,
     NewUserCreationFailed,
-    ExternalAccountAlreadyAssociated
+    ExternalAccountAlreadyAssociated,
+    SignInCancelled
 }

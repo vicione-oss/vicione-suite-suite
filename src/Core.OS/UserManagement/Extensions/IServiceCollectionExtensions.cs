@@ -3,6 +3,7 @@ using Core.OS.DbContext;
 using Core.OS.Mail.Extensions;
 using Core.OS.Modules;
 using Core.OS.Modules.Services;
+using Core.OS.Persistence;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Security;
 using Core.OS.UserManagement.Templates;
@@ -30,10 +31,11 @@ internal static class IServiceCollectionExtensions
         services.AddScoped<IAdministratorNameProvider, AdministratorNameProvider>();
         services.AddScoped<IAdministratorInitialPasswordProvider, AdministratorInitialPasswordProvider>();
 
-        // Registered here rather than next to the other external authentication services, which sit
-        // behind a UI host callback that does not run for every host: the security header
-        // middleware asks for this on every request regardless of whether identity was wired up.
+        // Not with the other external authentication services, which only a UI host callback registers:
+        // the security header middleware needs this on every host.
         services.AddSingleton<ExternalLoginFormActionOrigin>();
+
+        services.AddSingleton<IReplicationObserver, ExternalIdProviderReplicationObserver>();
 
         services.AddTransient<IAccountVerification, AccountVerification>();
         services.AddTransient<ISecuritySettings, SecuritySettings>();

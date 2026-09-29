@@ -93,6 +93,12 @@ namespace Blazor.Server.Backend.Localization {
             }
         }
         
+        public static string ExternalLoginCancelled {
+            get {
+                return ResourceManager.GetString("ExternalLoginCancelled", resourceCulture);
+            }
+        }
+        
         public static string NoLocalUser {
             get {
                 return ResourceManager.GetString("NoLocalUser", resourceCulture);

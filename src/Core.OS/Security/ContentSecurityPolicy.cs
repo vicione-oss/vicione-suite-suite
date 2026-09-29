@@ -9,16 +9,14 @@ internal static class ContentSecurityPolicy
     private const string ViolationReportGroup = "csp-endpoint";
 
     /// <summary>
-    /// The <c>Reporting-Endpoints</c> header addressing <see cref="GetBaseline"/>'s
-    /// <c>report-to</c> group. Without it the group has no address, so the two are sent together.
+    /// Gives <see cref="GetBaseline"/>'s <c>report-to</c> group its address, so the two are sent together.
     /// </summary>
     public const string ReportingEndpoints = $"{ViolationReportGroup}=\"{CspViolationReporting.Route}\"";
 
     /// <summary>
     /// The policy of the running suite, which relaxes ADR-006 for the time being (suite#2897).
-    /// <paramref name="externalFormActionOrigin"/> is the origin of the configured OpenID provider,
-    /// or <see langword="null"/> while none is configured. It is the one value that varies per
-    /// installation; there is no development variant.
+    /// <paramref name="externalFormActionOrigin"/> is the configured OpenID provider's origin, or
+    /// <see langword="null"/> without one.
     /// </summary>
     public static string GetBaseline(string? externalFormActionOrigin) =>
         "default-src 'self'; " +

@@ -2,15 +2,53 @@
 
 ## Configuration
 
-External OpenID Connect providers are configured through the `ExternalIdProviders` configuration section.
-Each entry under `Providers` describes one provider users can sign in with:
+The suite signs users in through **one** external OpenID Connect provider.
+There are two ways to configure it; the settings dialog is the primary one.
+
+### Settings dialog
+
+**Settings → User Management → OpenID provider**, available to administrators (`SharedClientModule`, full access).
+
+| Field           | Required | Description                                                                                                                                                    |
+|-----------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Authority`     | yes      | Base URL of the provider's OIDC issuer, e.g. `https://gitlab.com`. Its discovery document must be reachable at `<Authority>/.well-known/openid-configuration`. Must be an absolute `https` URL — the handler sets `RequireHttpsMetadata = true`. |
+| `Client ID`     | yes      | The application/client id issued by the provider.                                                                                                              |
+| `Client secret` | no       | The client secret issued by the provider. Required for confidential clients.                                                                                   |
+
+The panel writes `app.ExternalIdProviders`, and the database is what the panel reads back — a provider defined in configuration files is never shown there.
+Saving goes through the settings dialog's global **Save**.
+
+What the panel does beyond storing the values:
+
+- **Changes take effect on the next sign-in, without a Suite restart.**
+  The saved provider is published as `ExternalIdProviderChanged`, and every node clears its cached `OpenIdConnectOptions`.
+  A slave clears them again once replication has written the stored provider, since the event can arrive before the row.
+  A sign-in that was already in flight fails and has to be retried.
+- **Changing the authority or the client id clears every external login.**
+  The links pointed at the old provider.
+  Rotating only the client secret leaves them alone.
+- **Clearing both `Authority` and `Client ID` removes the provider** and, with it, every external login.
+  Leaving one of the two filled is a validation error, not a removal.
+- **Users created through the provider have no password** and lose access when their external login is cleared.
+- **The stored client secret never leaves the server.**
+  The field always renders empty; leaving it empty keeps the stored secret, and *Remove stored secret* clears it — needed to switch to a public PKCE client.
+- **The secret is stored unencrypted**, like the file-based path below.
+
+### Configuration files
+
+The `ExternalIdProviders` configuration section remains supported as a developer convenience, and is the fallback when the database holds no provider.
+It is not surfaced in the settings dialog.
 
 | Setting        | Required | Description                                                                                                                                                    |
 |----------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Name`         | yes      | Display name of the provider, e.g. shown on the login page.                                                                                                    |
+| `Name`         | yes      | Identifies the provider internally. It is **not** shown anywhere in the UI — the login page always reads `OpenID`. The settings dialog does not offer it and stores a fixed value. |
 | `Authority`    | yes      | Base URL of the provider's OIDC issuer, e.g. `https://gitlab.com`. Its discovery document must be reachable at `<Authority>/.well-known/openid-configuration`. |
 | `ClientId`     | yes      | The application/client id issued by the provider.                                                                                                              |
 | `ClientSecret` | no       | The client secret issued by the provider. Required for confidential clients.                                                                                   |
+
+Only one provider is supported. If several are configured, the first one wins and the rest are ignored.
+
+> **On a developer machine:** removing the provider in the settings dialog deletes the database row, which silently reactivates a provider configured in a file.
 
 Example as JSON (`appsettings`):
 

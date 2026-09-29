@@ -5,6 +5,7 @@ using Blazor.Server.Backend.Extensions;
 using Blazor.Server.Backend.Localization;
 using Blazor.Server.Backend.Middleware;
 using Blazor.Server.Backend.Services;
+using Blazor.Server.Backend.UserManagement;
 using Blazor.Shared.Authorization;
 using Blazor.Shared.Components;
 using Blazor.Shared.Services;
@@ -83,6 +84,8 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         // ITicketStore lives in Core.OS because it needs the db context and other core parts.
         services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>>(
             sp => new CookieAuthConfigurator(sp.GetRequiredService<ITicketStore>()));
+
+        services.ConfigureOptions<ExternalLoginFailureRedirect>();
 
         services.AddSingleton<IAppRenderingProvider, ServerRenderingProvider>();
         services.AddTransient(typeof(IUiEventPublisher<>), typeof(UiEventPublisher<>));

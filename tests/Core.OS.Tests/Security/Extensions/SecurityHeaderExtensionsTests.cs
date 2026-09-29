@@ -36,11 +36,6 @@ public class SecurityHeaderExtensionsTests
             .Should().Equal(ContentSecurityPolicy.GetBaseline(null));
     }
 
-    /// <summary>
-    /// The policy is not the same in every installation any more — the configured OpenID provider
-    /// joins <c>form-action</c> — so it has to be read per response rather than captured once when
-    /// the middleware is registered.
-    /// </summary>
     [Fact]
     public async Task Should_send_the_policy_resolved_for_the_request()
     {

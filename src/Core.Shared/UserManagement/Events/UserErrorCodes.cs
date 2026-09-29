@@ -13,4 +13,5 @@ public static class UserErrorCodes
     public const int DeleteFailed = 300;
     public const int DeleteFailedNotFound = 301;
     public const int SystemAdminLockout = 401;
+    public const int ExternalIdProviderInvalid = 500;
 }
