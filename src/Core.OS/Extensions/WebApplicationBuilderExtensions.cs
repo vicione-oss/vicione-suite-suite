@@ -75,7 +75,7 @@ internal static partial class WebApplicationBuilderExtensions
         {
             Instance = instanceOptions,
             HostManagement = hostMgmtOptions,
-            Logger = preparationContext.Logger,
+            Logger = preparationContext.LoggerFactory.CreateLogger(nameof(DowngradeWebApiHostBuilder)),
             DowngradeInformation = downgradeResult.DowngradeInformation
         };
 

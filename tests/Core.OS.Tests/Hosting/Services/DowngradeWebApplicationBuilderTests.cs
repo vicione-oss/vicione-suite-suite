@@ -134,6 +134,7 @@ public sealed class DowngradeWebApplicationBuilderTests
         tokenSource.CancelAfter(_testTimeout);
 
         var downgradeOptions = CreateDowngradeOptions();
+        _logger.IsEnabled(Arg.Any<LogLevel>()).Returns(true);
 
         await using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, downgradeOptions);
         host.Urls.Add(TestUrl);
@@ -189,6 +190,33 @@ public sealed class DowngradeWebApplicationBuilderTests
         policy.Should().Contain($"style-src {InlineStyleSheet.HashOf(html)};");
         policy.Should().Contain("script-src 'none';");
         response.Headers.GetValues("X-Frame-Options").Should().Equal("DENY");
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Theory]
+    [InlineData("/reset")]
+    [InlineData("/exit")]
+    public async Task Should_redirect_back_to_the_page_on_action_request(string route)
+    {
+        // Arrange
+        // Development adds the developer exception page, whose inline styles and scripts the startup failure policy blocks.
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = Environments.Development });
+
+        await using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, CreateDowngradeOptions());
+        host.Urls.Add("http://127.0.0.1:0");
+        await host.StartAsync(TestContext.Current.CancellationToken);
+
+        using var handler = new HttpClientHandler { AllowAutoRedirect = false };
+        using var client = new HttpClient(handler) { BaseAddress = new Uri(host.Urls.First()) };
+
+        // Act
+        using var response = await client.GetAsync(new Uri(route, UriKind.Relative), TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.Redirect);
+        response.Headers.Location.Should().Be(new Uri("/", UriKind.Relative));
 
         await host.StopAsync(TestContext.Current.CancellationToken);
     }

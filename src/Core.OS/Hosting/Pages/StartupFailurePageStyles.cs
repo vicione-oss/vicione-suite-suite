@@ -22,6 +22,8 @@ internal static class StartupFailurePageStyles
 
         using var reader = new StreamReader(stream);
 
-        return reader.ReadToEnd();
+        // A browser hashes an inline stylesheet after its HTML parser has turned CRLF into LF, so the hashed string
+        // must not depend on the line endings of the checkout the sheet was embedded from.
+        return reader.ReadToEnd().ReplaceLineEndings("\n");
     }
 }

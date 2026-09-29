@@ -15,4 +15,12 @@ public sealed class StartupFailurePageStylesTests
     [Fact]
     public void Should_load_the_downgrade_page_stylesheet()
         => StartupFailurePageStyles.DowngradePage.Should().Contain("body {");
+
+    [Fact]
+    public void Should_load_the_failsafe_page_stylesheet_with_lf_line_endings()
+        => StartupFailurePageStyles.FailsafePage.Should().NotContain("\r");
+
+    [Fact]
+    public void Should_load_the_downgrade_page_stylesheet_with_lf_line_endings()
+        => StartupFailurePageStyles.DowngradePage.Should().NotContain("\r");
 }
