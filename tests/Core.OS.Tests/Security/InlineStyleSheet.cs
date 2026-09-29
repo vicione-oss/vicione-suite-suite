@@ -9,6 +9,7 @@ namespace Core.OS.Tests.Security;
 /// rendered page, so a test can check that the header allows the block the page really sent.
 /// Comparing the header against the stylesheet constant instead would pass however far the rendered
 /// block and the hashed one have drifted apart.
+/// The browser hashes the block after its HTML parser has turned every CRLF and CR into LF, so this does too.
 /// </summary>
 internal static partial class InlineStyleSheet
 {
@@ -17,7 +18,7 @@ internal static partial class InlineStyleSheet
         var match = StyleBlock().Match(html);
         match.Success.Should().BeTrue("the page carries an inline stylesheet");
 
-        var css = Encoding.UTF8.GetBytes(match.Groups["css"].Value);
+        var css = Encoding.UTF8.GetBytes(match.Groups["css"].Value.Replace("\r\n", "\n").Replace('\r', '\n'));
 
         return $"'sha256-{Convert.ToBase64String(SHA256.HashData(css))}'";
     }

@@ -13,14 +13,11 @@ using Microsoft.Extensions.Options;
 
 namespace Core.OS.Hosting.Services;
 
-internal static class DowngradeWebApiHostBuilder
+internal static partial class DowngradeWebApiHostBuilder
 {
-    private static int StopDelay = 1000;
-
     public static WebApplication Build(WebApplicationBuilder builder, IFileSystem fileSystem, DowngradeWebApiParameters options)
     {
         builder.Services.AddSingleton(fileSystem);
-        builder.Services.AddSingleton(options.Logger);
         builder.Services.AddSingleton(Options.Create(options.Instance));
         builder.Services.AddSingleton<EventCallbackRegistry>();
         builder.Services.AddPipeClient(options.HostManagement);
@@ -32,77 +29,66 @@ internal static class DowngradeWebApiHostBuilder
 
         // The page offers two links: reset or exit.
         host.MapGet("/", () => CreateVersionDowngradeDetectedHtml(options.DowngradeInformation.CurrentVersion, options.DowngradeInformation.DataVersion));
-        host.MapGet("/reset", (HttpContext _) => DowngradeReset(host.Services));
-        host.MapGet("/exit", (HttpContext _) => DowngradeExit(host.Services));
-
-        StopDelay = options.StopApplicationDelayMs;
+        host.MapGet("/reset", () => DowngradeReset(host.Services, options));
+        host.MapGet("/exit", () => DowngradeExit(host.Services, options));
 
         return host;
     }
 
     /// <summary>
-    /// Trigger application shutdown delayed http request can be finished before stopping
+    /// Writes the reset file and restarts the suite.
     /// </summary>
-    private static void RestartDelayed(IServiceProvider services)
-        => Task.Run(async () =>
-        {
-            var logger = services.GetRequiredService<Serilog.ILogger>();
-
-            try
-            {
-                // Get services before delay because we usee scoped http context provider!
-                var pipeClient = services.GetRequiredService<IPipeClient>();
-                var instanceOptions = services.GetRequiredService<IOptions<InstanceOptions>>();
-
-                await Task.Delay(StopDelay);
-                logger.Information("Stop delay passed by. Requesting restart by hostmanagement now...");
-
-                // Restarts Core.OS immediately.
-                await pipeClient.RestartSuite(instanceOptions.Value);
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Failed to trigger restart");
-            }
-        }).ConfigureAwait(false);
-
-    /// <summary>
-    /// Writes the reset file and stops the application.
-    /// </summary>
-    private static IResult DowngradeReset(IServiceProvider services)
+    private static IResult DowngradeReset(IServiceProvider services, DowngradeWebApiParameters options)
     {
-        var logger = services.GetRequiredService<Serilog.ILogger>();
-        logger.Warning("Suite reset requested by user because of detected version downgrade");
+        var fileSystem = services.GetRequiredService<IFileSystem>();
+        var pipeClient = services.GetRequiredService<IPipeClient>();
+
+        LogResetRequested(options.Logger);
 
         try
         {
-            var fileSystem = services.GetRequiredService<IFileSystem>();
-            var options = services.GetRequiredService<IOptions<InstanceOptions>>();
-
-            fileSystem.WriteResetFile(options.Value);
+            fileSystem.WriteResetFile(options.Instance);
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to create reset file for downgrade reset operation");
+            LogResetFileFailed(options.Logger, ex);
         }
 
-        RestartDelayed(services);
+        RestartDelayed(pipeClient, options);
+
+        return Results.Redirect("/");
+    }
+
+    private static IResult DowngradeExit(IServiceProvider services, DowngradeWebApiParameters options)
+    {
+        var pipeClient = services.GetRequiredService<IPipeClient>();
+
+        LogExitRequested(options.Logger);
+
+        RestartDelayed(pipeClient, options);
 
         return Results.Redirect("/");
     }
 
     /// <summary>
-    /// Just stops the application
+    /// Triggers the restart delayed, so the redirect reaches the browser before the host goes down.
     /// </summary>
-    private static IResult DowngradeExit(IServiceProvider services)
-    {
-        var logger = services.GetRequiredService<Serilog.ILogger>();
-        logger.Information("Suite shutdown requested by user because of detected version downgrade");
+    private static void RestartDelayed(IPipeClient pipeClient, DowngradeWebApiParameters options)
+        => Task.Run(async () =>
+        {
+            try
+            {
+                await Task.Delay(options.StopApplicationDelayMs);
+                LogRestartRequested(options.Logger);
 
-        RestartDelayed(services);
-
-        return Results.Redirect("/");
-    }
+                // Restarts Core.OS immediately.
+                await pipeClient.RestartSuite(options.Instance);
+            }
+            catch (Exception ex)
+            {
+                LogRestartFailed(options.Logger, ex);
+            }
+        }).ConfigureAwait(false);
 
     private static HtmlResult CreateVersionDowngradeDetectedHtml(string currentVersion, string persistedVersion)
     {
@@ -133,4 +119,19 @@ internal static class DowngradeWebApiHostBuilder
             return httpContext.Response.WriteAsync(html);
         }
     }
+
+    [LoggerMessage(LogLevel.Warning, "Suite reset requested by user because of detected version downgrade")]
+    private static partial void LogResetRequested(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "Failed to create reset file for downgrade reset operation")]
+    private static partial void LogResetFileFailed(ILogger logger, Exception ex);
+
+    [LoggerMessage(LogLevel.Information, "Suite shutdown requested by user because of detected version downgrade")]
+    private static partial void LogExitRequested(ILogger logger);
+
+    [LoggerMessage(LogLevel.Information, "Stop delay passed by. Requesting restart by hostmanagement now...")]
+    private static partial void LogRestartRequested(ILogger logger);
+
+    [LoggerMessage(LogLevel.Error, "Failed to trigger restart")]
+    private static partial void LogRestartFailed(ILogger logger, Exception ex);
 }
