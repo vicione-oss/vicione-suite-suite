@@ -8,5 +8,5 @@ namespace Blazor.Shared.Module.ControlPanels.Services;
 internal sealed class ModuleManagementControlPanelDescriptor : IControlPanelDescriptor<ModuleManagementControlPanel>
 {
     public string Title => TechnicalTerms.ModulePlural;
-    public Uri IconUrl => SvgIcon.Modules.GetPath();
+    public Uri? IconUrl => SvgIcon.Modules.GetPath();
 }

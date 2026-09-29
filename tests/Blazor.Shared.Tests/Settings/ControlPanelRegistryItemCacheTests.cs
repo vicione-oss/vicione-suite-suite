@@ -242,7 +242,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     private sealed class AdminControlPanelDescriptor : IControlPanelDescriptor<AdminControlPanel>
     {
         public string Title => "Foo";
-        public Uri IconUrl => new("icon.svg", UriKind.Relative);
+        public Uri? IconUrl => new("icon.svg", UriKind.Relative);
     }
 
     [ControlPanelCategory<TestControlPanelCategoryDescriptor>]
@@ -254,7 +254,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     private sealed class UserControlPanelDescriptor : IControlPanelDescriptor<UserControlPanel>
     {
         public string Title => "Bar";
-        public Uri IconUrl => new("icon.svg", UriKind.Relative);
+        public Uri? IconUrl => new("icon.svg", UriKind.Relative);
     }
 
     [ControlPanelCategory<TestControlPanelCategoryDescriptor>]
@@ -265,7 +265,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     private sealed class AllowAnonymousControlPanelDescriptor : IControlPanelDescriptor<AllowAnonymousControlPanel>
     {
         public string Title => "Anonymous";
-        public Uri IconUrl => new("icon.svg", UriKind.Relative);
+        public Uri? IconUrl => new("icon.svg", UriKind.Relative);
     }
 
     [Fact]

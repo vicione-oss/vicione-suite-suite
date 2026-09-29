@@ -42,7 +42,6 @@ public sealed class InstanceInformationProviderTests : IClassFixture<TestApplica
                 services.AddScoped(_ => Substitute.For<ISuiteMediator>());
                 services.AddModuleManagerWithTestModule();
                 services.AddApplicationDbContextsInMemory();
-                services.AddApplicationDbContextsInMemory();
                 services.AddScoped<InstanceInformationProvider>();
             });
         });
