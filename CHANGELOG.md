@@ -14,6 +14,7 @@
 - **Configuration is now validated all the way down, and an out-of-range value stops the instance at startup.** Settings nested below a configuration section — `MessageBus:KillSwitch`, `MessageBus:ErrorQueue`, `Logging:Resources:Memory`, `Logging:SpamGuard`, `Instance:HealthChecks`, `MqttClient:*` and the entries under `ExternalIdProviders:Providers` — were previously never checked: only the top-level properties of each section were, so a value outside its documented range bound silently and left the feature misconfigured (a `MessageBus:KillSwitch:TripThresholdPercent` of `500`, for instance, left the kill switch unable to trip at all). **This is a behaviour change for anyone running an instance whose configuration contains such a value: it will now refuse to start** and report the offending setting, instead of starting in a degraded state. Correct the value, or remove it to fall back to the default. `MessageBus:Connection` is deliberately exempt — it binds a MassTransit type the suite does not own, and a bad broker connection is still reported by the transport at bus start. See `docs/ADRs/ADR-004-error-handling-strategy.md`
 - MQTT viewer, the broker connection button shows a sweeping arc while it connects
 - Settings actions such as connection tests, DHCP lease renewal, backup export and reset show their progress on their own button
+- Rename the company to `ViciOne open automation gmbh` in the license, the package metadata and the account page footer
 
 ### Added
 

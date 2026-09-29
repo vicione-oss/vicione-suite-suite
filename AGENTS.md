@@ -9,7 +9,7 @@ ViciOne Suite is a modular, distributed automation platform built on .NET 10 and
 - **Version:** See `VERSION` file
 - **Solution:** `vicione-suite.slnx`
 - **Main entry point:** `src/Core.OS/Program.cs`
-- **Company:** ifm software
+- **Company:** ViciOne open automation gmbh
 - **License:** See LICENSE.txt
 
 ## Architecture at a Glance
