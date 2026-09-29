@@ -11,7 +11,7 @@ internal sealed class NetworkInterfaceControlPanelDescriptor(NetworkInterfaceCon
 {
     public string Category => CommonVocabulary.Network;
     public string Title => GetTitle();
-    public Uri IconUrl => SvgIcon.HostConfig.GetPath();
+    public Uri? IconUrl => SvgIcon.HostConfig.GetPath();
     public int? Position => controlPanelState.NetworkInterfaceIndex;
 
     private string GetTitle()

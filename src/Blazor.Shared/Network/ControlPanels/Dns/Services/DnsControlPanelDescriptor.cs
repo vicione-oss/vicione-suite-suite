@@ -10,5 +10,5 @@ internal sealed class DnsControlPanelDescriptor : IControlPanelDescriptor<DnsCon
 {
     public string Category => CommonVocabulary.Network;
     public string Title => TechnicalAcronyms.Dns;
-    public Uri IconUrl => SvgIcon.HostConfig.GetPath();
+    public Uri? IconUrl => SvgIcon.HostConfig.GetPath();
 }

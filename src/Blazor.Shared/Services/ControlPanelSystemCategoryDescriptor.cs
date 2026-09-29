@@ -9,6 +9,6 @@ internal sealed class ControlPanelSystemCategoryDescriptor : IControlPanelCatego
 {
     public string Title => CommonVocabulary.System;
     public string? IconCssClass => null;
-    public Uri IconUrl => SvgIcon.CloudConnection.GetPath();
+    public Uri? IconUrl => SvgIcon.CloudConnection.GetPath();
     public int? Position => 1;
 }

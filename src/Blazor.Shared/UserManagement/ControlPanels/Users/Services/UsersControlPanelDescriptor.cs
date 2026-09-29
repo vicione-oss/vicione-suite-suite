@@ -9,5 +9,5 @@ namespace Blazor.Shared.UserManagement.ControlPanels.Users.Services;
 internal sealed class UsersControlPanelDescriptor : IControlPanelDescriptor<UsersControlPanel>
 {
     public string Title => CommonVocabulary.UserPlural;
-    public Uri IconUrl => SvgIcon.User.GetPath();
+    public Uri? IconUrl => SvgIcon.User.GetPath();
 }

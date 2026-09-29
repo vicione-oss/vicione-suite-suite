@@ -33,7 +33,7 @@ public sealed class SettingsContainerTests
         public sealed class FirstControlPanelDescriptor : IControlPanelDescriptor<FirstControlPanel>
         {
             public string Title => "Dummy";
-            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public Uri? IconUrl => new("icon.svg", UriKind.Relative);
         }
 
         internal sealed class FirstControlPanelCategoryDescriptor : IControlPanelCategoryDescriptor
@@ -60,7 +60,7 @@ public sealed class SettingsContainerTests
         public sealed class CloudControlPanelDescriptor : IControlPanelDescriptor<CloudControlPanel>
         {
             public string Title => "Cloud";
-            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public Uri? IconUrl => new("icon.svg", UriKind.Relative);
         }
     }
 

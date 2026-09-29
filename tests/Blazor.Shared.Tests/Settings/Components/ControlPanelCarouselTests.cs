@@ -158,7 +158,7 @@ public sealed class ControlPanelCarouselTests
         public sealed class FirstLevelControlPanelDescriptor : IControlPanelDescriptor<FirstLevelControlPanel>
         {
             public string Title => "First level";
-            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public Uri? IconUrl => new("icon.svg", UriKind.Relative);
         }
 
         public sealed class SecondLevelControlPanel : TestControlPanel
@@ -181,7 +181,7 @@ public sealed class ControlPanelCarouselTests
         public sealed class SecondLevelControlPanelDescriptor : IControlPanelDescriptor<SecondLevelControlPanel>
         {
             public string Title => "Second level";
-            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public Uri? IconUrl => new("icon.svg", UriKind.Relative);
             public bool ShowInNavigation => false;
         }
     }

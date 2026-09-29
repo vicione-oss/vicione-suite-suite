@@ -7,7 +7,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 
 internal sealed class ArtifactRepositoryControlPanelDescriptor : IControlPanelDescriptor<ArtifactRepositoryControlPanel>
 {
-    public Uri IconUrl => SvgIcon.ClusterOverview.GetPath();
+    public Uri? IconUrl => SvgIcon.ClusterOverview.GetPath();
 
     public string Title => CommonVocabulary.Source;
 
