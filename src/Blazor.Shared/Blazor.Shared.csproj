@@ -76,6 +76,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="UserManagement\ControlPanels\OpenIdProvider\Localization\OpenIdProviderControlPanel.Designer.cs">
+      <DependentUpon>OpenIdProviderControlPanel.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Instance\Localization\Common.Designer.cs">
       <DependentUpon>Common.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -522,6 +527,10 @@
     </EmbeddedResource>
     <EmbeddedResource Update="EnvironmentOverrides\ControlPanels\Localization\EnvironmentOverridesControlPanel.resx">
       <LastGenOutput>EnvironmentOverridesControlPanel.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UserManagement\ControlPanels\OpenIdProvider\Localization\OpenIdProviderControlPanel.resx">
+      <LastGenOutput>OpenIdProviderControlPanel.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Instance\Localization\Common.resx">

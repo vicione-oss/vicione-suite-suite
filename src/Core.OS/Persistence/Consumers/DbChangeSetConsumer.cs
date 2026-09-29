@@ -6,6 +6,7 @@ using Core.OS.Instance.Commands;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Mappers;
 using Core.OS.Instance.Services;
+using Core.OS.Persistence.Extensions;
 using MassTransit;
 using MassTransit.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -61,7 +62,7 @@ public sealed partial class DbChangeSetConsumer(
         if (dbContext is null)
             return;
 
-        var appliedCount = 0;
+        var appliedEntityTypes = new HashSet<string>(StringComparer.Ordinal);
         Exception? lastEntityException = null;
 
         foreach (var change in changeSet.Changes)
@@ -69,7 +70,7 @@ public sealed partial class DbChangeSetConsumer(
             try
             {
                 ApplyEntity(dbContext, change);
-                appliedCount++;
+                appliedEntityTypes.Add(change.EntityTypeFullName);
             }
             catch (Exception ex)
             {
@@ -78,12 +79,12 @@ public sealed partial class DbChangeSetConsumer(
             }
         }
 
-        if (appliedCount == 0 && lastEntityException is not null)
+        if (appliedEntityTypes.Count == 0 && lastEntityException is not null)
             throw new InvalidOperationException(
                 $"All {changeSet.Changes.Count} entities in batch for '{changeSet.ContextType}' failed to apply. See previous log entries for details.",
                 lastEntityException);
 
-        if (appliedCount == 0)
+        if (appliedEntityTypes.Count == 0)
             return;
 
         try
@@ -95,6 +96,9 @@ public sealed partial class DbChangeSetConsumer(
             LogApplyChangesFailed(logger, e, changeSet.Changes.Count, changeSet.ContextType);
             throw;
         }
+
+        services.NotifyReplicationObservers(logger,
+            observer => observer.ChangeSetApplied(changeSet.ContextType, appliedEntityTypes));
     }
 
     private static void ApplyEntity(Microsoft.EntityFrameworkCore.DbContext dbContext, ChangedEntity change)

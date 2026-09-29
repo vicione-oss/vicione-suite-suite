@@ -1,4 +1,5 @@
-﻿using Blazor.Shared.UserManagement.ControlPanels.Role.Extensions;
+﻿using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Extensions;
+using Blazor.Shared.UserManagement.ControlPanels.Role.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.Roles.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.User.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.Users.Extensions;
@@ -23,6 +24,7 @@ public static class IServiceCollectionExtensions
             services.AddUserControlPanel();
             services.AddRolesControlPanel();
             services.AddRoleControlPanel();
+            services.AddOpenIdProviderControlPanel();
 
             return services;
         }

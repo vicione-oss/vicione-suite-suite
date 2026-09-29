@@ -141,6 +141,9 @@
   <data name="ExternalLoginFailed" xml:space="preserve">
     <value>Externer Login fehlgeschlagen</value>
   </data>
+  <data name="ExternalLoginCancelled" xml:space="preserve">
+    <value>Anmeldung wurde abgebrochen</value>
+  </data>
   <data name="NoLocalUser" xml:space="preserve">
     <value>Kein lokaler Nutzer gefunden</value>
   </data>

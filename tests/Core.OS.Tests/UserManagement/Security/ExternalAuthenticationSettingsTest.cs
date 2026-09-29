@@ -10,6 +10,7 @@ namespace Core.OS.Tests.UserManagement.Security;
 
 public sealed class ExternalAuthenticationSettingsTest : IAsyncDisposable
 {
+    private readonly RecordingLogger logger = new();
     private ApplicationDbContextSqlite? applicationDbContext;
 
     [Fact]
@@ -145,6 +146,114 @@ public sealed class ExternalAuthenticationSettingsTest : IAsyncDisposable
         (await sut.IsExternalAuthenticationProviderConfigured()).Should().BeTrue();
     }
 
+    [Fact]
+    public async Task Should_prefer_the_database_provider_over_the_one_in_config()
+    {
+        // Arrange
+        // Config-first, the sentinel would hide the login button while sign-in uses the stored provider.
+        var options = new ExternalIdProviderOptions
+        {
+            Providers =
+            [
+                new ExternalIdProvider
+                {
+                    Name = "ConfigProvider",
+                    Authority = "https://config.example.com",
+                    ClientId = Constants.UnconfiguredClient,
+                    ClientSecret = null
+                }
+            ]
+        };
+        var sut = CreateSut(options,
+            context =>
+            {
+                context.ExternalIdProviders.Add(new Shared.UserManagement.Contracts.ExternalIdProvider
+                {
+                    Authority = "https://db.example.com",
+                    ClientId = "DbClientId",
+                    ClientSecret = "DbSecret",
+                    Name = "DbProvider"
+                });
+                context.SaveChanges();
+            });
+
+        // Act
+        var result = await sut.IsExternalAuthenticationProviderConfigured();
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_not_warn_when_the_database_provider_takes_precedence_over_the_one_in_config()
+    {
+        // Arrange
+        var options = new ExternalIdProviderOptions
+        {
+            Providers =
+            [
+                new ExternalIdProvider
+                {
+                    Name = "ConfigProvider",
+                    Authority = "https://config.example.com",
+                    ClientId = "ConfigClientId",
+                    ClientSecret = null
+                }
+            ]
+        };
+        var sut = CreateSut(options,
+            context =>
+            {
+                context.ExternalIdProviders.Add(new Shared.UserManagement.Contracts.ExternalIdProvider
+                {
+                    Authority = "https://db.example.com",
+                    ClientId = "DbClientId",
+                    ClientSecret = "DbSecret",
+                    Name = "DbProvider"
+                });
+                context.SaveChanges();
+            });
+
+        // Act
+        await sut.IsExternalAuthenticationProviderConfigured();
+
+        // Assert
+        logger.Warnings.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_warn_when_the_config_holds_more_than_one_provider()
+    {
+        // Arrange
+        var options = new ExternalIdProviderOptions
+        {
+            Providers =
+            [
+                new ExternalIdProvider
+                {
+                    Name = "Provider1",
+                    Authority = "https://first.example.com",
+                    ClientId = "ClientId1",
+                    ClientSecret = null
+                },
+                new ExternalIdProvider
+                {
+                    Name = "Provider2",
+                    Authority = "https://second.example.com",
+                    ClientId = "ClientId2",
+                    ClientSecret = null
+                }
+            ]
+        };
+        var sut = CreateSut(options);
+
+        // Act
+        await sut.IsExternalAuthenticationProviderConfigured();
+
+        // Assert
+        logger.Warnings.Should().ContainSingle();
+    }
+
     private ExternalAuthenticationSettings CreateSut(ExternalIdProviderOptions options,
         Action<ApplicationDbContext>? configureDb = null)
     {
@@ -154,12 +263,28 @@ public sealed class ExternalAuthenticationSettingsTest : IAsyncDisposable
         var optionsWrapper = new OptionsWrapper<ExternalIdProviderOptions>(options);
         return new ExternalAuthenticationSettings(optionsWrapper,
             applicationDbContext,
-            Substitute.For<ILogger<ExternalAuthenticationSettings>>());
+            logger);
     }
 
     public async ValueTask DisposeAsync()
     {
         if (applicationDbContext != null)
             await applicationDbContext.DisposeAsync();
+    }
+
+    private sealed class RecordingLogger : ILogger<ExternalAuthenticationSettings>
+    {
+        public List<string> Warnings { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+            Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel == LogLevel.Warning)
+                Warnings.Add(formatter(state, exception));
+        }
     }
 }

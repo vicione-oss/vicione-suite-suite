@@ -272,6 +272,7 @@ public sealed partial class LoginContent
             ExternalLoginError.UnknownExternalUser => Login.UnknownExternalUser,
             ExternalLoginError.NewUserCreationFailed => Login.ExternalUserCreationFailed,
             ExternalLoginError.ExternalAccountAlreadyAssociated => Login.ExternalLoginAlreadyInUse,
+            ExternalLoginError.SignInCancelled => Login.ExternalLoginCancelled,
             ExternalLoginError.None => string.Empty,
             _ => LogMissingErrorMessageMapping(externalError)
         };

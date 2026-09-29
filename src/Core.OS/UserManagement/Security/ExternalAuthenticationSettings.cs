@@ -22,24 +22,18 @@ public class ExternalAuthenticationSettings(
     }
 
     private ExternalIdProvider? GetExternalIdProvider()
-    {
-        var providersInDatabase =
-            GetProvidersInDatabase();
-        var externalIdProviders =
-            options.Value.Providers.Concat(providersInDatabase)
-                .ToArray();
-        switch (externalIdProviders.Length)
-        {
-            case 0:
-                return null;
-            case > 1:
-                logger.LogWarning(
-                    "Multiple external ids are configured {@Providers}. Only one is currently supported. Picking the first one.",
-                    externalIdProviders.Select(x => x.Name));
-                break;
-        }
+        => GetProvidersInDatabase().FirstOrDefault() ?? GetProviderInConfiguration();
 
-        return externalIdProviders.FirstOrDefault();
+    private ExternalIdProvider? GetProviderInConfiguration()
+    {
+        var providers = options.Value.Providers;
+
+        if (providers.Count > 1)
+            logger.LogWarning(
+                "Multiple external ids are configured {@Providers}. Only one is currently supported. Picking the first one.",
+                providers.Select(x => x.Name));
+
+        return providers.FirstOrDefault();
     }
 
     private IQueryable<ExternalIdProvider> GetProvidersInDatabase()

@@ -25,6 +25,9 @@ public class CspViolationEndpointTests
 {
     private const string BlockedUri = "https://cdn.example.invalid/module.js";
     private const string DocumentUri = "https://suite.example.invalid/";
+    private const string SourceFile = "https://suite.example.invalid/account/login";
+    private const int LineNumber = 412;
+    private const int ColumnNumber = 9;
     private const string ErrorRoute = "/Error";
 
     private static readonly string SingleReport =
@@ -34,7 +37,10 @@ public class CspViolationEndpointTests
                 "document-uri": "{{DocumentUri}}",
                 "blocked-uri": "{{BlockedUri}}",
                 "violated-directive": "script-src-elem 'self'",
-                "effective-directive": "script-src-elem"
+                "effective-directive": "script-src-elem",
+                "source-file": "{{SourceFile}}",
+                "line-number": {{LineNumber}},
+                "column-number": {{ColumnNumber}}
             }
         }
         """;
@@ -47,7 +53,10 @@ public class CspViolationEndpointTests
                 "body": {
                     "documentURL": "{{DocumentUri}}",
                     "blockedURL": "{{BlockedUri}}",
-                    "effectiveDirective": "script-src-elem"
+                    "effectiveDirective": "script-src-elem",
+                    "sourceFile": "{{SourceFile}}",
+                    "lineNumber": {{LineNumber}},
+                    "columnNumber": {{ColumnNumber}}
                 }
             },
             {
@@ -56,6 +65,24 @@ public class CspViolationEndpointTests
             }
         ]
         """;
+
+    private static readonly string ReportWithoutSource =
+        $$"""
+        {
+            "csp-report": {
+                "document-uri": "{{DocumentUri}}",
+                "blocked-uri": "{{BlockedUri}}",
+                "effective-directive": "script-src-elem"
+            }
+        }
+        """;
+
+    private static string LocatedViolation =>
+        $"Content Security Policy refused {BlockedUri} on {DocumentUri} " +
+        $"at {SourceFile}:{LineNumber}:{ColumnNumber}, violating script-src-elem";
+
+    private static string UnlocatedViolation =>
+        $"Content Security Policy refused {BlockedUri} on {DocumentUri}, violating script-src-elem";
 
     /// <summary>
     /// The shape <c>report-uri</c> posts, and the one the browser floor of ADR-006 acts on.
@@ -70,8 +97,7 @@ public class CspViolationEndpointTests
         await CspViolationEndpoint.Receive(RequestOf(SingleReport), logger);
 
         // Assert
-        logger.Warnings.Should().ContainSingle()
-            .Which.Should().Be($"Content Security Policy refused {BlockedUri} on {DocumentUri}, violating script-src-elem");
+        logger.Warnings.Should().ContainSingle().Which.Should().Be(LocatedViolation);
     }
 
     /// <summary>
@@ -89,8 +115,20 @@ public class CspViolationEndpointTests
         await CspViolationEndpoint.Receive(RequestOf(ReportBatch), logger);
 
         // Assert
-        logger.Warnings.Should().ContainSingle()
-            .Which.Should().Be($"Content Security Policy refused {BlockedUri} on {DocumentUri}, violating script-src-elem");
+        logger.Warnings.Should().ContainSingle().Which.Should().Be(LocatedViolation);
+    }
+
+    [Fact]
+    public async Task Should_log_a_report_that_carries_no_source_position()
+    {
+        // Arrange
+        using var logger = new RecordingLoggerFactory();
+
+        // Act
+        await CspViolationEndpoint.Receive(RequestOf(ReportWithoutSource), logger);
+
+        // Assert
+        logger.Warnings.Should().ContainSingle().Which.Should().Be(UnlocatedViolation);
     }
 
     /// <summary>

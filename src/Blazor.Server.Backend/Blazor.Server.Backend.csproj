@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App.Internal.Assets" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" />
     <PackageReference Include="AspNetCore.SassCompiler" PrivateAssets="all" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" />

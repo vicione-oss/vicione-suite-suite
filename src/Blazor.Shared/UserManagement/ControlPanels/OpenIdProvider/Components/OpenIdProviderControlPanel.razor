@@ -1,0 +1,57 @@
+@using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Services
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using ViciOne.Ui.MonochromeIcons.Core.Extensions
+
+@inherits ControlPanelBase<OpenIdProviderControlPanelState>
+
+<DescriptionBanner Title="@Localization.OpenIdProviderControlPanel.PanelTitle"
+                   IconCssClass="@MonochromeIconName.WarningLight.GetCssClasses().ToSpaceSeparated()">
+    @Localization.OpenIdProviderControlPanel.RiskBannerContent
+</DescriptionBanner>
+
+@if (State.LoadError is not null)
+{
+    <SettingsLayout>
+        <SettingsGroup Title="@Localization.OpenIdProviderControlPanel.LoadFailedTitle">
+            <SettingsInformation>
+                @State.LoadError
+            </SettingsInformation>
+        </SettingsGroup>
+    </SettingsLayout>
+}
+else
+{
+    <SettingsLayout>
+        <SettingsGroup Title="@Localization.OpenIdProviderControlPanel.PanelTitle">
+            <SettingsField Label="@Localization.OpenIdProviderControlPanel.Authority">
+                <SettingsFieldTextBox Placeholder="@Localization.OpenIdProviderControlPanel.Authority"
+                                      Subline="@Localization.OpenIdProviderControlPanel.AuthorityHint"
+                                      @bind-Value="@State.Authority"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@Localization.OpenIdProviderControlPanel.ClientId">
+                <SettingsFieldTextBox Placeholder="@Localization.OpenIdProviderControlPanel.ClientId"
+                                      @bind-Value="@State.ClientId"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            <SettingsField Label="@Localization.OpenIdProviderControlPanel.ClientSecret">
+                <SettingsFieldTextBox Placeholder="@Localization.OpenIdProviderControlPanel.ClientSecret"
+                                      Password="true"
+                                      Subline="@ClientSecretSubline"
+                                      @bind-Value="@State.ClientSecret"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+
+            @if (RemoveStoredClientSecretAvailable)
+            {
+                <SettingsField>
+                    <SettingsFieldButton Text="@Localization.OpenIdProviderControlPanel.RemoveStoredClientSecret"
+                                         Title="@Localization.OpenIdProviderControlPanel.RemoveStoredClientSecret"
+                                         OnClick="@RemoveStoredClientSecret" />
+                </SettingsField>
+            }
+        </SettingsGroup>
+    </SettingsLayout>
+}

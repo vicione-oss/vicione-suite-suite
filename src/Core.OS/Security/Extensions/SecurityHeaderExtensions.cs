@@ -39,8 +39,7 @@ internal static class SecurityHeaderExtensions
         => app.UseSecurityHeaders(_ => policy, reportingEndpoints);
 
     /// <summary>
-    /// The overload for a policy that varies per response, currently because the configured OpenID
-    /// provider joins <c>form-action</c>. <paramref name="policy"/> is evaluated once per request.
+    /// Like the <c>string</c> overload, but resolves <paramref name="policy"/> once per request.
     /// </summary>
     public static IApplicationBuilder UseSecurityHeaders(
         this IApplicationBuilder app, Func<HttpContext, string> policy, string? reportingEndpoints = null)
