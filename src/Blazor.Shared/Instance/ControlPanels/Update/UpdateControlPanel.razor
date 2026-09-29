@@ -1,6 +1,7 @@
 @using System.Globalization
 @using Blazor.Shared.Instance.ControlPanels.Update.Services
 @using Blazor.Shared.Settings.Components
+@using ViciOne.Ui.Blazor.Components.Button.Enums
 @using Sdk.Client.Components.Settings.Expanders
 @using ViciOne.Ui.Localization.Resources
 
@@ -104,11 +105,12 @@
                 @Localization.UpdateControlPanel.BackupExportText
             </SettingsInformation>
 
-            <SettingsField Label="@Localization.UpdateControlPanel.BackupExportConfigurationFile" IsLoading="@_isExportInProgress" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+            <SettingsField Label="@Localization.UpdateControlPanel.BackupExportConfigurationFile">
                 <SettingsFieldButton Text="@CommonVocabulary.ExportVerb"
                                      IconCssClass="@_exportIconCssClasses"
                                      OnClick="OnExportButtonClick"
-                                     Enabled="@CanExecuteExportButton()" />
+                                     Enabled="@(CanExecuteExportButton() || _isExportInProgress)"
+                                     Busy="@_isExportInProgress" />
             </SettingsField>
 
             <SettingsFieldSeparator />
@@ -178,7 +180,9 @@
 
                             <SettingsFieldButtonRed Text="@Localization.UpdateControlPanel.EraseAllData"
                                                     IconCssClass="@_refreshButtonIconCssClass"
-                                                    Enabled="@(_confirmation && _resetCorrelationId == null)"
+                                                    Enabled="@((_confirmation && _resetCorrelationId == null) || _isResetInProgress)"
+                                                    Busy="@_isResetInProgress"
+                                                    BusyIndication="ButtonBusyIndication.SweepAndSpinningIcon"
                                                     OnClick="OnResetConfirmedButtonClick" />
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 @using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions
+@using ViciOne.Ui.Blazor.Components.Button.Enums
 @using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models
 @using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services
 @using Blazor.Shared.Settings.NetworkInterface.Components
@@ -30,8 +31,8 @@
             </Expander>
 
             <ChildContent>
-                <SettingsField Label="@Localization.GeneralControlPanelPage.TestConnection" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
-                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.TestVerb" Enabled="@(!_testConnectionRunning)" OnClick="TestConnectionButtonClick" />
+                <SettingsField Label="@Localization.GeneralControlPanelPage.TestConnection">
+                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.TestVerb" Busy="@_testConnectionRunning" BusyIndication="ButtonBusyIndication.SweepAndSpinningIcon" OnClick="TestConnectionButtonClick" />
                 </SettingsField>
 
                 @if (_testConnectionExecutedAtLeastOnce && _testConnectionResult is not null)
@@ -196,8 +197,8 @@
                     @SystemConfigurationService.LastDhcpLeaseFetchUtc.AdjustToTimeZone(TimeProvider.LocalTimeZone).LocalizeFullDateLongTime()
                 </SettingsField>
 
-                <SettingsField Label="@string.Format(UserActions.RenewSomething, TechnicalTerms.DhcpLease)" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
-                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.Renew" OnClick="@RenewDhcpLease" Enabled="@CanRenewDhcpLease()" />
+                <SettingsField Label="@string.Format(UserActions.RenewSomething, TechnicalTerms.DhcpLease)">
+                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.Renew" OnClick="@RenewDhcpLease" Enabled="@(CanRenewDhcpLease() || _renewingDhcpLease)" Busy="@_renewingDhcpLease" BusyIndication="ButtonBusyIndication.SweepAndSpinningIcon" />
                 </SettingsField>
             </SettingsGroup>
         }

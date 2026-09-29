@@ -31,8 +31,8 @@
                     <Button Title="@_toggleConnectionButtonTitle"
                             OnClick="@ToggleConnection"
                             IconCssClass="@_toggleConnectionButtonIconCssClass"
-                            CssClass="_toggleConnectionButtonCssClass"
-                            Enabled="@(!_isConnecting)"
+                            CssClass="@_toggleConnectionButtonCssClass"
+                            Busy="@_isConnecting"
                             Size="@ToggleConnectionButtonSize">
                     </Button>
                     

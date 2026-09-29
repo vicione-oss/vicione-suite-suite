@@ -12,6 +12,8 @@
 - A receive endpoint now stops consuming for 60 seconds when at least half of the messages it handled in the last 5 minutes failed, instead of working through the backlog at full CPU while a dependency is down. It restarts itself. On a master or slave the waiting messages stay in their durable queue; on a standalone instance, which uses the in-memory transport, they are held in memory and are lost if the instance restarts within that window — which is still better than the alternative there, where every message that exhausts its retries is discarded outright. Configurable under `MessageBus:KillSwitch`
 - RabbitMQ `_error` and `_skipped` queues are now bounded (7-day message TTL, 7-day queue expiry, 250 messages, 2 MiB, oldest dropped first) instead of inheriting the input queue settings, which left them unbounded on a master. **Upgrading a broker that already has such queues requires deleting them first** — queue arguments are part of a RabbitMQ queue's identity, so redeclaring one with different arguments fails. They are only created when an endpoint actually dead-letters a message, so a broker that has never faulted is unaffected. Alternatively set `MessageBus__CleanVirtualHost=true` once, or set the `MessageBus__ErrorQueue__*` values to `0` to keep the previous behaviour
 - **Configuration is now validated all the way down, and an out-of-range value stops the instance at startup.** Settings nested below a configuration section — `MessageBus:KillSwitch`, `MessageBus:ErrorQueue`, `Logging:Resources:Memory`, `Logging:SpamGuard`, `Instance:HealthChecks`, `MqttClient:*` and the entries under `ExternalIdProviders:Providers` — were previously never checked: only the top-level properties of each section were, so a value outside its documented range bound silently and left the feature misconfigured (a `MessageBus:KillSwitch:TripThresholdPercent` of `500`, for instance, left the kill switch unable to trip at all). **This is a behaviour change for anyone running an instance whose configuration contains such a value: it will now refuse to start** and report the offending setting, instead of starting in a degraded state. Correct the value, or remove it to fall back to the default. `MessageBus:Connection` is deliberately exempt — it binds a MassTransit type the suite does not own, and a bad broker connection is still reported by the transport at bus start. See `docs/ADRs/ADR-004-error-handling-strategy.md`
+- MQTT viewer, the broker connection button shows a sweeping arc while it connects
+- Settings actions such as connection tests, DHCP lease renewal, backup export and reset show their progress on their own button
 
 ### Added
 
@@ -29,6 +31,8 @@
 - A failed module package enqueue is no longer swallowed: the command is retried and finally dead-lettered, and the correlated failure is reported by a dedicated fault consumer instead of from the consumer's catch block
 - Retry intervals configured under `MessageBus` are no longer appended to the built-in defaults; a configured ladder now replaces the default one. Leaving a ladder unset keeps the default, while setting it to an empty value (`MessageBus__RetryIntervals=`, or `[]` in JSON) turns retry off for those endpoints
 - `UseDebugRoot` serves fingerprinted static web assets of project references, so modules can drop `StaticWebAssetFingerprintingEnabled=false`
+- MQTT viewer, the broker connection button shows its connected styling again
+- Network interface, the DHCP lease fields stay marked as loading until a lease renewal has finished
 
 ### Updated
 
