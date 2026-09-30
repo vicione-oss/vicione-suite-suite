@@ -19,7 +19,7 @@ spec:
 default:
   image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
   tags:
-    - saas-linux-large-amd64
+    - saas-linux-small-amd64
   # Cache configuration provided by cache-config component
   # Jobs should extend .mise-cache or .mise-cache-seed
 
@@ -142,8 +142,6 @@ include:
 
   ### Renovate configuration validation
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/renovate/configuration-validation@v1.1.0
-    inputs:
-      rules: *rules_common
 
   # xUnit test job (both x64 and arm64 via parallel matrix)
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@v2.7.1
@@ -182,7 +180,7 @@ include:
       remote_name: "${ARTIFACT_PREFIX}-${CI_PIPELINE_ID}-linux-arm64.tar.gz"
       package_name: $PACKAGE_NAME
       rules: *rules_packages
-      tags: ["saas-linux-large-arm64"]
+      tags: ["saas-linux-small-arm64"]
 
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.2.1
     inputs:
@@ -467,6 +465,8 @@ Build artifacts x64:
     paths:
       - artifacts.tar.gz
     expire_in: 30 days
+  tags:
+    - saas-linux-large-amd64
   when: manual
   rules: *rules_packages
 
