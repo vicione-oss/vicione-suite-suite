@@ -12,3 +12,5 @@ dotnet_diagnostic.VO2007.severity = error # Base implementation is not called in
 dotnet_diagnostic.VO2008.severity = none # Property assignments in the object initializer are not sorted alphabetically by property name
 dotnet_diagnostic.VO2009.severity = none # Property assignments in the constructor are not sorted alphabetically by property name
 
+# TEMPORARY: obsolete members after Blazor components update. Remove once migrated.
+dotnet_diagnostic.CS0618.severity = none # Member is obsolete
