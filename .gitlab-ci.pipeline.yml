@@ -1,0 +1,542 @@
+default:
+  image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
+  tags:
+    - saas-linux-small-amd64
+  # Cache configuration provided by cache-config component
+  # Jobs should extend .mise-cache or .mise-cache-seed
+
+stages:
+  - build
+  - test
+  - artifacts
+  - packaging
+  - e2e
+  - notify
+  - devrelease
+  - deploy
+  - release
+  - release-public
+  - cleanup
+
+.update_nuget_source_ro: &update_nuget_source_ro
+  - dotnet nuget update source JFrogNuGetProxy --configfile NuGet.Config -u $NuGet_User_JFrog -p $NuGet_PW_JFrog --store-password-in-clear-text
+  - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_JFrog -p $NuGet_PW_JFrog --store-password-in-clear-text
+
+# Anchors defined before include section so they can be used in component inputs
+.activate_mise: &activate_mise
+  - export MISE_DATA_DIR="${CI_PROJECT_DIR}/.mise-data"
+  - export MISE_DOTNET_ROOT="${MISE_DATA_DIR}/installs/dotnet"
+  - mise install
+  - eval "$(mise env)"
+
+.install_npm_packages: &install_npm_packages
+  - npm ci
+
+.run_npm_scripts: &run_npm_scripts
+  - npm run build
+
+.run_eslint: &run_eslint
+  - npx eslint src samples
+
+# Rules anchors (defined here so they can be used in component inputs)
+.rules_tag: &rules_tag
+  if: '$CI_COMMIT_TAG'
+
+.rules_protected_or_default_branch: &rules_protected_or_default_branch
+  if: '$CI_COMMIT_REF_PROTECTED == "true" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+
+.rules_merge_request: &rules_merge_request
+  if: '$CI_MERGE_REQUEST_ID'
+
+.rules_web: &rules_web
+  if: '$PARENT_PIPELINE_SOURCE == "web"'
+
+.rules_tag_manual: &rules_tag_manual
+  if: '$CI_COMMIT_TAG'
+  when: manual
+  allow_failure: true
+
+.rules_protected_or_default_branch_manual: &rules_protected_or_default_branch_manual
+  if: '$CI_COMMIT_REF_PROTECTED == "true" || $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  when: manual
+  allow_failure: true
+
+.rules_merge_request_manual: &rules_merge_request_manual
+  if: '$CI_MERGE_REQUEST_ID'
+  when: manual
+  allow_failure: true
+
+.rules_web_manual: &rules_web_manual
+  if: '$PARENT_PIPELINE_SOURCE == "web"'
+  when: manual
+  allow_failure: true
+
+# Scheduled pipelines opt in by input, so a schedule created for one purpose does not drag the
+# others along. Both values come from the schedule's inputs — see docs/e2e-testing.md
+.rules_default_branch_scheduled_packages: &rules_default_branch_scheduled_packages
+  if: '$PARENT_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $BUILD_PACKAGES == "true"'
+  when: on_success
+  allow_failure: false
+
+.rules_scheduled_cleanup: &rules_scheduled_cleanup
+  if: '$PARENT_PIPELINE_SOURCE == "schedule" && $CLEANUP == "true"'
+
+# Common rules list for build/test/upload jobs
+.rules_common: &rules_common
+  - <<: *rules_tag_manual
+  - <<: *rules_protected_or_default_branch
+  - <<: *rules_merge_request
+  - <<: *rules_web
+
+# Rules for the chain that produces the .deb: the artifact builds, their uploads and the deb-packaging
+# trigger. BUILD_PACKAGES comes from the nightly schedule's inputs — see docs/e2e-testing.md
+.rules_packages: &rules_packages
+  - <<: *rules_default_branch_scheduled_packages
+  - !reference [.rules_common]
+
+# Common rules list for manual deploy/review jobs
+.rules_common_manual: &rules_common_manual
+  - <<: *rules_tag_manual
+  - <<: *rules_protected_or_default_branch_manual
+  - <<: *rules_merge_request_manual
+  - <<: *rules_web_manual
+
+include:
+  - local: 'tests/Core.OS.Tests/.gitlab-ci/integration-tests.yml'
+  - local: 'tests/Core.OS.E2E.Tests/.gitlab-ci/e2e-base.yml'
+  - local: 'tests/Core.OS.E2E.Tests/.gitlab-ci/e2e-suite-image.yml'
+  - local: 'tests/Core.OS.E2E.Tests/.gitlab-ci/e2e-standalone.yml'
+  - local: 'tests/Core.OS.E2E.Tests/.gitlab-ci/e2e-master-slave.yml'
+  - local: 'tests/Core.OS.E2E.Tests/.gitlab-ci/e2e-notify.yml'
+
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/version/version-calc@v1.2.0
+    inputs:
+      rules:
+        - <<: *rules_tag
+        - <<: *rules_protected_or_default_branch
+        - <<: *rules_merge_request
+        - <<: *rules_web
+      env_file_name: version.env
+      before_script:
+        - echo "APP_PIPELINE=${CI_PIPELINE_ID}" >> version.env
+        - echo "APP_VERSION=$(cat VERSION)" >> version.env
+        - echo "APP_TAG=${CI_COMMIT_TAG}" >> version.env
+
+  ### Renovate configuration validation
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/renovate/configuration-validation@v1.1.0
+
+  # xUnit test job (both x64 and arm64 via parallel matrix)
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-test@v2.7.1
+    inputs:
+      name: 'xUnit'
+      stage: 'test'
+      no_build: false
+      execution_matrix:
+        - RUNNER_ARCH: [arm64, amd64]
+      tags:
+        - saas-linux-large-$RUNNER_ARCH
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
+      filter: '/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)&(Category!=E2E)&(Category!=E2E-MasterSlave)]'
+      coverage: true
+      config_file: "tests/testconfig.json"
+      before_script:
+        - *activate_mise
+        - *update_nuget_source_ro
+        - dotnet restore --packages packages
+        - *install_npm_packages
+        - *run_npm_scripts
+      rules: *rules_common
+
+  # Cache configuration component
+  # Caches: .mise-data/installs/, .nuget/packages/, node_modules/
+  # MISE_DOTNET_ROOT configured to install dotnet inside .mise-data/installs/
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/cache/cache-config@v0.1.2
+
+  # Registry components for artifact storage
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.2.1
+    inputs:
+      name: "Upload artifacts arm64"
+      stage: artifacts
+      file: "artifacts.tar.gz"
+      build_job_name: "Build artifacts arm64"
+      remote_name: "${ARTIFACT_PREFIX}-${CI_PIPELINE_ID}-linux-arm64.tar.gz"
+      package_name: $PACKAGE_NAME
+      rules: *rules_packages
+      tags: ["saas-linux-small-arm64"]
+
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/upload@v0.2.1
+    inputs:
+      name: "Upload artifacts x64"
+      stage: artifacts
+      file: "artifacts.tar.gz"
+      build_job_name: "Build artifacts x64"
+      remote_name: "${ARTIFACT_PREFIX}-${CI_PIPELINE_ID}-linux-x64.tar.gz"
+      package_name: $PACKAGE_NAME
+      rules: *rules_packages
+
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/cleanup@v0.2.1
+    inputs:
+      name: "Cleanup old packages"
+      stage: cleanup
+      package_name: $PACKAGE_NAME
+      hours: "720"
+      # Package retention that predates the nightly and is unrelated to it. It stays off unless a
+      # schedule sets CLEANUP, so nobody inherits it by adding a schedule — see docs/e2e-testing.md
+      rules:
+        - *rules_scheduled_cleanup
+
+  ### Pack
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-pack@v2.7.1
+    inputs:
+      name: "Pack Core.Artifacts"
+      stage: "packaging"
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
+      project: "src/Core.Artifacts/Core.Artifacts.csproj"
+      rules: *rules_common_manual
+      before_script:
+        - *activate_mise
+        - *update_nuget_source_ro
+        - dotnet restore --packages packages
+        - dotnet build src/Core.Artifacts/Core.Artifacts.csproj -c Release --no-restore
+
+  ### Push
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/dotnet-component/dotnet-nuget-push@v2.7.1
+    inputs:
+      pack_job_name: "Pack Core.Artifacts"
+      name: "Push Core.Artifacts"
+      stage: "release"
+      image: registry.gitlab.com/vicione-oss/tooling/base-image:vicione-stable
+      sources:
+        - "JFrogViciOne"
+        - "GitLabRegistry"
+      filename_pattern: "./src/Core.Artifacts/*"
+      rules: *rules_common_manual
+      before_script:
+        - *activate_mise
+        - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_RW_JFrog -p $NuGet_PW_RW_JFrog --store-password-in-clear-text
+        - dotnet nuget add source "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/nuget/index.json" --name GitLabRegistry --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text
+
+  # Promote to staging
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/promote@v2.0.1
+    inputs:
+      name: "Release Packages to JFrog"
+      stage: release
+      rules: 
+        - *rules_tag_manual
+      source_repository: "vicione-suite-dev"
+      destination_repository: "vicione-suite-staging"
+      remote_path: "suites"
+
+  # Promote staging to production
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/promote@v2.0.1
+    inputs:
+      name: "Public-Release Packages to JFrog"
+      stage: release-public
+      rules:
+        - *rules_tag_manual
+      source_repository: "vicione-suite-staging"
+      destination_repository: "vicione-suite"
+      remote_path: "suites"
+
+variables:
+  # The schedule switches below. A pipeline schedule sets them under Inputs, because this project's
+  # schedule form offers no variables; a CI/CD variable of the same name still wins where one is allowed.
+  # See docs/e2e-testing.md
+  PACKAGE_NAME: "ci-artifacts"
+  ARTIFACT_PREFIX: "suite"
+  DEB_PACKAGING_PROJECT: 'vicione-oss/vicione/suite/deb-packaging'
+  DEB_PACKAGING_BRANCH: 'master'
+  # mise HTTP settings - retry transient network failures with exponential backoff
+  MISE_HTTP_TIMEOUT: "60"
+  MISE_HTTP_RETRIES: "3"
+
+#################### Cache templates
+# Cache configuration provided by component: cache-config@v0.1.1
+# Provides .mise-cache (pull) and .mise-cache-seed (pull-push) anchors
+
+#################### Global
+
+# Removed global before_script antipattern
+# Jobs now extend appropriate templates based on their needs
+
+# Template for jobs needing dotnet + npm (but not eslint/npm build)
+# Used by test jobs that build Blazor projects with SASS/TypeScript
+# NOTE: Explicit dotnet restore populates NuGet cache for better performance
+.dotnet-npm-build:
+  before_script:
+    - *activate_mise
+    - !reference [.update_nuget_source_ro]
+    - *install_npm_packages
+
+# Template for jobs needing mise for deployment scripts
+.mise-only:
+  before_script:
+    - *activate_mise
+
+# Template for jobs with no build requirements
+.minimal:
+  before_script: []
+  cache: []
+
+.patch_version: &patch_version
+  - VERSION=undefined
+  - if [ ! -z "$CI_COMMIT_REF_NAME" ]; then VERSION=$(sed 's/[^0-9a-zA-Z-]//g' <<< ${CI_COMMIT_SHORT_SHA}-$CI_COMMIT_REF_NAME); fi
+  - if [ ! -z "$CI_COMMIT_TAG" ]; then VERSION="$CI_COMMIT_TAG (${CI_COMMIT_SHORT_SHA})"; fi
+  - sed -i -E "s/##VERSION_REF##/$VERSION/g" src/Core.OS/version.json
+
+.jfrog-package-release:
+  extends: .minimal
+  stage: deploy
+  image: releases-docker.jfrog.io/jfrog/jfrog-cli-v2-jf
+  variables:
+    SERVER: "https://ifm.jfrog.io/artifactory"
+    USER: ${Raw_User_RW_JFrog}
+    PASSWORD: ${Raw_PW_RW_JFrog}
+    REPOSITORY_DESTINATION: "vicione-suite-dev"
+  before_script:
+    - apk add --no-cache curl
+    - jf config add --user $USER --password ${PASSWORD} --artifactory-url ${SERVER} jfrog
+    - jf config use jfrog
+  script:
+    - APP_PIPELINE="${CI_PIPELINE_ID}"
+    - APP_VERSION="$(cat VERSION)"
+    - HMS_VERSION="$(cat VERSION_HOSTMANAGEMENT)"
+    - APP_TAG="${CI_COMMIT_TAG}"
+    - VERSION="${APP_VERSION}"
+    - if [[ -z "${APP_TAG}" ]]; then VERSION="${VERSION}~${APP_PIPELINE}"; fi
+    - |
+      artifacts=(
+        "vicione-suite_${VERSION}_amd64.deb"
+        "vicione-suite_${VERSION}_arm64.deb"
+        "vicione-suite_${VERSION}_amd64_${HMS_VERSION}.json"
+        "vicione-suite_${VERSION}_arm64_${HMS_VERSION}.json"
+      )
+    - |
+      printf "%s\n" "${artifacts[@]}" >> artifacts.list
+
+      for artifact in "${artifacts[@]}"; do
+        echo "Processing artifact: ${artifact}"
+
+        # Download .deb from Package Registry
+        case "${artifact}" in
+          *.deb)
+            echo "Downloading from Package Registry: ${artifact}"
+            curl --fail --silent --show-error \
+              --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+              --output "${artifact}" \
+              "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${APP_PIPELINE}/${artifact}"
+            ;;
+        esac
+
+        # Create Metadata files
+        case "${artifact}" in
+          *.json)
+            echo "Creating metadata: ${artifact}"
+            cat "suite-metadata.json" > "${artifact}"
+            ;;
+        esac
+
+        # Upload files to JFrog
+        case "${artifact}" in
+          *.deb|*.json)
+            if [ -f "${artifact}" ]; then
+              echo "Uploading to JFrog: ${artifact}"
+              jf rt upload "${artifact}" "${REPOSITORY_DESTINATION}/suites/${artifact}"
+            else
+              echo "WARNING: ${artifact} not found locally, skipping upload"
+            fi
+            ;;
+        esac
+      done
+  artifacts:
+    paths:
+      - vicione-suite_*.deb
+      - artifacts.list
+  when: manual
+  rules:
+    - <<: *rules_merge_request_manual
+    - <<: *rules_web_manual
+    - <<: *rules_protected_or_default_branch_manual
+
+Validation:
+  extends: .minimal
+  stage: test
+  script:
+    # must be case-sensitive, but gets generated case-insensitive by Visual Studio
+    - |
+      if grep -i 'nuget.config' src/Core.OS/Dockerfile &> /dev/null; then
+        if ! grep 'NuGet.Config' src/Core.OS/Dockerfile &> /dev/null; then
+          echo 'wrong casing of "NuGet.Config" in src/Core.OS/Dockerfile';
+          grep -i 'nuget.config' src/Core.OS/Dockerfile && false;
+        fi
+      fi
+  rules: *rules_common
+
+####################  Test stage
+
+# Test jobs now defined via dotnet-component includes above
+# Old job definitions removed to avoid duplicate job names
+
+#Override needs - Validation job doesn't use parallel matrix
+# https://docs.gitlab.com/ci/yaml/matrix_expressions/#matrix-expressions-in-needsparallelmatrix
+"xUnit":
+  needs: []
+  cache:
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      policy: pull-push
+    - key:
+        prefix: nuget-${RUNNER_ARCH}-v2
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
+      paths:
+        - ./packages/ # NuGet packages
+        - ./**/obj/project.* # restore information per project
+        - ./**/obj/*.csproj.nuget.* # restore information per project
+      policy: pull-push
+
+#################### Artifacts stage
+
+Build artifacts x64:
+  stage: artifacts
+  variables:
+    DOTNET_ARCH: 'linux-x64'
+    RUNNER_ARCH: amd64
+  cache:
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      policy: pull
+    - key:
+        prefix: nuget-${RUNNER_ARCH}-v2
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
+      paths:
+        - .nuget/packages/
+        - ./**/obj/
+      policy: pull
+  before_script:
+    - *activate_mise
+    - !reference [.update_nuget_source_ro]
+    - *patch_version
+    - *install_npm_packages
+    - *run_npm_scripts
+    - *run_eslint
+  script:
+    - ./build/deploy.sh --create-artifacts --platform 'linux-x64' --environment 'Minimal'
+    - du -sh ./artifacts/
+    - tar cfz artifacts.tar.gz ./artifacts/ start.sh
+    - ls -lh artifacts.tar.gz
+  artifacts:
+    paths:
+      - artifacts.tar.gz
+    expire_in: 30 days
+  tags:
+    - saas-linux-large-amd64
+  when: manual
+  rules: *rules_packages
+
+Build artifacts arm64:
+  stage: artifacts
+  variables:
+    DOTNET_ARCH: 'linux-arm64'
+    RUNNER_ARCH: arm64
+  cache:
+    - key:
+        prefix: mise-${RUNNER_ARCH}-v2
+        files:
+          - mise.toml
+      paths:
+        - ${CI_PROJECT_DIR}/.mise-data
+      policy: pull
+    - key:
+        prefix: nuget-${RUNNER_ARCH}-v2
+        files:
+          - Directory.Packages.props
+          - global.json
+      fallback_keys:
+        - nuget-${RUNNER_ARCH}-v2-${CI_DEFAULT_BRANCH}
+      paths:
+        - .nuget/packages/
+        - ./**/obj/
+      policy: pull
+  before_script:
+    - *activate_mise
+    - !reference [.update_nuget_source_ro]
+    - *patch_version
+    - *install_npm_packages
+    - *run_npm_scripts
+    - *run_eslint
+  script:
+    - ./build/deploy.sh --create-artifacts --platform 'linux-arm64' --environment 'Minimal'
+    - du -sh ./artifacts/
+    - tar cfz artifacts.tar.gz ./artifacts/ start.sh
+    - ls -lh artifacts.tar.gz
+  artifacts:
+    paths:
+      - artifacts.tar.gz
+    expire_in: 30 days
+  tags:
+    - saas-linux-large-arm64
+  when: manual
+  rules: *rules_packages
+
+# Upload jobs created by registry component includes above
+# Override before_script and cache - these jobs don't need mise tools
+Upload artifacts arm64:
+  before_script: []
+  cache: []
+  needs:
+    - job: "Build artifacts arm64"
+      artifacts: true
+
+Upload artifacts x64:
+  before_script: []
+  cache: []
+  needs:
+    - job: "Build artifacts x64"
+      artifacts: true
+
+#################### Packaging stage
+
+trigger deb packaging:
+  stage: packaging
+  variables:
+    APP_PIPELINE: ${APP_PIPELINE}
+    APP_VERSION: ${APP_VERSION}
+    APP_TAG: ${APP_TAG}
+    PARENT_PROJECT_ID: ${CI_PROJECT_ID}
+    ARTIFACT_PREFIX: "suite"
+  trigger:
+    project: ${DEB_PACKAGING_PROJECT}
+    branch: ${DEB_PACKAGING_BRANCH}
+    strategy: depend
+  needs:
+    - "Upload artifacts arm64"
+    - "Upload artifacts x64"
+    - Version
+  when: manual
+  rules: *rules_packages
+
+Prerelease Packages to JFrog:
+  extends: .jfrog-package-release
+  variables:
+    SERVER: "https://ifm.jfrog.io/artifactory"
+    USER: ${Raw_User_RW_JFrog}
+    PASSWORD: ${Raw_PW_RW_JFrog}
+    REPOSITORY_DESTINATION: "vicione-suite-dev"
+  needs:
+    - "trigger deb packaging"

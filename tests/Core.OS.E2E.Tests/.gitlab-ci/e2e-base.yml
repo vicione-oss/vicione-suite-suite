@@ -3,7 +3,7 @@
 # see docs/e2e-testing.md
 .e2e-rules:
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true"'
+    - if: '$PARENT_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true"'
       when: on_success
       allow_failure: false
       variables:
