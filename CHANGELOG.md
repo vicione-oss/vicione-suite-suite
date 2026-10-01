@@ -39,14 +39,16 @@
 
 ### Updated
 
-- `AspNetCore.SassCompiler` packages, update to version `1.103.0`
+- `AspNetCore.SassCompiler` packages, update to version `1.105.1`
 - `Microsoft` packages, update to version `10.0.12`
 - `Microsoft.FeatureManagement` packages, update to version `4.7.0`
 - `MailKit`, update to version `4.18.0`
+- `MassTransit` packages, update to version `8.5.11`
 - `Npgsql.EntityFrameworkCore.PostgreSQL`, update to version `10.0.3`
 - `OpenTelemetry` packages, update to version `1.18.0`
-- `ViciOne.Suite.Sdk` packages, update to version `3.1.0`
-- `ViciOne.Ui.Blazor.Components` packages, update to version `6.1.1`
+- `System.IO.Abstractions` package, update version to `22.3.0`
+- `ViciOne.Suite.Sdk` packages, update to version `3.2.0`
+- `ViciOne.Ui.Blazor.Components` packages, update to version `6.2.0`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
 - `ViciOne.Ui.Localization`, update to version `3.6.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`
