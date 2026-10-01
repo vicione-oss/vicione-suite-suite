@@ -42,7 +42,7 @@
     ALERT_TITLE: "Nightly E2E pipeline failed"
     ALERT_TIME_FIELD: start_time
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true" && $E2E_ALERT_URL && $E2E_ALERT_KEY'
+    - if: '$PARENT_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true" && $E2E_ALERT_URL && $E2E_ALERT_KEY'
       when: on_failure
 
 "Resolve Nightly Alert":
@@ -52,5 +52,5 @@
     ALERT_TIME_FIELD: end_time
     ALERT_TOLERATED_STATUS: "400"
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true" && $E2E_ALERT_URL && $E2E_ALERT_KEY'
+    - if: '$PARENT_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $RUN_E2E == "true" && $E2E_ALERT_URL && $E2E_ALERT_KEY'
       when: on_success
