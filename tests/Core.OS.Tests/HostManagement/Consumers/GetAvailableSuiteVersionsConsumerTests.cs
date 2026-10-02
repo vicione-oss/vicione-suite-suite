@@ -241,7 +241,7 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
 
         _repository.QuerySuiteArtifactBundles(Arg.Any<Version>(), false, Arg.Any<CancellationToken>())
             .Returns([]);
-        _repository.GetOSArchitectureFilter().Returns(osArchitecture);
+        _repository.GetOSArchitecture().Returns(osArchitecture);
 
         // Act
         var response = await tester.TestRequest<GetAvailableSuiteVersionsResponse, GetAvailableSuiteVersions>(request);
