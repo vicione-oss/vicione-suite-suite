@@ -150,8 +150,8 @@
   <data name="UnknownExternalUser" xml:space="preserve">
     <value>No user linked to this external account</value>
   </data>
-  <data name="LoginUsingExternalProvider" xml:space="preserve">
-    <value>Login using</value>
+  <data name="LoginWithExternalProvider" xml:space="preserve">
+    <value>Login with</value>
   </data>
   <data name="LoginWithPasskey" xml:space="preserve">
     <value>Login with passkey</value>

@@ -1,4 +1,5 @@
 using Blazor.Server.Backend.Components;
+using Blazor.Server.Backend.Enums;
 using Blazor.Shared.Profile.Models;
 using Bunit;
 using Microsoft.AspNetCore.Components;
@@ -66,6 +67,26 @@ public sealed class PasskeySubmitTests
 
         // Assert
         component.Find("passkey-submit").GetAttribute("username-field").Should().Be("Input.Username");
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Should_render_the_button_in_the_given_style(bool disabled)
+    {
+        // Arrange
+        using var ctx = CreateContext();
+
+        // Act
+        var component = ctx.Render<PasskeySubmit>(builder => builder
+            .Add(c => c.Operation, PasskeyOperation.Request)
+            .Add(c => c.Name, "Input.Passkey")
+            .Add(c => c.Text, "Login with passkey")
+            .Add(c => c.Disabled, disabled)
+            .Add(c => c.ButtonType, AccountButtonType.Outline));
+
+        // Assert
+        component.Find("button").ClassList.Should().Contain("outline");
     }
 
     private static BunitContext CreateContext()

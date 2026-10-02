@@ -1,4 +1,5 @@
-﻿@using Sdk.Client.Extensions
+﻿@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 @{
     var additionalAttributes = new Dictionary<string, object>();
@@ -9,12 +10,16 @@
     }
 }
 
-<button class="account-button @(ButtonType.ToString().ToHyphenSeparated())"
+<button class="@CssClass"
         type="submit"
         disabled="@Disabled"
         name="@Name"
         title="@Title"
         aria-label="@Title"
         @attributes="additionalAttributes">
-    @Text
+    @if (IconName is { } iconName)
+    {
+        <MonochromeIcon Name="@iconName" Size="MonochromeIconSize.Small" CssClass="icon" />
+    }
+    <span class="text">@Text</span>
 </button>
