@@ -40,7 +40,7 @@ public sealed partial class GetAvailableSuiteVersionsConsumer(
 
             filteredVersions.Add(new SuiteArtifactBundle
             {
-                Architecture = repository.GetOSArchitectureFilter(),
+                Architecture = repository.GetOSArchitecture(),
                 Version = currentVersion,
                 Package = localPackage,
                 PackageSignature = localSignature,

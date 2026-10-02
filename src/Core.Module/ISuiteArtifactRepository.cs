@@ -34,7 +34,8 @@ public interface ISuiteArtifactRepository
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Returns the current operating system architecture string as LowerInvariant, e.g. "arm64" or "amd64".
+    /// Architecture of this machine as named in suite package names: <c>amd64</c> or <c>arm64</c>.
     /// </summary>
-    string GetOSArchitectureFilter();
+    /// <exception cref="PlatformNotSupportedException">No suite packages are built for this architecture.</exception>
+    string GetOSArchitecture();
 }

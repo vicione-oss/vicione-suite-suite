@@ -249,21 +249,47 @@ public class SuiteArtifactRepositoryTests
             // Assert
             result.Should().NotBeEmpty();
         }
+    }
 
-        [Fact]
-        public async Task Should_return_architecture_filter()
+    public sealed class GetArchitectureFilter : SuiteArtifactRepositoryTests
+    {
+        [Theory]
+        [InlineData(Architecture.X64, "*_amd64*")]
+        [InlineData(Architecture.Arm64, "*_arm64*")]
+        public void Should_match_the_debian_architecture_in_suite_package_names(Architecture osArchitecture, string expectedFilter)
         {
-            // Arrange
-            await using var services = CreateServiceProvider();
-            var repository = services.GetRequiredService<SuiteArtifactRepository>();
-
             // Act
-            var result = repository.GetOSArchitectureFilter();
+            var filter = SuiteArtifactRepository.GetArchitectureFilter(osArchitecture);
 
-            // Assert - vicione-suite_1.0.3_arm64_1.1.0.json
-            var expected = $"*_{RuntimeInformation.OSArchitecture}*";
+            // Assert - vicione-suite_1.0.3_amd64_1.1.0.json
+            filter.Should().Be(expectedFilter);
+        }
 
-            string.Compare(result, expected, StringComparison.OrdinalIgnoreCase).Should().Be(0);
+        [Theory]
+        [InlineData(Architecture.X86)]
+        [InlineData(Architecture.Arm)]
+        public void Should_throw_for_an_architecture_without_suite_packages(Architecture osArchitecture)
+        {
+            // Act
+            var act = () => SuiteArtifactRepository.GetArchitectureFilter(osArchitecture);
+
+            // Assert
+            act.Should().Throw<PlatformNotSupportedException>();
+        }
+    }
+
+    public sealed class GetPackageArchitecture : SuiteArtifactRepositoryTests
+    {
+        [Theory]
+        [InlineData(Architecture.X64, "amd64")]
+        [InlineData(Architecture.Arm64, "arm64")]
+        public void Should_return_the_debian_architecture_without_wildcards(Architecture osArchitecture, string expectedArchitecture)
+        {
+            // Act
+            var architecture = SuiteArtifactRepository.GetPackageArchitecture(osArchitecture);
+
+            // Assert
+            architecture.Should().Be(expectedArchitecture);
         }
     }
 }
