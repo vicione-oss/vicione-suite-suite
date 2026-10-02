@@ -16,6 +16,8 @@
 - Settings actions such as connection tests, DHCP lease renewal, backup export and reset show their progress on their own button
 - Rename the company to `ViciOne open automation gmbh` in the license, the package metadata and the account page footer
 - Login page, the OpenID provider and passkey buttons show an icon and sit in their own section below the divider
+- **Every dynamic response now carries a Content Security Policy and `X-Frame-Options: DENY`**. **Breaking change for modules:** the policy is relaxed for now and will be tightened in a later release. See `docs/ADRs/ADR-006-content-security-policy.md`
+- **The Suite now requires a browser with CSP Level 3 support**; in older browsers parts of the UI stop working
 
 ### Added
 
@@ -23,6 +25,7 @@
 - Admin-only "Environment variables" settings panel (Settings → System) for editing the runtime overrides, offered where `VICIONE_SUITE_ENV_OVERRIDES` is on; entries are validated on save and take effect after a restart (see `docs/suite-startup.md`)
 - `FirstRunWizard` feature flag, enabled by default, gating the redirect to the first-run wizard
 - Admin-only "OpenID provider" settings panel (Settings → User Management) for external sign-in (see `docs/oidc.md`)
+- CSP violation reporting: browsers report violations to `POST /csp-report`, and the Suite logs each one as a warning. Requires HTTPS
 
 ### Fixed
 
