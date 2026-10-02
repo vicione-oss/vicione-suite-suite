@@ -84,7 +84,7 @@ Each relaxation is removed once its blockers are fixed and released ([suite#2897
 | `script-src-attr` | `'none'` | no inline event handler attribute exists (#514) |
 | `style-src` | `'self'` | no inline `<style>` block on the main host (#515) |
 | `style-src-attr` | `'unsafe-inline'` | permanent, see *Context* |
-| `img-src` | `'self'` | every image the Suite renders is same-origin, the icons included |
+| `img-src` | `'self' data:` | images are same-origin or `data:`, see *`data:` images* |
 | `font-src` | `'self'` | local woff2 fonts only |
 | [`connect-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src) | `'self'` | the SignalR circuit and chunked upload are same-origin; in CSP Level 3, `'self'` also matches the `wss:` URL of the page's own origin |
 | `form-action` | `'self'` **plus the configured OpenID provider** | see *`form-action` and the external identity provider* |
@@ -96,7 +96,7 @@ Each relaxation is removed once its blockers are fixed and released ([suite#2897
 | `report-uri` | `/csp-report` | for browsers that predate `report-to` |
 | [`report-to`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/report-to) | `csp-endpoint` | the same endpoint, named through the [`Reporting-Endpoints`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Reporting-Endpoints) header; a browser that supports it ignores `report-uri` |
 
-No directive carries a scheme-wide value (#513).
+No directive allows a whole network scheme such as `https:` (#513).
 The fallbacks `script-src` and `style-src` carry no `'unsafe-inline'`, so the policy fails closed in older browsers (see *Browser baseline*).
 
 ### Interim policy
@@ -112,9 +112,17 @@ The finding ids (CE-…, CM-…, DCW-…, DX-…) refer to [suite#2899](https://
 | `script-src-attr 'unsafe-inline'` | drag and drop in every TreeEditor, the Suite's MQTT filter included, and onto cluster-editor connectors | [tree-editor#247](https://gitlab.com/vicione-oss/vicione/ui-libs/tree-editor/-/work_items/247), CE-2 |
 | `style-src 'unsafe-inline'` | data-collection-wizard dialog layout, `<style>` in cluster-editor labels | DCW-1, CE-5, CE-6, a browser check of DX-B1 |
 | `https://maxcdn.bootstrapcdn.com` in `style-src` and `font-src` | toolbar icons of the cluster-editor label editor | CE-4 |
-| `img-src data:` | context menu icons, IODD device pictures, dropdown arrows, `data:` images in labels | CE-3, CE-5, CE-6, CE-7, CM-2, DCW-2, DCW-3 |
 | `img-src https:` | outside images in cluster-editor labels | CE-5, CE-6 |
 | `connect-src wss:` | nothing known | the browser checks in suite#2897 |
+
+### `data:` images
+
+A `data:` image carries its bytes in the URL, so the browser sends no request for it, and an SVG loaded as an image runs no script.
+Modules and the CSS of Bootstrap, DevExtreme and QuickGrid draw icons this way (suite#2899); forbidding it would push them towards inline SVG markup, which can carry script where a `data:` image cannot.
+No other directive lists `data:`, because there it would act like inline code.
+
+- **What it costs:** injected markup can show any picture, such as a convincing fake dialog, and can feed crafted bytes to the browser's image decoder.
+- **What it does not open:** a way to send data out; that takes `https:`, which the target policy does not carry. ZAP's wildcard check (#513) probes for a random `http:` or `https:` host, so `data:` does not trigger it.
 
 ### `form-action` and the external identity provider
 
@@ -199,7 +207,7 @@ This ADR does not set a product-wide browser policy.
 - `deb-packaging` runs no tests and no E2E job serves the Suite through nginx, so a change to `src/nginx/header` is verified by review and on an installed package.
 - The number of inline `style` attributes is not policed, because `style-src-attr 'unsafe-inline'` is permanent.
 - No new inline event handler and no new inline `<script>` block: the target policy refuses them, so one added now breaks when its relaxation is removed.
-- MRs adding an inline `<style>`, a `blob:` or `data:` consumer, a WebSocket opened from the browser, or a new off-origin fetch must state the directive they need under the target policy.
+- MRs adding an inline `<style>`, a `blob:` consumer, a `data:` consumer other than an image, a WebSocket opened from the browser, or a new off-origin fetch must state the directive they need under the target policy.
 - The `form-action` origin is unit-tested, including a provider change without a restart. E2E pins the policy without a provider.
 - A value rendered as raw HTML (`MarkupString`, `innerHTML`) is either encoded before it becomes markup, as the instance title is, or trusted by its origin — the `TopBar` icon and the failsafe page's own stylesheet are the only trusted cases, and request, database or module input never joins them.
 - New SDK client APIs that reach the DOM or the network are reviewed against this ADR before they become public.
