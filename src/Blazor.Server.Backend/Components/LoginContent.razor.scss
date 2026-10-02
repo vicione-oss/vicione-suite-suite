@@ -62,8 +62,13 @@
     }
 
     .button-section {
-        ::deep .account-button:nth-child(2) {
+        ::deep .account-button ~ .account-button {
             margin-top: 8px;
+        }
+
+        hr {
+            margin-top: 16px;
+            margin-bottom: 8px;
         }
     }
 

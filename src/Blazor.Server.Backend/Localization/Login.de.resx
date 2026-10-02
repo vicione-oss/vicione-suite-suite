@@ -150,11 +150,11 @@
   <data name="UnknownExternalUser" xml:space="preserve">
     <value>Zu diesem externen Konto ist kein Benutzer registriert</value>
   </data>
-  <data name="LoginUsingExternalProvider" xml:space="preserve">
-    <value>Anmelden mittels</value>
+  <data name="LoginWithExternalProvider" xml:space="preserve">
+    <value>Anmelden mit</value>
   </data>
   <data name="LoginWithPasskey" xml:space="preserve">
-    <value>Mit Passkey anmelden</value>
+    <value>Anmelden mit Passkey</value>
   </data>
   <data name="PasskeyLoginFailed" xml:space="preserve">
     <value>Passkey Anmeldung fehlgeschlagen</value>

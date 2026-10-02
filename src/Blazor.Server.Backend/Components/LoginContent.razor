@@ -16,7 +16,7 @@
     </form>
 
 }
-<EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login" class="@($"login {(BuildingLayout ? "building" : "account")}")">
+<EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login" class="@FormCssClass">
     <DataAnnotationsValidator />
 
     <TextInputField @bind-Value="@Input.Username"
@@ -55,20 +55,26 @@
         <AccountButton Text="@Login.Title"
                        ButtonType="@(BuildingLayout? AccountButtonType.Outline : AccountButtonType.Active)" />
 
+        @if (IsExternalIdProviderConfigured || IsPasskeySignInEnabled)
+        {
+            <hr />
+        }
+
         @if (IsExternalIdProviderConfigured)
         {
-            <AccountButton Text="@($"{Login.LoginUsingExternalProvider} {_externalProviderDisplayName}")" 
+            <AccountButton Text="@($"{Login.LoginWithExternalProvider} {_externalProviderDisplayName}")"
+                           IconName="@MonochromeIconName.ExternalIdProviderLight"
                            Form="@_formId"
-                           ButtonType="@(BuildingLayout? AccountButtonType.Outline : AccountButtonType.Default)" />
+                           ButtonType="@AlternativeSignInButtonType" />
         }
 
         @if (IsPasskeySignInEnabled)
         {
-            <hr />
             <PasskeySubmit Operation="PasskeyOperation.Request"
                            Name="Input.Passkey"
                            UsernameField="Input.Username"
                            Text="@Login.LoginWithPasskey"
+                           ButtonType="@AlternativeSignInButtonType"
                            Disabled="@(!IsPasskeyHostSupported)"
                            DisabledTitle="@Login.PasskeyRequiresDnsHost" />
             <ValidationMessage For="() => Input.Passkey" />

@@ -7,6 +7,8 @@ namespace Blazor.Shared.Components;
 
 public sealed partial class AccountLayout
 {
+    public const string TallCardCssClass = "tall-card";
+
     [Inject]
     private IInstanceInformationProvider InstanceInformation { get; set; } = default!;
 

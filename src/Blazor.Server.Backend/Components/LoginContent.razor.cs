@@ -1,8 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using Blazor.Server.Backend.Areas.Identity.Pages.Models;
+using Blazor.Server.Backend.Enums;
 using Blazor.Server.Backend.Localization;
 using Blazor.Server.Backend.Security;
 using Blazor.Shared;
+using Blazor.Shared.Components;
 using Blazor.Shared.Services;
 using Core.Shared.Mail;
 using Core.Shared.Passkeys;
@@ -84,6 +86,15 @@ public sealed partial class LoginContent
     private bool IsPasskeySignInEnabled { get; set; }
 
     private bool IsPasskeyHostSupported { get; set; }
+
+    private bool OffersAllSignInOptions => IsExternalIdProviderConfigured && IsPasskeySignInEnabled;
+
+    private string FormCssClass
+        => $"login {(BuildingLayout ? "building" : "account")}"
+           + (OffersAllSignInOptions ? $" {AccountLayout.TallCardCssClass}" : string.Empty);
+
+    private AccountButtonType AlternativeSignInButtonType
+        => BuildingLayout ? AccountButtonType.Outline : AccountButtonType.Default;
 
     protected override async Task OnInitializedAsync()
     {

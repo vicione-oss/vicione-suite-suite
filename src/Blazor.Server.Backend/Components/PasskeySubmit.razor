@@ -3,18 +3,20 @@
 @using Microsoft.AspNetCore.Antiforgery
 @using Microsoft.AspNetCore.Http
 @using Microsoft.Extensions.DependencyInjection
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
 @inject IServiceProvider Services
 
 @if (Disabled)
 {
-    <AccountButton name="__passkeySubmit" Text="@Text" ButtonType="AccountButtonType.Default"
-                   Disabled="true" Title="@DisabledTitle" />
+    <AccountButton name="__passkeySubmit" Text="@Text" IconName="@MonochromeIconName.PassKeyLight"
+                   ButtonType="@ButtonType" Disabled="true" Title="@DisabledTitle" />
 }
 else
 {
     <script src="@Assets["js/passkey-submit.js"]"></script>
 
-    <AccountButton name="__passkeySubmit" Text="@Text" ButtonType="AccountButtonType.Default" />
+    <AccountButton name="__passkeySubmit" Text="@Text" IconName="@MonochromeIconName.PassKeyLight"
+                   ButtonType="@ButtonType" />
     <passkey-submit
         operation="@Operation"
         name="@Name"
@@ -36,6 +38,8 @@ else
     [Parameter] public string? UsernameField { get; set; }
 
     [Parameter] public string Text { get; set; } = null!;
+
+    [Parameter] public AccountButtonType ButtonType { get; set; } = AccountButtonType.Default;
 
     [Parameter] public bool Disabled { get; set; }
 

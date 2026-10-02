@@ -111,9 +111,9 @@ namespace Blazor.Server.Backend.Localization {
             }
         }
         
-        public static string LoginUsingExternalProvider {
+        public static string LoginWithExternalProvider {
             get {
-                return ResourceManager.GetString("LoginUsingExternalProvider", resourceCulture);
+                return ResourceManager.GetString("LoginWithExternalProvider", resourceCulture);
             }
         }
         

@@ -15,6 +15,7 @@
 - MQTT viewer, the broker connection button shows a sweeping arc while it connects
 - Settings actions such as connection tests, DHCP lease renewal, backup export and reset show their progress on their own button
 - Rename the company to `ViciOne open automation gmbh` in the license, the package metadata and the account page footer
+- Login page, the OpenID provider and passkey buttons show an icon and sit in their own section below the divider
 
 ### Added
 
