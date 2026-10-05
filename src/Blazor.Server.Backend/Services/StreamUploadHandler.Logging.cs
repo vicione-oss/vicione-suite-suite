@@ -37,6 +37,9 @@ public sealed partial class StreamUploadHandler<TModule, TContext>
     [LoggerMessage(LogLevel.Error, "An error occured during filename transformation for file upload '{Filename}'")]
     private static partial void FilenameTransformationError(ILogger<StreamUploadHandler<TModule, TContext>> logger, Exception ex, string filename);
 
+    [LoggerMessage(LogLevel.Warning, "Rejected file upload '{Filename}' because its destination '{DestinationFile}' is not directly inside the upload directory")]
+    private static partial void InvalidDestination(ILogger<StreamUploadHandler<TModule, TContext>> logger, string filename, string destinationFile);
+
     [LoggerMessage(LogLevel.Debug, "Uploading to destination '{DestinationFile}'")]
     private static partial void UploadingToDestination(ILogger<StreamUploadHandler<TModule, TContext>> logger, string destinationFile);
 

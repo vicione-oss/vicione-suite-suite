@@ -123,6 +123,9 @@
   <data name="InsufficientDiskSpace" xml:space="preserve">
     <value>The device requires at least twice as much free disk space as the file size.</value>
   </data>
+  <data name="InvalidFileName" xml:space="preserve">
+    <value>'{0}' is not a valid file name because it contains folder parts such as '/' or '..'.</value>
+  </data>
   <data name="PathTransformationFailed" xml:space="preserve">
     <value>Failed to transform the upload path of '{0}'.</value>
   </data>

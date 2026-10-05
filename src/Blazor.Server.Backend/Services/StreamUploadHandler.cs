@@ -103,9 +103,28 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
         }
     }
 
+    /// <summary>
+    /// The client chooses the file name, so a rooted name or one with <c>..</c> segments must not leave <paramref name="path"/>.
+    /// </summary>
+    private bool IsDirectlyInside(string path, string destinationFile)
+    {
+        var fullDestinationFile = fileSystem.Path.GetFullPath(destinationFile);
+
+        return fileSystem.Path.GetFileName(fullDestinationFile).Length > 0
+            && string.Equals(fileSystem.Path.GetDirectoryName(fullDestinationFile),
+                             fileSystem.Path.TrimEndingDirectorySeparator(fileSystem.Path.GetFullPath(path)),
+                             StringComparison.Ordinal);
+    }
+
     private async Task<IStreamUploadResult> ExecuteUpload(Stream stream, StreamUploadProgress progress, string fileName, CancellationToken cancellationToken = default)
     {
         progress.DestinationFile = fileSystem.Path.Combine(progress.Path, fileName);
+
+        if (!IsDirectlyInside(progress.Path, progress.DestinationFile))
+        {
+            InvalidDestination(logger, progress.Filename, progress.DestinationFile);
+            return new StreamUploadErrorResult(string.Format(CultureInfo.CurrentCulture, Localization.StreamUploadHandler.InvalidFileName, progress.Filename));
+        }
 
         UploadingToDestination(logger, progress.DestinationFile);
 

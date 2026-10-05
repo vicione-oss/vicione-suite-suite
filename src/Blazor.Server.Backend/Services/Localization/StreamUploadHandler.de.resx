@@ -123,6 +123,9 @@
   <data name="InsufficientDiskSpace" xml:space="preserve">
     <value>Das Gerät benötigt mindestens doppelt so viel freien Speicherplatz wie die Dateigröße.</value>
   </data>
+  <data name="InvalidFileName" xml:space="preserve">
+    <value>'{0}' ist kein gültiger Dateiname, da er Ordnerangaben wie '/' oder '..' enthält.</value>
+  </data>
   <data name="PathTransformationFailed" xml:space="preserve">
     <value>Der Upload-Pfad von '{0}' konnte nicht umgewandelt werden.</value>
   </data>
