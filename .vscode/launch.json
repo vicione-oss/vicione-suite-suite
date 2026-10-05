@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Core.OS (Standalone-Ui)",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/src/Core.OS/Core.OS.csproj",
+      "launchConfigurationId": "TargetFramework=;Standalone-Ui",
+      "preLaunchTask": "build-ui-host"
+    }
+  ]
+}
