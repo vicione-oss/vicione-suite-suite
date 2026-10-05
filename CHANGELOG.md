@@ -5,6 +5,14 @@
 ### Fixed
 
 - `npm`, vulnerabilities fixed
+- Building the suite no longer prints Sass `if()` deprecation warnings from the font packages
+
+### Updated
+
+- `npm`
+  - `@fontsource-utils/scss`, update to `0.2.4`
+  - `@fontsource/noto-sans`, update to `5.3.0`
+  - `@fontsource/roboto`, update to `5.3.0`
 
 ## 1.4.0-beta1 - 2026-10-02
 

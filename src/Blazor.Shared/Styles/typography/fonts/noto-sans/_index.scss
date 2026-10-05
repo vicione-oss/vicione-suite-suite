@@ -1,6 +1,6 @@
 ﻿@use "variables";
 @use "../../../../../../node_modules/@fontsource-utils/scss/src/mixins" as font-source-utils;
-@use "../../../../../../node_modules/@fontsource/noto-sans/scss/mixins" as noto-sans;
+@use "../../../../../../node_modules/@fontsource/noto-sans/scss/metadata" as noto-sans;
 
 // https://github.com/fontsource/fontsource/blob/main/packages/scss/README.md
 @include font-source-utils.faces(
