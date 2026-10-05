@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Sdk.Backend.Modules;
 using Sdk.Client.Contracts;
 using Sdk.Client.Models;
+using UploadLocalization = Blazor.Server.Backend.Services.Localization.StreamUploadHandler;
 
 namespace Blazor.Server.Tests.Services;
 
@@ -54,7 +56,8 @@ public class StreamUploadHandlerTests
             var result = await sut.Execute(stream, "file.txt", TestContext.Current.CancellationToken);
 
             // Assert
-            result.Should().BeOfType<StreamUploadErrorResult>();
+            result.Should().BeOfType<StreamUploadErrorResult>()
+                .Which.Message.Should().Be(UploadLocalization.InsufficientDiskSpace);
         }
 
         [Fact]
@@ -163,6 +166,38 @@ public class StreamUploadHandlerTests
 
             // Assert
             result.Should().BeOfType<StreamUploadErrorResult>();
+        }
+
+        [Fact]
+        public async Task Should_return_localized_error_result_when_path_transformation_fails()
+        {
+            // Arrange
+            _options.PathTransform = _ => throw new InvalidOperationException();
+
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, new MockFileSystem(), _options, _logger);
+
+            // Act
+            var result = await sut.Execute(new MemoryStream(), "file.txt", TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().BeOfType<StreamUploadErrorResult>()
+                .Which.Message.Should().Be(string.Format(CultureInfo.CurrentCulture, UploadLocalization.PathTransformationFailed, "file.txt"));
+        }
+
+        [Fact]
+        public async Task Should_return_localized_error_result_when_filename_transformation_fails()
+        {
+            // Arrange
+            _options.FilenameTransform = _ => throw new InvalidOperationException();
+
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, new MockFileSystem(), _options, _logger);
+
+            // Act
+            var result = await sut.Execute(new MemoryStream(), "file.txt", TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().BeOfType<StreamUploadErrorResult>()
+                .Which.Message.Should().Be(string.Format(CultureInfo.CurrentCulture, UploadLocalization.FilenameTransformationFailed, "file.txt"));
         }
 
         private static void ResultDestinationFileShouldExist(IStreamUploadResult result, string expectedFilePath)
