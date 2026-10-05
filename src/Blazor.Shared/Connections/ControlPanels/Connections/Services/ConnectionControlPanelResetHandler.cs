@@ -1,12 +1,14 @@
 using Blazor.Shared.Connections.Contracts;
 using Blazor.Shared.Connections.Factories;
 using Blazor.Shared.Connections.Services;
+using Sdk.Client.Connections;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 
 namespace Blazor.Shared.Connections.ControlPanels.Connections.Services;
 
-internal sealed class ConnectionControlPanelResetHandler(ISuiteConnectionService suiteConnectionService, IConnectionTypeRegistry connectionTypeRegistry)
+internal sealed class ConnectionControlPanelResetHandler(ISuiteConnectionService suiteConnectionService, IConnectionTypeRegistry connectionTypeRegistry,
+    IConnectionTypeUiRegistry connectionTypeUiRegistry)
     : IControlPanelResetHandler<ConnectionControlPanelState>
 {
     public async Task Reset(ConnectionControlPanelState state, CancellationToken cancellationToken)
@@ -23,7 +25,7 @@ internal sealed class ConnectionControlPanelResetHandler(ISuiteConnectionService
             }
             else
             {
-                state.EditConnectionModel = EditConnectionModelFactory.CreateNew(connectionTypeRegistry);
+                state.EditConnectionModel = EditConnectionModelFactory.CreateNew(connectionTypeRegistry, connectionTypeUiRegistry);
             }
 
             state.AvailableTags = await suiteConnectionService.GetTags(cancellationToken);

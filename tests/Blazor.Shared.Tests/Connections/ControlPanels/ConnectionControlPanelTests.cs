@@ -63,7 +63,8 @@ public class ConnectionControlPanelTests
             await using var ctx = SetupTestContext();
 
             var registry = ctx.Services.GetRequiredService<IConnectionTypeRegistry>();
-            var connection = EditConnectionModelFactory.CreateNew(registry);
+            var uiRegistry = ctx.Services.GetRequiredService<IConnectionTypeUiRegistry>();
+            var connection = EditConnectionModelFactory.CreateNew(registry, uiRegistry);
 
             var state = new ConnectionControlPanelState();
 

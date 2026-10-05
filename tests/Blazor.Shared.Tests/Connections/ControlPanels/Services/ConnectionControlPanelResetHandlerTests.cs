@@ -3,6 +3,7 @@ using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Tests.Connections.Extensions;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
+using Sdk.Client.Connections;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 
@@ -19,6 +20,7 @@ public sealed class ConnectionControlPanelResetHandlerTests
         var services = new ServiceCollection()
             .AddScoped(_ => Substitute.For<ISuiteConnectionService>())
             .AddScoped(_ => Substitute.For<IConnectionTypeRegistry>().Setup())
+            .AddScoped(_ => Substitute.For<IConnectionTypeUiRegistry>())
             .AddScoped<IControlPanelResetHandler<ConnectionControlPanelState>, ConnectionControlPanelResetHandler>();
 
         await using var serviceProvider = services.BuildServiceProvider();
