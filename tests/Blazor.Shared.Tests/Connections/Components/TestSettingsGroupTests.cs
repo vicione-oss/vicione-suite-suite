@@ -7,6 +7,7 @@ using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.Components.Settings;
+using Sdk.Client.Connections;
 using Sdk.Client.Infrastructure;
 using Sdk.Connections.Contracts;
 
@@ -29,7 +30,7 @@ public sealed class TestSettingsGroupTests
             setup.ClientMediator.Register(Arg.Any<IEventConsumer<Core.Shared.Connections.Events.TestConnectionDoneEvent>>())
                 .Returns(Substitute.For<IDisposable>()));
 
-        var model = EditConnectionModelFactory.CreateNew(registry);
+        var model = EditConnectionModelFactory.CreateNew(registry, Substitute.For<IConnectionTypeUiRegistry>());
 
         var component = ctx.Render<TestSettingsGroup>(builder => builder.Add(p => p.Model, model));
 

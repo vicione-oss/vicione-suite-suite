@@ -10,5 +10,6 @@ internal static class IConnectionTypeRegistryExtensions
         => connectionTypeRegistry
             .GetConnectionTypes()
             .Select(e => new ComboBoxItem<ConnectionType, string>() { Text = connectionTypeUiRegistry.TryGetDisplayName(e, out var displayName) ? displayName : e, Value = new ConnectionType(e) })
+            .OrderBy(i => i.Text, StringComparer.CurrentCulture)
             .ToList();
 }
