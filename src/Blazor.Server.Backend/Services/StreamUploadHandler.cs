@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Globalization;
 using System.IO.Abstractions;
 using Blazor.Server.Backend.Contracts;
 using Microsoft.Extensions.Logging;
@@ -72,7 +73,7 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
         {
             var drive = fileSystem.DriveInfo.New(path);
             if (drive.AvailableFreeSpace < stream.Length * 2)
-                throw new IOException("The device requires at least twice as much free disk space as the file size.");
+                throw new IOException(Localization.StreamUploadHandler.InsufficientDiskSpace);
         }
         catch (Exception ex)
         {
@@ -164,12 +165,12 @@ public sealed partial class StreamUploadHandler<TModule, TContext>(IWorkspacePro
     {
         if (!TryPathTransformation(options, filename, out var path))
         {
-            return new StreamUploadErrorResult($"Failed to do path transformation on '{filename}'");
+            return new StreamUploadErrorResult(string.Format(CultureInfo.CurrentCulture, Localization.StreamUploadHandler.PathTransformationFailed, filename));
         }
 
         if (!TryFileTransformation(options, filename, out var transformedFileName))
         {
-            return new StreamUploadErrorResult($"Failed to do file transformation on '{filename}'");
+            return new StreamUploadErrorResult(string.Format(CultureInfo.CurrentCulture, Localization.StreamUploadHandler.FilenameTransformationFailed, filename));
         }
 
         var progress = new StreamUploadProgress { Path = path, Filename = filename, BytesTotal = stream.Length };

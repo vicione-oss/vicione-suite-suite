@@ -104,6 +104,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ModelValidation.resx</DependentUpon>
     </Compile>
+    <Compile Update="Services\Localization\StreamUploadHandler.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StreamUploadHandler.resx</DependentUpon>
+    </Compile>
     <Compile Update="Localization\BlazorServerClientModule.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -162,6 +167,10 @@
     <EmbeddedResource Update="Areas\Identity\Pages\Models\Localization\ModelValidation.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ModelValidation.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Services\Localization\StreamUploadHandler.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>StreamUploadHandler.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Localization\Login.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
