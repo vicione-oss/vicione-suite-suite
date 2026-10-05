@@ -7,6 +7,7 @@
 - `npm`, vulnerabilities fixed
 - Building the suite no longer prints Sass `if()` deprecation warnings from the font packages
 - File upload error messages, such as in the update and backup control panels, are shown in the user's language
+- File uploads reject file names that point outside the upload directory
 
 ### Updated
 

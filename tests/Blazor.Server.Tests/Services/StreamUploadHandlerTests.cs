@@ -46,6 +46,7 @@ public class StreamUploadHandlerTests
             _workspaceProvider.Cache.Returns("cache");
 
             var fileSystem = Substitute.For<IFileSystem>();
+            fileSystem.Path.Returns(new MockFileSystem().Path);
             fileSystem.DriveInfo.New("cache").AvailableFreeSpace.Returns(1);
 
             var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, _options, _logger);
@@ -155,8 +156,8 @@ public class StreamUploadHandlerTests
 
             var fileSystem = Substitute.For<IFileSystem>();
             fileSystem.DriveInfo.New("cache").AvailableFreeSpace.Returns(1024 * 1024);
+            fileSystem.Path.Returns(new MockFileSystem().Path);
             fileSystem.File.Create(Arg.Any<string>()).Returns(_ => throw new IOException("disk error"));
-            fileSystem.Path.Combine("cache", "bad.txt").Returns("cache/bad.txt");
 
             var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, _options, _logger);
             var input = new MemoryStream("foo"u8.ToArray());
@@ -198,6 +199,83 @@ public class StreamUploadHandlerTests
             // Assert
             result.Should().BeOfType<StreamUploadErrorResult>()
                 .Which.Message.Should().Be(string.Format(CultureInfo.CurrentCulture, UploadLocalization.FilenameTransformationFailed, "file.txt"));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(".")]
+        [InlineData("..")]
+        public async Task Should_reject_file_name_without_file_segment(string fileName)
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            _ = SetupSystemWorkspace(fileSystem);
+
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, _options, _logger);
+
+            // Act
+            var result = await sut.Execute(new MemoryStream("data"u8.ToArray()), fileName, TestContext.Current.CancellationToken);
+
+            // Assert
+            InvalidFileNameShouldBeRejected(result, fileSystem, fileName);
+        }
+
+        [Fact]
+        public async Task Should_reject_file_name_with_parent_directory_segments()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            _ = SetupSystemWorkspace(fileSystem);
+            var fileName = fileSystem.Path.Combine("..", "..", "appsettings.json");
+
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, _options, _logger);
+
+            // Act
+            var result = await sut.Execute(new MemoryStream("data"u8.ToArray()), fileName, TestContext.Current.CancellationToken);
+
+            // Assert
+            InvalidFileNameShouldBeRejected(result, fileSystem, fileName);
+        }
+
+        [Fact]
+        public async Task Should_reject_rooted_file_name()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            _ = SetupSystemWorkspace(fileSystem);
+            var fileName = fileSystem.Path.Combine(fileSystem.AllDrives.First(), "etc", "passwd");
+
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, _options, _logger);
+
+            // Act
+            var result = await sut.Execute(new MemoryStream("data"u8.ToArray()), fileName, TestContext.Current.CancellationToken);
+
+            // Assert
+            InvalidFileNameShouldBeRejected(result, fileSystem, fileName);
+        }
+
+        [Fact]
+        public async Task Should_reject_filename_transformation_that_returns_a_subdirectory()
+        {
+            // Arrange
+            var fileSystem = new MockFileSystem();
+            _ = SetupSystemWorkspace(fileSystem);
+            _options.FilenameTransform = name => fileSystem.Path.Combine("sub", name);
+
+            var sut = new StreamUploadHandler<BlazorServerBackendModule, DeviceImageContext>(_workspaceProvider, fileSystem, _options, _logger);
+
+            // Act
+            var result = await sut.Execute(new MemoryStream("data"u8.ToArray()), "file.txt", TestContext.Current.CancellationToken);
+
+            // Assert
+            InvalidFileNameShouldBeRejected(result, fileSystem, "file.txt");
+        }
+
+        private static void InvalidFileNameShouldBeRejected(IStreamUploadResult result, MockFileSystem fileSystem, string fileName)
+        {
+            result.Should().BeOfType<StreamUploadErrorResult>()
+                .Which.Message.Should().Be(string.Format(CultureInfo.CurrentCulture, UploadLocalization.InvalidFileName, fileName));
+            fileSystem.AllFiles.Should().BeEmpty();
         }
 
         private static void ResultDestinationFileShouldExist(IStreamUploadResult result, string expectedFilePath)

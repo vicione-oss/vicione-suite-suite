@@ -79,6 +79,15 @@ namespace Blazor.Server.Backend.Services.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to '{0}' is not a valid file name because it contains folder parts such as '/' or '..'..
+        /// </summary>
+        internal static string InvalidFileName {
+            get {
+                return ResourceManager.GetString("InvalidFileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to transform the upload path of '{0}'..
         /// </summary>
         internal static string PathTransformationFailed {
