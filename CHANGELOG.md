@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0-beta2 - Unreleased
+
+### Fixed
+
+- `npm`, vulnerabilities fixed
+
 ## 1.4.0-beta1 - 2026-10-02
 
 ### Changed
