@@ -24,11 +24,11 @@ namespace Blazor.Shared.Module.ControlPanels;
 [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
 public sealed partial class ModuleManagementControlPanel : ControlPanelBase<ModuleManagementControlPanelState>
 {
-    private readonly string _restartIconCssClasses = MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
-    private readonly string _reloadIconCssClasses = MonochromeIconName.Reload.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
-    private readonly string _installIconCssClasses = MonochromeIconName.Import.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
-    private readonly string _uninstallIconCssClasses = MonochromeIconName.UninstallLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
-    private readonly string _updateIconCssClasses = @MonochromeIconName.InstallPendingLight.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+    private readonly string _restartIconCssClasses = MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
+    private readonly string _reloadIconCssClasses = MonochromeIconName.Reload.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
+    private readonly string _installIconCssClasses = MonochromeIconName.Import.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
+    private readonly string _uninstallIconCssClasses = MonochromeIconName.UninstallLight.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
+    private readonly string _updateIconCssClasses = MonochromeIconName.InstallPendingLight.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
 
     private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
     private bool _dialogVisible;

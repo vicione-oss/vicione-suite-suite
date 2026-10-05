@@ -26,7 +26,7 @@ public sealed partial class EnvironmentOverridesControlPanel : ControlPanelBase<
         = MonochromeIconName.Redo.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
 
     private static readonly string RestartButtonIconCssClass
-        = MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.Small).ToSpaceSeparated();
+        = MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
 
     private bool _dialogVisible;
     private string? _filterText;
