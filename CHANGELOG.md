@@ -1,24 +1,6 @@
 # Changelog
 
-## 1.4.0-beta2 - Unreleased
-
-### Fixed
-
-- `npm`, vulnerabilities fixed
-- Building the suite no longer prints Sass `if()` deprecation warnings from the font packages
-- File upload error messages, such as in the update and backup control panels, are shown in the user's language
-- File uploads reject file names that point outside the upload directory
-- Connection settings, the connection type list is sorted alphabetically and a new connection preselects its first entry
-- Time zone settings, the map highlights the right zone for negative offsets with minutes, such as Newfoundland (UTC-03:30)
-
-### Updated
-
-- `npm`
-  - `@fontsource-utils/scss`, update to `0.2.4`
-  - `@fontsource/noto-sans`, update to `5.3.0`
-  - `@fontsource/roboto`, update to `5.3.0`
-
-## 1.4.0-beta1 - 2026-10-02
+## 1.4.0 - Unreleased
 
 ### Changed
 
@@ -59,6 +41,12 @@
 - `UseDebugRoot` serves fingerprinted static web assets of project references, so modules can drop `StaticWebAssetFingerprintingEnabled=false`
 - MQTT viewer, the broker connection button shows its connected styling again
 - Network interface, the DHCP lease fields stay marked as loading until a lease renewal has finished
+- `npm`, vulnerabilities fixed
+- Building the suite no longer prints Sass `if()` deprecation warnings from the font packages
+- File upload error messages, such as in the update and backup control panels, are shown in the user's language
+- File uploads reject file names that point outside the upload directory
+- Connection settings, the connection type list is sorted alphabetically and a new connection preselects its first entry
+- Time zone settings, the map highlights the right zone for negative offsets with minutes, such as Newfoundland (UTC-03:30)
 
 ### Updated
 
@@ -75,6 +63,10 @@
 - `ViciOne.Ui.Design`, update to version `2.5.0`
 - `ViciOne.Ui.Localization`, update to version `3.6.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`
+- `npm`
+  - `@fontsource-utils/scss`, update to `0.2.4`
+  - `@fontsource/noto-sans`, update to `5.3.0`
+  - `@fontsource/roboto`, update to `5.3.0`
 
 ## 1.3.0 - 2026-08-17
 
