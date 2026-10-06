@@ -45,16 +45,18 @@
             animation-fill-mode: forwards;
         }
 
-        $content-padding: 0px 32px;
+        $content-padding-horizontal: 32px;
 
         ::deep .content-scroll-container {
             .popup-scroll-container__content {
-                padding: $content-padding;
+                padding-left: $content-padding-horizontal;
+                padding-right: $content-padding-horizontal;
             }
         }
 
         ::deep .content-overflow {
-            padding: $content-padding;
+            padding-left: $content-padding-horizontal;
+            padding-right: $content-padding-horizontal;
         }
     }
 }
