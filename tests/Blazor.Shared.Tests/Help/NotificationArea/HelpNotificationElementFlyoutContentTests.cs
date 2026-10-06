@@ -3,6 +3,7 @@ using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Sdk.Testing.Client;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.SearchBox.Extensions;
 
 namespace Blazor.Shared.Tests.Help.NotificationArea;
 
@@ -14,6 +15,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
         // Arrange
         using var ctx = new BunitContext();
         ctx.SetupSuiteServices();
+        ctx.JSInterop.SetupForSearchBox();
 
         // Act
         var component = ctx.Render<HelpNotificationElementFlyoutContent>();
@@ -30,6 +32,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             // Act
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
@@ -47,6 +50,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             await using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
             var textbox = component.Find(".text-box");
@@ -75,6 +79,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
@@ -96,6 +101,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
@@ -119,6 +125,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
@@ -140,6 +147,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             await using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
             var textbox = component.Find(".text-box");
@@ -169,6 +177,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
@@ -192,6 +201,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
@@ -211,6 +221,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             // Arrange
             using var ctx = new BunitContext();
             ctx.SetupSuiteServices();
+            ctx.JSInterop.SetupForSearchBox();
 
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 

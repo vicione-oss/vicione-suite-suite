@@ -7,6 +7,7 @@ using Core.Shared.Instance.Contracts;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Testing.Client;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
 
 namespace Blazor.Shared.Tests.Instance.ControlPanels.Repositories;
 
@@ -18,6 +19,7 @@ public class ArtifactRepositoryControlPanelTests
     {
         var ctx = new BunitContext();
         ctx.SetupSuiteServices();
+        ctx.JSInterop.SetupForTextBox();
         ctx.SetupControlPanelServices();
         ctx.Services.AddControlPanelInfrastructure();
         ctx.Services.AddSingleton(_repositoryClientService);
