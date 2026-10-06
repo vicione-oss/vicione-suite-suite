@@ -15,15 +15,17 @@
         flex-basis: 48px;
     }
 
-    $page-padding: 0px 32px;
+    $page-padding-horizontal: 32px;
 
     ::deep .page-scroll-container {
         .popup-scroll-container__content {
-            padding: $page-padding;
+            padding-left: $page-padding-horizontal;
+            padding-right: $page-padding-horizontal;
         }
     }
 
     ::deep .page-overflow {
-        padding: $page-padding;
+        padding-left: $page-padding-horizontal;
+        padding-right: $page-padding-horizontal;
     }
 }
