@@ -6,6 +6,7 @@ using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
 
 namespace Blazor.Shared.Tests.UserInterface.ControlPanels.Theme;
 
@@ -21,6 +22,8 @@ public sealed class ThemeControlPanelTests
         var dropDownInstance = dropDownModule.SetupModule("attach", _ => true);
         dropDownInstance.SetupVoid("attachInputElement", _ => true);
         dropDownInstance.SetupVoid("setMinimumWidth");
+
+        ctx.JSInterop.SetupForTextBox();
 
         ctx.SetupSuiteServices(setup =>
         {

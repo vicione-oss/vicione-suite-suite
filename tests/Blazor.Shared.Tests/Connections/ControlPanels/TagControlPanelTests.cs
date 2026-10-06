@@ -9,6 +9,7 @@ using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Client;
 using ViciOne.Ui.Blazor.Components.CheckBox;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
 using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Tests.Connections.ControlPanels;
@@ -20,6 +21,8 @@ public sealed class TagControlPanelTests
     private static BunitContext SetupTestContext(ISuiteConnectionService connectionService)
     {
         var ctx = new BunitContext();
+
+        ctx.JSInterop.SetupForTextBox();
 
         ctx.SetupSuiteServices(setup =>
         {

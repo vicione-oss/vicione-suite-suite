@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.Components.Settings;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
 using Xunit;
 using OpenIdProviderControlPanelStrings
     = Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Localization.OpenIdProviderControlPanel;
@@ -22,6 +23,8 @@ public sealed class OpenIdProviderControlPanelTests
     private static BunitContext SetupTestContext()
     {
         var ctx = new BunitContext();
+
+        ctx.JSInterop.SetupForTextBox();
 
         ctx.SetupSuiteServices(setup =>
         {

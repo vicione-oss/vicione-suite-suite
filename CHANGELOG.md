@@ -26,6 +26,7 @@
 - `FirstRunWizard` feature flag, enabled by default, gating the redirect to the first-run wizard
 - Admin-only "OpenID provider" settings panel (Settings → User Management) for external sign-in (see `docs/oidc.md`)
 - CSP violation reporting: browsers report violations to `POST /csp-report`, and the Suite logs each one as a warning. Requires HTTPS
+- `Dialogs` and `Popups` keep the focus inside their boundaries while open
 
 ### Fixed
 
@@ -58,8 +59,8 @@
 - `Npgsql.EntityFrameworkCore.PostgreSQL`, update to version `10.0.3`
 - `OpenTelemetry` packages, update to version `1.18.0`
 - `System.IO.Abstractions` package, update version to `22.3.0`
-- `ViciOne.Suite.Sdk` packages, update to version `3.2.0`
-- `ViciOne.Ui.Blazor.Components` packages, update to version `6.2.0`
+- `ViciOne.Suite.Sdk` packages, update to version `3.3.0`
+- `ViciOne.Ui.Blazor.Components` packages, update to version `6.4.0`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
 - `ViciOne.Ui.Localization`, update to version `3.6.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`
