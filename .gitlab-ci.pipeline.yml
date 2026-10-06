@@ -38,6 +38,11 @@ stages:
 .run_eslint: &run_eslint
   - npx eslint src samples
 
+.prepare_metadata: &prepare_metadata
+  - mkdir -p "${METADATA_DIR}"
+  - cat suite-metadata.json > "${METADATA_DIR}/${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_amd64_${APP_HMS_VERSION}.json"
+  - cat suite-metadata.json > "${METADATA_DIR}/${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_arm64_${APP_HMS_VERSION}.json"
+
 # Rules anchors (defined here so they can be used in component inputs)
 .rules_tag: &rules_tag
   if: '$CI_COMMIT_TAG'
@@ -118,9 +123,16 @@ include:
         - <<: *rules_web
       env_file_name: version.env
       before_script:
+        - VERSION_FILE=$(cat VERSION)
+        - HMS_VERSION_FILE=$(cat VERSION_HOSTMANAGEMENT)
         - echo "APP_PIPELINE=${CI_PIPELINE_ID}" >> version.env
-        - echo "APP_VERSION=$(cat VERSION)" >> version.env
+        - echo "APP_VERSION=${VERSION_FILE}" >> version.env
+        - echo "APP_HMS_VERSION=${HMS_VERSION_FILE}" >> version.env
         - echo "APP_TAG=${CI_COMMIT_TAG}" >> version.env
+        - |
+          DEB_ARTIFACT_VERSION="${CI_COMMIT_TAG:-$VERSION_FILE~$CI_PIPELINE_ID}"
+          DEB_ARTIFACT_VERSION="$(printf '%s' "$DEB_ARTIFACT_VERSION" | sed 's/-/~/')"
+          echo "ARTIFACT_VERSION=${DEB_ARTIFACT_VERSION}" >> version.env
 
   ### Renovate configuration validation
   - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/renovate/configuration-validation@v1.1.0
@@ -216,34 +228,77 @@ include:
         - dotnet nuget update source JFrogViciOne --configfile NuGet.Config -u $NuGet_User_RW_JFrog -p $NuGet_PW_RW_JFrog --store-password-in-clear-text
         - dotnet nuget add source "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/nuget/index.json" --name GitLabRegistry --username gitlab-ci-token --password $CI_JOB_TOKEN --store-password-in-clear-text
 
-  # Promote to staging
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/promote@v2.0.1
+  # Download Artifacts from GitLab Registry
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/download@v0.1.5
     inputs:
-      name: "Release Packages to JFrog"
-      stage: release
-      rules: 
-        - *rules_tag_manual
-      source_repository: "vicione-suite-dev"
-      destination_repository: "vicione-suite-staging"
-      remote_path: "suites"
-
-  # Promote staging to production
-  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/promote@v2.0.1
-    inputs:
-      name: "Public-Release Packages to JFrog"
-      stage: release-public
+      name: "Download Debian Package arm64"
+      stage: deploy
+      package_name: $PACKAGE_NAME
+      remote_name: "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_arm64.deb"
       rules:
-        - *rules_tag_manual
+        - <<: *rules_tag
+        - <<: *rules_merge_request_manual
+        - <<: *rules_web_manual
+        - <<: *rules_protected_or_default_branch_manual
+
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/registry/download@v0.1.5
+    inputs:
+      name: "Download Debian Package amd64"
+      stage: deploy
+      package_name: $PACKAGE_NAME
+      remote_name: "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_amd64.deb"
+      rules:
+        - <<: *rules_tag
+        - <<: *rules_merge_request_manual
+        - <<: *rules_web_manual
+        - <<: *rules_protected_or_default_branch_manual
+  # (Pre-)Release Packages to dev and staging
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/release@v2.1.1
+    inputs:
+      name: "Prerelease Debian"
+      stage: deploy
+      repository: "vicione-suite-dev"
+      upload_path: "suites"
+      rules:
+        - <<: *rules_merge_request
+        - <<: *rules_web
+        - <<: *rules_protected_or_default_branch
+      artifacts:
+        - "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_arm64.deb"
+        - "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_amd64.deb"
+        - "${METADATA_DIR}/${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_arm64_${APP_HMS_VERSION}.json"
+        - "${METADATA_DIR}/${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_amd64_${APP_HMS_VERSION}.json"
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/release@v2.1.1
+    inputs:
+      name: "Release Debian to staging"
+      stage: deploy
+      repository: "vicione-suite-staging"
+      upload_path: "suites"
+      rules:
+        - <<: *rules_tag
+      artifacts:
+        - "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_arm64.deb"
+        - "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_amd64.deb"
+        - "${METADATA_DIR}/${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_arm64_${APP_HMS_VERSION}.json"
+        - "${METADATA_DIR}/${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_amd64_${APP_HMS_VERSION}.json"
+  - component: $CI_SERVER_FQDN/vicione-oss/tooling/components/jfrog/promote@v2.1.1
+    inputs:
+      name: "Release Debian to public"
+      stage: deploy
       source_repository: "vicione-suite-staging"
       destination_repository: "vicione-suite"
       remote_path: "suites"
+      remote_pattern: "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}*"
+      rules:
+        - <<: *rules_tag_manual
 
 variables:
   # The schedule switches below. A pipeline schedule sets them under Inputs, because this project's
   # schedule form offers no variables; a CI/CD variable of the same name still wins where one is allowed.
   # See docs/e2e-testing.md
   PACKAGE_NAME: "ci-artifacts"
-  ARTIFACT_PREFIX: "suite"
+  ARTIFACT_PREFIX: "vicione-suite"
+  METADATA_DIR: "metadata"
   DEB_PACKAGING_PROJECT: 'vicione-oss/vicione/suite/deb-packaging'
   DEB_PACKAGING_BRANCH: 'master'
   # mise HTTP settings - retry transient network failures with exponential backoff
@@ -284,80 +339,6 @@ variables:
   - if [ ! -z "$CI_COMMIT_TAG" ]; then VERSION="$CI_COMMIT_TAG (${CI_COMMIT_SHORT_SHA})"; fi
   - sed -i -E "s/##VERSION_REF##/$VERSION/g" src/Core.OS/version.json
 
-.jfrog-package-release:
-  extends: .minimal
-  stage: deploy
-  image: releases-docker.jfrog.io/jfrog/jfrog-cli-v2-jf
-  variables:
-    SERVER: "https://ifm.jfrog.io/artifactory"
-    USER: ${Raw_User_RW_JFrog}
-    PASSWORD: ${Raw_PW_RW_JFrog}
-    REPOSITORY_DESTINATION: "vicione-suite-dev"
-  before_script:
-    - apk add --no-cache curl
-    - jf config add --user $USER --password ${PASSWORD} --artifactory-url ${SERVER} jfrog
-    - jf config use jfrog
-  script:
-    - APP_PIPELINE="${CI_PIPELINE_ID}"
-    - APP_VERSION="$(cat VERSION)"
-    - HMS_VERSION="$(cat VERSION_HOSTMANAGEMENT)"
-    - APP_TAG="${CI_COMMIT_TAG}"
-    - VERSION="${APP_VERSION}"
-    - if [[ -z "${APP_TAG}" ]]; then VERSION="${VERSION}~${APP_PIPELINE}"; fi
-    - |
-      artifacts=(
-        "vicione-suite_${VERSION}_amd64.deb"
-        "vicione-suite_${VERSION}_arm64.deb"
-        "vicione-suite_${VERSION}_amd64_${HMS_VERSION}.json"
-        "vicione-suite_${VERSION}_arm64_${HMS_VERSION}.json"
-      )
-    - |
-      printf "%s\n" "${artifacts[@]}" >> artifacts.list
-
-      for artifact in "${artifacts[@]}"; do
-        echo "Processing artifact: ${artifact}"
-
-        # Download .deb from Package Registry
-        case "${artifact}" in
-          *.deb)
-            echo "Downloading from Package Registry: ${artifact}"
-            curl --fail --silent --show-error \
-              --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
-              --output "${artifact}" \
-              "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${APP_PIPELINE}/${artifact}"
-            ;;
-        esac
-
-        # Create Metadata files
-        case "${artifact}" in
-          *.json)
-            echo "Creating metadata: ${artifact}"
-            cat "suite-metadata.json" > "${artifact}"
-            ;;
-        esac
-
-        # Upload files to JFrog
-        case "${artifact}" in
-          *.deb|*.json)
-            if [ -f "${artifact}" ]; then
-              echo "Uploading to JFrog: ${artifact}"
-              jf rt upload "${artifact}" "${REPOSITORY_DESTINATION}/suites/${artifact}"
-            else
-              echo "WARNING: ${artifact} not found locally, skipping upload"
-            fi
-            ;;
-        esac
-      done
-  artifacts:
-    paths:
-      - vicione-suite_*.deb
-      - artifacts.list
-  when: manual
-  rules:
-    - <<: *rules_merge_request_manual
-    - <<: *rules_web_manual
-    - <<: *rules_protected_or_default_branch_manual
-
 Validation:
   extends: .minimal
   stage: test
@@ -371,6 +352,19 @@ Validation:
         fi
       fi
   rules: *rules_common
+
+Metadata:
+  stage: .pre
+  script:
+    - *prepare_metadata
+  rules: *rules_common
+  needs:
+    - Version
+  artifacts:
+    paths:
+      - metadata/*
+    expire_in: 5 days
+
 
 ####################  Test stage
 
@@ -519,7 +513,7 @@ trigger deb packaging:
     APP_VERSION: ${APP_VERSION}
     APP_TAG: ${APP_TAG}
     PARENT_PROJECT_ID: ${CI_PROJECT_ID}
-    ARTIFACT_PREFIX: "suite"
+    ARTIFACT_PREFIX: "vicione-suite"
   trigger:
     project: ${DEB_PACKAGING_PROJECT}
     branch: ${DEB_PACKAGING_BRANCH}
@@ -531,12 +525,34 @@ trigger deb packaging:
   when: manual
   rules: *rules_packages
 
-Prerelease Packages to JFrog:
-  extends: .jfrog-package-release
-  variables:
-    SERVER: "https://ifm.jfrog.io/artifactory"
-    USER: ${Raw_User_RW_JFrog}
-    PASSWORD: ${Raw_PW_RW_JFrog}
-    REPOSITORY_DESTINATION: "vicione-suite-dev"
+# Configure Package Release job dependencies
+Download Debian Package arm64:
   needs:
     - "trigger deb packaging"
+    - "Version"
+
+Download Debian Package amd64:
+  needs:
+    - "trigger deb packaging"
+    - "Version"
+
+# Configure JFrog job dependencies
+Prerelease Debian:
+  needs:
+    - "trigger deb packaging"
+    - "Download Debian Package arm64"
+    - "Download Debian Package amd64"
+    - "Version"
+    - "Metadata"
+
+Release Debian to staging:
+  needs:
+    - "trigger deb packaging"
+    - "Download Debian Package arm64"
+    - "Download Debian Package amd64"
+    - "Version"
+    - "Metadata"
+
+Release Debian to public:
+  needs:
+    - "Release Debian to staging"
