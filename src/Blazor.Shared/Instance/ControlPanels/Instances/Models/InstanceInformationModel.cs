@@ -39,7 +39,7 @@ public sealed class InstanceInformationModel(IInstanceInformation info) : IInsta
 
     public string? BranchName { get; } = info.BranchName;
 
-    public bool InRecoveryMode { get; set; }
+    public bool InRecoveryMode { get; set; } = info.InRecoveryMode;
 
-    IReadOnlyCollection<string> IInstanceInformation.InstalledModules => throw new NotImplementedException();
+    IReadOnlyCollection<string> IInstanceInformation.InstalledModules => InstalledModules;
 }

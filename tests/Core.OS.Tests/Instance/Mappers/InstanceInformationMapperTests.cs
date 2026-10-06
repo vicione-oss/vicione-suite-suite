@@ -1,4 +1,5 @@
-using System.Reflection;
+using AutoFixture;
+using AwesomeAssertions.Equivalency;
 using Core.OS.Instance.Commands;
 using Core.OS.Instance.Mappers;
 using Core.Shared.Instance.Contracts;
@@ -8,170 +9,97 @@ namespace Core.OS.Tests.Instance.Mappers;
 
 public class InstanceInformationMapperTests
 {
-    private static readonly HashSet<string> CommandOnlyProperties =
-    [
-        nameof(RegisterInstance.Configuration),
-        nameof(RegisterInstance.CorrelationId),
-        nameof(RegisterInstance.ForceSync),
-        nameof(RegisterInstance.LastAppliedSequences)
-    ];
-
-    private static readonly HashSet<string> LifecycleProperties =
-    [
-        nameof(InstanceInformation.FirstTimeRegistered),
-        nameof(InstanceInformation.LastRegistered),
-        nameof(InstanceInformation.InRecoveryMode)
-    ];
-
     [Fact]
     public void ToRegisterInstanceCommand_should_map_all_shared_properties()
     {
-        var info = CreateFullInstanceInformation();
-        var command = info.ToRegisterInstanceCommand(["mod"], [], []);
+        // Arrange
+        var info = CreateInstanceInformation();
+        List<string> loadedModules = ["loaded-module"];
 
-        var infoProps = GetSettableProperties<InstanceInformation>()
-            .Except(LifecycleProperties)
-            .ToHashSet();
+        // Act
+        var command = info.ToRegisterInstanceCommand(loadedModules, [], []);
 
-        var commandProps = GetSettableProperties<RegisterInstance>()
-            .Except(CommandOnlyProperties)
-            .ToHashSet();
-
-        var sharedNames = MapCommandPropertyToInfoProperty(commandProps);
-
-        foreach (var infoProp in infoProps)
-        {
-            Assert.Contains(infoProp, sharedNames.Values.ToHashSet());
-        }
+        // Assert
+        command.Should().BeEquivalentTo(info, o => o
+            .WithMapping<InstanceInformation, RegisterInstance>(i => i.Id, c => c.InstanceId)
+            .Excluding(i => i.FirstTimeRegistered)
+            .Excluding(i => i.LastRegistered)
+            .Excluding(i => i.InRecoveryMode)
+            .Excluding(i => i.InstalledModules));
+        command.InstalledModules.Should().Equal(loadedModules);
     }
 
     [Fact]
     public void ToInstanceInformation_from_command_should_set_all_non_lifecycle_properties()
     {
-        var command = CreateFullCommand();
-        var result = command.ToInstanceInformation(DateTimeOffset.UtcNow);
+        // Arrange
+        var command = CreateCommand();
+        var registrationTime = DateTimeOffset.UtcNow;
 
-        var expectedProps = GetSettableProperties<InstanceInformation>()
-            .Except(LifecycleProperties)
-            .Except([nameof(InstanceInformation.InRecoveryMode)])
-            .ToList();
+        // Act
+        var result = command.ToInstanceInformation(registrationTime);
 
-        foreach (var prop in expectedProps)
-        {
-            var value = typeof(InstanceInformation).GetProperty(prop)!.GetValue(result);
-            Assert.False(IsDefault(value), $"Property '{prop}' was not set by ToInstanceInformation");
-        }
+        // Assert
+        result.Should().BeEquivalentTo(command, MatchingSharedProperties);
+        result.FirstTimeRegistered.Should().Be(registrationTime);
+        result.LastRegistered.Should().Be(registrationTime);
     }
 
     [Fact]
     public void ApplyTo_from_command_should_update_all_non_lifecycle_properties()
     {
-        var command = CreateFullCommand();
-        var existing = new InstanceInformation { Id = command.InstanceId };
+        // Arrange
+        var command = CreateCommand();
+        var existing = CreateInstanceInformation(command.InstanceId);
+        var firstTimeRegistered = existing.FirstTimeRegistered;
+        var registrationTime = DateTimeOffset.UtcNow;
 
-        command.ApplyTo(existing, DateTimeOffset.UtcNow);
+        // Act
+        command.ApplyTo(existing, registrationTime);
 
-        var expectedProps = GetSettableProperties<InstanceInformation>()
-            .Except([nameof(InstanceInformation.FirstTimeRegistered), nameof(InstanceInformation.InRecoveryMode)])
-            .ToList();
-
-        foreach (var prop in expectedProps)
-        {
-            var value = typeof(InstanceInformation).GetProperty(prop)!.GetValue(existing);
-            Assert.False(IsDefault(value), $"Property '{prop}' was not set by ApplyTo");
-        }
+        // Assert
+        existing.Should().BeEquivalentTo(command, MatchingSharedProperties);
+        existing.FirstTimeRegistered.Should().Be(firstTimeRegistered);
+        existing.LastRegistered.Should().Be(registrationTime);
     }
 
     [Fact]
     public void ApplyTo_from_interface_should_copy_all_non_lifecycle_properties()
     {
-        var source = CreateFullInstanceInformation();
-        source.FirstTimeRegistered = DateTimeOffset.UtcNow.AddDays(-10);
-        source.LastRegistered = DateTimeOffset.UtcNow;
+        // Arrange
+        var source = CreateInstanceInformation();
+        var target = CreateInstanceInformation(source.Id);
+        source.InRecoveryMode = false;
+        target.InRecoveryMode = true;
 
-        var target = new InstanceInformation { Id = source.Id };
-
+        // Act
         ((IInstanceInformation)source).ApplyTo(target);
 
-        var expectedProps = GetSettableProperties<InstanceInformation>()
-            .Except([nameof(InstanceInformation.InRecoveryMode)])
-            .ToList();
-
-        foreach (var prop in expectedProps)
-        {
-            var sourceValue = typeof(InstanceInformation).GetProperty(prop)!.GetValue(source);
-            var targetValue = typeof(InstanceInformation).GetProperty(prop)!.GetValue(target);
-            Assert.Equal(sourceValue, targetValue);
-        }
+        // Assert
+        target.Should().BeEquivalentTo(source, o => o.Excluding(i => i.InRecoveryMode));
+        target.InRecoveryMode.Should().BeTrue();
     }
 
-    private static RegisterInstance CreateFullCommand() =>
-        new()
-        {
-            InstanceId = Guid.NewGuid(),
-            Type = InstanceType.Master,
-            Name = "TestInstance",
-            FormattedName = "{Test} Instance",
-            Description = "A test instance",
-            SerialNumber = "SN-001",
-            SystemType = "Linux",
-            SdkVersion = "1.0.0",
-            BranchName = "main",
-            InstalledModules = ["mod-a", "mod-b"],
-            Configuration = [new("key", "value")],
-            Version = "2.0.0",
-            CorrelationId = Guid.NewGuid(),
-            ForceSync = true,
-            LastAppliedSequences = new() { ["ctx"] = 42 }
-        };
+    /// <summary>
+    /// Fills every settable property, so a property added later is non-default without touching this test.
+    /// <see cref="InstanceType"/> is set explicitly because AutoFixture starts with its default value.
+    /// </summary>
+    private static InstanceInformation CreateInstanceInformation(Guid? id = null) =>
+        new Fixture().Build<InstanceInformation>()
+            .With(i => i.Id, id ?? Guid.NewGuid())
+            .With(i => i.Type, InstanceType.Master)
+            .Create();
 
-    private static InstanceInformation CreateFullInstanceInformation() =>
-        new()
-        {
-            Id = Guid.NewGuid(),
-            Type = InstanceType.Master,
-            Name = "TestInstance",
-            FormattedName = "{Test} Instance",
-            Description = "A test instance",
-            SerialNumber = "SN-001",
-            SystemType = "Linux",
-            SdkVersion = "1.0.0",
-            BranchName = "main",
-            InstalledModules = ["mod-a", "mod-b"],
-            Version = "2.0.0",
-            FirstTimeRegistered = DateTimeOffset.UtcNow.AddDays(-30),
-            LastRegistered = DateTimeOffset.UtcNow
-        };
+    private static RegisterInstance CreateCommand() =>
+        new Fixture().Build<RegisterInstance>()
+            .With(c => c.Type, InstanceType.Master)
+            .Create();
 
-    private static HashSet<string> GetSettableProperties<T>() =>
-        typeof(T)
-            .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(p => p.CanWrite || p.GetMethod?.ReturnType != p.PropertyType)
-            .Where(p => p.GetCustomAttribute<System.Runtime.CompilerServices.CompilerGeneratedAttribute>() == null)
-            .Select(p => p.Name)
-            .ToHashSet();
-
-    private static Dictionary<string, string> MapCommandPropertyToInfoProperty(HashSet<string> commandProps)
-    {
-        var map = new Dictionary<string, string>();
-        foreach (var prop in commandProps)
-        {
-            var infoPropName = prop == nameof(RegisterInstance.InstanceId)
-                ? nameof(InstanceInformation.Id)
-                : prop;
-            map[prop] = infoPropName;
-        }
-        return map;
-    }
-
-    private static bool IsDefault(object? value)
-    {
-        if (value is null) return true;
-        var type = value.GetType();
-        if (type == typeof(string)) return string.IsNullOrEmpty((string)value);
-        if (type == typeof(Guid)) return (Guid)value == Guid.Empty;
-        if (type.IsValueType) return value.Equals(Activator.CreateInstance(type));
-        if (value is ICollection<string> list) return list.Count == 0;
-        return false;
-    }
+    /// <summary>
+    /// Command-only members such as <see cref="RegisterInstance.Configuration"/> have no counterpart and are skipped.
+    /// </summary>
+    private static EquivalencyOptions<RegisterInstance> MatchingSharedProperties(EquivalencyOptions<RegisterInstance> options) =>
+        options
+            .WithMapping<RegisterInstance, InstanceInformation>(c => c.InstanceId, i => i.Id)
+            .ExcludingMissingMembers();
 }
