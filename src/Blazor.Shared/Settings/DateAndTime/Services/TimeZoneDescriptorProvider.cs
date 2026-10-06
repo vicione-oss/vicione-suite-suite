@@ -90,14 +90,7 @@ internal sealed class TimeZoneDescriptorProvider : ITimeZoneDescriptorProvider
 
     private static Uri GetTimeZoneImageSrc(TimeZoneInfo timeZoneInfo)
     {
-        string timeZoneHourOffsetFormat;
-
-        if (timeZoneInfo.BaseUtcOffset.TotalHours > timeZoneInfo.BaseUtcOffset.Hours)
-            timeZoneHourOffsetFormat = "0.##";
-        else
-            timeZoneHourOffsetFormat = "0";
-
-        var filename = $"timezone_{timeZoneInfo.BaseUtcOffset.TotalHours.ToString(timeZoneHourOffsetFormat, CultureInfo.InvariantCulture)}.png";
+        var filename = $"timezone_{timeZoneInfo.BaseUtcOffset.TotalHours.ToString("0.##", CultureInfo.InvariantCulture)}.png";
 
         return TimeZoneImageHelper.GetTimeZoneImageUri(filename);
     }

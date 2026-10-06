@@ -9,6 +9,7 @@
 - File upload error messages, such as in the update and backup control panels, are shown in the user's language
 - File uploads reject file names that point outside the upload directory
 - Connection settings, the connection type list is sorted alphabetically and a new connection preselects its first entry
+- Time zone settings, the map highlights the right zone for negative offsets with minutes, such as Newfoundland (UTC-03:30)
 
 ### Updated
 
