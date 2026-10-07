@@ -118,13 +118,13 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ClickHere" xml:space="preserve">
-    <value>If you didn't click here.</value>
+    <value>If you didn't receive it, click here to request a new one.</value>
   </data>
   <data name="ConfirmationIsRequiredText" xml:space="preserve">
     <value>You need to confirm your email address before you can log in.</value>
   </data>
   <data name="HowToConfirmText" xml:space="preserve">
-    <value>You should have received an email with a confirmation link when your account was first created.</value>
+    <value>You should have received an email with a confirmation link when your account was created.</value>
   </data>
   <data name="Title" xml:space="preserve">
     <value>Confirm email address</value>
