@@ -311,6 +311,14 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
         var installed = State.SuiteVersions?.Single(k => k.Installed);
         State.SelectedVersionChanged = !string.Equals(installed?.Version, State.SelectedVersion, StringComparison.Ordinal);
 
-        await BeginEdit();
+        if (State.SelectedVersionChanged)
+        {
+            await BeginEdit();
+            return;
+        }
+
+        // Cancelling resets the whole panel, so it would also discard an uploaded device image.
+        if (State.SwuFilenameUploaded is null)
+            await CancelEdit();
     }
 }

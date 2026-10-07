@@ -108,6 +108,23 @@ public class IFileSystemExtensionsTests
         }
 
         [Fact]
+        public void Should_keep_prerelease_part_of_version_from_json()
+        {
+            // Arrange
+            var appPath = _fileSystem.Path.GetDirectoryName(_coreAssembly!.Location);
+            var dataPath = _fileSystem.Path.Combine(appPath!, "version.json");
+
+            _fileSystem.AddFile(dataPath, "{\"Version\":\"1.4.0-beta1 (40454a3e)\"}");
+
+            // Act
+            var version = _fileSystem.EvaluateLocalVersionString(out var branchName);
+
+            // Assert
+            branchName.Should().BeNull();
+            version.Should().Be("1.4.0-beta1");
+        }
+
+        [Fact]
         public void Should_fallback_to_assembly_version_if_file_is_malformed()
         {
             // Arrange

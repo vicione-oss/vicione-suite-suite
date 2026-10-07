@@ -23,34 +23,24 @@
         }
         else if (State.VersionComboBoxItems is not null)
         {
-            @if (State.SelectedVersionChanged)
-            {
-                <SettingsGroup Title="@TechnicalTerms.Version" Expanded="true">
-                    <Expander>
-                        <ComboBoxExpander Items="@State.VersionComboBoxItems"
-                                          ValueSelector="@(i => i.Value)"
-                                          TextSelector="@(i => i.Text)"
-                                          @bind-Value="State.SelectedVersion"
-                                          @bind-Value:after="SelectedVersionChanged" />
-                    </Expander>
+            var expanded = State.SelectedVersionChanged;
 
-                    <ChildContent>
+            <SettingsGroup Title="@TechnicalTerms.Version" Expanded="@expanded">
+                <Expander>
+                    <ComboBoxExpander Items="@State.VersionComboBoxItems"
+                                      ValueSelector="@(i => i.Value)"
+                                      TextSelector="@(i => i.Text)"
+                                      @bind-Value="State.SelectedVersion"
+                                      @bind-Value:after="SelectedVersionChanged" />
+                </Expander>
+
+                <ChildContent>
+                    @if (State.SelectedVersionChanged)
+                    {
                         <InformationBannerSettingsField Text="@Localization.UpdateControlPanel.VersionChangedBannerContent" />
-                    </ChildContent>
-                </SettingsGroup>
-            }
-            else
-            {
-                <SettingsGroup Title="@TechnicalTerms.Version" Expanded="false">
-                    <Expander>
-                        <ComboBoxExpander Items="@State.VersionComboBoxItems"
-                                          ValueSelector="@(i => i.Value)"
-                                          TextSelector="@(i => i.Text)"
-                                          @bind-Value="State.SelectedVersion"
-                                          @bind-Value:after="SelectedVersionChanged" />
-                    </Expander>
-                </SettingsGroup>
-            }
+                    }
+                </ChildContent>
+            </SettingsGroup>
         }
         else
         {
@@ -81,7 +71,7 @@
                                              OnUploadStart="SwuFileUploadStart"
                                              OnUploadSuccess="SwuFileUploadSuccess"
                                              OnUploadError="SwuFileUploadError"
-                                             OnUploadCancel="SwuFileUploadCancel"/>
+                                             OnUploadCancel="SwuFileUploadCancel" />
                 </SettingsField>
 
                 <InformationBannerSettingsField Text="@Localization.UpdateControlPanel.SwuFilenameChangedBannerContent"
@@ -188,7 +178,7 @@
                     </div>
                 </SettingsInformation>
             }
-            
+
             @if (_isResetInProgress)
             {
                 <SettingsInformation>
