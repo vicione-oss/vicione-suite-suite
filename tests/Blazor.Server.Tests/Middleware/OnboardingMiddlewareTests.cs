@@ -2,6 +2,7 @@
 using Blazor.Server.Backend.Middleware;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Services;
+using Core.Shared.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,15 @@ namespace Blazor.Server.Tests.Middleware;
 public sealed class OnboardingMiddlewareTests
 {
     private readonly Guid _instanceId = Guid.NewGuid();
+
+    public static TheoryData<string> ExcludedPaths =>
+    [
+        "/_framework",
+        "/_blazor",
+        "/.well-known",
+        $"/{Shared.Constants.UpdateLanguageCookieRoute}",
+        CspViolationReporting.Route
+    ];
 
     private static ServiceProvider SetupServiceProvider(HttpContext context, OnboardingState state, bool firstRunWizardEnabled = true)
     {
@@ -72,13 +82,30 @@ public sealed class OnboardingMiddlewareTests
     }
 
     [Theory]
-    [InlineData("/_framework")]
-    [InlineData("/_blazor")]
-    [InlineData("/.well-known")]
-    public async Task Should_call_next_for_framework_internal_paths(string internalPath)
+    [MemberData(nameof(ExcludedPaths))]
+    public async Task Should_call_next_for_excluded_paths(string excludedPath)
     {
         // Arrange
-        var (context, nextCalled) = BuildHttpContext(authenticated: true, requestPath: internalPath);
+        var (context, nextCalled) = BuildHttpContext(authenticated: true, requestPath: excludedPath);
+        var state = new OnboardingState { InstanceId = _instanceId, Completed = false, ShowWizardWhenNotCompleted = true };
+        await using var _ = SetupServiceProvider(context, state);
+
+        var middleware = new OnboardingMiddleware(_ => { nextCalled.Value = true; return Task.CompletedTask; });
+
+        // Act
+        await middleware.InvokeAsync(context);
+
+        // Assert
+        nextCalled.Value.Should().BeTrue();
+        context.Response.StatusCode.Should().Be(200);
+    }
+
+    [Theory]
+    [MemberData(nameof(ExcludedPaths))]
+    public async Task Should_call_next_for_excluded_paths_in_other_casing(string excludedPath)
+    {
+        // Arrange
+        var (context, nextCalled) = BuildHttpContext(authenticated: true, requestPath: excludedPath.ToUpperInvariant());
         var state = new OnboardingState { InstanceId = _instanceId, Completed = false, ShowWizardWhenNotCompleted = true };
         await using var _ = SetupServiceProvider(context, state);
 
@@ -158,7 +185,7 @@ public sealed class OnboardingMiddlewareTests
     /// These two tests describe that as it is today, so they turn red once it is fixed.
     /// <para>
     /// When the redirect learns to spare such a user, invert them: next is called and the response
-    /// stays 200, the same shape as <see cref="Should_call_next_for_framework_internal_paths"/>.
+    /// stays 200, the same shape as <see cref="Should_call_next_for_excluded_paths"/>.
     /// </para>
     /// <para>
     /// They hold the instance state that ships — the <c>FirstRunWizard</c> feature on. An instance
