@@ -12,14 +12,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Core.Module.Tests;
 
-public class ModuleArtifactRepositoryTests
+public partial class ModuleArtifactRepositoryTests
 {
+    /// <summary>
+    /// Tests query <c>linux-arm64</c>, which CI publishes for every module, so the results do not depend on the test machine.
+    /// </summary>
+    private static readonly ArtifactPlatform LinuxArm64Platform = new(OSPlatform.Linux, Architecture.Arm64);
+
     private readonly Version _sdkVersion = new(2, 1, 0);
     private readonly string _packageName = "ViciOne.Suite.ClusterManagement";
     private readonly string _packageVersion = "2.1.0";
     private readonly ILogger<ModuleArtifactRepository> _logger = Substitute.For<ILogger<ModuleArtifactRepository>>();
 
-    private static ServiceProvider CreateServiceProvider()
+    private static ServiceProvider CreateServiceProvider(IArtifactPlatform? platform = null)
     {
         var optionsProvider = Substitute.For<IArtifactRepositoryOptionsProvider>();
         optionsProvider.GetOptions().Returns(SystemTestSettings.GetArtifactRepositoryOptions());
@@ -27,6 +32,7 @@ public class ModuleArtifactRepositoryTests
         return new ServiceCollection()
             .AddSingleton<IFileSystem>(new FileSystem())
             .AddSingleton<ModuleArtifactRepository>()
+            .AddSingleton<IArtifactPlatform>(platform ?? LinuxArm64Platform)
             .AddSingleton(Substitute.For<ILogger<ModuleArtifactRepository>>())
             .AddSingleton(optionsProvider)
             .AddHttpClient()
@@ -161,7 +167,7 @@ public class ModuleArtifactRepositoryTests
                 Interlocked.Decrement(ref concurrent);
             }
 
-            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, _logger);
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, LinuxArm64Platform, _logger);
             var packages = Enumerable.Range(0, 12)
                 .Select(i => new ModuleDependencyPackage { Name = $"Module.{i}", Version = "1.0.0" })
                 .ToArray();
@@ -237,7 +243,7 @@ public class ModuleArtifactRepositoryTests
                     throw new IOException("There is not enough space on the disk.");
                 });
 
-            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, _logger);
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, LinuxArm64Platform, _logger);
 
             // Act
             var result = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);
@@ -272,7 +278,7 @@ public class ModuleArtifactRepositoryTests
                         throw new IOException("There is not enough space on the disk.");
                 });
 
-            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, _logger);
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, LinuxArm64Platform, _logger);
 
             // Act
             var first = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);
@@ -310,7 +316,7 @@ public class ModuleArtifactRepositoryTests
                     throw new InvalidDataException("Central Directory corrupt.");
                 });
 
-            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, _logger);
+            var repository = new ModuleArtifactRepository(artifactRepository, fileSystem, LinuxArm64Platform, _logger);
 
             // Act
             var result = await repository.DownloadAndExtract(tempDir.Path, package, TestContext.Current.CancellationToken);
@@ -356,7 +362,7 @@ public class ModuleArtifactRepositoryTests
             await using var services = CreateServiceProvider();
             var repository = services.GetRequiredService<ModuleArtifactRepository>();
             var artifact = Substitute.For<IArtifact>();
-            artifact.Name.Returns($"{_packageVersion}-{RuntimeInformation.RuntimeIdentifier}_{_sdkVersion}.json");
+            artifact.Name.Returns($"{_packageVersion}-{LinuxArm64Platform.ModuleRuntimeIdentifier}_{_sdkVersion}.json");
             artifact.Path.Returns($"modules/{_packageName}");
             artifact.Repository.Returns("vicione-suite");
 
@@ -471,6 +477,23 @@ public class ModuleArtifactRepositoryTests
 
             // Assert
             asset.Should().NotBeNull();
+        }
+
+        [Theory]
+        [MemberData(nameof(ArtifactPlatformTheoryData.ModulePlatforms), MemberType = typeof(ArtifactPlatformTheoryData))]
+        public async Task Should_return_latest_module_metadata_asset_for_platform(string osPlatform, Architecture osArchitecture,
+            string runtimeIdentifier)
+        {
+            // Arrange
+            await using var services = CreateServiceProvider(ArtifactPlatformTheoryData.Create(osPlatform, osArchitecture));
+            var repository = services.GetRequiredService<ModuleArtifactRepository>();
+
+            // Act
+            var asset = await repository.QueryLatestModuleMetadataArtifact(_sdkVersion, _packageName, null, null, TestContext.Current.CancellationToken);
+
+            // Assert
+            asset.Should().NotBeNull();
+            asset.Name.Should().Contain($"-{runtimeIdentifier}_");
         }
 
         [Fact]

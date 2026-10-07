@@ -3,6 +3,7 @@ using Core.Module;
 using Core.Module.Extensions;
 using Core.OS.Hosting;
 using Core.OS.Hosting.Contracts;
+using Core.OS.Instance;
 using Core.OS.Modules.Extensions;
 using Core.OS.Modules.Services;
 
@@ -35,11 +36,8 @@ internal static class ModuleSynchronizationStep
 
         // A package not enabled by configuration must not be downloaded.
         var packages = ctx.Manifest.GetValidModulePackages([.. moduleIds], debugModuleVersions, ctx.Logger);
-        var repositoryLogger = ctx.LoggerFactory.CreateLogger<JFrogArtifactRepository>();
-        var repository = new JFrogArtifactRepository(ctx.FileSystem, httpClientFactory, ctx.RepositoryOptionsCache, repositoryLogger);
-        var moduleRepositoryLogger = ctx.LoggerFactory.CreateLogger<ModuleArtifactRepository>();
-        var moduleRepository = new ModuleArtifactRepository(repository, ctx.FileSystem, moduleRepositoryLogger);
-        
+        var moduleRepository = CreateModuleRepository(ctx, ctx.RepositoryOptionsCache, httpClientFactory);
+
         var synchronizer = new ModuleSynchronizer(ctx.FileSystem)
             .WithApiAdapter(moduleRepository)
             .WithPackages(packages)
@@ -72,5 +70,15 @@ internal static class ModuleSynchronizationStep
         }
 
         return PreparationResult.Success;
+    }
+
+    private static ModuleArtifactRepository CreateModuleRepository(ModulePreparationContext ctx, IArtifactRepositoryOptionsCache optionsCache,
+        IHttpClientFactory httpClientFactory)
+    {
+        var repositoryLogger = ctx.LoggerFactory.CreateLogger<JFrogArtifactRepository>();
+        var repository = new JFrogArtifactRepository(ctx.FileSystem, httpClientFactory, optionsCache, repositoryLogger);
+        var moduleRepositoryLogger = ctx.LoggerFactory.CreateLogger<ModuleArtifactRepository>();
+
+        return new ModuleArtifactRepository(repository, ctx.FileSystem, ArtifactPlatform.Current, moduleRepositoryLogger);
     }
 }

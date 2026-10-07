@@ -14,6 +14,11 @@ namespace Core.Module.Tests;
 
 public class SuiteArtifactRepositoryTests
 {
+    /// <summary>
+    /// Tests query <c>amd64</c> like the bundle under test, so the results do not depend on the test machine.
+    /// </summary>
+    private static readonly ArtifactPlatform LinuxX64Platform = new(OSPlatform.Linux, Architecture.X64);
+
     private static ServiceProvider CreateServiceProvider(ArtifactRepositoryOptions? apiOptions = null)
     {
         var options = Microsoft.Extensions.Options.Options.Create(apiOptions ?? SystemTestSettings.GetArtifactRepositoryOptions());
@@ -26,6 +31,7 @@ public class SuiteArtifactRepositoryTests
             .AddSingleton<IFileSystem>(new FileSystem())
             .AddSingleton(Substitute.For<ILogger<SuiteArtifactRepository>>)
             .AddSingleton<SuiteArtifactRepository>()
+            .AddSingleton<IArtifactPlatform>(LinuxX64Platform)
             .AddSingleton(options)
             .AddHttpClient()
             .AddArtifactRepository(s => optionsProvider)
@@ -251,45 +257,57 @@ public class SuiteArtifactRepositoryTests
         }
     }
 
-    public sealed class GetArchitectureFilter : SuiteArtifactRepositoryTests
+    public sealed class ArchitectureNameFilter : SuiteArtifactRepositoryTests
     {
-        [Theory]
-        [InlineData(Architecture.X64, "*_amd64*")]
-        [InlineData(Architecture.Arm64, "*_arm64*")]
-        public void Should_match_the_debian_architecture_in_suite_package_names(Architecture osArchitecture, string expectedFilter)
+        private readonly IArtifactRepository _artifactRepository = Substitute.For<IArtifactRepository>();
+        private readonly IArtifactQueryBuilder _queryBuilder = Substitute.For<IArtifactQueryBuilder>();
+
+        public ArchitectureNameFilter()
         {
+            _queryBuilder.AndPathMatches(Arg.Any<string>()).Returns(_queryBuilder);
+            _queryBuilder.AndNameMatches(Arg.Any<string>()).Returns(_queryBuilder);
+            _queryBuilder.OrderByDescending(Arg.Any<string[]>()).Returns(_queryBuilder);
+            _queryBuilder.Build().Returns("query");
+            _artifactRepository.CreateQueryBuilder().Returns(_queryBuilder);
+
+            var queryResult = Substitute.For<IArtifactQueryResult>();
+            queryResult.Artifacts.Returns([]);
+            _artifactRepository.Query(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(queryResult);
+        }
+
+        private SuiteArtifactRepository CreateRepository(Architecture osArchitecture)
+            => new(_artifactRepository,
+                new FileSystem(),
+                Microsoft.Extensions.Options.Options.Create(new ArtifactRepositoryOptions()),
+                ArtifactPlatformTheoryData.Create("LINUX", osArchitecture),
+                Substitute.For<ILogger<SuiteArtifactRepository>>());
+
+        [Theory]
+        [MemberData(nameof(ArtifactPlatformTheoryData.SuitePlatforms), MemberType = typeof(ArtifactPlatformTheoryData))]
+        public async Task Should_query_suite_artifact_bundles_by_platform(Architecture osArchitecture, string packageArchitecture)
+        {
+            // Arrange
+            var repository = CreateRepository(osArchitecture);
+
             // Act
-            var filter = SuiteArtifactRepository.GetArchitectureFilter(osArchitecture);
+            await repository.QuerySuiteArtifactBundles(new Version(1, 0, 0), cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert - vicione-suite_1.0.3_amd64_1.1.0.json
-            filter.Should().Be(expectedFilter);
+            _queryBuilder.Received(1).AndNameMatches($"*_{packageArchitecture}*");
         }
 
         [Theory]
-        [InlineData(Architecture.X86)]
-        [InlineData(Architecture.Arm)]
-        public void Should_throw_for_an_architecture_without_suite_packages(Architecture osArchitecture)
+        [MemberData(nameof(ArtifactPlatformTheoryData.UnsupportedSuitePlatforms), MemberType = typeof(ArtifactPlatformTheoryData))]
+        public async Task Should_throw_when_querying_suite_artifact_bundles_for_an_architecture_without_suite_packages(Architecture osArchitecture)
         {
+            // Arrange
+            var repository = CreateRepository(osArchitecture);
+
             // Act
-            var act = () => SuiteArtifactRepository.GetArchitectureFilter(osArchitecture);
+            var act = () => repository.QuerySuiteArtifactBundles(new Version(1, 0, 0), cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
-            act.Should().Throw<PlatformNotSupportedException>();
-        }
-    }
-
-    public sealed class GetPackageArchitecture : SuiteArtifactRepositoryTests
-    {
-        [Theory]
-        [InlineData(Architecture.X64, "amd64")]
-        [InlineData(Architecture.Arm64, "arm64")]
-        public void Should_return_the_debian_architecture_without_wildcards(Architecture osArchitecture, string expectedArchitecture)
-        {
-            // Act
-            var architecture = SuiteArtifactRepository.GetPackageArchitecture(osArchitecture);
-
-            // Assert
-            architecture.Should().Be(expectedArchitecture);
+            await act.Should().ThrowAsync<PlatformNotSupportedException>();
         }
     }
 }

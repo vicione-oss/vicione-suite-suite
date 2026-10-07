@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.Runtime.InteropServices;
 using Core.Artifacts;
 using Core.Module.Contracts;
 using Microsoft.Extensions.Logging;
@@ -12,6 +11,7 @@ namespace Core.Module;
 public sealed partial class SuiteArtifactRepository(IArtifactRepository repository,
     IFileSystem fileSystem,
     IOptions<ArtifactRepositoryOptions> options,
+    IArtifactPlatform platform,
     ILogger<SuiteArtifactRepository> logger) : ISuiteArtifactRepository
 {
     private const string SuitesBaseFolder = "suites"; // Base folder in the repository
@@ -159,7 +159,7 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
         // - vicione-suite_1.0.3_arm64_1.1.0.json
         var aqlQuery = repository.CreateQueryBuilder()
             .AndPathMatches($"{SuitesBaseFolder}")
-            .AndNameMatches(GetArchitectureFilter(RuntimeInformation.OSArchitecture))
+            .AndNameMatches($"*_{platform.SuitePackageArchitecture}*")
             .OrderByDescending("path", "name")
             .Build();
 
@@ -214,21 +214,6 @@ public sealed partial class SuiteArtifactRepository(IArtifactRepository reposito
             ? bundles
             : [.. bundles.Where(k => k.PackageSignature is not null)];
     }
-
-    public string GetOSArchitecture() => GetPackageArchitecture(RuntimeInformation.OSArchitecture);
-
-    /// <summary>
-    /// Maps the .NET architecture name to the Debian name that CI uses in suite package names, e.g. <c>X64</c> to <c>amd64</c>.
-    /// </summary>
-    /// <exception cref="PlatformNotSupportedException">No suite packages are built for the architecture.</exception>
-    internal static string GetPackageArchitecture(Architecture osArchitecture) => osArchitecture switch
-    {
-        Architecture.X64 => "amd64",
-        Architecture.Arm64 => "arm64",
-        _ => throw new PlatformNotSupportedException($"No suite packages are built for architecture '{osArchitecture}'."),
-    };
-
-    internal static string GetArchitectureFilter(Architecture osArchitecture) => $"*_{GetPackageArchitecture(osArchitecture)}*";
 
     private static IArtifact? TryGetPackage(IEnumerable<IArtifact> artifacts, SemVersion suiteVersion, string architecture)
     {
