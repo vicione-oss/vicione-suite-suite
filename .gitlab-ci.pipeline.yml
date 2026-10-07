@@ -357,7 +357,11 @@ Metadata:
   stage: .pre
   script:
     - *prepare_metadata
-  rules: *rules_common
+  rules:
+    - <<: *rules_tag
+    - <<: *rules_merge_request
+    - <<: *rules_web
+    - <<: *rules_protected_or_default_branch
   needs:
     - Version
   artifacts:
