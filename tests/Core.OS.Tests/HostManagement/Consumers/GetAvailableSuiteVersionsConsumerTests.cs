@@ -280,6 +280,29 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
         response.Versions.Should().NotContain(v => v.Version == _bundle110dev.SuiteVersion);
     }
 
+    [Fact]
+    public async Task Should_mark_installed_prerelease_version_without_adding_synthetic_entry()
+    {
+        // Arrange
+        var installedVersion = "1.4.0-beta1";
+        await using var tester = SetupTester(installedVersion);
+        var request = new GetAvailableSuiteVersions();
+
+        _repository.QuerySuiteArtifactBundles(Arg.Any<Version>(), false, Arg.Any<CancellationToken>())
+            .Returns([
+                CreateSuiteArtifactBundle(installedVersion, "1.2.1"),
+                CreateSuiteArtifactBundle("1.4.0", "1.2.1"),
+            ]);
+
+        // Act
+        var response = await tester.TestRequest<GetAvailableSuiteVersionsResponse, GetAvailableSuiteVersions>(request);
+
+        // Assert
+        response.Should().NotBeNull();
+        response.Versions.Select(v => v.Version).Should().Equal(installedVersion, "1.4.0");
+        response.Versions.Should().ContainSingle(v => v.Installed).Which.Version.Should().Be(installedVersion);
+    }
+
     private static SuiteArtifactBundle CreateSuiteArtifactBundle(string suiteVersion, string? hostMgmtVersion)
     {
         return new()
