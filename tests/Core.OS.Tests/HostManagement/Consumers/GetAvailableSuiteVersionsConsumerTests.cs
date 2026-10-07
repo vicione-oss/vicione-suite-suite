@@ -16,6 +16,7 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
     private const string Architecture = "amd64";
 
     private readonly ISuiteArtifactRepository _repository = Substitute.For<ISuiteArtifactRepository>();
+    private readonly IArtifactPlatform _platform = Substitute.For<IArtifactPlatform>();
 
     private readonly SuiteBundleVersion _bundle104 = new("1.0.4", "1.1.1");
     private readonly SuiteBundleVersion _bundle106 = new("1.0.6", "1.1.1");
@@ -29,6 +30,7 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
         {
             cfg.AddConsumer<GetAvailableSuiteVersionsConsumer>();
             cfg.AddSingleton(_repository);
+            cfg.AddSingleton(_platform);
             cfg.AddSingleton(s =>
             {
                 var info = Substitute.For<IInstanceInformation>();
@@ -241,7 +243,7 @@ public sealed class GetAvailableSuiteVersionsConsumerTests
 
         _repository.QuerySuiteArtifactBundles(Arg.Any<Version>(), false, Arg.Any<CancellationToken>())
             .Returns([]);
-        _repository.GetOSArchitecture().Returns(osArchitecture);
+        _platform.SuitePackageArchitecture.Returns(osArchitecture);
 
         // Act
         var response = await tester.TestRequest<GetAvailableSuiteVersionsResponse, GetAvailableSuiteVersions>(request);

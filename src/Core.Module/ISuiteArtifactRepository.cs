@@ -32,10 +32,4 @@ public interface ISuiteArtifactRepository
         Version minimumHostManagementVersion,
         bool includeUnsignedPackages = false,
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Architecture of this machine as named in suite package names: <c>amd64</c> or <c>arm64</c>.
-    /// </summary>
-    /// <exception cref="PlatformNotSupportedException">No suite packages are built for this architecture.</exception>
-    string GetOSArchitecture();
 }

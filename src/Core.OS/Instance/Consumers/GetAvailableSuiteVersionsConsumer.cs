@@ -12,6 +12,7 @@ namespace Core.OS.Instance.Consumers;
 
 public sealed partial class GetAvailableSuiteVersionsConsumer(
     ISuiteArtifactRepository repository,
+    IArtifactPlatform platform,
     IInstanceInformationProvider instanceInformationProvider,
     ILogger<GetAvailableSuiteVersionsConsumer> logger) : RequestConsumer<GetAvailableSuiteVersions, GetAvailableSuiteVersionsResponse>
 {
@@ -40,7 +41,7 @@ public sealed partial class GetAvailableSuiteVersionsConsumer(
 
             filteredVersions.Add(new SuiteArtifactBundle
             {
-                Architecture = repository.GetOSArchitecture(),
+                Architecture = platform.SuitePackageArchitecture,
                 Version = currentVersion,
                 Package = localPackage,
                 PackageSignature = localSignature,

@@ -43,6 +43,7 @@ internal static class IServiceCollectionExtensions
         {
             services.AddSingleton(optionsCache);
             services.AddArtifactRepository(s => s.GetRequiredService<IArtifactRepositoryOptionsCache>());
+            services.AddSingleton<IArtifactPlatform>(ArtifactPlatform.Current);
             services.AddTransient<IModuleArtifactRepository, ModuleArtifactRepository>();
             services.AddTransient<ISuiteArtifactRepository, SuiteArtifactRepository>();
 

@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Core.Module.Contracts;
 using Core.Module.Extensions;
 using Core.Module.Utils;
@@ -11,7 +10,10 @@ using Semver;
 
 namespace Core.Module;
 
-public sealed partial class ModuleArtifactRepository(IArtifactRepository artifactRepository, IFileSystem fileSystem, ILogger<ModuleArtifactRepository> logger) : IModuleArtifactRepository
+public sealed partial class ModuleArtifactRepository(IArtifactRepository artifactRepository,
+    IFileSystem fileSystem,
+    IArtifactPlatform platform,
+    ILogger<ModuleArtifactRepository> logger) : IModuleArtifactRepository
 {
     private const string ModulesBaseFolder = "modules"; // Base folder in the repository
     private const int MaxConcurrentDownloads = 5;
@@ -193,7 +195,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
         // -> .../vicione-suite/modules/ViciOne.Suite.ClusterManagement/0.32.1-linux-arm64.zip
         var aqlQuery = artifactRepository.CreateQueryBuilder()
             .AndPathMatches($"{ModulesBaseFolder}/{package.Name}")
-            .AndNameMatches($"*{package.Version}-{RuntimeInformation.RuntimeIdentifier}_*.json")
+            .AndNameMatches($"*{package.Version}-{platform.ModuleRuntimeIdentifier}_*.json")
             .OrderByDescending("path", "name")
             .Build();
 
@@ -214,7 +216,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
     {
         var aqlQuery = artifactRepository.CreateQueryBuilder()
             .AndPathMatches($"{ModulesBaseFolder}/*")
-            .AndNameMatches($"*{RuntimeInformation.RuntimeIdentifier}.zip")
+            .AndNameMatches($"*{platform.ModuleRuntimeIdentifier}.zip")
             .OrderByDescending("path", "name")
             .Build();
 
@@ -261,7 +263,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
     {
         var queryBuilder = artifactRepository.CreateQueryBuilder()
             .AndPathMatches($"{ModulesBaseFolder}/{package.Name}")
-            .AndNameMatches($"{package.Version}-{RuntimeInformation.RuntimeIdentifier}.zip");
+            .AndNameMatches($"{package.Version}-{platform.ModuleRuntimeIdentifier}.zip");
 
         // e.g. 0.28.0-ci1523472-linux-arm64_0.25.0.json
         var aqlQuery = queryBuilder.Build();
@@ -304,13 +306,13 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
     public IReadOnlyCollection<string> GetSourceKeys()
         => [.. artifactRepository.GetSourceKeys()];
 
-    private static string GetMetadataNameFilter(Version? sdkVersion)
+    private string GetMetadataNameFilter(Version? sdkVersion)
     {
         if (sdkVersion is null)
-            return $"*{RuntimeInformation.RuntimeIdentifier}*.json";
+            return $"*{platform.ModuleRuntimeIdentifier}*.json";
 
         // Limited to major.minor; any patch version is accepted.
-        return $"*{RuntimeInformation.RuntimeIdentifier}*_{sdkVersion.Major}.*.json";
+        return $"*{platform.ModuleRuntimeIdentifier}*_{sdkVersion.Major}.*.json";
     }
 
     private bool ModuleVersionExists(string modulePath)
