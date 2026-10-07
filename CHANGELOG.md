@@ -49,6 +49,7 @@
 - Connection settings, the connection type list is sorted alphabetically and a new connection preselects its first entry
 - Time zone settings, the map highlights the right zone for negative offsets with minutes, such as Newfoundland (UTC-03:30)
 - `ConnectionControlPanel`, tag box width behaves incorrectly
+- Email confirmation pages, typos and inconsistent wording in the login-blocked and confirmation messages are corrected
 
 ### Updated
 

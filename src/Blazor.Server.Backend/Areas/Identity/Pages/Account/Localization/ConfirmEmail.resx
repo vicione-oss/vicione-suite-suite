@@ -118,15 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Title" xml:space="preserve">
-    <value>Confirm Email</value>
+    <value>Confirm email address</value>
   </data>
   <data name="UserNotFound" xml:space="preserve">
     <value>Unable to load user with ID '{0}'.</value>
   </data>
   <data name="VerificationSuccessful" xml:space="preserve">
-    <value>You successfully verified your E-Mail account.</value>
+    <value>You have successfully confirmed your email address.</value>
   </data>
   <data name="VerifyingFailed" xml:space="preserve">
-    <value>Verifying you mail address failed. Please contact your administrator.</value>
+    <value>Confirming your email address failed. Please contact your administrator.</value>
   </data>
 </root>
