@@ -37,11 +37,11 @@ internal sealed class OnboardingMiddleware(RequestDelegate next)
         var cookieUpdate = new PathString($"/{Constants.UpdateLanguageCookieRoute}");
         var cspReport = new PathString(CspViolationReporting.Route);
 
-        if (context.Request.Path.StartsWithSegments(framework, StringComparison.Ordinal)
-            || context.Request.Path.StartsWithSegments(blazor, StringComparison.Ordinal)
-            || context.Request.Path.StartsWithSegments(devTools, StringComparison.Ordinal)
-            || context.Request.Path.StartsWithSegments(cookieUpdate, StringComparison.Ordinal)
-            || context.Request.Path.StartsWithSegments(cspReport, StringComparison.Ordinal))
+        if (context.Request.Path.StartsWithSegments(framework, StringComparison.OrdinalIgnoreCase)
+            || context.Request.Path.StartsWithSegments(blazor, StringComparison.OrdinalIgnoreCase)
+            || context.Request.Path.StartsWithSegments(devTools, StringComparison.OrdinalIgnoreCase)
+            || context.Request.Path.StartsWithSegments(cookieUpdate, StringComparison.OrdinalIgnoreCase)
+            || context.Request.Path.StartsWithSegments(cspReport, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
