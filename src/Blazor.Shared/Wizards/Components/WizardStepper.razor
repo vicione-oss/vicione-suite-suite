@@ -8,23 +8,23 @@
 
         var visibleStepNumbers = _steps.Select(step => step.Number).Reduce(activeStepNumber, maximumItems: 6);
 
-        var visibleSteps = _steps.Where(step => visibleStepNumbers.Contains(step.Number));
+        var visibleSteps = _steps.Where(step => visibleStepNumbers.Contains(step.Number)).ToList();
 
-        WizardStep? previousVisibleStep = null;
+        var visibleStepNumbersInOrder = visibleSteps.Select(step => step.Number).ToList();
 
-        foreach (var visibleStep in visibleSteps)
+        for (var index = 0; index < visibleSteps.Count; index++)
         {
-            if (previousVisibleStep.HasValue)
+            var visibleStep = visibleSteps[index];
+
+            if (index > 0)
             {
-                <span class="@GetStepSeparatorCssClass(visibleStep.Number, previousVisibleStep.Value.Number, activeStepNumber)"></span>
+                <span class="@GetStepSeparatorCssClass(visibleStep.Number, visibleSteps[index - 1].Number, activeStepNumber)"></span>
             }
 
-            <div class="@GetStepCssClass(visibleStep.Number, activeStepNumber)">
+            <div class="@GetStepCssClass(visibleStepNumbersInOrder, index, activeStepNumber)">
                 <span>@visibleStep.Number</span>
                 <span>@visibleStep.Title</span>
             </div>
-
-            previousVisibleStep = visibleStep;
         }
     }
 </div>

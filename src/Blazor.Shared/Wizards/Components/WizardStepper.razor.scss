@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "../../../../shared/styles/typography";
 @use "../../Styles/design/animations/variables" as animations;
 @use "../../Styles/design/colors";
@@ -79,6 +80,30 @@
 
             > span:last-of-type {
                 color: colors.$font-light;
+            }
+        }
+
+        &.stacked-before {
+            --stack-offset: -6px;
+        }
+
+        &.stacked-after {
+            --stack-offset: 6px;
+        }
+
+        &.stacked-before,
+        &.stacked-after {
+            $stack-color-alpha: 0.3;
+
+            --stack-color: #{color.change(colors.$font-light, $alpha: $stack-color-alpha)};
+
+            &.done {
+                --stack-color: #{color.change(colors.$accent, $alpha: $stack-color-alpha)};
+            }
+
+            // Outer shadows are clipped by the circle itself, so only the offset crescent of the stack shows.
+            > span:first-of-type {
+                box-shadow: 0 var(--stack-offset) 0 -1px colors.$background-darker, 0 var(--stack-offset) 0 0 var(--stack-color);
             }
         }
 
