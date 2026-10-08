@@ -8,4 +8,9 @@ public sealed class MockPipeClientOptions
     public MockPipeClientDataSource DataSource { get; set; }
     public SystemConfiguration? SystemConfiguration { get; set; }
     public string? SystemConfigurationJsonFile { get; set; }
+
+    /// <summary>
+    /// Capabilities in the HostManagement <c>ApplyCapabilities</c> JSON format, applied on top of all capabilities enabled.
+    /// </summary>
+    public string? SupportedCapabilitiesJsonFile { get; set; }
 }

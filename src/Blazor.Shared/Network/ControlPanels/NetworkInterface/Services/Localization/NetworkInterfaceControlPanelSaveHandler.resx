@@ -120,4 +120,7 @@
   <data name="CannotFindNetworkInterfaceSettingsBasedOnGivenIndex" xml:space="preserve">
     <value>Cannot find network interface settings based on given index {0}.</value>
   </data>
+  <data name="MacAddressIsInvalid" xml:space="preserve">
+    <value>'{0}' is not a valid MAC address.</value>
+  </data>
 </root>

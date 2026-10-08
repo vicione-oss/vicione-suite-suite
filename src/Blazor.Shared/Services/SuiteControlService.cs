@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 using Core.Shared.HostManagement.Commands;
+using Core.Shared.HostManagement.Requests;
 using Core.Shared.Instance.Commands;
+using HostManagement.Shared.Capabilities;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.Services;
@@ -16,6 +18,9 @@ internal sealed class SuiteControlService(IUiMediator mediator,
     // We are currently unable to trigger a complete shutdown. This method shuts down the suite and then triggers a restart.
     public async Task RestartInstance()
     {
+        if (!await EnsureEnabled(capabilities => capabilities.RestartService))
+            return;
+
 #if DEBUG
         var delay = 5;
 #else
@@ -39,6 +44,10 @@ internal sealed class SuiteControlService(IUiMediator mediator,
 
     public async Task RestartAllInstances()
     {
+        // Only the local capability is checked. Other nodes refuse on their own, without feedback here, see #2927.
+        if (!await EnsureEnabled(capabilities => capabilities.RestartService))
+            return;
+
 #if DEBUG
         var delay = 5;
 #else
@@ -54,6 +63,9 @@ internal sealed class SuiteControlService(IUiMediator mediator,
 
     public async Task RestartSystem()
     {
+        if (!await EnsureEnabled(capabilities => capabilities.RestartSystem))
+            return;
+
         logger.LogInformation("Requesting system restart for instance {InstanceId}", informationProvider.Local.Id);
 
         await mediator.Send(new ControlSystem(SystemCommand.Restart), informationProvider.Local.Id);
@@ -61,8 +73,22 @@ internal sealed class SuiteControlService(IUiMediator mediator,
 
     public async Task ShutdownSystem()
     {
+        if (!await EnsureEnabled(capabilities => capabilities.ShutdownSystem))
+            return;
+
         logger.LogInformation("Requesting system shutdown for instance {InstanceId}", informationProvider.Local.Id);
 
         await mediator.Send(new ControlSystem(SystemCommand.Shutdown), informationProvider.Local.Id);
+    }
+
+    /// <returns><see langword="false"/> after showing an error banner when HostManagement disables the capability.</returns>
+    private async Task<bool> EnsureEnabled(Func<SystemControlCapabilities, CapabilityStatus> capability)
+    {
+        var response = await mediator.Request<GetSystemControlCapabilities, GetSystemControlCapabilitiesResponse>(new GetSystemControlCapabilities());
+        if (response.Capabilities is null || capability(response.Capabilities) is not CapabilityStatus.Disabled)
+            return true;
+
+        bannerService.ShowMessageBanner(Sdk.MessageBanner.Contracts.MessageType.Error, Localization.HostManagementCapabilities.FunctionDisabled);
+        return false;
     }
 }

@@ -120,4 +120,7 @@
   <data name="CannotFindNetworkInterfaceSettingsBasedOnGivenIndex" xml:space="preserve">
     <value>Einstellungen der Netzwerkschnittstelle mit Index {0} konnten nicht gefunden werden.</value>
   </data>
+  <data name="MacAddressIsInvalid" xml:space="preserve">
+    <value>'{0}' ist keine gültige MAC-Adresse.</value>
+  </data>
 </root>

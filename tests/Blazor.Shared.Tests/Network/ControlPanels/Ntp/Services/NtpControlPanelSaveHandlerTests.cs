@@ -25,18 +25,19 @@ public sealed class NtpControlPanelSaveHandlerTests
     {
         _systemConfigurationService.SystemConfiguration.Returns(new SystemConfiguration
         {
-            NetworkInterfacesSettings = new NetworkInterfacesSettings([new NetworkInterfaceDetail
+            NetworkInterfaces = [new NetworkInterfaceDetail
             {
                 CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true },
-                IPv4 = new IPv4Settings([new IPv4Detail
+                IPv4 = new IPv4Settings
                 {
-                    IPAddress = System.Net.IPAddress.Parse("192.168.1.10"),
-                    Netmask = System.Net.IPAddress.Parse("255.255.255.0")
-                }])
-                {
+                    IPv4Details = [new IPv4Detail
+                    {
+                        IPAddress = System.Net.IPAddress.Parse("192.168.1.10"),
+                        Netmask = System.Net.IPAddress.Parse("255.255.255.0")
+                    }],
                     Gateway = System.Net.IPAddress.Parse("192.168.1.1")
                 }
-            }]),
+            }],
             NetworkDNSSettings = new NetworkDNSSettings { Hostname = "test-host" },
             NetworkNTPSettings = ntpSettings ?? new NetworkNTPSettings()
         });
@@ -131,7 +132,7 @@ public sealed class NtpControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkNTPSettings.NTPServersEnabled.Should().BeTrue();
+        captured!.NetworkNTPSettings.Enabled.Should().BeTrue();
     }
 
     [Fact]
@@ -150,7 +151,7 @@ public sealed class NtpControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkNTPSettings.NTPServersEnabled.Should().BeFalse();
+        captured!.NetworkNTPSettings.Enabled.Should().BeFalse();
     }
 
     [Fact]
@@ -172,9 +173,9 @@ public sealed class NtpControlPanelSaveHandlerTests
 
         // Assert
         var ntp = captured!.NetworkNTPSettings;
-        ntp.NTPServers.Should().HaveCount(2);
-        ntp.NTPServers[0].Should().Be("pool.ntp.org");
-        ntp.NTPServers[1].Should().Be("time.cloudflare.com");
+        ntp.Servers.Should().HaveCount(2);
+        ntp.Servers[0].Should().Be("pool.ntp.org");
+        ntp.Servers[1].Should().Be("time.cloudflare.com");
     }
 
     [Fact]
@@ -195,8 +196,8 @@ public sealed class NtpControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkNTPSettings.NTPServers.Should().HaveCount(1);
-        captured.NetworkNTPSettings.NTPServers[0].Should().Be("pool.ntp.org");
+        captured!.NetworkNTPSettings.Servers.Should().HaveCount(1);
+        captured.NetworkNTPSettings.Servers[0].Should().Be("pool.ntp.org");
     }
 
     [Fact]
@@ -214,7 +215,7 @@ public sealed class NtpControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.Should().Be(_systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings);
+        captured!.NetworkInterfaces.Should().Equal(_systemConfigurationService.SystemConfiguration.NetworkInterfaces);
     }
 
     [Fact]

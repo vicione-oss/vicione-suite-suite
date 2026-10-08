@@ -17,4 +17,9 @@ public sealed class HostManagementOptions
     /// The cache is invalidated after this period and refreshed on the next request, not on a timer.
     /// </summary>
     public long ConfigurationCacheLifetimeMs { get; set; } = 30_000;
+
+    /// <summary>
+    /// How long a request waits for the HostManagement pipe server before it fails, when the pipe is not connected yet.
+    /// </summary>
+    public int ConnectTimeoutMs { get; set; } = 5_000;
 }

@@ -1,5 +1,5 @@
-using Blazor.Shared.Extensions;
 using Core.Shared.HostManagement;
+using Core.Shared.HostManagement.Extensions;
 using HostManagement.Shared.Contracts;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.Infrastructure;
@@ -42,7 +42,7 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
 
     public async Task SetSystemConfiguration(SystemConfiguration newSystemConfiguration, CancellationToken cancellationToken)
     {
-        var networkInterfaces = newSystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces.Select(k => k.CommonInformation.Name);
+        var networkInterfaces = newSystemConfiguration.NetworkInterfaces.Select(k => k.CommonInformation.Name);
         LogSetSystemConfiguration(_logger, string.Join(", ", networkInterfaces));
 
         lock (_lock)

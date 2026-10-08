@@ -18,6 +18,9 @@
 - Login page, the OpenID provider and passkey buttons show an icon and sit in their own section below the divider
 - **Every dynamic response now carries a Content Security Policy and `X-Frame-Options: DENY`**. **Breaking change for modules:** the policy is relaxed for now and will be tightened in a later release. See `docs/ADRs/ADR-006-content-security-policy.md`
 - **The Suite now requires a browser with CSP Level 3 support**; in older browsers parts of the UI stop working
+- HostManagement requests are no longer delayed by 250 ms each, and events from HostManagement reach the Suite
+- Backups created before this version can no longer be restored, because they hold the HostManagement 1.x system configuration. **Upgrade:** create a new backup after updating
+- Restarts, flashing, module service restarts and backup restores show an error when HostManagement disables them, see `docs/hostmanagement-capabilities.md`. **Upgrade:** create `/etc/hostmanagement/SupportedCapabilities.conf` as described there, without it every capability is disabled
 
 ### Added
 
@@ -63,10 +66,20 @@
 - Update panel shows prerelease versions such as `1.4.0-beta1` in full
 - Update panel, selecting the installed version again no longer counts as a pending change
 - Password reset and email verification emails are now sent in the user's language, or else in the instance default language
+- Controlling a service while HostManagement is unreachable reports it as unavailable
+- A failed suite version install is reported as an error instead of a success
+- A module service command that HostManagement rejects reports the service state as unknown instead of the requested one
+- HostManagement requests fail after 5 seconds instead of waiting indefinitely when HostManagement is not running, set by `HostManagement:ConnectTimeoutMs`
+- A refused backup restore no longer leaves a copy of the backup on the device
+
+### Removed
+
+- SOCKS proxy settings, which HostManagement 2.0 no longer supports. **Behaviour change:** a configured SOCKS proxy is dropped, and modules get `null` for `ProxySettings.Socks`
 
 ### Updated
 
 - `AspNetCore.SassCompiler` packages, update to version `1.105.1`
+- `HostManagement` packages, update to version `2.0.0-beta1`
 - `Microsoft` packages, update to version `10.0.12`
 - `Microsoft.FeatureManagement` packages, update to version `4.7.0`
 - `MailKit`, update to version `4.18.0`

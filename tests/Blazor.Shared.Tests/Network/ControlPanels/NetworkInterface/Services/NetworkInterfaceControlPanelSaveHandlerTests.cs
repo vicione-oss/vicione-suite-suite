@@ -1,9 +1,9 @@
+using System.Net.NetworkInformation;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
-using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -26,7 +26,7 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         _systemConfigurationService.SystemConfiguration.Returns(new SystemConfiguration
         {
-            NetworkInterfacesSettings = new NetworkInterfacesSettings([.. networkInterfaces]),
+            NetworkInterfaces = [.. networkInterfaces],
             NetworkDNSSettings = new NetworkDNSSettings { Hostname = "test-host" }
         });
     }
@@ -95,9 +95,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         using var handler = CreateHandler();
         SetupMediatorToFireSuccess(handler);
@@ -116,9 +113,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         using var handler = CreateHandler();
         var error = new ErrorInfo(42, "Something went wrong");
@@ -139,9 +133,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         SystemConfiguration? captured = null;
         using var handler = CreateHandler();
@@ -155,7 +146,7 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.NetworkInterfaces[0].IPv4.DHCPEnabled.Should().BeTrue();
+        captured!.NetworkInterfaces[0].IPv4.DHCPEnabled.Should().BeTrue();
     }
 
     [Fact]
@@ -163,9 +154,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         SystemConfiguration? captured = null;
         using var handler = CreateHandler();
@@ -178,7 +166,7 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.NetworkInterfaces[0].IPv4.DHCPEnabled.Should().BeFalse();
+        captured!.NetworkInterfaces[0].IPv4.DHCPEnabled.Should().BeFalse();
     }
 
     [Fact]
@@ -187,9 +175,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         // Arrange
         const string customMac = "AA:BB:CC:DD:EE:FF";
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = "11:22:33:44:55:66" });
 
         SystemConfiguration? captured = null;
         using var handler = CreateHandler();
@@ -203,18 +188,14 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.NetworkInterfaces[0].CommonInformation.PhysicalAddress.Should().Be(customMac);
+        captured!.NetworkInterfaces[0].CommonInformation.UserDefinedMACAddress.Should().Be(new UserDefinedMACAddressSettings { Enabled = true, Address = PhysicalAddress.Parse(customMac) });
     }
 
     [Fact]
-    public async Task Should_use_original_mac_address_when_mac_not_set_manually()
+    public async Task Should_disable_user_defined_mac_address_when_mac_not_set_manually()
     {
         // Arrange
-        const string originalMac = "AA:BB:CC:11:22:33";
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = originalMac });
 
         SystemConfiguration? captured = null;
         using var handler = CreateHandler();
@@ -228,7 +209,27 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.NetworkInterfaces[0].CommonInformation.PhysicalAddress.Should().Be(originalMac);
+        captured!.NetworkInterfaces[0].CommonInformation.UserDefinedMACAddress.Should().Be(new UserDefinedMACAddressSettings());
+    }
+
+    [Fact]
+    public async Task Should_return_error_result_when_mac_address_manually_set_but_empty()
+    {
+        // Arrange
+        SetupSystemConfiguration(CreateNetworkInterface());
+
+        using var handler = CreateHandler();
+        SetupMediatorToFireSuccess(handler);
+
+        var state = CreateValidState();
+        state.MacAddressManually = true;
+        state.MacAddress = string.Empty;
+
+        // Act
+        var result = await handler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().BeOfType<SaveErrorResult>();
     }
 
     [Fact]
@@ -236,9 +237,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         SystemConfiguration? captured = null;
         using var handler = CreateHandler();
@@ -251,7 +249,7 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.NetworkInterfaces[0].IPv4.Gateway.Should().BeNull();
+        captured!.NetworkInterfaces[0].IPv4.Gateway.Should().BeNull();
     }
 
     [Fact]
@@ -259,9 +257,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         SystemConfiguration? captured = null;
         using var handler = CreateHandler();
@@ -274,7 +269,7 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.NetworkInterfaces[0].IPv4.Gateway.Should().Be(System.Net.IPAddress.Parse("192.168.1.254"));
+        captured!.NetworkInterfaces[0].IPv4.Gateway.Should().Be(System.Net.IPAddress.Parse("192.168.1.254"));
     }
 
     [Fact]
@@ -282,9 +277,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         SystemConfiguration? captured = null;
         using var handler = CreateHandler();
@@ -298,9 +290,9 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        var iface = captured!.NetworkInterfacesSettings.NetworkInterfaces[0];
-        iface.IPv4.VLANEnabled.Should().BeTrue();
-        iface.IPv4.VLANID.Should().Be(100);
+        var iface = captured!.NetworkInterfaces[0];
+        iface.VLAN.Enabled.Should().BeTrue();
+        iface.VLAN.ID.Should().Be(100);
     }
 
     [Fact]
@@ -308,9 +300,6 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         using var handler = CreateHandler();
 
@@ -326,13 +315,30 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
     }
 
     [Fact]
+    public async Task Should_return_error_result_when_mac_address_is_not_a_mac_address()
+    {
+        // Arrange
+        SetupSystemConfiguration(CreateNetworkInterface());
+
+        using var handler = CreateHandler();
+
+        var state = CreateValidState();
+        state.MacAddressManually = true;
+        state.MacAddress = "not-a-mac";
+
+        // Act
+        var result = await handler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().BeOfType<SaveErrorResult>()
+            .Which.Message.Should().Contain("not-a-mac");
+    }
+
+    [Fact]
     public async Task Should_save_multiple_ipv4_details()
     {
         // Arrange
         SetupSystemConfiguration(CreateNetworkInterface());
-        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
-                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse());
 
         SystemConfiguration? captured = null;
         using var handler = CreateHandler();
@@ -349,7 +355,7 @@ public sealed class NetworkInterfaceControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        var ipDetails = captured!.NetworkInterfacesSettings.NetworkInterfaces[0].IPv4.IPv4Details;
+        var ipDetails = captured!.NetworkInterfaces[0].IPv4.IPv4Details;
         ipDetails.Should().HaveCount(2);
         ipDetails[0].IPAddress.Should().Be(System.Net.IPAddress.Parse("192.168.1.10"));
         ipDetails[1].IPAddress.Should().Be(System.Net.IPAddress.Parse("10.0.0.1"));

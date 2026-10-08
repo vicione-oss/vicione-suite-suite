@@ -70,7 +70,7 @@
 
             <div class="section" data-expanded="@State.GeneralInformationExpanded">
                 <SettingsField Label="@TechnicalTerms.MacAddress">
-                    @GetPhysicalAddress()
+                    @State.GetPhysicalAddress(SystemConfigurationService)
                 </SettingsField>
             </div>
 
@@ -104,13 +104,13 @@
             <div class="section" data-expanded="@State.GeneralInformationExpanded">
                 <SettingsField Label="@TechnicalTerms.DnsServer">
                     <div class="dns-server-grid">
-                        @if (!SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Any() &&
+                        @if (!SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Addresses.Any() &&
                              !State.GetDhcpDnsNameServers(SystemConfigurationService).Any())
                         {
                             <div>@TechnicalTerms.Disabled</div>
                         }
 
-                        @foreach (var nameServer in SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers)
+                        @foreach (var nameServer in SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Addresses)
                         {
                             <div>@nameServer.ToString()</div>
                         }
@@ -253,7 +253,7 @@
 
         <SettingsGroup Title="@Localization.HardwareControlPanelPage.HardwareInformationSettingsGroupTitle">
             <SettingsField Label="@Localization.HardwareControlPanelPage.PhysicalAddressMac">
-                @GetPhysicalAddress()
+                @State.GetPhysicalAddress(SystemConfigurationService)
             </SettingsField>
         </SettingsGroup>
     </SettingsLayout>

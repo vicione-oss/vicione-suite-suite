@@ -5,6 +5,7 @@ using Blazor.Shared.Onboarding.Models;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Blazor.Shared.Validation.Services.Validators;
 using Core.Shared.HostManagement;
+using Core.Shared.HostManagement.Extensions;
 using HostManagement.Shared.Validation;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.Wizards.Models;
@@ -40,7 +41,7 @@ internal sealed class NetworkWizardPageSaveHandler(IUiMediator mediator, IRequir
             proposedSystemConfiguration.UpdateFrom(state.LocalNetwork);
             proposedSystemConfiguration.UpdateFrom(state.InternetConnection);
 
-            var validateResult = await new SystemConfigurationValidator().ValidateAsync(proposedSystemConfiguration, cancellationToken);
+            var validateResult = await new SystemConfigurationValidator().ValidateAsync(proposedSystemConfiguration, cancellationToken: cancellationToken);
             if (!validateResult.IsValid)
                 return new SaveErrorResult(string.Join(" ", validateResult.Entries.Select(e => e.Message)));
 

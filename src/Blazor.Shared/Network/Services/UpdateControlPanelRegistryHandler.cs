@@ -52,7 +52,7 @@ internal sealed class UpdateControlPanelRegistryHandler(IControlPanelRegistry<Sh
         var existingControlPanelRegistryItemMap = controlPanelRegistry.Where(i => i.State is NetworkInterfaceControlPanelState)
             .ToDictionary(k => (k.State as NetworkInterfaceControlPanelState)!.NetworkInterfaceIndex);
 
-        var networkInterfaces = systemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
+        var networkInterfaces = systemConfiguration.NetworkInterfaces
             .Select((networkInterfaceDetail, networkInterfaceIndex) => new { Detail = networkInterfaceDetail, Index = networkInterfaceIndex })
             .ToList();
 

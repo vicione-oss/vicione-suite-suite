@@ -48,7 +48,6 @@ public sealed class ProxiesControlPanelResetHandlerTests
     [Theory]
     [InlineData("http")]
     [InlineData("https")]
-    [InlineData("socks")]
     [InlineData("ftp")]
     [InlineData("sftp")]
     public async Task Should_load_proxy_settings_from_system_configuration(string protocol)
@@ -61,7 +60,6 @@ public sealed class ProxiesControlPanelResetHandlerTests
         {
             case "http": networkProxySettings.HTTP = proxyDetail; break;
             case "https": networkProxySettings.HTTPS = proxyDetail; break;
-            case "socks": networkProxySettings.SOCKS = proxyDetail; break;
             case "ftp": networkProxySettings.FTP = proxyDetail; break;
             case "sftp": networkProxySettings.SFTP = proxyDetail; break;
         }
@@ -80,7 +78,6 @@ public sealed class ProxiesControlPanelResetHandlerTests
         {
             "http" => state.HttpProxySettings,
             "https" => state.HttpsProxySettings,
-            "socks" => state.SocksProxySettings,
             "ftp" => state.FtpProxySettings,
             "sftp" => state.SftpProxySettings,
             _ => throw new ArgumentOutOfRangeException(nameof(protocol))
@@ -148,9 +145,9 @@ public sealed class ProxiesControlPanelResetHandlerTests
     public async Task Should_load_do_not_proxy_list_settings_from_system_configuration()
     {
         // Arrange
-        SetupSystemConfiguration(new NetworkProxySettings(doNotProxyList: ["192.168.1.0/24", "localhost"])
+        SetupSystemConfiguration(new NetworkProxySettings
         {
-            DoNotProxyListEnabled = true
+            NoProxy = new() { Enabled = true, Entries = ["192.168.1.0/24", "localhost"] }
         });
         await using var serviceProvider = SetupServiceProvider();
 

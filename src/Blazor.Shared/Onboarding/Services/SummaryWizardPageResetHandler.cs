@@ -1,5 +1,6 @@
 ﻿using Blazor.Shared.Onboarding.Extensions;
 using Core.Shared.HostManagement;
+using Core.Shared.HostManagement.Extensions;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.Wizards.Models;
 using Sdk.Client.Wizards.Services;

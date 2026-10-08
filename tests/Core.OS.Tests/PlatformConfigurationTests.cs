@@ -30,6 +30,7 @@ using Sdk.Backend.Persistence;
 using Sdk.Client.Services;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
+using CallbackHandlerRegistry = HostManagement.Shared.Communication.NamedPipe.Client.CallbackHandlerRegistry;
 
 namespace Core.OS.Tests;
 
@@ -102,7 +103,7 @@ public class PlatformConfigurationTests
             Assert.NotNull(serviceProvider.GetService<IModuleHost>());
             Assert.NotNull(serviceProvider.GetService<SynchronizationState>());
             Assert.NotNull(serviceProvider.GetService<IPipeClient>());
-            Assert.NotNull(serviceProvider.GetService<EventCallbackRegistry>());
+            Assert.NotNull(serviceProvider.GetService<CallbackHandlerRegistry>());
             Assert.Null(serviceProvider.GetService<IHealthCheckPublisher>());
 
             Assert.NotNull(serviceProvider.GetService<IFileSystem>());

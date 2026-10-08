@@ -28,7 +28,7 @@ internal sealed class RemoteAccessControlPanelSaveHandler(
 
         var systemConfiguration = new SystemConfiguration
         {
-            NetworkInterfacesSettings = SystemConfigurationService.SystemConfiguration.NetworkInterfacesSettings,
+            NetworkInterfaces = SystemConfigurationService.SystemConfiguration.NetworkInterfaces,
             NetworkDNSSettings = SystemConfigurationService.SystemConfiguration.NetworkDNSSettings,
             NetworkProxySettings = SystemConfigurationService.SystemConfiguration.NetworkProxySettings,
             NetworkNTPSettings = SystemConfigurationService.SystemConfiguration.NetworkNTPSettings,

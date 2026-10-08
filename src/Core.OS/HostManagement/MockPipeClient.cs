@@ -1,10 +1,13 @@
 using System.Diagnostics;
 using System.IO.Abstractions;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Text.Json;
 using Core.OS.Instance;
 using Core.Shared.HostManagement;
+using HostManagement.Shared.Capabilities;
 using HostManagement.Shared.Communication;
+using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Contracts;
@@ -23,9 +26,13 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
 
     private SystemConfiguration? _systemConfiguration = GetSystemConfigurationByOptions(fileSystem, options.Value);
 
+    private readonly SupportedCapabilities _supportedCapabilities = GetSupportedCapabilitiesByOptions(fileSystem, options.Value);
+
     public PipeState State { get; private set; }
 
-    public void Dispose() { }
+    public bool IsMock => true;
+
+    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
 
     private static SystemConfiguration? GetSystemConfigurationByOptions(IFileSystem fileSystem, MockPipeClientOptions options)
     {
@@ -50,6 +57,31 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
             default:
                 throw new UnreachableException($"Invalid DataSource option '{options.DataSource}'");
         }
+    }
+
+    private static SupportedCapabilities GetSupportedCapabilitiesByOptions(IFileSystem fileSystem, MockPipeClientOptions options)
+    {
+        var capabilities = CreateAllEnabledCapabilities();
+
+        if (options.SupportedCapabilitiesJsonFile is null)
+            return capabilities;
+
+        if (!fileSystem.Path.Exists(options.SupportedCapabilitiesJsonFile))
+            throw new FileNotFoundException(options.SupportedCapabilitiesJsonFile);
+
+        using var document = JsonDocument.Parse(fileSystem.File.ReadAllText(options.SupportedCapabilitiesJsonFile));
+        capabilities.ApplyCapabilities(document.RootElement);
+
+        return capabilities;
+    }
+
+    private static SupportedCapabilities CreateAllEnabledCapabilities()
+    {
+        var allDisabledJson = JsonSerializer.Serialize(new SupportedCapabilities(), CapabilitySourceGenerationContext.Default.SupportedCapabilities);
+        var allEnabledJson = allDisabledJson.Replace($"\"{CapabilityStatus.Disabled}\"", $"\"{CapabilityStatus.Enabled}\"");
+
+        return JsonSerializer.Deserialize(allEnabledJson, CapabilitySourceGenerationContext.Default.SupportedCapabilities)
+            ?? throw new InvalidOperationException($"{nameof(JsonSerializer.Deserialize)} returned null");
     }
 
     public Task Connect(CancellationToken cancellationToken = default)
@@ -111,7 +143,7 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                         LeaseExpires = DateTimeOffset.UtcNow.AddYears(2),
                         LeaseObtained = DateTimeOffset.UtcNow.AddHours(-1),
                         IPv4Detail = new() { IPAddress = new([192, 168, 14, 32]), Netmask = new([192, 168, 255, 255]) },
-                        NetworkDNSSettings = new(nameServers: [new([8, 8, 8, 8]), new([10, 10, 10, 10])])
+                        NetworkDNSSettings = new() { NameServers = new() { Addresses = [new([8, 8, 8, 8]), new([10, 10, 10, 10])] } }
                     },
                     Message = null
                 },
@@ -129,11 +161,20 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                 },
                     SourceGenerationContext.Default.GetNTPFallbackInformationResult);
 
+            case Topics.GetSupportedCapabilities:
+                return JsonSerializer.Serialize(new GetSupportedCapabilitiesResult
+                {
+                    Status = OperationStatus.Success,
+                    SupportedCapabilities = _supportedCapabilities,
+                    Message = null
+                },
+                    CapabilitySourceGenerationContext.Default.GetSupportedCapabilitiesResult);
+
             case Topics.GetOriginalPhysicalAddress:
                 return JsonSerializer.Serialize(new GetOriginalPhysicalAddressResult()
                 {
                     Status = OperationStatus.Success,
-                    OriginalPhysicalAddress = "00:02:01:10:53:25",
+                    OriginalPhysicalAddress = PhysicalAddress.Parse("00:02:01:10:53:25"),
                     Message = null
                 },
                 SourceGenerationContext.Default.GetOriginalPhysicalAddressResult);
@@ -218,7 +259,7 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                 LeaseExpires = DateTimeOffset.UtcNow.AddYears(2),
                 LeaseObtained = DateTimeOffset.UtcNow.AddHours(-1),
                 IPv4Detail = new() { IPAddress = new([192, 168, 14, 32]), Netmask = new([192, 168, 255, 255]) },
-                NetworkDNSSettings = new(nameServers: [new([8, 8, 8, 8]), new([10, 10, 10, 10])])
+                NetworkDNSSettings = new() { NameServers = new() { Addresses = [new([8, 8, 8, 8]), new([10, 10, 10, 10])] } }
             },
             Message = null
         }, SourceGenerationContext.Default.GetDHCPLeaseInformationResult);
@@ -236,7 +277,7 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                 IsDefaultGatewayAvailable = true,
                 IsInternetAvailable = true,
                 IsDNSFunctional = true,
-                InterfaceState = _systemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
+                InterfaceState = _systemConfiguration.NetworkInterfaces
                     .Where(i => i.CommonInformation.Name == content)
                     .Select(i => "Online")
                     .FirstOrDefault(NetworkStatusInformation.Empty.InterfaceState)

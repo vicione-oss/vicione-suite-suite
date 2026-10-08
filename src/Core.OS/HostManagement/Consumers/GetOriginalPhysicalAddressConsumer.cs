@@ -1,4 +1,5 @@
 using Core.OS.HostManagement.Extensions;
+using Core.Shared.HostManagement.Extensions;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Communication.Enums;
 using Sdk.Backend.Messaging;
@@ -26,13 +27,13 @@ public partial class GetOriginalPhysicalAddressConsumer(IPipeClient pipeClient, 
         }
 
         if (getOriginalPhysicalAddressResult.Status == OperationStatus.Success)
-            return new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = getOriginalPhysicalAddressResult.OriginalPhysicalAddress };
+            return new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = getOriginalPhysicalAddressResult.OriginalPhysicalAddress?.ToColonNotation() };
 
         if (getOriginalPhysicalAddressResult.Status == OperationStatus.Warning)
         {
             LogWarningStatusReturned(logger, getOriginalPhysicalAddressResult.Message);
 
-            return new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = getOriginalPhysicalAddressResult.OriginalPhysicalAddress };
+            return new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = getOriginalPhysicalAddressResult.OriginalPhysicalAddress?.ToColonNotation() };
         }
 
         // OperationStatus.Error

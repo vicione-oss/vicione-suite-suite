@@ -25,18 +25,19 @@ public sealed class ProxiesControlPanelSaveHandlerTests
     {
         _systemConfigurationService.SystemConfiguration.Returns(new SystemConfiguration
         {
-            NetworkInterfacesSettings = new NetworkInterfacesSettings([new NetworkInterfaceDetail
+            NetworkInterfaces = [new NetworkInterfaceDetail
             {
                 CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true },
-                IPv4 = new IPv4Settings([new IPv4Detail
+                IPv4 = new IPv4Settings
                 {
-                    IPAddress = System.Net.IPAddress.Parse("192.168.1.10"),
-                    Netmask = System.Net.IPAddress.Parse("255.255.255.0")
-                }])
-                {
+                    IPv4Details = [new IPv4Detail
+                    {
+                        IPAddress = System.Net.IPAddress.Parse("192.168.1.10"),
+                        Netmask = System.Net.IPAddress.Parse("255.255.255.0")
+                    }],
                     Gateway = System.Net.IPAddress.Parse("192.168.1.1")
                 }
-            }]),
+            }],
             NetworkDNSSettings = new NetworkDNSSettings { Hostname = "test-host" }
         });
     }
@@ -75,7 +76,6 @@ public sealed class ProxiesControlPanelSaveHandlerTests
     {
         HttpProxySettings = new ProxySettings(),
         HttpsProxySettings = new ProxySettings(),
-        SocksProxySettings = new ProxySettings(),
         FtpProxySettings = new ProxySettings(),
         SftpProxySettings = new ProxySettings(),
         DoNotProxyListEnabled = false,
@@ -160,23 +160,6 @@ public sealed class ProxiesControlPanelSaveHandlerTests
     }
 
     [Fact]
-    public async Task Should_return_error_result_when_socks_proxy_port_is_not_an_integer()
-    {
-        // Arrange
-        SetupSystemConfiguration();
-        using var handler = CreateHandler();
-
-        var state = CreateValidState();
-        state.SocksProxySettings = new ProxySettings { Enabled = true, Server = "socks://proxy.example.com", Port = "not-a-port" };
-
-        // Act
-        var result = await handler.Save(state, TestContext.Current.CancellationToken);
-
-        // Assert
-        result.Should().BeOfType<SaveErrorResult>();
-    }
-
-    [Fact]
     public async Task Should_return_error_result_when_ftp_proxy_port_is_not_an_integer()
     {
         // Arrange
@@ -252,28 +235,6 @@ public sealed class ProxiesControlPanelSaveHandlerTests
         proxy.Enabled.Should().BeTrue();
         proxy.Server.Should().Be("https://https-proxy.example.com");
         proxy.Port.Should().Be(3129);
-    }
-
-    [Fact]
-    public async Task Should_save_socks_proxy_settings_from_state()
-    {
-        // Arrange
-        SetupSystemConfiguration();
-        SystemConfiguration? captured = null;
-        using var handler = CreateHandler();
-        SetupMediatorToFireSuccess(handler, cmd => captured = cmd.SystemConfiguration);
-
-        var state = CreateValidState();
-        state.SocksProxySettings = CreateEnabledProxySettings("socks://socks-proxy.example.com", "1080");
-
-        // Act
-        await handler.Save(state, TestContext.Current.CancellationToken);
-
-        // Assert
-        var proxy = captured!.NetworkProxySettings.SOCKS;
-        proxy.Enabled.Should().BeTrue();
-        proxy.Server.Should().Be("socks://socks-proxy.example.com");
-        proxy.Port.Should().Be(1080);
     }
 
     [Fact]
@@ -400,10 +361,10 @@ public sealed class ProxiesControlPanelSaveHandlerTests
 
         // Assert
         var proxy = captured!.NetworkProxySettings;
-        proxy.DoNotProxyListEnabled.Should().BeTrue();
-        proxy.DoNotProxyList.Should().HaveCount(2);
-        proxy.DoNotProxyList[0].Should().Be("192.168.1.50");
-        proxy.DoNotProxyList[1].Should().Be("internal.example.com");
+        proxy.NoProxy.Enabled.Should().BeTrue();
+        proxy.NoProxy.Entries.Should().HaveCount(2);
+        proxy.NoProxy.Entries[0].Should().Be("192.168.1.50");
+        proxy.NoProxy.Entries[1].Should().Be("internal.example.com");
     }
 
     [Fact]
@@ -427,8 +388,8 @@ public sealed class ProxiesControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkProxySettings.DoNotProxyList.Should().HaveCount(1);
-        captured.NetworkProxySettings.DoNotProxyList[0].Should().Be("192.168.1.50");
+        captured!.NetworkProxySettings.NoProxy.Entries.Should().HaveCount(1);
+        captured.NetworkProxySettings.NoProxy.Entries[0].Should().Be("192.168.1.50");
     }
 
     [Fact]
@@ -446,6 +407,6 @@ public sealed class ProxiesControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.Should().Be(_systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings);
+        captured!.NetworkInterfaces.Should().Equal(_systemConfigurationService.SystemConfiguration.NetworkInterfaces);
     }
 }

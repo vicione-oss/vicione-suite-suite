@@ -1,5 +1,6 @@
 using System.IO.Abstractions.TestingHelpers;
 using Core.OS.Hosting.Contracts;
+using Core.OS.Hosting.Pages;
 using Core.OS.Hosting.Services;
 using Core.OS.HostManagement;
 using Core.OS.Instance;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using CallbackHandlerRegistry = HostManagement.Shared.Communication.NamedPipe.Client.CallbackHandlerRegistry;
 
 namespace Core.OS.Tests.Hosting.Services;
 
@@ -155,7 +157,7 @@ public sealed class DowngradeWebApplicationBuilderTests
         var response = await client.GetAsync($"{host.Urls.First()}/reset", tokenSource.Token);
 
         // Assert
-        host.Services.GetService<EventCallbackRegistry>().Should().NotBeNull();
+        host.Services.GetService<CallbackHandlerRegistry>().Should().NotBeNull();
 
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
         _fileSystem.ResetFileExists(_options).Should().BeTrue();
@@ -219,5 +221,77 @@ public sealed class DowngradeWebApplicationBuilderTests
         response.Headers.Location.Should().Be(new Uri("/", UriKind.Relative));
 
         await host.StopAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Theory]
+    [InlineData("/reset")]
+    [InlineData("/exit")]
+    public async Task Should_explain_instead_of_restarting_when_restart_service_is_disabled(string route)
+    {
+        // Arrange
+        var builder = WebApplication.CreateBuilder([]);
+        var downgradeOptions = CreateDowngradeOptionsWithRestartServiceDisabled();
+
+        await using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, downgradeOptions);
+        host.Urls.Add("http://127.0.0.1:0");
+        await host.StartAsync(TestContext.Current.CancellationToken);
+
+        using var handler = new HttpClientHandler { AllowAutoRedirect = false };
+        using var client = new HttpClient(handler) { BaseAddress = new Uri(host.Urls.First()) };
+
+        // Act
+        using var response = await client.GetAsync(new Uri(route, UriKind.Relative), TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+        var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        html.Should().Contain(RestartDisabledPage.Text);
+        response.Headers.GetValues("Content-Security-Policy").Single().Should().Contain($"style-src {InlineStyleSheet.HashOf(html)};");
+        await AssertNoStopRequest(host, downgradeOptions.StopApplicationDelayMs);
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
+    public async Task Should_write_the_reset_file_when_restart_service_is_disabled()
+    {
+        // Arrange
+        var builder = WebApplication.CreateBuilder([]);
+
+        await using var host = DowngradeWebApiHostBuilder.Build(builder, _fileSystem, CreateDowngradeOptionsWithRestartServiceDisabled());
+        host.Urls.Add("http://127.0.0.1:0");
+        await host.StartAsync(TestContext.Current.CancellationToken);
+
+        using var client = new HttpClient { BaseAddress = new Uri(host.Urls.First()) };
+
+        // Act
+        using var response = await client.GetAsync(new Uri("/reset", UriKind.Relative), TestContext.Current.CancellationToken);
+
+        // Assert
+        _fileSystem.ResetFileExists(_options).Should().BeTrue();
+
+        await host.StopAsync(TestContext.Current.CancellationToken);
+    }
+
+    private DowngradeWebApiParameters CreateDowngradeOptionsWithRestartServiceDisabled()
+    {
+        const string capabilitiesFile = "SupportedCapabilities.json";
+        _fileSystem.AddFile(capabilitiesFile, new MockFileData("""{ "Topics": { "RestartService": "Disabled" } }"""));
+        _hostManagementOptions.MockClient!.SupportedCapabilitiesJsonFile = capabilitiesFile;
+
+        return CreateDowngradeOptions() with { StopApplicationDelayMs = 100 };
+    }
+
+    /// <summary>
+    /// MockPipeClient answers a restart request by stopping the application, so the host still runs
+    /// well after the restart delay only if no restart was requested.
+    /// </summary>
+    private static async Task AssertNoStopRequest(WebApplication host, int stopApplicationDelayMs)
+    {
+        await Task.Delay(stopApplicationDelayMs * 10, TestContext.Current.CancellationToken);
+
+        host.Lifetime.ApplicationStopping.IsCancellationRequested.Should().BeFalse();
     }
 }

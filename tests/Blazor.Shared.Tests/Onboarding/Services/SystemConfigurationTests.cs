@@ -2,6 +2,7 @@ using System.Net;
 using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Onboarding.Models;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
+using Core.Shared.HostManagement.Extensions;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using HostManagement.Shared.Contracts.Service;
@@ -20,7 +21,7 @@ public sealed class SystemConfigurationTests
             // Arrange
             var config = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(),
+                NetworkInterfaces = [],
                 NetworkDNSSettings = new NetworkDNSSettings { Hostname = "myhost" },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -36,7 +37,7 @@ public sealed class SystemConfigurationTests
             // Arrange
             var config1 = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(),
+                NetworkInterfaces = [],
                 NetworkDNSSettings = new NetworkDNSSettings { Hostname = "myhost" },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -44,7 +45,7 @@ public sealed class SystemConfigurationTests
 
             var config2 = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(),
+                NetworkInterfaces = [],
                 NetworkDNSSettings = new NetworkDNSSettings { Hostname = "myhost" },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -59,17 +60,19 @@ public sealed class SystemConfigurationTests
         public void Should_handle_services_list_correctly()
         {
             // Arrange
-            var config1 = new SystemConfiguration([new ServiceDetail { Name = "suite", State = ServiceState.Enabled }])
+            var config1 = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(),
+                Services = [new ServiceDetail { Name = "suite", State = ServiceState.Enabled }],
+                NetworkInterfaces = [],
                 NetworkDNSSettings = new NetworkDNSSettings(),
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
             };
 
-            var config2 = new SystemConfiguration([new ServiceDetail { Name = "suite", State = ServiceState.Enabled }])
+            var config2 = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(),
+                Services = [new ServiceDetail { Name = "suite", State = ServiceState.Enabled }],
+                NetworkInterfaces = [],
                 NetworkDNSSettings = new NetworkDNSSettings(),
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -87,9 +90,10 @@ public sealed class SystemConfigurationTests
         public void Should_remain_equal_with_services()
         {
             // Arrange
-            var original = new SystemConfiguration([new ServiceDetail { Name = "suite", State = ServiceState.Enabled }])
+            var original = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(),
+                Services = [new ServiceDetail { Name = "suite", State = ServiceState.Enabled }],
+                NetworkInterfaces = [],
                 NetworkDNSSettings = new NetworkDNSSettings(),
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -109,16 +113,17 @@ public sealed class SystemConfigurationTests
             // Arrange
             var original = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(
+                NetworkInterfaces =
                 [
                     new NetworkInterfaceDetail
                 {
                     CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan1", Enabled = true },
-                    IPv4 = new IPv4Settings(
-                    [
-                        new IPv4Detail { IPAddress = IPAddress.Parse("10.0.0.1"), Netmask = IPAddress.Parse("255.255.255.0") }
-                    ])
+                    IPv4 = new IPv4Settings
                     {
+                        IPv4Details =
+                        [
+                            new IPv4Detail { IPAddress = IPAddress.Parse("10.0.0.1"), Netmask = IPAddress.Parse("255.255.255.0") }
+                        ],
                         DHCPEnabled = false,
                         Gateway = IPAddress.Parse("10.0.0.254")
                     }
@@ -128,12 +133,11 @@ public sealed class SystemConfigurationTests
                     CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan2", Enabled = true },
                     IPv4 = new IPv4Settings { DHCPEnabled = true }
                 }
-                ]),
+                ],
                 NetworkDNSSettings = new NetworkDNSSettings
                 {
                     Hostname = "suite-host",
-                    NameServersEnabled = true,
-                    NameServers = { IPAddress.Parse("8.8.8.8") }
+                    NameServers = new() { Enabled = true, Addresses = [IPAddress.Parse("8.8.8.8")] }
                 },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -153,7 +157,7 @@ public sealed class SystemConfigurationTests
             // Arrange - system is in DHCP mode on lan2
             var original = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(
+                NetworkInterfaces =
                 [
                     new NetworkInterfaceDetail
                 {
@@ -165,11 +169,11 @@ public sealed class SystemConfigurationTests
                     CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan2", Enabled = true },
                     IPv4 = new IPv4Settings { DHCPEnabled = true }
                 }
-                ]),
+                ],
                 NetworkDNSSettings = new NetworkDNSSettings
                 {
                     Hostname = "suite-host",
-                    NameServersEnabled = false
+                    NameServers = new() { Enabled = false }
                 },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -204,7 +208,7 @@ public sealed class SystemConfigurationTests
             // Arrange - system is in manual mode on lan2 with specific IP settings
             var original = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(
+                NetworkInterfaces =
                 [
                     new NetworkInterfaceDetail
                 {
@@ -214,21 +218,21 @@ public sealed class SystemConfigurationTests
                 new NetworkInterfaceDetail
                 {
                     CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan2", Enabled = true },
-                    IPv4 = new IPv4Settings(
-                    [
-                        new IPv4Detail { IPAddress = IPAddress.Parse("192.168.1.100"), Netmask = IPAddress.Parse("255.255.255.0") }
-                    ])
+                    IPv4 = new IPv4Settings
                     {
+                        IPv4Details =
+                        [
+                            new IPv4Detail { IPAddress = IPAddress.Parse("192.168.1.100"), Netmask = IPAddress.Parse("255.255.255.0") }
+                        ],
                         DHCPEnabled = false,
                         Gateway = IPAddress.Parse("192.168.1.1")
                     }
                 }
-                ]),
+                ],
                 NetworkDNSSettings = new NetworkDNSSettings
                 {
                     Hostname = "suite-host",
-                    NameServersEnabled = true,
-                    NameServers = { IPAddress.Parse("8.8.8.8") }
+                    NameServers = new() { Enabled = true, Addresses = [IPAddress.Parse("8.8.8.8")] }
                 },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -267,7 +271,7 @@ public sealed class SystemConfigurationTests
             // Arrange
             var original = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(
+                NetworkInterfaces =
                 [
                     new NetworkInterfaceDetail
                 {
@@ -279,7 +283,7 @@ public sealed class SystemConfigurationTests
                     CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan2", Enabled = true },
                     IPv4 = new IPv4Settings { DHCPEnabled = true }
                 }
-                ]),
+                ],
                 NetworkDNSSettings = new NetworkDNSSettings { Hostname = "old-host" },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -300,7 +304,7 @@ public sealed class SystemConfigurationTests
             // Arrange - system is in DHCP mode
             var original = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(
+                NetworkInterfaces =
                 [
                     new NetworkInterfaceDetail
                 {
@@ -312,11 +316,11 @@ public sealed class SystemConfigurationTests
                     CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan2", Enabled = true },
                     IPv4 = new IPv4Settings { DHCPEnabled = true }
                 }
-                ]),
+                ],
                 NetworkDNSSettings = new NetworkDNSSettings
                 {
                     Hostname = "suite-host",
-                    NameServersEnabled = false
+                    NameServers = new() { Enabled = false }
                 },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
@@ -356,16 +360,17 @@ public sealed class SystemConfigurationTests
             // DHCP-assigned address/gateway that a real host reports back.
             var original = new SystemConfiguration
             {
-                NetworkInterfacesSettings = new NetworkInterfacesSettings(
+                NetworkInterfaces =
                 [
                     new NetworkInterfaceDetail
                 {
                     CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan1", Enabled = true },
-                    IPv4 = new IPv4Settings(
-                    [
-                        new IPv4Detail { IPAddress = IPAddress.Parse("203.0.113.10"), Netmask = IPAddress.Parse("255.255.255.0") }
-                    ])
+                    IPv4 = new IPv4Settings
                     {
+                        IPv4Details =
+                        [
+                            new IPv4Detail { IPAddress = IPAddress.Parse("203.0.113.10"), Netmask = IPAddress.Parse("255.255.255.0") }
+                        ],
                         DHCPEnabled = true,
                         Gateway = IPAddress.Parse("203.0.113.1")
                     }
@@ -375,8 +380,8 @@ public sealed class SystemConfigurationTests
                     CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan2", Enabled = true },
                     IPv4 = new IPv4Settings { DHCPEnabled = true }
                 }
-                ]),
-                NetworkDNSSettings = new NetworkDNSSettings { Hostname = "suite-host", NameServersEnabled = false },
+                ],
+                NetworkDNSSettings = new NetworkDNSSettings { Hostname = "suite-host", NameServers = new() { Enabled = false } },
                 NetworkProxySettings = new NetworkProxySettings(),
                 NetworkNTPSettings = new NetworkNTPSettings()
             };

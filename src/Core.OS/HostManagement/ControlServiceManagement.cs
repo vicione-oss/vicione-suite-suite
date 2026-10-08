@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.HostManagement.Extensions;
+using Core.Shared.HostManagement.Extensions;
 using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Contracts;
@@ -16,15 +17,12 @@ namespace Core.OS.HostManagement;
 
 public sealed partial class ControlServiceManagement(IPipeClient pipeClient, SystemConfigurationCache responseCache, ILogger<ControlServiceManagement> logger) : IControlServiceManagement
 {
-    public bool IsAvailable => pipeClient is not MockPipeClient;
+    public bool IsAvailable => !pipeClient.IsMock;
 
     public async Task<ControlServiceManagementResult> TryControlService(ServiceCommand command, string serviceName, CancellationToken cancellationToken = default)
     {
         if (!IsAvailable)
-        {
-            var errorInfo = new ErrorInfo(ControlServiceErrorCodes.ControlServiceUnavailable, "Operation not supported. HMS not installed or connected.");
-            return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
-        }
+            return Unavailable(serviceName);
 
         try
         {
@@ -36,10 +34,21 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
         catch (Exception e)
         {
             LogFailedToControlService(logger, e, command, serviceName);
+
+            if (pipeClient.State is PipeState.NotOpened)
+                return Unavailable(serviceName);
+
             var errorInfo = new ErrorInfo(ControlServiceErrorCodes.UnknownError, e.Message);
 
             return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
         }
+    }
+
+    private static ControlServiceManagementResult Unavailable(string serviceName)
+    {
+        var errorInfo = new ErrorInfo(ControlServiceErrorCodes.ControlServiceUnavailable, "Operation not supported. HMS not installed or connected.");
+
+        return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
     }
 
     private async Task<ControlServiceManagementResult> ChangeServiceConfiguration(ServiceCommand command, string serviceName, CancellationToken cancellationToken)
@@ -50,12 +59,15 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
         if (response.Configuration is null)
             throw new InvalidOperationException("Failed to fetch system configuration.");
 
+        // The cached configuration stays untouched, so that a rejected change does not end up in the cache.
+        var configuration = response.Configuration.Clone();
+
         // Existing entries are reused, otherwise a new one is added.
-        var serviceToControl = GetOrAddServiceToControl(response.Configuration, serviceName);
+        var serviceToControl = GetOrAddServiceToControl(configuration, serviceName);
 
         ApplyServiceCommand(serviceToControl, command);
 
-        var setResult = await pipeClient.SetSystemConfiguration(response.Configuration, cancellationToken);
+        var setResult = await pipeClient.SetSystemConfiguration(configuration, cancellationToken);
         if (setResult?.Status == OperationStatus.Success)
             return new ControlServiceManagementResult(serviceName, ToSuiteState(command));
 
@@ -63,7 +75,7 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
         var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
         LogServiceCommandFailed(logger, command, serviceName, errorCode, setResult?.Message);
 
-        return new ControlServiceManagementResult(serviceName, ToSuiteState(command), errorInfo);
+        return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
     }
 
     private static ServiceDetail GetOrAddServiceToControl(SystemConfiguration? configuration, string serviceName)
@@ -108,23 +120,15 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
 
     private async Task<ControlServiceManagementResult> ChangeServiceState(ServiceCommand command, string serviceName, CancellationToken cancellationToken)
     {
-        ControlServiceManagementResult result = new(serviceName, SdkServiceState.Unknown);
-        if (command is ServiceCommand.Stop or ServiceCommand.Restart)
+        var requestResult = command switch
         {
-            var requestResult = await pipeClient.StopService(serviceName, cancellationToken);
-            result = HandleServiceControlResult(requestResult, command, serviceName);
-        }
+            ServiceCommand.Start => await pipeClient.StartService(serviceName, cancellationToken),
+            ServiceCommand.Stop => await pipeClient.StopService(serviceName, cancellationToken),
+            ServiceCommand.Restart => await pipeClient.RestartService(serviceName, cancellationToken),
+            _ => throw new UnreachableException(),
+        };
 
-        if (!result.Success)
-            return result;
-
-        if (command is ServiceCommand.Start or ServiceCommand.Restart)
-        {
-            var requestResult = await pipeClient.StartService(serviceName, cancellationToken);
-            return HandleServiceControlResult(requestResult, command, serviceName);
-        }
-
-        return result;
+        return HandleServiceControlResult(requestResult, command, serviceName);
     }
 
     private ControlServiceManagementResult HandleServiceControlResult(ServiceControlResult? setResult, ServiceCommand command, string serviceName)
@@ -135,7 +139,7 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
             var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
             LogServiceCommandFailed(logger, command, serviceName, errorCode, setResult?.Message);
 
-            return new ControlServiceManagementResult(serviceName, ToSuiteState(command), errorInfo);
+            return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
         }
 
         return new ControlServiceManagementResult(serviceName, ToSuiteState(command));

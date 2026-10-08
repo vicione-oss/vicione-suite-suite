@@ -9,6 +9,7 @@ using Sdk.Client.Infrastructure;
 using Sdk.Instance;
 using Sdk.Messaging;
 using ViciOne.Ui.Localization.Resources;
+using CapabilityTexts = Blazor.Shared.Localization.HostManagementCapabilities;
 
 namespace Blazor.Shared.Instance.ControlPanels.Update.Services;
 
@@ -47,9 +48,11 @@ internal sealed partial class UpdateControlPanelSaveHandler : ControlPanelSaveHa
 
             var command = new InstallSuiteVersion(installVersion.PackageName, installVersion.SignatureName);
 
-            var result = await SendAndWaitForCompletion(command, CreateUpdateSystemFailedResult, cancellationToken);
+            var result = await SendAndWaitForCompletion(command, CreateInstallOfSelectedVersionFailedResult, cancellationToken);
             if (result is SaveSuccessResult)
                 state.SelectedVersionChanged = false;
+
+            return result;
         }
 
         if (state.FlashDeviceEnabled)
@@ -62,7 +65,7 @@ internal sealed partial class UpdateControlPanelSaveHandler : ControlPanelSaveHa
             var result = await SendAndWaitForCompletion(
                 command,
                 _instanceInformationProvider.Local.Id,
-                CreateInstallOfSelectedVersionFailedResult,
+                CreateUpdateSystemFailedResult,
                 cancellationToken);
 
             if (result is SaveSuccessResult)
@@ -86,7 +89,9 @@ internal sealed partial class UpdateControlPanelSaveHandler : ControlPanelSaveHa
 
     private static ISaveResult CreateUpdateSystemFailedResult(ErrorInfo errorInfo)
         => new SaveErrorResult(
-            $"{Localization.UpdateControlPanelSaveHandler.UpdateSystemFailed} {CommonPhrases.SeeLogsForFurtherDetails}",
+            errorInfo.ErrorCode == Core.Shared.HostManagement.Events.UpdateSystemStarted.UpdateSystemDisabled
+                ? CapabilityTexts.FunctionDisabled
+                : $"{Localization.UpdateControlPanelSaveHandler.UpdateSystemFailed} {CommonPhrases.SeeLogsForFurtherDetails}",
             errorInfo.ErrorCode);
 
     public Task Consume(ClientContext<InstallSuiteVersionStarted> context, CancellationToken cancellationToken)

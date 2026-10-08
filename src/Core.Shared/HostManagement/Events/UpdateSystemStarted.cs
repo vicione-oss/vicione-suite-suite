@@ -6,4 +6,6 @@ namespace Core.Shared.HostManagement.Events;
 public record UpdateSystemStarted(string? Message, bool WithWarnings) : ResponseEventBase
 {
     public const int UnknownError = -1;
+
+    public const int UpdateSystemDisabled = 101;
 }

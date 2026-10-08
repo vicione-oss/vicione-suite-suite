@@ -12,8 +12,8 @@ internal static class NtpControlPanelStateExtensions
         var networkNtpSettings = systemConfigurationService.SystemConfiguration.NetworkNTPSettings;
         var result = await mediator.Request<GetNTPFallbackInformation, GetNTPFallbackInformationResponse>(new(), cancellationToken);
 
-        state.NtpServersEnabled = networkNtpSettings.NTPServersEnabled;
-        state.NtpServerDetails.Reset(networkNtpSettings.NTPServers);
+        state.NtpServersEnabled = networkNtpSettings.Enabled;
+        state.NtpServerDetails.Reset(networkNtpSettings.Servers);
         state.FallbackNtpServerDetails.Reset(result.FallbackNTPServers ?? []);
     }
 }

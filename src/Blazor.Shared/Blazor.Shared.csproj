@@ -86,6 +86,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Localization\HostManagementCapabilities.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>HostManagementCapabilities.resx</DependentUpon>
+    </Compile>
     <Compile Update="Localization\RestartSuite.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -536,6 +541,10 @@
     <EmbeddedResource Update="Instance\Localization\Common.resx">
       <LastGenOutput>Common.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\HostManagementCapabilities.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>HostManagementCapabilities.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Localization\RestartSuite.resx">
       <Generator>ResXFileCodeGenerator</Generator>

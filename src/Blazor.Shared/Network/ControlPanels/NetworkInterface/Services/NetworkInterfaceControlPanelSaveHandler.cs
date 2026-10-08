@@ -1,12 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Net;
+using System.Net.NetworkInformation;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
 using Blazor.Shared.Network.Extensions;
 using Blazor.Shared.Network.Models;
 using Blazor.Shared.Network.Services;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
-using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
 using Microsoft.Extensions.Logging;
@@ -20,11 +21,9 @@ internal sealed class NetworkInterfaceControlPanelSaveHandler(
     ISystemConfigurationService systemConfigurationService,
     ILogger<NetworkInterfaceControlPanelSaveHandler> logger) : NetworkControlPanelSaveHandlerBase<NetworkInterfaceControlPanelState>(mediator, systemConfigurationService, logger)
 {
-    private readonly IUiMediator _mediator = mediator;
-
-    protected override async Task<ISaveInternalResult> SaveInternal(NetworkInterfaceControlPanelState state)
+    protected override Task<ISaveInternalResult> SaveInternal(NetworkInterfaceControlPanelState state)
     {
-        var networkInterfaces = SystemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces.ToList();
+        var networkInterfaces = SystemConfigurationService.SystemConfiguration.NetworkInterfaces.ToList();
 
         var networkInterface = networkInterfaces.ElementAtOrDefault(state.NetworkInterfaceIndex)
             ?? throw new ArgumentOutOfRangeException(nameof(state), string.Format(CultureInfo.CurrentCulture, Localization.NetworkInterfaceControlPanelSaveHandler.CannotFindNetworkInterfaceSettingsBasedOnGivenIndex, state.NetworkInterfaceIndex));
@@ -35,16 +34,18 @@ internal sealed class NetworkInterfaceControlPanelSaveHandler(
             {
                 Enabled = networkInterface.CommonInformation.Enabled,
                 Name = networkInterface.CommonInformation.Name,
-                PhysicalAddress = networkInterface.CommonInformation.PhysicalAddress
+                UserDefinedMACAddress = networkInterface.CommonInformation.UserDefinedMACAddress
             },
             IPv4 = new IPv4Settings()
         };
 
-        var originalPhysicalAddressResponse = await _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(new GetOriginalPhysicalAddress(state.Name));
-
         newNetworkInterface.CommonInformation.Name = state.Name;
         newNetworkInterface.CommonInformation.Enabled = state.Enabled;
-        newNetworkInterface.CommonInformation.PhysicalAddress = string.IsNullOrEmpty(state.MacAddress) ? originalPhysicalAddressResponse.OriginalPhysicalAddress ?? string.Empty : state.MacAddress;
+
+        if (!TryCreateUserDefinedMACAddress(state, out var userDefinedMACAddress))
+            return Task.FromResult<ISaveInternalResult>(new SaveInternalErrorResult(string.Format(CultureInfo.CurrentCulture, Localization.NetworkInterfaceControlPanelSaveHandler.MacAddressIsInvalid, state.MacAddress)));
+
+        newNetworkInterface.CommonInformation.UserDefinedMACAddress = userDefinedMACAddress;
 
         newNetworkInterface.IPv4.DHCPEnabled = state.IpV4ConfigurationMode == IpConfigurationMode.AutomaticDhcp;
 
@@ -68,24 +69,21 @@ internal sealed class NetworkInterfaceControlPanelSaveHandler(
         else
             newNetworkInterface.IPv4.Gateway = IPAddress.Parse(state.DefaultGateway);
 
-        newNetworkInterface.IPv4.VLANEnabled = state.VLanEnabled;
+        newNetworkInterface.VLAN.Enabled = state.VLanEnabled;
 
         if (state.VLanEnabled)
         {
             if (int.TryParse(state.VLanId, out var vLanId))
-                newNetworkInterface.IPv4.VLANID = vLanId;
+                newNetworkInterface.VLAN.ID = vLanId;
             else
-                return new SaveInternalErrorResult(string.Format(CultureInfo.InvariantCulture, ValidationMessages.FieldMustBeAnInteger, Constants.VLanIdLabel));
+                return Task.FromResult<ISaveInternalResult>(new SaveInternalErrorResult(string.Format(CultureInfo.InvariantCulture, ValidationMessages.FieldMustBeAnInteger, Constants.VLanIdLabel)));
         }
 
         networkInterfaces[state.NetworkInterfaceIndex] = newNetworkInterface;
 
         var systemConfiguration = new SystemConfiguration
         {
-            NetworkInterfacesSettings = new NetworkInterfacesSettings
-            {
-                NetworkInterfaces = networkInterfaces
-            },
+            NetworkInterfaces = networkInterfaces,
             NetworkDNSSettings = SystemConfigurationService.SystemConfiguration.NetworkDNSSettings,
             NetworkProxySettings = SystemConfigurationService.SystemConfiguration.NetworkProxySettings,
             NetworkNTPSettings = SystemConfigurationService.SystemConfiguration.NetworkNTPSettings,
@@ -94,6 +92,25 @@ internal sealed class NetworkInterfaceControlPanelSaveHandler(
 
         state.HasUnsavedChanges = false;
 
-        return new SystemConfigurationSaveInternalResult(systemConfiguration);
+        return Task.FromResult<ISaveInternalResult>(new SystemConfigurationSaveInternalResult(systemConfiguration));
+    }
+
+    [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Blazor.Shared is only rendered on the server.")]
+    private static bool TryCreateUserDefinedMACAddress(NetworkInterfaceControlPanelState state, [NotNullWhen(true)] out UserDefinedMACAddressSettings? userDefinedMACAddress)
+    {
+        if (!state.MacAddressManually)
+        {
+            userDefinedMACAddress = new UserDefinedMACAddressSettings();
+            return true;
+        }
+
+        if (PhysicalAddress.TryParse(state.MacAddress, out var address))
+        {
+            userDefinedMACAddress = new UserDefinedMACAddressSettings { Enabled = true, Address = address };
+            return true;
+        }
+
+        userDefinedMACAddress = null;
+        return false;
     }
 }

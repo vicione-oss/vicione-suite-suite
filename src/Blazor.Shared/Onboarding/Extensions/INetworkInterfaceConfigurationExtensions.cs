@@ -15,7 +15,7 @@ internal static partial class INetworkInterfaceConfigurationExtensions
 {
     public static void ApplyTo(this INetworkInterfaceConfiguration target, SystemConfiguration source)
     {
-        var networkInterfaces = source.NetworkInterfacesSettings.NetworkInterfaces;
+        var networkInterfaces = source.NetworkInterfaces;
 
         var networkInterfaceName = target.GetName();
 
@@ -35,8 +35,8 @@ internal static partial class INetworkInterfaceConfigurationExtensions
         target.DefaultGateway = networkInterface.IPv4.Gateway?.ToString();
 
         var networkDnsSettings = source.NetworkDNSSettings;
-        if (networkDnsSettings.NameServersEnabled)
-            target.DnsServer = networkDnsSettings.NameServers.FirstOrDefault()?.ToString();
+        if (networkDnsSettings.NameServers.Enabled)
+            target.DnsServer = networkDnsSettings.NameServers.Addresses.FirstOrDefault()?.ToString();
         else
             target.DnsServer = null;
     }

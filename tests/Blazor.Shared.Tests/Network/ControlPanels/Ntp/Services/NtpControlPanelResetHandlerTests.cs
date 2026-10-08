@@ -60,7 +60,7 @@ public sealed class NtpControlPanelResetHandlerTests
     public async Task Should_set_ntp_servers_enabled_from_system_configuration()
     {
         // Arrange
-        SetupSystemConfiguration(new NetworkNTPSettings { NTPServersEnabled = true });
+        SetupSystemConfiguration(new NetworkNTPSettings { Enabled = true });
         await using var serviceProvider = SetupServiceProvider();
 
         var state = new NtpControlPanelState();
@@ -77,7 +77,7 @@ public sealed class NtpControlPanelResetHandlerTests
     public async Task Should_set_ntp_server_details_from_system_configuration()
     {
         // Arrange
-        SetupSystemConfiguration(new NetworkNTPSettings(ntpServers: ["pool.ntp.org", "time.windows.com"]));
+        SetupSystemConfiguration(new NetworkNTPSettings { Servers = ["pool.ntp.org", "time.windows.com"] });
         await using var serviceProvider = SetupServiceProvider();
 
         var state = new NtpControlPanelState();

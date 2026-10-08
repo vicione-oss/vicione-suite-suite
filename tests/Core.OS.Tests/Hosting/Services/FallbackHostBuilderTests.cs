@@ -205,6 +205,60 @@ public sealed class FallbackHostBuilderTests : IDisposable
 
     [Trait(Traits.Category, Traits.System)]
     [Fact]
+    public async Task Should_move_the_override_file_aside_and_explain_instead_of_restarting_when_restart_service_is_disabled()
+    {
+        // Arrange
+        Environment.SetEnvironmentVariable(EnvironmentOverridesSwitch.EnabledEnvironmentVariable, "true");
+
+        var fileSystem = new MockFileSystem();
+        var instanceOptions = CreateInstanceOptions();
+        fileSystem.AddDirectory(instanceOptions.HomeDirectory);
+
+        var path = EnvironmentOverridesFile.RequirePath(fileSystem, instanceOptions.HomeDirectory);
+        var disabledPath = EnvironmentOverridesFile.ResolveDisabledPath(fileSystem, instanceOptions.HomeDirectory)!;
+        fileSystem.AddFile(path, new MockFileData(EnvironmentOverridesFormat.Serialize(new Dictionary<string, string> { ["A"] = "b" })));
+
+        const string capabilitiesFile = "SupportedCapabilities.json";
+        fileSystem.AddFile(capabilitiesFile, new MockFileData("""{ "Topics": { "RestartService": "Disabled" } }"""));
+
+        var options = new FallbackHostOptions
+        {
+            Status = FallbackHostStatus.InvalidOptions,
+            Messages = ["Authentication is incompletely configured"],
+            Logger = NullLogger.Instance,
+            HttpStatusCode = 500,
+            FileSystem = fileSystem,
+            Instance = instanceOptions,
+            HostManagement = new HostManagementOptions
+            {
+                MockClient = new MockPipeClientOptions { Enabled = true, SupportedCapabilitiesJsonFile = capabilitiesFile }
+            },
+            StopApplicationDelayMs = 100,
+        };
+
+        // Act
+        await WithHost(options, async (host, client) =>
+        {
+            using var response = await client.PostAsync(
+                new Uri(FallbackHostBuilder.DisableEnvironmentOverridesRoute, UriKind.Relative),
+                content: null,
+                TestContext.Current.CancellationToken);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var html = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+            html.Should().Contain(RestartDisabledPage.Text);
+            response.Headers.GetValues(ContentSecurityPolicyHeader).Single().Should().Contain($"style-src {InlineStyleSheet.HashOf(html)};");
+
+            fileSystem.File.Exists(path).Should().BeFalse();
+            fileSystem.File.Exists(disabledPath).Should().BeTrue();
+
+            await AssertNoStopRequest(host, options.StopApplicationDelayMs);
+        });
+    }
+
+    [Trait(Traits.Category, Traits.System)]
+    [Fact]
     public async Task Should_not_offer_the_disable_action_without_host_management_options()
     {
         // Arrange
@@ -279,6 +333,17 @@ public sealed class FallbackHostBuilderTests : IDisposable
         }
 
         host.Lifetime.ApplicationStopping.IsCancellationRequested.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// MockPipeClient answers a restart request by stopping the application, so the host still runs
+    /// well after the restart delay only if no restart was requested.
+    /// </summary>
+    private static async Task AssertNoStopRequest(WebApplication host, int stopApplicationDelayMs)
+    {
+        await Task.Delay(stopApplicationDelayMs * 10, TestContext.Current.CancellationToken);
+
+        host.Lifetime.ApplicationStopping.IsCancellationRequested.Should().BeFalse();
     }
 
     private static FallbackHostOptions CreateRecoveryExhaustedOptions() => new()
