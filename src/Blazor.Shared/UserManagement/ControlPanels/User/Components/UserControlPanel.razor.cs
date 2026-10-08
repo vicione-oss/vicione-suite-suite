@@ -1,8 +1,11 @@
 using System.Globalization;
 using Blazor.Shared.Services;
+using Blazor.Shared.Settings.DateAndTime.Services;
 using Blazor.Shared.UserManagement.ControlPanels.User.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.User.Services;
 using Blazor.Shared.UserManagement.Services;
+using Core.Shared.Instance.Contracts;
+using Core.Shared.Instance.Requests;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Microsoft.AspNetCore.Components;
@@ -14,6 +17,8 @@ using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
 using Sdk.UserManagement.Events;
 using Sdk.Utils;
+using ViciOne.Ui.Blazor.Components.ComboBox;
+using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.UserManagement.ControlPanels.User.Components;
 
@@ -26,6 +31,8 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
     private readonly AutoDisposeList<IDisposable> _subscriptionHandle = [];
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private bool _selfEdit;
+    private List<ComboBoxItem<CultureInfo?, string>> _availableCultures = [];
+    private List<ComboBoxItem<TimeZoneInfo?, string>> _availableTimeZones = [];
 
     [Inject] private IUiMediator Mediator { get; set; } = default!;
     [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
@@ -33,6 +40,7 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
     [Inject] private IRoleService RoleService { get; set; } = default!;
     [Inject] private IModuleAuthorizationClaimParser ClaimsParser { get; set; } = default!;
     [Inject] private IClaimsProvider ClaimsProvider { get; set; } = default!;
+    [Inject] private ITimeZoneDescriptorProvider TimeZoneDescriptorProvider { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,6 +68,34 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
         State.Features = Features;
 
         State.UpdateGridItems(ClaimsParser);
+
+        await UpdateComboBoxItems();
+    }
+
+    private async Task UpdateComboBoxItems()
+    {
+        var requestResult = await Mediator.Request<GetCrossInstanceConfiguration, GetCrossInstanceConfigurationResponse>(
+            new GetCrossInstanceConfiguration());
+
+        var crossInstanceConfiguration = requestResult.CrossInstanceConfiguration;
+
+        _availableCultures = [new() { Text = $"{CommonVocabulary.Default} - {new CultureInfo(crossInstanceConfiguration.CultureName).DisplayName}", Value = null }];
+        _availableCultures.AddRange(CrossInstanceConfiguration.SupportedCultures.Select(c => new ComboBoxItem<CultureInfo?, string> { Text = c.DisplayName, Value = c }));
+
+        _availableTimeZones = [new() { Text = CommonVocabulary.Default, Value = null }];
+
+        try
+        {
+            var timeZoneDescriptors = await TimeZoneDescriptorProvider.GetAll(_cancellationTokenSource.Token);
+
+            _availableTimeZones.AddRange(timeZoneDescriptors
+                .OrderBy(Settings.DateAndTime.Constants.OrderByKeySelector)
+                .Select(d => new ComboBoxItem<TimeZoneInfo?, string> { Text = d.DisplayName, Value = TimeZoneInfo.FindSystemTimeZoneById(d.TimeZoneId) }));
+        }
+        catch (OperationCanceledException)
+        {
+            // Nothing to do here, we return gracefully
+        }
     }
 
     protected override async ValueTask DisposeAsyncCore()
