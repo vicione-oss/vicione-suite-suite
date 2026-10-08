@@ -35,6 +35,9 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
             var result = await pipeClient.SetSystemConfiguration(context.Message.SystemConfiguration, context.CancellationToken);
             if (result?.Status == OperationStatus.Success)
             {
+                // Invalidated before the event, because the UI reloads on it and must not get the cached previous configuration (#2933).
+                cache.Invalidate();
+
                 await context.Publish(new SystemConfigurationChanged { CorrelationId = correlationId }, context.CancellationToken);
 
                 if (EvaluateRequireSystemRestart(context.Message.SystemConfiguration, previousConfig))

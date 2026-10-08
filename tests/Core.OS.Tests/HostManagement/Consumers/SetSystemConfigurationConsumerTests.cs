@@ -202,4 +202,69 @@ public sealed class SetSystemConfigurationConsumerTests
         (await tester.Harness.Published.Any<SystemRestartRequired>(TestContext.Current.CancellationToken)).Should().BeFalse();
         (await tester.Harness.Published.Any<SystemConfigurationChanged>(TestContext.Current.CancellationToken)).Should().BeTrue();
     }
+
+    [Fact]
+    public async Task Should_invalidate_the_cache_before_publishing_the_changed_event()
+    {
+        // Arrange
+        var pipeClient = Substitute.For<IPipeClient>();
+        pipeClient.SetupSetSystemConfigurationResult(OperationStatus.Success);
+
+        await using var tester = new MassTransitTester(cfg =>
+        {
+            ConfigureServices(cfg, pipeClient);
+            cfg.AddConsumer<CacheProbe>();
+            cfg.AddSingleton<CacheProbeResult>();
+        });
+
+        // A consumer of the event sees the cache the way the UI's reload would.
+        tester.Services.GetRequiredService<SystemConfigurationCache>().Set(new SystemConfiguration());
+        var command = new SetSystemConfiguration(new SystemConfiguration());
+
+        // Act
+        await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(command);
+
+        // Assert
+        (await tester.Harness.Consumed.Any<SystemConfigurationChanged>(TestContext.Current.CancellationToken)).Should().BeTrue();
+        var probeResult = tester.Services.GetRequiredService<CacheProbeResult>();
+        probeResult.Consumed.Should().BeTrue();
+        probeResult.CachedConfiguration.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Should_keep_the_cache_when_host_management_rejects_the_configuration()
+    {
+        // Arrange
+        var pipeClient = Substitute.For<IPipeClient>();
+        pipeClient.SetupSetSystemConfigurationResult(OperationStatus.Error, "Test error");
+
+        await using var tester = new MassTransitTester(cfg => ConfigureServices(cfg, pipeClient));
+        var cache = tester.Services.GetRequiredService<SystemConfigurationCache>();
+        var cachedConfiguration = new SystemConfiguration();
+        cache.Set(cachedConfiguration);
+
+        // Act
+        await tester.TestCommand<SetSystemConfiguration, SetSystemConfigurationConsumer>(new SetSystemConfiguration(new SystemConfiguration()));
+
+        // Assert
+        cache.Get().Should().BeSameAs(cachedConfiguration);
+    }
+
+    private sealed class CacheProbeResult
+    {
+        public bool Consumed { get; set; }
+
+        public SystemConfiguration? CachedConfiguration { get; set; }
+    }
+
+    private sealed class CacheProbe(SystemConfigurationCache cache, CacheProbeResult result) : IConsumer<SystemConfigurationChanged>
+    {
+        public Task Consume(ConsumeContext<SystemConfigurationChanged> context)
+        {
+            result.CachedConfiguration = cache.Get();
+            result.Consumed = true;
+
+            return Task.CompletedTask;
+        }
+    }
 }

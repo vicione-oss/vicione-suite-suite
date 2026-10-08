@@ -213,6 +213,26 @@ public sealed class ControlServiceManagementTests
         services.GetRequiredService<SystemConfigurationCache>().Get().Should().Be(CreateConfiguration(currentState));
     }
 
+    [Theory]
+    [InlineData(ServiceCommand.Enable)]
+    [InlineData(ServiceCommand.Disable)]
+    public async Task Should_invalidate_the_cache_when_host_management_accepts_a_configuration_change(ServiceCommand command)
+    {
+        // Arrange
+        await using var pipeClient = CreateAvailablePipeClient();
+        pipeClient.SetupGetSystemConfigurationResult(OperationStatus.Success, CreateConfiguration(HostServiceState.Unknown));
+        pipeClient.SetupSetSystemConfigurationResult(OperationStatus.Success);
+        await using var services = CreateServices(_ => pipeClient);
+        var service = services.GetRequiredService<ControlServiceManagement>();
+
+        // Act
+        var result = await service.TryControlService(command, ServiceName, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        services.GetRequiredService<SystemConfigurationCache>().Get().Should().BeNull();
+    }
+
     private static IPipeClient CreateAvailablePipeClient()
     {
         var pipeClient = Substitute.For<IPipeClient>();

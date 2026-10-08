@@ -71,6 +71,7 @@
 - A module service command that HostManagement rejects reports the service state as unknown instead of the requested one
 - HostManagement requests fail after 5 seconds instead of waiting indefinitely when HostManagement is not running, set by `HostManagement:ConnectTimeoutMs`
 - A refused backup restore no longer leaves a copy of the backup on the device
+- Network settings show the saved value right after saving, also when a setting is changed again within 30 seconds
 
 ### Removed
 
