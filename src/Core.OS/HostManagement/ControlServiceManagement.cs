@@ -69,7 +69,12 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
 
         var setResult = await pipeClient.SetSystemConfiguration(configuration, cancellationToken);
         if (setResult?.Status == OperationStatus.Success)
+        {
+            // Invalidated before the caller publishes SystemConfigurationChanged, on which the UI reloads (#2933).
+            responseCache.Invalidate();
+
             return new ControlServiceManagementResult(serviceName, ToSuiteState(command));
+        }
 
         var errorCode = (int?)setResult?.Status ?? ControlServiceErrorCodes.UnknownError;
         var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
