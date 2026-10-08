@@ -1,4 +1,5 @@
-﻿@using Blazor.Shared.UserManagement.ControlPanels.Users.Services
+﻿@using Blazor.Shared.Settings.Components
+@using Blazor.Shared.UserManagement.ControlPanels.Users.Services
 @using Core.Shared.UserManagement.Contracts
 @using Sdk.Client.ControlPanels.Services
 @using ViciOne.Ui.Blazor.Components.Grid.Components
@@ -14,45 +15,47 @@
         @Localization.UsersControlPanel.DescriptionBannerContent
     </DescriptionBanner>
 
-    <Grid Items="@_usersQueryable" Virtualize="true" CssClass="users-grid">
-        <ActionButtons>
-            <AddGridActionButton OnClick="@AddUser" />
-            <EditGridActionButton Enabled="@_isSingleUserSelected" OnClick="@EditSelectedUser" />
-            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedUsers" />
-        </ActionButtons>
+    <LimitedHeightLayout>
+        <Grid Items="@_usersQueryable" Virtualize="true" CssClass="users-grid">
+            <ActionButtons>
+                <AddGridActionButton OnClick="@AddUser" />
+                <EditGridActionButton Enabled="@_isSingleUserSelected" OnClick="@EditSelectedUser" />
+                <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedUsers" />
+            </ActionButtons>
 
-        <Filter>
-            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
-        </Filter>
+            <Filter>
+                <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+            </Filter>
 
-        <ChildContent>
-            <ItemSelectColumn KeySelector="@(item => item.UserName)" Selection="@UserGridItemSelection" />
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item.UserName)" Selection="@UserGridItemSelection" />
 
-            <PropertyColumn Title="@TechnicalTerms.Username"
-                            Property="@(i => i.UserName)"
-                            Sortable="true" />
+                <PropertyColumn Title="@TechnicalTerms.Username"
+                                Property="@(i => i.UserName)"
+                                Sortable="true" />
 
-            <PropertyColumn Title="@CommonVocabulary.Email"
-                            Property="@(i => i.Email)"
-                            Sortable="true" />
+                <PropertyColumn Title="@CommonVocabulary.Email"
+                                Property="@(i => i.Email)"
+                                Sortable="true" />
 
-            <TemplateColumn Title="@CommonVocabulary.Description">
-            </TemplateColumn>
+                <TemplateColumn Title="@CommonVocabulary.Description">
+                </TemplateColumn>
 
-            <TemplateColumn Title="@($"2FA {CommonVocabulary.Status}")">
-                @TechnicalTerms.Disabled
-            </TemplateColumn>
+                <TemplateColumn Title="@($"2FA {CommonVocabulary.Status}")">
+                    @TechnicalTerms.Disabled
+                </TemplateColumn>
 
-            <TemplateColumn Title="@CommonVocabulary.Status">
-                @CommonVocabulary.NormalVerb
-            </TemplateColumn>
+                <TemplateColumn Title="@CommonVocabulary.Status">
+                    @CommonVocabulary.NormalVerb
+                </TemplateColumn>
 
-            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
-                              Navigate="@(async (UserProfile item) => await EditUser(item))" />
-        </ChildContent>
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@(async (UserProfile item) => await EditUser(item))" />
+            </ChildContent>
 
-        <Footer>
-            <SelectionFooter GridSelection="UserGridItemSelection" />
-        </Footer>
-    </Grid>
+            <Footer>
+                <SelectionFooter GridSelection="UserGridItemSelection" />
+            </Footer>
+        </Grid>
+    </LimitedHeightLayout>
 </div>

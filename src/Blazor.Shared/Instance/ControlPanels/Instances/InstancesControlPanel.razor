@@ -1,5 +1,6 @@
 @using Blazor.Shared.Instance.ControlPanels.Instances.Models
 @using Blazor.Shared.Instance.ControlPanels.Instances.Services
+@using Blazor.Shared.Settings.Components
 @using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.Blazor.Components.Grid.Components
@@ -13,71 +14,73 @@
         @Localization.InstancesControlPanel.DescriptionBannerContent
     </DescriptionBanner>
 
-    <Grid Items="_instancesQueryable" Virtualize="true" CssClass="instances-grid">
-        <ActionButtons>
-            <GridActionButton Enabled="true"
-                              OnClick="ReloadInstancesClick"
-                              Text="@CommonVocabulary.RefreshVerb"
-                              IconCssClass="@_refreshIconCssClass"></GridActionButton>
+    <LimitedHeightLayout>
+        <Grid Items="_instancesQueryable" Virtualize="true" CssClass="instances-grid">
+            <ActionButtons>
+                <GridActionButton Enabled="true"
+                                  OnClick="ReloadInstancesClick"
+                                  Text="@CommonVocabulary.RefreshVerb"
+                                  IconCssClass="@_refreshIconCssClass"></GridActionButton>
 
-            <GridActionButton Enabled="(InstanceGridItemSelection.Count > 0)"
-                              OnClick="SynchronizeSelectedInstances"
-                              Text="@CommonVocabulary.Synchronize"
-                              IconCssClass="@_reloadIconCssClass"></GridActionButton>
+                <GridActionButton Enabled="(InstanceGridItemSelection.Count > 0)"
+                                  OnClick="SynchronizeSelectedInstances"
+                                  Text="@CommonVocabulary.Synchronize"
+                                  IconCssClass="@_reloadIconCssClass"></GridActionButton>
 
-            <EditGridActionButton Enabled="@_isSingleInstanceSelected" OnClick="@EditSelectedInstance" />
+                <EditGridActionButton Enabled="@_isSingleInstanceSelected" OnClick="@EditSelectedInstance" />
 
-            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
-                                    OnClick="@DeleteSelectedInstancesClick" />
-        </ActionButtons>
+                <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
+                                        OnClick="@DeleteSelectedInstancesClick" />
+            </ActionButtons>
 
-        <Filter>
-            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
-        </Filter>
+            <Filter>
+                <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+            </Filter>
 
-        <ChildContent>
-            <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@InstanceGridItemSelection" />
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@InstanceGridItemSelection" />
         
-            <PropertyColumn Title="@CommonVocabulary.Name"
-                            Property="@(i => i.Name)"
-                            Sortable="true" />
+                <PropertyColumn Title="@CommonVocabulary.Name"
+                                Property="@(i => i.Name)"
+                                Sortable="true" />
 
-            <PropertyColumn Title="@TechnicalTerms.Type"
-                            Property="@(i => i.Type)"
-                            Sortable="true" />
+                <PropertyColumn Title="@TechnicalTerms.Type"
+                                Property="@(i => i.Type)"
+                                Sortable="true" />
 
-            <PropertyColumn Title="@TechnicalTerms.Version"
-                            Property="@(i => i.Version)"
-                            Sortable="true" />
+                <PropertyColumn Title="@TechnicalTerms.Version"
+                                Property="@(i => i.Version)"
+                                Sortable="true" />
 
-            <PropertyColumn Title="@TechnicalAcronyms.Sdk"
-                            Property="@(i => i.SdkVersion)"
-                            Sortable="true" />
+                <PropertyColumn Title="@TechnicalAcronyms.Sdk"
+                                Property="@(i => i.SdkVersion)"
+                                Sortable="true" />
 
-            <TemplateColumn Title="@CommonVocabulary.Status">
-                @if (context.IsSynchronizing)
-                {
-                    <div>@Localization.InstancesControlPanel.Executing</div>
-                }
-                else
-                {
-                    @if (context.HealthStatus is null)
+                <TemplateColumn Title="@CommonVocabulary.Status">
+                    @if (context.IsSynchronizing)
                     {
-                        <div>Unknown</div>
+                        <div>@Localization.InstancesControlPanel.Executing</div>
                     }
                     else
                     {
-                        <div>@context.HealthStatus</div>
+                        @if (context.HealthStatus is null)
+                        {
+                            <div>Unknown</div>
+                        }
+                        else
+                        {
+                            <div>@context.HealthStatus</div>
+                        }
                     }
-                }
-            </TemplateColumn>
+                </TemplateColumn>
 
-            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
-                              Navigate="@(async (InstanceInformationModel item) => await EditInstance(item))" />
-        </ChildContent>
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@(async (InstanceInformationModel item) => await EditInstance(item))" />
+            </ChildContent>
 
-        <Footer>
-            <SelectionFooter GridSelection="InstanceGridItemSelection" />
-        </Footer>
-    </Grid>
+            <Footer>
+                <SelectionFooter GridSelection="InstanceGridItemSelection" />
+            </Footer>
+        </Grid>
+    </LimitedHeightLayout>
 </div>

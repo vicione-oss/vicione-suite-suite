@@ -1,4 +1,5 @@
-﻿@using Blazor.Shared.UserManagement.ControlPanels.Roles.Services
+﻿@using Blazor.Shared.Settings.Components
+@using Blazor.Shared.UserManagement.ControlPanels.Roles.Services
 @using Core.Shared.UserManagement.Contracts
 @using ViciOne.Ui.Blazor.Components.Grid.Components
 @using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
@@ -14,34 +15,36 @@
         @Localization.RolesControlPanel.DescriptionBannerContent
     </DescriptionBanner>
 
-    <Grid Items="@_rolesQueryable" Virtualize="true" CssClass="roles-grid">
-        <ActionButtons>
-            <AddGridActionButton OnClick="@AddRole" />
-            <EditGridActionButton Enabled="@_isSingleRoleSelected" OnClick="@EditSelectedRole" />
-            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedRoles" />
-        </ActionButtons>
+    <LimitedHeightLayout>
+        <Grid Items="@_rolesQueryable" Virtualize="true" CssClass="roles-grid">
+            <ActionButtons>
+                <AddGridActionButton OnClick="@AddRole" />
+                <EditGridActionButton Enabled="@_isSingleRoleSelected" OnClick="@EditSelectedRole" />
+                <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedRoles" />
+            </ActionButtons>
 
-        <Filter>
-            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
-        </Filter>
+            <Filter>
+                <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+            </Filter>
 
-        <ChildContent>
-            <ItemSelectColumn KeySelector="@(item => item.Name)" Selection="RoleGridItemSelection" />
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item.Name)" Selection="RoleGridItemSelection" />
 
-            <PropertyColumn Title="@CommonVocabulary.Name"
-                            Property="@(i => i.Name)"
-                            Sortable="true" />
+                <PropertyColumn Title="@CommonVocabulary.Name"
+                                Property="@(i => i.Name)"
+                                Sortable="true" />
 
-            <PropertyColumn Title="@CommonVocabulary.Description"
-                            Property="@(i => i.Description)"
-                            Sortable="true" />
+                <PropertyColumn Title="@CommonVocabulary.Description"
+                                Property="@(i => i.Description)"
+                                Sortable="true" />
 
-            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
-                              Navigate="@(async (Role item) => await EditRole(item))" />
-        </ChildContent>
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@(async (Role item) => await EditRole(item))" />
+            </ChildContent>
 
-        <Footer>
-            <SelectionFooter GridSelection="RoleGridItemSelection" />
-        </Footer>
-    </Grid>
+            <Footer>
+                <SelectionFooter GridSelection="RoleGridItemSelection" />
+            </Footer>
+        </Grid>
+    </LimitedHeightLayout>
 </div>

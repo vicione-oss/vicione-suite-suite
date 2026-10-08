@@ -1,4 +1,5 @@
-﻿@using ViciOne.Ui.Blazor.Components.CheckBox
+﻿@using Blazor.Shared.Settings.Components
+@using ViciOne.Ui.Blazor.Components.CheckBox
 @using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.Blazor.Components.Grid.Components
@@ -12,38 +13,40 @@
         @Localization.TagsControlPanelPageContent.DescriptionBannerContent
     </DescriptionBanner>
 
-    <Grid Items="@_tagsQueryable" Virtualize="true" CssClass="tags-grid">
-        <ActionButtons>
-            <AddGridActionButton OnClick="@AddTag" />
-            <EditGridActionButton Enabled="@_isSingleTagSelected" OnClick="@EditSelectedTag" />
-            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedTags" />
-        </ActionButtons>
+    <LimitedHeightLayout>
+        <Grid Items="@_tagsQueryable" Virtualize="true" CssClass="tags-grid">
+            <ActionButtons>
+                <AddGridActionButton OnClick="@AddTag" />
+                <EditGridActionButton Enabled="@_isSingleTagSelected" OnClick="@EditSelectedTag" />
+                <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled" OnClick="@DeleteSelectedTags" />
+            </ActionButtons>
 
-        <Filter>
-            <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
-        </Filter>
+            <Filter>
+                <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+            </Filter>
 
-        <ChildContent>
-            <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@TagGridItemSelection" />
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@TagGridItemSelection" />
 
-            <PropertyColumn Title="@TechnicalTerms.Id"
-                            Property="@(i => i.Id)"
-                            Sortable="true" />
+                <PropertyColumn Title="@TechnicalTerms.Id"
+                                Property="@(i => i.Id)"
+                                Sortable="true" />
 
-            <PropertyColumn Title="@CommonVocabulary.Text"
-                            Property="@(i => i.Text)"
-                            Sortable="true" />
+                <PropertyColumn Title="@CommonVocabulary.Text"
+                                Property="@(i => i.Text)"
+                                Sortable="true" />
 
-            <TemplateColumn Title="@CommonVocabulary.Protected">
-                <CheckBox Enabled="false" Value="@context.Protected" />
-            </TemplateColumn>
+                <TemplateColumn Title="@CommonVocabulary.Protected">
+                    <CheckBox Enabled="false" Value="@context.Protected" />
+                </TemplateColumn>
 
-            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
-                              Navigate="@(async (Tag item) => await EditTag(item))" />
-        </ChildContent>
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@(async (Tag item) => await EditTag(item))" />
+            </ChildContent>
 
-        <Footer>
-            <SelectionFooter GridSelection="TagGridItemSelection" />
-        </Footer>
-    </Grid>
+            <Footer>
+                <SelectionFooter GridSelection="TagGridItemSelection" />
+            </Footer>
+        </Grid>
+    </LimitedHeightLayout>
 </div>

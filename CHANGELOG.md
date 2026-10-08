@@ -74,6 +74,7 @@
 - HostManagement requests fail after 5 seconds instead of waiting indefinitely when HostManagement is not running, set by `HostManagement:ConnectTimeoutMs`
 - A refused backup restore no longer leaves a copy of the backup on the device
 - Network settings show the saved value right after saving, also when a setting is changed again within 30 seconds
+- Settings dialog, control panels whose table fills the page no longer show an empty strip below the table
 
 ### Removed
 
