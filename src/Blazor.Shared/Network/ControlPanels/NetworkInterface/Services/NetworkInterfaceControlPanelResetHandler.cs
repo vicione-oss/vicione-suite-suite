@@ -14,7 +14,7 @@ internal sealed class NetworkInterfaceControlPanelResetHandler(IUiMediator media
         state.BeginLoading();
         try
         {
-            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
+            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
                 .ElementAtOrDefault(state.NetworkInterfaceIndex);
 
             if (networkInterface is null)
@@ -47,7 +47,8 @@ internal sealed class NetworkInterfaceControlPanelResetHandler(IUiMediator media
 
             state.UpdateIPv4Details(networkInterface);
 
-            state.UpdateMacAddress(networkInterface, getOriginalPhysicalAddressResponse.OriginalPhysicalAddress);
+            state.OriginalMacAddress = getOriginalPhysicalAddressResponse.OriginalPhysicalAddress;
+            state.UpdateMacAddress(networkInterface);
 
             state.HasUnsavedChanges = false;
         }

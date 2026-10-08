@@ -3,23 +3,14 @@ using Blazor.Shared.Onboarding.Models;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
-using Riok.Mapperly.Abstractions;
 
 namespace Blazor.Shared.Onboarding.Extensions;
 
-[Mapper(UseDeepCloning = true, IgnoreObsoleteMembersStrategy = IgnoreObsoleteMembersStrategy.Both)]
-internal static partial class SystemConfigurationExtensions
-{
-    public static partial SystemConfiguration Clone(this SystemConfiguration source);
-
-    private static IPAddress IPAddressToIPAddress(IPAddress ipAddress) => IPAddress.Parse(ipAddress.ToString());
-}
-
-internal static partial class SystemConfigurationExtensions
+internal static class SystemConfigurationExtensions
 {
     public static void UpdateFrom(this SystemConfiguration target, INetworkInterfaceConfiguration source)
     {
-        var networkInterfaces = target.NetworkInterfacesSettings.NetworkInterfaces;
+        var networkInterfaces = target.NetworkInterfaces;
         var networkInterfaceName = source.GetName();
 
         var networkInterface = networkInterfaces.FirstOrDefault(i => i.CommonInformation.Name == networkInterfaceName)
@@ -57,14 +48,14 @@ internal static partial class SystemConfigurationExtensions
 
             if (string.IsNullOrWhiteSpace(source.DnsServer))
             {
-                networkDnsSettings.NameServersEnabled = false;
+                networkDnsSettings.NameServers.Enabled = false;
             }
             else
             {
-                networkDnsSettings.NameServersEnabled = true;
+                networkDnsSettings.NameServers.Enabled = true;
 
-                networkDnsSettings.NameServers.Clear();
-                networkDnsSettings.NameServers.Add(IPAddress.Parse(source.DnsServer));
+                networkDnsSettings.NameServers.Addresses.Clear();
+                networkDnsSettings.NameServers.Addresses.Add(IPAddress.Parse(source.DnsServer));
             }
         }
     }

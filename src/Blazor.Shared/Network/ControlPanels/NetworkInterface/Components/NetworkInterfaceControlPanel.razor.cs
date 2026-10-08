@@ -81,17 +81,6 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
         State.HasUnsavedChanges = false;
     }
 
-    private string GetPhysicalAddress()
-    {
-        var networkInterface = SystemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
-            .ElementAtOrDefault(State.NetworkInterfaceIndex);
-
-        if (networkInterface is not null)
-            return networkInterface.CommonInformation.PhysicalAddress;
-        else
-            return CommonVocabulary.Unknown;
-    }
-
     private void AddAdditionalIPv4Detail()
         => State.AdditionalIpV4Details.Add(new NetworkInterfaceIPv4Detail());
 
@@ -139,7 +128,7 @@ public sealed partial class NetworkInterfaceControlPanel : NetworkControlPanelBa
     private void IpV4ConfigurationModeChanged()
     {
         if (State.IpV4ConfigurationMode is IpConfigurationMode.Manual &&
-            SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Count == 0)
+            SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Addresses.Count == 0)
         {
             _switchToManualConfigurationWarningDialog = true;
             return;

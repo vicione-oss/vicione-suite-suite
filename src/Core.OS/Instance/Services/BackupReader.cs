@@ -1,13 +1,18 @@
 using System.IO.Abstractions;
 using System.IO.Compression;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Extensions;
 using HostManagement.Shared.Contracts;
+using Sdk.Messaging;
 
 namespace Core.OS.Instance.Services;
 
 public static class BackupReader
 {
+    private static readonly int SupportedSystemConfigurationVersion = new SystemConfiguration().Version;
+
     public static async Task<BackupMetadata> GetBackupMetadata(IFileSystem fileSystem, string backupFilePath, CancellationToken cancellationToken = default)
     {
         await using var archiveStream = fileSystem.FileStream.New(backupFilePath, FileMode.Open, FileAccess.Read);
@@ -85,7 +90,20 @@ public static class BackupReader
             throw new InvalidOperationException("Could not find system configuration within backup.");
 
         // Without HostManagement installed, SystemConfiguration is null.
-        return await entry.DeserializeEntry<SystemConfiguration?>(cancellationToken);
+        var configuration = await entry.DeserializeEntry<JsonObject?>(cancellationToken);
+        if (configuration is null)
+            return null;
+
+        EnsureSupportedSystemConfigurationVersion(configuration);
+
+        return configuration.Deserialize<SystemConfiguration>(DefaultJsonSerializerSettings.Default);
+    }
+
+    private static void EnsureSupportedSystemConfigurationVersion(JsonObject configuration)
+    {
+        var version = configuration[nameof(SystemConfiguration.Version)]?.GetValue<int>();
+        if (version != SupportedSystemConfigurationVersion)
+            throw new UnsupportedBackupFormatException();
     }
 
     public static IEnumerable<ZipArchiveEntry> GetModuleEntries(IFileSystem fileSystem, string backupFilePath)

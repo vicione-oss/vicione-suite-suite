@@ -25,9 +25,6 @@ internal sealed class ProxiesControlPanelSaveHandler(IUiMediator mediator, ISyst
         if (SaveProxySettings(state.HttpsProxySettings, networkProxySettings.HTTPS) is SaveErrorResult httpsProxySaveErrorResult)
             return Task.FromResult<ISaveInternalResult>(new SaveInternalErrorResult(httpsProxySaveErrorResult.Message, httpsProxySaveErrorResult.ErrorCode));
 
-        if (SaveProxySettings(state.SocksProxySettings, networkProxySettings.SOCKS) is SaveErrorResult socksProxySaveErrorResult)
-            return Task.FromResult<ISaveInternalResult>(new SaveInternalErrorResult(socksProxySaveErrorResult.Message, socksProxySaveErrorResult.ErrorCode));
-
         if (SaveProxySettings(state.FtpProxySettings, networkProxySettings.FTP) is SaveErrorResult ftpProxySaveErrorResult)
             return Task.FromResult<ISaveInternalResult>(new SaveInternalErrorResult(ftpProxySaveErrorResult.Message, ftpProxySaveErrorResult.ErrorCode));
 
@@ -36,20 +33,20 @@ internal sealed class ProxiesControlPanelSaveHandler(IUiMediator mediator, ISyst
 
         // Proxy settings are not applied.
         {
-            networkProxySettings.DoNotProxyListEnabled = state.DoNotProxyListEnabled;
+            networkProxySettings.NoProxy.Enabled = state.DoNotProxyListEnabled;
 
             // Unfilled fieldsets and duplicates are dropped.
             state.DoNotProxyDetails = [.. state.DoNotProxyDetails.Where(d => !string.IsNullOrWhiteSpace(d.HostnameOrIp)).Distinct()];
 
-            networkProxySettings.DoNotProxyList.Clear();
-            networkProxySettings.DoNotProxyList.AddRange(state.DoNotProxyDetails.Select(d => d.HostnameOrIp));
+            networkProxySettings.NoProxy.Entries.Clear();
+            networkProxySettings.NoProxy.Entries.AddRange(state.DoNotProxyDetails.Select(d => d.HostnameOrIp));
 
             state.DoNotProxyDetails.EnsureAtLeastOneItemExists();
         }
 
         var systemConfiguration = new SystemConfiguration
         {
-            NetworkInterfacesSettings = SystemConfigurationService.SystemConfiguration.NetworkInterfacesSettings,
+            NetworkInterfaces = SystemConfigurationService.SystemConfiguration.NetworkInterfaces,
             NetworkDNSSettings = SystemConfigurationService.SystemConfiguration.NetworkDNSSettings,
             NetworkProxySettings = networkProxySettings,
             NetworkNTPSettings = SystemConfigurationService.SystemConfiguration.NetworkNTPSettings,

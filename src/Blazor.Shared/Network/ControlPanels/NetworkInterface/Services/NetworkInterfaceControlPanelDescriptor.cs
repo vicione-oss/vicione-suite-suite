@@ -16,7 +16,7 @@ internal sealed class NetworkInterfaceControlPanelDescriptor(NetworkInterfaceCon
 
     private string GetTitle()
     {
-        var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
+        var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
             .ElementAtOrDefault(controlPanelState.NetworkInterfaceIndex);
 
         return networkInterface?.CommonInformation.Name ?? CommonVocabulary.Unknown;

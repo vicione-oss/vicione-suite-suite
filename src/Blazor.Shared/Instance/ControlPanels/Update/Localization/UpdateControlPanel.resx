@@ -135,6 +135,9 @@
   <data name="BackupExportText" xml:space="preserve">
     <value>Manually export a system configuration backup file (.zip) and save it to your computer. Please note that this will only save your configuration, not any other data.</value>
   </data>
+  <data name="BackupFormatNotSupported" xml:space="preserve">
+    <value>This backup was created before the HostManagement 2.0 update and can no longer be restored. Please create a new backup.</value>
+  </data>
   <data name="BackupGroupTitle" xml:space="preserve">
     <value>Manual backup</value>
   </data>

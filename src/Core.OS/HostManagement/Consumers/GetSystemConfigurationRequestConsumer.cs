@@ -1,3 +1,4 @@
+using System.Net.NetworkInformation;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.HostManagement.Mappers;
 using HostManagement.Shared.Communication.Enums;
@@ -15,51 +16,51 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
     public override async Task<GetSystemConfigurationResponse> Respond(GetSystemConfiguration message, CancellationToken cancellationToken)
     {
         var config = responseCache.Get();
-        if (config is not null)
+        if (config is null)
         {
-            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(config, cancellationToken);
-            return new GetSystemConfigurationResponse { Configuration = config.ToSuiteFormat(dhcpLeases, ntpFallback) };
+            var configurationResult = await pipeClient.GetSystemConfiguration(cancellationToken);
+            if (configurationResult == null)
+            {
+                LogDeserializeReturnedNull(logger);
+
+                return new GetSystemConfigurationResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
+            }
+
+            if (configurationResult.Configuration is not null)
+                responseCache.Set(configurationResult.Configuration);
+
+            if (configurationResult.Status == OperationStatus.Error)
+            {
+                LogErrorStatusReturned(logger, configurationResult.Message);
+
+                return new GetSystemConfigurationResponse { RequestError = new ErrorInfo(3, configurationResult.Message) };
+            }
+
+            if (configurationResult.Status == OperationStatus.Warning)
+                LogWarningStatusReturned(logger, configurationResult.Message);
+
+            config = configurationResult.Configuration;
         }
 
-        var configurationResult = await pipeClient.GetSystemConfiguration(cancellationToken);
-        if (configurationResult == null)
-        {
-            LogDeserializeReturnedNull(logger);
+        var additionalData = await GetOrFetchAdditionalData(config, cancellationToken);
 
-            return new GetSystemConfigurationResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
-        }
-
-        if (configurationResult.Configuration is not null)
-            responseCache.Set(configurationResult.Configuration);
-
-        if (configurationResult.Status == OperationStatus.Success)
-        {
-            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(configurationResult.Configuration, cancellationToken);
-            return new GetSystemConfigurationResponse { Configuration = configurationResult.Configuration.ToSuiteFormat(dhcpLeases, ntpFallback) };
-        }
-
-        if (configurationResult.Status == OperationStatus.Warning)
-        {
-            LogWarningStatusReturned(logger, configurationResult.Message);
-
-            var (dhcpLeases, ntpFallback) = await GetOrFetchAdditionalData(configurationResult.Configuration, cancellationToken);
-            return new GetSystemConfigurationResponse { Configuration = configurationResult.Configuration.ToSuiteFormat(dhcpLeases, ntpFallback) };
-        }
-
-        // OperationStatus.Error
-        LogErrorStatusReturned(logger, configurationResult.Message);
-
-        return new GetSystemConfigurationResponse { RequestError = new ErrorInfo(3, configurationResult.Message) };
+        return new GetSystemConfigurationResponse { Configuration = config.ToSuiteFormat(additionalData) };
     }
 
-    private async Task<(Dictionary<string, DHCPLease?> DhcpLeases, List<string> NtpFallback)> GetOrFetchAdditionalData(
-        SystemConfiguration? config, CancellationToken cancellationToken)
+    private async Task<SystemConfigurationAdditionalData> GetOrFetchAdditionalData(SystemConfiguration? config, CancellationToken cancellationToken)
     {
         var dhcpLeases = responseCache.GetDhcpLeases();
         if (dhcpLeases is null)
         {
             dhcpLeases = await FetchDhcpLeases(config, cancellationToken);
             responseCache.SetDhcpLeases(dhcpLeases);
+        }
+
+        var originalPhysicalAddresses = responseCache.GetOriginalPhysicalAddresses();
+        if (originalPhysicalAddresses is null)
+        {
+            originalPhysicalAddresses = await FetchOriginalPhysicalAddresses(config, cancellationToken);
+            responseCache.SetOriginalPhysicalAddresses(originalPhysicalAddresses);
         }
 
         var ntpFallback = responseCache.GetNtpFallbackServers();
@@ -69,17 +70,17 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
             responseCache.SetNtpFallbackServers(ntpFallback);
         }
 
-        return (dhcpLeases, ntpFallback);
+        return new SystemConfigurationAdditionalData(dhcpLeases, originalPhysicalAddresses, ntpFallback);
     }
 
     private async Task<Dictionary<string, DHCPLease?>> FetchDhcpLeases(SystemConfiguration? config, CancellationToken cancellationToken)
     {
         var leases = new Dictionary<string, DHCPLease?>();
 
-        if (config?.NetworkInterfacesSettings is null)
+        if (config is null)
             return leases;
 
-        foreach (var nInterface in config.NetworkInterfacesSettings.NetworkInterfaces)
+        foreach (var nInterface in config.NetworkInterfaces)
         {
             if (!nInterface.IPv4.DHCPEnabled)
                 continue;
@@ -91,6 +92,27 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
         }
 
         return leases;
+    }
+
+    private async Task<Dictionary<string, PhysicalAddress?>> FetchOriginalPhysicalAddresses(SystemConfiguration? config, CancellationToken cancellationToken)
+    {
+        var originalPhysicalAddresses = new Dictionary<string, PhysicalAddress?>();
+
+        if (config is null)
+            return originalPhysicalAddresses;
+
+        foreach (var nInterface in config.NetworkInterfaces)
+        {
+            if (nInterface.CommonInformation.UserDefinedMACAddress.Enabled)
+                continue;
+
+            var result = await pipeClient.GetOriginalPhysicalAddress(nInterface.CommonInformation.Name, cancellationToken);
+            originalPhysicalAddresses[nInterface.CommonInformation.Name] = result is { Status: OperationStatus.Success }
+                ? result.OriginalPhysicalAddress
+                : null;
+        }
+
+        return originalPhysicalAddresses;
     }
 
     private async Task<List<string>> FetchNtpFallbackServers(CancellationToken cancellationToken)

@@ -3,79 +3,57 @@
   "Status": 0,
   "Message": "Loading last applied configuration succeeded.",
   "Configuration": {
-    "Version": 1,
-    "NetworkInterfacesSettings": {
-      "NetworkInterfaces": [
-        {
-          "CommonInformation": {
+    "Version": 2,
+    "NetworkInterfaces": [
+      {
+        "CommonInformation": {
+          "Enabled": false,
+          "Name": "lan2",
+          "UserDefinedMACAddress": {
             "Enabled": false,
-            "Name": "lan2",
-            "PhysicalAddress": "00:02:01:10:53:25"
-          },
-          "IPv4": {
-            "Gateway": null,
-            "DHCPEnabled": true,
-            "DHCPLease": {
-              "LeaseObtained": null,
-              "LeaseExpires": null,
-              "Gateway": null,
-              "NetworkDNSSettings": {
-                "Hostname": "",
-                "NameServers": [],
-                "DNSSuffixEnabled": false,
-                "DNSSuffix": "",
-                "SearchDomainsEnabled": false,
-                "SearchDomains": [],
-                "StaticHostsEnabled": false,
-                "StaticHosts": []
-              },
-              "IPv4Detail": null
-            },
-            "IPv4Details": []
+            "Address": ""
           }
         },
-        {
-          "CommonInformation": {
-            "Enabled": true,
-            "Name": "lan1",
-            "PhysicalAddress": "00:02:01:10:53:26"
-          },
-          "IPv4": {
-            "Gateway": null,
-            "DHCPEnabled": true,
-            "DHCPLease": {
-              "LeaseObtained": "2023-06-18T14:56:06",
-              "LeaseExpires": "2023-06-26T14:56:06",
-              "Gateway": "192.168.1.1",
-              "NetworkDNSSettings": {
-                "Hostname": "",
-                "NameServers": [ "192.168.10.10", "192.168.10.10" ],
-                "DNSSuffixEnabled": false,
-                "DNSSuffix": "",
-                "SearchDomainsEnabled": true,
-                "SearchDomains": [ "nsc-gmbh.de" ],
-                "StaticHostsEnabled": false,
-                "StaticHosts": []
-              },
-              "IPv4Detail": {
-                "IPAddress": "192.168.50.2",
-                "Netmask": "255.255.0.0"
-              }
-            },
-            "IPv4Details": []
-          }
+        "IPv4": {
+          "Gateway": null,
+          "DHCPEnabled": true,
+          "IPv4Details": []
         }
-      ]
-    },
+      },
+      {
+        "CommonInformation": {
+          "Enabled": true,
+          "Name": "lan1",
+          "UserDefinedMACAddress": {
+            "Enabled": true,
+            "Address": "00:02:01:10:53:26"
+          }
+        },
+        "IPv4": {
+          "Gateway": null,
+          "DHCPEnabled": true,
+          "IPv4Details": []
+        }
+      }
+    ],
     "NetworkDNSSettings": {
       "Hostname": "edges-vicione",
-      "NameServers": [],
-      "DNSSuffixEnabled": false,
-      "DNSSuffix": "",
-      "SearchDomainsEnabled": false,
-      "SearchDomains": [],
-      "StaticHostsEnabled": false,
-      "StaticHosts": []
+      "NameServers": {
+        "Enabled": false,
+        "Addresses": []
+      },
+      "PrimaryDNSSuffix": {
+        "Enabled": false,
+        "Suffix": ""
+      },
+      "SearchDomains": {
+        "Enabled": false,
+        "Domains": []
+      },
+      "StaticHosts": {
+        "Enabled": false,
+        "Hosts": []
+      }
     },
     "NetworkProxySettings": {
       "FTP": {
@@ -106,20 +84,14 @@
         "Username": null,
         "Password": null
       },
-      "SOCKS": {
-        "Enabled": false,
-        "Server": null,
-        "Port": null,
-        "Username": null,
-        "Password": null
-      },
-      "DoNotProxyListEnabled": true,
-      "DoNotProxyList": ["ifm.com"]
+      "NoProxy": {
+        "Enabled": true,
+        "Entries": ["ifm.com"]
+      }
     },
     "NetworkNTPSettings": {
-      "FallbackNTPServers": [ "0.debian.pool.ntp.org", "1.debian.pool.ntp.org", "2.debian.pool.ntp.org", "3.debian.pool.ntp.org" ],
-      "NTPServers": [], 
-      "NTPServersEnabled": false
+      "Enabled": false,
+      "Servers": []
     },
     "Services": [
       {

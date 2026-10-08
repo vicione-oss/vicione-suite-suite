@@ -5,6 +5,7 @@ using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Network.Extensions;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
+using Core.Shared.HostManagement.Extensions;
 using HostManagement.Shared.Contracts.Network;
 using ViciOne.Ui.Localization.Resources;
 
@@ -16,22 +17,38 @@ internal static class NetworkInterfaceControlPanelStateExtensions
     {
         internal string GetVlanInformation(ISystemConfigurationService systemConfigurationService)
         {
-            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
+            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
                 .ElementAtOrDefault(state.NetworkInterfaceIndex);
 
-            if (networkInterface is not null && networkInterface.IPv4.VLANEnabled)
-                return networkInterface.IPv4.VLANID.ToString(CultureInfo.InvariantCulture);
+            if (networkInterface is not null && networkInterface.VLAN.Enabled)
+                return networkInterface.VLAN.ID.ToString(CultureInfo.InvariantCulture);
             else
                 return TechnicalTerms.Disabled;
         }
 
+        internal string GetPhysicalAddress(ISystemConfigurationService systemConfigurationService)
+        {
+            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
+                .ElementAtOrDefault(state.NetworkInterfaceIndex);
+
+            if (networkInterface is null)
+                return CommonVocabulary.Unknown;
+
+            var userDefinedMACAddress = networkInterface.CommonInformation.UserDefinedMACAddress;
+
+            if (userDefinedMACAddress.Enabled)
+                return userDefinedMACAddress.Address.ToColonNotation();
+            else
+                return state.OriginalMacAddress ?? CommonVocabulary.Unknown;
+        }
+
         internal List<IPAddress> GetDhcpDnsNameServers(ISystemConfigurationService systemConfigurationService)
         {
-            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings.NetworkInterfaces
+            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
                 .ElementAtOrDefault(state.NetworkInterfaceIndex);
 
             if (networkInterface is not null && networkInterface.IPv4.DHCPEnabled)
-                return state.DHCPLease?.NetworkDNSSettings?.NameServers ?? [];
+                return state.DHCPLease?.NetworkDNSSettings?.NameServers.Addresses ?? [];
 
             return [];
         }
@@ -68,8 +85,8 @@ internal static class NetworkInterfaceControlPanelStateExtensions
             }
 
             state.DefaultGateway = networkInterface.IPv4.Gateway?.ToString();
-            state.VLanEnabled = networkInterface.IPv4.VLANEnabled;
-            state.VLanId = networkInterface.IPv4.VLANID.ToString(CultureInfo.InvariantCulture);
+            state.VLanEnabled = networkInterface.VLAN.Enabled;
+            state.VLanId = networkInterface.VLAN.ID.ToString(CultureInfo.InvariantCulture);
         }
 
         internal void UpdateIPv4Details(NetworkInterfaceDetail networkInterface)
@@ -84,14 +101,12 @@ internal static class NetworkInterfaceControlPanelStateExtensions
             state.AdditionalIpV4Details = [.. ipV4Details.Skip(1)];
         }
 
-        internal void UpdateMacAddress(NetworkInterfaceDetail networkInterface, string? originalPhysicalAddress = null)
+        internal void UpdateMacAddress(NetworkInterfaceDetail networkInterface)
         {
-            state.MacAddressManually = networkInterface.CommonInformation.PhysicalAddress != originalPhysicalAddress;
+            var userDefinedMACAddress = networkInterface.CommonInformation.UserDefinedMACAddress;
 
-            if (state.MacAddressManually)
-                state.MacAddress = networkInterface.CommonInformation.PhysicalAddress;
-            else
-                state.MacAddress = string.Empty;
+            state.MacAddressManually = userDefinedMACAddress.Enabled;
+            state.MacAddress = userDefinedMACAddress.Enabled ? userDefinedMACAddress.Address.ToColonNotation() : string.Empty;
         }
 
         internal void Reset()
@@ -113,6 +128,7 @@ internal static class NetworkInterfaceControlPanelStateExtensions
 
             state.MacAddressManually = false;
             state.MacAddress = string.Empty;
+            state.OriginalMacAddress = null;
 
             state.VLanEnabled = false;
             state.VLanId = string.Empty;

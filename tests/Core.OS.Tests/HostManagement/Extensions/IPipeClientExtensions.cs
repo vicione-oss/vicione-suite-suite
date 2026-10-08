@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Core.OS.HostManagement;
 using HostManagement.Shared.Communication;
+using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Contracts;
 using CommunicationJsonContext = HostManagement.Shared.Communication.Contracts.SourceGenerationContext;
 using CommunicationEnums = HostManagement.Shared.Communication.Enums;
@@ -85,6 +86,31 @@ internal static class IPipeClientExtensions
 
             pipeClient.SendRequest(Topics.RestartService, Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.ServiceControlResult));
+        }
+
+        public void SetupServiceControlResult(string topic, CommunicationEnums.OperationStatus status, string message = "OK")
+        {
+            var result = new CommunicationContracts.ServiceControlResult
+            {
+                Status = status,
+                Message = message
+            };
+
+            pipeClient.SendRequest(topic, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.ServiceControlResult));
+        }
+
+        public void SetupGetSupportedCapabilitiesResult(CommunicationEnums.OperationStatus status, SupportedCapabilities capabilities, string message = "OK")
+        {
+            var result = new CommunicationContracts.GetSupportedCapabilitiesResult
+            {
+                Status = status,
+                Message = message,
+                SupportedCapabilities = capabilities
+            };
+
+            pipeClient.SendRequest(Topics.GetSupportedCapabilities, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(JsonSerializer.Serialize(result, CommunicationContracts.CapabilitySourceGenerationContext.Default.GetSupportedCapabilitiesResult));
         }
     }
 }

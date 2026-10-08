@@ -11,7 +11,9 @@ using Core.OS.Tests.Persistence;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Persistence.Commands;
 using Core.Shared.Persistence.Events;
+using HostManagement.Shared.Capabilities;
 using HostManagement.Shared.Communication;
+using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -117,6 +119,8 @@ public sealed class RestoreBackupConsumerTests
         var backupZipBytes = TestResources.GetEmbeddedBackupFileBytes();
         var instanceId = await GetInstanceIdFromArchive(backupZipBytes);
         _informationProvider.SetupLocalInstanceInformation(guid: instanceId);
+        _pipeClient.SetupSetSystemConfigurationResult(OperationStatus.Success);
+        _pipeClient.SetupGetSystemConfigurationResult(OperationStatus.Success);
 
         var command = new RestoreBackup
         {
@@ -237,6 +241,34 @@ public sealed class RestoreBackupConsumerTests
     }
 
     [Fact]
+    public async Task Should_reject_backup_from_before_host_management_2()
+    {
+        // Arrange
+        await using var tester = new MassTransitTester(_configureServices);
+        SetupBackupStoreCreateBackupFile();
+        var backupZipBytes = TestResources.GetEmbeddedBackupFileBytes(TestResources.HostManagement1SystemConfigurationJson);
+        var instanceId = await GetInstanceIdFromArchive(backupZipBytes);
+        _informationProvider.SetupLocalInstanceInformation(guid: instanceId);
+
+        var command = new RestoreBackup
+        {
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
+            SuiteConfiguration = true,
+            SystemConfiguration = true,
+        };
+
+        // Act
+        var response = await tester.TestCommand<RestoreBackup, RestoreBackupConsumer, RestoreBackupPrepared>(command);
+
+        // Assert
+        response.ErrorInfo!.ErrorCode.Should().Be(RestoreBackupPrepared.BackupFormatNotSupported);
+        response.ErrorInfo.Message.Should().ContainEquivalentOf("create a new backup");
+        await _pipeClient.Received(0).SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        (await _fileSystem.ReadRestoreTask(_instanceOptions, TestContext.Current.CancellationToken)).Should().BeNull();
+        _store.Received(0).CreateBackupFile(out Arg.Any<string>());
+    }
+
+    [Fact]
     public async Task Should_publish_event_with_error_info_on_exception()
     {
         // Arrange
@@ -255,6 +287,112 @@ public sealed class RestoreBackupConsumerTests
         // Assert
         (await _fileSystem.ReadRestoreTask(_instanceOptions, TestContext.Current.CancellationToken)).Should().BeNull();
         response.ErrorInfo.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Should_refuse_before_restoring_anything_when_the_suite_restart_is_disabled()
+    {
+        // Arrange
+        await using var tester = new MassTransitTester(_configureServices);
+        SetupBackupStoreCreateBackupFile();
+        var backupZipBytes = TestResources.GetEmbeddedBackupFileBytes();
+        var instanceId = await GetInstanceIdFromArchive(backupZipBytes);
+        _informationProvider.SetupLocalInstanceInformation(guid: instanceId);
+        var capabilities = new SupportedCapabilities();
+        capabilities.Topics.RestartService = CapabilityStatus.Disabled;
+        _pipeClient.SetupGetSupportedCapabilitiesResult(OperationStatus.Success, capabilities);
+
+        var command = new RestoreBackup
+        {
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
+            SuiteConfiguration = true,
+        };
+
+        // Act
+        var response = await tester.TestCommand<RestoreBackup, RestoreBackupConsumer, RestoreBackupPrepared>(command);
+
+        // Assert
+        response.ErrorInfo!.ErrorCode.Should().Be(RestoreBackupPrepared.RestartServiceDisabled);
+        await AssertNothingRestored(tester);
+    }
+
+    [Fact]
+    public async Task Should_refuse_before_restoring_anything_when_the_backup_changes_a_disabled_setting()
+    {
+        // Arrange
+        await using var tester = new MassTransitTester(_configureServices);
+        SetupBackupStoreCreateBackupFile();
+        var backupZipBytes = TestResources.GetEmbeddedBackupFileBytes();
+        var instanceId = await GetInstanceIdFromArchive(backupZipBytes);
+        _informationProvider.SetupLocalInstanceInformation(guid: instanceId);
+        _pipeClient.SetupGetSystemConfigurationResult(OperationStatus.Success, await GetSystemConfigurationWithOtherHostname(backupZipBytes));
+        _pipeClient.SetupGetSupportedCapabilitiesResult(OperationStatus.Success, new SupportedCapabilities());
+
+        var command = new RestoreBackup
+        {
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
+            SuiteConfiguration = true,
+            SystemConfiguration = true,
+        };
+
+        // Act
+        var response = await tester.TestCommand<RestoreBackup, RestoreBackupConsumer, RestoreBackupPrepared>(command);
+
+        // Assert
+        response.ErrorInfo!.ErrorCode.Should().Be(RestoreBackupPrepared.SettingsDisabled);
+        response.ErrorInfo.Message.Should().Be("Hostname");
+        await AssertNothingRestored(tester);
+        await _pipeClient.Received(0).SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Should_restore_without_restart_service_when_host_management_restarts_for_network_changes()
+    {
+        // Arrange
+        await using var tester = new MassTransitTester(_configureServices);
+        SetupBackupStoreCreateBackupFile();
+        var backupZipBytes = TestResources.GetEmbeddedBackupFileBytes();
+        var instanceId = await GetInstanceIdFromArchive(backupZipBytes);
+        _informationProvider.SetupLocalInstanceInformation(guid: instanceId);
+        _pipeClient.SetupGetSystemConfigurationResult(OperationStatus.Success, await GetSystemConfigurationWithOtherHostname(backupZipBytes));
+        _pipeClient.SetupSetSystemConfigurationResult(OperationStatus.Success);
+        var capabilities = new SupportedCapabilities();
+        capabilities.Settings.DNS.Hostname.Capability = CapabilityStatus.Enabled;
+        _pipeClient.SetupGetSupportedCapabilitiesResult(OperationStatus.Success, capabilities);
+
+        var command = new RestoreBackup
+        {
+            BackupFilePath = WriteUploadedBackup(backupZipBytes),
+            SuiteConfiguration = true,
+            SystemConfiguration = true,
+        };
+
+        // Act
+        var response = await tester.TestCommand<RestoreBackup, RestoreBackupConsumer, RestoreBackupPrepared>(command);
+
+        // Assert
+        response.ErrorInfo.Should().BeNull();
+        await _handler1.Received(1).OnRestore(Arg.Any<CancellationToken>());
+        await _pipeClient.Received(1).SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
+    }
+
+    private async Task AssertNothingRestored(MassTransitTester tester)
+    {
+        await _handler1.DidNotReceive().OnRestore(Arg.Any<CancellationToken>());
+        await _handler2.DidNotReceive().OnRestore(Arg.Any<CancellationToken>());
+        (await tester.Harness.Published.Any<RestoreBackupPrepared>(m => m.Context.Message.ErrorInfo == null, TestContext.Current.CancellationToken)).Should().BeFalse();
+        (await tester.Harness.Sent.Any<ControlInstance>(TestContext.Current.CancellationToken)).Should().BeFalse();
+        (await _fileSystem.ReadRestoreTask(_instanceOptions, TestContext.Current.CancellationToken)).Should().BeNull();
+        _store.Received(0).CreateBackupFile(out Arg.Any<string>());
+    }
+
+    private static async Task<global::HostManagement.Shared.Contracts.SystemConfiguration> GetSystemConfigurationWithOtherHostname(byte[] zipContent)
+    {
+        using var memoryStream = new MemoryStream(zipContent);
+        var configuration = (await BackupReader.GetSystemConfiguration(memoryStream))!;
+        configuration.NetworkDNSSettings = configuration.NetworkDNSSettings with { Hostname = "other-host" };
+
+        return configuration;
     }
 
     private static async Task<Guid> GetInstanceIdFromArchive(byte[] zipContent)

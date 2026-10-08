@@ -1,3 +1,4 @@
+using System.Net.NetworkInformation;
 using Core.Shared.HostManagement;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.Network;
@@ -12,6 +13,7 @@ public sealed partial class SystemConfigurationCache(IOptions<HostManagementOpti
     private Timer? _cacheInvalidationTimer;
     private SystemConfiguration? _cachedConfiguration;
     private Dictionary<string, DHCPLease?>? _cachedDhcpLeases;
+    private Dictionary<string, PhysicalAddress?>? _cachedOriginalPhysicalAddresses;
     private List<string>? _cachedNtpFallbackServers;
     private readonly Lock _lock = new();
 
@@ -47,6 +49,17 @@ public sealed partial class SystemConfigurationCache(IOptions<HostManagementOpti
     public Dictionary<string, DHCPLease?>? GetDhcpLeases()
         => _cachedDhcpLeases;
 
+    public void SetOriginalPhysicalAddresses(Dictionary<string, PhysicalAddress?> originalPhysicalAddresses)
+    {
+        lock (_lock)
+        {
+            _cachedOriginalPhysicalAddresses = originalPhysicalAddresses;
+        }
+    }
+
+    public Dictionary<string, PhysicalAddress?>? GetOriginalPhysicalAddresses()
+        => _cachedOriginalPhysicalAddresses;
+
     public void SetNtpFallbackServers(List<string> fallbackServers)
     {
         lock (_lock)
@@ -66,6 +79,7 @@ public sealed partial class SystemConfigurationCache(IOptions<HostManagementOpti
         {
             _cachedConfiguration = null;
             _cachedDhcpLeases = null;
+            _cachedOriginalPhysicalAddresses = null;
             _cachedNtpFallbackServers = null;
             _cacheInvalidationTimer?.Dispose();
             _cacheInvalidationTimer = null;

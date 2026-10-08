@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <DotNetVersion>10.0.12</DotNetVersion>
-    <HostManagementVersion>1.3.0</HostManagementVersion>
+    <HostManagementVersion>2.0.0-beta1</HostManagementVersion>
     <OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.11</MassTransitVersion>
     <ViciOneUiBlazorComponentsVersion>6.4.0</ViciOneUiBlazorComponentsVersion>

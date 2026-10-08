@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
+using HostManagementPipeClientExtensions = Core.OS.HostManagement.Extensions.IPipeClientExtensions;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 
@@ -123,7 +124,7 @@ public sealed class ControlSystemConsumerTests
 
         // Assert
         (await tester.Harness.Published.Any<ControlSystemCompleted>(TestContext.Current.CancellationToken)).Should().BeTrue();
-        await _pipeClient.Received().SendRequest(Topics.RestartSystem, string.Empty, Arg.Any<CancellationToken>());
+        await _pipeClient.Received().SendRequest(Topics.RestartSystem, HostManagementPipeClientExtensions.SystemControlDelaySeconds, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -140,7 +141,7 @@ public sealed class ControlSystemConsumerTests
         // Assert
         (await tester.Harness.Published.Any<ControlSystemCompleted>(r => r.Context.Message.ErrorInfo != null,
             TestContext.Current.CancellationToken)).Should().BeTrue();
-        await _pipeClient.Received().SendRequest(Topics.RestartSystem, string.Empty, Arg.Any<CancellationToken>());
+        await _pipeClient.Received().SendRequest(Topics.RestartSystem, HostManagementPipeClientExtensions.SystemControlDelaySeconds, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -156,7 +157,7 @@ public sealed class ControlSystemConsumerTests
 
         // Assert
         await _pipeClient.Received().SendRequest(Topics.ShutdownSystem,
-                string.Empty,
+                HostManagementPipeClientExtensions.SystemControlDelaySeconds,
                 Arg.Any<CancellationToken>());
     }
 
@@ -199,7 +200,7 @@ public sealed class ControlSystemConsumerTests
         };
 
         _pipeClient.SendRequest(Topics.ShutdownSystem,
-                string.Empty,
+                HostManagementPipeClientExtensions.SystemControlDelaySeconds,
                 Arg.Any<CancellationToken>()).Returns(JsonSerializer.Serialize(result, SourceGenerationContext.Default.SystemControlResult));
 
     }

@@ -3,6 +3,7 @@ using Core.OS.UserManagement.Extensions;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
 using Core.Shared.UserManagement.Contracts;
+using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
@@ -23,20 +24,21 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
 
         try
         {
+            // HostManagement would reject the update anyway, but only after all users were logged out.
+            if (await pipeClient.IsDisabled(topics => topics.UpdateSystem, logger, context.CancellationToken))
+            {
+                LogUpdateFailed(logger, correlationId, filePath);
+                await PublishUpdateFailed(context, new ErrorInfo(UpdateSystemStarted.UpdateSystemDisabled, CapabilityErrors.Disabled(Topics.UpdateSystem)));
+                return;
+            }
+
             await userManager.InvalidateLogins();
 
             var result = await pipeClient.UpdateSystem(filePath, context.CancellationToken);
             if (result is null || result.Status == OperationStatus.Error)
             {
                 LogUpdateFailed(logger, correlationId, filePath);
-
-                var errorResponse = new UpdateSystemStarted(null, false)
-                {
-                    CorrelationId = correlationId,
-                    ErrorInfo = new ErrorInfo((int?)result?.Status ?? UpdateSystemStarted.UnknownError, result?.Message)
-                };
-
-                await context.Publish(errorResponse, context.CancellationToken);
+                await PublishUpdateFailed(context, new ErrorInfo((int?)result?.Status ?? UpdateSystemStarted.UnknownError, result?.Message));
                 return;
             }
 
@@ -59,6 +61,17 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
 
             await context.Publish(errorResponse, context.CancellationToken);
         }
+    }
+
+    private static async Task PublishUpdateFailed(ConsumeContext<UpdateSystem> context, ErrorInfo errorInfo)
+    {
+        var errorResponse = new UpdateSystemStarted(null, false)
+        {
+            CorrelationId = context.Message.CorrelationId,
+            ErrorInfo = errorInfo
+        };
+
+        await context.Publish(errorResponse, context.CancellationToken);
     }
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Updating system from file='{FilePath}' correlated by {CorrelationId}")]

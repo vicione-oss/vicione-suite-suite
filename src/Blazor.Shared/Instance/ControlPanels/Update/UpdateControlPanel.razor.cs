@@ -1,3 +1,4 @@
+using System.Globalization;
 using Blazor.Shared.Instance.ControlPanels.Update.Services;
 using Blazor.Shared.Services;
 using Core.Shared;
@@ -17,9 +18,11 @@ using Sdk.Client.Models;
 using Sdk.Client.Services;
 using Sdk.Instance;
 using Sdk.MessageBanner.Contracts;
+using Sdk.Messaging;
 using Sdk.Utils;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Extensions;
+using CapabilityTexts = Blazor.Shared.Localization.HostManagementCapabilities;
 
 namespace Blazor.Shared.Instance.ControlPanels.Update;
 
@@ -204,7 +207,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
 
         if (context.Message.ErrorInfo is not null)
         {
-            BannerService.ShowMessageBanner(MessageType.Error, context.Message.ErrorInfo.Message);
+            BannerService.ShowMessageBanner(MessageType.Error, GetRestoreErrorMessage(context.Message.ErrorInfo));
         }
         else
             BannerService.ShowMessageBanner(MessageType.Information, Localization.UpdateControlPanel.BackupRestoreInProgress);
@@ -212,6 +215,15 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
         return Task.CompletedTask;
         // Once the restore is prepared, a ControlSystemCompleted arrives if a restart was triggered.
     }
+
+    private static string? GetRestoreErrorMessage(ErrorInfo errorInfo)
+        => errorInfo.ErrorCode switch
+        {
+            RestoreBackupPrepared.RestartServiceDisabled => CapabilityTexts.FunctionDisabled,
+            RestoreBackupPrepared.SettingsDisabled => string.Format(CultureInfo.CurrentCulture, CapabilityTexts.SettingsDisabled, errorInfo.Message),
+            RestoreBackupPrepared.BackupFormatNotSupported => Localization.UpdateControlPanel.BackupFormatNotSupported,
+            _ => errorInfo.Message
+        };
 
     public async Task Consume(ClientContext<ControlSystemCompleted> context, CancellationToken cancellationToken)
     {

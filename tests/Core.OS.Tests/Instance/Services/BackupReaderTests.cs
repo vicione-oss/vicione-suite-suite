@@ -115,6 +115,21 @@ public class BackupReaderTests
             // Assert
             systemConfiguration.Should().NotBeNull();
         }
+
+        [Theory]
+        [InlineData(TestResources.HostManagement09SystemConfigurationJson)]
+        [InlineData(TestResources.HostManagement1SystemConfigurationJson)]
+        public async Task Should_reject_system_configuration_from_before_host_management_2(string systemConfigurationJson)
+        {
+            // Arrange
+            await using var archiveStream = new MemoryStream(TestResources.GetEmbeddedBackupFileBytes(systemConfigurationJson));
+
+            // Act
+            var act = () => BackupReader.GetSystemConfiguration(archiveStream, TestContext.Current.CancellationToken);
+
+            // Assert
+            await act.Should().ThrowExactlyAsync<UnsupportedBackupFormatException>();
+        }
     }
 
     public sealed class GetModuleEntries : BackupReaderTests

@@ -71,7 +71,7 @@ internal abstract partial class NetworkControlPanelSaveHandlerBase<TState>
 
         var proposedSystemConfiguration = systemConfigurationSaveInternalResult.ProposedSystemConfiguration;
 
-        var validateResult = await new SystemConfigurationValidator().ValidateAsync(proposedSystemConfiguration, cancellationToken);
+        var validateResult = await new SystemConfigurationValidator().ValidateAsync(proposedSystemConfiguration, cancellationToken: cancellationToken);
         if (!validateResult.IsValid)
             return new SaveErrorResult(string.Join(" ", validateResult.Entries.Select(e => e.Message)));
 

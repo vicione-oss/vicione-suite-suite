@@ -30,7 +30,7 @@ public sealed class SummaryWizardPageResetHandlerTests
             {
                 Configuration = new SystemConfiguration
                 {
-                    NetworkInterfacesSettings = new NetworkInterfacesSettings(
+                    NetworkInterfaces =
                     [
                         new NetworkInterfaceDetail
                         {
@@ -42,7 +42,7 @@ public sealed class SummaryWizardPageResetHandlerTests
                             CommonInformation = new NetworkInterfaceCommonInformation { Name = "lan2", Enabled = true },
                             IPv4 = new IPv4Settings { DHCPEnabled = true }
                         }
-                    ])
+                    ]
                 }
             });
     }

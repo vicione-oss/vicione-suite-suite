@@ -52,12 +52,11 @@ public sealed class DnsControlPanelResetHandlerTests
         SetupSystemConfiguration(new NetworkDNSSettings
         {
             Hostname = "myhost",
-            DNSSuffixEnabled = true,
-            DNSSuffix = "example.com",
+            PrimaryDNSSuffix = new() { Enabled = true, Suffix = "example.com" },
             MulticastDNSEnabled = true,
-            NameServersEnabled = true,
-            SearchDomainsEnabled = true,
-            StaticHostsEnabled = true
+            NameServers = new() { Enabled = true },
+            SearchDomains = new() { Enabled = true },
+            StaticHosts = new() { Enabled = true }
         });
         await using var serviceProvider = SetupServiceProvider();
 
@@ -81,11 +80,17 @@ public sealed class DnsControlPanelResetHandlerTests
     public async Task Should_load_dns_server_details_from_system_configuration()
     {
         // Arrange
-        SetupSystemConfiguration(new NetworkDNSSettings(nameServers:
-        [
-            System.Net.IPAddress.Parse("8.8.8.8"),
-            System.Net.IPAddress.Parse("1.1.1.1")
-        ]));
+        SetupSystemConfiguration(new NetworkDNSSettings
+        {
+            NameServers = new()
+            {
+                Addresses =
+                [
+                    System.Net.IPAddress.Parse("8.8.8.8"),
+                    System.Net.IPAddress.Parse("1.1.1.1")
+                ]
+            }
+        });
         await using var serviceProvider = SetupServiceProvider();
 
         var state = new DnsControlPanelState();
@@ -122,7 +127,7 @@ public sealed class DnsControlPanelResetHandlerTests
     public async Task Should_load_search_domain_details_from_system_configuration()
     {
         // Arrange
-        SetupSystemConfiguration(new NetworkDNSSettings(searchDomains: ["corp.example.com", "dev.example.com"]));
+        SetupSystemConfiguration(new NetworkDNSSettings { SearchDomains = new() { Domains = ["corp.example.com", "dev.example.com"] } });
         await using var serviceProvider = SetupServiceProvider();
 
         var state = new DnsControlPanelState();
@@ -159,11 +164,17 @@ public sealed class DnsControlPanelResetHandlerTests
     public async Task Should_load_static_host_details_from_system_configuration()
     {
         // Arrange
-        SetupSystemConfiguration(new NetworkDNSSettings(staticHosts:
-        [
-            new StaticHostDetail { IPAddress = System.Net.IPAddress.Parse("192.168.1.100"), Hostname = "server.local" },
-            new StaticHostDetail { IPAddress = System.Net.IPAddress.Parse("10.0.0.5"), Hostname = "printer.local" }
-        ]));
+        SetupSystemConfiguration(new NetworkDNSSettings
+        {
+            StaticHosts = new()
+            {
+                Hosts =
+                [
+                    new StaticHostDetail { IPAddress = System.Net.IPAddress.Parse("192.168.1.100"), Hostname = "server.local" },
+                    new StaticHostDetail { IPAddress = System.Net.IPAddress.Parse("10.0.0.5"), Hostname = "printer.local" }
+                ]
+            }
+        });
         await using var serviceProvider = SetupServiceProvider();
 
         var state = new DnsControlPanelState();

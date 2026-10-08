@@ -26,18 +26,19 @@ public sealed class DnsControlPanelSaveHandlerTests
     {
         _systemConfigurationService.SystemConfiguration.Returns(new SystemConfiguration
         {
-            NetworkInterfacesSettings = new NetworkInterfacesSettings([new NetworkInterfaceDetail
+            NetworkInterfaces = [new NetworkInterfaceDetail
             {
                 CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true },
-                IPv4 = new IPv4Settings([new IPv4Detail
+                IPv4 = new IPv4Settings
                 {
-                    IPAddress = IPAddress.Parse("192.168.1.10"),
-                    Netmask = IPAddress.Parse("255.255.255.0")
-                }])
-                {
+                    IPv4Details = [new IPv4Detail
+                    {
+                        IPAddress = IPAddress.Parse("192.168.1.10"),
+                        Netmask = IPAddress.Parse("255.255.255.0")
+                    }],
                     Gateway = IPAddress.Parse("192.168.1.1")
                 }
-            }]),
+            }],
             NetworkDNSSettings = dnsSettings ?? new NetworkDNSSettings { Hostname = "test-host" }
         });
     }
@@ -177,8 +178,8 @@ public sealed class DnsControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkDNSSettings.DNSSuffixEnabled.Should().BeTrue();
-        captured.NetworkDNSSettings.DNSSuffix.Should().Be("example.com");
+        captured!.NetworkDNSSettings.PrimaryDNSSuffix.Enabled.Should().BeTrue();
+        captured.NetworkDNSSettings.PrimaryDNSSuffix.Suffix.Should().Be("example.com");
     }
 
     [Fact]
@@ -203,10 +204,10 @@ public sealed class DnsControlPanelSaveHandlerTests
 
         // Assert
         var dns = captured!.NetworkDNSSettings;
-        dns.NameServersEnabled.Should().BeTrue();
-        dns.NameServers.Should().HaveCount(2);
-        dns.NameServers[0].Should().Be(IPAddress.Parse("8.8.8.8"));
-        dns.NameServers[1].Should().Be(IPAddress.Parse("8.8.4.4"));
+        dns.NameServers.Enabled.Should().BeTrue();
+        dns.NameServers.Addresses.Should().HaveCount(2);
+        dns.NameServers.Addresses[0].Should().Be(IPAddress.Parse("8.8.8.8"));
+        dns.NameServers.Addresses[1].Should().Be(IPAddress.Parse("8.8.4.4"));
     }
 
     [Fact]
@@ -230,8 +231,8 @@ public sealed class DnsControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkDNSSettings.NameServers.Should().HaveCount(1);
-        captured.NetworkDNSSettings.NameServers[0].Should().Be(IPAddress.Parse("8.8.8.8"));
+        captured!.NetworkDNSSettings.NameServers.Addresses.Should().HaveCount(1);
+        captured.NetworkDNSSettings.NameServers.Addresses[0].Should().Be(IPAddress.Parse("8.8.8.8"));
     }
 
     [Fact]
@@ -256,10 +257,10 @@ public sealed class DnsControlPanelSaveHandlerTests
 
         // Assert
         var dns = captured!.NetworkDNSSettings;
-        dns.SearchDomainsEnabled.Should().BeTrue();
-        dns.SearchDomains.Should().HaveCount(2);
-        dns.SearchDomains[0].Should().Be("example.com");
-        dns.SearchDomains[1].Should().Be("local.dev");
+        dns.SearchDomains.Enabled.Should().BeTrue();
+        dns.SearchDomains.Domains.Should().HaveCount(2);
+        dns.SearchDomains.Domains[0].Should().Be("example.com");
+        dns.SearchDomains.Domains[1].Should().Be("local.dev");
     }
 
     [Fact]
@@ -283,8 +284,8 @@ public sealed class DnsControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkDNSSettings.SearchDomains.Should().HaveCount(1);
-        captured.NetworkDNSSettings.SearchDomains[0].Should().Be("example.com");
+        captured!.NetworkDNSSettings.SearchDomains.Domains.Should().HaveCount(1);
+        captured.NetworkDNSSettings.SearchDomains.Domains[0].Should().Be("example.com");
     }
 
     [Fact]
@@ -309,12 +310,12 @@ public sealed class DnsControlPanelSaveHandlerTests
 
         // Assert
         var dns = captured!.NetworkDNSSettings;
-        dns.StaticHostsEnabled.Should().BeTrue();
-        dns.StaticHosts.Should().HaveCount(2);
-        dns.StaticHosts[0].IPAddress.Should().Be(IPAddress.Parse("192.168.1.100"));
-        dns.StaticHosts[0].Hostname.Should().Be("server1");
-        dns.StaticHosts[1].IPAddress.Should().Be(IPAddress.Parse("192.168.1.101"));
-        dns.StaticHosts[1].Hostname.Should().Be("server2");
+        dns.StaticHosts.Enabled.Should().BeTrue();
+        dns.StaticHosts.Hosts.Should().HaveCount(2);
+        dns.StaticHosts.Hosts[0].IPAddress.Should().Be(IPAddress.Parse("192.168.1.100"));
+        dns.StaticHosts.Hosts[0].Hostname.Should().Be("server1");
+        dns.StaticHosts.Hosts[1].IPAddress.Should().Be(IPAddress.Parse("192.168.1.101"));
+        dns.StaticHosts.Hosts[1].Hostname.Should().Be("server2");
     }
 
     [Fact]
@@ -338,8 +339,8 @@ public sealed class DnsControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkDNSSettings.StaticHosts.Should().HaveCount(1);
-        captured.NetworkDNSSettings.StaticHosts[0].IPAddress.Should().Be(IPAddress.Parse("192.168.1.100"));
+        captured!.NetworkDNSSettings.StaticHosts.Hosts.Should().HaveCount(1);
+        captured.NetworkDNSSettings.StaticHosts.Hosts[0].IPAddress.Should().Be(IPAddress.Parse("192.168.1.100"));
     }
 
     [Fact]
@@ -357,6 +358,6 @@ public sealed class DnsControlPanelSaveHandlerTests
         await handler.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
-        captured!.NetworkInterfacesSettings.Should().Be(_systemConfigurationService.SystemConfiguration.NetworkInterfacesSettings);
+        captured!.NetworkInterfaces.Should().Equal(_systemConfigurationService.SystemConfiguration.NetworkInterfaces);
     }
 }

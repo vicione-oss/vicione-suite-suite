@@ -14,14 +14,14 @@ internal sealed class NtpControlPanelSaveHandler(IUiMediator mediator, ISystemCo
 {
     protected override Task<ISaveInternalResult> SaveInternal(NtpControlPanelState state)
     {
-        var networkNtpSettings = NetworkNTPSettings.Empty;
+        var networkNtpSettings = new NetworkNTPSettings();
 
-        networkNtpSettings.NTPServersEnabled = state.NtpServersEnabled;
-        state.NtpServerDetails.Save(networkNtpSettings.NTPServers);
+        networkNtpSettings.Enabled = state.NtpServersEnabled;
+        state.NtpServerDetails.Save(networkNtpSettings.Servers);
 
         var systemConfiguration = new SystemConfiguration
         {
-            NetworkInterfacesSettings = SystemConfigurationService.SystemConfiguration.NetworkInterfacesSettings,
+            NetworkInterfaces = SystemConfigurationService.SystemConfiguration.NetworkInterfaces,
             NetworkDNSSettings = SystemConfigurationService.SystemConfiguration.NetworkDNSSettings,
             NetworkProxySettings = SystemConfigurationService.SystemConfiguration.NetworkProxySettings,
             NetworkNTPSettings = networkNtpSettings,

@@ -6,7 +6,6 @@ public sealed class ProxiesControlPanelState : NetworkControlPanelStateBase
 {
     internal ProxySettings HttpProxySettings { get; set; } = new();
     internal ProxySettings HttpsProxySettings { get; set; } = new();
-    internal ProxySettings SocksProxySettings { get; set; } = new();
     internal ProxySettings FtpProxySettings { get; set; } = new();
     internal ProxySettings SftpProxySettings { get; set; } = new();
 

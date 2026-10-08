@@ -115,6 +115,15 @@ namespace Blazor.Shared.Instance.ControlPanels.Update.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This backup was created before the HostManagement 2.0 update and can no longer be restored. Please create a new backup..
+        /// </summary>
+        internal static string BackupFormatNotSupported {
+            get {
+                return ResourceManager.GetString("BackupFormatNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manual backup.
         /// </summary>
         internal static string BackupGroupTitle {

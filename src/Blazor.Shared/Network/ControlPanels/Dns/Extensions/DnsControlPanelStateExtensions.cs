@@ -12,30 +12,30 @@ internal static class DnsControlPanelStateExtensions
         var networkDnsSettings = systemConfigurationService.SystemConfiguration.NetworkDNSSettings;
 
         state.Hostname = networkDnsSettings.Hostname;
-        state.DnsSuffixEnabled = networkDnsSettings.DNSSuffixEnabled;
-        state.DnsSuffix = networkDnsSettings.DNSSuffix;
+        state.DnsSuffixEnabled = networkDnsSettings.PrimaryDNSSuffix.Enabled;
+        state.DnsSuffix = networkDnsSettings.PrimaryDNSSuffix.Suffix;
 
         state.MulticastDnsEnabled = networkDnsSettings.MulticastDNSEnabled;
 
-        state.DnsEnabled = networkDnsSettings.NameServersEnabled;
+        state.DnsEnabled = networkDnsSettings.NameServers.Enabled;
 
-        state.DnsDetails = [.. networkDnsSettings.NameServers
+        state.DnsDetails = [.. networkDnsSettings.NameServers.Addresses
             .Select(d => new NetworkInterfaceDnsDetail { IpAddress = d.ToString() })
             .Distinct()];
 
         state.DnsDetails.EnsureAtLeastOneItemExists();
 
-        state.SearchDomainsEnabled = networkDnsSettings.SearchDomainsEnabled;
+        state.SearchDomainsEnabled = networkDnsSettings.SearchDomains.Enabled;
 
-        state.SearchDomainDetails = [.. networkDnsSettings.SearchDomains
+        state.SearchDomainDetails = [.. networkDnsSettings.SearchDomains.Domains
             .Select(d => new NetworkInterfaceSearchDomainDetail { IpAddress = d })
             .Distinct()];
 
         state.SearchDomainDetails.EnsureAtLeastOneItemExists();
 
-        state.StaticHostsEnabled = networkDnsSettings.StaticHostsEnabled;
+        state.StaticHostsEnabled = networkDnsSettings.StaticHosts.Enabled;
 
-        state.StaticHostDetails = [.. networkDnsSettings.StaticHosts
+        state.StaticHostDetails = [.. networkDnsSettings.StaticHosts.Hosts
             .Select(d => new NetworkInterfaceStaticHostDetail { IpAddress = d.IPAddress.ToString(), Hostname = d.Hostname })
             .Distinct()];
 

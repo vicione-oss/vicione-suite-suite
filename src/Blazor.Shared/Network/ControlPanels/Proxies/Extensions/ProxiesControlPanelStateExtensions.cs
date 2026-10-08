@@ -14,15 +14,14 @@ internal static class ProxiesControlPanelStateExtensions
 
         ResetProxySettings(state.HttpProxySettings, networkProxySettings.HTTP);
         ResetProxySettings(state.HttpsProxySettings, networkProxySettings.HTTPS);
-        ResetProxySettings(state.SocksProxySettings, networkProxySettings.SOCKS);
         ResetProxySettings(state.FtpProxySettings, networkProxySettings.FTP);
         ResetProxySettings(state.SftpProxySettings, networkProxySettings.SFTP);
 
         // Proxy settings are not applied.
         {
-            state.DoNotProxyListEnabled = networkProxySettings.DoNotProxyListEnabled;
+            state.DoNotProxyListEnabled = networkProxySettings.NoProxy.Enabled;
 
-            state.DoNotProxyDetails = [.. networkProxySettings.DoNotProxyList.Select(d => new DoNotProxyDetail { HostnameOrIp = d }).Distinct()];
+            state.DoNotProxyDetails = [.. networkProxySettings.NoProxy.Entries.Select(d => new DoNotProxyDetail { HostnameOrIp = d }).Distinct()];
 
             state.DoNotProxyDetails.EnsureAtLeastOneItemExists();
         }

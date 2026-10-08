@@ -2,7 +2,6 @@ using Core.OS.EnvironmentOverrides;
 using Core.OS.Hosting.Pages;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Extensions;
-using Core.OS.Instance;
 using Core.OS.Security;
 using Core.OS.Security.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -79,7 +78,7 @@ internal static partial class FallbackHostBuilder
     private static bool CanAct(FallbackHostOptions options)
         => options.FileSystem is not null && options.Instance is not null && options.HostManagement is not null;
 
-    private static IResult DisableEnvironmentOverrides(IServiceProvider services, FallbackHostOptions options)
+    private static async Task<IResult> DisableEnvironmentOverrides(IServiceProvider services, FallbackHostOptions options)
     {
         LogDisableRequested(options.Logger);
 
@@ -93,33 +92,9 @@ internal static partial class FallbackHostBuilder
             LogDisableFailed(options.Logger, ex);
         }
 
-        RestartDelayed(services, options.Logger, options.StopApplicationDelayMs);
-
-        return Results.Redirect("/");
+        return await StartupFailureRestart.RestartIfEnabled(
+            services.GetRequiredService<IPipeClient>(), options.Instance!, options.Logger, options.StopApplicationDelayMs, StartupFailurePageStyles.FailsafePage);
     }
-
-    /// <summary>
-    /// Triggers the restart delayed, so the redirect above reaches the browser before the host goes
-    /// down - the same reason the downgrade page delays its own restart.
-    /// </summary>
-    private static void RestartDelayed(IServiceProvider services, ILogger logger, int delayMs)
-        => Task.Run(async () =>
-        {
-            try
-            {
-                var pipeClient = services.GetRequiredService<IPipeClient>();
-                var instanceOptions = services.GetRequiredService<IOptions<InstanceOptions>>();
-
-                await Task.Delay(delayMs);
-                LogRestartRequested(logger);
-
-                await pipeClient.RestartSuite(instanceOptions.Value);
-            }
-            catch (Exception ex)
-            {
-                LogRestartFailed(logger, ex);
-            }
-        }).ConfigureAwait(false);
 
     // The reason is reported through a placeholder rather than as the template itself, so a
     // failure message that happens to contain braces is not read as one.
@@ -134,10 +109,4 @@ internal static partial class FallbackHostBuilder
 
     [LoggerMessage(LogLevel.Error, "Failed to disable the environment overrides file")]
     private static partial void LogDisableFailed(ILogger logger, Exception ex);
-
-    [LoggerMessage(LogLevel.Information, "Stop delay passed by. Requesting restart by hostmanagement now...")]
-    private static partial void LogRestartRequested(ILogger logger);
-
-    [LoggerMessage(LogLevel.Error, "Failed to trigger restart")]
-    private static partial void LogRestartFailed(ILogger logger, Exception ex);
 }

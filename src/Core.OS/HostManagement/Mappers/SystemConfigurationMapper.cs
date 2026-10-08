@@ -1,11 +1,13 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using Core.Shared.HostManagement.Extensions;
 using HostManagement.Shared.Contracts.Network;
 using HostManagement.Shared.Contracts.Service;
 using Sdk.SystemConfiguration.Contracts;
 using HmContracts = HostManagement.Shared.Contracts;
 using HmServiceState = HostManagement.Shared.Enums.ServiceState;
 using SdkServiceState = Sdk.SystemConfiguration.Contracts.ServiceState;
+using PhysicalAddress = System.Net.NetworkInformation.PhysicalAddress;
 
 namespace Core.OS.HostManagement.Mappers;
 
@@ -13,27 +15,25 @@ public static class SystemConfigurationMapper
 {
     public static SystemConfiguration ToSuiteFormat(
         this HmContracts.SystemConfiguration? source,
-        Dictionary<string, DHCPLease?> dhcpLeases,
-        List<string> ntpFallbackServers)
+        SystemConfigurationAdditionalData additionalData)
     {
         if (source is null)
             return new SystemConfiguration();
 
         return new SystemConfiguration
         {
-            Version = source.Version,
-            NetworkInterfaces = MapNetworkInterfaces(source.NetworkInterfacesSettings, dhcpLeases),
+            NetworkInterfaces = MapNetworkInterfaces(source.NetworkInterfaces, additionalData),
             Dns = MapDnsSettings(source.NetworkDNSSettings),
             Proxy = MapProxySettings(source.NetworkProxySettings),
-            Ntp = MapNtpSettings(source.NetworkNTPSettings, ntpFallbackServers),
+            Ntp = MapNtpSettings(source.NetworkNTPSettings, additionalData.NtpFallbackServers),
             Services = MapServices(source.Services),
         };
     }
 
-    private static List<NetworkInterface> MapNetworkInterfaces(NetworkInterfacesSettings? settings, Dictionary<string, DHCPLease?> dhcpLeases)
-        => settings is null ? [] : settings.NetworkInterfaces.Select(d => MapNetworkInterface(d, dhcpLeases)).ToList();
+    private static List<NetworkInterface> MapNetworkInterfaces(List<NetworkInterfaceDetail>? networkInterfaces, SystemConfigurationAdditionalData additionalData)
+        => networkInterfaces is null ? [] : networkInterfaces.Select(d => MapNetworkInterface(d, additionalData)).ToList();
 
-    private static NetworkInterface MapNetworkInterface(NetworkInterfaceDetail detail, Dictionary<string, DHCPLease?> dhcpLeases)
+    private static NetworkInterface MapNetworkInterface(NetworkInterfaceDetail detail, SystemConfigurationAdditionalData additionalData)
     {
         var ipv4 = detail.IPv4;
         var common = detail.CommonInformation;
@@ -47,7 +47,7 @@ public static class SystemConfigurationMapper
 
         if (ipv4.DHCPEnabled)
         {
-            dhcpLeases.TryGetValue(common.Name, out var lease);
+            additionalData.DhcpLeases.TryGetValue(common.Name, out var lease);
 
             if (lease?.IPv4Detail is not null)
             {
@@ -80,12 +80,12 @@ public static class SystemConfigurationMapper
             }
         }
 
-        VlanInfo? vlan = ipv4.VLANEnabled ? new VlanInfo { Id = ipv4.VLANID } : null;
+        VlanInfo? vlan = detail.VLAN.Enabled ? new VlanInfo { Id = detail.VLAN.ID } : null;
 
         return new NetworkInterface
         {
             Name = common.Name,
-            PhysicalAddress = common.PhysicalAddress,
+            PhysicalAddress = MapPhysicalAddress(common, additionalData.OriginalPhysicalAddresses),
             Enabled = common.Enabled,
             IPv4Address = effectiveIp,
             IPv4Netmask = effectiveNetmask,
@@ -101,6 +101,16 @@ public static class SystemConfigurationMapper
         };
     }
 
+    private static string MapPhysicalAddress(NetworkInterfaceCommonInformation common, Dictionary<string, PhysicalAddress?> originalPhysicalAddresses)
+    {
+        if (common.UserDefinedMACAddress.Enabled)
+            return common.UserDefinedMACAddress.Address.ToColonNotation();
+
+        originalPhysicalAddresses.TryGetValue(common.Name, out var originalPhysicalAddress);
+
+        return originalPhysicalAddress?.ToColonNotation() ?? string.Empty;
+    }
+
     private static DnsSettings MapDnsSettings(NetworkDNSSettings? source)
     {
         if (source is null)
@@ -110,11 +120,11 @@ public static class SystemConfigurationMapper
         {
             Hostname = source.Hostname,
             MulticastDnsEnabled = source.MulticastDNSEnabled,
-            NameServers = source.NameServersEnabled ? source.NameServers.ToList() : [],
-            DnsSuffix = source.DNSSuffixEnabled ? source.DNSSuffix : string.Empty,
-            SearchDomains = source.SearchDomainsEnabled ? source.SearchDomains.ToList() : [],
-            StaticHosts = source.StaticHostsEnabled
-                ? source.StaticHosts.Select(h => new StaticHost
+            NameServers = source.NameServers.Enabled ? source.NameServers.Addresses.ToList() : [],
+            DnsSuffix = source.PrimaryDNSSuffix.Enabled ? source.PrimaryDNSSuffix.Suffix : string.Empty,
+            SearchDomains = source.SearchDomains.Enabled ? source.SearchDomains.Domains.ToList() : [],
+            StaticHosts = source.StaticHosts.Enabled
+                ? source.StaticHosts.Hosts.Select(h => new StaticHost
                 {
                     IpAddress = h.IPAddress,
                     Hostname = h.Hostname,
@@ -134,8 +144,7 @@ public static class SystemConfigurationMapper
             Https = MapProxyDetail(source.HTTPS),
             Ftp = MapProxyDetail(source.FTP),
             Sftp = MapProxyDetail(source.SFTP),
-            Socks = MapProxyDetail(source.SOCKS),
-            DoNotProxyList = source.DoNotProxyListEnabled ? source.DoNotProxyList.ToList() : [],
+            DoNotProxyList = source.NoProxy.Enabled ? source.NoProxy.Entries.ToList() : [],
         };
     }
 
@@ -160,7 +169,7 @@ public static class SystemConfigurationMapper
 
         return new NtpSettings
         {
-            Servers = source.NTPServersEnabled ? source.NTPServers.ToList() : [],
+            Servers = source.Enabled ? source.Servers.ToList() : [],
             FallbackServers = fallbackServers,
         };
     }

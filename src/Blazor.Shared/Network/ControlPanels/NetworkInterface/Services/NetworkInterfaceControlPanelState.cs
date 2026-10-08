@@ -21,6 +21,7 @@ public sealed class NetworkInterfaceControlPanelState : NetworkControlPanelState
 
     internal bool MacAddressManually { get; set; }
     internal string MacAddress { get; set; } = string.Empty;
+    internal string? OriginalMacAddress { get; set; }
 
     internal DHCPLease? DHCPLease { get; set; }
     internal bool DhcpLeaseFetching { get; set; } = true;

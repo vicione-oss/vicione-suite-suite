@@ -3,8 +3,11 @@ using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
+using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.UserManagement.Contracts;
+using HostManagement.Shared.Capabilities;
 using HostManagement.Shared.Communication;
+using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
@@ -95,6 +98,28 @@ public sealed class UpdateSystemConsumerTests
         // Assert
         (await tester.Harness.Published.Any<UpdateSystemStarted>(r =>
             r.Context.Message.ErrorInfo != null, TestContext.Current.CancellationToken)).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_keep_logins_and_send_error_event_when_update_system_is_disabled()
+    {
+        // Arrange
+        await using var tester = new MassTransitTester(SetupServices);
+
+        var command = new UpdateSystem("some/file/path");
+        SetupUpdateSystemRequestSuccess(command);
+        var capabilities = new SupportedCapabilities();
+        capabilities.Topics.UpdateSystem = CapabilityStatus.Disabled;
+        _pipeClient.SetupGetSupportedCapabilitiesResult(OperationStatus.Success, capabilities);
+
+        // Act
+        await tester.TestInstanceDependentCommand<UpdateSystem, UpdateSystemConsumer>(command);
+
+        // Assert
+        (await tester.Harness.Published.Any<UpdateSystemStarted>(r =>
+            r.Context.Message.ErrorInfo?.ErrorCode == UpdateSystemStarted.UpdateSystemDisabled, TestContext.Current.CancellationToken)).Should().BeTrue();
+        _ = _userStore.DidNotReceive().Users;
+        await _pipeClient.DidNotReceive().SendRequest(Topics.UpdateSystem, Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     private void SetupUpdateSystemRequestSuccess(UpdateSystem command)

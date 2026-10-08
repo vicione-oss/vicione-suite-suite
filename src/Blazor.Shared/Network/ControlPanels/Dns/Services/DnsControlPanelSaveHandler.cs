@@ -18,49 +18,48 @@ internal sealed class DnsControlPanelSaveHandler(IUiMediator mediator, ISystemCo
         {
             Hostname = state.Hostname,
 
-            DNSSuffixEnabled = state.DnsSuffixEnabled,
-            DNSSuffix = state.DnsSuffix,
+            PrimaryDNSSuffix = new() { Enabled = state.DnsSuffixEnabled, Suffix = state.DnsSuffix },
 
             MulticastDNSEnabled = state.MulticastDnsEnabled
         };
 
         // Name servers.
         {
-            networkDnsSettings.NameServersEnabled = state.DnsEnabled;
+            networkDnsSettings.NameServers.Enabled = state.DnsEnabled;
 
             // Unfilled fieldsets and duplicates are dropped.
             state.DnsDetails = [.. state.DnsDetails.Where(d => !string.IsNullOrWhiteSpace(d.IpAddress)).Distinct()];
 
-            networkDnsSettings.NameServers.Clear();
-            networkDnsSettings.NameServers.AddRange(state.DnsDetails.Select(d => IPAddress.Parse(d.IpAddress)));
+            networkDnsSettings.NameServers.Addresses.Clear();
+            networkDnsSettings.NameServers.Addresses.AddRange(state.DnsDetails.Select(d => IPAddress.Parse(d.IpAddress)));
 
             state.DnsDetails.EnsureAtLeastOneItemExists();
         }
 
         // Search domains.
         {
-            networkDnsSettings.SearchDomainsEnabled = state.SearchDomainsEnabled;
+            networkDnsSettings.SearchDomains.Enabled = state.SearchDomainsEnabled;
 
             // Unfilled fieldsets and duplicates are dropped.
             state.SearchDomainDetails = [.. state.SearchDomainDetails.Where(d => !string.IsNullOrWhiteSpace(d.IpAddress)).Distinct()];
 
-            networkDnsSettings.SearchDomains.Clear();
-            networkDnsSettings.SearchDomains.AddRange(state.SearchDomainDetails.Select(d => d.IpAddress));
+            networkDnsSettings.SearchDomains.Domains.Clear();
+            networkDnsSettings.SearchDomains.Domains.AddRange(state.SearchDomainDetails.Select(d => d.IpAddress));
 
             state.SearchDomainDetails.EnsureAtLeastOneItemExists();
         }
 
         // Static hosts.
         {
-            networkDnsSettings.StaticHostsEnabled = state.StaticHostsEnabled;
+            networkDnsSettings.StaticHosts.Enabled = state.StaticHostsEnabled;
 
             // Unfilled fieldsets and duplicates are dropped.
             state.StaticHostDetails = [.. state.StaticHostDetails
                 .Where(d => !string.IsNullOrWhiteSpace(d.IpAddress) || !string.IsNullOrWhiteSpace(d.Hostname))
                 .Distinct()];
 
-            networkDnsSettings.StaticHosts.Clear();
-            networkDnsSettings.StaticHosts.AddRange(state.StaticHostDetails
+            networkDnsSettings.StaticHosts.Hosts.Clear();
+            networkDnsSettings.StaticHosts.Hosts.AddRange(state.StaticHostDetails
                 .Select(d => new HostManagement.Shared.Contracts.Network.StaticHostDetail { IPAddress = IPAddress.Parse(d.IpAddress), Hostname = d.Hostname }));
 
             state.StaticHostDetails.EnsureAtLeastOneItemExists();
@@ -68,7 +67,7 @@ internal sealed class DnsControlPanelSaveHandler(IUiMediator mediator, ISystemCo
 
         var systemConfiguration = new SystemConfiguration
         {
-            NetworkInterfacesSettings = SystemConfigurationService.SystemConfiguration.NetworkInterfacesSettings,
+            NetworkInterfaces = SystemConfigurationService.SystemConfiguration.NetworkInterfaces,
             NetworkDNSSettings = networkDnsSettings,
             NetworkProxySettings = SystemConfigurationService.SystemConfiguration.NetworkProxySettings,
             NetworkNTPSettings = SystemConfigurationService.SystemConfiguration.NetworkNTPSettings,

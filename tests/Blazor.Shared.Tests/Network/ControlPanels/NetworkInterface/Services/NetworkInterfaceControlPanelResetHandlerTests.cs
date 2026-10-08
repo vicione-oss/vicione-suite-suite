@@ -1,3 +1,4 @@
+using System.Net.NetworkInformation;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
@@ -40,7 +41,7 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
     {
         _systemConfigurationService.SystemConfiguration.Returns(new SystemConfiguration
         {
-            NetworkInterfacesSettings = new NetworkInterfacesSettings([.. networkInterfaces])
+            NetworkInterfaces = [.. networkInterfaces]
         });
     }
 
@@ -161,13 +162,37 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
     }
 
     [Fact]
-    public async Task Should_set_mac_address_manually_when_physical_address_differs_from_original()
+    public async Task Should_set_mac_address_manually_when_user_defined_mac_address_is_enabled()
     {
         // Arrange
         const string customMac = "AA:BB:CC:DD:EE:FF";
         var networkInterface = new NetworkInterfaceDetail
         {
-            CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true, PhysicalAddress = customMac },
+            CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true, UserDefinedMACAddress = new() { Enabled = true, Address = PhysicalAddress.Parse(customMac) } },
+            IPv4 = new IPv4Settings()
+        };
+        SetupSystemConfiguration(networkInterface);
+
+        await using var serviceProvider = SetupServiceProvider();
+
+        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0 };
+        var resetHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<NetworkInterfaceControlPanelState>>();
+
+        // Act
+        await resetHandler.Reset(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        state.MacAddressManually.Should().BeTrue();
+        state.MacAddress.Should().Be(customMac);
+    }
+
+    [Fact]
+    public async Task Should_not_set_mac_address_manually_when_user_defined_mac_address_is_disabled()
+    {
+        // Arrange
+        var networkInterface = new NetworkInterfaceDetail
+        {
+            CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true, UserDefinedMACAddress = new() { Enabled = false, Address = PhysicalAddress.Parse("AA:BB:CC:DD:EE:FF") } },
             IPv4 = new IPv4Settings()
         };
         SetupSystemConfiguration(networkInterface);
@@ -185,25 +210,25 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
         await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
         // Assert
-        state.MacAddressManually.Should().BeTrue();
-        state.MacAddress.Should().Be(customMac);
+        state.MacAddressManually.Should().BeFalse();
+        state.MacAddress.Should().BeEmpty();
     }
 
     [Fact]
-    public async Task Should_not_set_mac_address_manually_when_physical_address_matches_original()
+    public async Task Should_load_original_mac_address_of_network_interface()
     {
         // Arrange
-        const string mac = "AA:BB:CC:DD:EE:FF";
+        const string originalMac = "11:22:33:44:55:66";
         var networkInterface = new NetworkInterfaceDetail
         {
-            CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true, PhysicalAddress = mac },
+            CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true },
             IPv4 = new IPv4Settings()
         };
         SetupSystemConfiguration(networkInterface);
 
         _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
                 Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
-            .Returns(new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = mac });
+            .Returns(new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = originalMac });
 
         await using var serviceProvider = SetupServiceProvider();
 
@@ -214,8 +239,7 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
         await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
         // Assert
-        state.MacAddressManually.Should().BeFalse();
-        state.MacAddress.Should().BeEmpty();
+        state.OriginalMacAddress.Should().Be(originalMac);
     }
 
     [Fact]
@@ -225,7 +249,8 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
         var networkInterface = new NetworkInterfaceDetail
         {
             CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true },
-            IPv4 = new IPv4Settings { VLANEnabled = true, VLANID = 100 }
+            IPv4 = new IPv4Settings(),
+            VLAN = new VLANSettings { Enabled = true, ID = 100 }
         };
         SetupSystemConfiguration(networkInterface);
 
@@ -249,10 +274,13 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
         var networkInterface = new NetworkInterfaceDetail
         {
             CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true },
-            IPv4 = new IPv4Settings([
-                new IPv4Detail { IPAddress = System.Net.IPAddress.Parse("192.168.1.10"), Netmask = System.Net.IPAddress.Parse("255.255.255.0") },
-                new IPv4Detail { IPAddress = System.Net.IPAddress.Parse("10.0.0.1"), Netmask = System.Net.IPAddress.Parse("255.0.0.0") }
-            ])
+            IPv4 = new IPv4Settings
+            {
+                IPv4Details = [
+                    new IPv4Detail { IPAddress = System.Net.IPAddress.Parse("192.168.1.10"), Netmask = System.Net.IPAddress.Parse("255.255.255.0") },
+                    new IPv4Detail { IPAddress = System.Net.IPAddress.Parse("10.0.0.1"), Netmask = System.Net.IPAddress.Parse("255.0.0.0") }
+                ]
+            }
         };
         SetupSystemConfiguration(networkInterface);
 

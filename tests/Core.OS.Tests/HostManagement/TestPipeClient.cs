@@ -11,7 +11,9 @@ public sealed class TestPipeClient(MockPipeClient mockPipeClient) : IPipeClient
 {
     public PipeState State => mockPipeClient.State;
 
-    public void Dispose() => mockPipeClient.Dispose();
+    public bool IsMock => false;
+
+    public ValueTask DisposeAsync() => mockPipeClient.DisposeAsync();
 
     public Task Connect(CancellationToken cancellationToken = default) => mockPipeClient.Connect(cancellationToken);
 

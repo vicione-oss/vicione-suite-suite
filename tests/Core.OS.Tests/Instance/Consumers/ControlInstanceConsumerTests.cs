@@ -212,7 +212,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
     {
         if (disposing)
         {
-            _pipeClient.Dispose();
+            _pipeClient.DisposeAsync().AsTask().GetAwaiter().GetResult();
         }
         base.Dispose(disposing);
     }

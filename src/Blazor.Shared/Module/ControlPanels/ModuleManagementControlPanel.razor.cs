@@ -11,7 +11,6 @@ using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Client.Services;
 using Sdk.Instance;
 using Sdk.Utils;
 using ViciOne.Ui.Blazor.Components.Grid.Services;

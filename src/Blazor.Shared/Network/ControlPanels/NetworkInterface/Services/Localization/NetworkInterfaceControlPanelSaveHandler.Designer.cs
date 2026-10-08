@@ -69,5 +69,14 @@ namespace Blazor.Shared.Network.ControlPanels.NetworkInterface.Services.Localiza
                 return ResourceManager.GetString("CannotFindNetworkInterfaceSettingsBasedOnGivenIndex", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid MAC address..
+        /// </summary>
+        internal static string MacAddressIsInvalid {
+            get {
+                return ResourceManager.GetString("MacAddressIsInvalid", resourceCulture);
+            }
+        }
     }
 }

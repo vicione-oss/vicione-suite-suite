@@ -1,8 +1,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using Core.OS.Instance;
+using HostManagement.Shared.Capabilities;
 using HostManagement.Shared.Communication;
+using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Contracts;
+using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.System;
 using CommunicationJsonContext = HostManagement.Shared.Communication.Contracts.SourceGenerationContext;
@@ -10,8 +13,13 @@ using SharedJsonContext = HostManagement.Shared.Contracts.SourceGenerationContex
 
 namespace Core.OS.HostManagement.Extensions;
 
-internal static class IPipeClientExtensions
+internal static partial class IPipeClientExtensions
 {
+    /// <summary>
+    /// Seconds HostManagement waits before a device restart or shutdown, so its response reaches the Suite before the device goes down.
+    /// </summary>
+    internal const string SystemControlDelaySeconds = "3";
+
     extension(IPipeClient pipeClient)
     {
         public async Task<SystemControlResult?> InstallSignedDebianPackage(SignedDebianPackage debianPackage, CancellationToken cancellationToken = default)
@@ -22,7 +30,6 @@ internal static class IPipeClientExtensions
                 () => pipeClient.SendRequest(Topics.InstallSignedDebianPackage, requestJson, cancellationToken),
                 CommunicationJsonContext.Default.SystemControlResult);
         }
-
 
         public async Task<SetSystemConfigurationResult?> SetSystemConfiguration(SystemConfiguration systemConfiguration, CancellationToken cancellationToken = default)
         {
@@ -53,17 +60,52 @@ internal static class IPipeClientExtensions
                 () => pipeClient.SendRequest(Topics.GetNTPFallbackInformation, string.Empty, cancellationToken),
                 CommunicationJsonContext.Default.GetNTPFallbackInformationResult);
 
+        public async Task<GetSupportedCapabilitiesResult?> GetSupportedCapabilities(CancellationToken cancellationToken = default)
+            => await GetRequestResult(
+                () => pipeClient.SendRequest(Topics.GetSupportedCapabilities, string.Empty, cancellationToken),
+                CapabilitySourceGenerationContext.Default.GetSupportedCapabilitiesResult);
+
+        /// <returns>
+        /// The capabilities, or <see langword="null"/> when they cannot be read.
+        /// HostManagement still rejects disabled requests, so callers skip their own check on <see langword="null"/>.
+        /// </returns>
+        public async Task<SupportedCapabilities?> GetSupportedCapabilitiesOrNull(ILogger logger, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await pipeClient.GetSupportedCapabilities(cancellationToken);
+                if (result?.Status == OperationStatus.Success)
+                    return result.SupportedCapabilities;
+
+                LogSupportedCapabilitiesNotReturned(logger, result?.Status, result?.Message);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                LogSupportedCapabilitiesRequestFailed(logger, exception);
+            }
+
+            return null;
+        }
+
+        /// <returns>
+        /// <see langword="false"/> when the capabilities cannot be read, see <see cref="GetSupportedCapabilitiesOrNull"/>.
+        /// </returns>
+        public async Task<bool> IsDisabled(Func<SupportedTopics, CapabilityStatus> topic, ILogger logger, CancellationToken cancellationToken = default)
+        {
+            var capabilities = await pipeClient.GetSupportedCapabilitiesOrNull(logger, cancellationToken);
+
+            return capabilities is not null && topic(capabilities.Topics) is CapabilityStatus.Disabled;
+        }
+
         public async Task<GetOriginalPhysicalAddressResult?> GetOriginalPhysicalAddress(string networkInterfaceName, CancellationToken cancellationToken = default)
             => await GetRequestResult(
                 () => pipeClient.SendRequest(Topics.GetOriginalPhysicalAddress, networkInterfaceName, cancellationToken),
                 CommunicationJsonContext.Default.GetOriginalPhysicalAddressResult);
 
-#pragma warning disable CS0618 // Type or member is obsolete but still in use and not replaced by GetDHCPLeaseInformationResult yet
-        public async Task<RenewDHCPLeaseResult?> RenewDHCPLease(string networkInterfaceName, CancellationToken cancellationToken = default)
-#pragma warning restore CS0618 // Type or member is obsolete
+        public async Task<GetDHCPLeaseInformationResult?> RenewDHCPLease(string networkInterfaceName, CancellationToken cancellationToken = default)
             => await GetRequestResult(
                 () => pipeClient.SendRequest(Topics.RenewDHCPLease, networkInterfaceName, cancellationToken),
-                CommunicationJsonContext.Default.RenewDHCPLeaseResult);
+                CommunicationJsonContext.Default.GetDHCPLeaseInformationResult);
 
         public async Task<SystemControlResult?> UpdateSystem(string filePath, CancellationToken cancellationToken = default)
             => await GetRequestResult(
@@ -77,7 +119,7 @@ internal static class IPipeClientExtensions
 
         public async Task<SystemControlResult?> RestartSystem(CancellationToken cancellationToken = default)
             => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.RestartSystem, string.Empty, cancellationToken),
+                () => pipeClient.SendRequest(Topics.RestartSystem, SystemControlDelaySeconds, cancellationToken),
                 CommunicationJsonContext.Default.SystemControlResult);
 
         public async Task<ServiceControlResult> RestartService(string serviceName, CancellationToken cancellationToken = default)
@@ -91,7 +133,7 @@ internal static class IPipeClientExtensions
 
         public async Task<SystemControlResult?> ShutdownSystem(CancellationToken cancellationToken = default)
             => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.ShutdownSystem, string.Empty, cancellationToken),
+                () => pipeClient.SendRequest(Topics.ShutdownSystem, SystemControlDelaySeconds, cancellationToken),
                 CommunicationJsonContext.Default.SystemControlResult);
 
         public async Task<ServiceControlResult?> StartService(string serviceName, CancellationToken cancellationToken = default)
@@ -108,20 +150,23 @@ internal static class IPipeClientExtensions
     private static async Task<TResult?> GetRequestResult<TResult>(Func<Task<string>> pipeRequest, JsonTypeInfo<TResult> typeInfo)
         where TResult : class
     {
-        // Maybe the topic is not supported and we got an error response
-        // This will change with next HM 2.x version where we are able to check the supported topics/features
         var settingsJson = await pipeRequest();
 
         try
         {
-            // Usually we get the expected result except the topic/feature is not enabled
             return JsonSerializer.Deserialize(settingsJson, typeInfo);
         }
         catch (JsonException jsonEx)
         {
-            // Then we will get a default error response to get reason
+            // HostManagement answers a rejected request, such as one for a disabled topic, with a plain Response carrying the reason.
             var error = JsonSerializer.Deserialize(settingsJson, CommunicationJsonContext.Default.Response);
             throw new InvalidOperationException($"Pipe request failed with error: {error?.Message}", jsonEx);
         }
     }
+
+    [LoggerMessage(LogLevel.Warning, "HostManagement returned no supported capabilities ({Status}: {Message}), skipping the capability check")]
+    private static partial void LogSupportedCapabilitiesNotReturned(ILogger logger, OperationStatus? status, string? message);
+
+    [LoggerMessage(LogLevel.Warning, "Reading the supported capabilities from HostManagement failed, skipping the capability check")]
+    private static partial void LogSupportedCapabilitiesRequestFailed(ILogger logger, Exception exception);
 }

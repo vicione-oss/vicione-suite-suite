@@ -135,6 +135,9 @@
   <data name="BackupExportText" xml:space="preserve">
     <value>Exportieren Sie manuell eine Sicherungsdatei der Systemkonfiguration (.zip) und speichern Sie diese auf Ihrem Computer. Bitte beachten Sie, dass dabei nur Ihre Konfiguration und keine anderen Daten gespeichert werden.</value>
   </data>
+  <data name="BackupFormatNotSupported" xml:space="preserve">
+    <value>Diese Sicherung wurde vor dem Update auf HostManagement 2.0 erstellt und kann nicht mehr wiederhergestellt werden. Bitte erstellen Sie eine neue Sicherung.</value>
+  </data>
   <data name="BackupGroupTitle" xml:space="preserve">
     <value>Manuelle Sicherung</value>
   </data>

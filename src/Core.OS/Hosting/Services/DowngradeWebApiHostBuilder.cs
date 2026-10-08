@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.Net.Mime;
-using System.Text;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Pages;
 using Core.OS.HostManagement;
@@ -19,7 +18,6 @@ internal static partial class DowngradeWebApiHostBuilder
     {
         builder.Services.AddSingleton(fileSystem);
         builder.Services.AddSingleton(Options.Create(options.Instance));
-        builder.Services.AddSingleton<EventCallbackRegistry>();
         builder.Services.AddPipeClient(options.HostManagement);
 
         // The simplest host that can display the errors.
@@ -38,7 +36,7 @@ internal static partial class DowngradeWebApiHostBuilder
     /// <summary>
     /// Writes the reset file and restarts the suite.
     /// </summary>
-    private static IResult DowngradeReset(IServiceProvider services, DowngradeWebApiParameters options)
+    private static async Task<IResult> DowngradeReset(IServiceProvider services, DowngradeWebApiParameters options)
     {
         var fileSystem = services.GetRequiredService<IFileSystem>();
         var pipeClient = services.GetRequiredService<IPipeClient>();
@@ -54,45 +52,25 @@ internal static partial class DowngradeWebApiHostBuilder
             LogResetFileFailed(options.Logger, ex);
         }
 
-        RestartDelayed(pipeClient, options);
-
-        return Results.Redirect("/");
+        return await RestartIfEnabled(pipeClient, options);
     }
 
-    private static IResult DowngradeExit(IServiceProvider services, DowngradeWebApiParameters options)
+    private static async Task<IResult> DowngradeExit(IServiceProvider services, DowngradeWebApiParameters options)
     {
         var pipeClient = services.GetRequiredService<IPipeClient>();
 
         LogExitRequested(options.Logger);
 
-        RestartDelayed(pipeClient, options);
-
-        return Results.Redirect("/");
+        return await RestartIfEnabled(pipeClient, options);
     }
 
-    /// <summary>
-    /// Triggers the restart delayed, so the redirect reaches the browser before the host goes down.
-    /// </summary>
-    private static void RestartDelayed(IPipeClient pipeClient, DowngradeWebApiParameters options)
-        => Task.Run(async () =>
-        {
-            try
-            {
-                await Task.Delay(options.StopApplicationDelayMs);
-                LogRestartRequested(options.Logger);
+    private static Task<IResult> RestartIfEnabled(IPipeClient pipeClient, DowngradeWebApiParameters options)
+        => StartupFailureRestart.RestartIfEnabled(
+            pipeClient, options.Instance, options.Logger, options.StopApplicationDelayMs, StartupFailurePageStyles.DowngradePage);
 
-                // Restarts Core.OS immediately.
-                await pipeClient.RestartSuite(options.Instance);
-            }
-            catch (Exception ex)
-            {
-                LogRestartFailed(options.Logger, ex);
-            }
-        }).ConfigureAwait(false);
-
-    private static HtmlResult CreateVersionDowngradeDetectedHtml(string currentVersion, string persistedVersion)
+    private static IResult CreateVersionDowngradeDetectedHtml(string currentVersion, string persistedVersion)
     {
-        return new HtmlResult(@$"<!doctype html>
+        return Results.Content(@$"<!doctype html>
             <html lang=""en"">
             <head>
                 <meta charset=""UTF-8"">
@@ -107,17 +85,7 @@ internal static partial class DowngradeWebApiHostBuilder
                 <p><a href=""/reset"">Reset &amp; Restart</a></p>
                 <p><a href=""/exit"">Cancel &amp; Exit</a></p>
             </body>
-            </html>");
-    }
-
-    private class HtmlResult(string html) : IResult
-    {
-        public Task ExecuteAsync(HttpContext httpContext)
-        {
-            httpContext.Response.ContentType = MediaTypeNames.Text.Html;
-            httpContext.Response.ContentLength = Encoding.UTF8.GetByteCount(html);
-            return httpContext.Response.WriteAsync(html);
-        }
+            </html>", MediaTypeNames.Text.Html);
     }
 
     [LoggerMessage(LogLevel.Warning, "Suite reset requested by user because of detected version downgrade")]
@@ -128,10 +96,4 @@ internal static partial class DowngradeWebApiHostBuilder
 
     [LoggerMessage(LogLevel.Information, "Suite shutdown requested by user because of detected version downgrade")]
     private static partial void LogExitRequested(ILogger logger);
-
-    [LoggerMessage(LogLevel.Information, "Stop delay passed by. Requesting restart by hostmanagement now...")]
-    private static partial void LogRestartRequested(ILogger logger);
-
-    [LoggerMessage(LogLevel.Error, "Failed to trigger restart")]
-    private static partial void LogRestartFailed(ILogger logger, Exception ex);
 }
