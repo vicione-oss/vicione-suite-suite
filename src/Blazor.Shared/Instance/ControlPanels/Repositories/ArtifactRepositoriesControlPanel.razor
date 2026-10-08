@@ -1,5 +1,6 @@
 @using Blazor.Shared.Instance.ControlPanels.Repositories.Models
 @using Blazor.Shared.Instance.ControlPanels.Repositories.Services
+@using Blazor.Shared.Settings.Components
 @using ViciOne.Ui.Blazor.Components.Grid.Components
 @using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
 @using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
@@ -15,52 +16,54 @@
         @Localization.ArtifactRepositoriesControlPanel.DescriptionBannerContent
     </DescriptionBanner>
 
-    <Grid Items="_repositoriesQueryable" Virtualize="true" CssClass="repo-sources-grid">
-        <ActionButtons>
-            <AddGridActionButton OnClick="@AddNewRepository" />
-            <EditGridActionButton Enabled="@_isSingleItemSelected" OnClick="@EditSelectedRepository" />
-            <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
-                                    OnClick="@DeleteSelectedRepositories" />
-        </ActionButtons>
+    <LimitedHeightLayout>
+        <Grid Items="_repositoriesQueryable" Virtualize="true" CssClass="repo-sources-grid">
+            <ActionButtons>
+                <AddGridActionButton OnClick="@AddNewRepository" />
+                <EditGridActionButton Enabled="@_isSingleItemSelected" OnClick="@EditSelectedRepository" />
+                <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
+                                        OnClick="@DeleteSelectedRepositories" />
+            </ActionButtons>
 
-        <Filter>
-            <GridFilterControl @bind-Text="@State.FilterText" @bind-Text:after="@ApplyFilter" />
-        </Filter>
+            <Filter>
+                <GridFilterControl @bind-Text="@State.FilterText" @bind-Text:after="@ApplyFilter" />
+            </Filter>
 
-        <ChildContent>
-            <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@GridItemSelection" />
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@GridItemSelection" />
 
-            <PropertyColumn Title="@CommonVocabulary.Name"
-                            Property="@(i => i.Name)"
-                            Sortable="true" />
+                <PropertyColumn Title="@CommonVocabulary.Name"
+                                Property="@(i => i.Name)"
+                                Sortable="true" />
 
-            <PropertyColumn Title="@TechnicalTerms.Endpoint"
-                            Property="@(i => i.Endpoint)"
-                            Sortable="true" />
+                <PropertyColumn Title="@TechnicalTerms.Endpoint"
+                                Property="@(i => i.Endpoint)"
+                                Sortable="true" />
 
-            <TemplateColumn Title="@CommonVocabulary.Status">
-                <div class="status-wrapper">
-                    @if (context.IsEnabledAndOk)
-                    {
-                        <div title="@Localization.ArtifactRepositoriesControlPanel.SourceEnabled" class="icon-wrapper">
-                            <MonochromeIcon Name="MonochromeIconName.Check" Size="MonochromeIconSize.SmallMedium" />
-                        </div>
-                    }
-                    else if (context.IsTokenInvalid)
-                    {
-                        <div title="@Localization.ArtifactRepositoriesControlPanel.TokenInvalid" class="icon-wrapper">
-                            <MonochromeIcon Name="MonochromeIconName.WarningLight" Size="MonochromeIconSize.SmallMedium" />
-                        </div>
-                    }
-                </div>
-            </TemplateColumn>
+                <TemplateColumn Title="@CommonVocabulary.Status">
+                    <div class="status-wrapper">
+                        @if (context.IsEnabledAndOk)
+                        {
+                            <div title="@Localization.ArtifactRepositoriesControlPanel.SourceEnabled" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.Check" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+                        else if (context.IsTokenInvalid)
+                        {
+                            <div title="@Localization.ArtifactRepositoriesControlPanel.TokenInvalid" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.WarningLight" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+                    </div>
+                </TemplateColumn>
 
-            <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
-                              Navigate="@(async (ArtifactRepositoryModel item) => await EditRepository(item))" />
-        </ChildContent>
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@(async (ArtifactRepositoryModel item) => await EditRepository(item))" />
+            </ChildContent>
 
-        <Footer>
-            <SelectionFooter GridSelection="GridItemSelection" />
-        </Footer>
-    </Grid>
+            <Footer>
+                <SelectionFooter GridSelection="GridItemSelection" />
+            </Footer>
+        </Grid>
+    </LimitedHeightLayout>
 </div>

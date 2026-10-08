@@ -1,3 +1,4 @@
+@using Blazor.Shared.Settings.Components
 @using Blazor.Shared.UserManagement.ControlPanels.User.Models
 @using Blazor.Shared.UserManagement.ControlPanels.User.Services
 @using ViciOne.Ui.Blazor.Components.ComboBox
@@ -13,27 +14,29 @@
             @Localization.UserControlPanel.RolesDescriptionBannerContent
         </DescriptionBanner>
 
-        <Grid Items="@_assignedUserRoles" Virtualize="true" CssClass="roles-grid">
-            <ActionButtons>
-                @if (State.AvailableUserRoles?.Any() == true)
-                {
-                    <ComboBox Items="@State.AvailableUserRoles" @bind-Value="State.RoleToAdd" CssClass="roles-combo-box" />
-                    <AddGridActionButton OnClick="@AddToRole" Enabled="@(State.RoleToAdd != null)"/>
-                }
-                <DeleteGridActionButton Enabled="@_deleteRoleActionButtonEnabled" OnClick="@RemoveSelectedRoles" />
-            </ActionButtons>
+        <LimitedHeightLayout>
+            <Grid Items="@_assignedUserRoles" Virtualize="true" CssClass="roles-grid">
+                <ActionButtons>
+                    @if (State.AvailableUserRoles?.Any() == true)
+                    {
+                        <ComboBox Items="@State.AvailableUserRoles" @bind-Value="State.RoleToAdd" CssClass="roles-combo-box" />
+                        <AddGridActionButton OnClick="@AddToRole" Enabled="@(State.RoleToAdd != null)"/>
+                    }
+                    <DeleteGridActionButton Enabled="@_deleteRoleActionButtonEnabled" OnClick="@RemoveSelectedRoles" />
+                </ActionButtons>
 
-            <ChildContent>
-                <ItemSelectColumn KeySelector="@(item => item)" Selection="@RolesGridItemSelection" />
+                <ChildContent>
+                    <ItemSelectColumn KeySelector="@(item => item)" Selection="@RolesGridItemSelection" />
 
-                <TemplateColumn Title="@CommonVocabulary.RolePlural">
-                    @context
-                </TemplateColumn>
-            </ChildContent>
+                    <TemplateColumn Title="@CommonVocabulary.RolePlural">
+                        @context
+                    </TemplateColumn>
+                </ChildContent>
 
-            <Footer>
-                <SelectionFooter GridSelection="RolesGridItemSelection" />
-            </Footer>
-        </Grid>
+                <Footer>
+                    <SelectionFooter GridSelection="RolesGridItemSelection" />
+                </Footer>
+            </Grid>
+        </LimitedHeightLayout>
     </div>
 </ControlPanelPage>

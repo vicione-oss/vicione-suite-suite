@@ -2,8 +2,6 @@
     display: contents;
 
     ::deep .installed-modules-grid, ::deep .available-modules-grid {
-        max-height: 100%;
-
         .status-wrapper {
             display: flex;
             gap: 8px;
