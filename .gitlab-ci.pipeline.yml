@@ -130,7 +130,8 @@ include:
         - echo "APP_HMS_VERSION=${HMS_VERSION_FILE}" >> version.env
         - echo "APP_TAG=${CI_COMMIT_TAG}" >> version.env
         - |
-          DEB_ARTIFACT_VERSION="${CI_COMMIT_TAG:-$VERSION_FILE~$CI_PIPELINE_ID}"
+          DEB_ARTIFACT_VERSION="${VERSION_FILE}"
+          if [ -z "${CI_COMMIT_TAG}" ]; then DEB_ARTIFACT_VERSION="${VERSION_FILE}~${CI_PIPELINE_ID}"; fi
           DEB_ARTIFACT_VERSION="$(printf '%s' "$DEB_ARTIFACT_VERSION" | sed 's/-/~/')"
           echo "ARTIFACT_VERSION=${DEB_ARTIFACT_VERSION}" >> version.env
 
