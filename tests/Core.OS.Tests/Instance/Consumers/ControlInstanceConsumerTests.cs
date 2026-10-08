@@ -208,12 +208,9 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
         }
     }
 
-    protected override void Dispose(bool disposing)
+    protected override async ValueTask DisposeAsyncCore()
     {
-        if (disposing)
-        {
-            _pipeClient.DisposeAsync().AsTask().GetAwaiter().GetResult();
-        }
-        base.Dispose(disposing);
+        await _pipeClient.DisposeAsync();
+        await base.DisposeAsyncCore();
     }
 }
