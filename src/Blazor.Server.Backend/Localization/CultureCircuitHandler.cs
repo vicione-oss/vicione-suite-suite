@@ -1,5 +1,7 @@
 using System.Globalization;
 using Blazor.Shared;
+using Core.Shared.Instance.Contracts;
+using Core.Shared.Instance.Extensions;
 using Core.Shared.Instance.Requests;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components.Server.Circuits;
@@ -37,10 +39,9 @@ public sealed class CultureCircuitHandler(IServiceProvider serviceProvider) : Ci
             if (!cache.TryGetValue<string>(cacheKey, out var cultureString)) // check for cache entry
             {
                 var user = await userManager.FindByNameAsync(userName);
-                if (!string.IsNullOrEmpty(user?.Language)
-                    && Constants.SupportedCultures.Any(k => k.Name == user.Language))
+                if (CrossInstanceConfiguration.FindSupportedCulture(user?.Language) is { } userCulture)
                 {
-                    cultureString = user.Language;
+                    cultureString = userCulture.Name;
                     cache.Set(cacheKey, cultureString);
                 }
             }

@@ -11,6 +11,7 @@ using Blazor.Shared.Components;
 using Blazor.Shared.Services;
 using Blazor.Shared.UserManagement.Services;
 using Core.Shared;
+using Core.Shared.Instance.Contracts;
 using Core.Shared.Messaging;
 using Core.Shared.UserManagement.Contracts;
 using Core.UiHosting;
@@ -177,9 +178,9 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
         app.UseRequestLocalization(new RequestLocalizationOptions
         {
-            DefaultRequestCulture = new(Shared.Constants.SupportedCultures.First()),
-            SupportedCultures = Shared.Constants.SupportedCultures,
-            SupportedUICultures = Shared.Constants.SupportedCultures,
+            DefaultRequestCulture = new(CrossInstanceConfiguration.SupportedCultures[0]),
+            SupportedCultures = [.. CrossInstanceConfiguration.SupportedCultures],
+            SupportedUICultures = [.. CrossInstanceConfiguration.SupportedCultures],
             RequestCultureProviders = [new CookieRequestCultureProvider(), new DefaultRequestCultureProvider(this)]
         });
 

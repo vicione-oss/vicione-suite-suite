@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Sdk.Client.Components.Wallpaper.Enums;
+﻿using Sdk.Client.Components.Wallpaper.Enums;
 using Sdk.Client.Modules;
 
 namespace Blazor.Shared;
@@ -30,12 +29,6 @@ public static class Constants
 
     public static readonly Uri WallpaperBaseUri = ModuleAssetHelper.GetModuleImageUrl<SharedClientModule>("wallpapers");
     public static readonly WallpaperImage WallpaperImage = WallpaperImage.BlackAbstractTriangles;
-
-    public static readonly CultureInfo[] SupportedCultures =
-    [
-        new ("en-US"),
-        new ("de-DE")
-    ];
 
     public static string GetUserCultureCacheKey(string userId) => $"UserCulture_{userId}";
 }

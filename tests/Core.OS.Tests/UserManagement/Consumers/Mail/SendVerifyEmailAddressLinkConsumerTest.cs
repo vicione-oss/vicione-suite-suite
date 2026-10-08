@@ -1,10 +1,12 @@
 using System.IO.Abstractions;
+using Core.OS.DbContext;
 using Core.OS.Modules;
 using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers.Mail;
 using Core.OS.UserManagement.Extensions;
 using Core.OS.UserManagement.Templates;
+using Core.Shared.Instance.Contracts;
 using Core.Shared.Mail;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
@@ -26,6 +28,7 @@ public class SendVerifyEmailAddressLinkConsumerTest
         {
             cfg.AddConsumer<SendVerifyEmailAddressLinkConsumer>();
             cfg.AddUserDbContextsInMemory();
+            cfg.AddApplicationDbContextsInMemory();
             cfg.AddSingleton(Substitute.For<IModuleHost>());
             cfg.AddSingleton(Options.Create(new UserManagementOptions { SeedTestUsers = true }));
             cfg.AddUserManagement();
@@ -54,6 +57,37 @@ public class SendVerifyEmailAddressLinkConsumerTest
         // Assert
         await scope.ServiceProvider.GetRequiredService<IMailSender>()
             .AssertSentEmailContainsCallbackLink(callbackLink);
+    }
+
+    [Theory]
+    [InlineData("de-DE", "en-US", "Bitte bestätigen Sie Ihre E-Mail-Adresse", "Vielen Dank für Ihre Registrierung bei ViciOne")]
+    [InlineData(null, "de-DE", "Bitte bestätigen Sie Ihre E-Mail-Adresse", "Vielen Dank für Ihre Registrierung bei ViciOne")]
+    [InlineData(null, "en-US", "Please confirm your email address", "Thank you for registering with ViciOne")]
+    public async Task Should_send_email_in_user_language_or_else_instance_default(string? userLanguage,
+        string instanceCulture, string expectedSubject, string expectedBodyText)
+    {
+        // Arrange
+        await using var tester = new MassTransitTester(_configureServices);
+        await using var scope = tester.Services.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+        dbContext.CrossInstanceConfiguration.Add(new CrossInstanceConfiguration { CultureName = instanceCulture });
+        await dbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await scope.ServiceProvider.SeedUsersAndRoles(TestContext.Current.CancellationToken);
+        await scope.ServiceProvider.SeedTestRole();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SuiteUser>>();
+        var suiteUser = userManager.Users.First();
+        suiteUser.Language = userLanguage;
+        await userManager.UpdateAsync(suiteUser);
+        var command = new SendVerifyEmailAddressLink(suiteUser.Id, "http://localhost:5000");
+
+        // Act
+        await tester.TestCommand<SendVerifyEmailAddressLink, SendVerifyEmailAddressLinkConsumer>(command);
+
+        // Assert
+        await scope.ServiceProvider.GetRequiredService<IMailSender>()
+            .Received()
+            .SendMail(Arg.Is<Message>(m => m.Subject == expectedSubject && m.Body!.Contains(expectedBodyText)),
+                Arg.Any<CancellationToken>());
     }
 
     [Fact]

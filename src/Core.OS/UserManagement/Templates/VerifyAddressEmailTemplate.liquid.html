@@ -1,54 +1,52 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ Model.Language }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirm Your Email Address</title>
+    <title>{{ Text.VerifyAddressTitle }}</title>
 
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h2>Confirm Your Email Address</h2>
+        <h2>{{ Text.VerifyAddressTitle }}</h2>
     </div>
     <div class="content">
-        <p>Hi {{ User.FirstName }},</p>
+        <p>{{ Text.VerifyAddressGreeting }} {{ User.FirstName }},</p>
 
-        <p>Thank you for registering with ViciOne!</p>
+        <p>{{ Text.VerifyAddressThanks }}</p>
 
-        <p>To complete your account setup and access all features, please confirm your email address by clicking the
-            button below:</p>
+        <p>{{ Text.VerifyAddressInstruction }}</p>
 
         <div class="button-container">
             <a href="{{ Model.Link }}" class="button">
-                Confirm My Email
+                {{ Text.VerifyAddressButton }}
             </a>
         </div>
 
         <p style="margin-top: 40px; font-size: 14px; color: #555555;">
-            <strong>Confirmation Link:</strong>
+            <strong>{{ Text.VerifyAddressLinkLabel }}</strong>
         </p>
         <p class="link-text">
-            If the button above does not work, please copy and paste the following link into your web browser:<br>
+            {{ Text.VerifyAddressLinkFallback }}<br>
             <a href="{{ Model.Link }}">{{ Model.Link }}</a>
         </p>
 
         <hr style="border: 0; border-top: 1px solid #eeeeee; margin: 25px 0;">
 
         <p style="font-size: 14px;">
-            **Why Confirm?**<br>
-            Confirming your email helps us secure your account and ensures you receive important notifications from us.
-            Until confirmed, you may be unable to log in.
+            <strong>{{ Text.VerifyAddressWhyTitle }}</strong><br>
+            {{ Text.VerifyAddressWhyText }}
         </p>
         <p style="font-size: 14px;">
-            If you did not register for an account with ViciOne, please disregard this email.
+            {{ Text.VerifyAddressDisregard }}
         </p>
 
     </div>
     <div class="footer">
-        <p>Thanks,<br>The ViciOne Team</p>
-        <p><a href="https://www.ifm.com/de/en/shared/service/technischer-support/technical-support"
-              style="color: #007bff; text-decoration: none;">Technical support</a></p>
+        <p>{{ Text.SignOffThanks }}<br>{{ Text.SignOffTeam }}</p>
+        <p><a href="{{ Text.SupportUrl }}"
+              style="color: #007bff; text-decoration: none;">{{ Text.SupportLinkText }}</a></p>
     </div>
 </div>
 </body>

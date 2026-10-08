@@ -53,6 +53,7 @@
 - Email confirmation pages, typos and inconsistent wording in the login-blocked and confirmation messages are corrected
 - Update panel shows prerelease versions such as `1.4.0-beta1` in full
 - Update panel, selecting the installed version again no longer counts as a pending change
+- Password reset and email verification emails are now sent in the user's language, or else in the instance default language
 
 ### Updated
 
