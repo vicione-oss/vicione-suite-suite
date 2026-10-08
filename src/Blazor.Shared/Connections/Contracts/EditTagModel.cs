@@ -7,7 +7,6 @@ internal class EditTagModel
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Text { get; set; } = string.Empty;
     public bool Protected { get; set; }
-    public bool IsNew { get; init; }
 
     public EditTagModel()
     {

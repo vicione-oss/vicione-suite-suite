@@ -164,6 +164,52 @@ public sealed class ArtifactRepositoryControlPanelSaveHandlerTests
     }
 
     [Fact]
+    public async Task Should_switch_to_edit_mode_when_creating_the_repository_succeeds()
+    {
+        // Arrange
+        _repositoryService.CreateRepository(Arg.Any<ArtifactRepositoryModel>(), Arg.Any<CancellationToken>())
+            .Returns(new ArtifactRepositoryServiceSuccessResult());
+
+        await using var serviceProvider = SetupServiceProvider();
+
+        var state = new ArtifactRepositoryControlPanelState
+        {
+            Repository = new ArtifactRepositoryModel(new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo.example.com" })
+        };
+        var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ArtifactRepositoryControlPanelState>>();
+
+        // Act
+        await saveHandler.Save(state, Xunit.TestContext.Current.CancellationToken);
+
+        // Assert
+        state.RepositoryId.Should().Be(state.Repository.Id);
+        state.IsEditMode.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_stay_in_create_mode_when_creating_the_repository_fails()
+    {
+        // Arrange
+        _repositoryService.CreateRepository(Arg.Any<ArtifactRepositoryModel>(), Arg.Any<CancellationToken>())
+            .Returns(new ArtifactRepositoryServiceErrorResult("service error", 500));
+
+        await using var serviceProvider = SetupServiceProvider();
+
+        var state = new ArtifactRepositoryControlPanelState
+        {
+            Repository = new ArtifactRepositoryModel(new ArtifactRepository { Id = Guid.NewGuid(), Endpoint = "https://repo.example.com" })
+        };
+        var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ArtifactRepositoryControlPanelState>>();
+
+        // Act
+        await saveHandler.Save(state, Xunit.TestContext.Current.CancellationToken);
+
+        // Assert
+        state.RepositoryId.Should().BeNull();
+        state.IsEditMode.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task Should_return_error_when_service_returns_error()
     {
         // Arrange

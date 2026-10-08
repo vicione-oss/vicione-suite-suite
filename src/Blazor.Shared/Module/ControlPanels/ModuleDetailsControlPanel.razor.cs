@@ -28,7 +28,6 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
 
     protected override async ValueTask DisposeAsyncCore()
     {
-        ManagementService.OptionsChanged -= ManagementServiceOptionsChanged;
         ManagementService.OperationsChanged -= ManagementServiceOperationsChanged;
 
         await base.DisposeAsyncCore();
@@ -38,7 +37,6 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
     {
         base.OnInitialized();
 
-        ManagementService.OptionsChanged += ManagementServiceOptionsChanged;
         ManagementService.OperationsChanged += ManagementServiceOperationsChanged;
     }
 
@@ -164,15 +162,5 @@ public partial class ModuleDetailsControlPanel : ControlPanelBase<ModuleDetailsC
         State.ModuleMetadata.PendingOperation = change.Operation;
 
         await InvokeAsync(StateHasChanged);
-    }
-
-    private Task ManagementServiceOptionsChanged(ModuleOptionsChanged changeEvent, CancellationToken token)
-    {
-        if (State.ModuleMetadata?.ModuleId != changeEvent.ModuleId)
-            return Task.CompletedTask;
-
-        State.ModuleMetadata?.HasModifiedOptions = false;
-
-        return Task.CompletedTask;
     }
 }

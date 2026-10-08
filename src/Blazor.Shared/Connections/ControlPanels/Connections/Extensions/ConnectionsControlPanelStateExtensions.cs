@@ -10,6 +10,9 @@ internal static class ConnectionsControlPanelStateExtensions
 {
     internal static void UpdateTags(this ConnectionsControlPanelState state, TagsChanged changeEvent)
     {
+        if (changeEvent.ErrorInfo is not null)
+            return;
+
         var tags = new Dictionary<Guid, Tag>(state.Tags);
 
         foreach (var tag in changeEvent.Tags)

@@ -32,6 +32,15 @@
 
 - Signing in with an external OpenID provider, and linking one from the profile, were blocked by the Content Security Policy. `form-action` now also names the configured provider's origin (see `docs/ADRs/ADR-006-content-security-policy.md`)
 - Missing release date in `README.md` for version `1.3.0`
+- `RoleControlPanel`, adding a role whose name already exists shows the error and stays in create mode
+- `UserControlPanel`
+  - Saving a new user switches to edit mode, so saving again updates it instead of creating a duplicate
+  - A failed role delete no longer removes that role from the user being edited
+- `TagControlPanel`, the title shows whether a tag is being added or edited and switches to edit after the tag is saved
+- `ArtifactRepositoryControlPanel`, the title shows whether a source is being added or edited and switches to edit after saving
+- `ModuleDetailsControlPanel`, edited module options are saved even when another session changed the options of that module meanwhile
+- `RolesControlPanel`, a failed role create or delete no longer adds a duplicate row or hides a role that still exists
+- `ConnectionsControlPanel`, a failed tag create or update no longer shows the rejected tag
 - Update panel lists the available suite versions on amd64 devices such as IPC and Cloud, not only the installed one
 - Module installation finds module packages on devices whose .NET runtime reports a distro-specific runtime identifier
 - Cancelling or failing an external sign-in returns to the login page with a message instead of the error page
@@ -99,11 +108,11 @@
 
 - Module package operations (install/update/uninstall) are now applied cluster-wide. The master fans out an instance-dependent `EnqueueModulePackageOperations` command to every registered instance so all nodes enqueue the same changes and apply them on their next restart; offline nodes receive the command from their durable queue on reconnect. Standalone behavior is unchanged. Only the master forwards the resulting `ModulePackageOperationsChanged` event to the UI, while every node emits a per-node `ModulePackageOperationsEnqueued` event for backend correlation.
 - `JFrogArtifactRepository`
-    - module archives are now streamed to a temporary file on disk and extracted from there instead of being buffered in memory.
-    - artifact source endpoints are required to be secure HTTPs urls
+  - module archives are now streamed to a temporary file on disk and extracted from there instead of being buffered in memory.
+  - artifact source endpoints are required to be secure HTTPs urls
 - `ModuleArtifactRepository`
-    - bulk module downloads are now capped with a sliding-window throttle
-    - modules are now extracted into a staging directory, verified for completeness, and only then atomically promoted to their versioned folder
+  - bulk module downloads are now capped with a sliding-window throttle
+  - modules are now extracted into a staging directory, verified for completeness, and only then atomically promoted to their versioned folder
 - `Passkeys` feature flag is now enabled by default; the flag remains available to disable it via configuration
 - Replaced `DxTabs` with `ViciOne.Ui.Blazor.Components.TabStrip`
 - External ID providers and passkeys settings panels now display dedicated monochrome icons
@@ -174,8 +183,8 @@
 - Removed the shutdown button from UI as the feature was not supported by the edge S hardware
 - Replaced `DxTagBox` with `ViciOne.Ui.Blazor.Components.TagBox`
 - `ModuleArtifactCache`
-    - concurrent metadata HTTP requests are now capped using a sliding-window throttle, preventing connection pool exhaustion when many new artifacts are discovered
-    - replaced timer-based cache invalidation with a persistence-backed approach
+  - concurrent metadata HTTP requests are now capped using a sliding-window throttle, preventing connection pool exhaustion when many new artifacts are discovered
+  - replaced timer-based cache invalidation with a persistence-backed approach
 
 ### Fixed
 
@@ -183,8 +192,8 @@
 - `BackEndMediator`, local `RequestConsumer<,>` / `InstanceDependentRequestConsumer<,>` invocations now run in a fresh DI scope (matching MassTransit's `UseMessageScope`). Previously the consumer and its scoped dependencies (`DbContext`, `RoleManager`, `UserManager`, ...) were resolved from the caller's scope, which in Blazor Server is the long-lived circuit scope. EF Core's identity map then returned stale entities for reads performed after writes that had gone through the bus (e.g. updated role descriptions appearing unchanged in `GetRolesConsumer`). The exception handler on that short-circuit path is now actually `await`ed, so faulted consumer tasks correctly fall through to `HandleException`.
 - `ModuleManagementControlPanel`, fixed module status display after changes of artifactory sources
 - `NetworkControlPanel`
-    - fixed display of DHCP lease information after manual renew button click
-    - only reload DHCP lease information when DHCP is enabled on reset
+  - fixed display of DHCP lease information after manual renew button click
+  - only reload DHCP lease information when DHCP is enabled on reset
 - Artifact repository sources are now cleared on reset
 - Fixed extraction of initials when the user entered first and last name with leading whitespaces in user profile
 - Fixed a caching issue when editing the description of a role

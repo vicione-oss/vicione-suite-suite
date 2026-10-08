@@ -7,7 +7,7 @@
 
 @inherits ControlPanelBase<TagControlPanelState>
 
-<DescriptionBanner Title="@TechnicalTerms.Tag" IconCssClass="@MonochromeIconName.Tagging.GetCssClasses().ToSpaceSeparated()">
+<DescriptionBanner Title="@GetDescriptionBannerTitle(State.Tag?.Text)" IconCssClass="@MonochromeIconName.Tagging.GetCssClasses().ToSpaceSeparated()">
     @Localization.TagControlPanel.DescriptionBannerContent
 </DescriptionBanner>
 

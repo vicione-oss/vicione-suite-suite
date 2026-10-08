@@ -1,4 +1,5 @@
 using Blazor.Shared.Instance.ControlPanels.Repositories.Extensions;
+using Blazor.Shared.Instance.ControlPanels.Repositories.Models;
 using Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 using Blazor.Shared.Services;
 using Core.Shared.Instance.Contracts;
@@ -47,6 +48,19 @@ public sealed partial class ArtifactRepositoryControlPanel : ControlPanelBase<Ar
             return;
 
         await RepositoryService.UpdateRepositoryToken(State.Repository);
+    }
+
+    /// <remarks>
+    /// <see cref="ArtifactRepositoryModel.Name"/> is optional, so an unnamed source is titled by its endpoint.
+    /// </remarks>
+    private string GetDescriptionBannerTitle(ArtifactRepositoryModel? repository)
+    {
+        var culture = Localization.ArtifactRepositoryControlPanel.Culture;
+        var name = string.IsNullOrWhiteSpace(repository?.Name) ? repository?.Endpoint : repository.Name;
+
+        return string.Format(culture, State.IsEditMode
+            ? ViciOne.Ui.Localization.Resources.UserActions.EditSomething
+            : Localization.ArtifactRepositoryControlPanel.DescriptionBannerTitleOnAdd, name);
     }
 
     private static bool IsDebugMode()

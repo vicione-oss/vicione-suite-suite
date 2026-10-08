@@ -144,6 +144,62 @@ public sealed class ConnectionControlPanelSaveHandlerTests
     }
 
     [Fact]
+    public async Task Should_switch_to_edit_mode_when_upsert_succeeds()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProvider();
+        var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ConnectionControlPanelState>>();
+
+        var connection = new Connection() { Id = Guid.NewGuid(), Name = "Valid", Type = ConnectionType.SQLite };
+        var model = new EditConnectionModel(connection, _connectionTypeRegistry);
+
+        _connectionService.Connections.Returns([]);
+        _connectionService.UpsertConnection(Arg.Any<Connection>(), Arg.Any<CancellationToken>())
+            .Returns(new SuiteConnectionServiceSuccessResult());
+
+        var state = new ConnectionControlPanelState
+        {
+            EditConnectionModel = model,
+            EditModelTagTexts = [],
+            AvailableTags = []
+        };
+
+        // Act
+        await saveHandler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        state.ConnectionId.Should().Be(connection.Id);
+    }
+
+    [Fact]
+    public async Task Should_stay_in_create_mode_when_upsert_fails()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProvider();
+        var saveHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ConnectionControlPanelState>>();
+
+        var connection = new Connection() { Id = Guid.NewGuid(), Name = "Valid", Type = ConnectionType.SQLite };
+        var model = new EditConnectionModel(connection, _connectionTypeRegistry);
+
+        _connectionService.Connections.Returns([]);
+        _connectionService.UpsertConnection(Arg.Any<Connection>(), Arg.Any<CancellationToken>())
+            .Returns(new SuiteConnectionServiceErrorResult("Something went wrong"));
+
+        var state = new ConnectionControlPanelState
+        {
+            EditConnectionModel = model,
+            EditModelTagTexts = [],
+            AvailableTags = []
+        };
+
+        // Act
+        await saveHandler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        state.ConnectionId.Should().BeNull();
+    }
+
+    [Fact]
     public async Task Should_return_save_error_when_upsert_fails()
     {
         // Arrange

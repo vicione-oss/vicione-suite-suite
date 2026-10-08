@@ -6,7 +6,7 @@ namespace Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 public sealed class ArtifactRepositoryControlPanelState : ControlPanelState
 {
     /// <remarks>
-    /// <see cref="ArtifactRepositoryControlPanel"/> will use this property to decide whether a repository source could be edited (value is set) or not (value is null)
+    /// <see cref="ArtifactRepositoryControlPanel"/> will use this property to decide whether a repository source should be edited (value is set) or created (value is null)
     /// </remarks>
     public Guid? RepositoryId
     {
@@ -23,4 +23,6 @@ public sealed class ArtifactRepositoryControlPanelState : ControlPanelState
     }
 
     public ArtifactRepositoryModel? Repository { get; internal set; }
+
+    internal bool IsEditMode => RepositoryId.HasValue;
 }

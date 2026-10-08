@@ -186,6 +186,9 @@ public sealed partial class RolesControlPanel : ControlPanelBase<RolesControlPan
 
     public async Task Consume(ClientContext<RoleCreatedEvent> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+            return;
+
         State.Roles.Add(context.Message.Role);
 
         UpdateStatesDependingOnRoleGridItemSelection();
@@ -196,6 +199,9 @@ public sealed partial class RolesControlPanel : ControlPanelBase<RolesControlPan
 
     public async Task Consume(ClientContext<RoleDeletedEvent> context, CancellationToken cancellationToken)
     {
+        if (context.Message.ErrorInfo is not null)
+            return;
+
         var deleted = State.Roles.RemoveAll(k => k.Name == context.Message.Role.Name);
         if (deleted == 0)
             return;

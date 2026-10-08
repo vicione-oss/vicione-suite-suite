@@ -59,7 +59,16 @@ internal sealed class UserControlPanelSaveHandler(IUserService userService, IUse
 
         if (result is UserManagementServiceSuccessResult)
         {
-            state.PermissionEditContext = null;
+            state.BeginUpdate();
+            try
+            {
+                state.PermissionEditContext = null;
+                state.UserName = state.UserProfile.UserName;
+            }
+            finally
+            {
+                state.EndUpdate();
+            }
 
             return new SaveSuccessResult();
         }

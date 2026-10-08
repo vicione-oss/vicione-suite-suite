@@ -71,11 +71,11 @@ namespace Blazor.Shared.Instance.ControlPanels.Repositories.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Edit source.
+        ///   Looks up a localized string similar to Add source.
         /// </summary>
-        internal static string DescriptionBannerTitle {
+        internal static string DescriptionBannerTitleOnAdd {
             get {
-                return ResourceManager.GetString("DescriptionBannerTitle", resourceCulture);
+                return ResourceManager.GetString("DescriptionBannerTitleOnAdd", resourceCulture);
             }
         }
         
