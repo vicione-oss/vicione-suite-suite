@@ -78,10 +78,10 @@
 
             <SettingsGroup Title="@CommonVocabulary.Localization" @bind-Expanded="@State.LocalizationSettingsGroupExpanded">
                 <SettingsField Label="@CommonVocabulary.Language">
-                    <SettingsFieldTextBox ReadOnly="true" Value="@(State.SelectedCulture?.DisplayName ?? CommonVocabulary.Default)" />
+                    <SettingsFieldComboBox Items="@_availableCultures" ValueSelector="@(i => i.Value)" TextSelector="@(i => i.Text)" @bind-Value="@State.SelectedCulture" @bind-Value:after="BeginEdit" />
                 </SettingsField>
                 <SettingsField Label="@CommonVocabulary.TimeZone">
-                    <SettingsFieldTextBox ReadOnly="true" Value="@(State.SelectedTimeZone?.DisplayName ?? CommonVocabulary.Default)" />
+                    <SettingsFieldComboBox Items="@_availableTimeZones" ValueSelector="@(i => i.Value)" TextSelector="@(i => i.Text)" @bind-Value="@State.SelectedTimeZone" @bind-Value:after="BeginEdit" />
                 </SettingsField>
             </SettingsGroup>
         }
