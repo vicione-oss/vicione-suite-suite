@@ -32,7 +32,11 @@ internal sealed class ConnectionControlPanelSaveHandler(ISuiteConnectionService 
         var result = await suiteConnectionService.UpsertConnectionAndTags(state.EditConnectionModel, state.AvailableTags, state.EditModelTagTexts, cancellationToken);
 
         if (result is SuiteConnectionServiceSuccessResult)
+        {
+            state.ConnectionId = state.EditConnectionModel.Connection.Id;
+
             return new SaveSuccessResult();
+        }
 
         if (result is SuiteConnectionServiceErrorResult errorResult)
             return new SaveErrorResult(errorResult.ErrorMessage);

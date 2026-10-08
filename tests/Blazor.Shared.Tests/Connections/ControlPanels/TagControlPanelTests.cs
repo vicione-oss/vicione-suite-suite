@@ -1,3 +1,5 @@
+using System.Globalization;
+using Blazor.Shared.Connections.Contracts;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Connections.ControlPanels.Tags;
 using Blazor.Shared.Connections.ControlPanels.Tags.Services;
@@ -11,6 +13,8 @@ using Sdk.Testing.Client;
 using ViciOne.Ui.Blazor.Components.CheckBox;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
 using ViciOne.Ui.Localization.Resources;
+using Sdk.Client.Components.Settings;
+using TagControlPanelStrings = Blazor.Shared.Connections.ControlPanels.Tags.Localization.TagControlPanel;
 
 namespace Blazor.Shared.Tests.Connections.ControlPanels;
 
@@ -77,5 +81,35 @@ public sealed class TagControlPanelTests
         component.AssertSettingsFieldTextBox(TechnicalTerms.Id, tag.Id.ToString());
         component.AssertSettingsFieldTextBox(CommonVocabulary.Text, tag.Text);
         component.AssertSettingsFieldCheckBox(CommonVocabulary.Protected, tag.Protected);
+    }
+
+    [Fact]
+    public async Task Should_show_the_add_title_for_a_new_tag()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext(_connectionService);
+
+        var state = new TagControlPanelState();
+
+        // Act
+        var banner = ctx.Render<TagControlPanel>(p => p.Add(c => c.State, state)).FindComponent<DescriptionBanner>().Instance;
+
+        // Assert
+        banner.Title.Should().Be(TagControlPanelStrings.DescriptionBannerTitleOnAdd);
+    }
+
+    [Fact]
+    public async Task Should_show_the_edit_title_for_an_existing_tag()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext(_connectionService);
+
+        var state = new TagControlPanelState { TagId = Guid.NewGuid(), Tag = new EditTagModel { Text = "Line 1" } };
+
+        // Act
+        var banner = ctx.Render<TagControlPanel>(p => p.Add(c => c.State, state)).FindComponent<DescriptionBanner>().Instance;
+
+        // Assert
+        banner.Title.Should().Be(string.Format(CultureInfo.CurrentCulture, UserActions.EditSomething, "Line 1"));
     }
 }

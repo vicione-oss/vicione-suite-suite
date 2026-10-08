@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.UserManagement.Contracts;
+using Blazor.Shared.UserManagement.Contracts;
 using Blazor.Shared.UserManagement.Services;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
@@ -6,7 +6,7 @@ using Sdk.Client.ControlPanels.Services;
 namespace Blazor.Shared.UserManagement.ControlPanels.Role.Services;
 
 internal sealed class RoleControlPanelSaveHandler(IRoleService roleService)
-        : IControlPanelSaveHandler<RoleControlPanelState>
+    : IControlPanelSaveHandler<RoleControlPanelState>
 {
     public async Task<ISaveResult> Save(RoleControlPanelState state, CancellationToken cancellationToken)
     {
@@ -22,7 +22,16 @@ internal sealed class RoleControlPanelSaveHandler(IRoleService roleService)
 
         if (result is UserManagementServiceSuccessResult)
         {
-            state.PermissionEditContext = null;
+            state.BeginUpdate();
+            try
+            {
+                state.PermissionEditContext = null;
+                state.RoleName = state.Role.Name;
+            }
+            finally
+            {
+                state.EndUpdate();
+            }
 
             return new SaveSuccessResult();
         }

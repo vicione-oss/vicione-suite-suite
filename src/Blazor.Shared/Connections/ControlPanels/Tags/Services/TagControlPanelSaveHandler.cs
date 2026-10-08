@@ -25,6 +25,8 @@ internal sealed class TagControlPanelSaveHandler(ISuiteConnectionService connect
         if (result is SuiteConnectionServiceErrorResult errorResult)
             return new SaveErrorResult(errorResult.ErrorMessage);
 
+        state.TagId = tag.Id;
+
         return new SaveSuccessResult();
     }
 }

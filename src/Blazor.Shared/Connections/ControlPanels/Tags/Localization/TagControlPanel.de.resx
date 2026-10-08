@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -122,5 +122,8 @@
   </data>
   <data name="DescriptionBannerContent" xml:space="preserve">
     <value>Sie können den Tag-Text bearbeiten und den Schutzstatus des Tags ändern. Wenn das Tag geschützt ist, kann es nicht von anderen Benutzern gelöscht werden.</value>
+  </data>
+  <data name="DescriptionBannerTitleOnAdd" xml:space="preserve">
+    <value>Tag hinzufügen</value>
   </data>
 </root>

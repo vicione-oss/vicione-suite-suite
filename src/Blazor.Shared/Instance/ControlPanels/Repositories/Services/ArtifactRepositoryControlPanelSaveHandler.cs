@@ -31,7 +31,7 @@ internal sealed class ArtifactRepositoryControlPanelSaveHandler(IArtifactReposit
 
         IArtifactRepositoryServiceResult result;
 
-        if (state.RepositoryId.HasValue)
+        if (state.IsEditMode)
         {
             result = await service.UpdateRepository(state.Repository, cancellationToken);
         }
@@ -41,7 +41,11 @@ internal sealed class ArtifactRepositoryControlPanelSaveHandler(IArtifactReposit
         }
 
         if (result is ArtifactRepositoryServiceSuccessResult)
+        {
+            state.RepositoryId = state.Repository.Id;
+
             return new SaveSuccessResult();
+        }
 
         if (result is ArtifactRepositoryServiceErrorResult errorResult)
             return new SaveErrorResult(errorResult.ErrorMessage);

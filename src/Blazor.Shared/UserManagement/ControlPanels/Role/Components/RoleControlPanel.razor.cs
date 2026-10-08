@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Services;
+using Blazor.Shared.Services;
 using Blazor.Shared.UserManagement.ControlPanels.Role.Services;
 using Blazor.Shared.UserManagement.ControlPanels.Roles.Models;
 using Blazor.Shared.UserManagement.Models;
@@ -8,6 +8,7 @@ using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.Infrastructure;
+using Sdk.Messaging;
 using Sdk.UserManagement.Events;
 using Sdk.Utils;
 using ViciOne.Ui.Blazor.Components.Grid.Services;
@@ -115,9 +116,14 @@ public sealed partial class RoleControlPanel : ControlPanelBase<RoleControlPanel
             : Localization.RoleControlPanel.DescriptionBannerContentOnAdd);
     }
 
-    private async Task RoleCreatedOrUpdated(Sdk.UserManagement.Contracts.Role role)
+    /// <remarks>
+    /// Keeps the panel current when another session or instance changes roles. The switch from create to edit mode
+    /// happens in <see cref="RoleControlPanelSaveHandler"/>, so a failed create keeps the panel in create mode.
+    /// </remarks>
+    private async Task RoleCreatedOrUpdated(ErrorInfo? errorInfo)
     {
-        State.RoleName = role.Name;
+        if (errorInfo is not null)
+            return;
 
         if (State.Role is not null)
             await AvailableClaimsService.UpdateAvailableClaims(State);
@@ -126,8 +132,8 @@ public sealed partial class RoleControlPanel : ControlPanelBase<RoleControlPanel
     }
 
     public async Task Consume(ClientContext<RoleCreatedEvent> context, CancellationToken cancellationToken)
-        => await RoleCreatedOrUpdated(context.Message.Role);
+        => await RoleCreatedOrUpdated(context.Message.ErrorInfo);
 
     public async Task Consume(ClientContext<RoleUpdatedEvent> context, CancellationToken cancellationToken)
-        => await RoleCreatedOrUpdated(context.Message.Role);
+        => await RoleCreatedOrUpdated(context.Message.ErrorInfo);
 }

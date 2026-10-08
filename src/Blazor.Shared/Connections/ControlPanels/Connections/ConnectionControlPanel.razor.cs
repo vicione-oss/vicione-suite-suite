@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components;
 using Sdk.Client.Connections;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
-using Sdk.Client.Infrastructure;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Events;
 using Sdk.Messaging;
@@ -46,7 +45,6 @@ public sealed partial class ConnectionControlPanel(IConnectionTypeRegistry conne
 
         if (change.Action is CrudAction.Created or CrudAction.Updated)
         {
-            State.ConnectionId = change.Connection.Id;
             State.EditConnectionModel = new EditConnectionModel(change.Connection, connectionTypeRegistry);
             await InvokeAsync(StateHasChanged);
         }
@@ -104,22 +102,6 @@ public sealed partial class ConnectionControlPanel(IConnectionTypeRegistry conne
         }
 
         return string.Format(CultureInfo.CurrentCulture, Localization.ConnectionControlPanel.ConnectionDetailsForSpecificConnection, displayName);
-    }
-
-    public async Task Consume(ClientContext<ConnectionChanged> context, CancellationToken cancellationToken)
-    {
-        if (context.Message.Connection.Id != State.EditConnectionModel?.Connection.Id ||
-            context.Message.ErrorInfo is not null)
-        {
-            return;
-        }
-
-        if (context.Message.Action is CrudAction.Created or CrudAction.Updated)
-        {
-            State.ConnectionId = context.Message.Connection.Id;
-            State.EditConnectionModel = new EditConnectionModel(context.Message.Connection, connectionTypeRegistry);
-            await InvokeAsync(StateHasChanged);
-        }
     }
 
     protected override ValueTask DisposeAsyncCore()

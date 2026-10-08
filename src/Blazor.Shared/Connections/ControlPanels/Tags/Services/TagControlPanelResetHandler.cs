@@ -23,7 +23,6 @@ internal sealed class TagControlPanelResetHandler(ISuiteConnectionService connec
             else
             {
                 state.Tag = new();
-                state.IsNew = true;
             }
         }
         finally

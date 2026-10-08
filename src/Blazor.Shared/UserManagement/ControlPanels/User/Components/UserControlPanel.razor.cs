@@ -80,7 +80,7 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
 
     public async Task Consume(ClientContext<RoleDeletedEvent> context, CancellationToken cancellationToken)
     {
-        if (State.UserProfile is null)
+        if (context.Message.ErrorInfo is not null || State.UserProfile is null)
             return;
 
         var roleToRemove = State.UserProfile.Roles.FirstOrDefault(r => r == context.Message.Role.Name);
@@ -107,8 +107,6 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
 
         if (userProfile.UserName != State.UserName)
             return;
-
-        State.UserName = userProfile.UserName;
 
         if (State.UserProfile is not null)
         {

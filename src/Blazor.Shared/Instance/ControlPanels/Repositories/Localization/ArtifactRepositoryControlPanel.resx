@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DescriptionBannerTitle" xml:space="preserve">
-    <value>Edit source</value>
+  <data name="DescriptionBannerTitleOnAdd" xml:space="preserve">
+    <value>Add source</value>
   </data>
   <data name="DescriptionBannerContent" xml:space="preserve">
     <value>Details of the update source you are currently editing. If you change one of the editable values you need to confirm or cancel your changes to apply it to the system.</value>

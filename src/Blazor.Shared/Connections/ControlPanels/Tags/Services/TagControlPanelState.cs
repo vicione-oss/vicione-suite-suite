@@ -25,5 +25,5 @@ public sealed class TagControlPanelState : ControlPanelState
     }
 
     internal EditTagModel? Tag { get; set; }
-    internal bool IsNew { get; set; }
+    internal bool IsEditMode => TagId.HasValue;
 }
