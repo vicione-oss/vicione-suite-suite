@@ -144,7 +144,7 @@ The active culture for each request is resolved by ASP.NET Core's `RequestLocali
 1. **`CookieRequestCultureProvider`** — reads the language cookie sent by the browser. This is the primary source of truth for per-user culture.
 2. **`DefaultRequestCultureProvider`** — a custom fallback provider (`BlazorServerBackendModule.DefaultRequestCultureProvider`) that returns the system-wide default culture stored in `IUiHostModule`. It is consulted only when no cookie is present.
 
-If neither provider supplies a value, the `DefaultRequestCulture` configured on `RequestLocalizationOptions` (always the first entry in `Constants.SupportedCultures`) is used.
+If neither provider supplies a value, the `DefaultRequestCulture` configured on `RequestLocalizationOptions` (always the first entry in `CrossInstanceConfiguration.SupportedCultures`) is used.
 
 ## User Culture Evaluation
 

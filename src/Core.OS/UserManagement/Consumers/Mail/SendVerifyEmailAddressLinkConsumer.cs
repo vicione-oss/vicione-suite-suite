@@ -1,12 +1,16 @@
+using System.Globalization;
+using Core.OS.DbContext;
 using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Extensions;
 using Core.OS.UserManagement.Templates;
+using Core.OS.UserManagement.Templates.Localization;
 using Core.Shared.Mail;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
 using Fluid;
 using MassTransit;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core.OS.UserManagement.Consumers.Mail;
 
@@ -15,6 +19,7 @@ public sealed partial class SendVerifyEmailAddressLinkConsumer(
     UserManager<SuiteUser> userManager,
     FluidTemplateRenderer templateRenderer,
     UserManagementTemplates userManagementTemplates,
+    IApplicationDbContext dbContext,
     ILogger<SendVerifyEmailAddressLinkConsumer> logger) : IConsumer<SendVerifyEmailAddressLink>
 {
     public async Task Consume(ConsumeContext<SendVerifyEmailAddressLink> context)
@@ -28,27 +33,31 @@ public sealed partial class SendVerifyEmailAddressLinkConsumer(
         // Duplicate-email risk on redelivery is acceptable — recipient uses the first valid link.
         var user = await userManager.GetUserById(userId);
 
-        var message = await CreateMessage(context, user);
+        var instanceConfiguration = await dbContext.CrossInstanceConfiguration.AsNoTracking()
+            .SingleOrDefaultAsync(context.CancellationToken);
+        var culture = EmailCulture.Resolve(user.Language, instanceConfiguration?.CultureName);
+        var message = await CreateMessage(context, user, culture);
 
         await mailSender.SendMail(message);
 
         LogMailSent(logger, correlationId, userId);
     }
 
-    private async Task<Message> CreateMessage(ConsumeContext<SendVerifyEmailAddressLink> context, SuiteUser user)
+    private async Task<Message> CreateMessage(ConsumeContext<SendVerifyEmailAddressLink> context, SuiteUser user,
+        CultureInfo culture)
     {
-        var body = await RenderEmailBody(user, context);
+        var body = await RenderEmailBody(user, context, culture);
 
         return new Message
         {
             RecipientAddress = user.Email!,
-            Subject = "Please verify your account",
+            Subject = EmailTextLookup.Get(nameof(EmailTexts.VerifyAddressSubject), culture),
             Body = body
         };
     }
 
     private async Task<string> RenderEmailBody(SuiteUser user,
-        ConsumeContext<SendVerifyEmailAddressLink> context)
+        ConsumeContext<SendVerifyEmailAddressLink> context, CultureInfo culture)
     {
         var body = await templateRenderer.RenderFromTemplateFile(
             userManagementTemplates.VerifyAddressEmailTemplate,
@@ -60,8 +69,9 @@ public sealed partial class SendVerifyEmailAddressLinkConsumer(
                     new Dictionary<string, string>
                     {
                         { "Link", context.Message.CallbackLink },
-                        { "Title", "Verify your email address" }
+                        { "Language", culture.TwoLetterISOLanguageName }
                     });
+                templateContext.SetValue("Text", EmailTextLookup.GetAll(culture));
             },
             context.CancellationToken);
         return body;

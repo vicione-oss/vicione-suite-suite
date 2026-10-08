@@ -1,5 +1,6 @@
 @using Blazor.Shared.Settings.Components
 @using Blazor.Shared.UserInterface.ControlPanels.Language.Services
+@using Core.Shared.Instance.Contracts
 @using ViciOne.Ui.Localization.Resources
 
 @inherits ControlPanelBase<LanguageControlPanelState>
@@ -12,7 +13,7 @@
     <SettingsLayout>
         <SettingsGroup Title="@TechnicalTerms.DisplayLanguage">
             <SettingsField Label="@CommonVocabulary.Language">
-                <SettingsFieldCultureComboBox Items="@Constants.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="AfterSelectedCultureChange" />
+                <SettingsFieldCultureComboBox Items="@CrossInstanceConfiguration.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="AfterSelectedCultureChange" />
             </SettingsField>
 
             @* Shown only after a language change *@

@@ -5,6 +5,7 @@ using Blazor.Shared.Settings.DateAndTime.Services;
 using Blazor.Shared.UserManagement.Services;
 using Blazor.Shared.Validation.Services.Validators;
 using Core.Shared.Instance.Contracts;
+using Core.Shared.Instance.Extensions;
 using Core.Shared.Instance.Requests;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Mappers;
@@ -67,7 +68,7 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
         };
 
         _availableCultures = [emptyCultureEntry];
-        _availableCultures.AddRange(Constants.SupportedCultures.Select(c => new ComboBoxItem<CultureInfo?, string>
+        _availableCultures.AddRange(CrossInstanceConfiguration.SupportedCultures.Select(c => new ComboBoxItem<CultureInfo?, string>
         {
             Text = c.DisplayName,
             Value = c
@@ -98,7 +99,7 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
         {
             _userProfileBaseline = _userProfileMapper.Map(_userProfile);
 
-            _selectedCulture = _availableCultures.FirstOrDefault(c => c.Value?.Name == _userProfile.Language)?.Value;
+            _selectedCulture = CrossInstanceConfiguration.FindSupportedCulture(_userProfile.Language);
         }
         else
         {

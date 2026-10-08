@@ -1,3 +1,5 @@
+using Core.Shared.Instance.Contracts;
+using Core.Shared.Instance.Extensions;
 using Core.Shared.Instance.Requests;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
@@ -17,7 +19,8 @@ internal sealed class LanguageControlPanelResetHandler(IUiMediator mediator) : I
             var response = await mediator.Request<GetCrossInstanceConfiguration, GetCrossInstanceConfigurationResponse>(new(), cancellationToken);
             state.CrossInstanceConfiguration = response.CrossInstanceConfiguration;
 
-            state.SelectedCulture = Constants.SupportedCultures.FirstOrDefault(c => c.Name.Equals(state.CrossInstanceConfiguration?.CultureName, StringComparison.OrdinalIgnoreCase)) ?? LanguageControlPanelState.SelectedCultureDefault;
+            state.SelectedCulture = CrossInstanceConfiguration.FindSupportedCulture(state.CrossInstanceConfiguration?.CultureName)
+                                    ?? LanguageControlPanelState.SelectedCultureDefault;
         }
         finally
         {

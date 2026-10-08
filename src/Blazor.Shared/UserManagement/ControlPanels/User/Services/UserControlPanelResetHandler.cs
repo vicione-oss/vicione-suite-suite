@@ -1,6 +1,7 @@
-using System.Globalization;
 using Blazor.Shared.UserManagement.ControlPanels.User.Extensions;
 using Blazor.Shared.UserManagement.Services;
+using Core.Shared.Instance.Contracts;
+using Core.Shared.Instance.Extensions;
 using Core.Shared.UserManagement.Contracts;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Services;
@@ -68,13 +69,7 @@ internal sealed class UserControlPanelResetHandler(IUserService userService, IMo
     }
 
     private static void ResetSelectedCulture(UserControlPanelState state)
-    {
-        if (state.UserProfile?.Language is null
-            || Constants.SupportedCultures.All(c => c.Name != state.UserProfile.Language))
-            state.SelectedCulture = null;
-        else
-            state.SelectedCulture = new CultureInfo(state.UserProfile.Language);
-    }
+        => state.SelectedCulture = CrossInstanceConfiguration.FindSupportedCulture(state.UserProfile?.Language);
 
     private static void ResetSelectedTimeZone(UserControlPanelState state)
     {

@@ -1,10 +1,15 @@
 ﻿using System.IO.Abstractions;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using Fluid;
 
 namespace Core.OS.Modules.Services;
 
 public sealed class FluidTemplateRenderer(IFileSystem fileSystem)
 {
+    /// <summary>Encodes markup characters of rendered values, but keeps umlauts readable in the mail source.</summary>
+    private static readonly HtmlEncoder Encoder = HtmlEncoder.Create(UnicodeRanges.All);
+
     private readonly FluidParser _fluidParser = new();
 
     public async Task<string> RenderFromTemplateFile(IFileInfo templateFile,
@@ -23,6 +28,6 @@ public sealed class FluidTemplateRenderer(IFileSystem fileSystem)
         var templateContext = new TemplateContext();
         contextAction(templateContext);
 
-        return await template.RenderAsync(templateContext);
+        return await template.RenderAsync(templateContext, Encoder);
     }
 }

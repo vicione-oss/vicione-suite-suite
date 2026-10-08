@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Reflection;
 using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Templates;
+using Fluid;
 
 namespace Core.OS.Tests.UserManagement.Services;
 
@@ -35,6 +36,23 @@ public class FluidTemplateRendererTest
 
         // Assert
         result.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_html_encode_values()
+    {
+        // Arrange
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddFile("template.liquid.html", new MockFileData("<p>{{ Name }}</p>"));
+        var renderer = new FluidTemplateRenderer(fileSystem);
+
+        // Act
+        var result = await renderer.RenderFromTemplateFile(fileSystem.FileInfo.New("template.liquid.html"),
+            context => context.SetValue("Name", "<a href='https://evil.example'>x</a>"),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().Be("<p>&lt;a href=&#x27;https://evil.example&#x27;&gt;x&lt;/a&gt;</p>");
     }
 
     public static TheoryData<string> GetUserManagementTemplates()

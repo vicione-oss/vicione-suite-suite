@@ -6,6 +6,13 @@ public sealed class CrossInstanceConfiguration
 {
     public const string CultureNameDefault = "en-US";
 
+    /// <summary>Cultures the UI and the user management emails are translated to; the first is the default.</summary>
+    public static readonly IReadOnlyList<CultureInfo> SupportedCultures =
+    [
+        CultureInfo.GetCultureInfo(CultureNameDefault),
+        CultureInfo.GetCultureInfo("de-DE")
+    ];
+
     public Guid Id { get; init; } = Guid.NewGuid();
 
     /// <summary>
