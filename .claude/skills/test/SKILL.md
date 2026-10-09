@@ -5,13 +5,11 @@ description: Run the full test suite for ViciOne Suite and analyze failures. Use
 
 # Run tests
 
-This repo runs on **Microsoft.Testing.Platform (MTP)**, so use `--filter-query` (the VSTest-style
-`--filter "Category!=..."` matches zero tests here). To run everything except the infrastructure-heavy
-categories (matching CI's unit-test job):
+Run the test command from `AGENTS.md` → *Build & Run*. It excludes the infrastructure-heavy categories,
+matching CI's unit-test job.
 
-```shell
-dotnet test vicione-suite.slnx --no-build --filter-query "/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)&(Category!=E2E)&(Category!=E2E-MasterSlave)]"
-```
+This repo runs on **Microsoft.Testing.Platform (MTP)**, so filters use `--filter-query` — the VSTest-style
+`--filter "Category!=..."` matches zero tests here.
 
 Note: an exit code of 1 together with `failed: 0` is expected — the `Core.OS.E2E.Tests` project reports
 "Zero tests ran" once the E2E categories are excluded (CI runs E2E in separate jobs). It is not a failure.

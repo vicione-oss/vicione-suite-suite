@@ -25,8 +25,7 @@ Create the project structure for a new module following ViciOne Suite convention
 
 ## Testing:
 
-- Create `ModuleName.Tests` project with xUnit, NSubstitute, AwesomeAssertions
-- Test naming: snake_case (e.g., `Should_create_entity_when_command_received`)
+- Create `ModuleName.Tests` project following `tests/AGENTS.md`
 
 ## Reference
 

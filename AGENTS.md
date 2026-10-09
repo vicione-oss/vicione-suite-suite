@@ -1,5 +1,19 @@
 # AGENTS.md — ViciOne Suite
 
+## How rules are layered
+
+- This file holds the rules for the whole repository. An `AGENTS.md` in a subfolder holds the rules for that
+  folder and everything below it.
+- Before working on a file, read every `AGENTS.md` from the repository root down to that file's folder and apply
+  all of them.
+- Where two rules conflict, the one in the deeper folder wins. Everything it does not address still applies from
+  above.
+- Every rule lives in the deepest folder it applies to: a rule only for tests belongs in `tests/AGENTS.md`, not
+  here.
+- Skills in `.claude/skills/` add task steps and reference rules rather than restating them. Where a skill
+  contradicts an `AGENTS.md`, the `AGENTS.md` wins; report the conflict so the skill gets fixed.
+- `docs/` holds longer explanations with examples; an `AGENTS.md` links to them by trigger.
+
 ## Project Overview
 
 ViciOne Suite is a modular, distributed automation platform built on .NET 10 and Blazor Server. It provides a flexible, scalable infrastructure for automation workflows — from single edge devices (1.9 GB RAM, ARM Cortex-A53) to multi-site industrial clusters.
@@ -67,7 +81,7 @@ dotnet run --project src/Core.OS
 dotnet test vicione-suite.slnx --no-build --filter-query "/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)&(Category!=E2E)&(Category!=E2E-MasterSlave)]"
 ```
 
-Note: If the repo was fully reset (e.g. `git clean -xfd`) or files in `src/Blazor.Shared/Scripts` where changed, run `npm ci && npm run build` first.
+Note: If the repo was fully reset (e.g. `git clean -xfd`) or files in `src/Blazor.Shared/Scripts` were changed, run `npm ci && npm run build` first.
 
 **Target framework:** net10.0
 **Runtime identifiers:** linux-x64, linux-arm64, win-x64
@@ -75,12 +89,8 @@ Note: If the repo was fully reset (e.g. `git clean -xfd`) or files in `src/Blazo
 
 ## Code Style & Conventions
 
-- See `docs/code-style-guide.md` for member ordering, test naming and comment rules
+- See `docs/code-style-guide.md` for member ordering and comment rules
 - Prefer primary constructors over explicit constructors with `private readonly` field assignments
-- Test method names: `snake_case` (displayed as sentences in Test Explorer)
-- All tests are structured by arrange/act/assert with explicit `// Arrange`, `// Act`, `// Assert` comments
-- Frameworks: **xUnit**, **NSubstitute**, **AwesomeAssertions**
-- Test runner: Microsoft.Testing.Platform (see global.json)
 - Warnings are errors in CI (`TREAT_WARNINGS_AS_ERRORS=true`)
 - Languages: en-US primary, de secondary (satellite resources)
 
@@ -113,7 +123,7 @@ references (ADR, issue, spec, vendor bug).
 
 ### Form
 
-- One sentence, capitalised, ends with `.` — except `// Arrange` / `// Act` / `// Assert`.
+- One sentence, capitalised, ends with `.`.
 - Impersonal, present tense, indicative. No `we`/`our`/`you`, no `!`, no emoticons.
 - ≤ 140 chars per line, ≤ 6 lines per block. Longer → `docs/` + one-line pointer.
 - **Structured comments** (legend, group listing, small table): shorten the entries, never collapse the
@@ -137,7 +147,6 @@ reaches nobody.
 - `<exception>`: only for exceptions the caller handles.
 - Implementations/overrides use `<inheritdoc />`; never copy interface docs.
 - Reference types via `<see cref="..."/>`, not bare names.
-- `*Tests` projects: `CS1591` suppressed there; the test name carries intent. Helper members still take `///`.
 
 ### Markers
 
@@ -148,18 +157,6 @@ reaches nobody.
 `@* *@` only for a structural section label markup cannot express; prefer extracting a named component.
 Rationale goes in `@code` or the code-behind, not the markup.
 
-### Tests
-
-`// Arrange` / `// Act` / `// Assert` are mandatory structure — keep verbatim. Any further comment only when
-the *setup* is counter-intuitive; the test name carries the intent.
-
-### Samples
-
-`samples/` is teaching code. Comment it **more** than the rest: explain the mechanics a newcomer needs —
-message flow, why a call goes to one endpoint and not another, what a framework hook does. "No need to
-explain the obvious" does not apply; obvious-to-us is the thing being taught. Form rules still hold, and a
-missing piece is described in prose rather than left as commented-out code.
-
 ## Key Architectural Rules
 
 ### Messaging (MassTransit)
@@ -169,6 +166,11 @@ missing piece is described in prose rather than left as commented-out code.
 - Commands are fire-and-forget; results are communicated via corresponding Events.
 - Slaves only register: instance-dependent consumers + `ReadOnlyConsumer`s.
 - Masters/Standalone register: all consumers except `DbChangeset` consumers.
+- Consumer error handling follows ADR-004 (`docs/ADRs/ADR-004-error-handling-strategy.md`): D1, D6 and D6a for
+  the rules, *Compliance* for the checklist.
+- A logged exception is passed to the `[LoggerMessage]` method as an `Exception` parameter, never flattened into
+  the message text — otherwise the stack trace is lost.
+- Error codes come from the module's `*ErrorCodes` constants, never a magic number.
 
 ### Module Boundaries
 
@@ -259,15 +261,6 @@ Reusable skill definitions located in `.claude/skills/` following the [Agent Ski
 | [review-module](.claude/skills/review-module/SKILL.md) | Architecture compliance audit for a module |
 | [build](.claude/skills/build/SKILL.md) | Build the solution |
 | [test](.claude/skills/test/SKILL.md) | Run the test suite and analyze failures |
-
-## Project Structure
-
-Per-directory `AGENTS.md` files exist in key projects with project-specific constraints:
-- `src/Core.OS/AGENTS.md` — host app, only project configuring MassTransit
-- `src/Core.Module/AGENTS.md` — module loading and assembly isolation
-- `src/Core.Shared/AGENTS.md` — contracts only, no implementation
-- `src/Blazor.Server.Backend/AGENTS.md` — UI host, no business logic
-- `tests/AGENTS.md` — test conventions and shared fixtures
 
 ## Related Repositories
 

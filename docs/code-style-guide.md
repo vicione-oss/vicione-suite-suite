@@ -166,9 +166,9 @@ without a reference are not accepted — an untracked marker is a comment nobody
 
 ### Tests
 
-The `// Arrange`, `// Act`, `// Assert` markers are mandatory and stay exactly as they are — they are
-structure, not commentary. Beyond those three, a test needs a comment only when the *setup* is
-counter-intuitive; the test name carries the intent.
+Beyond the `// Arrange`, `// Act`, `// Assert` markers, a test needs a comment only when the *setup* is
+counter-intuitive; the test name carries the intent. The markers themselves are structure, not commentary —
+see [Test Structure Guide → Arrange / Act / Assert](test-structure-guide.md#5-arrange-act-assert).
 
 ### Samples
 

@@ -1,13 +1,26 @@
 # Tests
 
-Shared test infrastructure and all test projects for ViciOne Suite.
+Shared test infrastructure and all test projects for ViciOne Suite. Applies in addition to `../AGENTS.md`.
+
+Longer explanations with examples: `docs/test-structure-guide.md` (structure of a test class),
+`docs/integration-testing.md` (integration tests), `docs/e2e-testing.md` (Playwright E2E tests).
 
 ## Conventions
-- Test method names: `snake_case` after a capitalised first word. Two forms are in use, and both are correct — pick one per test class and stay consistent within it:
-    - `Should_[tested_behaviour]` — the prevailing form. Use it when the enclosing class already says what is under test, either because the class covers a single member or because tests are grouped in an inner class named after the member (e.g. `RegisterInstanceConsumerTests.ErrorHandling.Should_propagate_exception_when_persistence_is_unavailable`)
-    - `[MemberName]_should_[tested_behaviour]` — the older form, without inner classes. Use it when one flat test class covers several members and the method name has to say which (e.g. `SavingChangesAsync_should_publish_added_entity`)
-- All tests structured with `// Arrange`, `// Act`, `// Assert` comments
+- Test method names: `Should_[tested_behaviour]` in `snake_case` after the capitalised first word, displayed as sentences in Test Explorer. The enclosing class says what is under test: either the class covers a single member, or the tests are grouped in an inner class named after the member (e.g. `RegisterInstanceConsumerTests.ErrorHandling.Should_propagate_exception_when_persistence_is_unavailable`)
 - Frameworks: xUnit, NSubstitute, AwesomeAssertions, bUnit
+- Test runner: Microsoft.Testing.Platform (see `global.json`)
+
+## Arrange / Act / Assert
+- `// Arrange`, `// Act`, `// Assert` structure every test, in that order, and stay verbatim. They are structure
+  markers, not sentences, so the comment form rule does not apply to them.
+- `// Act + Assert` replaces the two markers when the action *is* the assertion, e.g.
+  `await act.Should().ThrowAsync<InvalidOperationException>();`.
+- `// Arrange` may be left out when the body has no arrange code at all (inputs come from data attributes or
+  fields). Any arrange code in the body requires it — `[Fact]` and `[Theory]` alike.
+- Any further comment only when the *setup* is counter-intuitive; the test name carries the intent.
+
+## XML docs
+- `CS1591` is suppressed in `*Tests` projects; the test name carries the intent. Helper members still take `///`.
 
 ## Test Utilities
 - **Core.Tests.Tools** — system test settings, artifact repo config, path helpers, trait constants. Use these; don't create ad-hoc config.
