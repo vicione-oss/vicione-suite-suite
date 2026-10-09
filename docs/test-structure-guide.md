@@ -49,12 +49,27 @@
 ## 5. Arrange / Act / Assert
 
 - **Rule 5.1** Every test has explicit `// Arrange`, `// Act`, `// Assert`
-  comments, in that order.
+  comments, in that order. `// Arrange` may be left out when the body has no
+  arrange code at all (inputs come from data attributes or fields). Any arrange
+  code in the body requires it, for `[Fact]` and `[Theory]` alike.
 - **Rule 5.2** Collapse to `// Act + Assert` only when the action *is* the
   assertion (exception checks, MassTransit consume):
   `await act.Should().ThrowAsync<InvalidOperationException>();`.
 - **Rule 5.3** Pending tests use `[Fact(Skip = "reason")]` and keep the empty
   `// Arrange` / `// Act` / `// Assert` scaffold.
+
+```csharp
+[Theory]
+[InlineData("Debug", "debug")]
+public void Should_transform_pascal_case_to_kebab_case(string value, string expected)
+{
+    // Act
+    var result = _transformer.TransformOutbound(value);
+
+    // Assert
+    result.Should().Be(expected);
+}
+```
 
 ## 6. Assertions
 
@@ -145,7 +160,8 @@ When unifying an existing test class, verify each item:
       each inheriting the outer class and marked `sealed`
       (or intentionally kept flat for single-behavior classes).
 - [ ] Every test method starts with `Should_`.
-- [ ] Every test has `// Arrange` / `// Act` / `// Assert` (or `// Act + Assert`).
+- [ ] Every test has `// Arrange` / `// Act` / `// Assert` (or `// Act + Assert`;
+      `// Arrange` omitted when there is no arrange code).
 - [ ] Assertions use AwesomeAssertions; raw `Assert.*` only for null-guards.
 - [ ] `MockFileSystem` / MassTransit harness used instead of mocking I/O or bus.
 - [ ] Async tests are `async Task` and pass

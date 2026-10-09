@@ -1,6 +1,6 @@
 # Core.Module
 
-Manages dynamic module loading, assembly resolution, dependency validation, and artifact repository access.
+Manages dynamic module loading, assembly resolution, dependency validation, and artifact repository access. Applies in addition to `../../AGENTS.md`.
 
 - Custom `AssemblyLoadContext` for isolated module loading — modules run in separate contexts
 - Validates module SDK version compatibility before loading; mismatches become `StartupErrors`

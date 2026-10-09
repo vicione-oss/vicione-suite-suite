@@ -1,6 +1,6 @@
 # Core.Shared
 
-Shared contracts, events, commands, DTOs, and configuration models used across all projects.
+Shared contracts, events, commands, DTOs, and configuration models used across all projects. Applies in addition to `../../AGENTS.md`.
 
 - **No implementation** — only interfaces, data classes, records, and enums
 - Contains all MassTransit message contracts (events, commands, requests) in domain-specific namespaces

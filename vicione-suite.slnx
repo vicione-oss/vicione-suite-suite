@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/samples/">
     <File Path="samples/.editorconfig" />
+    <File Path="samples/AGENTS.md" />
   </Folder>
   <Folder Name="/samples/Burger/">
     <Project Path="samples/Burger.Backend/Burger.Backend.csproj" />

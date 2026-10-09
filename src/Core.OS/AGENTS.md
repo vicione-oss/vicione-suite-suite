@@ -1,6 +1,6 @@
 # Core.OS
 
-The main application host. Orchestrates module lifecycle, persistence, messaging, authentication, and all infrastructure services.
+The main application host. Orchestrates module lifecycle, persistence, messaging, authentication, and all infrastructure services. Applies in addition to `../../AGENTS.md`.
 
 - **Only project that configures MassTransit** — consumer assembly scanning happens here (`MassTransitConfiguration.cs`)
 - All database migrations and EF Core configuration live here
