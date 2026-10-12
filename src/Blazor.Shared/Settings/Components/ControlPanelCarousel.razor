@@ -1,82 +1,59 @@
+@using Blazor.Shared.Extensions
 @using Blazor.Shared.Popup.Components
 @using Blazor.Shared.Popup.ContentOverlays.Models
 @using Microsoft.AspNetCore.Components.Sections
 @using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
-@using ViciOne.Ui.Blazor.Components.Extensions
 
 <div class="control-panel-carousel">
-    @{
-        ControlPanelPageRegistry.BeginUpdate();
-        try
-        {
-            for (var itemIndex = 0; itemIndex < _items.Count; itemIndex++)
+    <div @ref="_track"
+         class="control-panel-carousel__track @(_transition is not null ? "sliding" : null)"
+         style="margin-left: @((Math.Max(_activeIndex, 0) * -100).ToAttributeValue("%"))">
+
+        @{
+            ControlPanelPageRegistry.BeginUpdate();
+            try
             {
-                var item = _items[itemIndex];
-
-                var itemCssClasses = new List<string> { "control-panel-carousel__item" };
-                var itemAttributes = new Dictionary<string, object>();
-                var renderControlPanel = false;
-
-                if (_itemTransitions.TryPeek(out var itemTransition))
+                for (var itemIndex = 0; itemIndex < _items.Count; itemIndex++)
                 {
-                    if (item.ControlPanelRegistryItem == itemTransition.From || item.ControlPanelRegistryItem == itemTransition.To)
-                        renderControlPanel = true;
-                    else
-                        itemCssClasses.Add("hidden");
+                    var item = _items[itemIndex];
+                    var renderControlPanel = itemIndex == _activeIndex || item == _transition?.From;
 
-                    if (item.ControlPanelRegistryItem == itemTransition.Animation.RegistryItem)
-                    {
-                        renderControlPanel = true;
+                    var descriptionBannerSectionId = new DescriptionBannerSectionId();
+                    var controlPanelLoadingIndicationSectionId = new ContentOverlaySectionId();
 
-                        itemCssClasses.Add(itemTransition.Animation.Kind.ToString().ToDashCase());
-                        itemAttributes.Add("style", $"--animation-duration: {itemTransition.Animation.DurationMs}ms");
-                    }
+                    <div class="control-panel-carousel__item" @key="item">
+                        @if (renderControlPanel)
+                        {
+                            <AdvancedErrorBoundary>
+                                <PopupContentLayout>
+                                    <PopupStaticContent>
+                                        <SectionOutlet SectionId="descriptionBannerSectionId" />
+                                    </PopupStaticContent>
+
+                                    <PopupScrollContainer CssClass="content-scroll-container">
+                                        <Content>
+                                            <CascadingValue Value="descriptionBannerSectionId">
+                                                <ControlPanelContainer ControlPanelRegistryItem="item.ControlPanelRegistryItem"
+                                                                       LoadingIndicationSectionId="controlPanelLoadingIndicationSectionId" />
+                                            </CascadingValue>
+                                        </Content>
+
+                                        <AfterContent>
+                                            <PopupOverflowEffect CssClass="content-overflow"/>
+
+                                            <SectionOutlet SectionId="controlPanelLoadingIndicationSectionId" />
+                                        </AfterContent>
+                                    </PopupScrollContainer>
+                                </PopupContentLayout>
+                            </AdvancedErrorBoundary>
+                        }
+                    </div>
                 }
-                else
-                {
-                    if (item.Active)
-                        renderControlPanel = true;
-                    else
-                        itemCssClasses.Add("hidden");
-                }
-
-                itemAttributes.Add("class", string.Join(" ", itemCssClasses));
-
-                var descriptionBannerSectionId = new DescriptionBannerSectionId();
-                var controlPanelLoadingIndicationSectionId = new ContentOverlaySectionId();
-
-                <div @attributes="itemAttributes" @key="item">
-                    @if (renderControlPanel)
-                    {
-                        <AdvancedErrorBoundary>
-                            <PopupContentLayout>
-                                <PopupStaticContent>
-                                    <SectionOutlet SectionId="descriptionBannerSectionId" />
-                                </PopupStaticContent>
-
-                                <PopupScrollContainer CssClass="content-scroll-container">
-                                    <Content>
-                                        <CascadingValue Value="descriptionBannerSectionId">
-                                            <ControlPanelContainer ControlPanelRegistryItem="item.ControlPanelRegistryItem"
-                                                                   LoadingIndicationSectionId="controlPanelLoadingIndicationSectionId" />
-                                        </CascadingValue>
-                                    </Content>
-
-                                    <AfterContent>
-                                        <PopupOverflowEffect CssClass="content-overflow"/>
-
-                                        <SectionOutlet SectionId="controlPanelLoadingIndicationSectionId" />
-                                    </AfterContent>
-                                </PopupScrollContainer>
-                            </PopupContentLayout>
-                        </AdvancedErrorBoundary>
-                    }
-                </div>
+            }
+            finally
+            {
+                ControlPanelPageRegistry.EndUpdate();
             }
         }
-        finally
-        {
-            ControlPanelPageRegistry.EndUpdate();
-        }
-    }
+    </div>
 </div>

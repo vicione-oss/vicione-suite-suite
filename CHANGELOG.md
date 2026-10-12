@@ -23,6 +23,7 @@
 - Backups created before this version can no longer be restored, because they hold the HostManagement 1.x system configuration. **Upgrade:** create a new backup after updating
 - Restarts, flashing, module service restarts and backup restores show an error when HostManagement disables them, see `docs/hostmanagement-capabilities.md`. **Upgrade:** create `/etc/hostmanagement/SupportedCapabilities.conf` as described there, without it every capability is disabled
 - `UserControlPanel`, language and time zone are editable again
+- Settings, the slide between control panels runs in the browser
 
 ### Added
 
