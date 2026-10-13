@@ -79,6 +79,8 @@
 - A refused backup restore no longer leaves a copy of the backup on the device
 - Network settings show the saved value right after saving, also when a setting is changed again within 30 seconds
 - Settings dialog, control panels whose table fills the page no longer show an empty strip below the table
+- Account pages, signing out and the redirect to sign-in no longer flash the reconnect dialog in Firefox
+- Module pages whose URL contains `/account`, such as `/accounts`, stay interactive after a reload
 
 ### Removed
 

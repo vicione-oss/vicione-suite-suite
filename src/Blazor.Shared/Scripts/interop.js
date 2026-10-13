@@ -302,6 +302,17 @@
             document.body.appendChild(form);
             form.submit();
         },
+        signOut: function (path) {
+            // Firefox drops the circuit's WebSocket as soon as the navigation starts, which would show the reconnect
+            // modal until the next page arrives (#2700). A circuit ended on purpose shows no modal.
+            Blazor.disconnect?.();
+            Interop.submitForm(path, {});
+        },
+        redirectToSignIn: function (url) {
+            // Ends the circuit first for the same reason as signOut.
+            Blazor.disconnect?.();
+            location.assign(url);
+        },
         getFiles: function (id) {
             var files = [];
             var fileinput = document.getElementById(id);

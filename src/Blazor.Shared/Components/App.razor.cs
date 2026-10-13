@@ -34,7 +34,15 @@ namespace Blazor.Shared.Components
             builder.AddScriptResources(ResourceProviders, Logger);
         };
 
+        internal static bool IsAccountPath(string baseRelativePath)
+        {
+            var path = baseRelativePath.Split('?', '#')[0];
+
+            return path.Equals("account", StringComparison.OrdinalIgnoreCase)
+                || path.StartsWith("account/", StringComparison.OrdinalIgnoreCase);
+        }
+
         private bool IsNavigationOnLogin()
-            => NavigationService.NavManager.Uri.Contains("/Account", StringComparison.OrdinalIgnoreCase);
+            => IsAccountPath(NavigationService.NavManager.ToBaseRelativePath(NavigationService.NavManager.Uri));
     }
 }

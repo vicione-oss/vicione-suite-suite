@@ -28,4 +28,13 @@ public sealed partial class Routes
 
         _initialized = true;
     }
+
+    private void RedirectToSignIn()
+    {
+        // Ending the circuit before the redirect needs JS interop, which a statically rendered account page lacks.
+        if (RendererInfo.IsInteractive)
+            NavigationService.RedirectToSignIn();
+        else
+            NavigationService.RedirectTo(IdentityRoutes.LoginRoute);
+    }
 }
