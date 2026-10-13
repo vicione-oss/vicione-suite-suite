@@ -1,5 +1,6 @@
 using Blazor.Shared.Settings.Models;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute.ExceptionExtensions;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 
@@ -31,6 +32,52 @@ public sealed class ControlPanelEditTests
 
         // Assert
         await saveHandler.Received(1).Save(controlPanelState, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Should_return_canceled_result_and_keep_running_when_save_is_canceled()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+
+        var saveHandler = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
+        saveHandler.Save(Arg.Any<ControlPanelState>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(new OperationCanceledException());
+        services.AddScoped(_ => saveHandler);
+
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(new ControlPanelState(), serviceProvider);
+        controlPanelEdit.Begin();
+
+        // Act
+        var saveResult = await controlPanelEdit.Save();
+
+        // Assert
+        saveResult.Should().BeOfType<SaveCanceledResult>();
+        controlPanelEdit.IsRunning.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_return_canceled_result_when_saving_a_disposed_edit()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddScoped(_ => Substitute.For<IControlPanelSaveHandler<ControlPanelState>>());
+
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(new ControlPanelState(), serviceProvider);
+        controlPanelEdit.Begin();
+        await controlPanelEdit.DisposeAsync();
+
+        // Act
+        var saveResult = await controlPanelEdit.Save();
+
+        // Assert
+        saveResult.Should().BeOfType<SaveCanceledResult>();
     }
 
     [Fact]

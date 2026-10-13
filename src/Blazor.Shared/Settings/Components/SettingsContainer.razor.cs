@@ -603,7 +603,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
             _lastSaveErrorResults.AddRange(saveResults.OfType<SaveErrorResult>());
             _navigateBackAfterSaveRequested = saveResults.OfType<NavigateBackOnSaveSuccessResult>().Any();
 
-            var success = _lastSaveErrorResults.Count == 0;
+            var success = !saveResults.Any(saveResult => saveResult is SaveErrorResult or SaveCanceledResult);
 
             return success;
         }
