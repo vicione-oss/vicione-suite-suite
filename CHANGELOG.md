@@ -26,6 +26,7 @@
 - Settings, the slide between control panels runs in the browser
 - `modules.json`, `latest` and `x.*` also resolve to `beta` and `rc` versions, so modules that only have a beta install after a reset. **Behaviour change:** a newer `beta` or `rc` wins over the last release
 - Wizards, the page slides sideways when moving to the next or previous step
+- System information, the copy button confirms the copy with a check mark and a tooltip
 
 ### Added
 
@@ -95,7 +96,7 @@
 - `OpenTelemetry` packages, update to version `1.18.0`
 - `System.IO.Abstractions` package, update version to `22.3.0`
 - `ViciOne.Suite.Sdk` packages, update to version `3.4.0`
-- `ViciOne.Ui.Blazor.Components` packages, update to version `6.5.0`
+- `ViciOne.Ui.Blazor.Components` packages, update to version `6.6.0`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
 - `ViciOne.Ui.Localization`, update to version `3.6.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`

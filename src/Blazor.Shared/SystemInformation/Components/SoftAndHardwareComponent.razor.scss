@@ -15,6 +15,9 @@
     align-items: center;
 
     .systeminfo-hw-sw-header {
+        display: flex;
+        align-items: center;
+        gap: 4px;
         font-size: 14px;
         letter-spacing: 0.2px;
         text-align: left;
