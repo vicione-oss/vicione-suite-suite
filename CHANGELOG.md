@@ -90,6 +90,7 @@
 - `HostManagement` packages, update to version `2.0.0-beta1`
 - `Microsoft` packages, update to version `10.0.12`
 - `Microsoft.FeatureManagement` packages, update to version `4.7.0`
+- `Microsoft.TypeScript.MSBuild`, update to version `7.0.1`
 - `MailKit`, update to version `4.18.0`
 - `MassTransit` packages, update to version `8.5.11`
 - `Npgsql.EntityFrameworkCore.PostgreSQL`, update to version `10.0.3`
