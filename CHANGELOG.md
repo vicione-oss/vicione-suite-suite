@@ -24,6 +24,7 @@
 - Restarts, flashing, module service restarts and backup restores show an error when HostManagement disables them, see `docs/hostmanagement-capabilities.md`. **Upgrade:** create `/etc/hostmanagement/SupportedCapabilities.conf` as described there, without it every capability is disabled
 - `UserControlPanel`, language and time zone are editable again
 - Settings, the slide between control panels runs in the browser
+- `modules.json`, `latest` and `x.*` also resolve to `beta` and `rc` versions, so modules that only have a beta install after a reset. **Behaviour change:** a newer `beta` or `rc` wins over the last release
 
 ### Added
 

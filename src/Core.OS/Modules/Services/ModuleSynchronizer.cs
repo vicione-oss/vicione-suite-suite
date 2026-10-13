@@ -1,5 +1,6 @@
 using System.IO.Abstractions;
 using Core.Module.Exceptions;
+using Core.Module.Extensions;
 using Core.Module.Utils;
 using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
@@ -189,13 +190,13 @@ internal sealed partial class ModuleSynchronizer(IFileSystem fileSystem)
                 return result;
             }
 
-            if (moduleVersion.IsPrerelease)
+            if (moduleVersion.IsCiBuild())
             {
-                result.Error = new ErrorInfo(ModuleErrorCodes.FoundCiVersionOnly, $"Skip pre-release version '{moduleVersion}' of '{package.Name}' for path '{metadataArtifact.Path}'.");
+                result.Error = new ErrorInfo(ModuleErrorCodes.FoundCiVersionOnly, $"Skip CI version '{moduleVersion}' of '{package.Name}' for path '{metadataArtifact.Path}'.");
                 return result;
             }
 
-            // e.g. 0.24.0
+            // e.g. 0.24.0 or with staging support, 1.0.0-beta1 or 1.1.0-rc1
             result.Version = moduleVersion;
         }
         catch (HttpRequestException)

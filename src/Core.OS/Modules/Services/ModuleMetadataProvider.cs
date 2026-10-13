@@ -1,3 +1,4 @@
+using Core.Module.Extensions;
 using Core.Module.Options;
 using Core.OS.Modules.Contracts;
 using Core.OS.Modules.Extensions;
@@ -192,28 +193,27 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
                 continue;
 
             var latest = bundle.AvailableVersions.First();
-            
-            // Only released versions are resolved:
+
             if (!SemVersion.TryParse(latest, out var latestSemVer))
                 continue;
 
-            // A new artifact source was added after the initial resolve failed.
-            // we want to display that it will be installed after next restart.
-            // ci versions are not considered for automatic update
+            // A new artifact source was added after the initial resolve failed, so the newest non-CI version,
+            // the one the synchronizer resolves, is shown as installed after the next restart.
             var removedError = bundle.Errors.RemoveAll(k => k.ErrorCode == ModuleErrorCodes.FoundNoVersion);
-            if (removedError > 0 && bundle.Metadata.Version == ModuleConstants.UnresolvedVersionMarker && !latestSemVer.IsPrerelease)
+            var latestNonCi = bundle.AvailableVersions.FirstOrDefault(k => SemVersion.TryParse(k, out var semVer) && !semVer.IsCiBuild());
+            if (removedError > 0 && bundle.Metadata.Version == ModuleConstants.UnresolvedVersionMarker && latestNonCi is not null)
             {
                 var dependency = new ModuleDependencyPackage
                 {
                     Name = bundle.Metadata.Name,
-                    Version = latest
+                    Version = latestNonCi
                 };
                 bundle.PendingOperation = new ModulePackageOperation(dependency, ModulePackageOperationKind.Install);
                 continue;
             }
 
             // A newer version plus a resolvable module means an update is possible.
-            bundle.CanUpdate = (bundle.Metadata.Version != ModuleConstants.UnresolvedVersionMarker || latestSemVer.IsPrerelease)
+            bundle.CanUpdate = (bundle.Metadata.Version != ModuleConstants.UnresolvedVersionMarker || latestSemVer.IsCiBuild())
                 && bundle.Metadata.Version != latest;
         }
     }
@@ -244,14 +244,11 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
     }
 
     private static bool IsSameBaseCiVersion(SemVersion? existing, SemVersion? available) =>
-        existing is not null && IsCiVersion(existing)
-        && available is not null && IsCiVersion(available)
+        existing is not null && existing.IsCiBuild()
+        && available is not null && available.IsCiBuild()
         && existing.Major == available.Major
         && existing.Minor == available.Minor
         && existing.Patch == available.Patch;
-
-    private static bool IsCiVersion(SemVersion version) =>
-        version.IsPrerelease && version.Prerelease.StartsWith("ci", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsDependencySupported(ModuleMetadata metadata, ModuleDependencyPackage dependency)
     {

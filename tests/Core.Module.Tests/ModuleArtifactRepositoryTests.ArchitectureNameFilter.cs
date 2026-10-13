@@ -72,7 +72,7 @@ public partial class ModuleArtifactRepositoryTests
             await using var stream = await repository.GetMetadataDownloadStream(package, TestContext.Current.CancellationToken);
 
             // Assert - 0.28.0-ci1523472-linux-arm64_0.25.0.json
-            _queryBuilder.Received(1).AndNameMatches($"*{_packageVersion}-{runtimeIdentifier}_*.json");
+            _queryBuilder.Received(1).AndNameMatches($"{_packageVersion}-{runtimeIdentifier}_*.json");
         }
 
         [Theory]
