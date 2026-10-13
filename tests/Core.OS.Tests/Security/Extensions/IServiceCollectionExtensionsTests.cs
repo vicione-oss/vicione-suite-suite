@@ -39,7 +39,7 @@ public class IServiceCollectionExtensionsTests
         return provider.GetRequiredService<IOptions<T>>().Value;
     }
 
-    public class AddTransportSecurity : IServiceCollectionExtensionsTests
+    public sealed class AddTransportSecurity : IServiceCollectionExtensionsTests
     {
         [Fact]
         public void Should_trust_forwarded_headers_from_loopback_only_by_default()
@@ -147,7 +147,7 @@ public class IServiceCollectionExtensionsTests
         }
     }
 
-    public class TransportSecurityPipeline : IServiceCollectionExtensionsTests
+    public sealed class TransportSecurityPipeline : IServiceCollectionExtensionsTests
     {
         [Fact]
         public async Task Should_apply_forwarded_proto_from_a_loopback_proxy()

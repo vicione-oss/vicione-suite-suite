@@ -18,15 +18,15 @@ using Sdk.Testing.Backend;
 
 namespace Core.OS.Tests.UserManagement.Consumers.Mail;
 
-public class SendVerifyEmailAddressLinkConsumerTest
+public class SendResetPasswordLinkConsumerTests
 {
     private readonly Action<IBusRegistrationConfigurator> _configureServices;
 
-    public SendVerifyEmailAddressLinkConsumerTest()
+    public SendResetPasswordLinkConsumerTests()
     {
         _configureServices = cfg =>
         {
-            cfg.AddConsumer<SendVerifyEmailAddressLinkConsumer>();
+            cfg.AddConsumer<SendResetPasswordLinkConsumer>();
             cfg.AddUserDbContextsInMemory();
             cfg.AddApplicationDbContextsInMemory();
             cfg.AddSingleton(Substitute.For<IModuleHost>());
@@ -49,10 +49,10 @@ public class SendVerifyEmailAddressLinkConsumerTest
         await scope.ServiceProvider.SeedTestRole();
         var suiteUser = scope.ServiceProvider.GetRequiredService<UserManager<SuiteUser>>().Users.First();
         const string callbackLink = "http://localhost:5000";
-        var command = new SendVerifyEmailAddressLink(suiteUser.Id, callbackLink);
+        var command = new SendResetPasswordLink(suiteUser.Id, callbackLink);
 
         // Act
-        await tester.TestCommand<SendVerifyEmailAddressLink, SendVerifyEmailAddressLinkConsumer>(command);
+        await tester.TestCommand<SendResetPasswordLink, SendResetPasswordLinkConsumer>(command);
 
         // Assert
         await scope.ServiceProvider.GetRequiredService<IMailSender>()
@@ -60,9 +60,9 @@ public class SendVerifyEmailAddressLinkConsumerTest
     }
 
     [Theory]
-    [InlineData("de-DE", "en-US", "Bitte bestätigen Sie Ihre E-Mail-Adresse", "Vielen Dank für Ihre Registrierung bei ViciOne")]
-    [InlineData(null, "de-DE", "Bitte bestätigen Sie Ihre E-Mail-Adresse", "Vielen Dank für Ihre Registrierung bei ViciOne")]
-    [InlineData(null, "en-US", "Please confirm your email address", "Thank you for registering with ViciOne")]
+    [InlineData("de-DE", "en-US", "Passwort zurücksetzen", "Bitte setzen Sie Ihr Passwort über den folgenden Link zurück")]
+    [InlineData(null, "de-DE", "Passwort zurücksetzen", "Bitte setzen Sie Ihr Passwort über den folgenden Link zurück")]
+    [InlineData(null, "en-US", "Reset password", "Please reset your password using the following link")]
     public async Task Should_send_email_in_user_language_or_else_instance_default(string? userLanguage,
         string instanceCulture, string expectedSubject, string expectedBodyText)
     {
@@ -78,10 +78,10 @@ public class SendVerifyEmailAddressLinkConsumerTest
         var suiteUser = userManager.Users.First();
         suiteUser.Language = userLanguage;
         await userManager.UpdateAsync(suiteUser);
-        var command = new SendVerifyEmailAddressLink(suiteUser.Id, "http://localhost:5000");
+        var command = new SendResetPasswordLink(suiteUser.Id, "http://localhost:5000");
 
         // Act
-        await tester.TestCommand<SendVerifyEmailAddressLink, SendVerifyEmailAddressLinkConsumer>(command);
+        await tester.TestCommand<SendResetPasswordLink, SendResetPasswordLinkConsumer>(command);
 
         // Assert
         await scope.ServiceProvider.GetRequiredService<IMailSender>()
@@ -96,12 +96,12 @@ public class SendVerifyEmailAddressLinkConsumerTest
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         await using var scope = tester.Services.CreateAsyncScope();
-        await scope.ServiceProvider.SeedUsersAndRoles(CancellationToken.None);
+        await scope.ServiceProvider.SeedUsersAndRoles(TestContext.Current.CancellationToken);
         await scope.ServiceProvider.SeedTestRole();
 
         // Act & Assert — ADR-002: exceptions propagate; consumer throws InvalidOperationException for unknown user.
-        var command = new SendVerifyEmailAddressLink("some non existent id", "callbackLink");
+        var command = new SendResetPasswordLink("some non existent id", "callbackLink");
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => tester.TestCommandFault<SendVerifyEmailAddressLink, SendVerifyEmailAddressLinkConsumer>(command));
+            () => tester.TestCommandFault<SendResetPasswordLink, SendResetPasswordLinkConsumer>(command));
     }
 }

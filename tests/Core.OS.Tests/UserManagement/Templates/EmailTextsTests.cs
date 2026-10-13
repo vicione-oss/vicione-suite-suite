@@ -7,7 +7,7 @@ using Core.OS.UserManagement.Templates.Localization;
 
 namespace Core.OS.Tests.UserManagement.Templates;
 
-public partial class EmailTextsTest
+public partial class EmailTextsTests
 {
     [Fact]
     public void Should_translate_every_text_to_german()
@@ -23,7 +23,7 @@ public partial class EmailTextsTest
     }
 
     [Theory]
-    [MemberData(nameof(FluidTemplateRendererTest.GetUserManagementTemplates), MemberType = typeof(FluidTemplateRendererTest))]
+    [MemberData(nameof(FluidTemplateRendererTests.GetUserManagementTemplates), MemberType = typeof(FluidTemplateRendererTests))]
     public void Should_define_every_text_used_by_template(string templateFile)
     {
         // Arrange

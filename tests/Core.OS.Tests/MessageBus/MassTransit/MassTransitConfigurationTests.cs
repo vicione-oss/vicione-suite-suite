@@ -33,60 +33,63 @@ public class MassTransitConfigurationTests
                 .BuildServiceProvider();
     }
 
-    [Fact]
-    public async Task Add_message_bus_standalone_should_register_services()
+    public sealed class AddMassTransitMessageBus : MassTransitConfigurationTests
     {
-        // Arrange
-        var config = new TestConfig()
-            .UseInMemoryBus()
-            .UseInstanceType(InstanceType.Standalone);
+        [Fact]
+        public async Task Should_register_services_for_standalone()
+        {
+            // Arrange
+            var config = new TestConfig()
+                .UseInMemoryBus()
+                .UseInstanceType(InstanceType.Standalone);
 
-        // Act
-        await using var serviceProvider = SetupServiceProvider(config.BuildConfiguration());
+            // Act
+            await using var serviceProvider = SetupServiceProvider(config.BuildConfiguration());
 
-        // Assert
-        Assert.NotNull(serviceProvider.GetService<IOptions<MessageBusOptions>>());
-        Assert.NotNull(serviceProvider.GetService<IOptions<RabbitMqTransportOptions>>());
+            // Assert
+            Assert.NotNull(serviceProvider.GetService<IOptions<MessageBusOptions>>());
+            Assert.NotNull(serviceProvider.GetService<IOptions<RabbitMqTransportOptions>>());
 
-        Assert.NotNull(serviceProvider.GetService<IEndpointNameFormatter>());
-        Assert.NotNull(serviceProvider.GetService<IRoutingSlipBuilder>());
-        Assert.NotNull(serviceProvider.GetService<IRoutingSlipBuilderFactory>());
-        Assert.NotNull(serviceProvider.GetService<IBus>());
-    }
+            Assert.NotNull(serviceProvider.GetService<IEndpointNameFormatter>());
+            Assert.NotNull(serviceProvider.GetService<IRoutingSlipBuilder>());
+            Assert.NotNull(serviceProvider.GetService<IRoutingSlipBuilderFactory>());
+            Assert.NotNull(serviceProvider.GetService<IBus>());
+        }
 
-    [Fact]
-    public async Task Add_mass_transit_message_bus_with_rabbit_mq_should_register_services()
-    {
-        // Arrange
-        var config = new TestConfig()
-            .UseInMemoryBus(false)
-            .UseInstanceType(InstanceType.Standalone);
+        [Fact]
+        public async Task Should_register_services_with_rabbit_mq()
+        {
+            // Arrange
+            var config = new TestConfig()
+                .UseInMemoryBus(false)
+                .UseInstanceType(InstanceType.Standalone);
 
-        // Act
-        await using var serviceProvider = SetupServiceProvider(config.BuildConfiguration());
+            // Act
+            await using var serviceProvider = SetupServiceProvider(config.BuildConfiguration());
 
-        // Assert
-        Assert.NotNull(serviceProvider.GetService<IOptions<MessageBusOptions>>());
-        Assert.NotNull(serviceProvider.GetService<IOptions<RabbitMqTransportOptions>>());
+            // Assert
+            Assert.NotNull(serviceProvider.GetService<IOptions<MessageBusOptions>>());
+            Assert.NotNull(serviceProvider.GetService<IOptions<RabbitMqTransportOptions>>());
 
-        Assert.NotNull(serviceProvider.GetService<IEndpointNameFormatter>());
-        Assert.NotNull(serviceProvider.GetService<IRoutingSlipBuilder>());
-        Assert.NotNull(serviceProvider.GetService<IRoutingSlipBuilderFactory>());
-        Assert.NotNull(serviceProvider.GetService<IBus>());
-    }
+            Assert.NotNull(serviceProvider.GetService<IEndpointNameFormatter>());
+            Assert.NotNull(serviceProvider.GetService<IRoutingSlipBuilder>());
+            Assert.NotNull(serviceProvider.GetService<IRoutingSlipBuilderFactory>());
+            Assert.NotNull(serviceProvider.GetService<IBus>());
+        }
 
-    [Fact]
-    public async Task Add_mass_transit_message_bus_slave_should_add_local_bus()
-    {
-        // Arrange
-        var config = new TestConfig()
-            .UseInMemoryBus()
-            .UseInstanceType(InstanceType.Slave);
+        [Fact]
+        public async Task Should_add_local_bus_for_slave()
+        {
+            // Arrange
+            var config = new TestConfig()
+                .UseInMemoryBus()
+                .UseInstanceType(InstanceType.Slave);
 
-        // Act
-        await using var serviceProvider = SetupServiceProvider(config.BuildConfiguration());
+            // Act
+            await using var serviceProvider = SetupServiceProvider(config.BuildConfiguration());
 
-        // Assert
-        Assert.NotNull(serviceProvider.GetService<ILocalBus>());
+            // Assert
+            Assert.NotNull(serviceProvider.GetService<ILocalBus>());
+        }
     }
 }

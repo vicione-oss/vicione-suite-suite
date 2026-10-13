@@ -11,7 +11,7 @@ using Sdk.Testing.Backend;
 
 namespace Blazor.Server.Tests.Passkeys;
 
-public sealed class DeletePasskeysConsumerTest
+public sealed class DeletePasskeysConsumerTests
 {
     private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
     private readonly ILogger<DeletePasskeysConsumer> _logger = Substitute.For<ILogger<DeletePasskeysConsumer>>();

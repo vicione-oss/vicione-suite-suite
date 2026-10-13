@@ -55,7 +55,7 @@ public class PlatformConfigurationTests
             RepositoryOptionsCache = Substitute.For<IArtifactRepositoryOptionsCache>()
         };
 
-    public class AddCoreOs : PlatformConfigurationTests
+    public sealed class AddCoreOs : PlatformConfigurationTests
     {
         [Fact]
         public async Task Should_configure_platform_services()
@@ -111,7 +111,7 @@ public class PlatformConfigurationTests
         }
     }
 
-    public class AddCoreServices : PlatformConfigurationTests
+    public sealed class AddCoreServices : PlatformConfigurationTests
     {
         [Fact]
         public async Task Should_configure_master_services_when_instance_is_master()

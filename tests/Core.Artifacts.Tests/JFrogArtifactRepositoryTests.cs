@@ -79,7 +79,7 @@ public class JFrogArtifactRepositoryTests
     public sealed class Query : JFrogArtifactRepositoryTests
     {
         [Fact]
-        public async Task Returns_result_when_http_response_is_successful()
+        public async Task Should_return_result_when_http_response_is_successful()
         {
             // Arrange
             _httpClientFactory.MessageHandlerSetup = () => new FakeHttpHandler(HttpStatusCode.OK, """{ "results": [] }""");
@@ -154,7 +154,7 @@ public class JFrogArtifactRepositoryTests
         }
 
         [Fact]
-        public async Task Download_allows_secure_https_source()
+        public async Task Should_allow_secure_https_source()
         {
             // Arrange
             using var stream = new MemoryStream("Hello world"u8.ToArray());
@@ -174,7 +174,7 @@ public class JFrogArtifactRepositoryTests
     public sealed class DownloadToFile : JFrogArtifactRepositoryTests
     {
         [Fact]
-        public async Task Writes_stream_to_file_system()
+        public async Task Should_write_stream_to_file_system()
         {
             // Arrange
             using var stream = new MemoryStream("Hello world"u8.ToArray());
@@ -198,7 +198,7 @@ public class JFrogArtifactRepositoryTests
     public sealed class DownloadAndExtract : JFrogArtifactRepositoryTests
     {
         [Fact]
-        public async Task Extracts_zip_file_into_target_folder()
+        public async Task Should_extract_zip_file_into_target_folder()
         {
             // Arrange
             using var zipStream = new MemoryStream();

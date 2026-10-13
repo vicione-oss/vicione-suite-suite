@@ -279,7 +279,7 @@ public class ModulePackageOperationStoreTests
         }
     }
 
-    public class GetEnqueuedOperations : ModulePackageOperationStoreTests
+    public sealed class GetEnqueuedOperations : ModulePackageOperationStoreTests
     {
         [Fact]
         public async Task Should_return_queued_operations_when_file_exists()
@@ -332,7 +332,7 @@ public class ModulePackageOperationStoreTests
         }
     }
 
-    public class ClearEnqueuedOperations : ModulePackageOperationStoreTests
+    public sealed class ClearEnqueuedOperations : ModulePackageOperationStoreTests
     {
         [Fact]
         public void Should_delete_existing_queue_file()

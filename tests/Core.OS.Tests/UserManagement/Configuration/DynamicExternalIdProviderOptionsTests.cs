@@ -8,7 +8,7 @@ using Sdk.Testing.Backend;
 
 namespace Core.OS.Tests.UserManagement.Configuration;
 
-public class DynamicExternalIdProviderOptionsTest
+public class DynamicExternalIdProviderOptionsTests
 {
     [Fact]
     public void Should_not_change_the_options_when_the_name_is_not_the_expected_default()

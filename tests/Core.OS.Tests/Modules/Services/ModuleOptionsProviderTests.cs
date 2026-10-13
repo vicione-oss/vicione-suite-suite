@@ -12,31 +12,34 @@ public class ModuleOptionsProviderTests
     private ModuleOptionsProvider CreateProvider()
         => new(_moduleManager, _optionsStore);
 
-    [Fact]
-    public void Data_should_contain_options_of_backend_modules()
+    public sealed class Load : ModuleOptionsProviderTests
     {
-        // Assert
-        var provider = CreateProvider();
-        var options = new Dictionary<string, string?>
+        [Fact]
+        public void Should_provide_options_of_backend_modules()
         {
-            ["option1"] = "value1",
-            ["option2"] = "42",
-            ["option3"] = "value3",
-        };
+            // Assert
+            var provider = CreateProvider();
+            var options = new Dictionary<string, string?>
+            {
+                ["option1"] = "value1",
+                ["option2"] = "42",
+                ["option3"] = "value3",
+            };
 
-        _moduleManager.GetModules().Returns([new TestBackendModule(), new TestClientModule()]);
-        _optionsStore.LoadDictionarySync(Arg.Any<string>()).Returns(options);
+            _moduleManager.GetModules().Returns([new TestBackendModule(), new TestClientModule()]);
+            _optionsStore.LoadDictionarySync(Arg.Any<string>()).Returns(options);
 
-        // Act
-        provider.Load();
+            // Act
+            provider.Load();
 
-        // Assert
-        foreach (var option in options)
-        {
-            provider.TryGet(option.Key, out var value).Should().BeTrue();
-            value.Should().Be(option.Value);
+            // Assert
+            foreach (var option in options)
+            {
+                provider.TryGet(option.Key, out var value).Should().BeTrue();
+                value.Should().Be(option.Value);
+            }
+
+            provider.GetChildKeys([], null).Should().HaveCount(options.Count);
         }
-
-        provider.GetChildKeys([], null).Should().HaveCount(options.Count);
     }
 }

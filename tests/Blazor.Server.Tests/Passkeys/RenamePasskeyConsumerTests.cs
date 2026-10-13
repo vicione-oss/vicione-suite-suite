@@ -11,7 +11,7 @@ using Sdk.Testing.Backend;
 
 namespace Blazor.Server.Tests.Passkeys;
 
-public sealed class RenamePasskeyConsumerTest
+public sealed class RenamePasskeyConsumerTests
 {
     private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
     private readonly ILogger<RenamePasskeyConsumer> _logger = Substitute.For<ILogger<RenamePasskeyConsumer>>();

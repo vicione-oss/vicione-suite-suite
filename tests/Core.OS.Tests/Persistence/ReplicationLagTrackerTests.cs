@@ -3,7 +3,7 @@ using Microsoft.Extensions.Time.Testing;
 
 namespace Core.OS.Tests.Persistence;
 
-public sealed class ReplicationLagTrackerTests
+public class ReplicationLagTrackerTests
 {
     private readonly FakeTimeProvider _timeProvider = new();
     private readonly ReplicationLagTracker _tracker;
@@ -14,74 +14,83 @@ public sealed class ReplicationLagTrackerTests
         _tracker = new ReplicationLagTracker(_timeProvider);
     }
 
-    [Fact]
-    public void Record_should_store_lag_per_context_type()
+    public sealed class Record : ReplicationLagTrackerTests
     {
-        // Arrange
-        var publishedAt = _timeProvider.GetUtcNow() - TimeSpan.FromSeconds(5);
+        [Fact]
+        public void Should_store_lag_per_context_type()
+        {
+            // Arrange
+            var publishedAt = _timeProvider.GetUtcNow() - TimeSpan.FromSeconds(5);
 
-        // Act
-        _tracker.Record("ContextA", publishedAt);
+            // Act
+            _tracker.Record("ContextA", publishedAt);
 
-        // Assert
-        var lag = _tracker.GetLag("ContextA");
-        lag.Should().NotBeNull();
-        lag!.Value.Should().Be(TimeSpan.FromSeconds(5));
+            // Assert
+            var lag = _tracker.GetLag("ContextA");
+            lag.Should().NotBeNull();
+            lag!.Value.Should().Be(TimeSpan.FromSeconds(5));
+        }
+
+        [Fact]
+        public void Should_clamp_negative_lag_to_zero()
+        {
+            // Arrange — publishedAt is in the future (simulates clock skew)
+            var publishedAt = _timeProvider.GetUtcNow() + TimeSpan.FromMinutes(1);
+
+            // Act
+            _tracker.Record("ContextA", publishedAt);
+
+            // Assert
+            var lag = _tracker.GetLag("ContextA");
+            lag.Should().NotBeNull();
+            lag!.Value.Should().Be(TimeSpan.Zero);
+        }
+
+        [Fact]
+        public void Should_update_lag_on_subsequent_calls()
+        {
+            // Arrange
+            _tracker.Record("ContextA", _timeProvider.GetUtcNow() - TimeSpan.FromMinutes(10));
+
+            // Act — more recent message
+            _tracker.Record("ContextA", _timeProvider.GetUtcNow() - TimeSpan.FromSeconds(2));
+
+            // Assert — lag should now reflect the most recent message
+            var lag = _tracker.GetLag("ContextA");
+            lag.Should().NotBeNull();
+            lag!.Value.Should().Be(TimeSpan.FromSeconds(2));
+        }
     }
 
-    [Fact]
-    public void GetLag_should_return_null_for_unknown_context()
+    public sealed class GetLag : ReplicationLagTrackerTests
     {
-        // Arrange / Act
-        var lag = _tracker.GetLag("UnknownContext");
+        [Fact]
+        public void Should_return_null_for_unknown_context()
+        {
+            // Arrange / Act
+            var lag = _tracker.GetLag("UnknownContext");
 
-        // Assert
-        lag.Should().BeNull();
+            // Assert
+            lag.Should().BeNull();
+        }
     }
 
-    [Fact]
-    public void Record_should_clamp_negative_lag_to_zero()
+    public sealed class GetAllLags : ReplicationLagTrackerTests
     {
-        // Arrange — publishedAt is in the future (simulates clock skew)
-        var publishedAt = _timeProvider.GetUtcNow() + TimeSpan.FromMinutes(1);
+        [Fact]
+        public void Should_return_all_tracked_contexts()
+        {
+            // Arrange
+            _tracker.Record("ContextA", _timeProvider.GetUtcNow() - TimeSpan.FromSeconds(1));
+            _tracker.Record("ContextB", _timeProvider.GetUtcNow() - TimeSpan.FromSeconds(2));
 
-        // Act
-        _tracker.Record("ContextA", publishedAt);
+            // Act
+            var lags = _tracker.GetAllLags();
 
-        // Assert
-        var lag = _tracker.GetLag("ContextA");
-        lag.Should().NotBeNull();
-        lag!.Value.Should().Be(TimeSpan.Zero);
-    }
-
-    [Fact]
-    public void Record_should_update_lag_on_subsequent_calls()
-    {
-        // Arrange
-        _tracker.Record("ContextA", _timeProvider.GetUtcNow() - TimeSpan.FromMinutes(10));
-
-        // Act — more recent message
-        _tracker.Record("ContextA", _timeProvider.GetUtcNow() - TimeSpan.FromSeconds(2));
-
-        // Assert — lag should now reflect the most recent message
-        var lag = _tracker.GetLag("ContextA");
-        lag.Should().NotBeNull();
-        lag!.Value.Should().Be(TimeSpan.FromSeconds(2));
-    }
-
-    [Fact]
-    public void GetAllLags_should_return_all_tracked_contexts()
-    {
-        // Arrange
-        _tracker.Record("ContextA", _timeProvider.GetUtcNow() - TimeSpan.FromSeconds(1));
-        _tracker.Record("ContextB", _timeProvider.GetUtcNow() - TimeSpan.FromSeconds(2));
-
-        // Act
-        var lags = _tracker.GetAllLags();
-
-        // Assert
-        lags.Should().HaveCount(2);
-        lags.Should().ContainKey("ContextA");
-        lags.Should().ContainKey("ContextB");
+            // Assert
+            lags.Should().HaveCount(2);
+            lags.Should().ContainKey("ContextA");
+            lags.Should().ContainKey("ContextB");
+        }
     }
 }

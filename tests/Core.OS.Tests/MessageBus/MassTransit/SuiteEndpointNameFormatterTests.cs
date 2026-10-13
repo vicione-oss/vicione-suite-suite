@@ -32,7 +32,7 @@ public class SuiteEndpointNameFormatterTests
         return $"{testType.Namespace!.Replace(".", string.Empty, StringComparison.Ordinal)}{testType.Name}";
     }
 
-    public class TemporaryEndpoint : SuiteEndpointNameFormatterTests
+    public sealed class TemporaryEndpoint : SuiteEndpointNameFormatterTests
     {
         [Fact]
         public void Should_return_temporary_endpoint()
@@ -46,7 +46,7 @@ public class SuiteEndpointNameFormatterTests
         }
     }
 
-    public class Consumer : SuiteEndpointNameFormatterTests
+    public sealed class Consumer : SuiteEndpointNameFormatterTests
     {
         [Fact]
         public void Should_return_consumer_name()
@@ -59,7 +59,7 @@ public class SuiteEndpointNameFormatterTests
         }
     }
 
-    public class Message : SuiteEndpointNameFormatterTests
+    public sealed class Message : SuiteEndpointNameFormatterTests
     {
         [Fact]
         public void Should_return_message_name()
@@ -72,7 +72,7 @@ public class SuiteEndpointNameFormatterTests
         }
     }
 
-    public class GetConsumerName : SuiteEndpointNameFormatterTests
+    public sealed class GetConsumerName : SuiteEndpointNameFormatterTests
     {
         [Theory]
         [InlineData("Commands", typeof(ValidCommandConsumer))]
@@ -182,7 +182,7 @@ public class SuiteEndpointNameFormatterTests
                 => SuiteEndpointNameFormatter.GetConsumerName(consumerType, Guid.NewGuid()));
     }
 
-    public class GetMessageName : SuiteEndpointNameFormatterTests
+    public sealed class GetMessageName : SuiteEndpointNameFormatterTests
     {
 
 
@@ -329,7 +329,7 @@ public class SuiteEndpointNameFormatterTests
         }
     }
 
-    public class CompensateActivity : SuiteEndpointNameFormatterTests
+    public sealed class CompensateActivity : SuiteEndpointNameFormatterTests
     {
         [Fact]
         public void Should_return_correct_compensate_name_with_truncate_activity_word()
@@ -364,7 +364,7 @@ public class SuiteEndpointNameFormatterTests
         }
     }
 
-    public class ExecuteActivity : SuiteEndpointNameFormatterTests
+    public sealed class ExecuteActivity : SuiteEndpointNameFormatterTests
     {
         [Fact]
         public void Should_return_correct_execute_name_for_own_endpoint_name_instance_dependent()
@@ -378,7 +378,7 @@ public class SuiteEndpointNameFormatterTests
         }
     }
 
-    public class Saga : SuiteEndpointNameFormatterTests
+    public sealed class Saga : SuiteEndpointNameFormatterTests
     {
 
         [Fact]
@@ -392,7 +392,7 @@ public class SuiteEndpointNameFormatterTests
         }
 
         [Fact]
-        public void GetSagaName_should_return_valid_name()
+        public void Should_return_valid_saga_name()
             => Assert.NotNull(CreateFormatter().Saga<TestMachineState>());
     }
 

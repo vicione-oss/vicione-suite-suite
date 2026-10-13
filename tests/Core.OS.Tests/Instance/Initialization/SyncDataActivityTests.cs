@@ -9,37 +9,40 @@ namespace Core.OS.Tests.Instance.Initialization;
 
 public class SyncDataActivityTests
 {
-    [Fact(Skip = "TODO - this functionality needs to tested again a real postgres db")]
-    public void To_be_tested()
+    public sealed class Execute : SyncDataActivityTests
     {
-        // Arrange
+        [Fact(Skip = "TODO - this functionality needs to tested again a real postgres db")]
+        public void Should_synchronize_data_against_a_real_postgres_db()
+        {
+            // Arrange
 
-        // Act
+            // Act
 
-        // Assert
-    }
+            // Assert
+        }
 
-    [Fact]
-    public async Task Should_notify_the_replication_observers_when_the_full_sync_completes()
-    {
-        // Arrange
-        var observer = Substitute.For<IReplicationObserver>();
-        await using var services = new ServiceCollection()
-            .AddSingleton(new ReplicationSequenceTracker())
-            .AddSingleton(new SyncRetryState())
-            .AddSingleton(new SynchronizationState())
-            .AddSingleton(observer)
-            .BuildServiceProvider();
+        [Fact]
+        public async Task Should_notify_the_replication_observers_when_the_full_sync_completes()
+        {
+            // Arrange
+            var observer = Substitute.For<IReplicationObserver>();
+            await using var services = new ServiceCollection()
+                .AddSingleton(new ReplicationSequenceTracker())
+                .AddSingleton(new SyncRetryState())
+                .AddSingleton(new SynchronizationState())
+                .AddSingleton(observer)
+                .BuildServiceProvider();
 
-        var context = Substitute.For<ExecuteContext<SyncDataArguments>>();
-        context.Arguments.Returns(new SyncDataArguments { SyncCompleted = true });
+            var context = Substitute.For<ExecuteContext<SyncDataArguments>>();
+            context.Arguments.Returns(new SyncDataArguments { SyncCompleted = true });
 
-        var sut = new SyncDataActivity(services, NullLogger<SyncDataActivity>.Instance);
+            var sut = new SyncDataActivity(services, NullLogger<SyncDataActivity>.Instance);
 
-        // Act
-        await sut.Execute(context);
+            // Act
+            await sut.Execute(context);
 
-        // Assert
-        observer.Received(1).Resynchronized();
+            // Assert
+            observer.Received(1).Resynchronized();
+        }
     }
 }

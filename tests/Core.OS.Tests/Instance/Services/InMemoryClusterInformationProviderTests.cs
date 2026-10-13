@@ -298,7 +298,7 @@ public sealed class InMemoryClusterInformationProviderTests
     public class RemoveInstance
     {
         [Fact]
-        public async Task Removes_instance()
+        public async Task Should_remove_instance()
         {
             var guid = Guid.NewGuid();
             var called = false;
@@ -329,7 +329,7 @@ public sealed class InMemoryClusterInformationProviderTests
         }
 
         [Fact]
-        public async Task Invokes_event_when_delete_instance_failed()
+        public async Task Should_invoke_event_when_delete_instance_failed()
         {
             var guid = Guid.NewGuid();
             var called = false;

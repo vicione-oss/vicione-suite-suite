@@ -49,7 +49,7 @@ public class ModuleHostBuilderTests
         return metadata;
     }
 
-    public class Build : ModuleHostBuilderTests
+    public sealed class Build : ModuleHostBuilderTests
     {
         [Fact]
         public async Task Should_build_host_without_features()
@@ -104,7 +104,7 @@ public class ModuleHostBuilderTests
         }
     }
 
-    public class WithSuiteDependencyContext : ModuleHostBuilderTests
+    public sealed class WithSuiteDependencyContext : ModuleHostBuilderTests
     {
         [Fact]
         public async Task Should_build_suite_dependency_context()
@@ -131,7 +131,7 @@ public class ModuleHostBuilderTests
         }
     }
 
-    public class WithOptionsSupport : ModuleHostBuilderTests
+    public sealed class WithOptionsSupport : ModuleHostBuilderTests
     {
         [Fact]
         public async Task Should_add_option_validation_errors_to_module_error_list()
@@ -191,7 +191,7 @@ public class ModuleHostBuilderTests
         }
     }
 
-    public class WithSynchronizationResults : ModuleHostBuilderTests
+    public sealed class WithSynchronizationResults : ModuleHostBuilderTests
     {
         [Fact]
         public async Task Should_not_add_any_module_errors_when_no_results_are_provided()

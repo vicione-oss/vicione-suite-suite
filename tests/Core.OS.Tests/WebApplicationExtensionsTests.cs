@@ -8,7 +8,7 @@ namespace Core.OS.Tests;
 
 public class WebApplicationExtensionsTests
 {
-    public class GetInvalidOptions : WebApplicationExtensionsTests
+    public sealed class GetInvalidOptions : WebApplicationExtensionsTests
     {
         [Fact]
         public void Should_return_invalid_options()

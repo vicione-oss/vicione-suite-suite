@@ -10,7 +10,7 @@ using Sdk.Testing.Backend;
 
 namespace Blazor.Server.Tests.UserManagement;
 
-public sealed class DeleteExternalLoginConsumerTest
+public sealed class DeleteExternalLoginConsumerTests
 {
     private const string LoginProvider = "OpenIdConnect";
     private const string ProviderKey = "subject-1";

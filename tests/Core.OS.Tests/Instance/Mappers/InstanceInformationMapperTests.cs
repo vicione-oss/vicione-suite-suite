@@ -9,75 +9,84 @@ namespace Core.OS.Tests.Instance.Mappers;
 
 public class InstanceInformationMapperTests
 {
-    [Fact]
-    public void ToRegisterInstanceCommand_should_map_all_shared_properties()
+    public sealed class ToRegisterInstanceCommand : InstanceInformationMapperTests
     {
-        // Arrange
-        var info = CreateInstanceInformation();
-        List<string> loadedModules = ["loaded-module"];
+        [Fact]
+        public void Should_map_all_shared_properties()
+        {
+            // Arrange
+            var info = CreateInstanceInformation();
+            List<string> loadedModules = ["loaded-module"];
 
-        // Act
-        var command = info.ToRegisterInstanceCommand(loadedModules, [], []);
+            // Act
+            var command = info.ToRegisterInstanceCommand(loadedModules, [], []);
 
-        // Assert
-        command.Should().BeEquivalentTo(info, o => o
-            .WithMapping<InstanceInformation, RegisterInstance>(i => i.Id, c => c.InstanceId)
-            .Excluding(i => i.FirstTimeRegistered)
-            .Excluding(i => i.LastRegistered)
-            .Excluding(i => i.InRecoveryMode)
-            .Excluding(i => i.InstalledModules));
-        command.InstalledModules.Should().Equal(loadedModules);
+            // Assert
+            command.Should().BeEquivalentTo(info, o => o
+                .WithMapping<InstanceInformation, RegisterInstance>(i => i.Id, c => c.InstanceId)
+                .Excluding(i => i.FirstTimeRegistered)
+                .Excluding(i => i.LastRegistered)
+                .Excluding(i => i.InRecoveryMode)
+                .Excluding(i => i.InstalledModules));
+            command.InstalledModules.Should().Equal(loadedModules);
+        }
     }
 
-    [Fact]
-    public void ToInstanceInformation_from_command_should_set_all_non_lifecycle_properties()
+    public sealed class ToInstanceInformation : InstanceInformationMapperTests
     {
-        // Arrange
-        var command = CreateCommand();
-        var registrationTime = DateTimeOffset.UtcNow;
+        [Fact]
+        public void Should_set_all_non_lifecycle_properties_from_command()
+        {
+            // Arrange
+            var command = CreateCommand();
+            var registrationTime = DateTimeOffset.UtcNow;
 
-        // Act
-        var result = command.ToInstanceInformation(registrationTime);
+            // Act
+            var result = command.ToInstanceInformation(registrationTime);
 
-        // Assert
-        result.Should().BeEquivalentTo(command, MatchingSharedProperties);
-        result.FirstTimeRegistered.Should().Be(registrationTime);
-        result.LastRegistered.Should().Be(registrationTime);
+            // Assert
+            result.Should().BeEquivalentTo(command, MatchingSharedProperties);
+            result.FirstTimeRegistered.Should().Be(registrationTime);
+            result.LastRegistered.Should().Be(registrationTime);
+        }
     }
 
-    [Fact]
-    public void ApplyTo_from_command_should_update_all_non_lifecycle_properties()
+    public sealed class ApplyTo : InstanceInformationMapperTests
     {
-        // Arrange
-        var command = CreateCommand();
-        var existing = CreateInstanceInformation(command.InstanceId);
-        var firstTimeRegistered = existing.FirstTimeRegistered;
-        var registrationTime = DateTimeOffset.UtcNow;
+        [Fact]
+        public void Should_update_all_non_lifecycle_properties_from_command()
+        {
+            // Arrange
+            var command = CreateCommand();
+            var existing = CreateInstanceInformation(command.InstanceId);
+            var firstTimeRegistered = existing.FirstTimeRegistered;
+            var registrationTime = DateTimeOffset.UtcNow;
 
-        // Act
-        command.ApplyTo(existing, registrationTime);
+            // Act
+            command.ApplyTo(existing, registrationTime);
 
-        // Assert
-        existing.Should().BeEquivalentTo(command, MatchingSharedProperties);
-        existing.FirstTimeRegistered.Should().Be(firstTimeRegistered);
-        existing.LastRegistered.Should().Be(registrationTime);
-    }
+            // Assert
+            existing.Should().BeEquivalentTo(command, MatchingSharedProperties);
+            existing.FirstTimeRegistered.Should().Be(firstTimeRegistered);
+            existing.LastRegistered.Should().Be(registrationTime);
+        }
 
-    [Fact]
-    public void ApplyTo_from_interface_should_copy_all_non_lifecycle_properties()
-    {
-        // Arrange
-        var source = CreateInstanceInformation();
-        var target = CreateInstanceInformation(source.Id);
-        source.InRecoveryMode = false;
-        target.InRecoveryMode = true;
+        [Fact]
+        public void Should_copy_all_non_lifecycle_properties_from_interface()
+        {
+            // Arrange
+            var source = CreateInstanceInformation();
+            var target = CreateInstanceInformation(source.Id);
+            source.InRecoveryMode = false;
+            target.InRecoveryMode = true;
 
-        // Act
-        ((IInstanceInformation)source).ApplyTo(target);
+            // Act
+            ((IInstanceInformation)source).ApplyTo(target);
 
-        // Assert
-        target.Should().BeEquivalentTo(source, o => o.Excluding(i => i.InRecoveryMode));
-        target.InRecoveryMode.Should().BeTrue();
+            // Assert
+            target.Should().BeEquivalentTo(source, o => o.Excluding(i => i.InRecoveryMode));
+            target.InRecoveryMode.Should().BeTrue();
+        }
     }
 
     /// <summary>

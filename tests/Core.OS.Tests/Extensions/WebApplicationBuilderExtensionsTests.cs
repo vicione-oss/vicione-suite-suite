@@ -39,7 +39,7 @@ public class WebApplicationBuilderExtensionsTests
     }
 
     [Collection(StaticSerilogLogger.Name)]
-    public class TryRunCoreOs : WebApplicationBuilderExtensionsTests
+    public sealed class TryRunCoreOs : WebApplicationBuilderExtensionsTests
     {
         [Fact]
         public async Task Should_flush_buffered_log_events_when_preparation_aborts()
@@ -74,7 +74,7 @@ public class WebApplicationBuilderExtensionsTests
         }
     }
 
-    public class PrepareSuite : WebApplicationBuilderExtensionsTests
+    public sealed class PrepareSuite : WebApplicationBuilderExtensionsTests
     {
         // NOTE: The step-focused preparation tests were migrated to
         // Core.OS.Tests.Hosting.SuitePreparationPipelineTests.Steps after the pipeline refactor

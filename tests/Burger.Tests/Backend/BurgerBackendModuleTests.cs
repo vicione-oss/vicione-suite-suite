@@ -11,7 +11,7 @@ namespace Burger.Tests.Backend;
 public class BurgerBackendModuleTests
 {
     [Fact]
-    public void Init_module_should_register_and_configure_services()
+    public void Should_register_and_configure_services()
     {
         // Arrange
         var module = new BurgerBackendModule();

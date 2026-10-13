@@ -8,7 +8,7 @@ using Sdk.Testing.Backend;
 
 namespace Core.OS.Tests.UserManagement.Security;
 
-public sealed class ExternalAuthenticationSettingsTest : IAsyncDisposable
+public sealed class ExternalAuthenticationSettingsTests : IAsyncDisposable
 {
     private readonly RecordingLogger logger = new();
     private ApplicationDbContextSqlite? applicationDbContext;

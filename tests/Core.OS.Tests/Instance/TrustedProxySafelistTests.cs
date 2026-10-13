@@ -6,7 +6,7 @@ namespace Core.OS.Tests.Instance;
 
 public class TrustedProxySafelistTests
 {
-    public class Parse : TrustedProxySafelistTests
+    public sealed class Parse : TrustedProxySafelistTests
     {
         [Fact]
         public void Should_return_empty_safelist_for_no_entries()

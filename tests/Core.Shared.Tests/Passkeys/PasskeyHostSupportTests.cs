@@ -2,7 +2,7 @@ using Core.Shared.Passkeys;
 
 namespace Core.Shared.Tests.Passkeys;
 
-public class PasskeyHostSupportTest
+public class PasskeyHostSupportTests
 {
     private readonly PasskeyHostSupport _sut = new();
 
