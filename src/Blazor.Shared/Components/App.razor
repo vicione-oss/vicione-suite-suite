@@ -36,6 +36,10 @@
 
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script src="_content/ViciOne.Suite.Blazor.Shared/js/reconnect.js"></script>
+    @if (IsNavigationOnLogin())
+    {
+        <script type="module" src="_content/ViciOne.Suite.Blazor.Shared/js/end-circuit-on-page-leave.js"></script>
+    }
     <script async src="_content/ViciOne.Suite.Blazor.Shared/js/loadjs.min.js"></script>
     <script async src="_content/ViciOne.Suite.Blazor.Shared/js/suite.js"></script>
     @RenderScriptResources()

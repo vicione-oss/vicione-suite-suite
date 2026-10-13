@@ -1,15 +1,18 @@
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using Sdk.Client.NotificationArea.Services;
 using Sdk.Client.Services;
 
 namespace Blazor.Server.Backend.Services;
 
-internal sealed class NavigationService : INavigationService, IDisposable
+internal sealed partial class NavigationService : INavigationService, IDisposable
 {
     private readonly ILayoutService _layoutService;
     private readonly IActiveNotificationElementPolicy _activeNotificationElementPolicy;
-    private readonly IJsInterop _interop;
+    private readonly IJSRuntime _jsRuntime;
+    private readonly ILogger<NavigationService> _logger;
 
     public NavigationManager NavManager { get; }
 
@@ -17,13 +20,15 @@ internal sealed class NavigationService : INavigationService, IDisposable
         NavigationManager navigationManager,
         ILayoutService layoutService,
         IActiveNotificationElementPolicy activeNotificationElementPolicy,
-        IJsInterop interop)
+        IJSRuntime jsRuntime,
+        ILogger<NavigationService> logger)
     {
         NavManager = navigationManager;
         NavManager.LocationChanged += NavigationManager_LocationChanged;
         _layoutService = layoutService;
         _activeNotificationElementPolicy = activeNotificationElementPolicy;
-        _interop = interop;
+        _jsRuntime = jsRuntime;
+        _logger = logger;
     }
 
     public void Dispose() => NavManager.LocationChanged -= NavigationManager_LocationChanged;
@@ -47,17 +52,14 @@ internal sealed class NavigationService : INavigationService, IDisposable
 
         NoActiveNotificationElement();
 
-        return _interop.SubmitForm(uriBuilder.Uri.AbsoluteUri, "");
+        return EndCircuitAndNavigate("ViciOne.Interop.signOut", uriBuilder.Uri.AbsoluteUri);
     }
 
     public void RedirectToSignIn()
     {
         var uriBuilder = new UriBuilder($"{NavManager.BaseUri}account/login");
 
-        // Routes renders with prerender:false, so this runs in the circuit and NavigateTo goes through JS
-        // rather than throwing NavigationException. The 404 in aspnetcore#18849 no longer applies: since
-        // .NET 8 an unmatched URI falls back to a real browser navigation, which reaches the Razor Page.
-        NavManager.NavigateTo(uriBuilder.Uri.ToString());
+        _ = EndCircuitAndNavigate("ViciOne.Interop.redirectToSignIn", uriBuilder.Uri.AbsoluteUri);
     }
 
     public void RedirectTo(string route)
@@ -78,6 +80,30 @@ internal sealed class NavigationService : INavigationService, IDisposable
         RedirectTo(newUri);
     }
 
+    private async Task EndCircuitAndNavigate(string identifier, string uri)
+    {
+        try
+        {
+            await _jsRuntime.InvokeVoidAsync(identifier, uri);
+        }
+        catch (Exception ex) when (ex is OperationCanceledException or JSDisconnectedException)
+        {
+            // Ending the circuit cancels this in-flight interop call.
+            LogNavigationCancelled(_logger, ex, identifier);
+        }
+        catch (Exception ex)
+        {
+            // Callers are event handlers and a fire-and-forget redirect, so an exception would fail the circuit or be lost.
+            LogNavigationFailed(_logger, ex, identifier);
+        }
+    }
+
     private void NoActiveNotificationElement()
         => _activeNotificationElementPolicy.NoneActive();
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Navigation via '{Identifier}' was cancelled by the ending circuit.")]
+    private static partial void LogNavigationCancelled(ILogger logger, Exception exception, string identifier);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Navigation via '{Identifier}' failed.")]
+    private static partial void LogNavigationFailed(ILogger logger, Exception exception, string identifier);
 }

@@ -18,7 +18,7 @@
                 <NotAuthorized>
                     @if (context.User.Identity?.IsAuthenticated != true)
                     {
-                        NavigationService.RedirectToSignIn();
+                        RedirectToSignIn();
                     }
                     else
                     {
