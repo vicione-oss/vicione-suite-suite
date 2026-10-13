@@ -95,7 +95,7 @@
 - `Npgsql.EntityFrameworkCore.PostgreSQL`, update to version `10.0.3`
 - `OpenTelemetry` packages, update to version `1.18.0`
 - `System.IO.Abstractions` package, update version to `22.3.0`
-- `ViciOne.Suite.Sdk` packages, update to version `3.4.0`
+- `ViciOne.Suite.Sdk` packages, update to version `3.5.0`
 - `ViciOne.Ui.Blazor.Components` packages, update to version `6.6.0`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
 - `ViciOne.Ui.Localization`, update to version `3.6.0`
