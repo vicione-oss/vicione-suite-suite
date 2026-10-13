@@ -1,7 +1,9 @@
+using System.Collections.Concurrent;
 using AngleSharp.Dom;
 using Blazor.Shared.Onboarding.Components.WizardPages;
 using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Onboarding.Models;
+using Blazor.Shared.Onboarding.Services;
 using Blazor.Shared.Settings.DateAndTime.Services;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.UserInterface.ControlPanels.DateAndTime.Models;
@@ -19,8 +21,11 @@ using HostManagement.Shared.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
+using Microsoft.JSInterop.Infrastructure;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.NavTiles.Services;
+using Sdk.Client.Services;
 using Sdk.Client.Wizards.Components;
 using Sdk.Client.Wizards.Services;
 using Sdk.Instance;
@@ -44,6 +49,8 @@ public sealed class OnboardingWizardTests : IAsyncDisposable
     private readonly TimeProvider _timeProvider = Substitute.For<TimeProvider>();
     private readonly IUiMediator _mediator;
     private readonly OnboardingState _onboardingState;
+    private readonly IJsInterop _jsInterop;
+    private readonly ConcurrentQueue<TaskCompletionSource<IJSVoidResult>> _pendingSlideEnds = new();
 
     private SystemConfiguration _systemConfiguration = SystemConfigurations.CreateDhcp();
     private IEventConsumer<CrossInstanceConfigurationChanged>? _crossInstanceConfigurationChangedConsumer;
@@ -53,6 +60,7 @@ public sealed class OnboardingWizardTests : IAsyncDisposable
     {
         IUiMediator? mediator = null;
         IInstanceInformationProvider? instanceInformationProvider = null;
+        IJsInterop? jsInterop = null;
 
         StubPage<WelcomeWizardPage>();
         StubPage<HostnameWizardPage>();
@@ -64,6 +72,7 @@ public sealed class OnboardingWizardTests : IAsyncDisposable
         {
             mediator = setup.ClientMediator;
             instanceInformationProvider = setup.InstanceInformationProvider;
+            jsInterop = setup.JsInterop;
 
             setup.Services
                 .AddControlPanelInfrastructure()
@@ -72,6 +81,7 @@ public sealed class OnboardingWizardTests : IAsyncDisposable
         }).SetLocalServices();
 
         _mediator = mediator!;
+        _jsInterop = jsInterop!;
         _onboardingState = new OnboardingState { InstanceId = instanceInformationProvider!.Local.Id };
 
         _ctx.Services
@@ -126,6 +136,36 @@ public sealed class OnboardingWizardTests : IAsyncDisposable
     private static TimeZoneDescriptor CreateTimeZoneDescriptor(string timeZoneId)
         => new(timeZoneId, timeZoneId, TimeSpan.Zero, new Uri("https://localhost/flag.svg"));
 
+    /// <summary>
+    /// Slides end only when the test calls <see cref="EndSlide"/>; without this setup every slide ends at once.
+    /// </summary>
+    private void SetupCarouselModule()
+    {
+        var carouselModule = Substitute.For<IJSObjectReference>();
+#pragma warning disable CA2012 // NSubstitute only records the call here; the returned ValueTask is never consumed.
+        carouselModule.InvokeAsync<IJSVoidResult>("waitForTransitionEnd", Arg.Any<CancellationToken>(), Arg.Any<object?[]?>())
+            .Returns(_ =>
+            {
+                var slideEnd = new TaskCompletionSource<IJSVoidResult>();
+                _pendingSlideEnds.Enqueue(slideEnd);
+
+                return new ValueTask<IJSVoidResult>(slideEnd.Task);
+            });
+#pragma warning restore CA2012
+        _jsInterop.IncludeModuleScript<SharedClientModule>("carousel.js", Arg.Any<CancellationToken>()).Returns(carouselModule);
+    }
+
+    private void WaitForSlide(IRenderedComponent<OnboardingWizardBody> wizard)
+        => wizard.WaitForAssertion(() => _pendingSlideEnds.Should().NotBeEmpty());
+
+    private void EndSlide(IRenderedComponent<OnboardingWizardBody> wizard)
+    {
+        WaitForSlide(wizard);
+
+        _pendingSlideEnds.TryDequeue(out var slideEnd);
+        slideEnd!.SetResult(default!);
+    }
+
     private IRenderedComponent<OnboardingWizardBody> RenderWizard()
         => _ctx.Render<OnboardingWizardBody>(builder => builder
             .Add(c => c.Title, "Onboarding")
@@ -146,6 +186,9 @@ public sealed class OnboardingWizardTests : IAsyncDisposable
 
     private static string? GetActivePage(IRenderedComponent<OnboardingWizardBody> wizard)
         => wizard.Find("[data-page]").GetAttribute("data-page");
+
+    private static IReadOnlyList<string?> GetMountedPages(IRenderedComponent<OnboardingWizardBody> wizard)
+        => [.. wizard.FindAll("[data-page]").Select(page => page.GetAttribute("data-page"))];
 
     [Fact]
     public void Should_list_the_registered_pages_in_order()
@@ -204,6 +247,128 @@ public sealed class OnboardingWizardTests : IAsyncDisposable
         _onboardingState.Completed.Should().BeTrue();
         _mediator.Received(1).Send(Arg.Is<SetCrossInstanceConfiguration>(c => c.TimeZoneId == TimeZoneInfo.Utc.Id),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public void Should_keep_previous_page_while_sliding_to_next_step()
+    {
+        // Arrange
+        SetupCarouselModule();
+        var wizard = RenderWizard();
+
+        // Act
+        ClickWhenEnabled(wizard, CommonVocabulary.Next);
+
+        // Assert
+        wizard.WaitForAssertion(() => GetMountedPages(wizard).Should().Equal(nameof(WelcomeWizardPage), nameof(HostnameWizardPage)));
+    }
+
+    [Fact]
+    public void Should_remove_previous_page_when_slide_ends()
+    {
+        // Arrange
+        SetupCarouselModule();
+        var wizard = RenderWizard();
+
+        ClickWhenEnabled(wizard, CommonVocabulary.Next);
+
+        // Act
+        EndSlide(wizard);
+
+        // Assert
+        wizard.WaitForAssertion(() => GetMountedPages(wizard).Should().Equal(nameof(HostnameWizardPage)));
+    }
+
+    [Fact]
+    public void Should_keep_next_page_while_sliding_to_previous_step()
+    {
+        // Arrange
+        SetupCarouselModule();
+        var wizard = RenderWizard();
+
+        ClickWhenEnabled(wizard, CommonVocabulary.Next);
+        EndSlide(wizard);
+
+        // Act
+        ClickWhenEnabled(wizard, CommonVocabulary.BackVerb);
+
+        // Assert
+        wizard.WaitForAssertion(() => GetMountedPages(wizard).Should().Equal(nameof(WelcomeWizardPage), nameof(HostnameWizardPage)));
+    }
+
+    [Fact]
+    public void Should_keep_navigation_enabled_while_page_slides()
+    {
+        // Arrange
+        SetupCarouselModule();
+        var wizard = RenderWizard();
+
+        // Act
+        ClickWhenEnabled(wizard, CommonVocabulary.Next);
+
+        // Assert
+        WaitForSlide(wizard);
+        wizard.WaitForAssertion(() =>
+        {
+            FindButton(wizard, CommonVocabulary.BackVerb).IsDisabled().Should().BeFalse();
+            FindButton(wizard, CommonVocabulary.Next).IsDisabled().Should().BeFalse();
+        });
+        GetMountedPages(wizard).Should().Equal(nameof(WelcomeWizardPage), nameof(HostnameWizardPage));
+    }
+
+    [Fact]
+    public void Should_save_only_active_page_while_previous_page_slides()
+    {
+        // Arrange
+        SetupCarouselModule();
+        var wizard = RenderWizard();
+
+        ClickWhenEnabled(wizard, CommonVocabulary.Next);
+        EndSlide(wizard);
+        ClickWhenEnabled(wizard, CommonVocabulary.Next);
+        WaitForSlide(wizard);
+
+        var hostnameWizardPageState = (HostnameWizardPageState)_ctx.Services
+            .GetRequiredService<IWizardPageRegistry<IOnboardingWizardContext>>()
+            .Single(item => item.ComponentType == typeof(HostnameWizardPage)).State;
+
+        // The hostname page sliding out would now fail to save.
+        hostnameWizardPageState.Hostname = "-edge";
+
+        // Act
+        ClickWhenEnabled(wizard, CommonVocabulary.Next);
+
+        // Assert
+        var hostnameError = string.Format(ValidationMessages.Culture, HostnameValidatorTexts.MustNotStartWithHypenCharacter,
+            TechnicalTerms.Hostname);
+
+        wizard.WaitForAssertion(() => GetMountedPages(wizard).Should().Equal(nameof(TimeZoneWizardPage), nameof(NetworkWizardPage)));
+        wizard.Markup.Should().NotContain(hostnameError);
+    }
+
+    [Fact]
+    public async Task Should_jump_to_first_step_when_reset_moves_more_than_one_step()
+    {
+        // Arrange
+        SetupCarouselModule();
+        var wizard = RenderWizard();
+
+        for (var i = 0; i < 3; i++)
+        {
+            ClickWhenEnabled(wizard, CommonVocabulary.Next);
+            EndSlide(wizard);
+        }
+
+        wizard.WaitForAssertion(() => GetMountedPages(wizard).Should().Equal(nameof(NetworkWizardPage)));
+
+        var pageRegistry = _ctx.Services.GetRequiredService<IWizardPageRegistry<IOnboardingWizardContext>>();
+
+        // Act
+        await wizard.InvokeAsync(() => pageRegistry.Remove(item => item.ComponentType == typeof(HostnameWizardPage)));
+
+        // Assert
+        wizard.WaitForAssertion(() => GetMountedPages(wizard).Should().Equal(nameof(WelcomeWizardPage)));
+        _pendingSlideEnds.Should().BeEmpty();
     }
 
     private sealed class RenderCycleNotifier : ComponentBase

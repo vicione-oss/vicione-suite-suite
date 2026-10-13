@@ -1,9 +1,7 @@
-﻿@using Blazor.Shared.Popup.Components
+@using Blazor.Shared.Components.Carousel
+@using Blazor.Shared.Popup.Components
 @using Blazor.Shared.Popup.Enums
-@using Blazor.Shared.Wizards.Extensions
-@using Blazor.Shared.Wizards.Models
-@using Blazor.Shared.Wizards.Services
-@using Microsoft.AspNetCore.Components.Sections
+@using Sdk.Client.Wizards.Services
 @using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
 @using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
@@ -30,20 +28,21 @@
         </BeforeContent>
 
         <Content>
-            @{
-                var wizardPageRegistryItem = _contentRenderCycle.Items.FirstOrDefault();
-                if (wizardPageRegistryItem is not null)
-                {
-                    var wizardPageState = wizardPageRegistryItem.State;
+            <Carousel TItem="IWizardPageRegistryItem"
+                      Items="_pageItems"
+                      ActiveIndex="_activeIndex"
+                      SlideFrom="_slideFrom"
+                      OnSlideEnded="SlideEnded">
 
-                    <AdvancedErrorBoundary @key="wizardPageRegistryItem">
+                <ItemTemplate Context="wizardPageRegistryItem">
+                    <AdvancedErrorBoundary>
                         <WizardPageContainer WizardPageRegistryItem="@wizardPageRegistryItem"
                                              WizardBodyContentRenderCycle="@_contentRenderCycle"
                                              HasGenericLoadingOverlay="@(LoadingIndicationPlacementBehavior.Placement == LoadingIndicationPlacement.Overlay)"
                                              OnWizardOperationStarted="@WizardOperationStarted"/>
                     </AdvancedErrorBoundary>
-                }
-            }
+                </ItemTemplate>
+            </Carousel>
         </Content>
 
         <ContentActionButtons>

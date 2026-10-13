@@ -1,59 +1,44 @@
-@using Blazor.Shared.Extensions
+@using Blazor.Shared.Components.Carousel
 @using Blazor.Shared.Popup.Components
 @using Blazor.Shared.Popup.ContentOverlays.Models
 @using Microsoft.AspNetCore.Components.Sections
 @using ViciOne.Ui.Blazor.Components.AdvancedErrorBoundary
 
 <div class="control-panel-carousel">
-    <div @ref="_track"
-         class="control-panel-carousel__track @(_transition is not null ? "sliding" : null)"
-         style="margin-left: @((Math.Max(_activeIndex, 0) * -100).ToAttributeValue("%"))">
+    <Carousel TItem="Item"
+              Items="_items"
+              ActiveIndex="_activeIndex"
+              SlideFrom="_transition?.From"
+              OnSlideEnded="SlideEnded">
 
-        @{
-            ControlPanelPageRegistry.BeginUpdate();
-            try
-            {
-                for (var itemIndex = 0; itemIndex < _items.Count; itemIndex++)
-                {
-                    var item = _items[itemIndex];
-                    var renderControlPanel = itemIndex == _activeIndex || item == _transition?.From;
-
-                    var descriptionBannerSectionId = new DescriptionBannerSectionId();
-                    var controlPanelLoadingIndicationSectionId = new ContentOverlaySectionId();
-
-                    <div class="control-panel-carousel__item" @key="item">
-                        @if (renderControlPanel)
-                        {
-                            <AdvancedErrorBoundary>
-                                <PopupContentLayout>
-                                    <PopupStaticContent>
-                                        <SectionOutlet SectionId="descriptionBannerSectionId" />
-                                    </PopupStaticContent>
-
-                                    <PopupScrollContainer CssClass="content-scroll-container">
-                                        <Content>
-                                            <CascadingValue Value="descriptionBannerSectionId">
-                                                <ControlPanelContainer ControlPanelRegistryItem="item.ControlPanelRegistryItem"
-                                                                       LoadingIndicationSectionId="controlPanelLoadingIndicationSectionId" />
-                                            </CascadingValue>
-                                        </Content>
-
-                                        <AfterContent>
-                                            <PopupOverflowEffect CssClass="content-overflow"/>
-
-                                            <SectionOutlet SectionId="controlPanelLoadingIndicationSectionId" />
-                                        </AfterContent>
-                                    </PopupScrollContainer>
-                                </PopupContentLayout>
-                            </AdvancedErrorBoundary>
-                        }
-                    </div>
-                }
+        <ItemTemplate Context="item">
+            @{
+                var descriptionBannerSectionId = new DescriptionBannerSectionId();
+                var controlPanelLoadingIndicationSectionId = new ContentOverlaySectionId();
             }
-            finally
-            {
-                ControlPanelPageRegistry.EndUpdate();
-            }
-        }
-    </div>
+
+            <AdvancedErrorBoundary>
+                <PopupContentLayout>
+                    <PopupStaticContent>
+                        <SectionOutlet SectionId="descriptionBannerSectionId" />
+                    </PopupStaticContent>
+
+                    <PopupScrollContainer CssClass="content-scroll-container">
+                        <Content>
+                            <CascadingValue Value="descriptionBannerSectionId">
+                                <ControlPanelContainer ControlPanelRegistryItem="item.ControlPanelRegistryItem"
+                                                       LoadingIndicationSectionId="controlPanelLoadingIndicationSectionId" />
+                            </CascadingValue>
+                        </Content>
+
+                        <AfterContent>
+                            <PopupOverflowEffect CssClass="content-overflow"/>
+
+                            <SectionOutlet SectionId="controlPanelLoadingIndicationSectionId" />
+                        </AfterContent>
+                    </PopupScrollContainer>
+                </PopupContentLayout>
+            </AdvancedErrorBoundary>
+        </ItemTemplate>
+    </Carousel>
 </div>
