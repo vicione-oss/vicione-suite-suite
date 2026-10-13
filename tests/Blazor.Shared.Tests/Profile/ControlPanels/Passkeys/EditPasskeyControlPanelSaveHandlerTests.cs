@@ -4,7 +4,7 @@ using PasskeyConstants = Core.Shared.Passkeys.Constants;
 
 namespace Blazor.Shared.Tests.Settings.Profile.ControlPanels.Passkeys;
 
-public class EditPasskeyControlPanelSaveHandlerTest
+public class EditPasskeyControlPanelSaveHandlerTests
 {
     [Fact]
     public async Task Should_return_error_when_user_id_is_null()

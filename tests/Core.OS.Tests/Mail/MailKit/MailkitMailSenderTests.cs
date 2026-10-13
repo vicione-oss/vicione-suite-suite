@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Core.OS.Tests.Mail.MailKit;
 
-public class MailkitMailSenderTest
+public class MailkitMailSenderTests
 {
     [Fact]
     public void Should_implement_interface_required_by_identity()

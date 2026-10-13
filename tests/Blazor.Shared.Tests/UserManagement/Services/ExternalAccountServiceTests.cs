@@ -7,7 +7,7 @@ using Sdk.Client.Infrastructure;
 
 namespace Blazor.Shared.Tests.UserManagement.Services;
 
-public sealed class ExternalAccountServiceTest
+public sealed class ExternalAccountServiceTests
 {
     [Fact]
     public async Task Should_return_null_when_no_external_accounts_exist()

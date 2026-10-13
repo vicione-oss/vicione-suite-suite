@@ -66,7 +66,7 @@ public class ModuleMetadataProviderTests
         }
     }
 
-    public class GetModuleMetadata : ModuleMetadataProviderTests
+    public sealed class GetModuleMetadata : ModuleMetadataProviderTests
     {
         [Fact]
         public async Task Should_return_empty_list_if_no_modules_available()

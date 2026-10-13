@@ -7,7 +7,7 @@ using Fluid;
 
 namespace Core.OS.Tests.UserManagement.Services;
 
-public class FluidTemplateRendererTest
+public class FluidTemplateRendererTests
 {
     private static readonly MockFileSystem TestFileSystem = new();
 

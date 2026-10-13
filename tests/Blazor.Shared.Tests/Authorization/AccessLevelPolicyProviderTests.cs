@@ -7,11 +7,11 @@ using Sdk.Authorization;
 
 namespace Blazor.Shared.Tests.Authorization;
 
-public class AccessLevelPolicyProviderFacts
+public class AccessLevelPolicyProviderTests
 {
     private static readonly ILogger<AccessLevelPolicyProvider> Logger = Substitute.For<ILogger<AccessLevelPolicyProvider>>();
 
-    public sealed class GetDefaultPolicyAsync : AccessLevelPolicyProviderFacts
+    public sealed class GetDefaultPolicyAsync : AccessLevelPolicyProviderTests
     {
         [Fact]
         public async Task Should_return_deny_anonymous_requirement()
@@ -27,7 +27,7 @@ public class AccessLevelPolicyProviderFacts
         }
     }
 
-    public sealed class GetFallbackPolicyAsync : AccessLevelPolicyProviderFacts
+    public sealed class GetFallbackPolicyAsync : AccessLevelPolicyProviderTests
     {
         [Fact]
         public async Task Should_return_null()
@@ -43,7 +43,7 @@ public class AccessLevelPolicyProviderFacts
         }
     }
 
-    public sealed class GetPolicyAsync : AccessLevelPolicyProviderFacts
+    public sealed class GetPolicyAsync : AccessLevelPolicyProviderTests
     {
         private const string ModuleId = "moduleId";
         private const string Feature = "feature";

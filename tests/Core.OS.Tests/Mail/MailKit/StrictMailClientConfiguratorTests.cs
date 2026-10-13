@@ -4,7 +4,7 @@ using MailKit.Net.Smtp;
 
 namespace Core.OS.Tests.Mail.MailKit;
 
-public class StrictMailClientConfiguratorTest
+public class StrictMailClientConfiguratorTests
 {
     [Fact]
     public void Should_set_protocols_to_latest_tls()

@@ -97,7 +97,7 @@ public class ModuleArtifactCacheTests
             MinSuiteSdkVersion = minSdkVersion,
         };
 
-    public class GetAvailableModuleMetadata : ModuleArtifactCacheTests
+    public sealed class GetAvailableModuleMetadata : ModuleArtifactCacheTests
     {
         [Fact]
         public async Task Should_return_empty_list_if_no_modules_available()
@@ -195,7 +195,7 @@ public class ModuleArtifactCacheTests
         }
     }
 
-    public class IncrementalRefresh : ModuleArtifactCacheTests
+    public sealed class IncrementalRefresh : ModuleArtifactCacheTests
     {
         [Fact]
         public async Task Should_only_download_metadata_for_newly_added_artifacts()
@@ -271,7 +271,7 @@ public class ModuleArtifactCacheTests
         }
     }
 
-    public class Persistence : ModuleArtifactCacheTests
+    public sealed class Persistence : ModuleArtifactCacheTests
     {
         private string GetExpectedCacheFilePath()
         {

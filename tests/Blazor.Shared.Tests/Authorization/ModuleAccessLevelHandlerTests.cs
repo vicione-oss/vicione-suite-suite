@@ -7,9 +7,9 @@ using Sdk.Authorization.Extensions;
 
 namespace Blazor.Shared.Tests.Authorization;
 
-public class ModuleAccessLevelHandlerFacts
+public class ModuleAccessLevelHandlerTests
 {
-    public sealed class HandleRequirementAsync : ModuleAccessLevelHandlerFacts
+    public sealed class HandleRequirementAsync : ModuleAccessLevelHandlerTests
     {
         private readonly ModuleAccessLevelHandler _moduleAccessLevelHandler;
 

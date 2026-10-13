@@ -14,7 +14,7 @@ public class IFileSystemExtensionsTests
             => _root = _fileSystem.Path.GetFullPath("test-root");
 
         [Fact]
-        public void Returns_resolved_path_for_valid_entry()
+        public void Should_return_resolved_path_for_valid_entry()
         {
             // Act
             var result = _fileSystem.EnsureContainedPath(_root, "file.txt");
@@ -24,7 +24,7 @@ public class IFileSystemExtensionsTests
         }
 
         [Fact]
-        public void Allows_nested_subdirectory_entry()
+        public void Should_allow_nested_subdirectory_entry()
         {
             // Act
             var result = _fileSystem.EnsureContainedPath(_root, "sub/nested/file.txt");
@@ -38,7 +38,7 @@ public class IFileSystemExtensionsTests
         [Theory]
         [InlineData("")]
         [InlineData("   ")]
-        public void Throws_for_empty_entry(string entryName)
+        public void Should_throw_for_empty_entry(string entryName)
         {
             // Act
             var act = () => _fileSystem.EnsureContainedPath(_root, entryName);
@@ -53,7 +53,7 @@ public class IFileSystemExtensionsTests
         [InlineData("../../evil.txt")]
         [InlineData("sub/../../evil.txt")]
         [InlineData("nested/../../../evil.txt")]
-        public void Throws_for_traversing_entry(string entryName)
+        public void Should_throw_for_traversing_entry(string entryName)
         {
             // Act
             var act = () => _fileSystem.EnsureContainedPath(_root, entryName);
@@ -64,7 +64,7 @@ public class IFileSystemExtensionsTests
         }
 
         [Fact]
-        public void Throws_for_rooted_entry()
+        public void Should_throw_for_rooted_entry()
         {
             // Act
             var act = () => _fileSystem.EnsureContainedPath(_root, "/etc/passwd");

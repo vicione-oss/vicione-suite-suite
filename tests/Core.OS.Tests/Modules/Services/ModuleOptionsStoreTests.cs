@@ -53,7 +53,7 @@ public class ModuleOptionsStoreTests
             .BuildServiceProvider();
     }
 
-    public class Store : ModuleOptionsStoreTests
+    public sealed class Store : ModuleOptionsStoreTests
     {
         [Fact]
         public async Task Should_create_configuration_file_as_json()
@@ -98,7 +98,7 @@ public class ModuleOptionsStoreTests
         }
     }
 
-    public class Load : ModuleOptionsStoreTests
+    public sealed class Load : ModuleOptionsStoreTests
     {
         [Fact]
         public async Task Should_load_configuration()
@@ -134,7 +134,7 @@ public class ModuleOptionsStoreTests
         }
     }
 
-    public class ValidateModuleOptions : ModuleOptionsStoreTests
+    public sealed class ValidateModuleOptions : ModuleOptionsStoreTests
     {
         [Fact]
         public async Task Should_validate_possible_startup()

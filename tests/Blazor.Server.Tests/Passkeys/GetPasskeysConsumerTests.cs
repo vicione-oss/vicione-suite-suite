@@ -9,7 +9,7 @@ using Sdk.Testing.Backend;
 
 namespace Blazor.Server.Tests.Passkeys;
 
-public sealed class GetPasskeysConsumerTest
+public sealed class GetPasskeysConsumerTests
 {
     private readonly UserManager<SuiteUser> _userManager = TestFactory.CreateUserManager();
     private readonly ILogger<GetPasskeysConsumer> _logger =

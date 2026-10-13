@@ -12,7 +12,7 @@ namespace Burger.Tests.Client;
 public sealed class BurgerPageTests
 {
     [Fact]
-    public async Task PageGetsRendered()
+    public async Task Should_render_page()
     {
         // Arrange
         await using var ctx = new BunitContext();

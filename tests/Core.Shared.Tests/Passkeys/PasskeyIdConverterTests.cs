@@ -2,7 +2,7 @@ using Core.Shared.Passkeys;
 
 namespace Core.Shared.Tests.Passkeys;
 
-public class PasskeyIdConverterTest
+public class PasskeyIdConverterTests
 {
     [Theory]
     [InlineData("null")]

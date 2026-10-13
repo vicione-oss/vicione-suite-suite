@@ -25,7 +25,7 @@ public class IFileSystemExtensionsTests
         Type = Sdk.Instance.InstanceType.Standalone,
     };
 
-    public class EnsureModuleVersionsFile : IFileSystemExtensionsTests
+    public sealed class EnsureModuleVersionsFile : IFileSystemExtensionsTests
     {
         [Fact]
         public async Task Should_create_default_modules_json_if_it_not_exists()

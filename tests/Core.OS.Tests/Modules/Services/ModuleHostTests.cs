@@ -36,20 +36,23 @@ namespace Core.OS.Tests.Modules.Services;
 
 public class ModuleHostTests
 {
-    [Fact]
-    public void Module_should_be_ordered_by_dependencies()
+    public sealed class Modules : ModuleHostTests
     {
-        // Arrange
-        var manager = CreateModuleHost();
+        [Fact]
+        public void Should_be_ordered_by_dependencies()
+        {
+            // Arrange
+            var manager = CreateModuleHost();
 
-        // Act
-        var moduleInfos = manager.Modules.ToArray();
+            // Act
+            var moduleInfos = manager.Modules.ToArray();
 
-        // Assert
-        moduleInfos.Should().HaveCount(4, "System, UiHost + TestBackend|Client");
+            // Assert
+            moduleInfos.Should().HaveCount(4, "System, UiHost + TestBackend|Client");
+        }
     }
 
-    public class AddModuleServices : ModuleHostTests
+    public sealed class AddModuleServices : ModuleHostTests
     {
         [Fact]
         public async Task Should_register_module_controllers_as_service()
@@ -124,7 +127,7 @@ public class ModuleHostTests
         }
     }
 
-    public class AddUiHostServices : ModuleHostTests
+    public sealed class AddUiHostServices : ModuleHostTests
     {
         [Fact]
         public async Task Should_init_ui_host_services()
@@ -174,7 +177,7 @@ public class ModuleHostTests
         }
     }
 
-    public class GetModule : ModuleHostTests
+    public sealed class GetModule : ModuleHostTests
     {
         [Fact]
         public void Should_get_existing_modules_by_type()
@@ -193,7 +196,7 @@ public class ModuleHostTests
         }
     }
 
-    public class GetModuleAssemblies : ModuleHostTests
+    public sealed class GetModuleAssemblies : ModuleHostTests
     {
         [Fact]
         public void Should_get_existing_module_assemblies()
@@ -212,7 +215,7 @@ public class ModuleHostTests
         }
     }
 
-    public class MapModuleEndpoints : ModuleHostTests
+    public sealed class MapModuleEndpoints : ModuleHostTests
     {
         [Fact]
         public async Task Should_call_map_endpoints_on_all_modules()
@@ -254,7 +257,7 @@ public class ModuleHostTests
         }
     }
 
-    public class UseUiHost : ModuleHostTests
+    public sealed class UseUiHost : ModuleHostTests
     {
         [Fact]
         public async Task Should_initialize_with_options()
@@ -278,7 +281,7 @@ public class ModuleHostTests
         }
     }
 
-    public class UseSecurity : ModuleHostTests
+    public sealed class UseSecurity : ModuleHostTests
     {
         [Fact]
         public async Task Should_call_module_use_security()
@@ -298,7 +301,7 @@ public class ModuleHostTests
         }
     }
 
-    public class UseModuleServices : ModuleHostTests
+    public sealed class UseModuleServices : ModuleHostTests
     {
         [Fact]
         public async Task Should_call_use_services_on_modules()
@@ -318,7 +321,7 @@ public class ModuleHostTests
         }
     }
 
-    public class ConfigureBusRegistrationConfigurator : ModuleHostTests
+    public sealed class ConfigureBusRegistrationConfigurator : ModuleHostTests
     {
         [Fact]
         public void Should_call_module_configure_bus()
@@ -334,10 +337,10 @@ public class ModuleHostTests
         }
     }
 
-    public class MoveModuleResources : ModuleHostTests
+    public sealed class MoveModuleResources : ModuleHostTests
     {
         [Fact]
-        public async Task Module_resources_should_be_copied()
+        public async Task Should_copy_module_resources()
         {
             // Arrange
             var module = new TestBackendModule();
@@ -371,7 +374,7 @@ public class ModuleHostTests
         }
 
         [Fact]
-        public async Task Exception_on_module_resource_move_should_be_catched()
+        public async Task Should_catch_exception_on_module_resource_move()
         {
             // Arrange
             var module = new TestBackendModule();
@@ -396,7 +399,7 @@ public class ModuleHostTests
         }
 
         [Fact]
-        public async Task Module_with_null_resource_options_should_be_skipped()
+        public async Task Should_skip_module_with_null_resource_options()
         {
             // Arrange
             var noResourceModule = Substitute.ForPartsOf<BackendModule>();
@@ -417,7 +420,7 @@ public class ModuleHostTests
         }
 
         [Fact]
-        public async Task CopyAlways_should_overwrite_existing_files()
+        public async Task Should_overwrite_existing_files_for_copy_always()
         {
             // Arrange
             var module = new TestBackendModule(null,
@@ -451,7 +454,7 @@ public class ModuleHostTests
         }
 
         [Fact]
-        public async Task NeverCopy_should_skip_matching_files()
+        public async Task Should_skip_matching_files_for_never_copy()
         {
             // Arrange
             var module = new TestBackendModule(null,
@@ -487,7 +490,7 @@ public class ModuleHostTests
         }
 
         [Fact]
-        public async Task Rule_should_override_default_behavior()
+        public async Task Should_let_rule_override_default_behavior()
         {
             // Arrange — default is NeverCopy, but *.txt rule says CopyAlways
             var module = new TestBackendModule(null,
@@ -525,7 +528,7 @@ public class ModuleHostTests
 
     }
 
-    public class MigrateAndSeedModuleData : ModuleHostTests
+    public sealed class MigrateAndSeedModuleData : ModuleHostTests
     {
         [Fact]
         public async Task Should_call_module_initializer_methods()

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Core.OS.Tests.UserManagement.Security;
 
-public sealed class AccountVerificationTest : IDisposable
+public sealed class AccountVerificationTests : IDisposable
 {
     private const string UserId = "123";
 

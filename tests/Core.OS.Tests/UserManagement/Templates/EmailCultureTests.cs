@@ -2,7 +2,7 @@ using Core.OS.UserManagement.Templates;
 
 namespace Core.OS.Tests.UserManagement.Templates;
 
-public class EmailCultureTest
+public class EmailCultureTests
 {
     [Theory]
     [InlineData("de-DE", "en-US", "de-DE")]

@@ -10,7 +10,7 @@ namespace Burger.Tests.Client;
 public class BurgerModuleTests
 {
     [Fact]
-    public void Init_module_should_register_and_configure_services()
+    public void Should_register_and_configure_services()
     {
         // Arrange
         var module = new BurgerClientModule();

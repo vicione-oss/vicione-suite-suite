@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Blazor.Server.Tests.Services;
 
-public sealed class ExternalLoginServiceTest
+public sealed class ExternalLoginServiceTests
 {
     private const string LoginProvider = "OpenIdConnect";
     private const string ProviderKey = "some-sub-id";

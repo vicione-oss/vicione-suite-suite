@@ -10,7 +10,7 @@ using PasskeyConstants = Core.Shared.Passkeys.Constants;
 
 namespace Blazor.Shared.Tests.Settings.Profile.ControlPanels.Passkeys;
 
-public sealed class AddPasskeyControlPanelSaveHandlerTest
+public sealed class AddPasskeyControlPanelSaveHandlerTests
 {
     [Fact]
     public async Task Should_validate_that_name_is_not_null()

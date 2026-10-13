@@ -33,7 +33,7 @@ public partial class SuiteDependencyContextExtensionsTests
         #endregion
 
         [Fact]
-        public void Core_assemblies_dont_map_to_core()
+        public void Should_not_map_core_assemblies_to_core()
         {
             // Arrange
             var suiteContext = new TestDependencyContextBuilder()
@@ -48,7 +48,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Only_shared_uihost_assemblies_should_map_to_core()
+        public void Should_map_only_shared_uihost_assemblies_to_core()
         {
             // Arrange
             var suiteContext = new TestDependencyContextBuilder()
@@ -70,7 +70,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Ping_backend_module_should_map_to_core_and_uihost()
+        public void Should_map_ping_backend_module_to_core_and_uihost()
         {
             // Arrange
             var suiteContext = new TestDependencyContextBuilder()
@@ -89,7 +89,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Ping_client_module_assemblies_should_map_to_core_and_uihost()
+        public void Should_map_ping_client_module_assemblies_to_core_and_uihost()
         {
             // Arrange
             var builder = new TestDependencyContextBuilder()
@@ -122,7 +122,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Ping_client_module_assembly_versions_should_map_to_blazor_server()
+        public void Should_map_ping_client_module_assembly_versions_to_blazor_server()
         {
             // Arrange
             var coreVersions = new TestDependencyVersions();
@@ -153,7 +153,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Ping_client_module_assembly_versions_should_map()
+        public void Should_map_ping_client_module_assembly_versions()
         {
             // Arrange
             var coreVersions = new TestDependencyVersions();
@@ -174,7 +174,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Ping_module_different_assemblies_should_map_versions()
+        public void Should_map_versions_of_different_ping_module_assemblies()
         {
             // Arrange
             var coreVersions = new TestDependencyVersions();
@@ -198,7 +198,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Cluster_management_backend_module_assembly_versions_should_map()
+        public void Should_map_cluster_management_backend_module_assembly_versions()
         {
             // Arrange
             var coreVersions = new TestDependencyVersions();
@@ -244,7 +244,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Cluster_management_client_module_assembly_versions_should_map()
+        public void Should_map_cluster_management_client_module_assembly_versions()
         {
             // Arrange
             var coreVersions = new TestDependencyVersions();
@@ -281,7 +281,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Public_module_assembly_should_map_to_backend()
+        public void Should_map_public_module_assembly_to_backend()
         {
             // Arrange
             var pingVersions = new TestDependencyVersions();
@@ -314,7 +314,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Module_only_dependencies_should_map_to_backend_origin()
+        public void Should_map_module_only_dependencies_to_backend_origin()
         {
             // Arrange - Ping.Backend|Ping.Client|ClusterManagement.Client depend on ThirdPartyPackage
             var pingVersions = new TestDependencyVersions
@@ -349,7 +349,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Client_only_dependencies_should_map_to_one_module()
+        public void Should_map_client_only_dependencies_to_one_module()
         {
             // Arrange - Ping.Client|ClusterManagement.Client depend on ThirdPartyPackage
             var pingVersions = new TestDependencyVersions
@@ -372,7 +372,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Create_mapping_summary_should_contain_no_mismatch()
+        public void Should_create_mapping_summary_without_mismatch()
         {
             // Arrange
             var suiteContext = new TestDependencyContextBuilder()
@@ -392,7 +392,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Create_mapping_summary_should_contain_mismatches_for_different_versions()
+        public void Should_create_mapping_summary_with_mismatches_for_different_versions()
         {
             // Arrange
             var pingVersions = new TestDependencyVersions
@@ -429,7 +429,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Create_mapping_summary_should_contain_matches_for_sdk_pipeline_versions()
+        public void Should_create_mapping_summary_with_matches_for_sdk_pipeline_versions()
         {
             // Arrange
             var pingVersions = new TestDependencyVersions
@@ -455,7 +455,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Create_mapping_summary_should_take_latest_shared_version()
+        public void Should_create_mapping_summary_with_latest_shared_version()
         {
             // Arrange
             var mgmtVersions = new TestDependencyVersions
@@ -489,7 +489,7 @@ public partial class SuiteDependencyContextExtensionsTests
         }
 
         [Fact]
-        public void Unrelated_modules_should_resolve_highest_compatible_shared_version()
+        public void Should_resolve_highest_compatible_shared_version_for_unrelated_modules()
         {
             // Arrange
             // Module A and module B have no dependency relation to each other and no other module

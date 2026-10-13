@@ -30,7 +30,7 @@ public sealed class IConfigurationExtensionsTests
         }
 
         [Fact]
-        public void Configuration_should_work()
+        public void Should_read_uihost_from_core_app_settings()
         {
             // Arrange
             var builder = new ConfigurationBuilder();

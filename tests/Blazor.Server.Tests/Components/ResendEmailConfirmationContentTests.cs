@@ -11,7 +11,7 @@ using Sdk.Backend.Messaging;
 
 namespace Blazor.Server.Tests.Components;
 
-public sealed class ResendEmailConfirmationContentTest
+public sealed class ResendEmailConfirmationContentTests
 {
     private const string TestEmail = "user@example.com";
 
@@ -19,7 +19,7 @@ public sealed class ResendEmailConfirmationContentTest
     private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
     private readonly ISuiteMediator _mediator = Substitute.For<ISuiteMediator>();
 
-    public ResendEmailConfirmationContentTest()
+    public ResendEmailConfirmationContentTests()
     {
         _navigationService.NavManager.Returns(new TestNavigationManager());
     }

@@ -34,7 +34,7 @@ public class OrderBurgerStateMachineTests : TestWithDbContextSqlite<BurgerDbCont
     }
 
     [Fact]
-    public async Task Command_should_be_consumed()
+    public async Task Should_consume_command()
     {
         await using var tester = new MassTransitTester(_configureServices);
         // Arrange

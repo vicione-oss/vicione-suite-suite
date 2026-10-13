@@ -12,13 +12,13 @@ using static Core.OS.Tests.DataTransfer.Helpers.UnitTestHelper;
 
 namespace Core.OS.Tests.DataTransfer;
 
-public class SynchronizeDataSqlite2SqliteFacts
+public class SynchronizeDataSqlite2SqliteTests
 {
     private readonly string _pathDbSqlite = "..\\..\\..\\DataTransfer\\";
 
     [Fact]
     [Trait(Traits.Category, Traits.ManualDbTest)]
-    public async Task FirstStep_CheckSimpleData()
+    public async Task Should_synchronize_simple_data()
     {
         // Arrange
         // Source database configuration.
@@ -56,7 +56,7 @@ public class SynchronizeDataSqlite2SqliteFacts
 
     [Fact]
     [Trait(Traits.Category, Traits.ManualDbTest)]
-    public async Task SynchronizeSuccessful_EmployeeSmallDB()
+    public async Task Should_synchronize_employee_small_db()
     {
         // Arrange
         // Source database configuration.
@@ -106,7 +106,7 @@ public class SynchronizeDataSqlite2SqliteFacts
 
     [Fact]
     [Trait(Traits.Category, Traits.ManualDbTest)]
-    public async Task SQLInjection_Insert_ExecuteSqlCommand()
+    public async Task Should_not_execute_sql_injection_on_insert()
     {
         // Ein gefundenes Single-Quote in einer TEXT-Spalte wird mit weiterem Single-Quote maskiert.
         // Dieses Single-Quote interpretiert die sqlite-DB als Escape-Zeichen.
@@ -158,7 +158,7 @@ public class SynchronizeDataSqlite2SqliteFacts
 
     [Fact]
     [Trait(Traits.Category, Traits.ManualDbTest)]
-    public async Task SQLInjection_Insert_CancelInsert()
+    public async Task Should_cancel_insert_of_sql_injection_values()
     {
         // Bei einigen Datensätzen der Tabelle "Titles" wurden in der Spalte "Title" SQL-Injection-Werte eingetragen.
         // Arrange

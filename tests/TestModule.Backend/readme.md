@@ -21,14 +21,14 @@ durch Ausführen eines Scriptes erstellt werden:
 
 	Testfall										Script - Kommandozeile						Script - Powershell
 	
-	FirstStep_CheckSimpleData						-
+	Should_synchronize_simple_data					-
 	
-	SynchronizeSuccessful_EmployeeSmallDB			CreateDbEmployeeSmall.cmd					CreateDbEmployeeSmall.ps1
+	Should_synchronize_employee_small_db			CreateDbEmployeeSmall.cmd					CreateDbEmployeeSmall.ps1
 	
-	SQLInjection_Insert_CancelInsert				CreateDbEmployeeInjectionCancelInsert.cmd	CreateDbEmployeeInjectionCancelInsert.ps1
+	Should_cancel_insert_of_sql_injection_values	CreateDbEmployeeInjectionCancelInsert.cmd	CreateDbEmployeeInjectionCancelInsert.ps1
 	Fix_SQLInjection_Insert_CancelInsert
 	
-	SQLInjection_Insert_ExecuteSqlCommand			CreateDbEmployeeInjectionExecute.cmd		CreateDbEmployeeInjectionExecute.ps1
+	Should_not_execute_sql_injection_on_insert		CreateDbEmployeeInjectionExecute.cmd		CreateDbEmployeeInjectionExecute.ps1
 	Fix_SQLInjection_Insert_ExecuteSqlCommand
 	
 
@@ -85,4 +85,4 @@ Szenario 2 (von Postgres nach Sqlite)
 5. Die sich in dem Verzeichnis "docker-entrypoint-initdb.d" befindlichen Script-Dateien werden beim erstmaligen Start des Docker-Containers automatisch ausgeführt. 
    Sie erstellen die Test-Datenbanken und befüllen die Tabellen mit Daten.
 
-6. Im Anschluss können die Unit-Tests der Testklasse "SynchronizeDataPostgres2SqliteFacts" ausgeführt werden.
+6. Im Anschluss können die Unit-Tests der Testklasse "SynchronizeDataPostgres2SqliteTests" ausgeführt werden.
