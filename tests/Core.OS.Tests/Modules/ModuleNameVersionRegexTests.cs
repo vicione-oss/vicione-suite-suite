@@ -49,6 +49,37 @@ public class ModuleNameVersionRegexTests
             moduleVersion.Should().BeEquivalentTo(new SemVersion(0, 24, 0, ["rc5"]));
         }
 
+        [Theory]
+        [InlineData("3.0.0-beta2-linux-x64_3.0.0.json", "3.0.0-beta2")]
+        [InlineData("3.0.0-rc1-linux-arm64.zip", "3.0.0-rc1")]
+        [InlineData("0.24.0-alpha1-win-x64.zip", "0.24.0-alpha1")]
+        [InlineData("0.24.0-linux-arm64_1.0.0.json", "0.24.0")]
+        [InlineData("0.24.0-ci8423423-linux-arm64.zip", "0.24.0-ci8423423")]
+        public void Should_parse_version_with_any_prerelease_label(string path, string expectedVersion)
+        {
+            // Act
+            var match = ModuleNameVersionRegex.GetModuleVersion(path, out var moduleVersion);
+
+            // Assert
+            match.Should().BeTrue();
+            moduleVersion.Should().BeEquivalentTo(SemVersion.Parse(expectedVersion));
+        }
+
+        [Fact]
+        public void Should_keep_unknown_prerelease_label()
+        {
+            // Arrange
+            var path = "3.0.0-preview3-linux-x64_3.0.0.json";
+
+            // Act
+            var match = ModuleNameVersionRegex.GetModuleVersion(path, out var moduleVersion);
+
+            // Assert
+            match.Should().BeTrue();
+            moduleVersion!.IsPrerelease.Should().BeTrue();
+            moduleVersion.Prerelease.Should().Be("preview3");
+        }
+
         [Fact]
         public void Should_return_false_for_invalid_name()
         {
@@ -72,6 +103,8 @@ public class ModuleNameVersionRegexTests
         [InlineData("0.24.0-amd64_1.19.0.json", "0.24.0", "amd64", "1.19.0")]
         [InlineData("0.24.0-ci2546490531-win-x64_2.0.0.json", "0.24.0-ci2546490531", "win-x64", "2.0.0")]
         [InlineData("0.24.0-ci2510650262-win-x64_2.0.1.json", "0.24.0-ci2510650262", "win-x64", "2.0.1")]
+        [InlineData("0.24.0-linux-arm64_1.0.0.json", "0.24.0", "linux-arm64", "1.0.0")]
+        [InlineData("3.0.0-beta2-linux-x64_3.0.0.json", "3.0.0-beta2", "linux-x64", "3.0.0")]
         public void Should_parse_release_metadata_file_name(string name, string expectedVersion, string expectedArchitecture, string expectedSdkVersion)
         {
             // Act

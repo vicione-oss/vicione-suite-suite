@@ -55,6 +55,28 @@ public class IArtifactQueryResultExtensionsTests
         }
 
         [Fact]
+        public void Should_order_beta_and_rc_above_older_release_when_ci_is_excluded()
+        {
+            // Arrange
+            var queryResult = CreateQueryResult(
+                "2.9.0-linux-arm64_1.0.0.json",
+                "3.0.0-beta2-linux-arm64_1.0.0.json",
+                "3.0.0-ci1523472-linux-arm64_1.0.0.json",
+                "3.0.0-rc1-linux-arm64_1.0.0.json"
+            );
+
+            // Act
+            var ordered = queryResult.OrderModuleArtifactsByVersionDesc(k => !k.IsCiBuild()).ToList();
+
+            // Assert
+            ordered.Select(a => a.Name).Should().Equal(
+                "3.0.0-rc1-linux-arm64_1.0.0.json",
+                "3.0.0-beta2-linux-arm64_1.0.0.json",
+                "2.9.0-linux-arm64_1.0.0.json"
+            );
+        }
+
+        [Fact]
         public void Should_exclude_artifacts_with_unparseable_names()
         {
             // Arrange

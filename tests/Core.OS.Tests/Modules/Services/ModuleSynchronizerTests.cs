@@ -329,6 +329,37 @@ public class ModuleSynchronizerTests
                 && k.Error!.ErrorCode == ModuleErrorCodes.FoundCiVersionOnly);
         }
 
+        [Theory]
+        [InlineData("3.0.0-beta2-linux-x64.zip", "3.0.0-beta2")]
+        [InlineData("3.0.0-rc1-linux-x64.zip", "3.0.0-rc1")]
+        public async Task Should_resolve_module_to_beta_or_rc_version(string artifactName, string expectedVersion)
+        {
+            // Arrange
+            var moduleArtifact = Substitute.For<IArtifact>();
+            moduleArtifact.Name.Returns(artifactName);
+            moduleArtifact.Path.Returns($"modules/{_moduleA.Name}/");
+            moduleArtifact.Repository.Returns("vicione-suite");
+
+            var matchVersion = Arg.Is<Version>(k => k!.Major == _sdkVersion.Major && k.Minor == _sdkVersion.Minor);
+            _moduleRepository.QueryLatestModuleMetadataArtifact(matchVersion, _moduleA.Name, null, null, Arg.Any<CancellationToken>())
+                .Returns(moduleArtifact);
+
+            var synchronizer = new ModuleSynchronizer(_fileSystem);
+            synchronizer
+                .WithPackageSdkValidation()
+                .WithPackages([_moduleA])
+                .WithApiAdapter(_moduleRepository)
+                .WithModulesPath(ModulesFolder);
+
+            // Act
+            var result = await synchronizer.ProcessSynchronization(TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Resolved.Should().ContainSingle(k => k.Name == ModuleA
+                && k.Error == null
+                && k.Version!.ToString() == expectedVersion);
+        }
+
         [Fact]
         public async Task Should_not_resolve_module_to_invalid_version()
         {

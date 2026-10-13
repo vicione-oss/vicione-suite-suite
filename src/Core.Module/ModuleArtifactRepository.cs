@@ -195,7 +195,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
         // -> .../vicione-suite/modules/ViciOne.Suite.ClusterManagement/0.32.1-linux-arm64.zip
         var aqlQuery = artifactRepository.CreateQueryBuilder()
             .AndPathMatches($"{ModulesBaseFolder}/{package.Name}")
-            .AndNameMatches($"*{package.Version}-{platform.ModuleRuntimeIdentifier}_*.json")
+            .AndNameMatches($"{package.Version}-{platform.ModuleRuntimeIdentifier}_*.json")
             .OrderByDescending("path", "name")
             .Build();
 
@@ -297,7 +297,7 @@ public sealed partial class ModuleArtifactRepository(IArtifactRepository artifac
 
         LogQueryResultErrors(result);
 
-        return result.OrderModuleArtifactsByVersionDesc(k => !k.IsPrerelease &&
+        return result.OrderModuleArtifactsByVersionDesc(k => !k.IsCiBuild() &&
             (major is null || major == k.Major) &&
             (minor is null || minor == k.Minor))
             .FirstOrDefault();

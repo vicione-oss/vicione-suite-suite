@@ -586,6 +586,46 @@ public class ModuleMetadataProviderTests
         }
 
         [Fact]
+        public async Task Should_set_pending_install_operation_to_newest_non_ci_version_if_a_newer_ci_version_exists()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
+            var module = metadata.First();
+            var betaVersion = "3.0.0-beta2";
+
+            var installed = new List<ModuleMetadataBundle>
+            {
+                new()
+                {
+                    ModuleId = module.Name,
+                    Metadata = new ModuleMetadata { Name = module.Name, Version = ModuleConstants.UnresolvedVersionMarker, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+                    Installed = true,
+                    Errors = [new ErrorInfo(ModuleErrorCodes.FoundNoVersion, "No version found")]
+                }
+            };
+            var available = new List<ModuleMetadata>
+            {
+                new() { Name = module.Name, Version = "3.0.0-ci1523472", MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+                new() { Name = module.Name, Version = betaVersion, MinSuiteSdkVersion = module.MinSuiteSdkVersion },
+            };
+
+            _moduleManager.GetManifestModules().Returns(installed);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
+
+            // Assert
+            var bundle = result.First(k => k.ModuleId == module.Name);
+            bundle.PendingOperation.Should().NotBeNull();
+            bundle.PendingOperation!.OperationKind.Should().Be(ModulePackageOperationKind.Install);
+            bundle.PendingOperation.Package.Version.Should().Be(betaVersion);
+            bundle.CanUpdate.Should().BeFalse("the restart installs the beta, not the CI build");
+        }
+
+        [Fact]
         public async Task Should_not_set_pending_install_operation_if_found_no_version_error_is_absent()
         {
             // Arrange
