@@ -6,8 +6,7 @@ export class AuthenticationCookieUpdater {
         url.searchParams.append('nonce', nonce);
 
         const response = await fetch(url, {
-            cache: 'no-store',
-            credentials: 'same-origin'
+            cache: 'no-store'
         });
 
         return response.ok && response.status === 204;
