@@ -1,34 +1,17 @@
 ﻿.control-panel-carousel {
     height: 100%;
-    overflow: hidden;
 
-    .control-panel-carousel__track {
-        display: flex;
-        width: 100%; // an auto width grows by the negative margin, which would widen every item with it
-        height: 100%;
+    $content-padding-horizontal: 32px;
 
-        &.sliding {
-            transition: margin-left 200ms ease-in;
-        }
-    }
-
-    .control-panel-carousel__item {
-        height: 100%;
-        width: 100%; // take full width to push sibling items to invisible area
-        flex-shrink: 0; // do not allow the item to shrink
-
-        $content-padding-horizontal: 32px;
-
-        ::deep .content-scroll-container {
-            .popup-scroll-container__content {
-                padding-left: $content-padding-horizontal;
-                padding-right: $content-padding-horizontal;
-            }
-        }
-
-        ::deep .content-overflow {
+    ::deep .content-scroll-container {
+        .popup-scroll-container__content {
             padding-left: $content-padding-horizontal;
             padding-right: $content-padding-horizontal;
         }
+    }
+
+    ::deep .content-overflow {
+        padding-left: $content-padding-horizontal;
+        padding-right: $content-padding-horizontal;
     }
 }

@@ -1,11 +1,7 @@
 using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Logging;
-using Microsoft.JSInterop;
 using Sdk.Client.ControlPanels.Services;
-using Sdk.Client.Extensions;
 using Sdk.Client.Models;
-using Sdk.Client.Services;
 
 namespace Blazor.Shared.Settings.Components;
 
@@ -22,8 +18,8 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
     private sealed class Transition
     {
         /// <summary>
-        /// The panel the slide moves away from; the same <see cref="Item"/> instance is kept in the items, so Blazor keeps it
-        /// mounted until the slide ends.
+        /// The panel the slide moves away from; the same <see cref="Item"/> instance stays in the items, so the carousel keeps
+        /// it mounted until the slide ends.
         /// </summary>
         public required Item From { get; init; }
 
@@ -33,17 +29,12 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
         public required bool PopWhenEnded { get; init; }
 
         public required IControlPanelRegistryItem To { get; init; }
-
-        public bool EndAwaited { get; set; }
     }
 
     private readonly List<Item> _items = [];
     private int _activeIndex = -1;
     private Transition? _transition;
     private bool _shouldRender;
-
-    private ElementReference _track;
-    private IJSObjectReference? _jsModule;
 
     private bool _disposed;
 
@@ -53,17 +44,11 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
 
     private CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
-    [Inject] private IControlPanelPageRegistry ControlPanelPageRegistry { get; set; } = default!;
-
     [Inject] private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
 
     [Inject] private INavigateBackRequest NavigateBackRequest { get; set; } = default!;
 
     [Inject] private SettingsModuleState SettingsModuleState { get; set; } = default!;
-
-    [Inject] private IJsInterop JsInterop { get; set; } = default!;
-
-    [Inject] private ILogger<ControlPanelCarousel> Logger { get; set; } = default!;
 
     protected override void OnInitialized()
     {
@@ -88,8 +73,6 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
 
         _settingsModuleStateSemaphore.Dispose();
 
-        await _jsModule.TryDisposeAsync(Logger);
-
         // The commit of a slide waits for its end, which no longer comes. It runs last because it notifies subscribers, and
         // one that throws must not skip the cleanup above.
         EndTransition(_transition);
@@ -107,45 +90,18 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
         return false;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async Task SlideEnded(Item from)
     {
-        if (_disposed || _transition is not { EndAwaited: false } transition)
+        if (_disposed)
             return;
-
-        transition.EndAwaited = true;
 
         try
         {
-            try
-            {
-                _jsModule ??= await JsInterop.IncludeModuleScript<SharedClientModule>("control-panel-carousel.js", CancellationToken);
-
-                // The import ignores cancellation, so a carousel disposed meanwhile has not released the module yet.
-                if (_disposed)
-                {
-                    await _jsModule.TryDisposeAsync(Logger);
-
-                    return;
-                }
-
-                if (_jsModule is not null)
-                    await _jsModule.InvokeVoidAsync("waitForTransitionEnd", CancellationToken, _track);
-            }
-            catch (JSException ex)
-            {
-                // A failed wait ends the slide anyway, so the panel sliding out does not stay mounted off-screen.
-                Logger.LogWarning(ex, "Waiting for the control panel slide to end failed.");
-            }
-            catch (OperationCanceledException ex) when (!_disposed)
-            {
-                // The JS interop call timed out; the slide ends anyway, so the panel sliding out does not stay mounted off-screen.
-                Logger.LogWarning(ex, "Waiting for the control panel slide to end timed out.");
-            }
-
             await _settingsModuleStateSemaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
             try
             {
-                EndTransition(transition);
+                if (_transition?.From == from)
+                    EndTransition(_transition);
             }
             finally
             {
@@ -163,10 +119,6 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
         catch (ObjectDisposedException)
         {
             // CancellationTokenSource behind CancellationToken already disposed, nothing we can do, return gracefully.
-        }
-        catch (JSDisconnectedException)
-        {
-            // The circuit is gone mid-slide; nothing left to clean up.
         }
     }
 

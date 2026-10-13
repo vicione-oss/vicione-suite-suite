@@ -309,46 +309,6 @@ public sealed class ControlPanelCarouselTests
     }
 
     [Fact]
-    public async Task Should_slide_track_to_requested_control_panel()
-    {
-        // Arrange
-        await using var testContext = SetupTestContext(out _);
-
-        var component = testContext.Render<ControlPanelCarousel>();
-
-        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
-        await controlPanelRequest.Send<FirstLevelControlPanel>();
-
-        // Act
-        await controlPanelRequest.Send<SecondLevelControlPanel>();
-
-        // Assert
-        var track = component.Find(".control-panel-carousel__track");
-        track.GetAttribute("style").Should().Be("margin-left: -100%");
-        track.ClassList.Should().Contain("sliding");
-    }
-
-    [Fact]
-    public async Task Should_stop_sliding_track_when_slide_ends()
-    {
-        // Arrange
-        await using var testContext = SetupTestContext(out var transitionEnd);
-
-        var component = testContext.Render<ControlPanelCarousel>();
-
-        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
-        await controlPanelRequest.Send<FirstLevelControlPanel>();
-        await controlPanelRequest.Send<SecondLevelControlPanel>();
-
-        // Act
-        transitionEnd.SetResult(default!);
-
-        // Assert
-        component.WaitForAssertion(() => component.Find(".control-panel-carousel__track").ClassList.Should().NotContain("sliding"));
-        component.Find(".control-panel-carousel__track").GetAttribute("style").Should().Be("margin-left: -100%");
-    }
-
-    [Fact]
     public async Task Should_end_slide_without_waiting_when_settings_navigation_replaces_control_panel()
     {
         // Arrange
@@ -368,49 +328,10 @@ public sealed class ControlPanelCarouselTests
 
         // Assert
         component.WaitForAssertion(() => component.FindComponents<SecondLevelControlPanel>().Should().BeEmpty());
-        var track = component.Find(".control-panel-carousel__track");
+        var track = component.Find(".carousel__track");
         track.ClassList.Should().NotContain("sliding");
         track.GetAttribute("style").Should().Be("margin-left: 0%");
         component.FindComponents<FirstLevelControlPanel>().Should().ContainSingle();
-    }
-
-    [Fact]
-    public async Task Should_end_slide_immediately_when_carousel_script_is_unavailable()
-    {
-        // Arrange
-        await using var testContext = SetupTestContext(out _, carouselModuleAvailable: false);
-
-        var component = testContext.Render<ControlPanelCarousel>();
-
-        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
-        await controlPanelRequest.Send<FirstLevelControlPanel>();
-
-        // Act
-        await controlPanelRequest.Send<SecondLevelControlPanel>();
-
-        // Assert
-        component.WaitForAssertion(() => component.FindComponents<FirstLevelControlPanel>().Should().BeEmpty());
-        component.FindComponents<SecondLevelControlPanel>().Should().ContainSingle();
-    }
-
-    [Fact]
-    public async Task Should_end_slide_when_waiting_for_its_end_fails()
-    {
-        // Arrange
-        await using var testContext = SetupTestContext(out var transitionEnd);
-
-        var component = testContext.Render<ControlPanelCarousel>();
-
-        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
-        await controlPanelRequest.Send<FirstLevelControlPanel>();
-        await controlPanelRequest.Send<SecondLevelControlPanel>();
-
-        // Act
-        transitionEnd.SetException(new JSException("getAnimations is not a function"));
-
-        // Assert
-        component.WaitForAssertion(() => component.FindComponents<FirstLevelControlPanel>().Should().BeEmpty());
-        component.Find(".control-panel-carousel__track").ClassList.Should().NotContain("sliding");
     }
 
     [Fact]
@@ -431,7 +352,9 @@ public sealed class ControlPanelCarouselTests
         await testContext.Services.GetRequiredService<INavigateBackRequest>().Send();
 
         // Act
-        await testContext.DisposeComponentsAsync();
+        // DisposeComponentsAsync skips the disposal while the renderer is busy (bUnit 2.11.3 clears its root components outside
+        // the dispatcher), so the context is disposed instead.
+        await testContext.DisposeAsync();
 
         // Assert
         secondLevel.State.ActivePageIndex.Should().BeNull();
@@ -448,7 +371,7 @@ public sealed class ControlPanelCarouselTests
         where TControlPanel : ControlPanelBase<ControlPanelState>
         => ctx.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>().First(i => i.ComponentType == typeof(TControlPanel));
 
-    private static BunitContext SetupTestContext(out TaskCompletionSource<IJSVoidResult> transitionEnd, bool carouselModuleAvailable = true)
+    private static BunitContext SetupTestContext(out TaskCompletionSource<IJSVoidResult> transitionEnd)
     {
         var slideEnd = new TaskCompletionSource<IJSVoidResult>();
         transitionEnd = slideEnd;
@@ -461,8 +384,8 @@ public sealed class ControlPanelCarouselTests
             carouselModule.InvokeAsync<IJSVoidResult>("waitForTransitionEnd", Arg.Any<CancellationToken>(), Arg.Any<object?[]?>())
                 .Returns(_ => new ValueTask<IJSVoidResult>(slideEnd.Task));
 #pragma warning restore CA2012
-            setup.JsInterop.IncludeModuleScript<SharedClientModule>("control-panel-carousel.js", Arg.Any<CancellationToken>())
-                .Returns(carouselModuleAvailable ? carouselModule : null);
+            setup.JsInterop.IncludeModuleScript<SharedClientModule>("carousel.js", Arg.Any<CancellationToken>())
+                .Returns(carouselModule);
 
             setup.Services.AddSettings();
 

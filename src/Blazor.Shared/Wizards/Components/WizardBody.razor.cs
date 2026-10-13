@@ -27,6 +27,9 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
     private bool _requestedExit;
 
     private WizardBodyContentRenderCycle _contentRenderCycle = new();
+    private List<IWizardPageRegistryItem> _pageItems = [];
+    private int _activeIndex = -1;
+    private IWizardPageRegistryItem? _slideFrom;
     private int _wizardPageEditRunningCount;
     private readonly Lock _wizardPageEditRunningCountLock = new();
 
@@ -193,6 +196,8 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
                     _contentRenderCycle = new(State.ActiveStep.HasValue ? [State.ActiveStep.Value.WizardPageRegistryItem] : []);
                     _contentRenderCycle.Completed += ContentRenderCycleCompleted;
 
+                    UpdateCarousel();
+
                     State.BeginUpdate();
                     try
                     {
@@ -259,6 +264,27 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
 
     private void ContentRenderCycleCompleted()
         => UpdateContentActionButtonStates();
+
+    private void UpdateCarousel()
+    {
+        var previousItem = _pageItems.ElementAtOrDefault(_activeIndex);
+
+        _pageItems = [.. State.Steps.Select(step => step.WizardPageRegistryItem)];
+        _activeIndex = State.ActiveStep is { } activeStep ? activeStep.Number - 1 : -1;
+
+        // Only a step change to a neighbour slides; the first page, a reset and any longer step change jump.
+        var previousIndex = previousItem is null ? -1 : _pageItems.IndexOf(previousItem);
+
+        _slideFrom = previousIndex >= 0 && Math.Abs(_activeIndex - previousIndex) == 1 ? previousItem : null;
+    }
+
+    private void SlideEnded(IWizardPageRegistryItem slideFrom)
+    {
+        if (slideFrom != _slideFrom)
+            return;
+
+        _slideFrom = null;
+    }
 
     private async Task WizardOperationStarted(IWizardOperation wizardOperation)
     {
@@ -470,7 +496,11 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
         {
             State.LastSaveErrorResults = [];
 
-            var wizardPageEdits = WizardPageEditRegistry.ToArray();
+            var activeWizardPageState = State.ActiveStep?.WizardPageRegistryItem.State;
+
+            // Only the active page saves: a page sliding out is still registered, and saving it again could apply the
+            // summary or show its errors on the page navigated to.
+            var wizardPageEdits = WizardPageEditRegistry.Where(wizardPageEdit => wizardPageEdit.State == activeWizardPageState).ToArray();
 
             var saveTasks = wizardPageEdits
 

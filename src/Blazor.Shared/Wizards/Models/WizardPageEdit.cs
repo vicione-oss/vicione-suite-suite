@@ -29,6 +29,8 @@ internal sealed partial class WizardPageEdit<TWizardPageState>(TWizardPageState 
     private bool _disposedAsync;
     private bool _isRunning;
 
+    public IWizardPageState State => wizardPageState;
+
     public bool IsRunning
     {
         get => _isRunning;

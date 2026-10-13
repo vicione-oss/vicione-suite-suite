@@ -1,0 +1,29 @@
+@using Blazor.Shared.Extensions
+
+@typeparam TItem where TItem : class
+
+@{
+    var trackCssClasses = new List<string> { "carousel__track" };
+
+    if (SlideFrom is not null)
+        trackCssClasses.Add("sliding");
+}
+
+<div class="carousel">
+    <div @ref="_track"
+         class="@string.Join(" ", trackCssClasses)"
+         style="margin-left: @((Math.Max(ActiveIndex, 0) * -100).ToAttributeValue("%"))">
+
+        @for (var itemIndex = 0; itemIndex < Items.Count; itemIndex++)
+        {
+            var item = Items[itemIndex];
+
+            <div class="carousel__item" @key="item">
+                @if (itemIndex == ActiveIndex || item == SlideFrom)
+                {
+                    @ItemTemplate(item)
+                }
+            </div>
+        }
+    </div>
+</div>
