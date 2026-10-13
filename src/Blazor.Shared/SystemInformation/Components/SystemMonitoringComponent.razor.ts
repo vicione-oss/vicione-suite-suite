@@ -293,9 +293,9 @@ export class Monitoring {
     };
 
     readonly #canvas: HTMLCanvasElement;
-    #dpr = window.devicePixelRatio || 1;
+    #dpr = 1;
     readonly #ctx: CanvasRenderingContext2D;
-    #hoveredGauge: string | undefined = '';
+    #hoveredGauge = '';
     #hoveredChartDataPosition: number | undefined = undefined;
     readonly #canvasStart = this.#parameterToCanvasAngle(this.#config.gauge.style.startAngleDeg);
     #canvasEnd = this.#parameterToCanvasAngle(this.#config.gauge.style.endAngleDeg);
@@ -310,14 +310,14 @@ export class Monitoring {
 
     constructor(canvasElement: HTMLCanvasElement, timeZoneOffsetMinutes: number, timeSpanHours: number) {
         if (!(canvasElement instanceof HTMLCanvasElement))
-            throw new Error('Canvas element not found');
+            throw new TypeError('Canvas element not found');
 
         this.#canvas = canvasElement;
         this.#ctx = this.#canvas.getContext('2d', { willReadFrequently: true })!;
 
         const tooltipElement = this.#canvas.closest('.systeminfo-monitor-diagramm')?.querySelector('#tooltip');
         if (!(tooltipElement instanceof HTMLDivElement))
-            throw new Error('Tooltip element not found');
+            throw new TypeError('Tooltip element not found');
 
         this.#tooltipDiv = tooltipElement;
         this.#timeZoneOffsetMinutes = timeZoneOffsetMinutes;
@@ -328,10 +328,10 @@ export class Monitoring {
             this.#updateTooltip();
         }));
 
-        this.#canvas.addEventListener('mousemove', (e: MouseEvent) => {
+        this.#canvas.addEventListener('mousemove', (event: MouseEvent) => {
             const rect = this.#canvas.getBoundingClientRect();
-            const mouseX = e.clientX - rect.left;
-            const mouseY = e.clientY - rect.top;
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
             const pos = this.#config.chart.position;
 
             const isInsideChart = mouseX >= pos.x && mouseX <= pos.x + pos.width && mouseY >= pos.y && mouseY <= pos.y + pos.height;
@@ -349,7 +349,7 @@ export class Monitoring {
                     const gaugeCenter = this.#config.gaugeCenters[metric];
                     const dx = mouseX - gaugeCenter.x;
                     const dy = mouseY - gaugeCenter.y;
-                    if (Math.sqrt((dx * dx) + (dy * dy)) < this.#config.gauge.style.radius + 15) {
+                    if (Math.hypot(dx, dy) < this.#config.gauge.style.radius + 15) {
                         this.#hoveredGauge = metric;
                         break;
                     }
@@ -366,36 +366,6 @@ export class Monitoring {
             this.render();
             this.#updateTooltip();
         });
-    }
-
-    public generateTestData() {
-        this.#cpuData = this.#generateTestDataForMetric('cpu');
-        this.#ramData = this.#generateTestDataForMetric('ram');
-        this.#hddData = this.#generateTestDataForMetric('hdd');
-        this.#netData = this.#generateTestDataForMetric('net');
-    }
-
-    public render() {
-        this.#ctx.clearRect(0, 0, this.#config.canvas.width, this.#config.canvas.height);
-        this.#resizeCanvas();
-        this.#drawChart();
-        ['cpu', 'ram', 'hdd', 'net'].forEach(metric => {
-            const gaugeVal = this.#getGaugeValue(metric);
-            this.#drawGauge(metric, gaugeVal, this.#config.gaugeCenters[metric]);
-        });
-    }
-
-    public setValue(values: Float32Array, metric: 'cpu' | 'ram' | 'hdd' | 'net') {
-        switch (metric) {
-            case 'cpu': this.#cpuData = values;
-                break;
-            case 'ram': this.#ramData = values;
-                break;
-            case 'hdd': this.#hddData = values;
-                break;
-            case 'net': this.#netData = values;
-                break;
-        }
     }
 
     #getPointCount(): number {
@@ -422,7 +392,7 @@ export class Monitoring {
     }
 
     #resizeCanvas() {
-        this.#dpr = window.devicePixelRatio || 1;
+        this.#dpr = window.devicePixelRatio > 0 ? window.devicePixelRatio : 1;
 
         this.#canvas.width = this.#config.canvas.width * this.#dpr;
         this.#canvas.height = this.#config.canvas.height * this.#dpr;
@@ -461,14 +431,14 @@ export class Monitoring {
 
         for (let j = 0; j < nPoints; j++) {
             const idx = j * 3;
-            const minVal = metricData[idx];
-            const avgVal = metricData[idx + 1];
-            const maxVal = metricData[idx + 2];
+            const minValue = metricData[idx];
+            const avgValue = metricData[idx + 1];
+            const maxValue = metricData[idx + 2];
 
             const x = this.#getXFromDataPoint(j);
-            const yAvg = pos.y + pos.height - ((avgVal / maxPercent) * pos.height);
-            const yMin = pos.y + pos.height - ((minVal / maxPercent) * pos.height);
-            const yMax = pos.y + pos.height - ((maxVal / maxPercent) * pos.height);
+            const yAvg = pos.y + pos.height - ((avgValue / maxPercent) * pos.height);
+            const yMin = pos.y + pos.height - ((minValue / maxPercent) * pos.height);
+            const yMax = pos.y + pos.height - ((maxValue / maxPercent) * pos.height);
             avgPoints.push({ x, y: yAvg });
             minPoints.push({ x, y: yMin });
             maxPoints.push({ x, y: yMax });
@@ -476,14 +446,16 @@ export class Monitoring {
 
         let avgLinePath: Path2D;
         switch (this.#config.chart.lineType) {
-            case LineType.Simple:
+            case LineType.Simple: {
                 avgLinePath = new Path2D();
                 avgLinePath.moveTo(avgPoints.at(0)!.x, avgPoints.at(0)!.y);
                 for (let i = 1; i < avgPoints.length; i++)
                     avgLinePath.lineTo(avgPoints[i].x, avgPoints[i].y);
 
                 break;
-            case LineType.Quadratic:
+            }
+
+            case LineType.Quadratic: {
                 avgLinePath = new Path2D();
                 if (avgPoints.length > 0) {
                     avgLinePath.moveTo(avgPoints.at(0)!.x, avgPoints.at(0)!.y);
@@ -499,9 +471,12 @@ export class Monitoring {
                 }
 
                 break;
-            case LineType.Bezier:
+            }
+
+            case LineType.Bezier: {
                 avgLinePath = this.#catmullRomToBezier(avgPoints);
                 break;
+            }
         }
 
         const areaPath = new Path2D();
@@ -542,32 +517,46 @@ export class Monitoring {
         let phase = 0;
 
         switch (metric) {
-            case 'cpu': phase = 0;
+            case 'cpu': {
+                phase = 0;
                 break;
-            case 'ram': phase = Math.PI / 2;
+            }
+
+            case 'ram': {
+                phase = Math.PI / 2;
                 break;
-            case 'hdd': phase = Math.PI;
+            }
+
+            case 'hdd': {
+                phase = Math.PI;
                 break;
-            case 'net': phase = 3 * Math.PI / 2;
+            }
+
+            case 'net': {
+                phase = 3 * Math.PI / 2;
                 break;
-            default: phase = 0;
+            }
+
+            default: {
+                phase = 0;
+            }
         }
 
         const totalValues = nPoints * 3;
-        const arr = new Float32Array(totalValues);
+        const array = new Float32Array(totalValues);
         for (let j = 0; j < nPoints; j++) {
             const t = (j / (nPoints - 1)) * (2 * Math.PI);
             let avg = base + (amplitude * Math.sin(t + phase));
             avg = Math.max(0, Math.min(100, avg));
-            const minVal = Math.max(0, avg - offset);
-            const maxVal = Math.min(100, avg + offset);
+            const minValue = Math.max(0, avg - offset);
+            const maxValue = Math.min(100, avg + offset);
             const idx = j * 3;
-            arr[idx] = minVal;
-            arr[idx + 1] = avg;
-            arr[idx + 2] = maxVal;
+            array[idx] = minValue;
+            array[idx + 1] = avg;
+            array[idx + 2] = maxValue;
         }
 
-        return arr;
+        return array;
     }
 
     #drawXAxis() { // eslint-disable-line @typescript-eslint/naming-convention
@@ -581,16 +570,16 @@ export class Monitoring {
         this.#ctx.lineTo(pos.x + pos.width, pos.y + pos.height);
         this.#ctx.stroke();
 
-        const intervalMs = this.#config.chart.xAxis.tickInterval * 3600000;
-        const labelIntervalMs = this.#config.chart.xAxis.labelInterval * 3600000;
-        const spanMs = this.#timeSpanHours * 3600000;
+        const intervalMs = this.#config.chart.xAxis.tickInterval * 3_600_000;
+        const labelIntervalMs = this.#config.chart.xAxis.labelInterval * 3_600_000;
+        const spanMs = this.#timeSpanHours * 3_600_000;
 
         const now = new Date();
         const minTimeMs = now.getTime() - spanMs;
         let tickTimeMs = Math.ceil(minTimeMs / intervalMs) * intervalMs;
         while (tickTimeMs <= now.getTime()) {
             const tickTime = new Date(tickTimeMs);
-            const minutesOffset = (now.getTime() - tickTimeMs) / 60000;
+            const minutesOffset = (now.getTime() - tickTimeMs) / 60_000;
             const xTick = this.#getXFromDataPoint(minutesOffset / 5);
             const isLabelTick = style.showLabels && (tickTimeMs % labelIntervalMs === 0);
 
@@ -617,12 +606,12 @@ export class Monitoring {
                 if (hours.length < 2) hours = '0' + hours;
                 let minutes = localizedTickTime.getUTCMinutes().toString();
                 if (minutes.length < 2) minutes = '0' + minutes;
-                const labelStr = `${hours}:${minutes}`;
+                const labelString = `${hours}:${minutes}`;
                 this.#ctx.font = style.labelFont;
                 this.#ctx.fillStyle = style.labelFontColor;
                 this.#ctx.textAlign = 'center';
                 this.#ctx.textBaseline = 'top';
-                this.#ctx.fillText(labelStr, xTick, pos.y + pos.height + style.tickLength + style.labelTextOffset);
+                this.#ctx.fillText(labelString, xTick, pos.y + pos.height + style.tickLength + style.labelTextOffset);
             }
 
             tickTimeMs += intervalMs;
@@ -642,12 +631,12 @@ export class Monitoring {
         this.#ctx.stroke();
 
         for (let v = 0; v <= yAxisCfg.maxValue; v += yAxisCfg.tickInterval) {
-            const yVal = pos.y + pos.height - ((v / yAxisCfg.maxValue) * pos.height);
+            const yValue = pos.y + pos.height - ((v / yAxisCfg.maxValue) * pos.height);
             this.#ctx.beginPath();
             this.#ctx.strokeStyle = style.tickColor;
             this.#ctx.lineWidth = style.tickWidth;
-            this.#ctx.moveTo(pos.x - style.tickLength, yVal);
-            this.#ctx.lineTo(pos.x, yVal);
+            this.#ctx.moveTo(pos.x - style.tickLength, yValue);
+            this.#ctx.lineTo(pos.x, yValue);
             this.#ctx.stroke();
 
             if (style.showLabels && v % yAxisCfg.labelInterval === 0) {
@@ -655,17 +644,18 @@ export class Monitoring {
                 this.#ctx.fillStyle = style.labelFontColor;
                 this.#ctx.textAlign = 'end';
                 this.#ctx.textBaseline = 'middle';
-                this.#ctx.fillText(v + '%', pos.x - style.tickLength - style.labelTextOffset, yVal);
+                this.#ctx.fillText(v + '%', pos.x - style.tickLength - style.labelTextOffset, yValue);
             }
 
-            if (this.#config.chart.grid.y.showGrid) {
-                this.#ctx.beginPath();
-                this.#ctx.strokeStyle = this.#config.chart.grid.y.lineColor;
-                this.#ctx.lineWidth = this.#config.chart.grid.y.lineWidth;
-                this.#ctx.moveTo(pos.x, yVal);
-                this.#ctx.lineTo(pos.x + pos.width, yVal);
-                this.#ctx.stroke();
-            }
+            if (!this.#config.chart.grid.y.showGrid)
+                continue;
+
+            this.#ctx.beginPath();
+            this.#ctx.strokeStyle = this.#config.chart.grid.y.lineColor;
+            this.#ctx.lineWidth = this.#config.chart.grid.y.lineWidth;
+            this.#ctx.moveTo(pos.x, yValue);
+            this.#ctx.lineTo(pos.x + pos.width, yValue);
+            this.#ctx.stroke();
         }
     }
 
@@ -677,21 +667,9 @@ export class Monitoring {
         this.#ctx.fillRect(pos.x, pos.y, pos.width, pos.height);
         this.#drawXAxis();
         this.#drawYAxis();
-        ['cpu', 'ram', 'hdd', 'net'].forEach(metric => {
-            let dataArray: Float32Array | undefined;
-            switch (metric) {
-                case 'cpu': dataArray = this.#cpuData;
-                    break;
-                case 'ram': dataArray = this.#ramData;
-                    break;
-                case 'hdd': dataArray = this.#hddData;
-                    break;
-                default: dataArray = this.#netData;
-                    break;
-            }
-
-            const paths = this.#buildPathsForMetric(dataArray);
-            if (this.#hoveredGauge === metric && paths.area) {
+        for (const metric of ['cpu', 'ram', 'hdd', 'net']) {
+            const paths = this.#buildPathsForMetric(this.#getDataArray(metric));
+            if (this.#hoveredGauge === metric) {
                 this.#ctx.fillStyle = this.#config.chart.metrics[metric].minMaxAreaColor;
                 this.#ctx.fill(paths.area);
             }
@@ -699,7 +677,8 @@ export class Monitoring {
             this.#ctx.strokeStyle = this.#config.chart.metrics[metric].color;
             this.#ctx.lineWidth = 2;
             this.#ctx.stroke(new Path2D(paths.line));
-        });
+        }
+
         this.#drawIndicatorLine();
     }
 
@@ -748,14 +727,14 @@ export class Monitoring {
         this.#ctx.fill();
     }
 
-    #drawGauge(metricName: string, gaugeVal: { min: number; avg: number; max: number }, center: Position) {
+    #drawGauge(metricName: string, gaugeValue: { min: number; avg: number; max: number }, center: Position) {
         const gaugeStyle = this.#config.gauge.style;
         this.#ctx.beginPath();
         this.#ctx.lineWidth = gaugeStyle.strokeWidth;
         this.#ctx.strokeStyle = gaugeStyle.backgroundArcColor;
         this.#ctx.arc(center.x, center.y, gaugeStyle.radius, this.#parameterToCanvasAngle(gaugeStyle.startAngleDeg), this.#parameterToCanvasAngle(gaugeStyle.endAngleDeg), false);
         this.#ctx.stroke();
-        const avgAngle = this.#percentageToAngle(gaugeVal.avg);
+        const avgAngle = this.#percentageToAngle(gaugeValue.avg);
         this.#ctx.beginPath();
         this.#ctx.strokeStyle = this.#config.chart.metrics[metricName].color;
         this.#ctx.lineWidth = gaugeStyle.strokeWidth;
@@ -772,18 +751,29 @@ export class Monitoring {
         this.#ctx.fillText(gaugeStyle.scaleLabels.left, center.x + gaugeStyle.scaleLabelOffsets.left.x, center.y + gaugeStyle.scaleLabelOffsets.left.y);
         this.#ctx.fillText(gaugeStyle.scaleLabels.center, center.x + gaugeStyle.scaleLabelOffsets.center.x, center.y + gaugeStyle.scaleLabelOffsets.center.y);
         this.#ctx.fillText(gaugeStyle.scaleLabels.right, center.x + gaugeStyle.scaleLabelOffsets.right.x, center.y + gaugeStyle.scaleLabelOffsets.right.y);
-        const minAngle = this.#percentageToAngle(gaugeVal.min);
+        const minAngle = this.#percentageToAngle(gaugeValue.min);
         this.#drawTriangleForGauge(minAngle, center, gaugeStyle.triangleSize, this.#config.gauge.markers.min);
-        const maxAngle = this.#percentageToAngle(gaugeVal.max);
+        const maxAngle = this.#percentageToAngle(gaugeValue.max);
         this.#drawTriangleForGauge(maxAngle, center, gaugeStyle.triangleSize, this.#config.gauge.markers.max);
     }
 
     #getDataArray(metric: string): Float32Array {
         switch (metric) {
-            case 'cpu': return this.#cpuData;
-            case 'ram': return this.#ramData;
-            case 'hdd': return this.#hddData;
-            default: return this.#netData;
+            case 'cpu': {
+                return this.#cpuData;
+            }
+
+            case 'ram': {
+                return this.#ramData;
+            }
+
+            case 'hdd': {
+                return this.#hddData;
+            }
+
+            default: {
+                return this.#netData;
+            }
         }
     }
 
@@ -804,20 +794,20 @@ export class Monitoring {
             return;
         }
 
-        if (this.#hoveredGauge) {
-            const gaugeVal = this.#getGaugeValue(this.#hoveredGauge);
+        if (this.#hoveredGauge.length > 0) {
+            const gaugeValue = this.#getGaugeValue(this.#hoveredGauge);
             const gaugeCenter = this.#config.gaugeCenters[this.#hoveredGauge];
             const tooltipTop = this.#config.canvas.height + this.#config.popup.verticalOffset;
             this.#tooltipDiv.querySelector('.tooltip-header')!.textContent = this.#hoveredGauge.toUpperCase();
-            const rows = this.#tooltipDiv.querySelectorAll('.tooltip-table tr');
-            rows[0].querySelector('.value')!.textContent = Math.round(gaugeVal.min ?? 0) + ' %';
-            rows[1].querySelector('.value')!.textContent = Math.round(gaugeVal.avg ?? 0) + ' %';
-            rows[2].querySelector('.value')!.textContent = Math.round(gaugeVal.max ?? 0) + ' %';
-            this.#tooltipDiv.querySelectorAll('.tooltip-table .label').forEach((cell: Element) => {
+            const rows = this.#tooltipDiv.querySelectorAll(':scope .tooltip-table tr');
+            rows[0].querySelector('.value')!.textContent = Math.round(gaugeValue.min ?? 0) + ' %';
+            rows[1].querySelector('.value')!.textContent = Math.round(gaugeValue.avg ?? 0) + ' %';
+            rows[2].querySelector('.value')!.textContent = Math.round(gaugeValue.max ?? 0) + ' %';
+            this.#tooltipDiv.querySelectorAll(':scope .tooltip-table .label').forEach((cell: Element) => {
                 if (cell instanceof HTMLElement)
                     cell.style.width = this.#config.popup.labelColumnWidth + 'px';
             });
-            this.#tooltipDiv.querySelectorAll('.tooltip-table .value').forEach((cell: Element) => {
+            this.#tooltipDiv.querySelectorAll(':scope .tooltip-table .value').forEach((cell: Element) => {
                 if (cell instanceof HTMLElement)
                     cell.style.width = this.#config.popup.valueColumnWidth + 'px';
             });
@@ -837,18 +827,60 @@ export class Monitoring {
             this.#tooltipDiv.style.left = tooltipLeft + 'px';
             this.#tooltipDiv.style.top = tooltipTop + 'px';
             const pointerLeft = (totalWidth / 2) - (this.#config.popup.pointerWidth / 2);
-            const pointerEl = this.#tooltipDiv.querySelector('.tooltip-pointer');
-            if (pointerEl instanceof HTMLElement)
-                pointerEl.style.left = pointerLeft + 'px';
-            this.#tooltipDiv.querySelectorAll('.tooltip-table tr').forEach(row => {
-                if (row instanceof HTMLElement) {
-                    row.style.height = this.#config.popup.rowHeight + 'px';
-                    row.style.lineHeight = this.#config.popup.rowHeight + 'px';
-                    row.style.marginBottom = this.#config.popup.rowSpacing + 'px';
-                }
+            const pointerElement = this.#tooltipDiv.querySelector('.tooltip-pointer');
+            if (pointerElement instanceof HTMLElement)
+                pointerElement.style.left = pointerLeft + 'px';
+            this.#tooltipDiv.querySelectorAll(':scope .tooltip-table tr').forEach(row => {
+                if (!(row instanceof HTMLElement))
+                    return;
+
+                row.style.height = this.#config.popup.rowHeight + 'px';
+                row.style.lineHeight = this.#config.popup.rowHeight + 'px';
+                row.style.marginBottom = this.#config.popup.rowSpacing + 'px';
             });
         } else {
             this.#tooltipDiv.style.display = 'none';
+        }
+    }
+
+    public generateTestData() {
+        this.#cpuData = this.#generateTestDataForMetric('cpu');
+        this.#ramData = this.#generateTestDataForMetric('ram');
+        this.#hddData = this.#generateTestDataForMetric('hdd');
+        this.#netData = this.#generateTestDataForMetric('net');
+    }
+
+    public render() {
+        this.#ctx.clearRect(0, 0, this.#config.canvas.width, this.#config.canvas.height);
+        this.#resizeCanvas();
+        this.#drawChart();
+        for (const metric of ['cpu', 'ram', 'hdd', 'net']) {
+            const gaugeValue = this.#getGaugeValue(metric);
+            this.#drawGauge(metric, gaugeValue, this.#config.gaugeCenters[metric]);
+        }
+    }
+
+    public setValue(values: Float32Array, metric: 'cpu' | 'ram' | 'hdd' | 'net') {
+        switch (metric) {
+            case 'cpu': {
+                this.#cpuData = values;
+                break;
+            }
+
+            case 'ram': {
+                this.#ramData = values;
+                break;
+            }
+
+            case 'hdd': {
+                this.#hddData = values;
+                break;
+            }
+
+            case 'net': {
+                this.#netData = values;
+                break;
+            }
         }
     }
 }
