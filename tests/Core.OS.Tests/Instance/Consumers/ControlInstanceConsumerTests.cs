@@ -134,6 +134,12 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
             _pipeClient.SetupRestartServiceResult(OperationStatus.Success, "TEST");
             _localInstanceProvider.SetupLocalInstanceInformation(guid: _instanceId);
 
+            // The consumer sends the request from a background task after it returns, which the test harness does not wait for.
+            var restartRequested = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            _pipeClient
+                .When(x => x.SendRequest(Topics.RestartService, Arg.Any<string>(), Arg.Any<CancellationToken>()))
+                .Do(_ => restartRequested.TrySetResult());
+
             var command = new ControlInstance()
             {
                 Action = InstanceCommand.Restart,
@@ -142,6 +148,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
 
             // Act
             await tester.TestInstanceDependentCommand<ControlInstance, ControlInstanceConsumer>(command);
+            await restartRequested.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
 
             // Assert
             await _pipeClient.Received(1).SendRequest(Topics.RestartService, _instanceOptions.ServiceName, Arg.Any<CancellationToken>());

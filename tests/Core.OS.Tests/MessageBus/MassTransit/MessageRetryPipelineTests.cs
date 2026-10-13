@@ -23,7 +23,7 @@ public class MessageRetryPipelineTests
     /// <summary>Activation threshold used by the kill switch test.</summary>
     private const int ActivationThreshold = 2;
 
-    /// <summary>Messages published at the endpoint the kill switch is expected to stop.</summary>
+    /// <summary>Messages published after the kill switch is expected to have stopped the endpoint.</summary>
     private const int PublishedAtStoppedEndpoint = 10;
 
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(30);
@@ -300,19 +300,24 @@ public class MessageRetryPipelineTests
 
         try
         {
-            // Act: publish far more failing messages than the endpoint may consume before it is stopped
-            for (var i = 0; i < PublishedAtStoppedEndpoint; i++)
+            // MassTransit arms the switch once ActivationThreshold messages have been consumed and trips it on the
+            // failure after that. Messages the transport already dispatched when it trips still run, so only messages
+            // published after the trip are guaranteed to stay queued.
+            for (var i = 0; i <= ActivationThreshold; i++)
                 await bus.Publish(new RetryProbeCommand(), TestContext.Current.CancellationToken);
 
             (await Completes(probe.FirstAttempt)).Should().BeTrue("the endpoint has to start consuming");
-            var consumed = await WaitUntilConsumptionStops(probe);
+            var consumedUntilTripped = await WaitUntilConsumptionStops(probe);
 
-            // Assert: the exact trip point is not asserted - MassTransit arms the switch once ActivationThreshold
-            // messages have been consumed and trips it on the failure after that, but messages already dispatched when
-            // it trips still run, so the count varies. What has to hold is that the endpoint stopped rather than
-            // draining its queue into the error transport.
-            consumed.Should().BeLessThan(PublishedAtStoppedEndpoint,
-                "the kill switch has to stop the endpoint, leaving the remaining messages queued");
+            // Act
+            for (var i = 0; i < PublishedAtStoppedEndpoint; i++)
+                await bus.Publish(new RetryProbeCommand(), TestContext.Current.CancellationToken);
+
+            await Task.Delay(StoppedWindow, TestContext.Current.CancellationToken);
+
+            // Assert
+            probe.Attempts.Should().Be(consumedUntilTripped,
+                "the kill switch has to stop the endpoint, leaving the messages published afterwards queued");
         }
         finally
         {
