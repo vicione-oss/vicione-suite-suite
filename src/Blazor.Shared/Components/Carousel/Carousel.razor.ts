@@ -1,6 +1,6 @@
-export async function waitForTransitionEnd(element: HTMLElement | null): Promise<void> {
+export async function waitForTransitionEnd(element: HTMLElement | undefined): Promise<void> {
     if (!element)
         return;
 
-    await Promise.allSettled(element.getAnimations().map(animation => animation.finished));
+    await Promise.allSettled(element.getAnimations().map(async animation => animation.finished));
 }
