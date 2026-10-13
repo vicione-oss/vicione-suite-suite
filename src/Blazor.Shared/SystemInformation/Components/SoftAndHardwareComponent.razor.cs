@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Blazor.Shared.SystemInformation.Extensions;
 using Blazor.Shared.SystemInformation.Services;
 using Microsoft.AspNetCore.Components;
@@ -42,5 +42,6 @@ public sealed partial class SoftAndHardwareComponent
         base.OnInitialized();
     }
 
-    private Task<string> CopyToClipboardButtonSetText() => InformationProvider.GetSystemInformationMarkdown();
+    private Task<string> GetCopyToClipboardButtonTextToCopy()
+        => InformationProvider.GetSystemInformationMarkdown();
 }

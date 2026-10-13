@@ -5,7 +5,7 @@
     <HostManagementVersion>2.0.0-beta1</HostManagementVersion>
     <OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.11</MassTransitVersion>
-    <ViciOneUiBlazorComponentsVersion>6.5.0</ViciOneUiBlazorComponentsVersion>
+    <ViciOneUiBlazorComponentsVersion>6.6.0</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.18.0</ViciOneUiMonochromeIconsVersion>
     <ViciOneSuiteSdkVersion>3.4.0</ViciOneSuiteSdkVersion>
   </PropertyGroup>
