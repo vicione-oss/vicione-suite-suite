@@ -11,6 +11,7 @@ using Sdk.Client.Models;
 using Sdk.Client.Services;
 using Sdk.Client.Wizards.Models;
 using Sdk.Client.Wizards.Services;
+using SaveCanceledResult = Blazor.Shared.Wizards.Models.SaveCanceledResult;
 
 namespace Blazor.Shared.Wizards.Components;
 
@@ -515,7 +516,7 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
 
             State.LastSaveErrorResults = [.. saveResults.OfType<SaveErrorResult>()];
 
-            var success = State.LastSaveErrorResults.Count == 0;
+            var success = !saveResults.Any(saveResult => saveResult is SaveErrorResult or SaveCanceledResult);
 
             return success;
         }

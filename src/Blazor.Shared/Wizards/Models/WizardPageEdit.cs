@@ -136,15 +136,13 @@ internal sealed partial class WizardPageEdit<TWizardPageState>(TWizardPageState 
         }
         catch (OperationCanceledException)
         {
-            // Nothing to do here.
-
-            return new SaveSuccessResult();
+            // Disposal or a superseding call canceled the save.
+            return new SaveCanceledResult();
         }
         catch (ObjectDisposedException)
         {
-            // Semaphore or CancellationTokenSource already disposed, nothing we can do, return gracefully
-
-            return new SaveSuccessResult();
+            // Save on a disposed edit did not run, so it is reported as canceled.
+            return new SaveCanceledResult();
         }
         catch (Exception e)
         {

@@ -232,6 +232,21 @@ public sealed class SettingsContainerTests
         _ = ctx.Services.GetRequiredService<INavigateBackRequest>().DidNotReceive().Send();
     }
 
+    [Fact]
+    public async Task Should_neither_display_nor_complete_a_canceled_save()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = await SaveControlPanelEditWithResult(ctx, new SaveCanceledResult());
+
+        // Assert
+        component.FindAll(".error-message").Should().BeEmpty();
+        component.FindAll(".popup-content-action-button--confirm").Should().NotBeEmpty();
+        _ = ctx.Services.GetRequiredService<INavigateBackRequest>().DidNotReceive().Send();
+    }
+
     private static async Task<IRenderedComponent<SettingsContainer>> SaveControlPanelEditWithResult(BunitContext ctx, ISaveResult saveResult)
     {
         ctx.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
