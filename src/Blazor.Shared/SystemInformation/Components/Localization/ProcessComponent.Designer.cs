@@ -61,11 +61,830 @@ namespace Blazor.Shared.SystemInformation.Components.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to CPU usage (total).
+        ///   Looks up a localized string similar to above.
         /// </summary>
-        internal static string CpuUsage {
+        internal static string Above {
             get {
-                return ResourceManager.GetString("CpuUsage", resourceCulture);
+                return ResourceManager.GetString("Above", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} in 24 h.
+        /// </summary>
+        internal static string AmountInDay {
+            get {
+                return ResourceManager.GetString("AmountInDay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to at the start of the Suite.
+        /// </summary>
+        internal static string AtSuiteStart {
+            get {
+                return ResourceManager.GetString("AtSuiteStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Board.
+        /// </summary>
+        internal static string Board {
+            get {
+                return ResourceManager.GetString("Board", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to cache.
+        /// </summary>
+        internal static string CacheLabel {
+            get {
+                return ResourceManager.GetString("CacheLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 24 h.
+        /// </summary>
+        internal static string CaptionDay {
+            get {
+                return ResourceManager.GetString("CaptionDay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 15-min.
+        /// </summary>
+        internal static string CaptionFifteenMinutes {
+            get {
+                return ResourceManager.GetString("CaptionFifteenMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 5-min.
+        /// </summary>
+        internal static string CaptionFiveMinutes {
+            get {
+                return ResourceManager.GetString("CaptionFiveMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to free.
+        /// </summary>
+        internal static string CaptionFree {
+            get {
+                return ResourceManager.GetString("CaptionFree", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to max.
+        /// </summary>
+        internal static string CaptionMax {
+            get {
+                return ResourceManager.GetString("CaptionMax", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to min.
+        /// </summary>
+        internal static string CaptionMin {
+            get {
+                return ResourceManager.GetString("CaptionMin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to of.
+        /// </summary>
+        internal static string CaptionOf {
+            get {
+                return ResourceManager.GetString("CaptionOf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to used.
+        /// </summary>
+        internal static string CaptionUsed {
+            get {
+                return ResourceManager.GetString("CaptionUsed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Child processes.
+        /// </summary>
+        internal static string ChildProcesses {
+            get {
+                return ResourceManager.GetString("ChildProcesses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear the filter.
+        /// </summary>
+        internal static string ClearFilter {
+            get {
+                return ResourceManager.GetString("ClearFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to limited to {0} GHz.
+        /// </summary>
+        internal static string ClockLimited {
+            get {
+                return ResourceManager.GetString("ClockLimited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} cores.
+        /// </summary>
+        internal static string CoreCount {
+            get {
+                return ResourceManager.GetString("CoreCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Core {0}.
+        /// </summary>
+        internal static string CoreNumber {
+            get {
+                return ResourceManager.GetString("CoreNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} of {1} GHz.
+        /// </summary>
+        internal static string CpuClock {
+            get {
+                return ResourceManager.GetString("CpuClock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to current {0} · max. {1} · avg. {2} (2 minutes).
+        /// </summary>
+        internal static string CpuDetails {
+            get {
+                return ResourceManager.GetString("CpuDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU history.
+        /// </summary>
+        internal static string CpuHistory {
+            get {
+                return ResourceManager.GetString("CpuHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU over the last 2 minutes.
+        /// </summary>
+        internal static string CpuHistoryLegend {
+            get {
+                return ResourceManager.GetString("CpuHistoryLegend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU total.
+        /// </summary>
+        internal static string CpuTotal {
+            get {
+                return ResourceManager.GetString("CpuTotal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Last 24 hours, at most since the suite started: min {0}, avg. {1}, max {2}. Line: now, band: range, dashed: threshold..
+        /// </summary>
+        internal static string DayRangeHint {
+            get {
+                return ResourceManager.GetString("DayRangeHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disk.
+        /// </summary>
+        internal static string Disk {
+            get {
+                return ResourceManager.GetString("Disk", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} GB disk.
+        /// </summary>
+        internal static string DiskSize {
+            get {
+                return ResourceManager.GetString("DiskSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disk writes.
+        /// </summary>
+        internal static string DiskWrite {
+            get {
+                return ResourceManager.GetString("DiskWrite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to What is written to the disks. Flash memory endures a limited number of write cycles..
+        /// </summary>
+        internal static string DiskWriteHint {
+            get {
+                return ResourceManager.GetString("DiskWriteHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Distribution by {0}.
+        /// </summary>
+        internal static string DistributionBy {
+            get {
+                return ResourceManager.GetString("DistributionBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} d {1:00} h.
+        /// </summary>
+        internal static string DurationDays {
+            get {
+                return ResourceManager.GetString("DurationDays", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0}:{1:00} h.
+        /// </summary>
+        internal static string DurationHours {
+            get {
+                return ResourceManager.GetString("DurationHours", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} min.
+        /// </summary>
+        internal static string DurationMinutes {
+            get {
+                return ResourceManager.GetString("DurationMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} s.
+        /// </summary>
+        internal static string DurationSeconds {
+            get {
+                return ResourceManager.GetString("DurationSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expand or collapse the child processes of {0}.
+        /// </summary>
+        internal static string ExpandChildren {
+            get {
+                return ResourceManager.GetString("ExpandChildren", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} GB free.
+        /// </summary>
+        internal static string FreeGb {
+            get {
+                return ResourceManager.GetString("FreeGb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to free.
+        /// </summary>
+        internal static string FreeLabel {
+            get {
+                return ResourceManager.GetString("FreeLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kernel.
+        /// </summary>
+        internal static string GroupKernel {
+            get {
+                return ResourceManager.GetString("GroupKernel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Other.
+        /// </summary>
+        internal static string GroupOther {
+            get {
+                return ResourceManager.GetString("GroupOther", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Highest CPU.
+        /// </summary>
+        internal static string HighestCpu {
+            get {
+                return ResourceManager.GetString("HighestCpu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} at {1}.
+        /// </summary>
+        internal static string HighestCpuAt {
+            get {
+                return ResourceManager.GetString("HighestCpuAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Waiting for the disk.
+        /// </summary>
+        internal static string IoWait {
+            get {
+                return ResourceManager.GetString("IoWait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kernel thread.
+        /// </summary>
+        internal static string KernelThread {
+            get {
+                return ResourceManager.GetString("KernelThread", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kernel threads ({0}).
+        /// </summary>
+        internal static string KernelThreads {
+            get {
+                return ResourceManager.GetString("KernelThreads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shows or hides kernel threads. They have no command and hardly any load..
+        /// </summary>
+        internal static string KernelThreadsHint {
+            get {
+                return ResourceManager.GetString("KernelThreadsHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Key figures.
+        /// </summary>
+        internal static string KeyFigures {
+            get {
+                return ResourceManager.GetString("KeyFigures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to last 24 h.
+        /// </summary>
+        internal static string LastDay {
+            get {
+                return ResourceManager.GetString("LastDay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to last 2 minutes.
+        /// </summary>
+        internal static string LastTwoMinutes {
+            get {
+                return ResourceManager.GetString("LastTwoMinutes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The process overview is only available on Linux..
+        /// </summary>
+        internal static string LinuxOnly {
+            get {
+                return ResourceManager.GetString("LinuxOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Linux state.
+        /// </summary>
+        internal static string LinuxState {
+            get {
+                return ResourceManager.GetString("LinuxState", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List.
+        /// </summary>
+        internal static string List {
+            get {
+                return ResourceManager.GetString("List", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to System load.
+        /// </summary>
+        internal static string LoadAverage {
+            get {
+                return ResourceManager.GetString("LoadAverage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1 / 5 / 15-min: {0} · {1} · {2}.
+        /// </summary>
+        internal static string LoadAverageDetails {
+            get {
+                return ResourceManager.GetString("LoadAverageDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Average number of processes running or waiting for a core. Above the number of cores, processes have to wait..
+        /// </summary>
+        internal static string LoadAverageHint {
+            get {
+                return ResourceManager.GetString("LoadAverageHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to System load (1-min).
+        /// </summary>
+        internal static string LoadAverageTile {
+            get {
+                return ResourceManager.GetString("LoadAverageTile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} matches.
+        /// </summary>
+        internal static string MatchCount {
+            get {
+                return ResourceManager.GetString("MatchCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Memory.
+        /// </summary>
+        internal static string Memory {
+            get {
+                return ResourceManager.GetString("Memory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to used {0} · cache {1} · free {2} GB.
+        /// </summary>
+        internal static string MemoryBreakdown {
+            get {
+                return ResourceManager.GetString("MemoryBreakdown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RES {0} MB · VIRT {1} MB · peak {2} MB · swap {3} MB.
+        /// </summary>
+        internal static string MemoryDetails {
+            get {
+                return ResourceManager.GetString("MemoryDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to memory pressure.
+        /// </summary>
+        internal static string MemoryPressure {
+            get {
+                return ResourceManager.GetString("MemoryPressure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} GB RAM.
+        /// </summary>
+        internal static string MemorySize {
+            get {
+                return ResourceManager.GetString("MemorySize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to mostly {0}.
+        /// </summary>
+        internal static string MostlyBy {
+            get {
+                return ResourceManager.GetString("MostlyBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} errors.
+        /// </summary>
+        internal static string NetworkErrorCount {
+            get {
+                return ResourceManager.GetString("NetworkErrorCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Errors.
+        /// </summary>
+        internal static string NetworkErrors {
+            get {
+                return ResourceManager.GetString("NetworkErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to faulty packets in 2 minutes · {0} dropped.
+        /// </summary>
+        internal static string NetworkErrorsDetails {
+            get {
+                return ResourceManager.GetString("NetworkErrorsDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A rising count points to a cable, switch or radio problem. Dropped packets also include unwanted ones and are no fault..
+        /// </summary>
+        internal static string NetworkErrorsHint {
+            get {
+                return ResourceManager.GetString("NetworkErrorsHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port {0}.
+        /// </summary>
+        internal static string NetworkPort {
+            get {
+                return ResourceManager.GetString("NetworkPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Received.
+        /// </summary>
+        internal static string NetworkReceived {
+            get {
+                return ResourceManager.GetString("NetworkReceived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sent.
+        /// </summary>
+        internal static string NetworkSent {
+            get {
+                return ResourceManager.GetString("NetworkSent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to no data · Suite running for {0}.
+        /// </summary>
+        internal static string NoDataSinceStart {
+            get {
+                return ResourceManager.GetString("NoDataSinceStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No process matches "{0}"..
+        /// </summary>
+        internal static string NoMatch {
+            get {
+                return ResourceManager.GetString("NoMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No peak in the last 24 hours..
+        /// </summary>
+        internal static string NoPeakLastDay {
+            get {
+                return ResourceManager.GetString("NoPeakLastDay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No peak since the start..
+        /// </summary>
+        internal static string NoPeakSinceStart {
+            get {
+                return ResourceManager.GetString("NoPeakSinceStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No values yet.
+        /// </summary>
+        internal static string NoValuesYet {
+            get {
+                return ResourceManager.GetString("NoValuesYet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Now.
+        /// </summary>
+        internal static string Now {
+            get {
+                return ResourceManager.GetString("Now", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to / {0} cores.
+        /// </summary>
+        internal static string OfCores {
+            get {
+                return ResourceManager.GetString("OfCores", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} over threshold.
+        /// </summary>
+        internal static string OverThreshold {
+            get {
+                return ResourceManager.GetString("OverThreshold", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Over the threshold of {0}.
+        /// </summary>
+        internal static string OverThresholdOf {
+            get {
+                return ResourceManager.GetString("OverThresholdOf", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} pages/s.
+        /// </summary>
+        internal static string PagesPerSecond {
+            get {
+                return ResourceManager.GetString("PagesPerSecond", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parent process.
+        /// </summary>
+        internal static string ParentProcess {
+            get {
+                return ResourceManager.GetString("ParentProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} min above the threshold of {1}.
+        /// </summary>
+        internal static string PeakAbove {
+            get {
+                return ResourceManager.GetString("PeakAbove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU of the last 24 hours with its peaks.
+        /// </summary>
+        internal static string PeakChartLabel {
+            get {
+                return ResourceManager.GetString("PeakChartLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Largest consumers in the highest minute.
+        /// </summary>
+        internal static string PeakConsumers {
+            get {
+                return ResourceManager.GetString("PeakConsumers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show details of {0}.
+        /// </summary>
+        internal static string PeakDetails {
+            get {
+                return ResourceManager.GetString("PeakDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Memory pressure.
+        /// </summary>
+        internal static string PeakMemoryPressure {
+            get {
+                return ResourceManager.GetString("PeakMemoryPressure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to the kernel throttled.
+        /// </summary>
+        internal static string PeakThrottled {
+            get {
+                return ResourceManager.GetString("PeakThrottled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} {1} at {2}.
+        /// </summary>
+        internal static string PeakTitle {
+            get {
+                return ResourceManager.GetString("PeakTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Peaks.
+        /// </summary>
+        internal static string Peaks {
+            get {
+                return ResourceManager.GetString("Peaks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PID.
+        /// </summary>
+        internal static string Pid {
+            get {
+                return ResourceManager.GetString("Pid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to connected.
+        /// </summary>
+        internal static string PortConnected {
+            get {
+                return ResourceManager.GetString("PortConnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to no cable.
+        /// </summary>
+        internal static string PortNoCable {
+            get {
+                return ResourceManager.GetString("PortNoCable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} processes.
+        /// </summary>
+        internal static string ProcessCount {
+            get {
+                return ResourceManager.GetString("ProcessCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to no longer running.
+        /// </summary>
+        internal static string ProcessGone {
+            get {
+                return ResourceManager.GetString("ProcessGone", resourceCulture);
             }
         }
         
@@ -79,20 +898,452 @@ namespace Blazor.Shared.SystemInformation.Components.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to RES (MB).
+        ///   Looks up a localized string similar to Processes.
         /// </summary>
-        internal static string Res {
+        internal static string Processes {
             get {
-                return ResourceManager.GetString("Res", resourceCulture);
+                return ResourceManager.GetString("Processes", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to VIRT (MB).
+        ///   Looks up a localized string similar to running.
         /// </summary>
-        internal static string Virt {
+        internal static string ProcessesRunning {
             get {
-                return ResourceManager.GetString("Virt", resourceCulture);
+                return ResourceManager.GetString("ProcessesRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reads back from disk.
+        /// </summary>
+        internal static string Refaults {
+            get {
+                return ResourceManager.GetString("Refaults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Memory pages read back from disk per second. Without swap this rises when memory runs short, because program code is dropped and read again..
+        /// </summary>
+        internal static string RefaultsHint {
+            get {
+                return ResourceManager.GetString("RefaultsHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RES (MB).
+        /// </summary>
+        internal static string ResMb {
+            get {
+                return ResourceManager.GetString("ResMb", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Engine host.
+        /// </summary>
+        internal static string RoleEngineHost {
+            get {
+                return ResourceManager.GetString("RoleEngineHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ViciOne Suite.
+        /// </summary>
+        internal static string RoleSuite {
+            get {
+                return ResourceManager.GetString("RoleSuite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Running for.
+        /// </summary>
+        internal static string RunningFor {
+            get {
+                return ResourceManager.GetString("RunningFor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Measured every 2 seconds while this page is open.
+        /// </summary>
+        internal static string SampledWhileOpen {
+            get {
+                return ResourceManager.GetString("SampledWhileOpen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Memory shared by several processes counts once per process, so the groups add up to more than the used memory. The bar shows them in proportion to the used memory..
+        /// </summary>
+        internal static string SharedMemoryHint {
+            get {
+                return ResourceManager.GetString("SharedMemoryHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show only {0}.
+        /// </summary>
+        internal static string ShowOnly {
+            get {
+                return ResourceManager.GetString("ShowOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to since {0}.
+        /// </summary>
+        internal static string SinceStart {
+            get {
+                return ResourceManager.GetString("SinceStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copies everything on this page, all processes included, as Markdown for a ticket..
+        /// </summary>
+        internal static string SnapshotHint {
+            get {
+                return ResourceManager.GetString("SnapshotHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process overview of {0}, {1}.
+        /// </summary>
+        internal static string SnapshotTitle {
+            get {
+                return ResourceManager.GetString("SnapshotTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sort by {0}.
+        /// </summary>
+        internal static string SortBy {
+            get {
+                return ResourceManager.GetString("SortBy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Started.
+        /// </summary>
+        internal static string Started {
+            get {
+                return ResourceManager.GetString("Started", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} (for {1}).
+        /// </summary>
+        internal static string StartedAt {
+            get {
+                return ResourceManager.GetString("StartedAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to waiting for I/O.
+        /// </summary>
+        internal static string StateDiskSleep {
+            get {
+                return ResourceManager.GetString("StateDiskSleep", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to idle.
+        /// </summary>
+        internal static string StateIdle {
+            get {
+                return ResourceManager.GetString("StateIdle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to running.
+        /// </summary>
+        internal static string StateRunning {
+            get {
+                return ResourceManager.GetString("StateRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to sleeping.
+        /// </summary>
+        internal static string StateSleeping {
+            get {
+                return ResourceManager.GetString("StateSleeping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to stopped.
+        /// </summary>
+        internal static string StateStopped {
+            get {
+                return ResourceManager.GetString("StateStopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to zombie.
+        /// </summary>
+        internal static string StateZombie {
+            get {
+                return ResourceManager.GetString("StateZombie", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swap.
+        /// </summary>
+        internal static string Swap {
+            get {
+                return ResourceManager.GetString("Swap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} of {1} MB · {2} pages swapped in 2 minutes.
+        /// </summary>
+        internal static string SwapDetails {
+            get {
+                return ResourceManager.GetString("SwapDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swapping means memory is short and writes to the flash..
+        /// </summary>
+        internal static string SwapHint {
+            get {
+                return ResourceManager.GetString("SwapHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Switch to {0}.
+        /// </summary>
+        internal static string SwitchTo {
+            get {
+                return ResourceManager.GetString("SwitchTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to System values.
+        /// </summary>
+        internal static string SystemValues {
+            get {
+                return ResourceManager.GetString("SystemValues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Temperature.
+        /// </summary>
+        internal static string Temperature {
+            get {
+                return ResourceManager.GetString("Temperature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU temperature.
+        /// </summary>
+        internal static string TemperatureCpu {
+            get {
+                return ResourceManager.GetString("TemperatureCpu", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Threads.
+        /// </summary>
+        internal static string Threads {
+            get {
+                return ResourceManager.GetString("Threads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Threshold {0} %.
+        /// </summary>
+        internal static string ThresholdPercent {
+            get {
+                return ResourceManager.GetString("ThresholdPercent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Threshold {0}.
+        /// </summary>
+        internal static string ThresholdValue {
+            get {
+                return ResourceManager.GetString("ThresholdValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to throttles from {0} °C.
+        /// </summary>
+        internal static string ThrottleFrom {
+            get {
+                return ResourceManager.GetString("ThrottleFrom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to throttling.
+        /// </summary>
+        internal static string Throttling {
+            get {
+                return ResourceManager.GetString("Throttling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show or hide the details of {0}.
+        /// </summary>
+        internal static string ToggleDetails {
+            get {
+                return ResourceManager.GetString("ToggleDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Largest consumers.
+        /// </summary>
+        internal static string TopConsumers {
+            get {
+                return ResourceManager.GetString("TopConsumers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tree.
+        /// </summary>
+        internal static string Tree {
+            get {
+                return ResourceManager.GetString("Tree", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to falling.
+        /// </summary>
+        internal static string TrendFalling {
+            get {
+                return ResourceManager.GetString("TrendFalling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to rising.
+        /// </summary>
+        internal static string TrendRising {
+            get {
+                return ResourceManager.GetString("TrendRising", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to steady.
+        /// </summary>
+        internal static string TrendSteady {
+            get {
+                return ResourceManager.GetString("TrendSteady", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to not assigned.
+        /// </summary>
+        internal static string Unassigned {
+            get {
+                return ResourceManager.GetString("Unassigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updated.
+        /// </summary>
+        internal static string Updated {
+            get {
+                return ResourceManager.GetString("Updated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uptime.
+        /// </summary>
+        internal static string Uptime {
+            get {
+                return ResourceManager.GetString("Uptime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} d {1:00}:{2:00} h.
+        /// </summary>
+        internal static string UptimeValue {
+            get {
+                return ResourceManager.GetString("UptimeValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Utilization.
+        /// </summary>
+        internal static string Utilization {
+            get {
+                return ResourceManager.GetString("Utilization", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to View.
+        /// </summary>
+        internal static string View {
+            get {
+                return ResourceManager.GetString("View", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to over threshold or waiting for I/O.
+        /// </summary>
+        internal static string WarningLegend {
+            get {
+                return ResourceManager.GetString("WarningLegend", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Normal.
+        /// </summary>
+        internal static string WithinLimits {
+            get {
+                return ResourceManager.GetString("WithinLimits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to normal.
+        /// </summary>
+        internal static string WithinLimitsLegend {
+            get {
+                return ResourceManager.GetString("WithinLimitsLegend", resourceCulture);
             }
         }
     }

@@ -1,0 +1,19 @@
+<svg class="sparkline" viewBox="0 0 @Width @Height" preserveAspectRatio="none" aria-hidden="true">
+    @if (_limitY is { } limitY)
+    {
+        <defs>
+            <clipPath id="@_overLimitClipId">
+                <rect x="0" y="-4" width="@Width" height="@Svg(limitY + 4)"></rect>
+            </clipPath>
+        </defs>
+        <line class="limit" x1="0" x2="@Width" y1="@Svg(limitY)" y2="@Svg(limitY)"></line>
+    }
+    @if (_points.Length > 0)
+    {
+        <polyline class="line" points="@_points"></polyline>
+        @if (_hasOverLimit)
+        {
+            <polyline class="line over" points="@_points" clip-path="url(#@_overLimitClipId)"></polyline>
+        }
+    }
+</svg>

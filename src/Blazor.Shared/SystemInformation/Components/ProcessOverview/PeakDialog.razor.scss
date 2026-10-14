@@ -1,0 +1,47 @@
+@use "../../../Styles/design/colors";
+@use "../../../../../shared/styles/colors-staged";
+@use "overview";
+
+.peak-details {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 20px 34px 0;
+    font-size: 12px;
+    color: colors.$font;
+
+    .summary {
+        @include overview.muted;
+        margin: 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+    }
+
+    th {
+        @include overview.muted;
+        padding: 0 8px 6px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, .12);
+        font-weight: 400;
+        text-align: left;
+    }
+
+    td {
+        padding: 6px 8px 6px 0;
+        border-top: 1px solid rgba(255, 255, 255, .06);
+    }
+
+    .num {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .gone {
+        @include overview.muted;
+        display: block;
+        font-size: 11px;
+    }
+}

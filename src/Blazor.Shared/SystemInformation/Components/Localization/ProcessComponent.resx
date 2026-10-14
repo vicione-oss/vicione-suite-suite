@@ -117,16 +117,433 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CpuUsage" xml:space="preserve">
-    <value>CPU usage (total)</value>
+  <data name="Above" xml:space="preserve">
+    <value>above</value>
+  </data>
+  <data name="AmountInDay" xml:space="preserve">
+    <value>{0} in 24 h</value>
+  </data>
+  <data name="AtSuiteStart" xml:space="preserve">
+    <value>at the start of the Suite</value>
+  </data>
+  <data name="Board" xml:space="preserve">
+    <value>Board</value>
+  </data>
+  <data name="CacheLabel" xml:space="preserve">
+    <value>cache</value>
+  </data>
+  <data name="CaptionDay" xml:space="preserve">
+    <value>24 h</value>
+  </data>
+  <data name="CaptionFifteenMinutes" xml:space="preserve">
+    <value>15-min</value>
+  </data>
+  <data name="CaptionFiveMinutes" xml:space="preserve">
+    <value>5-min</value>
+  </data>
+  <data name="CaptionFree" xml:space="preserve">
+    <value>free</value>
+  </data>
+  <data name="CaptionMax" xml:space="preserve">
+    <value>max</value>
+  </data>
+  <data name="CaptionMin" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="CaptionOf" xml:space="preserve">
+    <value>of</value>
+  </data>
+  <data name="CaptionUsed" xml:space="preserve">
+    <value>used</value>
+  </data>
+  <data name="ChildProcesses" xml:space="preserve">
+    <value>Child processes</value>
+  </data>
+  <data name="ClearFilter" xml:space="preserve">
+    <value>Clear the filter</value>
+  </data>
+  <data name="ClockLimited" xml:space="preserve">
+    <value>limited to {0} GHz</value>
+  </data>
+  <data name="CoreCount" xml:space="preserve">
+    <value>{0} cores</value>
+  </data>
+  <data name="CoreNumber" xml:space="preserve">
+    <value>Core {0}</value>
+  </data>
+  <data name="CpuClock" xml:space="preserve">
+    <value>{0} of {1} GHz</value>
+  </data>
+  <data name="CpuDetails" xml:space="preserve">
+    <value>current {0} · max. {1} · avg. {2} (2 minutes)</value>
+  </data>
+  <data name="CpuHistory" xml:space="preserve">
+    <value>CPU history</value>
+  </data>
+  <data name="CpuHistoryLegend" xml:space="preserve">
+    <value>CPU over the last 2 minutes</value>
+  </data>
+  <data name="CpuTotal" xml:space="preserve">
+    <value>CPU total</value>
+  </data>
+  <data name="DayRangeHint" xml:space="preserve">
+    <value>Last 24 hours, at most since the suite started: min {0}, avg. {1}, max {2}. Line: now, band: range, dashed: threshold.</value>
+  </data>
+  <data name="Disk" xml:space="preserve">
+    <value>Disk</value>
+  </data>
+  <data name="DiskSize" xml:space="preserve">
+    <value>{0} GB disk</value>
+  </data>
+  <data name="DiskWrite" xml:space="preserve">
+    <value>Disk writes</value>
+  </data>
+  <data name="DiskWriteHint" xml:space="preserve">
+    <value>What is written to the disks. Flash memory endures a limited number of write cycles.</value>
+  </data>
+  <data name="DistributionBy" xml:space="preserve">
+    <value>Distribution by {0}</value>
+  </data>
+  <data name="DurationDays" xml:space="preserve">
+    <value>{0} d {1:00} h</value>
+  </data>
+  <data name="DurationHours" xml:space="preserve">
+    <value>{0}:{1:00} h</value>
+  </data>
+  <data name="DurationMinutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="DurationSeconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="ExpandChildren" xml:space="preserve">
+    <value>Expand or collapse the child processes of {0}</value>
+  </data>
+  <data name="FreeGb" xml:space="preserve">
+    <value>{0} GB free</value>
+  </data>
+  <data name="FreeLabel" xml:space="preserve">
+    <value>free</value>
+  </data>
+  <data name="GroupKernel" xml:space="preserve">
+    <value>Kernel</value>
+  </data>
+  <data name="GroupOther" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="HighestCpu" xml:space="preserve">
+    <value>Highest CPU</value>
+  </data>
+  <data name="HighestCpuAt" xml:space="preserve">
+    <value>{0} at {1}</value>
+  </data>
+  <data name="IoWait" xml:space="preserve">
+    <value>Waiting for the disk</value>
+  </data>
+  <data name="KernelThread" xml:space="preserve">
+    <value>Kernel thread</value>
+  </data>
+  <data name="KernelThreads" xml:space="preserve">
+    <value>Kernel threads ({0})</value>
+  </data>
+  <data name="KernelThreadsHint" xml:space="preserve">
+    <value>Shows or hides kernel threads. They have no command and hardly any load.</value>
+  </data>
+  <data name="KeyFigures" xml:space="preserve">
+    <value>Key figures</value>
+  </data>
+  <data name="LastDay" xml:space="preserve">
+    <value>last 24 h</value>
+  </data>
+  <data name="LastTwoMinutes" xml:space="preserve">
+    <value>last 2 minutes</value>
+  </data>
+  <data name="LinuxOnly" xml:space="preserve">
+    <value>The process overview is only available on Linux.</value>
+  </data>
+  <data name="LinuxState" xml:space="preserve">
+    <value>Linux state</value>
+  </data>
+  <data name="List" xml:space="preserve">
+    <value>List</value>
+  </data>
+  <data name="LoadAverage" xml:space="preserve">
+    <value>System load</value>
+  </data>
+  <data name="LoadAverageDetails" xml:space="preserve">
+    <value>1 / 5 / 15-min: {0} · {1} · {2}</value>
+  </data>
+  <data name="LoadAverageHint" xml:space="preserve">
+    <value>Average number of processes running or waiting for a core. Above the number of cores, processes have to wait.</value>
+  </data>
+  <data name="LoadAverageTile" xml:space="preserve">
+    <value>System load (1-min)</value>
+  </data>
+  <data name="MatchCount" xml:space="preserve">
+    <value>{0} matches</value>
+  </data>
+  <data name="Memory" xml:space="preserve">
+    <value>Memory</value>
+  </data>
+  <data name="MemoryBreakdown" xml:space="preserve">
+    <value>used {0} · cache {1} · free {2} GB</value>
+  </data>
+  <data name="MemoryDetails" xml:space="preserve">
+    <value>RES {0} MB · VIRT {1} MB · peak {2} MB · swap {3} MB</value>
+  </data>
+  <data name="MemoryPressure" xml:space="preserve">
+    <value>memory pressure</value>
+  </data>
+  <data name="MemorySize" xml:space="preserve">
+    <value>{0} GB RAM</value>
+  </data>
+  <data name="MostlyBy" xml:space="preserve">
+    <value>mostly {0}</value>
+  </data>
+  <data name="NetworkErrorCount" xml:space="preserve">
+    <value>{0} errors</value>
+  </data>
+  <data name="NetworkErrors" xml:space="preserve">
+    <value>Errors</value>
+  </data>
+  <data name="NetworkErrorsDetails" xml:space="preserve">
+    <value>faulty packets in 2 minutes · {0} dropped</value>
+  </data>
+  <data name="NetworkErrorsHint" xml:space="preserve">
+    <value>A rising count points to a cable, switch or radio problem. Dropped packets also include unwanted ones and are no fault.</value>
+  </data>
+  <data name="NetworkPort" xml:space="preserve">
+    <value>Port {0}</value>
+  </data>
+  <data name="NetworkReceived" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="NetworkSent" xml:space="preserve">
+    <value>Sent</value>
+  </data>
+  <data name="NoDataSinceStart" xml:space="preserve">
+    <value>no data · Suite running for {0}</value>
+  </data>
+  <data name="NoMatch" xml:space="preserve">
+    <value>No process matches "{0}".</value>
+  </data>
+  <data name="NoPeakLastDay" xml:space="preserve">
+    <value>No peak in the last 24 hours.</value>
+  </data>
+  <data name="NoPeakSinceStart" xml:space="preserve">
+    <value>No peak since the start.</value>
+  </data>
+  <data name="NoValuesYet" xml:space="preserve">
+    <value>No values yet</value>
+  </data>
+  <data name="Now" xml:space="preserve">
+    <value>Now</value>
+  </data>
+  <data name="OfCores" xml:space="preserve">
+    <value>/ {0} cores</value>
+  </data>
+  <data name="OverThreshold" xml:space="preserve">
+    <value>{0} over threshold</value>
+  </data>
+  <data name="OverThresholdOf" xml:space="preserve">
+    <value>Over the threshold of {0}</value>
+  </data>
+  <data name="PagesPerSecond" xml:space="preserve">
+    <value>{0} pages/s</value>
+  </data>
+  <data name="ParentProcess" xml:space="preserve">
+    <value>Parent process</value>
+  </data>
+  <data name="PeakAbove" xml:space="preserve">
+    <value>{0} min above the threshold of {1}</value>
+  </data>
+  <data name="PeakChartLabel" xml:space="preserve">
+    <value>CPU of the last 24 hours with its peaks</value>
+  </data>
+  <data name="PeakConsumers" xml:space="preserve">
+    <value>Largest consumers in the highest minute</value>
+  </data>
+  <data name="PeakDetails" xml:space="preserve">
+    <value>Show details of {0}</value>
+  </data>
+  <data name="PeakMemoryPressure" xml:space="preserve">
+    <value>Memory pressure</value>
+  </data>
+  <data name="PeakThrottled" xml:space="preserve">
+    <value>the kernel throttled</value>
+  </data>
+  <data name="PeakTitle" xml:space="preserve">
+    <value>{0} {1} at {2}</value>
+  </data>
+  <data name="Peaks" xml:space="preserve">
+    <value>Peaks</value>
+  </data>
+  <data name="Pid" xml:space="preserve">
+    <value>PID</value>
+  </data>
+  <data name="PortConnected" xml:space="preserve">
+    <value>connected</value>
+  </data>
+  <data name="PortNoCable" xml:space="preserve">
+    <value>no cable</value>
+  </data>
+  <data name="ProcessCount" xml:space="preserve">
+    <value>{0} processes</value>
+  </data>
+  <data name="ProcessGone" xml:space="preserve">
+    <value>no longer running</value>
   </data>
   <data name="ProcessOverview" xml:space="preserve">
     <value>Process overview</value>
   </data>
-  <data name="Res" xml:space="preserve">
+  <data name="Processes" xml:space="preserve">
+    <value>Processes</value>
+  </data>
+  <data name="ProcessesRunning" xml:space="preserve">
+    <value>running</value>
+  </data>
+  <data name="Refaults" xml:space="preserve">
+    <value>Reads back from disk</value>
+  </data>
+  <data name="RefaultsHint" xml:space="preserve">
+    <value>Memory pages read back from disk per second. Without swap this rises when memory runs short, because program code is dropped and read again.</value>
+  </data>
+  <data name="ResMb" xml:space="preserve">
     <value>RES (MB)</value>
   </data>
-  <data name="Virt" xml:space="preserve">
-    <value>VIRT (MB)</value>
+  <data name="RoleEngineHost" xml:space="preserve">
+    <value>Engine host</value>
+  </data>
+  <data name="RoleSuite" xml:space="preserve">
+    <value>ViciOne Suite</value>
+  </data>
+  <data name="RunningFor" xml:space="preserve">
+    <value>Running for</value>
+  </data>
+  <data name="SampledWhileOpen" xml:space="preserve">
+    <value>Measured every 2 seconds while this page is open</value>
+  </data>
+  <data name="SharedMemoryHint" xml:space="preserve">
+    <value>Memory shared by several processes counts once per process, so the groups add up to more than the used memory. The bar shows them in proportion to the used memory.</value>
+  </data>
+  <data name="ShowOnly" xml:space="preserve">
+    <value>Show only {0}</value>
+  </data>
+  <data name="SinceStart" xml:space="preserve">
+    <value>since {0}</value>
+  </data>
+  <data name="SnapshotHint" xml:space="preserve">
+    <value>Copies everything on this page, all processes included, as Markdown for a ticket.</value>
+  </data>
+  <data name="SnapshotTitle" xml:space="preserve">
+    <value>Process overview of {0}, {1}</value>
+  </data>
+  <data name="SortBy" xml:space="preserve">
+    <value>Sort by {0}</value>
+  </data>
+  <data name="Started" xml:space="preserve">
+    <value>Started</value>
+  </data>
+  <data name="StartedAt" xml:space="preserve">
+    <value>{0} (for {1})</value>
+  </data>
+  <data name="StateDiskSleep" xml:space="preserve">
+    <value>waiting for I/O</value>
+  </data>
+  <data name="StateIdle" xml:space="preserve">
+    <value>idle</value>
+  </data>
+  <data name="StateRunning" xml:space="preserve">
+    <value>running</value>
+  </data>
+  <data name="StateSleeping" xml:space="preserve">
+    <value>sleeping</value>
+  </data>
+  <data name="StateStopped" xml:space="preserve">
+    <value>stopped</value>
+  </data>
+  <data name="StateZombie" xml:space="preserve">
+    <value>zombie</value>
+  </data>
+  <data name="Swap" xml:space="preserve">
+    <value>Swap</value>
+  </data>
+  <data name="SwapDetails" xml:space="preserve">
+    <value>{0} of {1} MB · {2} pages swapped in 2 minutes</value>
+  </data>
+  <data name="SwapHint" xml:space="preserve">
+    <value>Swapping means memory is short and writes to the flash.</value>
+  </data>
+  <data name="SwitchTo" xml:space="preserve">
+    <value>Switch to {0}</value>
+  </data>
+  <data name="SystemValues" xml:space="preserve">
+    <value>System values</value>
+  </data>
+  <data name="Temperature" xml:space="preserve">
+    <value>Temperature</value>
+  </data>
+  <data name="TemperatureCpu" xml:space="preserve">
+    <value>CPU temperature</value>
+  </data>
+  <data name="Threads" xml:space="preserve">
+    <value>Threads</value>
+  </data>
+  <data name="ThresholdPercent" xml:space="preserve">
+    <value>Threshold {0} %</value>
+  </data>
+  <data name="ThresholdValue" xml:space="preserve">
+    <value>Threshold {0}</value>
+  </data>
+  <data name="ThrottleFrom" xml:space="preserve">
+    <value>throttles from {0} °C</value>
+  </data>
+  <data name="Throttling" xml:space="preserve">
+    <value>throttling</value>
+  </data>
+  <data name="ToggleDetails" xml:space="preserve">
+    <value>Show or hide the details of {0}</value>
+  </data>
+  <data name="TopConsumers" xml:space="preserve">
+    <value>Largest consumers</value>
+  </data>
+  <data name="Tree" xml:space="preserve">
+    <value>Tree</value>
+  </data>
+  <data name="TrendFalling" xml:space="preserve">
+    <value>falling</value>
+  </data>
+  <data name="TrendRising" xml:space="preserve">
+    <value>rising</value>
+  </data>
+  <data name="TrendSteady" xml:space="preserve">
+    <value>steady</value>
+  </data>
+  <data name="Unassigned" xml:space="preserve">
+    <value>not assigned</value>
+  </data>
+  <data name="Updated" xml:space="preserve">
+    <value>Updated</value>
+  </data>
+  <data name="Uptime" xml:space="preserve">
+    <value>Uptime</value>
+  </data>
+  <data name="UptimeValue" xml:space="preserve">
+    <value>{0} d {1:00}:{2:00} h</value>
+  </data>
+  <data name="Utilization" xml:space="preserve">
+    <value>Utilization</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="WarningLegend" xml:space="preserve">
+    <value>over threshold or waiting for I/O</value>
+  </data>
+  <data name="WithinLimits" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="WithinLimitsLegend" xml:space="preserve">
+    <value>normal</value>
   </data>
 </root>

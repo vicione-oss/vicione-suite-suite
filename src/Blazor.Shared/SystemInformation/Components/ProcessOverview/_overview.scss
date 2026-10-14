@@ -1,0 +1,161 @@
+@use "sass:color";
+@use "sass:map";
+@use "../../../Styles/mixins";
+@use "../../../Styles/design/colors";
+@use "../../../Styles/design/typography";
+@use "../../../../../shared/styles/colors-staged";
+
+$gap: 16px;
+$panel-padding: 16px;
+$panel-head-height: 48px;
+$radius: 3px;
+$gauge-height: 6px;
+
+$tile-background: color.change(colors-staged.$color-content, $alpha: .7);
+
+// Text on a primary-colored surface.
+$on-primary: color.adjust(colors.$primary, $lightness: -38%, $saturation: -30%);
+
+$status-colors: (
+    "normal": colors-staged.$color-green,
+    "warning": colors-staged.$color-warning,
+    "failed": colors.$error,
+    "info": colors-staged.$color-blue,
+    "neutral": colors-staged.$color-foreground,
+);
+
+@mixin panel {
+    background-color: color.change(colors-staged.$color-content-dark, $alpha: .3);
+    border-radius: $radius;
+    min-width: 0;
+}
+
+@mixin panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    min-height: $panel-head-height;
+    padding: 8px $panel-padding;
+    box-sizing: border-box;
+    border-bottom: 1px solid colors.$border;
+}
+
+@mixin panel-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: typography.$font-weight-regular;
+    letter-spacing: .2px;
+    color: colors.$font-light;
+}
+
+@mixin head-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+@mixin big-value {
+    font-size: 24px;
+    font-weight: typography.$font-weight-light;
+    letter-spacing: .5px;
+    color: colors.$font-light;
+}
+
+@mixin ellipsis {
+    @include mixins.overflow-ellipsis();
+}
+
+@mixin muted {
+    color: colors-staged.$color-foreground;
+}
+
+@mixin mono {
+    font-family: var(--bs-font-monospace);
+    font-variant-numeric: tabular-nums;
+}
+
+// Buttons joined into one toggle; the pressed one is filled.
+@mixin segmented($height: 28px) {
+    display: flex;
+
+    button {
+        height: $height;
+        padding: 0 12px;
+        border: 1px solid colors.$border;
+        background: transparent;
+        color: colors.$font;
+        font: inherit;
+        white-space: nowrap;
+        cursor: pointer;
+
+        & + button {
+            border-left: none;
+        }
+
+        &:first-child {
+            border-top-left-radius: $radius;
+            border-bottom-left-radius: $radius;
+        }
+
+        &:last-child {
+            border-top-right-radius: $radius;
+            border-bottom-right-radius: $radius;
+        }
+
+        &:hover:not([aria-pressed="true"]) {
+            background: colors.$background-light;
+        }
+
+        &[aria-pressed="true"] {
+            border-color: colors.$primary;
+            background: colors.$primary;
+            color: $on-primary;
+        }
+    }
+}
+
+@mixin chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: $radius;
+    font-size: 12px;
+    letter-spacing: .4px;
+    white-space: nowrap;
+    flex: none;
+}
+
+@mixin dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+}
+
+/// Colors `.chip.status-<name>` for the given status names only.
+@mixin chip-colors($names...) {
+    @each $name in $names {
+        $color: map.get($status-colors, $name);
+
+        .chip.status-#{$name} {
+            color: color.adjust($color, $lightness: 8%);
+            background-color: color.change($color, $alpha: .15);
+        }
+    }
+}
+
+/// Colors `.dot.status-<name>` for the given status names only.
+@mixin dot-colors($names...) {
+    @each $name in $names {
+        .dot.status-#{$name} {
+            background-color: map.get($status-colors, $name);
+        }
+    }
+}

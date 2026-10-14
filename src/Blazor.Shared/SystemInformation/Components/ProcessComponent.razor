@@ -1,194 +1,191 @@
 @using System.Globalization
-@using ViciOne.SystemMonitoring.Collectors
-@using ViciOne.Ui.Blazor.Components.Grid.Components
-@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using Blazor.Shared.SystemInformation.Components.ProcessOverview
+@using Blazor.Shared.SystemInformation.Extensions
+@using Blazor.Shared.SystemInformation.Models
+@using ViciOne.Ui.Blazor.Components.CopyToClipboardButton.Components
+@using ViciOne.Ui.Blazor.Components.CopyToClipboardButton.Enums
 @using ViciOne.Ui.Blazor.Components.LoadingSpinner.Components
-@using ViciOne.Ui.Blazor.Components.SearchBox
-@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+@using Text = Blazor.Shared.SystemInformation.Components.Localization.ProcessComponent
 
-@if (OperatingSystem.IsLinux())
-{
-    <div class="layout">
-        <div class="information-wrapper">
-            <div class="metrics-area">
-                <div class="hardware-overview">
-                    <div>CPU:</div>
-                    <div class="outer-bar">
-                        <div class="inner-bar cpu" style="--cpuWidth: @FormatHardwareValue(_cpuValue, CultureInfo.InvariantCulture)%" />
+<div class="process-overview">
+    @if (!Sampler.IsAvailable)
+    {
+        <div class="notice">@Text.LinuxOnly</div>
+    }
+    else if (_snapshot is not { } snapshot)
+    {
+        <LoadingSpinner Visible="true" />
+    }
+    else
+    {
+        <div class="overview">
+            <div class="full-row">
+                <section class="panel node-header" aria-label="@InstanceName">
+                    <div class="node-icon">
+                        <MonochromeIcon Name="MonochromeIconName.ServerLight" Size="MonochromeIconSize.Large" />
                     </div>
-                    <div class="value">@FormatHardwareValue(_cpuValue)%</div>
-                    <div>RAM:</div>
-                    <div class="outer-bar">
-                        <div class="inner-bar ram" style="--ramWidth: @FormatHardwareValue(_ramValue, CultureInfo.InvariantCulture)%" />
+                    <div class="node-info">
+                        <div class="title-row">
+                            <h1 title="@InstanceName">@InstanceName</h1>
+                            <StatusChip OverThreshold="@SystemOverThreshold" ShowDot="true" />
+                            <span class="chip status-info">@InstanceType</span>
+                        </div>
+                        <div class="description">@HardwareDescription</div>
+                        <div class="facts">
+                            <span><span class="muted">@Text.Uptime</span> <span class="mono">@UptimeText</span></span>
+                            <span><span class="muted">@Text.Updated</span> <span class="mono">@UpdatedText</span></span>
+                            <span class="muted">@Text.SampledWhileOpen</span>
+                        </div>
                     </div>
-                    <div class="value">@FormatHardwareValue(_ramValue)%</div>
-                    <div>HDD:</div>
-                    <div class="outer-bar">
-                        <div class="inner-bar hdd" style="--hddWidth: @FormatHardwareValue(_hddValue, CultureInfo.InvariantCulture)%" />
+                    <div class="actions">
+                        <CopyToClipboardButton TextToCopy="GetSnapshotText"
+                                               Title="@Text.SnapshotHint"
+                                               Size="CopyToClipboardButtonSize.Medium" />
                     </div>
-                    <div class="value">@FormatHardwareValue(_hddValue)%</div>
-                    <div>NET:</div>
-                    <div class="outer-bar">
-                        <div class="inner-bar net" style="--netWidth: @FormatHardwareValue(_netValue, CultureInfo.InvariantCulture)%" />
-                    </div>
-                    <div class="value">@FormatHardwareValue(_netValue)%</div>
-                </div>
-
-                <div class="load-average">
-                    <span>Load average:</span>
-                    <span class="load-average-value">@FormatLoadAvgValue(_loadAvg1Value)</span>
-                    <span class="load-average-value">@FormatLoadAvgValue(_loadAvg5Value)</span>
-                    <span class="load-average-value">@FormatLoadAvgValue(_loadAvg15Value)</span>
-                </div>
+                </section>
             </div>
 
-            <div class="search-container">
-                <SearchBox Text="@_filterText"
-                           TextChanging="@ApplyFilter"
-                           Placeholder="@($"{CommonVocabulary.SearchVerb}...")"
-                           CssClass="search-box" />
-            </div>
-        </div>
-
-        <div class="processes-grid">
-            <table cellpadding="0"
-                   cellspacing="0">
-                <thead>
-                    <tr>
-                        <th class="pid">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@nameof(LinuxProcessInfo.Pid)</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="ppid">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@nameof(LinuxProcessInfo.PPid)</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="name">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@CommonVocabulary.Name</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="state">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@CommonVocabulary.State</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="threads">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@nameof(LinuxProcessInfo.Threads)</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="res">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@Localization.ProcessComponent.Res</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="virt">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@Localization.ProcessComponent.Virt</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="cpu">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@Localization.ProcessComponent.CpuUsage</span>
-                                </div>
-                            </div>
-                        </th>
-                        <th class="command">
-                            <div class="header-template">
-                                <span></span>
-                                <div>
-                                    <span>@TechnicalTerms.Command</span>
-                                </div>
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (var process in _processes)
+            <div class="full-row">
+                <section class="summary-tiles" aria-label="@Text.KeyFigures">
+                    @foreach (var tile in _tiles)
                     {
-                        <tr>
-                            <td class="pid">
-                                <div>
-                                    <span>@process.Pid</span>
+                        <div class="tile @(tile.Critical ? "critical" : tile.Over ? "over" : null)" @key="tile.Label" title="@tile.Tooltip">
+                            <div class="head-row">
+                                <div class="value @(tile.Critical ? "critical" : tile.Over ? "over" : null)">
+                                    @tile.Value
+                                    @if (tile.Unit is { } unit)
+                                    {
+                                        <span class="unit">@unit</span>
+                                    }
+                                    @if (tile.Trend is { } trend)
+                                    {
+                                        <span class="trend" title="@trend.Text">@trend.Arrow</span>
+                                    }
                                 </div>
-                            </td>
-                            <td class="ppid">
-                                <div>
-                                    <span>@process.PPid</span>
+                                @if (tile.Corner is { } corner)
+                                {
+                                    <span class="corner">@CaptionText(corner)</span>
+                                }
+                            </div>
+                            <div class="label">@tile.Label</div>
+                            @if (tile.Gauge is not null || tile.Caption is not null)
+                            {
+                                <div class="detail">
+                                    @if (tile.Gauge is { } gauge)
+                                    {
+                                        <RangeGauge Current="@gauge.Current"
+                                                    LowerBound="@gauge.LowerBound"
+                                                    UpperBound="@gauge.UpperBound"
+                                                    Range="@gauge.Range"
+                                                    Limit="@gauge.Limit"
+                                                    Marks="@gauge.Marks"
+                                                    Warning="@tile.Over" />
+                                    }
+                                    else
+                                    {
+                                        <div class="gauge-placeholder"></div>
+                                    }
+                                    @if (tile.Caption is { } caption)
+                                    {
+                                        <div class="caption">
+                                            <span>@CaptionText(caption.Left)</span>
+                                            @if (tile.Alert is { } alert)
+                                            {
+                                                <span class="chip status-warning">@alert</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@CaptionText(caption.Right)</span>
+                                            }
+                                        </div>
+                                    }
                                 </div>
-                            </td>
-                            <td class="name">
-                                <div>
-                                    <span>@process.Name</span>
-                                </div>
-                            </td>
-                            <td class="state">
-                                <div title="@SplitStateInformation(process.State)[1]">
-                                    <span>@SplitStateInformation(process.State)[0]</span>
-                                </div>
-                            </td>
-                            <td class="threads">
-                                <div>
-                                    <span>@process.Threads</span>
-                                </div>
-                            </td>
-                            <td class="res">
-                                <div>
-                                    <span>@Math.Round((process.MemoryDetails.VmRSSKb / 1024d), 1)</span>
-                                </div>
-                            </td>
-                            <td class="virt">
-                                <div>
-                                    <span>@Math.Round((process.MemoryDetails.VmPeakKb / 1024d), 1)</span>
-                                </div>
-                            </td>
-                            <td class="cpu">
-                                <div>
-                                    <span>@FormatHardwareValue(Math.Round(process.CpuUsage, 1))%</span>
-                                </div>
-                            </td>
-                            <td class="command">
-                                <div>
-                                    <span>@process.CmdLine</span>
-                                </div>
-                            </td>
-                        </tr>
+                            }
+                        </div>
                     }
-                </tbody>
-            </table>
-        </div>
-    </div>
+                </section>
+            </div>
 
-    <LoadingSpinner Visible="_loadingSpinnerVisible" />
-}
-else
-{
-    <p>Process overview is only available on Linux</p>
-}
+            <div class="main-column">
+                <ProcessTable @ref="_table"
+                              Processes="@snapshot.Processes"
+                              TotalMemoryKb="@TotalMemoryKb"
+                              CpuPercent="@Metrics.Cpu.Latest"
+                              MemoryPercent="@Metrics.Memory.Latest"
+                              MemoryFreePercent="@Metrics.MemoryFreePercent" />
+            </div>
+
+            <div class="side-column">
+                <section class="panel" aria-label="@Text.Utilization">
+                    <div class="panel-head">
+                        <h2 class="panel-title">@Text.Utilization</h2>
+                        <div class="head-info">
+                            <span class="muted">@Text.LastTwoMinutes</span>
+                            <StatusChip OverThreshold="@SystemOverThreshold" />
+                        </div>
+                    </div>
+                    <div class="rows">
+                        @foreach (var row in VisibleSystemRows())
+                        {
+                            <StatusRow @key="row.Title"
+                                       Status="@ShownStatus(row)"
+                                       ValueStatus="@row.Status"
+                                       Title="@row.Title"
+                                       Subtitle="@row.Subtitle"
+                                       History="@row.History"
+                                       Max="@row.Max"
+                                       Limit="@row.Limit"
+                                       Value="@row.Value"
+                                       Tooltip="@row.Tooltip"
+                                       Indented="@row.Indented"
+                                       Bar="@row.Bar"
+                                       Expanded="@(HasChildRows(row) ? _expandedGroups.Contains(row.Title) : null)"
+                                       ReserveExpanderSpace="@(!row.Indented)"
+                                       ClickLabel="@(HasChildRows(row) ? string.Format(CultureInfo.CurrentCulture, Text.ToggleDetails, row.Title) : null)"
+                                       OnClick="@(HasChildRows(row) ? EventCallback.Factory.Create(this, () => ToggleGroup(row.Title)) : default)" />
+                        }
+                    </div>
+                </section>
+
+                <section class="panel" aria-label="@Text.Peaks">
+                    <div class="panel-head">
+                        <h2 class="panel-title">@Text.Peaks</h2>
+                        <div class="head-info">
+                            <span class="muted">@PeakSpanText</span>
+                            @if (_peaks.Count > 0)
+                            {
+                                <span class="chip status-warning">@_peaks.Count</span>
+                            }
+                        </div>
+                    </div>
+                    <PeakChart Minutes="@_minutes" Peaks="@_peaks" Started="@DailyRanges.Started" OnPeakSelected="@OpenPeak" />
+                    <div class="rows">
+                        @if (_peaks.Count == 0)
+                        {
+                            <div class="empty-note">
+                                <span class="dot status-normal"></span>
+                                @{ var calm = CalmText; }
+                                <span>@calm.Lead<b>@calm.Value</b>@calm.Tail</span>
+                            </div>
+                        }
+                        @foreach (var peak in _peaks)
+                        {
+                            <StatusRow @key="(peak.Kind, peak.Start)"
+                                       Status="@(peak.Throttled && peak.Kind == PeakKind.Temperature ? OverviewStatus.Failed : OverviewStatus.Warning)"
+                                       Title="@($"{PeakText.Name(peak.Kind)} {PeakText.Value(peak.Kind, peak.PeakValue)}")"
+                                       Subtitle="@PeakSubtitle(peak)"
+                                       History="@s_noHistory"
+                                       Max="1"
+                                       Value="@LocalTime(peak.PeakTime)"
+                                       ClickLabel="@string.Format(CultureInfo.CurrentCulture, Text.PeakDetails, PeakText.Name(peak.Kind))"
+                                       OnClick="@(() => OpenPeak(peak))" />
+                        }
+                    </div>
+                </section>
+                <PeakDialog Peak="@_openPeak" RunningPids="@_runningPids" @bind-Visible="_peakDialogVisible" />
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,15 @@
+<div class="range-gauge" aria-hidden="true">
+    @if (Range is { } range)
+    {
+        <span class="band" style="left: @Position(range.Min); width: @Width(range.Min, range.Max)"></span>
+    }
+    @foreach (var mark in Marks)
+    {
+        <span class="tick dim" style="left: @Position(mark)"></span>
+    }
+    @if (Limit is { } limit)
+    {
+        <span class="limit" style="left: @Position(limit)"></span>
+    }
+    <span class="current @(Warning ? "warning" : null)" style="left: @Position(Current)"></span>
+</div>

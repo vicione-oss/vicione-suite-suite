@@ -1,0 +1,194 @@
+@use "sass:map";
+@use "../../../Styles/design/colors";
+@use "../../../../../shared/styles/colors-staged";
+
+$muted: rgba(222, 222, 222, .6);
+$series: (
+    "cpu": rgb(103, 183, 76),
+    "memory": rgb(255, 206, 0),
+    "disk": rgb(114, 149, 194),
+    "network": rgb(255, 150, 0),
+    "temperature": rgb(240, 110, 80),
+);
+
+.load-chart {
+    font-size: 12px;
+}
+
+.plot {
+    position: relative;
+    margin: 0 0 18px 24px;
+    cursor: crosshair;
+
+    .lines {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+
+    .grid {
+        stroke: rgba(255, 255, 255, .07);
+        vector-effect: non-scaling-stroke;
+    }
+
+    .highlight {
+        fill: color-mix(in srgb, #{colors-staged.$color-warning} 14%, transparent);
+    }
+
+    .threshold {
+        stroke: rgba(255, 255, 255, .45);
+        stroke-dasharray: 3 3;
+        vector-effect: non-scaling-stroke;
+    }
+
+    .line {
+        fill: none;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        vector-effect: non-scaling-stroke;
+
+        &.focus {
+            stroke-width: 2.2;
+        }
+
+        &.dim {
+            stroke-opacity: .2;
+        }
+    }
+
+    .level-line {
+        stroke-dasharray: 2 3;
+        vector-effect: non-scaling-stroke;
+    }
+
+    @each $name, $color in $series {
+        .line.#{$name},
+        .level-line.#{$name} {
+            stroke: $color;
+        }
+
+        .band.#{$name} {
+            fill: rgba($color, .18);
+        }
+
+        .level.#{$name} {
+            fill: rgba($color, .08);
+        }
+
+        .dot.#{$name} {
+            background-color: $color;
+        }
+    }
+
+    .no-data {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: repeating-linear-gradient(135deg, rgba(255, 255, 255, .06) 0 2px, transparent 2px 7px);
+        color: $muted;
+        font-size: 11px;
+        line-height: 14px;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .no-data-line {
+        display: block;
+    }
+
+    .y-label,
+    .x-label,
+    .top-label,
+    .time-box {
+        position: absolute;
+        font-size: 10px;
+        line-height: 12px;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    .y-label {
+        left: -24px;
+        width: 20px;
+        text-align: right;
+        color: $muted;
+        transform: translateY(-50%);
+    }
+
+    .x-label {
+        top: calc(100% + 3px);
+        color: $muted;
+        transform: translateX(-50%);
+
+        &.start {
+            left: 0;
+            transform: none;
+        }
+
+        &.end {
+            right: 0;
+            transform: none;
+        }
+    }
+
+    .top-label {
+        top: 2px;
+        right: 2px;
+        color: map.get($series, "network");
+    }
+
+    .marker {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background-color: colors-staged.$color-warning;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+
+        &:focus-visible {
+            outline: 2px solid colors.$primary;
+            outline-offset: 2px;
+        }
+    }
+
+    .cursor {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background-color: rgba(255, 255, 255, .7);
+        pointer-events: none;
+    }
+
+    .dot {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        box-shadow: 0 0 0 1.5px rgb(64, 64, 64);
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+    }
+
+    .time-box {
+        top: calc(100% + 2px);
+        padding: 0 4px;
+        border: 1px solid rgba(255, 255, 255, .45);
+        border-radius: 2px;
+        background-color: rgb(64, 64, 64);
+        color: colors.$font;
+        transform: translateX(-50%);
+    }
+}

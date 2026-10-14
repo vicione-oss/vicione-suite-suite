@@ -1,0 +1,79 @@
+@use "../../../Styles/design/colors";
+@use "../../../../../shared/styles/colors-staged";
+@use "overview";
+
+$muted: rgba(222, 222, 222, .6);
+$line: rgb(103, 183, 76);
+
+.peak-chart {
+    padding: 18px overview.$panel-padding 0;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    font-size: 13px;
+}
+
+::deep .load-chart .plot {
+    margin-bottom: 30px;
+}
+
+.consumers,
+.rows {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 80px 48px;
+    gap: 10px 12px;
+    align-items: center;
+}
+
+.consumers {
+    padding: 0 0 18px;
+
+    .head {
+        color: $muted;
+    }
+
+    .total-label {
+        text-align: right;
+        white-space: nowrap;
+    }
+}
+
+// Rows that peak-chart.js writes on hover.
+.rows {
+    grid-column: 1 / -1;
+}
+
+.rows ::deep {
+    .value {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        color: colors.$font-light;
+    }
+
+    .name {
+        @include overview.ellipsis;
+        color: colors.$font;
+    }
+
+    .bar {
+        height: 6px;
+        overflow: hidden;
+        border-radius: 3px;
+        background-color: rgba(255, 255, 255, .08);
+
+        span {
+            display: block;
+            height: 100%;
+            border-radius: 3px;
+            background-color: $line;
+
+            &.over {
+                background-color: colors-staged.$color-warning;
+            }
+        }
+    }
+}
+
+.value {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: colors.$font-light;
+}

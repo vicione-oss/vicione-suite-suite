@@ -1,0 +1,66 @@
+@using Blazor.Shared.SystemInformation.Components.Charts
+@using ViciOne.Ui.Blazor.Components.Dialog.Components
+@using ViciOne.Ui.Localization.Resources
+
+<Dialog CssClass="peak-dialog"
+        HeaderText="@Title"
+        Height="500px"
+        Width="600px"
+        @bind-Visible:get="Visible"
+        @bind-Visible:set="UpdateVisible">
+
+    <Body>
+        @if (Peak is { } peak)
+        {
+            <div class="peak-details">
+                <p class="summary">@Summary(peak)</p>
+                @if (peak.Course.Count > 1)
+                {
+                    var (minimum, maximum) = Scale(peak);
+                    <LoadChart Start="@peak.Course[0].Time"
+                               End="@peak.Course[^1].Time"
+                               Slots="@peak.Course.Count"
+                               Minimum="@minimum"
+                               Maximum="@maximum"
+                               StartLabel="@LocalTime(peak.Course[0].Time)"
+                               EndLabel="@LocalTime(peak.Course[^1].Time)"
+                               Highlight="@Window(peak)"
+                               Lines="@([new ChartLine(SeriesClass(peak.Kind), [.. peak.Course.Select(point => point.Value)])])"
+                               Threshold="@peak.Limit"
+                               PlotHeight="120"
+                               AriaLabel="@Title" />
+                }
+                <table>
+                    <thead>
+                        <tr>
+                            <th>@Text.PeakConsumers</th>
+                            <th class="num">@TechnicalAcronyms.Cpu</th>
+                            <th class="num">@Text.Memory</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var process in peak.TopProcesses)
+                        {
+                            <tr>
+                                <td>
+                                    @PeakText.Process(process)
+                                    @if (!RunningPids.Contains(process.Pid))
+                                    {
+                                        <span class="gone">@Text.ProcessGone</span>
+                                    }
+                                </td>
+                                <td class="num">@PeakText.Percent(process.CpuPercent)</td>
+                                <td class="num">@OverviewFormat.MegabytesFromKilobytes(process.MemoryKb) MB</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </Body>
+
+    <Footer>
+        <DialogFooterButton OnClick="@(() => UpdateVisible(false))"
+                            Text="@CommonVocabulary.CloseVerb" />
+    </Footer>
+</Dialog>

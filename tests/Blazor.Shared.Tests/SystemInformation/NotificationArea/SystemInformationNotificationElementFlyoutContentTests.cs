@@ -4,6 +4,7 @@ using Blazor.Shared.SystemInformation.NotificationArea;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.Infrastructure;
+using Sdk.Client.NotificationArea.Services;
 using Sdk.Instance;
 
 namespace Blazor.Shared.Tests.SystemInformation.NotificationArea;
@@ -21,7 +22,8 @@ public sealed class SystemInformationNotificationElementFlyoutContentTests
             .AddSingleton(Substitute.For<IUiMediator>())
             .AddSingleton(Substitute.For<IInstanceInformationProvider>())
             .AddSingleton(Substitute.For<ISuiteControlService>())
-            .AddSingleton(Substitute.For<INavigationService>());
+            .AddSingleton(Substitute.For<INavigationService>())
+            .AddSingleton(Substitute.For<IActiveNotificationElementPolicy>());
 
         // Act
         var component = ctx.Render<SystemInformationNotificationElementFlyoutContent>();

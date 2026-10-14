@@ -1,157 +1,336 @@
-﻿@use "../../Styles/design/colors";
+@use "sass:color";
+@use "sass:map";
+@use "../../Styles/design/colors";
+@use "../../Styles/design/scrollbar";
+@use "../../Styles/design/typography";
 @use "../../../../shared/styles/colors-staged";
-@use 'sass:color';
+@use "ProcessOverview/overview";
 
-.layout {
+.process-overview {
+    @include scrollbar.adjust-styles;
+    container: process-overview / inline-size;
     width: 100%;
     height: 100%;
-    display: grid;
-    grid-template-rows: min-content auto;
-    padding: 16px 40px;
-}
-
-.information-wrapper {
-    width: 100%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: auto 400px;
-    grid-template-rows: auto min-content;
-    row-gap: 16px;
-    padding-bottom: 8px;
-}
-
-.metrics-area {
-    display: flex;
-    gap: 32px;
-    grid-column: 1;
-    grid-row-start: 1;
-    grid-row-end: 3;
-}
-
-.hardware-overview {
-    display: grid;
-    width: min-content;
-    line-height: 20px;
-    grid-template-columns: max-content 200px auto;
-    grid-gap: 8px;
-
-    .value {
-        text-align: right;
-    }
-}
-
-.outer-bar {
-    width: 100%;
-    height: 20px;
-    background-color: transparent;
-    border: 1px solid color.adjust(colors.$font-light, $alpha: -0.8);
-    border-radius: 3px;
-    padding: 1px;
-
-    .inner-bar {
-        height: 100%;
-        border-radius: inherit;
-
-        &.cpu {
-            width: var(--cpuWidth);
-            background-color: #95ee11;
-        }
-
-        &.ram {
-            width: var(--ramWidth);
-            background-color: #ffcd00;
-        }
-
-        &.hdd {
-            width: var(--hddWidth);
-            background-color: #7394c1;
-        }
-
-        &.net {
-            width: var(--netWidth);
-            background-color: #ff9600;
-        }
-    }
-}
-
-.load-average {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding-left: 20px;
-    flex-direction: row;
-    align-content: flex-start;
-    flex-wrap: wrap;
-
-    .load-average-value {
-        font-variant-numeric: tabular-nums;
-    }
-}
-
-.search-container {
-    width: 100%;
-    grid-column: 2;
-    grid-row: 3;
-    align-self: end;
-
-    ::deep .search-box {
-        width: 100%;
-    }
-}
-
-.processes-grid {
-    color: #bababa;
     overflow: auto;
 }
 
-.res, .virt, .cpu {
-    .header-template {
-        white-space: nowrap;
+// The last row takes the remaining height, so only the process table scrolls and not the page.
+.overview {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: overview.$gap;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 24px;
+}
+
+.full-row {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+.main-column,
+.side-column {
+    display: flex;
+    flex-direction: column;
+    gap: overview.$gap;
+    min-width: 0;
+}
+
+.main-column {
+    grid-column: 1 / 6;
+    min-height: 0;
+
+    ::deep .process-table {
+        flex: 1;
     }
 }
 
-.header-template {
-    > div {
-        border-top: 1px solid colors-staged.$color-content-hover;
-        border-bottom: 1px solid colors-staged.$color-content-hover;
-        padding: 16px var(--width-padding);
-    }
+.side-column {
+    grid-column: 6 / 9;
+    min-height: 0;
+    overflow-y: auto;
+}
 
-    > span {
-        padding: 0px 0px 8px 16px;
-        display: block;
-        font-weight: normal;
-        font-size: 14px;
-        line-height: 1em;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+.panel {
+    @include overview.panel;
+}
+
+.panel-head {
+    @include overview.panel-head;
+}
+
+.panel-title {
+    @include overview.panel-title;
+}
+
+.head-info {
+    @include overview.head-info;
+}
+
+.rows {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 0;
+
+    ::deep .status-row + .status-row {
+        border-top: 1px solid colors.$background-light;
     }
 }
 
-table {
-    --width-padding: 8px;
-    border: none;
-    width: 100%;
+.node-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: overview.$gap 24px;
+    padding: overview.$panel-padding;
 
-    tbody {
-        > tr:nth-child(even) > td {
-            background-color: color.adjust(colors.$background-darker, $lightness: 2%);
+    .node-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        flex: none;
+        color: colors.$primary;
+    }
+
+    .node-info {
+        display: flex;
+        flex: 1 1 360px;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .title-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+
+        h1 {
+            @include overview.ellipsis;
+            @include overview.big-value;
+            min-width: 0;
+            margin: 0;
         }
     }
 
-    td {
-        align-content: start;
-        padding: 11px 0px 11px var(--width-padding);
+    .description,
+    .facts {
+        @include overview.muted;
+        min-height: 1.5em;
     }
 
-    th {
-        align-content: end;
-        background-color: colors.$background-darker;
-        font-size: 14px;
-        font-weight: normal;
-        line-height: 1em;
-        position: sticky;
-        top: 0px;
+    .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 20px;
+
+        .mono {
+            color: colors.$font;
+        }
+    }
+
+    .actions {
+        align-self: flex-start;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+    }
+}
+
+.summary-tiles {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: overview.$gap;
+
+    .tile {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        padding: 12px overview.$panel-padding;
+        background-color: overview.$tile-background;
+
+        @each $state, $name, $alpha in ("over", "warning", .12), ("critical", "failed", .16) {
+            &.#{$state} {
+                $color: map.get(overview.$status-colors, $name);
+                background-image: linear-gradient(color.change($color, $alpha: $alpha), color.change($color, $alpha: $alpha));
+                box-shadow: inset 3px 0 0 $color;
+            }
+        }
+    }
+
+    .head-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .corner {
+        flex: none;
+        font-size: 12px;
+        white-space: nowrap;
+        color: color.change(colors.$font-light, $alpha: .6);
+
+        ::deep b {
+            font-weight: typography.$font-weight-regular;
+            color: colors.$font-light;
+        }
+    }
+
+    .value {
+        @include overview.ellipsis;
+        @include overview.big-value;
+        line-height: 28px;
+        font-variant-numeric: tabular-nums;
+
+        &.over {
+            color: colors-staged.$color-warning;
+        }
+
+        &.critical {
+            color: map.get(overview.$status-colors, "failed");
+        }
+    }
+
+    .unit {
+        margin-left: 4px;
+        font-size: 16px;
+        color: color.change(colors.$font-light, $alpha: .6);
+    }
+
+    .trend {
+        margin-left: 6px;
+        font-size: 18px;
+        color: color.change(colors.$font-light, $alpha: .75);
+    }
+
+    .detail {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 4px;
+    }
+
+    // Keeps the values of a tile without gauge in line with the other tiles.
+    .gauge-placeholder {
+        height: overview.$gauge-height;
+    }
+
+    // As tall as the warning chip that can take its right part.
+    .caption {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 22px;
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+        color: color.change(colors.$font-light, $alpha: .6);
+
+        span {
+            @include overview.ellipsis;
+            min-width: 0;
+        }
+
+        // The values come in as markup, which scoped CSS only reaches through ::deep; Noto Sans is loaded without a bold face.
+        ::deep b {
+            font-weight: typography.$font-weight-regular;
+            color: colors.$font-light;
+        }
+    }
+
+    .label {
+        @include overview.ellipsis;
+        font-weight: typography.$font-weight-light;
+        letter-spacing: .2px;
+        color: color.change(colors.$font-light, $alpha: .8);
+    }
+}
+
+.notice {
+    @include overview.panel;
+    margin: 24px;
+    padding: overview.$panel-padding;
+    color: colors.$font;
+}
+
+.empty-note {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 16px overview.$panel-padding;
+    font-size: 13px;
+    line-height: 1.5;
+    color: colors.$font;
+
+    .dot {
+        @include overview.dot;
+        flex: none;
+    }
+
+    b {
+        font-weight: 400;
+        color: colors.$font-light;
+    }
+}
+
+@include overview.dot-colors("normal");
+
+.muted {
+    @include overview.muted;
+}
+
+.mono {
+    @include overview.mono;
+}
+
+.chip {
+    @include overview.chip;
+}
+
+@include overview.chip-colors("info", "warning");
+
+@media (max-width: 1100px) {
+    .overview {
+        grid-template-rows: none;
+        height: auto;
+    }
+
+    .main-column,
+    .side-column {
+        grid-column: 1 / -1;
+        overflow-y: visible;
+    }
+
+    .main-column ::deep .table-wrap {
+        flex: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .overview {
+        padding: 16px;
+    }
+}
+
+// Below about 155 px per tile the values under the gauge overlap.
+@container process-overview (max-width: 1400px) {
+    .summary-tiles {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@container process-overview (max-width: 820px) {
+    .summary-tiles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
