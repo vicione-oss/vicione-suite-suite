@@ -2,7 +2,6 @@
 using Core.Shared.Monitoring;
 using Microsoft.Extensions.Options;
 using ViciOne.SystemMonitoring;
-using ViciOne.SystemMonitoring.Collectors;
 using ViciOne.SystemMonitoring.Metrics;
 
 namespace Blazor.Shared.SystemInformation.Services;
@@ -16,7 +15,6 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
     private readonly Func<Metric, bool> _filterRam = m => m.Group == Collectors.Ram && m.Name == "total_memory_usage";
     private readonly Func<Metric, bool> _filterNet = m => m.Group == Collectors.Network && m.Name == "total_bandwidth_usage" && m.SubGroup == options.Value.DefaultNetworkInterface;
     private readonly Func<Metric, bool> _filterHdd = m => m.Group == Collectors.Disk && m.Name == "usage" && m.SubGroup == "\\";
-    private readonly Func<Metric, bool> _filterProcessList = m => m.Group == Collectors.Process && m.Name == "processes";
     private readonly Func<Metric, bool> _filterLoadAvg1 = m => m.Group == Collectors.LoadAverage && m.Name == "load1";
     private readonly Func<Metric, bool> _filterLoadAvg5 = m => m.Group == Collectors.LoadAverage && m.Name == "load5";
     private readonly Func<Metric, bool> _filterLoadAvg15 = m => m.Group == Collectors.LoadAverage && m.Name == "load15";
@@ -33,7 +31,6 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
     private readonly List<float> _hddGraphValues = [];
     private readonly List<float> _netGraphValues = [];
 
-    private List<LinuxProcessInfo> _currentProcessList = [];
     private float _currentCpuValue;
     private float _currentRamValue;
     private float _currentHddValue;
@@ -42,7 +39,6 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
     private float _currentLoadAvg5Value;
     private float _currentLoadAvg15Value;
 
-    public IReadOnlyCollection<LinuxProcessInfo> CurrentProcessList => Lock(_currentProcessList.ToArray);
     public float CurrentCpuValue => Lock(() => _currentCpuValue);
     public float CurrentRamValue => Lock(() => _currentRamValue);
     public float CurrentHddValue => Lock(() => _currentHddValue);
@@ -58,7 +54,6 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
 
     internal event Func<Task>? GraphValuesChanged;
     internal event Action<MetricType>? MetricChanged;
-    internal event Action<IEnumerable<LinuxProcessInfo>>? ProcessListChanged;
 
     public Task Connect(CancellationToken cancellationToken)
         => Task.CompletedTask;
@@ -75,12 +70,10 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
         var loadAvg1Changed = false;
         var loadAvg5Changed = false;
         var loadAvg15Changed = false;
-        var processListChanged = false;
         var graphValuesHasChanged = false;
 
         lock (_lock)
         {
-            processListChanged = CollectMetric<List<LinuxProcessInfo>, List<LinuxProcessInfo>>(metrics, _filterProcessList, x => x, null, ref _currentProcessList);
             cpuChanged = CollectMetric<double, float>(metrics, _filterCpu, Convert.ToSingle, _cpuTempValues, ref _currentCpuValue);
             ramChanged = CollectMetric<double, float>(metrics, _filterRam, Convert.ToSingle, _ramTempValues, ref _currentRamValue);
             netChanged = CollectMetric<double, float>(metrics, _filterNet, Convert.ToSingle, _netTempValues, ref _currentNetValue);
@@ -114,8 +107,6 @@ public class MonitoringService(IOptions<SystemMonitoringOptions> options) : IOut
             MetricChanged?.Invoke(MetricType.LoadAvg5);
         if (loadAvg15Changed)
             MetricChanged?.Invoke(MetricType.LoadAvg15);
-        if (processListChanged)
-            ProcessListChanged?.Invoke(CurrentProcessList);
         if (graphValuesHasChanged && GraphValuesChanged is not null)
             await GraphValuesChanged.Invoke();
     }

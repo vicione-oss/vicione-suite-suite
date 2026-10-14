@@ -1,0 +1,86 @@
+@using System.Globalization
+@using Text = Blazor.Shared.SystemInformation.Components.Localization.ProcessComponent
+
+<div class="load-chart @CssClass" @ref="_root" data-chart="@_hoverData">
+    <div class="plot" style="height: @(PlotHeight)px" role="img" aria-label="@AriaLabel">
+        <svg class="lines" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
+            @foreach (var percent in s_gridValues)
+            {
+                <line class="grid" x1="0" x2="1000" y1="@Svg(100 - percent)" y2="@Svg(100 - percent)"></line>
+            }
+            @foreach (var tick in _ticks)
+            {
+                <line class="grid" x1="@Svg(tick.Percent * 10)" x2="@Svg(tick.Percent * 10)" y1="0" y2="100"></line>
+            }
+            @if (Highlight is { } highlight)
+            {
+                <rect class="highlight" x="@Svg(SlotPercent(highlight.FromSlot) * 10)" width="@Svg((SlotPercent(highlight.ToSlot) - SlotPercent(highlight.FromSlot)) * 10)" y="0" height="100"></rect>
+            }
+            @if (Level is { } level)
+            {
+                <rect class="level @level.CssClass" x="0" width="1000" y="@Svg(Top(level.High))" height="@Svg(Math.Max(0.5, Top(level.Low) - Top(level.High)))"></rect>
+                @if (level.Line is { } line)
+                {
+                    <line class="level-line @level.CssClass" x1="0" x2="1000" y1="@Svg(Top(line))" y2="@Svg(Top(line))"></line>
+                }
+            }
+            @foreach (var band in _bands)
+            {
+                <polygon class="band @band.CssClass" points="@band.Points"></polygon>
+            }
+            @if (Threshold is { } threshold)
+            {
+                <line class="threshold" x1="0" x2="1000" y1="@Svg(Top(threshold))" y2="@Svg(Top(threshold))"></line>
+            }
+            @foreach (var line in _lines)
+            {
+                <polyline class="line @line.CssClass" points="@line.Points"></polyline>
+            }
+        </svg>
+        @if (NoDataSlots > 0)
+        {
+            <div class="no-data" style="width: @Svg(NoDataPercent)%">
+                @if (NoDataText is { } text && NoDataPercent >= 35)
+                {
+                    <span>
+                        @foreach (var part in text.Split('\n'))
+                        {
+                            <span class="no-data-line">@part</span>
+                        }
+                    </span>
+                }
+            </div>
+        }
+        @foreach (var percent in s_gridValues)
+        {
+            <span class="y-label" style="top: @Svg(100 - percent)%">@GridValue(percent).ToString(YLabelFormat, CultureInfo.CurrentCulture)</span>
+        }
+        @foreach (var tick in _ticks)
+        {
+            <span class="x-label" style="left: @Svg(tick.Percent)%">@tick.Label</span>
+        }
+        @if (StartLabel is { } startLabel)
+        {
+            <span class="x-label start">@startLabel</span>
+        }
+        <span class="x-label end">@(EndLabel ?? Text.Now)</span>
+        @if (TopLabel is { } topLabel)
+        {
+            <span class="top-label">@topLabel</span>
+        }
+        @for (var i = 0; i < Markers.Count; i++)
+        {
+            var index = i;
+            var marker = Markers[i];
+            <button type="button" class="marker @marker.CssClass" style="left: @Svg(SlotPercent(marker.Slot))%; top: @Svg(Top(marker.Value))%"
+                    aria-label="@marker.Label" title="@marker.Label"
+                    @onclick="@(() => OnMarkerSelected.InvokeAsync(index))"></button>
+        }
+        <span class="cursor" hidden></span>
+        @foreach (var line in Lines)
+        {
+            <span class="dot @line.CssClass" hidden></span>
+        }
+        <span class="time-box" hidden></span>
+    </div>
+</div>

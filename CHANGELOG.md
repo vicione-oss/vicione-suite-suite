@@ -27,6 +27,9 @@
 - `modules.json`, `latest` and `x.*` also resolve to `beta` and `rc` versions, so modules that only have a beta install after a reset. **Behaviour change:** a newer `beta` or `rc` wins over the last release
 - Wizards, the page slides sideways when moving to the next or previous step
 - System information, the copy button confirms the copy with a check mark and a tooltip
+- Process overview, redesigned with tiles, utilization details, the peaks of the last day and a process table, updated every 2 seconds while the page is open
+- System flyout, opening the monitor or the journal closes the flyout
+- System monitoring collects the thermal sensors by default
 
 ### Added
 
@@ -36,6 +39,8 @@
 - Admin-only "OpenID provider" settings panel (Settings → User Management) for external sign-in (see `docs/oidc.md`)
 - CSP violation reporting: browsers report violations to `POST /csp-report`, and the Suite logs each one as a warning. Requires HTTPS
 - `Dialogs` and `Popups` keep the focus inside their boundaries while open
+- Process overview, a snapshot button copies all values and processes as text for a support ticket
+- System monitoring collects swap, disk I/O, CPU frequency and thermal zones, switchable under `SystemMonitoring:Collectors`
 
 ### Fixed
 
@@ -81,6 +86,7 @@
 - Settings dialog, control panels whose table fills the page no longer show an empty strip below the table
 - Account pages, signing out and the redirect to sign-in no longer flash the reconnect dialog in Firefox
 - Module pages whose URL contains `/account`, such as `/accounts`, stay interactive after a reload
+- System monitoring collectors run even when no MQTT endpoint is configured
 
 ### Removed
 
@@ -90,6 +96,7 @@
 
 - `AspNetCore.SassCompiler` packages, update to version `1.105.1`
 - `HostManagement` packages, update to version `2.0.0-beta1`
+- `ViciOne.SystemMonitoring` package, update to version `1.1.0`
 - `Microsoft` packages, update to version `10.0.12`
 - `Microsoft.FeatureManagement` packages, update to version `4.7.0`
 - `Microsoft.TypeScript.MSBuild`, update to version `7.0.1`

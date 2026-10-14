@@ -1,0 +1,116 @@
+@use "sass:map";
+@use "../../../Styles/design/colors";
+@use "../../../../../shared/styles/colors-staged";
+@use "overview";
+
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 0 overview.$panel-padding;
+
+    &.indented {
+        min-height: 36px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        padding-left: calc(#{overview.$panel-padding} + 34px);
+
+        .title {
+            font-size: 13px;
+        }
+    }
+
+    &.clickable {
+        cursor: pointer;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, .03);
+        }
+    }
+
+    .name {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        min-width: 0;
+
+        .title,
+        .subtitle {
+            @include overview.ellipsis;
+        }
+
+        .title {
+            color: colors.$font;
+        }
+
+        .subtitle {
+            @include overview.muted;
+            font-size: 12px;
+        }
+    }
+
+    .expander {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        flex: none;
+        margin: 0 -6px 0 -8px;
+        padding: 0;
+        color: colors.$font;
+
+        .chevron {
+            display: flex;
+        }
+
+        &.expanded .chevron {
+            transform: rotate(90deg);
+        }
+    }
+
+    .expander-spacer {
+        width: 24px;
+        flex: none;
+        margin: 0 -6px 0 -8px;
+    }
+
+    .bar {
+        flex: none;
+        width: 48px;
+        height: 6px;
+        overflow: hidden;
+        border-radius: 3px;
+        background-color: rgba(255, 255, 255, .08);
+
+        span {
+            display: block;
+            height: 100%;
+            border-radius: 3px;
+            background-color: map.get(overview.$status-colors, "normal");
+
+            &.over {
+                background-color: map.get(overview.$status-colors, "warning");
+            }
+        }
+    }
+
+    .value {
+        @include overview.mono;
+        width: 72px;
+        text-align: right;
+        white-space: nowrap;
+        color: colors.$font;
+
+        &.over {
+            color: colors-staged.$color-warning;
+        }
+    }
+
+    .dot {
+        @include overview.dot;
+    }
+
+    @include overview.dot-colors("normal", "warning", "failed", "neutral");
+}

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sdk.Authorization;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.NotificationArea.Components;
+using Sdk.Client.NotificationArea.Services;
 using Sdk.Utils;
 
 namespace Blazor.Shared.SystemInformation.NotificationArea;
@@ -38,6 +39,9 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
     [Inject]
     private INavigationService NavigationService { get; set; } = default!;
 
+    [Inject]
+    private IActiveNotificationElementPolicy ActiveNotificationElementPolicy { get; set; } = default!;
+
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
     private static string TwentyFourHoursLabel => string.Format(CultureInfo.InvariantCulture, ViciOne.Ui.Localization.Resources.CommonPatterns.MultipleHours, 24);
@@ -53,7 +57,10 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
     }
 
     private void OpenMonitor()
-        => NavigationService.RedirectTo(Constants.ProcessRoute);
+    {
+        ActiveNotificationElementPolicy.NoneActive();
+        NavigationService.RedirectTo(Constants.ProcessRoute);
+    }
 
     private async Task RestartSuite()
         => await SuiteControlService.RestartInstance();

@@ -1,0 +1,51 @@
+@use "../../../../../shared/styles/colors-staged";
+@use "overview";
+
+.range-gauge {
+    position: relative;
+    height: overview.$gauge-height;
+    border-radius: overview.$gauge-height * 0.5;
+    background-color: rgba(255, 255, 255, .08);
+
+    span {
+        position: absolute;
+    }
+
+    .band {
+        top: 0;
+        bottom: 0;
+        border-radius: overview.$gauge-height * 0.5;
+        background-color: rgba(255, 255, 255, .22);
+    }
+
+    .tick {
+        top: -2px;
+        bottom: -2px;
+        width: 2px;
+        margin-left: -1px;
+        background-color: rgba(255, 255, 255, .55);
+
+        &.dim {
+            background-color: rgba(255, 255, 255, .3);
+        }
+    }
+
+    .limit {
+        top: -4px;
+        bottom: -4px;
+        border-left: 1px dashed colors-staged.$color-font-disabled;
+    }
+
+    .current {
+        top: -3px;
+        bottom: -3px;
+        width: 2px;
+        margin-left: -1px;
+        border-radius: 1px;
+        background-color: colors-staged.$color-green;
+
+        &.warning {
+            background-color: colors-staged.$color-warning;
+        }
+    }
+}

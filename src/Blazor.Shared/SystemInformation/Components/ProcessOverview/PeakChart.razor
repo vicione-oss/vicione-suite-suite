@@ -1,0 +1,29 @@
+@using Blazor.Shared.SystemInformation.Components.Charts
+
+<div class="peak-chart" @ref="_root" data-slots="@_slotData">
+    <LoadChart Start="@_start"
+               End="@_end"
+               Slots="@_slotCount"
+               Lines="@_lines"
+               Bands="@_bands"
+               Threshold="@ProcessOverviewThresholds.CpuPercent"
+               NoDataSlots="@_noDataSlots"
+               NoDataText="@_noDataText"
+               Markers="@_markers"
+               OnMarkerSelected="@SelectMarker"
+               PlotHeight="110"
+               AriaLabel="@Text.PeakChartLabel" />
+    <div class="consumers">
+        <span class="head">@Text.TopConsumers</span>
+        <span class="head total-label">@Text.CpuTotal</span>
+        <span class="value total" data-now="@_nowTotal">@_nowTotal</span>
+        <div class="rows" data-now>
+            @foreach (var process in _nowTop)
+            {
+                <span class="name">@PeakText.Process(process)</span>
+                <span class="bar"><span class="@(process.CpuPercent > ProcessOverviewThresholds.ProcessCpuPercent ? "over" : null)" style="width: @Css(BarWidth(process.CpuPercent))%"></span></span>
+                <span class="value">@PeakText.Percent(process.CpuPercent)</span>
+            }
+        </div>
+    </div>
+</div>

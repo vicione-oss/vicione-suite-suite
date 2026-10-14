@@ -73,6 +73,23 @@ internal static class IServiceCollectionExtensions
         config.ClusterNodeId = localInstanceInformationProvider.ReadLocalInstanceId().ToString();
         config.NodeType = NodeType.DefaultDebian;
 
+        var collectors = options.Value.Collectors;
+
+        config.EnabledMetrics[Collectors.Cpu] = collectors.Cpu;
+        config.EnabledMetrics[Collectors.Ram] = collectors.Ram;
+        config.EnabledMetrics[Collectors.Disk] = collectors.Disk;
+        config.EnabledMetrics[Collectors.Network] = collectors.Network;
+        config.EnabledMetrics[Collectors.Process] = collectors.Process;
+        config.EnabledMetrics[Collectors.Processor] = collectors.Processor;
+        config.EnabledMetrics[Collectors.ThermalSensors] = collectors.ThermalSensors;
+        config.EnabledMetrics[Collectors.Uptime] = collectors.Uptime;
+        config.EnabledMetrics[Collectors.JournalFields] = collectors.JournalFields;
+        config.EnabledMetrics[Collectors.LoadAverage] = collectors.LoadAvg;
+        config.EnabledMetrics[Collectors.Swap] = collectors.Swap;
+        config.EnabledMetrics[Collectors.DiskIo] = collectors.DiskIo;
+        config.EnabledMetrics[Collectors.CpuFrequency] = collectors.CpuFrequency;
+        config.EnabledMetrics[Collectors.ThermalZones] = collectors.ThermalZones;
+
         var mqttOptions = mqttClientOptions.Value.ServiceClient;
 
         if (mqttOptions is null)
@@ -90,18 +107,5 @@ internal static class IServiceCollectionExtensions
         config.Mqtt.Port = ((ushort?)mqttOptions.Port) ?? 1883;
         config.Mqtt.Username = mqttOptions.UserName;
         config.Mqtt.Password = mqttOptions.Password;
-
-        var collectors = options.Value.Collectors;
-
-        config.EnabledMetrics[Collectors.Cpu] = collectors.Cpu;
-        config.EnabledMetrics[Collectors.Ram] = collectors.Ram;
-        config.EnabledMetrics[Collectors.Disk] = collectors.Disk;
-        config.EnabledMetrics[Collectors.Network] = collectors.Network;
-        config.EnabledMetrics[Collectors.Process] = collectors.Process;
-        config.EnabledMetrics[Collectors.Processor] = collectors.Processor;
-        config.EnabledMetrics[Collectors.ThermalSensors] = collectors.ThermalSensors;
-        config.EnabledMetrics[Collectors.Uptime] = collectors.Uptime;
-        config.EnabledMetrics[Collectors.JournalFields] = collectors.JournalFields;
-        config.EnabledMetrics[Collectors.LoadAverage] = collectors.LoadAvg;
     }
 }

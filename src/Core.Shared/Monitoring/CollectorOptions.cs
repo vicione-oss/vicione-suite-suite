@@ -24,4 +24,15 @@ public sealed class CollectorOptions
     public bool JournalFields { get; set; } = true;
 
     public bool LoadAvg { get; set; } = true;
+
+    public bool Swap { get; set; } = true;
+
+    [ConfigurationKeyName(Collectors.DiskIo)]
+    public bool DiskIo { get; set; } = true;
+
+    [ConfigurationKeyName(Collectors.CpuFrequency)]
+    public bool CpuFrequency { get; set; } = true;
+
+    [ConfigurationKeyName(Collectors.ThermalZones)]
+    public bool ThermalZones { get; set; } = true;
 }

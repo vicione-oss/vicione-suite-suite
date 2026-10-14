@@ -12,4 +12,8 @@ public static class Collectors
     public const string Uptime = "uptime";
     public const string JournalFields = "journal_fields";
     public const string LoadAverage = "loadavg";
+    public const string Swap = "swap";
+    public const string DiskIo = "disk_io";
+    public const string CpuFrequency = "cpu_frequency";
+    public const string ThermalZones = "thermal_zones";
 }

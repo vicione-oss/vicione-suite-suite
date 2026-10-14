@@ -7,6 +7,7 @@ using Blazor.Shared.SystemInformation.Enums;
 using Blazor.Shared.SystemInformation.Models;
 using Blazor.Shared.SystemInformation.Services;
 using Microsoft.AspNetCore.Components;
+using Sdk.Client.NotificationArea.Services;
 using Sdk.Journal;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
@@ -17,12 +18,22 @@ public sealed partial class LogCenterComponent : IDisposable
     [Inject] private IJournalMonitoring JournalMonitoring { get; set; } = default!;
     [Inject] private LogCenterService LogCenterService { get; set; } = default!;
     [Inject] private INavigationService NavigationService { get; set; } = default!;
+    [Inject] private IActiveNotificationElementPolicy ActiveNotificationElementPolicy { get; set; } = default!;
 
     private void OpenJournal()
-        => NavigationService.RedirectTo(Constants.JournalViewRoute);
+        => Open(Constants.JournalViewRoute);
 
     private void OpenJournal(JournalFilterEntry filterEntry)
-        => NavigationService.RedirectTo($"{Constants.JournalViewRoute}?filter={UrlEncoder.Default.Encode(filterEntry.Filter)}");
+        => Open($"{Constants.JournalViewRoute}?filter={UrlEncoder.Default.Encode(filterEntry.Filter)}");
+
+    /// <summary>
+    /// Closes the flyout this component sits in, so the opened page is not covered.
+    /// </summary>
+    private void Open(string route)
+    {
+        ActiveNotificationElementPolicy.NoneActive();
+        NavigationService.RedirectTo(route);
+    }
 
     private IEnumerable<(string Key, LogCenterEntry LogEntry, JournalFilterEntry FilterEntry)> GetEntries()
     {

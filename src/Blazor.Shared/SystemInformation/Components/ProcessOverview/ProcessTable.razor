@@ -1,0 +1,178 @@
+@using ViciOne.Ui.Blazor.Components.SearchBox
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<section class="process-table" aria-label="@Text.Processes">
+    <div class="panel-head">
+        <div class="head-info">
+            <h2 class="panel-title">@Text.Processes</h2>
+            <span class="chip status-neutral count">@CountText</span>
+            <StatusChip OverThreshold="@_overThresholdCount" />
+        </div>
+    </div>
+
+    <ProcessGroupBar Processes="@Processes"
+                     CpuPercent="@CpuPercent"
+                     MemoryPercent="@MemoryPercent"
+                     MemoryFreePercent="@MemoryFreePercent"
+                     TotalMemoryKb="@TotalMemoryKb"
+                     Selected="@_groupFilter"
+                     SelectedChanged="@OnGroupSelected" />
+
+    <div class="toolbar">
+        <div class="legend">
+            <span>@Text.CpuHistoryLegend</span>
+            <span><i class="limit-sample"></i>@string.Format(CultureInfo.CurrentCulture, Text.ThresholdPercent, ProcessOverviewThresholds.ProcessCpuPercent)</span>
+            <span><i class="over-sample"></i>@Text.Above</span>
+            <span><span class="dot status-normal"></span>@Text.WithinLimitsLegend</span>
+            <span><span class="dot status-warning"></span>@Text.WarningLegend</span>
+            <span><span class="dot status-failed"></span>@Text.StateZombie</span>
+        </div>
+        <div class="tools">
+            <SearchBox Text="@_filter"
+                       TextChanging="@ApplyFilter"
+                       Placeholder="@($"{CommonVocabulary.SearchVerb}...")"
+                       CssClass="search-box" />
+            <div class="segmented">
+                <button type="button" aria-pressed="@(_showKernelThreads ? "true" : "false")" title="@Text.KernelThreadsHint"
+                        @onclick="@ToggleKernelThreads">
+                    @string.Format(CultureInfo.CurrentCulture, Text.KernelThreads, _kernelThreadCount)
+                </button>
+            </div>
+            <div class="segmented" role="group" aria-label="@Text.View">
+                <button type="button" aria-pressed="@(_tree ? "false" : "true")" @onclick="@(() => SetTree(false))">@Text.List</button>
+                <button type="button" aria-pressed="@(_tree ? "true" : "false")" @onclick="@(() => SetTree(true))">@Text.Tree</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrap"
+         @onpointerenter="@(() => _pointerInTable = true)" @onpointerleave="@(() => _pointerInTable = false)"
+         @onfocusin="@(() => _focusInTable = true)" @onfocusout="@(() => _focusInTable = false)">
+        <table>
+            <thead>
+                <tr>
+                    @foreach (var column in Columns)
+                    {
+                        @if (column.Key is { } key)
+                        {
+                            <th class="@column.CssClass" aria-sort="@AriaSort(key)">
+                                <button type="button" @onclick="@(() => SortBy(key))"
+                                        aria-label="@string.Format(CultureInfo.CurrentCulture, Text.SortBy, column.Label)">
+                                    @column.Header@SortArrow(key)
+                                </button>
+                            </th>
+                        }
+                        else
+                        {
+                            <th class="@column.CssClass static">@column.Header</th>
+                        }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (_rows.Count == 0)
+                {
+                    <tr>
+                        <td colspan="@Columns.Length" class="empty">@string.Format(CultureInfo.CurrentCulture, Text.NoMatch, _filter)</td>
+                    </tr>
+                }
+                @foreach (var row in _rows)
+                {
+                    var process = row.Process;
+                    var open = _openPids.Contains(process.Info.Pid);
+                    <tr @key="process.Info.Pid" @ref="_rowReferences[process.Info.Pid]" class="process @(open ? "open" : null)" tabindex="0" aria-expanded="@(open ? "true" : "false")"
+                        @onclick="@(() => ToggleDetails(process.Info.Pid))" @onkeydown="@(e => OnRowKeyDown(e, process.Info.Pid))">
+                        <td class="state">
+                            <span class="dot status-@process.Status.CssName" title="@StatusTitle(process)"></span>
+                        </td>
+                        <td class="pid mono">@process.Info.Pid</td>
+                        <td class="name-cell">
+                            <div class="name" style="padding-left: @(row.Depth * 18)px">
+                                @if (_tree)
+                                {
+                                    @if (row.HasChildren)
+                                    {
+                                        <button type="button" class="expander @(IsCollapsed(process.Info.Pid) ? null : "expanded")"
+                                                aria-expanded="@(IsCollapsed(process.Info.Pid) ? "false" : "true")"
+                                                aria-label="@string.Format(CultureInfo.CurrentCulture, Text.ExpandChildren, process.Info.Name)"
+                                                @onclick="@(() => ToggleCollapsed(process.Info.Pid))" @onclick:stopPropagation="true">
+                                            <span class="chevron">
+                                                <MonochromeIcon Name="MonochromeIconName.Chevron" Size="MonochromeIconSize.SmallMedium" />
+                                            </span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span class="expander-spacer"></span>
+                                    }
+                                }
+                                <div class="text">
+                                    <span class="process-name">
+                                        @process.Info.Name
+                                        @if (process.Role.DisplayName is { } role)
+                                        {
+                                            <span class="tag">@role</span>
+                                        }
+                                    </span>
+                                    @if (string.IsNullOrEmpty(process.Info.CmdLine))
+                                    {
+                                        <span class="command kernel">@Text.KernelThread</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="command" title="@process.Info.CmdLine">@process.Info.CmdLine</span>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td class="num mono running-for">@OverviewFormat.Duration(process.RunningFor)</td>
+                        <td class="num mono">@process.Info.Threads</td>
+                        <td class="num">
+                            @if (process.Info.MemoryDetails.VmRSSKb > 0)
+                            {
+                                <div class="memory">
+                                    <span class="mono">@OverviewFormat.MegabytesFromKilobytes(process.Info.MemoryDetails.VmRSSKb)</span>
+                                    <span class="memory-bar"><span style="width: @MemoryShare(process)%"></span></span>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="none">–</span>
+                            }
+                        </td>
+                        <td class="chart">
+                            <Sparkline Samples="@process.Cpu.Samples" Capacity="@process.Cpu.Capacity" Max="@ProcessOverviewThresholds.ProcessChartMax"
+                                       Limit="@ProcessOverviewThresholds.ProcessCpuPercent" />
+                        </td>
+                        <td class="num mono cpu @(process.Status == OverviewStatus.Normal ? null : "over")">@OverviewFormat.Percent(process.CpuUsage)</td>
+                    </tr>
+                    @if (open)
+                    {
+                        <tr class="details" @key="@($"details-{process.Info.Pid}")">
+                            <td colspan="@Columns.Length">
+                                <dl>
+                                    <dt>@Text.LinuxState</dt>
+                                    <dd><span class="mono">@process.Info.State</span> · @StateText(process.StateCode)</dd>
+                                    <dt>@Text.Started</dt>
+                                    <dd class="mono">@StartedText(process)</dd>
+                                    <dt>@Text.ParentProcess</dt>
+                                    <dd>@ParentText(process)</dd>
+                                    <dt>@Text.ChildProcesses</dt>
+                                    <dd class="mono">@ChildCount(process.Info.Pid)</dd>
+                                    <dt>@Text.Memory</dt>
+                                    <dd class="mono">@MemoryText(process)</dd>
+                                    <dt>@TechnicalAcronyms.Cpu</dt>
+                                    <dd class="mono">@CpuText(process)</dd>
+                                    <dt>@TechnicalTerms.Command</dt>
+                                    <dd class="mono command-full">@(string.IsNullOrEmpty(process.Info.CmdLine) ? Text.KernelThread : process.Info.CmdLine)</dd>
+                                </dl>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

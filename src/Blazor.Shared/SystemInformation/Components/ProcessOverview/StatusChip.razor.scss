@@ -1,0 +1,15 @@
+@use "overview";
+
+// Wide enough for "1 über Warnschwelle", so switching between that and "Normal" moves nothing next to the chip.
+.chip {
+    @include overview.chip;
+    justify-content: center;
+    min-width: 11em;
+}
+
+.dot {
+    @include overview.dot;
+}
+
+@include overview.chip-colors("normal", "warning");
+@include overview.dot-colors("normal", "warning");

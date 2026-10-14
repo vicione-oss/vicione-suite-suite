@@ -1,0 +1,35 @@
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<div class="status-row @(OnClick.HasDelegate ? "clickable" : null) @(Indented ? "indented" : null)"
+     title="@Tooltip"
+     tabindex="@(OnClick.HasDelegate ? "0" : null)"
+     role="@(OnClick.HasDelegate ? "button" : null)"
+     aria-label="@ClickLabel"
+     aria-expanded="@(Expanded is { } isExpanded ? (isExpanded ? "true" : "false") : null)"
+     @onclick="@OnClick"
+     @onkeydown="@OnKeyDown">
+    @if (Expanded is { } expanded)
+    {
+        <span class="expander @(expanded ? "expanded" : null)" aria-hidden="true">
+            <span class="chevron">
+                <MonochromeIcon Name="MonochromeIconName.Chevron" Size="MonochromeIconSize.SmallMedium" />
+            </span>
+        </span>
+    }
+    else if (ReserveExpanderSpace)
+    {
+        <span class="expander-spacer"></span>
+    }
+    <span class="dot status-@Status.CssName"></span>
+    <div class="name">
+        <span class="title">@Title</span>
+        <span class="subtitle">@Subtitle</span>
+    </div>
+    @if (Bar is { } bar)
+    {
+        <span class="bar"><span class="@(Status == OverviewStatus.Normal ? null : "over")" style="width: @BarWidth(bar)"></span></span>
+    }
+    <Sparkline Samples="@History.Samples" Capacity="@History.Capacity" Max="@Max" Limit="@Limit" />
+    <span class="value @((ValueStatus ?? Status) == OverviewStatus.Normal ? null : "over")">@Value</span>
+</div>

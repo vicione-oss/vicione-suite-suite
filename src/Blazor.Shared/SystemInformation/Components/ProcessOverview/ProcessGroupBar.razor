@@ -1,0 +1,39 @@
+@using ViciOne.Ui.Localization.Resources
+
+<div class="group-bar">
+    <div class="top">
+        <button type="button" class="measure"
+                title="@string.Format(CultureInfo.CurrentCulture, Text.SwitchTo, _byMemory ? TechnicalAcronyms.Cpu : TechnicalTerms.Memory)"
+                @onclick="@(() => ShowMemory(!_byMemory))">
+            @string.Format(CultureInfo.CurrentCulture, Text.DistributionBy, _byMemory ? TechnicalTerms.Memory : TechnicalAcronyms.Cpu)
+            <span class="swap" aria-hidden="true">⇄</span>
+        </button>
+        <div class="bar" title="@(_sharedCounted ? Text.SharedMemoryHint : null)">
+            @foreach (var part in _parts)
+            {
+                <span class="part @part.CssClass" style="flex: @Share(part.Width)" title="@($"{part.Label}: {part.Text}")"></span>
+            }
+            @if (_rest > 0)
+            {
+                <span class="rest" style="flex: @Share(_rest)"></span>
+            }
+        </div>
+    </div>
+    <div class="legend">
+        @foreach (var part in _parts)
+        {
+            @if (part.Group is { } group)
+            {
+                <button type="button" aria-pressed="@(Selected == group ? "true" : "false")"
+                        title="@(Selected == group ? Text.ClearFilter : string.Format(CultureInfo.CurrentCulture, Text.ShowOnly, part.Label))"
+                        @onclick="@(() => Select(group))">
+                    <i class="@part.CssClass"></i>@part.Label <b>@part.Text</b>
+                </button>
+            }
+            else
+            {
+                <span class="info"><i class="@part.CssClass"></i>@part.Label <b>@part.Text</b></span>
+            }
+        }
+    </div>
+</div>
