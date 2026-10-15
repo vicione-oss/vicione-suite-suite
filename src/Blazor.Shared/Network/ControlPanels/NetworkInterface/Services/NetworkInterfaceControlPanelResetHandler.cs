@@ -47,7 +47,7 @@ internal sealed class NetworkInterfaceControlPanelResetHandler(IUiMediator media
 
             state.UpdateIPv4Details(networkInterface);
 
-            state.OriginalMacAddress = getOriginalPhysicalAddressResponse.OriginalPhysicalAddress;
+            state.OriginalPhysicalAddress = getOriginalPhysicalAddressResponse.OriginalPhysicalAddress;
             state.UpdateMacAddress(networkInterface);
 
             state.HasUnsavedChanges = false;

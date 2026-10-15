@@ -34,13 +34,13 @@ public sealed class NetworkInterfaceControlPanelStateExtensionsTests
     {
         // Arrange
         SetupSystemConfiguration(new UserDefinedMACAddressSettings { Enabled = true, Address = PhysicalAddress.Parse("AA:BB:CC:DD:EE:FF") });
-        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0, OriginalMacAddress = OriginalMac };
+        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0, OriginalPhysicalAddress = OriginalMac };
 
         // Act
-        var physicalAddress = state.GetPhysicalAddress(_systemConfigurationService);
+        var macAddress = state.GetMacAddress(_systemConfigurationService);
 
         // Assert
-        physicalAddress.Should().Be("AA:BB:CC:DD:EE:FF");
+        macAddress.Should().Be("AA:BB:CC:DD:EE:FF");
     }
 
     [Fact]
@@ -48,13 +48,13 @@ public sealed class NetworkInterfaceControlPanelStateExtensionsTests
     {
         // Arrange
         SetupSystemConfiguration(new UserDefinedMACAddressSettings());
-        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0, OriginalMacAddress = OriginalMac };
+        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0, OriginalPhysicalAddress = OriginalMac };
 
         // Act
-        var physicalAddress = state.GetPhysicalAddress(_systemConfigurationService);
+        var macAddress = state.GetMacAddress(_systemConfigurationService);
 
         // Assert
-        physicalAddress.Should().Be(OriginalMac);
+        macAddress.Should().Be(OriginalMac);
     }
 
     [Fact]
@@ -65,10 +65,10 @@ public sealed class NetworkInterfaceControlPanelStateExtensionsTests
         var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0 };
 
         // Act
-        var physicalAddress = state.GetPhysicalAddress(_systemConfigurationService);
+        var macAddress = state.GetMacAddress(_systemConfigurationService);
 
         // Assert
-        physicalAddress.Should().Be(CommonVocabulary.Unknown);
+        macAddress.Should().Be(CommonVocabulary.Unknown);
     }
 
     [Fact]
@@ -76,12 +76,12 @@ public sealed class NetworkInterfaceControlPanelStateExtensionsTests
     {
         // Arrange
         SetupSystemConfiguration(new UserDefinedMACAddressSettings());
-        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 5, OriginalMacAddress = OriginalMac };
+        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 5, OriginalPhysicalAddress = OriginalMac };
 
         // Act
-        var physicalAddress = state.GetPhysicalAddress(_systemConfigurationService);
+        var macAddress = state.GetMacAddress(_systemConfigurationService);
 
         // Assert
-        physicalAddress.Should().Be(CommonVocabulary.Unknown);
+        macAddress.Should().Be(CommonVocabulary.Unknown);
     }
 }

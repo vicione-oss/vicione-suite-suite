@@ -70,7 +70,7 @@
 
             <div class="section" data-expanded="@State.GeneralInformationExpanded">
                 <SettingsField Label="@TechnicalTerms.MacAddress">
-                    @State.GetPhysicalAddress(SystemConfigurationService)
+                    @State.GetMacAddress(SystemConfigurationService)
                 </SettingsField>
             </div>
 
@@ -253,7 +253,7 @@
 
         <SettingsGroup Title="@Localization.HardwareControlPanelPage.HardwareInformationSettingsGroupTitle">
             <SettingsField Label="@Localization.HardwareControlPanelPage.PhysicalAddressMac">
-                @State.GetPhysicalAddress(SystemConfigurationService)
+                @(State.OriginalPhysicalAddress ?? CommonVocabulary.Unknown)
             </SettingsField>
         </SettingsGroup>
     </SettingsLayout>
