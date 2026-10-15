@@ -64,6 +64,7 @@ public sealed partial class TagsControlPanelPageContent : ComponentBase, IDispos
 
         if (obj.PropertyNames.Contains(nameof(State.Tags)))
         {
+            UpdateTagGridSelection();
             UpdateTagsQueryable();
             UpdateStatesDependingOnTagGridItemSelection();
 
@@ -161,6 +162,25 @@ public sealed partial class TagsControlPanelPageContent : ComponentBase, IDispos
 
     private void ApplyFilter()
         => UpdateTagsQueryable();
+
+    private void UpdateTagGridSelection()
+    {
+        var removed = TagGridItemSelection.Where(id => !State.Tags.ContainsKey(id)).ToList();
+        if (removed.Count == 0)
+            return;
+
+        TagGridItemSelection.BeginUpdate();
+
+        try
+        {
+            foreach (var tagId in removed)
+                TagGridItemSelection.Remove(tagId);
+        }
+        finally
+        {
+            TagGridItemSelection.EndUpdate();
+        }
+    }
 
     private void UpdateTagsQueryable()
     {

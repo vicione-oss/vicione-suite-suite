@@ -54,7 +54,9 @@
 - `ArtifactRepositoryControlPanel`, the title shows whether a source is being added or edited and switches to edit after saving
 - `ModuleDetailsControlPanel`, edited module options are saved even when another session changed the options of that module meanwhile
 - `RolesControlPanel`, a failed role create or delete no longer adds a duplicate row or hides a role that still exists
-- `ConnectionsControlPanel`, a failed tag create or update no longer shows the rejected tag
+- `ConnectionsControlPanel`
+  - For tags that fail to be created or updated, the rejected tag will no longer be displayed
+  - Tags deleted in another session disappear from the tag list and its selection
 - Update panel lists the available suite versions on amd64 devices such as IPC and Cloud, not only the installed one
 - Module installation finds module packages on devices whose .NET runtime reports a distro-specific runtime identifier
 - Cancelling or failing an external sign-in returns to the login page with a message instead of the error page

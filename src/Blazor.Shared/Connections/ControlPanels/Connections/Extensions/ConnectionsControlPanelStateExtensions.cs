@@ -21,9 +21,12 @@ internal static class ConnectionsControlPanelStateExtensions
             {
                 case CrudAction.Created:
                 case CrudAction.Updated:
-                    tags[tag.Id] = tag;
+                    // A tag marked for deletion stays hidden until the edit is saved or cancelled.
+                    if (!state.DeletingTags.Contains(tag))
+                        tags[tag.Id] = tag;
                     break;
                 case CrudAction.Deleted:
+                    tags.Remove(tag.Id);
                     break;
                 default:
                     throw new InvalidEnumArgumentException(nameof(changeEvent.Action), (int)changeEvent.Action, typeof(CrudAction));
