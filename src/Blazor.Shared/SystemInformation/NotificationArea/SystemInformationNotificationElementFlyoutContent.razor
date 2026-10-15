@@ -3,7 +3,6 @@
 @using Sdk.Authorization
 @using Sdk.Client.Components.LinkButton
 @using Sdk.Client.NotificationArea.Components.Layout
-@using ViciOne.Ui.Blazor.Components.TabStrip.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 @if (_authState != null)
@@ -11,21 +10,7 @@
     <NotificationElementFlyoutContentLayout>
         <Main>
             <div class="systeminfo-monitor">
-                <div class="systeminfo-tabs">
-                    <TabStrip @bind-ActiveTabIndex="_activeTabIndex">
-                        <Tab Text="@TwentyFourHoursLabel" />
-                        <Tab Text="@OneHourLabel" />
-                    </TabStrip>
-                </div>
-
-                @if (_activeTabIndex is 0)
-                {
-                    <SystemMonitoringComponent TimeSpanHours="24" />
-                }
-                else
-                {
-                    <SystemMonitoringComponent TimeSpanHours="1" />
-                }
+                <SystemMonitoringComponent />
 
                 <AuthorizeView Policy="@ModulePolicyProvider.GetPolicy(Core.Shared.Constants.SystemModuleId, AccessLevel.Full, Constants.LogViewFeature)">
                     <Authorized>

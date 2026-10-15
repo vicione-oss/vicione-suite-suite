@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Sdk.Client.Infrastructure;
 using Sdk.NetworkStatus.Requests;
 using ViciOne.Ui.Localization.Extensions;
-using ViciOne.Ui.Localization.Resources;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 

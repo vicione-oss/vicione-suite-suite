@@ -3,7 +3,6 @@ using System.Text;
 using System.Text.Json;
 using Blazor.Shared.Mqtt.Contracts;
 using Blazor.Shared.Mqtt.Helpers;
-using MQTTnet.Protocol;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Extensions;
 

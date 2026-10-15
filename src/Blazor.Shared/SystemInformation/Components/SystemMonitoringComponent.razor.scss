@@ -1,72 +1,132 @@
-@use "../../Styles/design/colors";
-@use "../../Styles/design/tooltip";
 @use "../../../../shared/styles/colors-staged";
+@use "../../Styles/design/colors";
+@use "ProcessOverview/overview";
 
-.systeminfo-monitor-diagramm {
-    /*margin-top: 24px; Should be uncommented when tab view is added */
-    margin-bottom: 16px;
-    width: 252px;
-    position: relative;
+$color-cpu: rgb(103, 183, 76);
+$color-memory: rgb(255, 206, 0);
+$color-disk: rgb(114, 149, 194);
+$color-network: rgb(255, 150, 0);
+$muted: rgba(222, 222, 222, .6);
 
-    canvas {
+.system-monitoring {
+    display: flex;
+    flex-direction: column;
+    width: 251px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: colors.$font;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    color: $muted;
+}
+
+.span-toggle {
+    @include overview.segmented(22px);
+    font-size: 11px;
+
+    // The flyout background is about as light as the hover color of the process page, so it needs a lighter one.
+    button:hover:not([aria-pressed="true"]) {
+        background: rgba(255, 255, 255, .14);
+        color: colors.$font-light;
+    }
+}
+
+.chart {
+    width: 267px;
+    // The plot area ends in line with the Log Center tiles below; the axis labels reach into the padding.
+    margin: 6px 0 0 -16px;
+}
+
+.gauges {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2px;
+    margin-top: 10px;
+}
+
+.gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 0 6px;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    color: colors.$font;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, .06);
+    }
+
+    &[aria-pressed="true"] {
+        background: rgba(255, 255, 255, .1);
+    }
+
+    svg {
         display: block;
-        margin: 0 auto;
-        background: colors-staged.$color-content-dark;
+        width: 60px;
+        height: 56px;
     }
 
-    #tooltip {
-        position: absolute;
-
-        box-shadow: tooltip.$box-shadow;
-
-        background-color: tooltip.$background-color;
-        color: tooltip.$content-text-color;
-
-        font-size: tooltip.$font-size;
-        font-weight: tooltip.$font-weight;
-        letter-spacing: tooltip.$letter-spacing;
-        line-height: tooltip.$line-height;
-
-        border-radius: tooltip.$border-radius;
-
-        padding: 5px;
-        display: none;
-        z-index: 102;
-        box-sizing: border-box;
+    path {
+        fill: none;
+        stroke-width: 5;
     }
 
-    #tooltip .tooltip-header {
-        color: tooltip.$header-text-color;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 4px;
+    .track {
+        stroke: rgba(255, 255, 255, .12);
+        stroke-linecap: round;
     }
 
-    #tooltip .tooltip-pointer {
-        position: absolute;
-        top: -5px;
-        width: 0;
-        height: 0;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-bottom: 6px solid tooltip.$background-color;
+    .band {
+        stroke-opacity: .25;
     }
 
-    #tooltip .tooltip-table {
-        width: 100%;
-        border-collapse: collapse;
+    .value {
+        stroke-linecap: round;
     }
 
-    #tooltip .tooltip-table td {
-        padding: 0;
-        margin: 0;
+    @each $name, $color in (cpu: $color-cpu, memory: $color-memory, disk: $color-disk, network: $color-network) {
+        &.#{$name} .band,
+        &.#{$name} .value {
+            stroke: $color;
+        }
     }
 
-    #tooltip .tooltip-table .label {
-        text-align: left;
+    // The ring keeps the colour of its line in the chart and glows when over its threshold; memory is drawn in the
+    // warning colour already, so a change of colour would not show there.
+    .value.over {
+        filter: drop-shadow(0 0 3px colors-staged.$color-warning);
     }
 
-    #tooltip .tooltip-table .value {
-        text-align: right;
+    .number {
+        fill: colors.$font-light;
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+
+        &.long {
+            font-size: 11px;
+        }
+
+        &.over {
+            fill: colors-staged.$color-warning;
+        }
+    }
+
+    .unit {
+        fill: $muted;
+        font-size: 9px;
+    }
+
+    .name {
+        font-size: 11px;
+        white-space: nowrap;
     }
 }

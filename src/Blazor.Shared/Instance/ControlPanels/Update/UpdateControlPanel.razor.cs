@@ -76,7 +76,7 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
     private IStreamUploadHandler<BackupUpload> BackupUploadHandler { get; set; } = default!;
 
     [Inject]
-    private IUploadTicketFactory UploadTicketFactory{ get; set; } = default!;
+    private IUploadTicketFactory UploadTicketFactory { get; set; } = default!;
 
     protected override void OnInitialized()
     {

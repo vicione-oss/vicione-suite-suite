@@ -326,6 +326,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="SystemInformation\Components\Localization\SystemMonitoringComponent.Designer.cs">
+      <DependentUpon>SystemMonitoringComponent.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="SystemInformation\Components\Localization\LogCenterComponent.Designer.cs">
       <DependentUpon>LogCenterComponent.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -728,6 +733,10 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Settings\NetworkInterface\Enums\Localization\IpConfigurationMode.resx">
       <LastGenOutput>IpConfigurationMode.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="SystemInformation\Components\Localization\SystemMonitoringComponent.resx">
+      <LastGenOutput>SystemMonitoringComponent.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="SystemInformation\Components\Localization\LogCenterComponent.resx">

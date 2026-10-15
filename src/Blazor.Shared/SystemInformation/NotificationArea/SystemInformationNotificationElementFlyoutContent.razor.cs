@@ -1,4 +1,3 @@
-using System.Globalization;
 using Blazor.Shared.Services;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
@@ -21,7 +20,6 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
     private bool _restartSystemDialogVisible;
     private bool _restartDialogVisible;
     private bool _shutdownDialogVisible;
-    private int _activeTabIndex;
     private readonly AutoDisposeList<IDisposable> _subscriptionHandles = [];
 
     private string? SysAdminPolicy { get; }
@@ -44,8 +42,6 @@ public sealed partial class SystemInformationNotificationElementFlyoutContent : 
 
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
-    private static string TwentyFourHoursLabel => string.Format(CultureInfo.InvariantCulture, ViciOne.Ui.Localization.Resources.CommonPatterns.MultipleHours, 24);
-    private static string OneHourLabel => string.Format(CultureInfo.InvariantCulture, ViciOne.Ui.Localization.Resources.CommonPatterns.SingleHour, 1);
 
     protected override async Task OnInitializedAsync()
     {

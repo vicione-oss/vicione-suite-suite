@@ -1,5 +1,4 @@
 using Core.Shared.Passkeys;
-using Core.Shared.Passkeys.Commands;
 using Core.Shared.Passkeys.Events;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;

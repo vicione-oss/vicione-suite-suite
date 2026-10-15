@@ -1,26 +1,52 @@
-﻿@using Blazor.Shared.SystemInformation.Enums;
-@using Blazor.Shared.SystemInformation.Models;
-@using System.Drawing;
-@using Blazor.Shared.SystemInformation.Services
+@using System.Globalization
+@using Blazor.Shared.SystemInformation.Components.Charts
+@using Blazor.Shared.SystemInformation.Models
+@using Text = Blazor.Shared.SystemInformation.Components.Localization.SystemMonitoringComponent
+@using ProcessComponentText = Blazor.Shared.SystemInformation.Components.Localization.ProcessComponent
 
-<div class="systeminfo-monitor-diagramm systeminfo-font-bold">
-    <canvas @ref="_canvasRef" width="252" height="176"></canvas>
-    <div id="tooltip">
-        <div class="tooltip-pointer"></div>
-        <div class="tooltip-header"></div>
-        <table class="tooltip-table">
-            <tr>
-                <td class="label">Min:</td>
-                <td class="value"></td>
-            </tr>
-            <tr>
-                <td class="label">Avg:</td>
-                <td class="value"></td>
-            </tr>
-            <tr>
-                <td class="label">Max:</td>
-                <td class="value"></td>
-            </tr>
-        </table>
+<div class="system-monitoring" @ref="_root" data-chart="@HoverData()">
+    <div class="head">
+        <span>@ProcessComponentText.Utilization</span>
+        <span class="span-toggle" role="group" aria-label="@Text.Period">
+            <button type="button" aria-pressed="@(_day ? "false" : "true")" @onclick="@(() => SetDay(false))">@Text.OneHour</button>
+            <button type="button" aria-pressed="@(_day ? "true" : "false")" @onclick="@(() => SetDay(true))">@Text.OneDay</button>
+        </span>
+    </div>
+
+    <div class="chart">
+        <LoadChart Start="@_data.SlotEnds[0]"
+                   End="@_data.SlotEnds[^1]"
+                   Slots="@_data.SlotCount"
+                   Lines="@ChartLines()"
+                   Level="@ChartLevel()"
+                   Threshold="@(_focus is { } focus ? Limit(focus) : null)"
+                   NoDataSlots="@(FirstSlotWithData() ?? _data.SlotCount)"
+                   NoDataText="@NoDataText()"
+                   TopLabel="@(_focus == SystemMonitoringSeries.Network && _data.NetworkInMbit ? string.Format(CultureInfo.CurrentCulture, Text.NetworkTop, NetworkTopText()) : null)"
+                   PlotHeight="68"
+                   AriaLabel="@Text.ChartLabel" />
+    </div>
+
+    <div class="gauges">
+        @foreach (var series in s_series)
+        {
+            var latest = _data.Latest(series);
+            var number = Number(series, latest);
+            var over = IsOver(series) ? "over" : null;
+            <button type="button" class="gauge @CssName(series)" aria-pressed="@(_focus == series ? "true" : "false")" aria-label="@GaugeLabel(series)"
+                    @onclick="@(() => ToggleFocus(series))">
+                <svg viewBox="0 0 60 56" aria-hidden="true">
+                    <path class="track" d="@Arc(0, 1)"></path>
+                    @if (latest is not null && _data.Range(series) is { } spread)
+                    {
+                        <path class="band" d="@Arc(Fraction(series, spread.Min), Math.Max(Fraction(series, spread.Max), Fraction(series, spread.Min) + 0.01))"></path>
+                    }
+                    <path class="value @over" d="@(latest is { } value ? Arc(0, Math.Max(Fraction(series, value), 0.005)) : "")"></path>
+                    <text class="number @over @(number.Length > 3 ? "long" : null)" x="30" y="@(InMbit(series) ? 30 : 34)" text-anchor="middle">@number</text>
+                    <text class="unit" x="30" y="@(InMbit(series) ? 42 : 46)" text-anchor="middle">@Unit(series)</text>
+                </svg>
+                <span class="name">@Name(series)</span>
+            </button>
+        }
     </div>
 </div>
