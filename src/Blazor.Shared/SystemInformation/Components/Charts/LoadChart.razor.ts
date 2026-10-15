@@ -1,18 +1,17 @@
-interface ChartData {
+type ChartData = {
     t: string[];
-    y: (number | null)[][];
-}
+    y: Array<Array<number | undefined>>;
+};
 
 /**
- * Shows the slot under the pointer: a cursor, a dot on each line and the time on the axis. Raises a bubbling
- * `chart-hover` event with the slot, or `null` once the pointer leaves, for the surrounding component to show its values.
- * Blazor re-renders the element when the data changes; the data is read from its attribute on each move, so it is current.
- */
+Shows the slot under the pointer: a cursor, a dot on each line and the time on the axis. Raises a bubbling
+`chart-hover` event with the slot, or `undefined` once the pointer leaves, for the surrounding component to show its values.
+Blazor re-renders the element when the data changes; the data is read from its attribute on each move, so it is current.
+*/
 export function attach(root: HTMLElement): void {
     const plot = root.querySelector<HTMLElement>('.plot');
-    if (!plot) {
+    if (!plot)
         return;
-    }
 
     let cachedText = '';
     let cached: ChartData = { t: [], y: [] };
@@ -20,33 +19,33 @@ export function attach(root: HTMLElement): void {
         const text = root.dataset.chart ?? '';
         if (text !== cachedText) {
             cachedText = text;
-            cached = text ? JSON.parse(text) as ChartData : { t: [], y: [] };
+            cached = text === '' ? { t: [], y: [] } : JSON.parse(text) as ChartData;
         }
 
         return cached;
     };
 
-    let shown: number | null = null;
-    const raise = (slot: number | null): void => {
-        if (slot === shown) {
+    let shown: number | undefined;
+    const raise = (slot: number | undefined): void => {
+        if (slot === shown)
             return;
-        }
 
         shown = slot;
         root.dispatchEvent(new CustomEvent('chart-hover', { bubbles: true, detail: { slot } }));
     };
 
     const reset = (): void => {
-        plot.querySelectorAll<HTMLElement>('.cursor, .dot, .time-box').forEach(element => element.hidden = true);
-        raise(null);
+        plot.querySelectorAll<HTMLElement>('.cursor, .dot, .time-box').forEach(element => {
+            element.hidden = true;
+        });
+        raise(undefined);
     };
 
     plot.addEventListener('pointermove', event => {
         const current = data();
         const slots = current.t.length;
-        if (slots < 2) {
+        if (slots < 2)
             return;
-        }
 
         const box = plot.getBoundingClientRect();
         const slot = Math.max(0, Math.min(slots - 1, Math.round((event.clientX - box.left) / box.width * (slots - 1))));
@@ -61,10 +60,11 @@ export function attach(root: HTMLElement): void {
         plot.querySelectorAll<HTMLElement>('.dot').forEach((dot, index) => {
             const y = current.y[index]?.[slot];
             dot.hidden = y === null || y === undefined;
-            if (!dot.hidden) {
-                dot.style.left = `${left}%`;
-                dot.style.top = `${y}%`;
-            }
+            if (dot.hidden)
+                return;
+
+            dot.style.left = `${left}%`;
+            dot.style.top = `${y}%`;
         });
 
         const timeBox = plot.querySelector<HTMLElement>('.time-box');
