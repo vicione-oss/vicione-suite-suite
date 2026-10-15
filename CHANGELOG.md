@@ -91,6 +91,7 @@
 - Module pages whose URL contains `/account`, such as `/accounts`, stay interactive after a reload
 - System monitoring collectors run even when no MQTT endpoint is configured
 - `DateAndTimeControlPanel`, the UTC-12 time zone (International Date Line West) shows its map image
+- Network interface settings, _Physical address (MAC)_ shows the hardware address also while a user-defined MAC address is set
 
 ### Removed
 

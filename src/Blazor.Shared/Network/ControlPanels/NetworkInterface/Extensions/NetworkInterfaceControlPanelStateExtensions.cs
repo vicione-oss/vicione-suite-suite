@@ -26,7 +26,7 @@ internal static class NetworkInterfaceControlPanelStateExtensions
                 return TechnicalTerms.Disabled;
         }
 
-        internal string GetPhysicalAddress(ISystemConfigurationService systemConfigurationService)
+        internal string GetMacAddress(ISystemConfigurationService systemConfigurationService)
         {
             var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
                 .ElementAtOrDefault(state.NetworkInterfaceIndex);
@@ -39,7 +39,7 @@ internal static class NetworkInterfaceControlPanelStateExtensions
             if (userDefinedMACAddress.Enabled)
                 return userDefinedMACAddress.Address.ToColonNotation();
             else
-                return state.OriginalMacAddress ?? CommonVocabulary.Unknown;
+                return state.OriginalPhysicalAddress ?? CommonVocabulary.Unknown;
         }
 
         internal List<IPAddress> GetDhcpDnsNameServers(ISystemConfigurationService systemConfigurationService)
@@ -128,7 +128,7 @@ internal static class NetworkInterfaceControlPanelStateExtensions
 
             state.MacAddressManually = false;
             state.MacAddress = string.Empty;
-            state.OriginalMacAddress = null;
+            state.OriginalPhysicalAddress = null;
 
             state.VLanEnabled = false;
             state.VLanId = string.Empty;

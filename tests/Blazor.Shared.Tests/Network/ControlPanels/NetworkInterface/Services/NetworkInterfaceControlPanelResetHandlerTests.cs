@@ -239,7 +239,36 @@ public sealed class NetworkInterfaceControlPanelResetHandlerTests
         await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
         // Assert
-        state.OriginalMacAddress.Should().Be(originalMac);
+        state.OriginalPhysicalAddress.Should().Be(originalMac);
+    }
+
+    [Fact]
+    public async Task Should_keep_original_mac_address_separate_from_user_defined_mac_address_when_enabled()
+    {
+        // Arrange
+        const string originalMac = "11:22:33:44:55:66";
+        var networkInterface = new NetworkInterfaceDetail
+        {
+            CommonInformation = new NetworkInterfaceCommonInformation { Name = "eth0", Enabled = true, UserDefinedMACAddress = new() { Enabled = true, Address = PhysicalAddress.Parse("AA:BB:CC:DD:EE:FF") } },
+            IPv4 = new IPv4Settings()
+        };
+        SetupSystemConfiguration(networkInterface);
+
+        _mediator.Request<GetOriginalPhysicalAddress, GetOriginalPhysicalAddressResponse>(
+                Arg.Any<GetOriginalPhysicalAddress>(), Arg.Any<CancellationToken>())
+            .Returns(new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = originalMac });
+
+        await using var serviceProvider = SetupServiceProvider();
+
+        var state = new NetworkInterfaceControlPanelState { NetworkInterfaceIndex = 0 };
+        var resetHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<NetworkInterfaceControlPanelState>>();
+
+        // Act
+        await resetHandler.Reset(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        state.MacAddress.Should().Be("AA:BB:CC:DD:EE:FF");
+        state.OriginalPhysicalAddress.Should().Be(originalMac);
     }
 
     [Fact]
