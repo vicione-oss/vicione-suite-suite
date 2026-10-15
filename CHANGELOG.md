@@ -87,6 +87,7 @@
 - Account pages, signing out and the redirect to sign-in no longer flash the reconnect dialog in Firefox
 - Module pages whose URL contains `/account`, such as `/accounts`, stay interactive after a reload
 - System monitoring collectors run even when no MQTT endpoint is configured
+- `DateAndTimeControlPanel`, the UTC-12 time zone (International Date Line West) shows its map image
 
 ### Removed
 
