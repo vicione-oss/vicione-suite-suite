@@ -69,10 +69,7 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
     }
 
     private Task ConnectionServiceTagsChanged(Sdk.Connections.Events.TagsChanged changeEvent)
-    {
-        State.UpdateTags(changeEvent);
-        return Task.CompletedTask;
-    }
+        => InvokeAsync(() => State.UpdateTags(changeEvent));
 
     private async void StateChanged(ControlPanelStateChangedEventArgs obj)
     {

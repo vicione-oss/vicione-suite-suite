@@ -62,5 +62,57 @@ public sealed class ConnectionsControlPanelStateExtensionsTests
             // Assert
             state.Tags[tagId].Text.Should().Be("Line 1");
         }
+
+        [Fact]
+        public void Should_remove_a_deleted_tag()
+        {
+            // Arrange
+            var tagId = Guid.NewGuid();
+            var state = new ConnectionsControlPanelState { Tags = new() { [tagId] = new Tag { Id = tagId, Text = "Line 1" } } };
+            var deleted = new TagsChanged(CrudAction.Deleted, [new Tag { Id = tagId }]) { CorrelationId = Guid.NewGuid() };
+
+            // Act
+            state.UpdateTags(deleted);
+
+            // Assert
+            state.Tags.Should().NotContainKey(tagId);
+        }
+
+        [Fact]
+        public void Should_keep_a_tag_whose_deletion_failed()
+        {
+            // Arrange
+            var tagId = Guid.NewGuid();
+            var state = new ConnectionsControlPanelState { Tags = new() { [tagId] = new Tag { Id = tagId, Text = "Line 1" } } };
+            var failedDelete = new TagsChanged(CrudAction.Deleted, [new Tag { Id = tagId }])
+            {
+                CorrelationId = Guid.NewGuid(),
+                ErrorInfo = new ErrorInfo(500, "Delete rejected")
+            };
+
+            // Act
+            state.UpdateTags(failedDelete);
+
+            // Assert
+            state.Tags.Should().ContainKey(tagId);
+        }
+
+        [Theory]
+        [InlineData(CrudAction.Created)]
+        [InlineData(CrudAction.Updated)]
+        public void Should_not_list_a_tag_that_is_marked_for_deletion(CrudAction action)
+        {
+            // Arrange
+            var tag = new Tag { Id = Guid.NewGuid(), Text = "Line 1" };
+            var state = new ConnectionsControlPanelState();
+            state.DeletingTags.Add(tag);
+            var changed = new TagsChanged(action, [new Tag { Id = tag.Id, Text = "Line 2" }]) { CorrelationId = Guid.NewGuid() };
+
+            // Act
+            state.UpdateTags(changed);
+
+            // Assert
+            state.Tags.Should().NotContainKey(tag.Id);
+        }
     }
 }

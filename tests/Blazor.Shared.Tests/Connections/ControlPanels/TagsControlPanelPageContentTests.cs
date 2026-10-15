@@ -7,9 +7,11 @@ using Blazor.Shared.Settings.Extensions;
 using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Client;
+using ViciOne.Ui.Blazor.Components.Grid.Services;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
 namespace Blazor.Shared.Tests.Connections.ControlPanels;
@@ -94,6 +96,34 @@ public class TagsControlPanelPageContentTests
             Assert.NotNull(ctx.Render<TagsControlPanelPageContent>(b =>
                 b.Add(p => p.State, state)
                 .Add(p => p.BeginEdit, () => Task.CompletedTask)));
+        }
+    }
+
+    public sealed class StateChanged : TagsControlPanelPageContentTests
+    {
+        [Fact]
+        public void Should_deselect_a_tag_that_is_no_longer_listed()
+        {
+            // Arrange
+            var tags = CreateTags();
+            var deletedTag = tags[1];
+            var keptTag = tags[2];
+            var state = new ConnectionsControlPanelState { Tags = tags.ToDictionary(k => k.Id) };
+            using var ctx = SetupTestContext();
+            var selection = ctx.Services.GetRequiredKeyedService<IGridItemSelection<Guid>>(typeof(TagsControlPanelPageContentServiceKey));
+
+            ctx.Render<TagsControlPanelPageContent>(b =>
+                b.Add(p => p.State, state)
+                .Add(p => p.BeginEdit, () => Task.CompletedTask));
+
+            selection.Add(deletedTag.Id);
+            selection.Add(keptTag.Id);
+
+            // Act
+            state.Tags = tags.Where(t => t.Id != deletedTag.Id).ToDictionary(k => k.Id);
+
+            // Assert
+            selection.Should().BeEquivalentTo([keptTag.Id]);
         }
     }
 
