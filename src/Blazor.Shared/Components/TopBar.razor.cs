@@ -2,8 +2,8 @@ using System.ComponentModel;
 using Blazor.Shared.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.Services;
-using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Assets.Services;
+using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
 namespace Blazor.Shared.Components;
 

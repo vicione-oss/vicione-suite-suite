@@ -30,6 +30,7 @@
 - Process overview, redesigned with tiles, utilization details, the peaks of the last day and a process table, updated every 2 seconds while the page is open
 - System flyout, opening the monitor or the journal closes the flyout
 - System monitoring collects the thermal sensors by default
+- System flyout, the chart shows CPU, memory, disk and network of the last hour or day, the gauges below show the values under the pointer
 
 ### Added
 

@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Network.Extensions;
+using Blazor.Shared.Network.Extensions;
 using Blazor.Shared.Onboarding.Components.WizardPages;
 using Blazor.Shared.Onboarding.Models;
 using Blazor.Shared.Onboarding.Services;

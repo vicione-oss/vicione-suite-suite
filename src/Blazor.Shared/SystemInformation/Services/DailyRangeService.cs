@@ -8,7 +8,8 @@ using ViciOne.SystemMonitoring.Metrics;
 namespace Blazor.Shared.SystemInformation.Services;
 
 /// <summary>
-/// Keeps the one-minute values of the system monitoring for a day, for the ranges in the process overview tiles and its peaks.
+/// Keeps the one-minute values of the system monitoring for a day, for the ranges in the process overview tiles and the
+/// chart in the system flyout.
 /// </summary>
 /// <remarks>
 /// Besides the minutes it reads the CPU every few seconds, to keep the lowest and highest reading of each minute.
@@ -33,6 +34,7 @@ internal sealed class DailyRangeService(IOptions<SystemMonitoringOptions> option
     private readonly RingBuffer _written = new(MinutesPerDay);
     private readonly RingBuffer _received = new(MinutesPerDay);
     private readonly RingBuffer _sent = new(MinutesPerDay);
+    private readonly Queue<SystemMonitoringSample> _samples = new(MinutesPerDay);
     private readonly Queue<MinuteLoad> _minutes = new(MinutesPerDay);
 
     private string? _networkInterface;
@@ -51,6 +53,11 @@ internal sealed class DailyRangeService(IOptions<SystemMonitoringOptions> option
     public IReadOnlyList<LoadPeak> Peaks { get; private set; } = [];
 
     public DailyRanges Current { get; private set; } = new(null, null, null, null, null, null, null, null, null, null);
+
+    /// <summary>
+    /// Raised after a new minute was added, outside the lock.
+    /// </summary>
+    public event Action? Changed;
 
     public Task Connect(CancellationToken cancellationToken)
     {
@@ -83,18 +90,27 @@ internal sealed class DailyRangeService(IOptions<SystemMonitoringOptions> option
         {
             _networkInterface = MetricSelection.SelectNetworkInterface(list, options.Value.DefaultNetworkInterface, _networkInterface);
 
-            _cpu.Add(MetricSelection.CpuPercent(list));
-            _memory.Add(MetricSelection.MemoryPercent(list));
-            _disk.Add(MetricSelection.DiskPercent(list));
-            _network.Add(_networkInterface is null || MetricSelection.NetworkPorts(list, _networkInterface).Count > 0
+            var cpu = MetricSelection.CpuPercent(list);
+            _cpu.Add(cpu);
+            var memory = MetricSelection.MemoryPercent(list);
+            _memory.Add(memory);
+            var disk = MetricSelection.DiskPercent(list);
+            _disk.Add(disk);
+            var network = _networkInterface is null || MetricSelection.NetworkPorts(list, _networkInterface).Count > 0
                 ? null
-                : MetricSelection.NetworkPercent(list, _networkInterface));
-            _networkThroughput.Add(_networkInterface is null ? null : MetricSelection.Throughput(list, _networkInterface));
+                : MetricSelection.NetworkPercent(list, _networkInterface);
+            _network.Add(network);
+            var throughput = _networkInterface is null ? null : MetricSelection.Throughput(list, _networkInterface);
+            _networkThroughput.Add(throughput);
             _temperature.Add(MetricSelection.SelectTemperature(list).Value);
             _diskWrite.Add(MetricSelection.DiskWriteBytesPerSecond(list));
             _written.Add(MetricSelection.DiskWrittenBytes(list));
             _received.Add(_networkInterface is null ? null : MetricSelection.ReceivedBytes(list, _networkInterface));
             _sent.Add(_networkInterface is null ? null : MetricSelection.SentBytes(list, _networkInterface));
+
+            if (_samples.Count == MinutesPerDay)
+                _samples.Dequeue();
+            _samples.Enqueue(new(timestamp, cpu, memory, disk, network, throughput));
 
             if (_minutes.Count == MinutesPerDay)
                 _minutes.Dequeue();
@@ -110,6 +126,7 @@ internal sealed class DailyRangeService(IOptions<SystemMonitoringOptions> option
                 _diskWrite.ToRange(), Sum(_written), Sum(_received), Sum(_sent));
         }
 
+        Changed?.Invoke();
         return Task.CompletedTask;
     }
 
@@ -120,6 +137,15 @@ internal sealed class DailyRangeService(IOptions<SystemMonitoringOptions> option
     {
         lock (_lock)
             return [.. _minutes];
+    }
+
+    /// <summary>
+    /// The minutes of the last day, oldest first.
+    /// </summary>
+    public SystemMonitoringSample[] Samples()
+    {
+        lock (_lock)
+            return [.. _samples];
     }
 
     private void OnCpuSample(LiveSample sample)

@@ -1,11 +1,6 @@
 @use "./../../../../shared/styles/typography";
 @use "./../../../../shared/styles/overflow";
 
-$color-cpu: rgb(103, 183, 76);
-$color-ram: rgb(255, 206, 0);
-$color-hdd: rgb(114, 149, 194);
-$color-net: rgb(255, 150, 0);
-
 .systeminfo-monitor {
     margin-bottom: 56px;
 

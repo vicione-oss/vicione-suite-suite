@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Blazor.Shared.Popup.Services;
 using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Wizards.Extensions;

@@ -1,6 +1,4 @@
 using HostManagement.Shared.Contracts;
-using Sdk.Client.Infrastructure;
-using Sdk.SystemConfiguration.Events;
 
 namespace Blazor.Shared.Services;
 

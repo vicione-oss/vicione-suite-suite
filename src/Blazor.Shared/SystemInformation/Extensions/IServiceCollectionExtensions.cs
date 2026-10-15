@@ -14,13 +14,11 @@ public static class IServiceCollectionExtensions
     public static IServiceCollection AddSystemInformation(this IServiceCollection services)
     {
         services.AddSingleton<HardwareInfoService>();
-        services.AddSingleton<MonitoringService>();
         services.AddSingleton<LogCenterService>();
         services.AddSingleton<ProcessOverviewSampler>();
         services.AddSingleton<DailyRangeService>();
         services.AddSingleton<IOutput, DailyRangeService>(s => s.GetRequiredService<DailyRangeService>());
         services.AddSingleton<IOutput, HardwareInfoService>(s => s.GetRequiredService<HardwareInfoService>());
-        services.AddSingleton<IOutput, MonitoringService>(s => s.GetRequiredService<MonitoringService>());
         services.AddSingleton<IOutput, LogCenterService>(s => s.GetRequiredService<LogCenterService>());
 
         return services;
