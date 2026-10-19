@@ -24,16 +24,18 @@ public partial class JournalViewPage
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
+
         Layout.TitleBarAppName = TechnicalTerms.Journal;
 
         EnsureFilter();
-        base.OnInitialized();
     }
 
     protected override void OnParametersSet()
     {
-        EnsureFilter();
         base.OnParametersSet();
+
+        EnsureFilter();
     }
 
     private void EnsureFilter()

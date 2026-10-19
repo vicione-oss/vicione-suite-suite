@@ -131,6 +131,8 @@ public sealed partial class ProcessTable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (_pidToFocus is { } pid && _rowReferences.TryGetValue(pid, out var row))
         {
             _pidToFocus = null;

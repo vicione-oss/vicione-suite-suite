@@ -21,6 +21,8 @@ public sealed partial class JournalFollowView : ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         try
         {
             using CancellationTokenSource cts = new(3_000);
@@ -54,8 +56,6 @@ public sealed partial class JournalFollowView : ComponentBase, IDisposable
             _follower.NewEntry += LoadEntry;
             _follower.Start(10);
         }
-
-        await base.OnInitializedAsync();
     }
 
     private void LoadEntry(IReadOnlyDictionary<string, string> entry)

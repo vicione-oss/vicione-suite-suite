@@ -23,11 +23,12 @@ public sealed partial class JournalListView : ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         _isRunningOnLinux = OperatingSystem.IsLinux();
 
         Entries.CollectionChanged -= CollectionChanged;
         Entries.CollectionChanged += CollectionChanged;
-        await base.OnInitializedAsync();
     }
 
     private void CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

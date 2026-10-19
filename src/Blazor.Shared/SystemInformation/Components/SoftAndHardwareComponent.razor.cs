@@ -26,6 +26,8 @@ public sealed partial class SoftAndHardwareComponent
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
+
         if (!string.IsNullOrEmpty(HardwareInformationProvider.Processor))
             Processor = HardwareInformationProvider.Processor;
         if (HardwareInformationProvider.TotalMemoryKb > 0)
@@ -38,8 +40,6 @@ public sealed partial class SoftAndHardwareComponent
             SuiteVersion = InformationProvider.Local.Version;
         BranchName = InformationProvider.Local.BranchName;
         MachineName = Environment.MachineName;
-
-        base.OnInitialized();
     }
 
     private Task<string> GetCopyToClipboardButtonTextToCopy()

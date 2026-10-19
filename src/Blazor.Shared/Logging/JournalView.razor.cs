@@ -21,16 +21,18 @@ public sealed partial class JournalView : ComponentBase, IDisposable
 
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         await Initialize();
         LoadMoreEntries();
-        await base.OnInitializedAsync();
     }
 
     protected override async Task OnParametersSetAsync()
     {
+        await base.OnParametersSetAsync();
+
         await Initialize();
         LoadMoreEntries();
-        await base.OnParametersSetAsync();
     }
 
     private async Task Initialize()

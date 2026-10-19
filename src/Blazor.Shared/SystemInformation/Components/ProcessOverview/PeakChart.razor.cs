@@ -97,6 +97,8 @@ public sealed partial class PeakChart : IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (!firstRender)
             return;
 

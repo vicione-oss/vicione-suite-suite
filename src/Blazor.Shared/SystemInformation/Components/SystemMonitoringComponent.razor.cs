@@ -70,6 +70,8 @@ public sealed partial class SystemMonitoringComponent : IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (!firstRender)
             return;
 

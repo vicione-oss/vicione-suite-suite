@@ -21,10 +21,11 @@ public sealed partial class ArtifactRepositoryControlPanel : ControlPanelBase<Ar
 
     [Inject] private IArtifactRepositoryClientService RepositoryService { get; set; } = default!;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         RepositoryService.RepositoryChanged += RepositoryChanged;
-        return base.OnInitializedAsync();
     }
 
     protected override ValueTask DisposeAsyncCore()
