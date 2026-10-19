@@ -12,18 +12,29 @@
     }
 
     @{
-        var controlPanelPages = ControlPanelPageRegistry
-            .Where(i => i.ControlPanelRegistryItem == _activeControlPanelRegistryItem)
-            .Select(i => i.ControlPanelPage)
-            .ToList();
+        var children = _activeControlPanelRegistryItem is not null ? GetChildren(_activeControlPanelRegistryItem) : [];
+        var controlPanelPages = children.Count == 0 ? GetControlPanelPages() : [];
 
-        if (controlPanelPages.Count > 1)
+        if (children.Count > 0)
         {
-            var activeControlPanelPage = _activeControlPanelRegistryItem is not null ? ActiveControlPanelPageProvider.GetActiveControlPanelPage(_activeControlPanelRegistryItem) : null;
-            var activeControlPanelPageIndex = activeControlPanelPage is not null ? controlPanelPages.IndexOf(activeControlPanelPage) : 0;
-
             <div class="tab-control-container">
-                <TabStrip ActiveTabIndex="activeControlPanelPageIndex" TabSize="TabSize.Large">
+                <TabStrip @key="_activeControlPanelRegistryItem" ActiveTabIndex="@GetActiveTabIndex(children)" TabSize="TabSize.Large">
+                    @if (ActiveItemHasOwnTab)
+                    {
+                        <Tab Text="@_activeControlPanelRegistryItem?.Descriptor.Title" OnSelected="@ControlPanelTabSelected" />
+                    }
+
+                    @foreach (var child in children)
+                    {
+                        <Tab Text="@child.Descriptor.Title" OnSelected="@ControlPanelTabSelected" />
+                    }
+                </TabStrip>
+            </div>
+        }
+        else if (controlPanelPages.Count > 1)
+        {
+            <div class="tab-control-container">
+                <TabStrip @key="_activeControlPanelRegistryItem" ActiveTabIndex="@GetActivePageIndex(controlPanelPages)" TabSize="TabSize.Large">
                     @foreach (var controlPanelPage in controlPanelPages)
                     {
                         <Tab Text="@controlPanelPage.Title" OnSelected="@ControlPanelPageTabSelected" />

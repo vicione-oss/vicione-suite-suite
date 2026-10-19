@@ -5,6 +5,11 @@
     <RootNamespace>Blazor.Shared.Tests</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <!-- Keeps the deprecated ControlPanelPage API buildable until the last control panel is migrated. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);CS0618</WarningsNotAsErrors>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="AutoFixture" />
     <PackageReference Include="ViciOne.Ui.Blazor.Components.TestingHelpers" />

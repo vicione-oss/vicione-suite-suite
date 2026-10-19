@@ -10,7 +10,7 @@ This document describes aspects of settings implementation.
 flowchart TD
     subgraph SdkClientControlPanels["Sdk.Client.ControlPanels"]
         IControlPanelRegistry
-        IControlPanelPageRegistry
+        IActiveControlPanelChildProvider
     end
 
     subgraph FooClientModule
@@ -69,7 +69,9 @@ flowchart TD
         end
     end
 
-    IControlPanelPageRegistry-. "provides candidates for tabs" .->SettingsContainerContentHeader
+    IControlPanelRegistryItem-- "ChildOf links to the AsParent descriptor of" -->IControlPanelRegistryItem
+    IControlPanelRegistry-. "children (ChildOf == AsParent of the active item) provide candidates for tabs" .->SettingsContainerContentHeader
+    IActiveControlPanelChildProvider-. "resolves the active child per parent" .->SettingsContainerContentHeader
 
     classDef cluster fill:#ffffff10
     classDef authorization stroke:#ffff00

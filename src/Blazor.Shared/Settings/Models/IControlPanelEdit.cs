@@ -7,6 +7,8 @@ internal interface IControlPanelEdit : IHasChangeableProperties, IAsyncDisposabl
 {
     bool IsRunning { get; }
 
+    SharedResetGroup? SharedResetGroup { get; }
+
     Task<bool> Reset();
     void Begin();
     Task<ISaveResult> Save();

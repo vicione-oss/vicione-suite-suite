@@ -6,6 +6,7 @@ using Blazor.Shared.Settings.Extensions;
 using Bunit;
 using Core.Shared.Instance.Requests;
 using Microsoft.Extensions.DependencyInjection;
+using Sdk.Client.ControlPanels;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Testing.Client;
@@ -63,7 +64,7 @@ public class InstanceControlPanelTests
         ctx.Services.AddInstanceControlPanel();
         ctx.SetupControlPanelServices();
 
-        var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstanceControlPanelState>>();
+        var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<InstanceControlPanelState>>(typeof(ControlPanelServiceKey<InstanceControlPanel>));
 
         // Act
         await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);

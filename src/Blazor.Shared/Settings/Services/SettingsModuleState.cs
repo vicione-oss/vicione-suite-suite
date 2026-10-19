@@ -18,6 +18,7 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
     // which would invert the logic at every call site.
     private readonly List<IControlPanelRegistryItem> _requestedControlPanelRegistryItems = [];
     private readonly Dictionary<SettingsEntriesKey, IControlPanelRegistryItem> _lastActiveControlPanelRegistryItemMap = [];
+    private readonly Dictionary<IControlPanelRegistryItem, IControlPanelRegistryItem> _activeChildMap = [];
 
     private bool _showNavigateBackButton;
     private bool _isLoadingOverlayVisible;
@@ -66,6 +67,15 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
     /// of the control panel requested.
     /// </remarks>
     public IReadOnlyList<IControlPanelRegistryItem> RequestedControlPanelRegistryItems => _requestedControlPanelRegistryItems;
+
+    /// <summary>
+    /// Active child per parent control panel, as selected via the content header's tab strip.
+    /// </summary>
+    /// <remarks>
+    /// A parent missing from this map has no explicitly selected child; <see cref="IActiveControlPanelChildProvider"/>
+    /// falls back to the parent itself being active in that case.
+    /// </remarks>
+    public IReadOnlyDictionary<IControlPanelRegistryItem, IControlPanelRegistryItem> ActiveChildMap => _activeChildMap;
 
     /// <inheritdoc/>
     public int UpdateLock => _updateLock;
@@ -135,6 +145,28 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
 
             OnPropertyChanged(propertyName: nameof(LastActiveControlPanelRegistryItemMap));
         }
+    }
+
+    /// <summary>
+    /// Sets the active child of <paramref name="parent"/>, otherwise clears it when <paramref name="child"/> is <see langword="null"/>
+    /// so that <see cref="IActiveControlPanelChildProvider"/> falls back to the parent itself being active again.
+    /// </summary>
+    public void SetActiveChild(IControlPanelRegistryItem parent, IControlPanelRegistryItem? child)
+    {
+        if (child is null)
+        {
+            if (_activeChildMap.Remove(parent))
+                OnPropertyChanged(propertyName: nameof(ActiveChildMap));
+
+            return;
+        }
+
+        if (_activeChildMap.TryGetValue(parent, out var existingChild) && existingChild == child)
+            return;
+
+        _activeChildMap[parent] = child;
+
+        OnPropertyChanged(propertyName: nameof(ActiveChildMap));
     }
 
     public bool TryPushRequestedControlPanelRegistryItem(IControlPanelRegistryItem controlPanelRegistryItem)

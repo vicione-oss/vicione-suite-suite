@@ -14,7 +14,7 @@ internal static class SettingsModuleStateExtensions
             settingsModuleState.BeginUpdate();
             try
             {
-                ResetActiveControlPanelPage(settingsModuleState.ActiveControlPanelRegistryItem);
+                ResetActiveChild(settingsModuleState.ActiveControlPanelRegistryItem);
 
                 settingsModuleState.ActiveControlPanelRegistryItem = controlPanelRegistryItem;
 
@@ -24,16 +24,19 @@ internal static class SettingsModuleStateExtensions
 
                 settingsModuleState.ShowNavigateBackButton = false;
 
-                ResetActiveControlPanelPage(settingsModuleState.ActiveControlPanelRegistryItem);
+                ResetActiveChild(settingsModuleState.ActiveControlPanelRegistryItem);
             }
             finally
             {
                 settingsModuleState.EndUpdate();
             }
-        }
 
-        private static void ResetActiveControlPanelPage(IControlPanelRegistryItem? controlPanelRegistryItem)
-            => controlPanelRegistryItem?.State.ActivePageIndex = null;
+            void ResetActiveChild(IControlPanelRegistryItem? controlPanelRegistryItem)
+            {
+                if (controlPanelRegistryItem is not null)
+                    settingsModuleState.SetActiveChild(controlPanelRegistryItem, null);
+            }
+        }
 
         /// <remarks>
         /// This method only supports requests for control panels configured to be displayed in settings categories.

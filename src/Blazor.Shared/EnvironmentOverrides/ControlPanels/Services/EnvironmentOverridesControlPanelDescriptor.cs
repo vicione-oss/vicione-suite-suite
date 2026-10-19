@@ -7,5 +7,6 @@ internal sealed class
     EnvironmentOverridesControlPanelDescriptor : IControlPanelDescriptor<EnvironmentOverridesControlPanel>
 {
     public string Title => Localization.EnvironmentOverridesControlPanel.PanelTitle;
+    public int? Position => 2;
     public Uri? IconUrl => null;
 }

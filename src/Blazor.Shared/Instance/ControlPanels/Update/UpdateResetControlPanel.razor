@@ -1,0 +1,68 @@
+@using Blazor.Shared.Instance.ControlPanels.Update.Services
+@using Blazor.Shared.Settings.Components
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<UpdateResetControlPanelState>
+
+<DescriptionBanner IconCssClass="@_refreshIconCssClass" Title="@Localization.UpdateControlPanel.ResetDescriptionBannerTitle">
+    @Localization.UpdateControlPanel.ResetDescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@Localization.UpdateControlPanel.ResetGroupTitle" @bind-Expanded="@State.ResetGroupExpanded">
+        <SettingsInformation>
+            @Localization.UpdateControlPanel.ResetText
+        </SettingsInformation>
+
+        <SettingsField Label="@Localization.UpdateControlPanel.ResetDevice">
+            <SettingsFieldButtonRed Text="@CommonVocabulary.ResetVerb"
+                                    IconCssClass="@_refreshButtonIconCssClass"
+                                    Enabled="@(!ShowResetConfirmSection)"
+                                    OnClick="OnResetButtonClick" />
+        </SettingsField>
+
+        @if (ShowResetConfirmSection)
+        {
+            <SettingsFieldSeparator />
+
+            <SettingsInformation>
+                <div class="information-wrapper">
+                    <label>@Localization.UpdateControlPanel.ResetConfirmationTitle</label>
+
+                    <SettingsFieldCheckBoxRed Text="@Localization.UpdateControlPanel.ResetConfirmationText"
+                                              @bind-Value="_confirmation" />
+
+                    <div class="wrapper">
+                        <SettingsFieldButton Text="@CommonVocabulary.No"
+                                             IconCssClass="@_closeIconCssClass"
+                                             CssClass="no-button"
+                                             Enabled="@(!ResetService.IsResetInProgress)"
+                                             OnClick="OnNoButtonClick" />
+
+                        <SettingsFieldButtonRed Text="@Localization.UpdateControlPanel.EraseAllData"
+                                                IconCssClass="@_refreshButtonIconCssClass"
+                                                Enabled="@(_confirmation || ResetService.IsResetInProgress)"
+                                                Busy="@ResetService.IsResetInProgress"
+                                                BusyIndication="ButtonBusyIndication.SweepAndSpinningIcon"
+                                                OnClick="OnResetConfirmedButtonClick" />
+                    </div>
+                </div>
+            </SettingsInformation>
+        }
+
+        @if (ResetService.IsResetInProgress)
+        {
+            <SettingsInformation>
+                @Localization.UpdateControlPanel.ResetInProgressMessage
+            </SettingsInformation>
+        }
+
+        @if (!string.IsNullOrEmpty(ResetService.ErrorMessage))
+        {
+            <SettingsField Label="@CommonVocabulary.Error">
+                @ResetService.ErrorMessage
+            </SettingsField>
+        }
+    </SettingsGroup>
+</SettingsLayout>

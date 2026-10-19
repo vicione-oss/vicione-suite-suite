@@ -4,28 +4,28 @@
 
 @inherits NetworkControlPanelBase<RemoteAccessControlPanelState>
 
-<ControlPanelPage Title="@TechnicalTerms.Terminal">
-    <DescriptionBanner IconCssClass="@_cluster1IconCssClasses" Title="@TechnicalTerms.RemoteAccess">
-        @Localization.RemoteAccessControlPanel.DescriptionBannerContent
-        @if (State.Terminal.CanMoneoRc) // This whole logic should be moved to the moneo connect module somehow
-        {
-            @(" " + Localization.RemoteAccessControlPanel.DescriptionBannerContentMoneo)
-        }
-    </DescriptionBanner>
+<DescriptionBanner IconCssClass="@_cluster1IconCssClasses" Title="@TechnicalTerms.RemoteAccess">
+    @Localization.RemoteAccessControlPanel.DescriptionBannerContent
 
-    <SettingsLayout>
-        <SettingsGroup Title="@TechnicalAcronyms.Ssh" Expanded="@State.Terminal.IsSecureShell">
+    @if (State.Terminal.CanMoneoRc) // This whole logic should be moved to the moneo connect module somehow
+    {
+        @(" " + Localization.RemoteAccessControlPanel.DescriptionBannerContentMoneo)
+    }
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@TechnicalAcronyms.Ssh" Expanded="@State.Terminal.IsSecureShell">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.Terminal.IsSecureShell" @bind-Value:after="@IsSecureShellChanged" Enabled="@State.Terminal.CanSecureShell" />
+        </Expander>
+    </SettingsGroup>
+
+    @if (State.Terminal.CanMoneoRc) // This whole logic should be moved to the moneo connect module somehow
+    {
+        <SettingsGroup Title="moneo|remoteConnect" Expanded="@State.Terminal.IsMoneoRc">
             <Expander>
-                <SwitchExpander @bind-Value="@State.Terminal.IsSecureShell" @bind-Value:after="@IsSecureShellChanged" Enabled="@State.Terminal.CanSecureShell" />
+                <SwitchExpander @bind-Value="@State.Terminal.IsMoneoRc" @bind-Value:after="@IsMoneoRcChanged" Enabled="@State.Terminal.CanMoneoRc"/>
             </Expander>
         </SettingsGroup>
-        @if (State.Terminal.CanMoneoRc) // This whole logic should be moved to the moneo connect module somehow
-        {
-            <SettingsGroup Title="moneo|remoteConnect" Expanded="@State.Terminal.IsMoneoRc">
-                <Expander>
-                    <SwitchExpander @bind-Value="@State.Terminal.IsMoneoRc" @bind-Value:after="@IsMoneoRcChanged" Enabled="@State.Terminal.CanMoneoRc"/>
-                </Expander>
-            </SettingsGroup>
-        }
-    </SettingsLayout>
-</ControlPanelPage>
+    }
+</SettingsLayout>

@@ -7,6 +7,7 @@ using Blazor.Shared.Connections.Extensions;
 using Blazor.Shared.Connections.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
+using Sdk.Client.ControlPanels;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 using Sdk.Testing.Client;
@@ -66,7 +67,7 @@ public sealed class TagControlPanelTests
 
         var state = new TagControlPanelState { TagId = tag.Id };
 
-        var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<TagControlPanelState>>();
+        var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<TagControlPanelState>>(typeof(ControlPanelServiceKey<TagControlPanel>));
         await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);
 
         // Act

@@ -57,7 +57,11 @@ public sealed class NetworkInterfaceControlPanelState : NetworkControlPanelState
         }
     }
 
-    internal bool HasUnsavedChanges { get; set; }
+    internal bool GeneralHasChanges { get; set; }
+    internal bool TcpIpHasChanges { get; set; }
+    internal bool HardwareHasChanges { get; set; }
+
+    internal bool HasUnsavedChanges => GeneralHasChanges || TcpIpHasChanges || HardwareHasChanges;
 
     internal bool GeneralInformationExpanded { get; set; } = true;
 }

@@ -1,11 +1,11 @@
-﻿.module-detail-control-panel-page {
-    ::deep .installed-version-wrapper {
+.module-details-control-panel {
+    .installed-version-wrapper {
         display: flex;
         gap: 8px;
         align-items: center;
     }
 
-    ::deep .install-version-wrapper {
+    .install-version-wrapper {
         display: contents;
 
         .combo-box-wrapper {

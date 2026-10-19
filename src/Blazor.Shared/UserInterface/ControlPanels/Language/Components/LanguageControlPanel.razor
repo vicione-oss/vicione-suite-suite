@@ -5,26 +5,24 @@
 
 @inherits ControlPanelBase<LanguageControlPanelState>
 
-<ControlPanelPage Title="@TechnicalTerms.SystemDefault">
-    <DescriptionBanner Title="@CommonVocabulary.Language" IconCssClass="@_languageIconCssClasses">
-        @Localization.LanguageControlPanel.DescriptionBannerContent
-    </DescriptionBanner>
+<DescriptionBanner Title="@CommonVocabulary.Language" IconCssClass="@_languageIconCssClasses">
+    @Localization.LanguageControlPanel.DescriptionBannerContent
+</DescriptionBanner>
 
-    <SettingsLayout>
-        <SettingsGroup Title="@TechnicalTerms.DisplayLanguage">
-            <SettingsField Label="@CommonVocabulary.Language">
-                <SettingsFieldCultureComboBox Items="@CrossInstanceConfiguration.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="AfterSelectedCultureChange" />
-            </SettingsField>
+<SettingsLayout>
+    <SettingsGroup Title="@TechnicalTerms.DisplayLanguage">
+        <SettingsField Label="@CommonVocabulary.Language">
+            <SettingsFieldCultureComboBox Items="@CrossInstanceConfiguration.SupportedCultures" @bind-Value="@State.SelectedCulture" @bind-Value:after="AfterSelectedCultureChange" />
+        </SettingsField>
 
-            @* Shown only after a language change *@
-            <InformationBannerSettingsField Text="@Localization.LanguageControlPanel.LanguageChangeSavedBannerText" Visible="@State.ShowPageRefreshInformation">
-                <Button>
-                    <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.RefreshVerb" OnClick="RefreshButtonClick" />
-                </Button>
-            </InformationBannerSettingsField>
+        @* Shown only after a language change *@
+        <InformationBannerSettingsField Text="@Localization.LanguageControlPanel.LanguageChangeSavedBannerText" Visible="@State.ShowPageRefreshInformation">
+            <Button>
+                <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.RefreshVerb" OnClick="RefreshButtonClick" />
+            </Button>
+        </InformationBannerSettingsField>
 
-            @* Shown only when the change does not affect the current user *@
-            <InformationBannerSettingsField Text="@Localization.LanguageControlPanel.LanguageChangeDoesNotAffectUser" Visible="@State.ShowLanguageDoesNotAffectCurrentUser" />
-        </SettingsGroup>
-    </SettingsLayout>
-</ControlPanelPage>
+        @* Shown only when the change does not affect the current user *@
+        <InformationBannerSettingsField Text="@Localization.LanguageControlPanel.LanguageChangeDoesNotAffectUser" Visible="@State.ShowLanguageDoesNotAffectCurrentUser" />
+    </SettingsGroup>
+</SettingsLayout>

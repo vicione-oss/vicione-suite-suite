@@ -1,17 +1,14 @@
-@using Blazor.Shared.Localization
 @using Blazor.Shared.UserManagement.ControlPanels.User.Services
-@using Labels = Blazor.Shared.UserManagement.Localization.Labels;
-@using Sdk.Client.Components.Settings.Expanders
 @using ViciOne.Ui.Localization.Resources
+@using Labels = Blazor.Shared.UserManagement.Localization.Labels;
 
 @inherits ControlPanelBase<UserControlPanelState>
 
-<ControlPanelPage Title="@Localization.UserControlPanel.Info">
-    <DescriptionBanner Title="@GetDescriptionBannerTitle(State.UserProfile?.UserName.Value)">
-        @GetDescriptionBannerContent()
-    </DescriptionBanner>
+<DescriptionBanner Title="@GetDescriptionBannerTitle(State.UserProfile?.UserName.Value)">
+    @GetDescriptionBannerContent()
+</DescriptionBanner>
 
-    <SettingsLayout>
+<SettingsLayout>
         @if (State.UserProfile is not null)
         {
             <SettingsGroup Title="@CommonVocabulary.User" @bind-Expanded="@State.UserSettingsGroupExpanded">
@@ -86,11 +83,6 @@
             </SettingsGroup>
         }
     </SettingsLayout>
-</ControlPanelPage>
-
-<UserRolesControlPanelPage State="State" OnEdit="BeginEdit" />
 
 @* The Apps, Devices, Time, two-factor and company reporting sections are part of the UI design but
    have no functionality yet, so their markup is not carried here. *@
-
-<UserPermissionsControlPanelPage State="State" OnEdit="BeginEdit" />

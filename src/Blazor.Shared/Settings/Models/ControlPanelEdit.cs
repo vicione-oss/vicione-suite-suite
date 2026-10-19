@@ -6,7 +6,13 @@ using Sdk.Client.Models;
 
 namespace Blazor.Shared.Settings.Models;
 
-internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanelState controlPanelState, IServiceProvider serviceProvider) : IControlPanelEdit
+/// <param name="handlerServiceKey">
+/// The <see cref="Sdk.Client.ControlPanels.ControlPanelServiceKey{TControlPanel}"/> type of the edited control panel, under
+/// which its handlers are registered. A control panel without a handler of its own has none, even when another control
+/// panel of <typeparamref name="TControlPanelState"/> has one.
+/// </param>
+internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanelState controlPanelState, IServiceProvider serviceProvider,
+    Type handlerServiceKey) : IControlPanelEdit
     where TControlPanelState : class, IControlPanelState
 {
     private readonly TControlPanelState _controlPanelState = controlPanelState;
@@ -15,13 +21,13 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
         serviceProvider.GetRequiredService<ILogger<ControlPanelEdit<TControlPanelState>>>();
 
     private readonly Lazy<IControlPanelResetHandler<TControlPanelState>?> _resetHandler =
-        new(() => serviceProvider.GetService<IControlPanelResetHandler<TControlPanelState>>());
+        new(() => serviceProvider.GetKeyedService<IControlPanelResetHandler<TControlPanelState>>(handlerServiceKey));
 
     private readonly Lazy<IControlPanelSaveHandler<TControlPanelState>?> _saveHandler =
-        new(() => serviceProvider.GetService<IControlPanelSaveHandler<TControlPanelState>>());
+        new(() => serviceProvider.GetKeyedService<IControlPanelSaveHandler<TControlPanelState>>(handlerServiceKey));
 
     private readonly Lazy<IControlPanelCancelHandler<TControlPanelState>?> _cancelHandler =
-        new(() => serviceProvider.GetService<IControlPanelCancelHandler<TControlPanelState>>());
+        new(() => serviceProvider.GetKeyedService<IControlPanelCancelHandler<TControlPanelState>>(handlerServiceKey));
 
     private CancellationTokenSource? _handlerMethodInvocationCancellationTokenSource;
     private readonly SemaphoreSlim _semaphore = new(1);
@@ -44,6 +50,10 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
             Changed?.Invoke(new PropertiesChangedEventArgs(this, new HashSet<string> { nameof(IsRunning) }));
         }
     }
+
+    public SharedResetGroup? SharedResetGroup => _resetHandler.Value is ISharedControlPanelHandler sharedResetHandler
+        ? new SharedResetGroup(sharedResetHandler.OwnerServiceKey, sharedResetHandler.HandlerType)
+        : null;
 
     public event Action<PropertiesChangedEventArgs>? Changed;
 

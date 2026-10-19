@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.UserManagement.ControlPanels.Role.Components;
+using Blazor.Shared.UserManagement.ControlPanels.Role.Components;
 using Blazor.Shared.UserManagement.ControlPanels.Role.Services;
 using Blazor.Shared.UserManagement.ControlPanels.Roles.Models;
 using Blazor.Shared.UserManagement.Models;
@@ -19,8 +19,16 @@ internal static class IServiceCollectionExtensions
 
         services.AddControlPanel<SharedClientModule, RoleControlPanel, RoleControlPanelState>()
             .WithAutoDiscovery<RoleControlPanelDescriptor>()
-            .WithSaveHandler<RoleControlPanelSaveHandler>()
-            .WithResetHandler<RoleControlPanelResetHandler>();
+            .WithSharedState(out var roleControlPanelState)
+            .WithSharedHandlers(b => b
+                    .WithSaveHandler<RoleControlPanelSaveHandler>()
+                    .WithResetHandler<RoleControlPanelResetHandler>(),
+                out var roleControlPanelHandlers);
+
+        services.AddControlPanel<SharedClientModule, RolePermissionsControlPanel, RoleControlPanelState>()
+            .WithAutoDiscovery<RolePermissionsControlPanelDescriptor>()
+            .WithSharedState(roleControlPanelState)
+            .WithSharedHandlers(roleControlPanelHandlers);
 
         services.AddGridItemSelectColumn();
         services.AddGridItemSelection<PermissionGridItemId>(typeof(RolesControlPanelServiceKey));

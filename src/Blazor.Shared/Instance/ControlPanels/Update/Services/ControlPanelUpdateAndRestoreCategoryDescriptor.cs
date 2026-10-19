@@ -11,5 +11,5 @@ internal sealed class ControlPanelUpdateAndRestoreCategoryDescriptor : IControlP
     public string Title => string.Format(CultureInfo.CurrentCulture, CommonPatterns.ThisAndThat, TechnicalTerms.Update, TechnicalTerms.Restore);
     public string? IconCssClass => MonochromeIconName.Refresh.GetCssClasses(MonochromeIconSize.SmallMedium).ToSpaceSeparated();
     public Uri? IconUrl => null;
-    public int? Position => null;
+    public int? Position => 3;
 }

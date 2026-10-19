@@ -1,0 +1,16 @@
+.module-management-browse-control-panel {
+    display: contents;
+
+    ::deep .available-modules-grid {
+        .status-wrapper {
+            display: flex;
+            gap: 8px;
+
+            .icon-wrapper {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+        }
+    }
+}

@@ -53,11 +53,16 @@ public static class IServiceCollectionExtensions
                 .WithSaveHandler<ConnectionsControlPanelSaveHandler>()
                 .WithResetHandler<ConnectionsControlPanelResetHandler>();
 
+            services.AddControlPanel<SharedClientModule, ConnectionsTagsControlPanel, ConnectionsTagsControlPanelState>()
+                .WithAutoDiscovery<ConnectionsTagsControlPanelDescriptor>()
+                .WithSaveHandler<ConnectionsTagsControlPanelSaveHandler>()
+                .WithResetHandler<ConnectionsTagsControlPanelResetHandler>();
+
             services.AddConnectionServices();
 
             services.AddGridItemSelectColumn()
                 .AddGridItemSelection<Guid>(typeof(ConnectionsControlPanelServiceKey))
-                .AddGridItemSelection<Guid>(typeof(TagsControlPanelPageContentServiceKey));
+                .AddGridItemSelection<Guid>(typeof(ConnectionsTagsControlPanelServiceKey));
 
             return services;
         }

@@ -43,6 +43,56 @@ public sealed class SettingsModuleServiceTests
     {
     }
 
+    private sealed class GroupingParentDescriptor : IControlPanelParentDescriptor;
+
+    private sealed class GroupingControlPanelDescriptor : IControlPanelDescriptor<GroupingControlPanel>
+    {
+        public string Title => "Grouping";
+        public Uri? IconUrl => null;
+        public bool HasContent => false;
+    }
+
+    [ControlPanelCategory<TestControlPanelCategoryDescriptor>]
+    [ControlPanelParent<GroupingParentDescriptor>]
+    private sealed class GroupingControlPanel : ControlPanelBase<ControlPanelState>;
+
+    private sealed class GroupedControlPanelDescriptor : IControlPanelDescriptor<GroupedControlPanel>
+    {
+        public string Title => "Grouped";
+        public Uri? IconUrl => null;
+    }
+
+    [ControlPanelCategory<TestControlPanelCategoryDescriptor>]
+    [ControlPanelChild<GroupingParentDescriptor>]
+    private sealed class GroupedControlPanel : ControlPanelBase<ControlPanelState>;
+
+    private static ServiceProvider SetupServiceProviderWithControlPanelWithoutContent(bool withChild)
+    {
+        var services = new ServiceCollection();
+
+        services.AddControlPanelInfrastructure();
+        services.AddControlPanel<TestClientModuleA, GroupingControlPanel, ControlPanelState>()
+            .WithAutoDiscovery<GroupingControlPanelDescriptor>();
+
+        if (withChild)
+        {
+            services.AddControlPanel<TestClientModuleA, GroupedControlPanel, ControlPanelState>()
+                .WithAutoDiscovery<GroupedControlPanelDescriptor>();
+        }
+
+        return services.BuildServiceProvider();
+    }
+
+    private static List<string> GetSettingsEntryTitles(ServiceProvider serviceProvider)
+    {
+        var controlPanelRegistryItems = serviceProvider.GetRequiredService<IEnumerable<IControlPanelRegistry>>().SelectMany(i => i);
+
+        return new SettingsModuleService(_logger)
+            .GetSettingsEntries(controlPanelRegistryItems, groupPosition: 0, "Category1")
+            .Select(e => e.Title)
+            .ToList();
+    }
+
     private static ServiceProvider SetupServiceProvider()
     {
         var services = new ServiceCollection();
@@ -114,5 +164,31 @@ public sealed class SettingsModuleServiceTests
                 settingsEntries.ControlPanelRegistryItem.Should().NotBeNull();
             }
         }
+    }
+
+    [Fact]
+    public async Task Should_list_a_control_panel_without_content_when_it_has_children()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProviderWithControlPanelWithoutContent(withChild: true);
+
+        // Act
+        var titles = GetSettingsEntryTitles(serviceProvider);
+
+        // Assert
+        titles.Should().Equal("Grouping");
+    }
+
+    [Fact]
+    public async Task Should_not_list_a_control_panel_without_content_when_it_has_no_children()
+    {
+        // Arrange
+        await using var serviceProvider = SetupServiceProviderWithControlPanelWithoutContent(withChild: false);
+
+        // Act
+        var titles = GetSettingsEntryTitles(serviceProvider);
+
+        // Assert
+        titles.Should().BeEmpty();
     }
 }

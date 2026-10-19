@@ -29,8 +29,6 @@ public class ConnectionsControlPanelTests
                 _controlPanelRequest = setup;
             });
 
-        _connectionService.GetTags(Arg.Any<CancellationToken>()).Returns([]);
-
         ctx.Services
             .AddSingleton(_connectionService)
             .AddSingleton(_ => SetupConnectionTypeRegistry())
@@ -72,7 +70,7 @@ public class ConnectionsControlPanelTests
             // Arrange
             using var ctx = SetupTestContext();
             var state = new ConnectionsControlPanelState();
-            var component = ctx.RenderControlPanelPage<ConnectionsControlPanel, ConnectionsControlPanelState>(state);
+            var component = ctx.Render<ConnectionsControlPanel>(b => b.Add(c => c.State, state));
 
             // Act
             component.FindGridActionButton(MonochromeIconName.PlusSlim).Click();
@@ -100,7 +98,7 @@ public class ConnectionsControlPanelTests
             };
 
             var state = new ConnectionsControlPanelState();
-            var component = ctx.RenderControlPanelPage<ConnectionsControlPanel, ConnectionsControlPanelState>(state);
+            var component = ctx.Render<ConnectionsControlPanel>(b => b.Add(c => c.State, state));
 
             _connectionService.ConnectionStateChanged += Raise.Event<Func<IReadOnlyList<Connection>, Task>?>(connections);
 
@@ -131,7 +129,7 @@ public class ConnectionsControlPanelTests
             };
 
             var state = new ConnectionsControlPanelState();
-            var component = ctx.RenderControlPanelPage<ConnectionsControlPanel, ConnectionsControlPanelState>(state);
+            var component = ctx.Render<ConnectionsControlPanel>(b => b.Add(c => c.State, state));
 
             _connectionService.ConnectionStateChanged += Raise.Event<Func<IReadOnlyList<Connection>, Task>?>(connections);
 
@@ -160,7 +158,7 @@ public class ConnectionsControlPanelTests
             };
 
             var state = new ConnectionsControlPanelState();
-            var component = ctx.RenderControlPanelPage<ConnectionsControlPanel, ConnectionsControlPanelState>(state);
+            var component = ctx.Render<ConnectionsControlPanel>(b => b.Add(c => c.State, state));
 
             // Act
             _connectionService.ConnectionStateChanged += Raise.Event<Func<IReadOnlyList<Connection>, Task>?>(connections);

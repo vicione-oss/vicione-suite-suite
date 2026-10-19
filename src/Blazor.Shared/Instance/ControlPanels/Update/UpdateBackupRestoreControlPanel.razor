@@ -1,0 +1,51 @@
+@using Blazor.Shared.Instance.ControlPanels.Update.Services
+@using ViciOne.Ui.Localization.Resources
+
+@inherits ControlPanelBase<UpdateBackupRestoreControlPanelState>
+
+<DescriptionBanner IconCssClass="@_saveIconCssClasses" Title="@Localization.UpdateControlPanel.BackupDescriptionBannerTitle">
+    @Localization.UpdateControlPanel.BackupDescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@Localization.UpdateControlPanel.BackupGroupTitle" @bind-Expanded="@State.BackupGroupExpanded">
+        <SettingsInformation>
+            @Localization.UpdateControlPanel.BackupExportText
+        </SettingsInformation>
+
+        <SettingsField Label="@Localization.UpdateControlPanel.BackupExportConfigurationFile">
+            <SettingsFieldButton Text="@CommonVocabulary.ExportVerb"
+                                 IconCssClass="@_exportIconCssClasses"
+                                 OnClick="OnExportButtonClick"
+                                 Enabled="@(CanExecuteExportButton() || BackupRestoreService.IsExportInProgress)"
+                                 Busy="@BackupRestoreService.IsExportInProgress" />
+        </SettingsField>
+
+        <SettingsFieldSeparator />
+
+        <SettingsInformation>
+            @Localization.UpdateControlPanel.BackupRestoreText
+        </SettingsInformation>
+
+        <SettingsField Label="@Localization.UpdateControlPanel.BackupRestoreConfigurationFile" IsLoading="@BackupRestoreService.IsRestoreInProgress" LoadingIndication="SettingsFieldLoadingIndication.Spinner">
+            <SettingsFieldFileUpload @bind-Filename="State.RestoreFilename"
+                                     UploadTicket="State.RestoreFileUploadTicket"
+                                     UploadTicketFactory="@UploadTicketFactory"
+                                     UploadHandler="BackupUploadHandler"
+                                     Accept="@Core.Shared.Constants.BackupFileExtension"
+                                     MaximumAllowedSize="@Constants.BackupFileSizeLimitMB"
+                                     OnUploadStart="RestoreFileUploadStart"
+                                     OnUploadSuccess="RestoreFileUploadSuccess"
+                                     OnUploadError="RestoreFileUploadError"
+                                     OnUploadCancel="RestoreFileUploadCancel" />
+        </SettingsField>
+
+        @if (!string.IsNullOrEmpty(BackupRestoreService.ErrorMessage))
+        {
+            <SettingsField Label="@CommonVocabulary.Error">
+                @BackupRestoreService.ErrorMessage
+            </SettingsField>
+        }
+
+    </SettingsGroup>
+</SettingsLayout>

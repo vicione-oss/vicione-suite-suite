@@ -1,0 +1,123 @@
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services
+@using Blazor.Shared.Settings.NetworkInterface.Enums
+@using Blazor.Shared.Settings.NetworkInterface.Enums.Extensions
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Localization.Extensions
+@using ViciOne.Ui.Localization.Resources
+
+@inherits NetworkControlPanelBase<NetworkInterfaceControlPanelState>
+
+<DescriptionBanner Title="@string.Format(Localization.NetworkInterfaceGeneralControlPanel.DescriptionBannerTitle, State.Name)"
+                   IconCssClass="@_cluster1IconCssClasses">
+    @Localization.NetworkInterfaceGeneralControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@Localization.NetworkInterfaceGeneralControlPanel.InterfaceNameSettingsGroupTitle">
+        <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.InterfaceName">
+            @State.Name
+        </SettingsField>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@Localization.NetworkInterfaceGeneralControlPanel.InterfaceEnabledSettingsGroupTitle" Expanded="@State.Enabled">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.Enabled" @bind-Value:after="InterfaceEnabledChanged" />
+        </Expander>
+
+        <ChildContent>
+            <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.TestConnection">
+                <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.TestVerb" Busy="@_testConnectionRunning" BusyIndication="ButtonBusyIndication.SweepAndSpinningIcon" OnClick="TestConnectionButtonClick" />
+            </SettingsField>
+
+            @if (_testConnectionExecutedAtLeastOnce && _testConnectionResult is not null)
+            {
+                <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.IsDefaultRouteConfigured" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @_testConnectionResult.IsDefaultRouteConfigured.LocalizeYesNo()
+                </SettingsField>
+
+                <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.IsDefaultGatewayAvailable" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @_testConnectionResult.IsDefaultGatewayAvailable.LocalizeYesNo()
+                </SettingsField>
+
+                <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.IsInternetAvailable" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @_testConnectionResult.IsInternetAvailable.LocalizeYesNo()
+                </SettingsField>
+
+                <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.IsDnsFunctional" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @_testConnectionResult.IsDnsFunctional.LocalizeYesNo()
+                </SettingsField>
+
+                <SettingsField Label="@CommonVocabulary.State" IsLoading="@_testConnectionRunning" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                    @_testConnectionResult.State
+                </SettingsField>
+            }
+
+            @* A factory-reset field is designed for this group but has no functionality yet. *@
+        </ChildContent>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@Localization.NetworkInterfaceGeneralControlPanel.GeneralInformation" @bind-Expanded="State.GeneralInformationExpanded">
+        <SettingsInformation>
+            <div class="description">
+                @Localization.NetworkInterfaceGeneralControlPanel.GeneralInformationDescription
+            </div>
+        </SettingsInformation>
+
+        <div class="section" data-expanded="@State.GeneralInformationExpanded">
+            <SettingsField Label="@TechnicalTerms.MacAddress">
+                @State.GetMacAddress(SystemConfigurationService)
+            </SettingsField>
+        </div>
+
+        @foreach (var address in State.IpAddresses)
+        {
+            <div class="section" data-expanded="@State.GeneralInformationExpanded">
+                <SettingsField Label="@Localization.NetworkTerms.IPv4Configuration">
+                    @address.Configuration.ToLocalizedString()
+                </SettingsField>
+
+                <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.Ipv4Address">
+                    @address.Address
+                </SettingsField>
+
+                <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.Ipv4SubnetMask">
+                    @address.Subnet
+                </SettingsField>
+
+                <SettingsField Label="@Localization.NetworkInterfaceGeneralControlPanel.Ipv4DefaultGateway">
+                    @address.Gateway
+                </SettingsField>
+            </div>
+        }
+
+        <div class="section" data-expanded="@State.GeneralInformationExpanded">
+            <SettingsField Label="@TechnicalAcronyms.VLan">
+                @State.GetVlanInformation(SystemConfigurationService)
+            </SettingsField>
+        </div>
+
+        <div class="section" data-expanded="@State.GeneralInformationExpanded">
+            <SettingsField Label="@TechnicalTerms.DnsServer">
+                <div class="dns-server-grid">
+                    @if (!SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Addresses.Any() &&
+                         !State.GetDhcpDnsNameServers(SystemConfigurationService).Any())
+                    {
+                        <div>@TechnicalTerms.Disabled</div>
+                    }
+
+                    @foreach (var nameServer in SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Addresses)
+                    {
+                        <div>@nameServer.ToString()</div>
+                    }
+
+                    @foreach (var nameServer in State.GetDhcpDnsNameServers(SystemConfigurationService))
+                    {
+                        <div>@nameServer.ToString() (@IpConfigurationMode.AutomaticDhcp.ToLocalizedString())</div>
+                    }
+                </div>
+            </SettingsField>
+        </div>
+    </SettingsGroup>
+</SettingsLayout>

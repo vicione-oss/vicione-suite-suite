@@ -9,6 +9,7 @@ using Blazor.Shared.Settings.Services;
 using Bunit;
 using Core.Shared.UserManagement.Comparers;
 using Microsoft.Extensions.DependencyInjection;
+using Sdk.Client.ControlPanels;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Extensions;
@@ -186,7 +187,8 @@ public sealed class SettingsContainerTests
         var controlPanelRegistry = ctx.Services.GetRequiredService<IControlPanelRegistry>();
         var controlPanelState = controlPanelRegistry.First().State as ControlPanelState;
 
-        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState!, ctx.Services);
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState!, ctx.Services,
+            typeof(ControlPanelServiceKey<DummyClientModule.FirstControlPanel>));
         var controlPanelEditRegistry = ctx.Services.GetRequiredService<IControlPanelEditRegistry>();
         controlPanelEditRegistry.Add(controlPanelEdit);
 
@@ -202,6 +204,118 @@ public sealed class SettingsContainerTests
 
         // Assert
         component.Find(".error-message").Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Should_hide_save_and_revert_buttons_when_running_edit_is_removed()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        ctx.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
+
+        var component = ctx.Render<SettingsContainer>();
+
+        var controlPanelEditRegistry = ctx.Services.GetRequiredService<IControlPanelEditRegistry>();
+        var controlPanelEdit = controlPanelEditRegistry.Single();
+        controlPanelEdit.Begin();
+
+        component.WaitForAssertion(() => component.FindAll(".popup-content-action-button--confirm").Should().NotBeEmpty());
+
+        // Act
+        controlPanelEditRegistry.Remove(controlPanelEdit);
+
+        // Assert
+        component.WaitForAssertion(() => component.FindAll(".popup-content-action-button--confirm").Should().BeEmpty());
+    }
+
+    [Fact]
+    public async Task Should_save_only_running_edits()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        ctx.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
+
+        var saveHandler = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
+        saveHandler.Save(Arg.Any<ControlPanelState>(), Arg.Any<CancellationToken>())
+            .Returns(new SaveSuccessResult());
+        AddSaveHandler(ctx, saveHandler);
+
+        var component = ctx.Render<SettingsContainer>();
+
+        var controlPanelEditRegistry = ctx.Services.GetRequiredService<IControlPanelEditRegistry>();
+        controlPanelEditRegistry.Single().Begin();
+
+        var idleEdit = Substitute.For<IControlPanelEdit>();
+        controlPanelEditRegistry.Add(idleEdit);
+
+        component.Render();
+
+        // Act
+        await component.Find(".popup-content-action-button--confirm").ClickAsync();
+
+        // Assert
+        _ = idleEdit.DidNotReceive().Save();
+        component.FindAll(".error-message").Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_display_an_error_reported_by_several_edits_once()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        ctx.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
+
+        var saveHandler = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
+        saveHandler.Save(Arg.Any<ControlPanelState>(), Arg.Any<CancellationToken>())
+            .Returns(new SaveErrorResult("Shared save failed", 42));
+        AddSaveHandler(ctx, saveHandler);
+
+        var component = ctx.Render<SettingsContainer>();
+
+        var controlPanelEditRegistry = ctx.Services.GetRequiredService<IControlPanelEditRegistry>();
+        controlPanelEditRegistry.Single().Begin();
+
+        var sharingEdit = Substitute.For<IControlPanelEdit>();
+        sharingEdit.IsRunning.Returns(true);
+        sharingEdit.Save().Returns(new SaveErrorResult("Shared save failed", 42));
+        controlPanelEditRegistry.Add(sharingEdit);
+
+        component.Render();
+
+        // Act
+        await component.Find(".popup-content-action-button--confirm").ClickAsync();
+
+        // Assert
+        component.WaitForAssertion(() => component.Find(".error-message").TextContent
+            .Split("Shared save failed").Length.Should().Be(2));
+    }
+
+    [Fact]
+    public async Task Should_cancel_only_running_edits()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        ctx.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
+
+        var component = ctx.Render<SettingsContainer>();
+
+        var controlPanelEditRegistry = ctx.Services.GetRequiredService<IControlPanelEditRegistry>();
+        controlPanelEditRegistry.Single().Begin();
+
+        var idleEdit = Substitute.For<IControlPanelEdit>();
+        controlPanelEditRegistry.Add(idleEdit);
+
+        component.Render();
+
+        // Act
+        await component.Find(".popup-content-action-button:not(.popup-content-action-button--confirm)").ClickAsync();
+
+        // Assert
+        _ = idleEdit.DidNotReceive().Cancel();
     }
 
     [Fact]
@@ -254,7 +368,7 @@ public sealed class SettingsContainerTests
         var saveHandler = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
         saveHandler.Save(Arg.Any<ControlPanelState>(), Arg.Any<CancellationToken>())
             .Returns(saveResult);
-        ctx.Services.AddSingleton(saveHandler);
+        AddSaveHandler(ctx, saveHandler);
 
         var component = ctx.Render<SettingsContainer>();
 
@@ -267,5 +381,16 @@ public sealed class SettingsContainerTests
         await saveButton.ClickAsync();
 
         return component;
+    }
+
+    /// <summary>
+    /// Registers the handler for both control panels, whichever of them is the active and thereby edited one.
+    /// </summary>
+    private static void AddSaveHandler(BunitContext ctx, IControlPanelSaveHandler<ControlPanelState> saveHandler)
+    {
+        ctx.Services.AddKeyedSingleton<IControlPanelSaveHandler<ControlPanelState>>(
+            typeof(ControlPanelServiceKey<DummyClientModule.FirstControlPanel>), saveHandler);
+        ctx.Services.AddKeyedSingleton<IControlPanelSaveHandler<ControlPanelState>>(
+            typeof(ControlPanelServiceKey<DummyClientModule.CloudControlPanel>), saveHandler);
     }
 }

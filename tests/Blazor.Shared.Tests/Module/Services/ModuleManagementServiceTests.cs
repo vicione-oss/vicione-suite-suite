@@ -112,10 +112,10 @@ public class ModuleManagementServiceTests
             SetupModuleMetadata(_moduleBundles);
 
             // Act
-            var results = await service.GetMetadata(cancellationToken: TestContext.Current.CancellationToken);
+            var results = await service.GetAvailableMetadata(cancellationToken: TestContext.Current.CancellationToken);
 
             // Assert
-            var available = results.First(k => k.ModuleId == AvailableModulePackageName);
+            var available = results.Modules.First(k => k.ModuleId == AvailableModulePackageName);
             foreach (var option in available.EditOptions.Values)
             {
                 if (string.IsNullOrWhiteSpace(option.DefaultValue))
@@ -136,26 +136,41 @@ public class ModuleManagementServiceTests
             SetupModuleMetadata();
 
             // Act
-            var results = await service.GetMetadata(true, TestContext.Current.CancellationToken);
+            var results = await service.GetAvailableMetadata(true, TestContext.Current.CancellationToken);
 
             // Assert
-            results.Should().BeEmpty();
+            results.Modules.Should().BeEmpty();
         }
 
         [Fact]
-        public async Task Should_return_installed_modules()
+        public async Task Should_return_the_installed_modules_of_the_response()
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var service = serviceProvider.GetRequiredService<ModuleManagementService>();
             SetupModuleMetadata(_moduleBundles);
-            var models = ModuleMetadataModelFactory.CreateModels(_moduleBundles);
+            var models = ModuleMetadataModelFactory.CreateModels([.. _moduleBundles.Where(k => k.Installed)]);
 
             // Act
-            var results = await service.GetMetadata(cancellationToken: TestContext.Current.CancellationToken);
+            var results = await service.GetInstalledMetadata(TestContext.Current.CancellationToken);
 
             // Assert
-            results.Select(k => k).Should().BeEquivalentTo(models);
+            results.Modules.Should().BeEquivalentTo(models);
+        }
+
+        [Fact]
+        public async Task Should_drop_installed_modules_from_the_available_ones_if_the_response_contains_both()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var service = serviceProvider.GetRequiredService<ModuleManagementService>();
+            SetupModuleMetadata(_moduleBundles);
+
+            // Act
+            var results = await service.GetAvailableMetadata(cancellationToken: TestContext.Current.CancellationToken);
+
+            // Assert
+            results.Modules.Should().ContainSingle().Which.ModuleId.Should().Be(AvailableModulePackageName);
         }
 
         [Fact]
@@ -170,10 +185,64 @@ public class ModuleManagementServiceTests
             .Returns(new GetModuleMetadataBundlesResponse([], new ErrorInfo(1, "Request failed")));
 
             // Act
-            var action = () => service.GetMetadata(cancellationToken: TestContext.Current.CancellationToken);
+            var action = () => service.GetInstalledMetadata(TestContext.Current.CancellationToken);
 
             // Assert
             await action.Should().ThrowAsync<InvalidOperationException>();
+        }
+
+        [Fact]
+        public async Task Should_request_installed_modules_with_their_updates()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var service = serviceProvider.GetRequiredService<ModuleManagementService>();
+            SetupModuleMetadata();
+
+            // Act
+            await service.GetInstalledMetadata(TestContext.Current.CancellationToken);
+
+            // Assert
+            await _mediator.Received(1).Request<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>(
+                new GetModuleMetadataBundlesRequest(true, false, false, true), Arg.Any<CancellationToken>());
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Should_request_available_modules_only(bool forceReload)
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var service = serviceProvider.GetRequiredService<ModuleManagementService>();
+            SetupModuleMetadata();
+
+            // Act
+            await service.GetAvailableMetadata(forceReload, TestContext.Current.CancellationToken);
+
+            // Assert
+            await _mediator.Received(1).Request<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>(
+                new GetModuleMetadataBundlesRequest(false, true, forceReload), Arg.Any<CancellationToken>());
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Should_return_allow_installation_of_the_response(bool allowInstallation)
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var service = serviceProvider.GetRequiredService<ModuleManagementService>();
+
+            _mediator.Request<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>(
+                Arg.Any<GetModuleMetadataBundlesRequest>(), Arg.Any<CancellationToken>())
+                .Returns(new GetModuleMetadataBundlesResponse([], AllowInstallation: allowInstallation));
+
+            // Act
+            var result = await service.GetAvailableMetadata(cancellationToken: TestContext.Current.CancellationToken);
+
+            // Assert
+            result.AllowInstallation.Should().Be(allowInstallation);
         }
     }
 

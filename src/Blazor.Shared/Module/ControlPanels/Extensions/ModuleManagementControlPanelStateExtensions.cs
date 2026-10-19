@@ -1,36 +1,23 @@
+using Blazor.Shared.Module.ControlPanels.Models;
 using Blazor.Shared.Module.ControlPanels.Services;
 using Blazor.Shared.Module.Models;
+using Blazor.Shared.Module.Services;
 using Core.Shared.Modules.Contracts;
 using Core.Shared.Modules.Events;
+using Microsoft.Extensions.Logging;
+using Sdk.Client.ControlPanels.Models;
 
 namespace Blazor.Shared.Module.ControlPanels.Extensions;
 
 internal static class ModuleManagementControlPanelStateExtensions
 {
-    extension(ModuleManagementControlPanelState state)
+    extension(ModuleManagementControlPanelStateBase state)
     {
-        internal void UpdateModules(List<ModuleMetadataModel> models)
+        internal void SetModules(List<ModuleMetadataModel> models)
         {
             state.EnqueuedOperations.Clear();
 
-            // No module allows modification, so installation is disallowed.
-            state.AllowInstallation = models.Any(k => k.CanBeModified);
-
-            // Split for the tabs.
-            state.InstalledModules = models.Where(k => k.Installed).OrderBy(k => k.Title).AsQueryable();
-            state.AvailableModules = models.Where(k => !k.Installed).OrderBy(k => k.Title).AsQueryable();
-        }
-
-        internal async Task CancelEditInOptionGrids()
-        {
-            foreach (var installedModule in state.InstalledModules)
-            {
-                if (installedModule.OptionGrid is not null)
-                {
-                    await installedModule.OptionGrid.CancelEdit();
-                    installedModule.HasModifiedOptions = false;
-                }
-            }
+            state.Modules = models.OrderBy(k => k.Title).AsQueryable();
         }
 
         internal void EnqueueOperations(List<ModulePackageOperation> operations)
@@ -39,10 +26,24 @@ internal static class ModuleManagementControlPanelStateExtensions
             {
                 var exists = state.EnqueuedOperations.FirstOrDefault(k => k.Package.Name == operation.Package.Name && k.OperationKind == operation.OperationKind);
                 if (exists is not null)
-                    state.EnqueuedOperations.Remove(operation);
+                    state.EnqueuedOperations.Remove(exists);
 
                 state.EnqueuedOperations.Add(operation);
             }
+        }
+
+        internal async Task<ISaveResult> SaveEnqueuedOperations(IModuleManagementService managementService, CancellationToken cancellationToken)
+        {
+            if (!state.HasPendingChanges())
+                return new SaveSuccessResult();
+
+            var result = await managementService.UpdateOperations([.. state.EnqueuedOperations], cancellationToken);
+            if (result is ModuleManagementServiceErrorResult error)
+                return new SaveErrorResult(error.ErrorMessage, error.ErrorCode);
+
+            state.EnqueuedOperations.Clear();
+
+            return new SaveSuccessResult();
         }
 
         internal bool ApplyOperationChanges(ModulePackageOperationsChanged changes)
@@ -50,20 +51,12 @@ internal static class ModuleManagementControlPanelStateExtensions
             var hasChanged = false;
             foreach (var change in changes.Changes)
             {
-                var installed = state.InstalledModules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
-                if (installed != null)
-                {
-                    installed.PendingOperation = UpdateOperation(installed.PendingOperation, change);
-                    hasChanged = true;
+                var module = state.Modules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
+                if (module is null)
                     continue;
-                }
 
-                var available = state.AvailableModules.FirstOrDefault(k => k.Name == change.Operation.Package.Name);
-                if (available != null)
-                {
-                    available.PendingOperation = UpdateOperation(available.PendingOperation, change);
-                    hasChanged = true;
-                }
+                module.PendingOperation = UpdateOperation(module.PendingOperation, change);
+                hasChanged = true;
             }
             return hasChanged;
 
@@ -86,5 +79,49 @@ internal static class ModuleManagementControlPanelStateExtensions
         }
 
         internal bool HasPendingChanges() => state.EnqueuedOperations.Count > 0;
+    }
+
+    extension(ModuleManagementInstalledControlPanelState state)
+    {
+        internal async Task CancelEditInOptionGrids()
+        {
+            foreach (var installedModule in state.Modules)
+            {
+                if (installedModule.OptionGrid is not null)
+                {
+                    await installedModule.OptionGrid.CancelEdit();
+                    installedModule.HasModifiedOptions = false;
+                }
+            }
+        }
+    }
+
+    extension(ModuleManagementBrowseControlPanelState state)
+    {
+        internal async Task LoadAvailableModules(IModuleManagementService managementService, bool forceReload, ILogger logger,
+            CancellationToken cancellationToken)
+        {
+            state.BeginLoading();
+            try
+            {
+                var result = await managementService.GetAvailableMetadata(forceReload, cancellationToken);
+
+                state.RequestErrorCode = 0;
+                state.RequestErrorMessage = null;
+                state.AllowInstallation = result.AllowInstallation;
+                state.SetModules(result.Modules);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogError(ex, "Failed to load module metadata");
+
+                state.RequestErrorCode = 1;
+                state.RequestErrorMessage = Localization.ModuleManagementBrowseControlPanel.ModuleMetadataLoadFailed;
+            }
+            finally
+            {
+                state.EndLoading();
+            }
+        }
     }
 }

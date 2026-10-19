@@ -9,5 +9,6 @@ namespace Blazor.Shared.UserManagement.ControlPanels.Roles.Services;
 internal sealed class RolesControlPanelDescriptor : IControlPanelDescriptor<RolesControlPanel>
 {
     public string Title => CommonVocabulary.RolePlural;
+    public int? Position => 2;
     public Uri? IconUrl => SvgIcon.User.GetPath();
 }

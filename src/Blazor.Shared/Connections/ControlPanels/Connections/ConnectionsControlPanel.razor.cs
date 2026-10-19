@@ -17,6 +17,7 @@ using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 namespace Blazor.Shared.Connections.ControlPanels.Connections;
 
 [ControlPanelCategory<ControlPanelSystemCategoryDescriptor>]
+[ControlPanelParent<ConnectionsControlPanelDescriptor>]
 [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
 public sealed partial class ConnectionsControlPanel : ControlPanelBase<ConnectionsControlPanelState>
 {
@@ -42,7 +43,6 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
         await base.OnInitializedAsync();
 
         ConnectionService.ConnectionStateChanged += ConnectionServiceConnectionStateChanged;
-        ConnectionService.TagsChanged += ConnectionServiceTagsChanged;
 
         GridItemSelection.Clear();
         GridItemSelection.Changed += GridItemSelectionChanged;
@@ -61,15 +61,11 @@ public sealed partial class ConnectionsControlPanel : ControlPanelBase<Connectio
         _connectionsQueryable = Enumerable.Empty<EditConnectionModel>().AsQueryable();
 
         ConnectionService.ConnectionStateChanged -= ConnectionServiceConnectionStateChanged;
-        ConnectionService.TagsChanged -= ConnectionServiceTagsChanged;
         GridItemSelection.Changed -= GridItemSelectionChanged;
         State.Changed -= StateChanged;
 
         await base.DisposeAsyncCore();
     }
-
-    private Task ConnectionServiceTagsChanged(Sdk.Connections.Events.TagsChanged changeEvent)
-        => InvokeAsync(() => State.UpdateTags(changeEvent));
 
     private async void StateChanged(ControlPanelStateChangedEventArgs obj)
     {

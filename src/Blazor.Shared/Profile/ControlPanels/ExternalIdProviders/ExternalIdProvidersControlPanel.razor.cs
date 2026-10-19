@@ -6,9 +6,14 @@ using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Sdk.Authorization;
+using Sdk.Client.ControlPanels.Attributes;
 
 namespace Blazor.Shared.Profile.ControlPanels.ExternalIdProviders;
 
+[ControlPanelCategory<ProfileCategoryDescriptor>]
+[ControlPanelGroup<SecondaryControlPanelGroupDescriptor>]
+[ModuleAuthorize(SharedClientModule.ModuleId)]
 public partial class ExternalIdProvidersControlPanel
 {
     private bool _unlinkDialogVisible;

@@ -25,15 +25,25 @@ internal sealed class ModuleManagementService : CompletionSourceHandlerBase<IMod
         Register<ModuleOptionsChanged>();
     }
 
-    public async Task<List<ModuleMetadataModel>> GetMetadata(bool forceReload = false, CancellationToken cancellationToken = default)
+    public Task<ModuleMetadataResult> GetInstalledMetadata(CancellationToken cancellationToken = default)
+        => GetMetadata(new GetModuleMetadataBundlesRequest(true, false, ResolveUpdates: true), cancellationToken);
+
+    public Task<ModuleMetadataResult> GetAvailableMetadata(bool forceReload = false, CancellationToken cancellationToken = default)
+        => GetMetadata(new GetModuleMetadataBundlesRequest(false, true, forceReload), cancellationToken);
+
+    private async Task<ModuleMetadataResult> GetMetadata(GetModuleMetadataBundlesRequest request, CancellationToken cancellationToken)
     {
-        var request = new GetModuleMetadataBundlesRequest(true, true, forceReload);
         var response = await Mediator.Request<GetModuleMetadataBundlesRequest, GetModuleMetadataBundlesResponse>(request, cancellationToken);
 
         if (response.RequestError is not null)
             throw new InvalidOperationException($"Failed to retrieve module metadata: {response.RequestError.Message}");
 
-        return ModuleMetadataModelFactory.CreateModels(response.Bundles);
+        // A slave sends the request to the master, which returns both halves while it runs a version without the filter.
+        var bundles = response.Bundles
+            .Where(k => k.Installed ? request.Installed : request.Available)
+            .ToList();
+
+        return new ModuleMetadataResult(ModuleMetadataModelFactory.CreateModels(bundles), response.AllowInstallation);
     }
 
     public async Task<IModuleManagementServiceResult> UpdateOptions(string moduleId, IEnumerable<ModuleOptionDeclaration> options, CancellationToken cancellationToken = default)

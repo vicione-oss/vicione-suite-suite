@@ -1,17 +1,24 @@
 using Blazor.Shared.Profile.ControlPanels.Passkeys.Services;
+using Blazor.Shared.Services;
 using Core.Shared.Passkeys;
 using Core.Shared.Passkeys.Contracts;
 using Core.Shared.Passkeys.Requests;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.FeatureManagement;
+using Sdk.Authorization;
+using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using ViciOne.Ui.Blazor.Components.Grid.Services;
 
 namespace Blazor.Shared.Profile.ControlPanels.Passkeys.Components;
 
+[ControlPanelCategory<ProfileCategoryDescriptor>]
+[ControlPanelGroup<SecondaryControlPanelGroupDescriptor>]
+[ModuleAuthorize(SharedClientModule.ModuleId)]
 public partial class PasskeysControlPanel
 {
     [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
@@ -33,6 +40,9 @@ public partial class PasskeysControlPanel
 
     [Inject]
     private IPasskeyHostSupport PasskeyHostSupport { get; set; } = default!;
+
+    [Inject]
+    private UserManager<SuiteUser> UserManager { get; set; } = default!;
 
     public IQueryable<PasskeyInfo> Passkeys { get; private set; } = Enumerable.Empty<PasskeyInfo>().AsQueryable();
 

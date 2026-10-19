@@ -12,9 +12,19 @@ internal static class IServiceCollectionExtensions
     {
         services.AddDialogs();
 
-        services.AddControlPanel<SharedClientModule, NetworkInterfaceControlPanel, NetworkInterfaceControlPanelState>()
-            .WithSaveHandler<NetworkInterfaceControlPanelSaveHandler>()
-            .WithResetHandler<NetworkInterfaceControlPanelResetHandler>();
+        services.AddScoped<NetworkInterfaceSaver>();
+
+        services.AddControlPanel<SharedClientModule, NetworkInterfaceGeneralControlPanel, NetworkInterfaceControlPanelState>()
+            .WithSaveHandler<NetworkInterfaceGeneralControlPanelSaveHandler>()
+            .WithResetHandler<NetworkInterfaceGeneralControlPanelResetHandler>();
+
+        services.AddControlPanel<SharedClientModule, NetworkInterfaceTcpIpControlPanel, NetworkInterfaceControlPanelState>()
+            .WithSaveHandler<NetworkInterfaceTcpIpControlPanelSaveHandler>()
+            .WithResetHandler<NetworkInterfaceTcpIpControlPanelResetHandler>();
+
+        services.AddControlPanel<SharedClientModule, NetworkInterfaceHardwareControlPanel, NetworkInterfaceControlPanelState>()
+            .WithSaveHandler<NetworkInterfaceHardwareControlPanelSaveHandler>()
+            .WithResetHandler<NetworkInterfaceHardwareControlPanelResetHandler>();
 
         return services;
     }

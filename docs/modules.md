@@ -30,7 +30,7 @@ The installation of new modules and the modification of existing ones can be dis
 Start _Core.OS_ and use an admin account for authentication. Goto `Settings`->`System`->`Modules` to manage _Core.OS_ modules. There are two different areas available:
 
 - `Installed Modules`: Lists already installed modules. Here you can edit module options, update modules and retrieve information about startup errors etc.
-- `Browse Modules`: Browse through available modules for your _Core.OS_ version. Only modules with matching SDK versions will appear here. You can select multiple modules at once for installation. By default you will only find released module versions here but you can also include existing pre-release versions by enabling the 'Pre-Release' switch and `Refresh` action.
+- `Browse Modules`: Browse through available modules for your _Core.OS_ version. Only modules with matching SDK versions will appear here. You can select multiple modules at once for installation. By default you will only find released module versions here but you can also include existing pre-release versions by enabling the 'Pre-Release' switch and `Refresh` action. With `AllowInstallation` set to `false`, the available modules are listed but cannot be installed.
 
 Any changes to installed or available modules need to be confirmed before they get applied. After restarting the system applied changes will be processed, downloading missing modules, using modified options etc. A persisted version of these options gets stored in `AppData` folder. The persisted options can still be overriden by environment variables or user secrets. 
 

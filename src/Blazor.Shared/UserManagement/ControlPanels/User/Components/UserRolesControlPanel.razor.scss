@@ -1,0 +1,9 @@
+.user-roles-control-panel {
+    display: contents;
+
+    ::deep .roles-grid {
+        .roles-combo-box {
+            z-index: 3;
+        }
+    }
+}

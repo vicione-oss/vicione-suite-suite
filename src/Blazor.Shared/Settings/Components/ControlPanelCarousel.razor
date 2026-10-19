@@ -15,6 +15,7 @@
             @{
                 var descriptionBannerSectionId = new DescriptionBannerSectionId();
                 var controlPanelLoadingIndicationSectionId = new ContentOverlaySectionId();
+                var activeLeaf = ResolveActiveLeaf(item.ControlPanelRegistryItem);
             }
 
             <AdvancedErrorBoundary>
@@ -26,8 +27,13 @@
                     <PopupScrollContainer CssClass="content-scroll-container">
                         <Content>
                             <CascadingValue Value="descriptionBannerSectionId">
-                                <ControlPanelContainer ControlPanelRegistryItem="item.ControlPanelRegistryItem"
-                                                       LoadingIndicationSectionId="controlPanelLoadingIndicationSectionId" />
+                                <CascadingValue Value="item.EditScope">
+                                    @* @key forces a fresh ControlPanelContainer (and its DynamicComponent) when the active leaf changes,
+                                       e.g. via a tab switch, since ControlPanelContainer only reads its state/edit-handler in OnInitialized *@
+                                    <ControlPanelContainer @key="activeLeaf"
+                                                           ControlPanelRegistryItem="activeLeaf"
+                                                           LoadingIndicationSectionId="controlPanelLoadingIndicationSectionId" />
+                                </CascadingValue>
                             </CascadingValue>
                         </Content>
 

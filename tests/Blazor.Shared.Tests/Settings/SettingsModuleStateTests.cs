@@ -92,6 +92,85 @@ public sealed class SettingsModuleStateTests
     }
 
     [Fact]
+    public void Should_set_active_child_and_trigger_changed_event()
+    {
+        // Arrange
+        var parent = Substitute.For<IControlPanelRegistryItem>();
+        var child = Substitute.For<IControlPanelRegistryItem>();
+
+        var state = new SettingsModuleState();
+
+        var changedTriggered = false;
+        state.Changed += args => changedTriggered = args.PropertyNames.Contains(nameof(state.ActiveChildMap));
+
+        // Act
+        state.SetActiveChild(parent, child);
+
+        // Assert
+        changedTriggered.Should().BeTrue();
+        state.ActiveChildMap.Should().ContainKey(parent).WhoseValue.Should().Be(child);
+    }
+
+    [Fact]
+    public void Should_not_trigger_changed_event_when_active_child_is_set_to_same_value()
+    {
+        // Arrange
+        var parent = Substitute.For<IControlPanelRegistryItem>();
+        var child = Substitute.For<IControlPanelRegistryItem>();
+
+        var state = new SettingsModuleState();
+        state.SetActiveChild(parent, child);
+
+        var changedTriggered = false;
+        state.Changed += args => changedTriggered = true;
+
+        // Act
+        state.SetActiveChild(parent, child);
+
+        // Assert
+        changedTriggered.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Should_clear_active_child_and_trigger_changed_event()
+    {
+        // Arrange
+        var parent = Substitute.For<IControlPanelRegistryItem>();
+        var child = Substitute.For<IControlPanelRegistryItem>();
+
+        var state = new SettingsModuleState();
+        state.SetActiveChild(parent, child);
+
+        var changedTriggered = false;
+        state.Changed += args => changedTriggered = args.PropertyNames.Contains(nameof(state.ActiveChildMap));
+
+        // Act
+        state.SetActiveChild(parent, null);
+
+        // Assert
+        changedTriggered.Should().BeTrue();
+        state.ActiveChildMap.Should().NotContainKey(parent);
+    }
+
+    [Fact]
+    public void Should_not_trigger_changed_event_when_clearing_active_child_that_was_never_set()
+    {
+        // Arrange
+        var parent = Substitute.For<IControlPanelRegistryItem>();
+
+        var state = new SettingsModuleState();
+
+        var changedTriggered = false;
+        state.Changed += args => changedTriggered = true;
+
+        // Act
+        state.SetActiveChild(parent, null);
+
+        // Assert
+        changedTriggered.Should().BeFalse();
+    }
+
+    [Fact]
     public void Should_not_trigger_changed_event_after_begin_update()
     {
         // Arrange

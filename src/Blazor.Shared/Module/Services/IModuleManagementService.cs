@@ -25,10 +25,16 @@ public interface IModuleManagementService
     event Func<ModuleOptionsChanged, CancellationToken, Task>? OptionsChanged;
 
     /// <summary>
-    /// Retrieves the metadata for all available and installed modules.
+    /// Retrieves the metadata of the installed modules, including the versions they can be updated to.
+    /// </summary>
+    Task<ModuleMetadataResult> GetInstalledMetadata(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves the metadata of the modules that are available but not installed.
     /// </summary>
     /// <param name="forceReload">When <see langword="true"/>, bypasses any cache and reloads metadata from the source.</param>
-    Task<List<ModuleMetadataModel>> GetMetadata(bool forceReload = false, CancellationToken cancellationToken = default);
+    /// <param name="cancellationToken">Cancels the request.</param>
+    Task<ModuleMetadataResult> GetAvailableMetadata(bool forceReload = false, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Sends a command to apply the given package operations and waits for the correlating

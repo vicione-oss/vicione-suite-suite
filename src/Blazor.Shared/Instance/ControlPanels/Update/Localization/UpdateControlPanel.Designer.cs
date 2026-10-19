@@ -79,24 +79,6 @@ namespace Blazor.Shared.Instance.ControlPanels.Update.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The uploaded file is not in the correct format. Please only use *.zip files..
-        /// </summary>
-        internal static string BackupErrorText {
-            get {
-                return ResourceManager.GetString("BackupErrorText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error occurred.
-        /// </summary>
-        internal static string BackupErrorTitle {
-            get {
-                return ResourceManager.GetString("BackupErrorTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Export configuration file:.
         /// </summary>
         internal static string BackupExportConfigurationFile {
@@ -201,6 +183,15 @@ namespace Blazor.Shared.Instance.ControlPanels.Update.Localization {
         internal static string FileUploadCancelled {
             get {
                 return ResourceManager.GetString("FileUploadCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The upload of {0} was cancelled because its page was left..
+        /// </summary>
+        internal static string FileUploadCancelledOnLeave {
+            get {
+                return ResourceManager.GetString("FileUploadCancelledOnLeave", resourceCulture);
             }
         }
         

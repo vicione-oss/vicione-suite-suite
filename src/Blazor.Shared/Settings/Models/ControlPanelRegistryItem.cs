@@ -6,6 +6,7 @@ namespace Blazor.Shared.Settings.Models;
 
 internal sealed record ControlPanelRegistryItem<TClientModule>(Type ComponentType, IControlPanelDescriptor Descriptor,
     IControlPanelState State, IControlPanelCategoryDescriptor CategoryDescriptor, IControlPanelGroupDescriptor GroupDescriptor,
-    IAuthorizationRequirement? AuthorizationRequirement) :
+    IAuthorizationRequirement? AuthorizationRequirement, IControlPanelParentDescriptor? ChildOf = null,
+    IControlPanelParentDescriptor? AsParent = null) :
         IControlPanelRegistryItem<TClientModule>
             where TClientModule : class, IClientModule;

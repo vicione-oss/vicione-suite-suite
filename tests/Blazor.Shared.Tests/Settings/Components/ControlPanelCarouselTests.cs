@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Microsoft.JSInterop.Infrastructure;
+using Sdk.Client.ControlPanels;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Modules;
+using Sdk.Testing.Client;
 using Sdk.Modules;
 using static Blazor.Shared.Tests.Settings.Components.ControlPanelCarouselTests.TestClientModule;
 
@@ -360,6 +362,397 @@ public sealed class ControlPanelCarouselTests
         secondLevel.State.ActivePageIndex.Should().BeNull();
     }
 
+    [Fact]
+    public async Task Should_reset_each_control_panel_once_with_its_own_handler_when_switching_tabs()
+    {
+        // Arrange
+        SharedStateResetHandler.ResetCounter();
+        ChildResetHandler.ResetCounter();
+
+        await using var testContext = SetupTestContextWithParentAndChild(out var transitionEnd);
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var settingsModuleState = testContext.Services.GetRequiredService<SettingsModuleState>();
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+
+        var parentItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ParentWithChildControlPanel));
+        var childItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ChildOfParentControlPanel));
+
+        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
+        await controlPanelRequest.Send(parentItem);
+
+        SetActiveControlPanel<ParentWithChildControlPanel>(testContext);
+
+        component.WaitForAssertion(() => component.FindComponent<ParentWithChildControlPanel>().Should().NotBeNull());
+
+        SharedStateResetHandler.ResetCount.Should().Be(1);
+        ChildResetHandler.ResetCount.Should().Be(0);
+
+        // Act - switch to the child, which shares the same IControlPanelState instance as the parent, back and again
+        settingsModuleState.SetActiveChild(parentItem, childItem);
+        component.WaitForAssertion(() => component.FindComponent<ChildOfParentControlPanel>().Should().NotBeNull());
+
+        settingsModuleState.SetActiveChild(parentItem, null);
+        component.WaitForAssertion(() => component.FindComponent<ParentWithChildControlPanel>().Should().NotBeNull());
+
+        settingsModuleState.SetActiveChild(parentItem, childItem);
+        component.WaitForAssertion(() => component.FindComponent<ChildOfParentControlPanel>().Should().NotBeNull());
+
+        // Assert - the child's first mount reset the child alone, the remounts reset nothing
+        SharedStateResetHandler.ResetCount.Should().Be(1);
+        ChildResetHandler.ResetCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Should_keep_running_edit_of_parent_beside_the_edit_of_child_when_switching_to_child()
+    {
+        // Arrange
+        await using var testContext = SetupTestContextWithParentAndChild(out _);
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var settingsModuleState = testContext.Services.GetRequiredService<SettingsModuleState>();
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+        var controlPanelEditRegistry = testContext.Services.GetRequiredService<IControlPanelEditRegistry>();
+
+        var parentItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ParentWithChildControlPanel));
+        var childItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ChildOfParentControlPanel));
+
+        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
+        await controlPanelRequest.Send(parentItem);
+
+        SetActiveControlPanel<ParentWithChildControlPanel>(testContext);
+
+        component.WaitForAssertion(() => component.FindComponent<ParentWithChildControlPanel>().Should().NotBeNull());
+
+        var runningEdit = controlPanelEditRegistry.Single();
+        runningEdit.Begin();
+
+        // Act
+        settingsModuleState.SetActiveChild(parentItem, childItem);
+        component.Render();
+
+        // Assert
+        component.WaitForAssertion(() => component.FindComponent<ChildOfParentControlPanel>().Should().NotBeNull());
+
+        component.WaitForAssertion(() => controlPanelEditRegistry.Should().HaveCount(2));
+
+        controlPanelEditRegistry.Should().Contain(runningEdit);
+        runningEdit.IsRunning.Should().BeTrue();
+
+        controlPanelEditRegistry.Single(e => e != runningEdit).IsRunning.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Should_switch_control_panel_when_leaving_a_parent_from_a_child_tab()
+    {
+        // Arrange
+        await using var testContext = SetupTestContextWithParentAndChild(out _);
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var settingsModuleState = testContext.Services.GetRequiredService<SettingsModuleState>();
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+
+        var parentItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ParentWithChildControlPanel));
+        var childItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ChildOfParentControlPanel));
+        var otherTopLevelItem = controlPanelRegistry.First(i => i.ComponentType == typeof(SecondLevelControlPanel));
+
+        settingsModuleState.SetActiveControlPanel(parentItem);
+        component.WaitForAssertion(() => component.FindComponent<ParentWithChildControlPanel>().Should().NotBeNull());
+
+        settingsModuleState.SetActiveChild(parentItem, childItem);
+        component.WaitForAssertion(() => component.FindComponent<ChildOfParentControlPanel>().Should().NotBeNull());
+
+        // Act
+        settingsModuleState.SetActiveControlPanel(otherTopLevelItem);
+
+        // Assert
+        component.WaitForAssertion(() => component.FindComponent<SecondLevelControlPanel>().Should().NotBeNull());
+        component.FindComponents<ChildOfParentControlPanel>().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_switch_to_child_tab_after_returning_to_a_parent_left_with_a_reverted_edit()
+    {
+        // Arrange
+        await using var testContext = SetupTestContextWithParentAndChild(out _);
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var settingsModuleState = testContext.Services.GetRequiredService<SettingsModuleState>();
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+        var controlPanelEditRegistry = testContext.Services.GetRequiredService<IControlPanelEditRegistry>();
+
+        var parentItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ParentWithChildControlPanel));
+        var childItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ChildOfParentControlPanel));
+        var otherTopLevelItem = controlPanelRegistry.First(i => i.ComponentType == typeof(SecondLevelControlPanel));
+
+        settingsModuleState.SetActiveControlPanel(parentItem);
+        component.WaitForAssertion(() => component.FindComponent<ParentWithChildControlPanel>().Should().NotBeNull());
+
+        var edit = controlPanelEditRegistry.Single();
+        edit.Begin();
+
+        settingsModuleState.SetActiveChild(parentItem, childItem);
+        component.WaitForAssertion(() => component.FindComponent<ChildOfParentControlPanel>().Should().NotBeNull());
+
+        await edit.Cancel(withReset: true);
+
+        settingsModuleState.SetActiveControlPanel(otherTopLevelItem);
+        component.WaitForAssertion(() => component.FindComponent<SecondLevelControlPanel>().Should().NotBeNull());
+
+        settingsModuleState.SetActiveControlPanel(parentItem);
+        component.WaitForAssertion(() => component.FindComponent<ParentWithChildControlPanel>().Should().NotBeNull());
+
+        // Act
+        settingsModuleState.SetActiveChild(parentItem, childItem);
+
+        // Assert
+        component.WaitForAssertion(() => component.FindComponent<ChildOfParentControlPanel>().Should().NotBeNull());
+    }
+
+    [Fact]
+    public async Task Should_remove_edits_when_top_level_control_panel_changes()
+    {
+        // Arrange
+        await using var testContext = SetupTestContextWithParentAndChild(out _);
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var settingsModuleState = testContext.Services.GetRequiredService<SettingsModuleState>();
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+        var controlPanelEditRegistry = testContext.Services.GetRequiredService<IControlPanelEditRegistry>();
+
+        var parentItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ParentWithChildControlPanel));
+        var otherTopLevelItem = controlPanelRegistry.First(i => i.ComponentType == typeof(SecondLevelControlPanel));
+
+        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
+        await controlPanelRequest.Send(parentItem);
+
+        SetActiveControlPanel<ParentWithChildControlPanel>(testContext);
+
+        component.WaitForAssertion(() => component.FindComponent<ParentWithChildControlPanel>().Should().NotBeNull());
+
+        var parentEdit = controlPanelEditRegistry.Single();
+
+        // Act
+        settingsModuleState.ClearRequestedControlPanelRegistryItems();
+        settingsModuleState.TryPushRequestedControlPanelRegistryItem(otherTopLevelItem);
+
+        SetActiveControlPanel<SecondLevelControlPanel>(testContext);
+
+        // Assert
+        component.WaitForAssertion(() => component.FindComponent<SecondLevelControlPanel>().Should().NotBeNull());
+
+        controlPanelEditRegistry.Should().NotContain(parentEdit);
+    }
+
+    [Fact]
+    public async Task Should_reset_state_again_when_navigating_back_to_a_control_panel()
+    {
+        // Arrange
+        SharedStateResetHandler.ResetCounter();
+
+        await using var testContext = SetupTestContextWithParentAndChild(out var transitionEnd);
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+        var parentItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ParentWithChildControlPanel));
+
+        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
+        await controlPanelRequest.Send(parentItem);
+
+        SetActiveControlPanel<ParentWithChildControlPanel>(testContext);
+
+        component.WaitForAssertion(() => component.FindComponent<ParentWithChildControlPanel>().Should().NotBeNull());
+
+        await controlPanelRequest.Send<SecondLevelControlPanel>();
+
+        // Ends this slide and, the result staying set, the one back as well.
+        transitionEnd.SetResult(default!);
+
+        component.WaitForAssertion(() => component.FindComponents<ParentWithChildControlPanel>().Should().BeEmpty());
+
+        var resetCountBeforeNavigateBack = SharedStateResetHandler.ResetCount;
+
+        var navigateBackRequest = testContext.Services.GetRequiredService<INavigateBackRequest>();
+
+        // Act
+        await navigateBackRequest.Send();
+
+        // Assert
+        component.WaitForAssertion(
+            () => SharedStateResetHandler.ResetCount.Should().Be(resetCountBeforeNavigateBack + 1),
+            TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public async Task Should_render_first_child_instead_of_parent_without_content()
+    {
+        // Arrange
+        await using var testContext = new BunitContext();
+        testContext.SetupBlazorSharedSettings(setup =>
+        {
+            setup.Services.AddSettings();
+
+            setup.Services.AddControlPanel<TestClientModule, ParentWithoutContentControlPanel, ControlPanelState>()
+                .WithAutoDiscovery<ParentWithoutContentControlPanelDescriptor>();
+
+            setup.Services.AddControlPanel<TestClientModule, ChildOfParentWithoutContentControlPanel, ControlPanelState>()
+                .WithAutoDiscovery<ChildOfParentWithoutContentControlPanelDescriptor>();
+        });
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+        var parentItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ParentWithoutContentControlPanel));
+
+        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
+
+        // Act
+        await controlPanelRequest.Send(parentItem);
+
+        SetActiveControlPanel<ParentWithoutContentControlPanel>(testContext);
+
+        // Assert
+        component.WaitForAssertion(() => component.FindComponent<ChildOfParentWithoutContentControlPanel>().Should().NotBeNull());
+
+        component.FindComponents<ParentWithoutContentControlPanel>().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_load_the_entity_once_when_switching_to_a_tab_sharing_the_reset_handler()
+    {
+        // Arrange
+        await using var testContext = SetupTestContextWithParentAndTabSharingTheResetHandler();
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var (parentItem, tabItem) = await ShowParentOfTabSharingTheResetHandler(testContext, component);
+
+        var settingsModuleState = testContext.Services.GetRequiredService<SettingsModuleState>();
+        var resetCounter = testContext.Services.GetRequiredService<ResetCounter>();
+
+        component.WaitForAssertion(() => resetCounter.ResetCount.Should().Be(1));
+
+        // Act
+        settingsModuleState.SetActiveChild(parentItem, tabItem);
+        component.Render();
+
+        // Assert
+        component.WaitForAssertion(() => component.FindComponent<TabSharingTheResetHandlerControlPanel>().Should().NotBeNull());
+
+        resetCounter.ResetCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Should_reset_the_entity_when_cancelling_a_change_made_only_on_a_tab_sharing_the_reset_handler()
+    {
+        // Arrange
+        await using var testContext = SetupTestContextWithParentAndTabSharingTheResetHandler();
+
+        var component = testContext.Render<ControlPanelCarousel>();
+
+        var (parentItem, tabItem) = await ShowParentOfTabSharingTheResetHandler(testContext, component);
+
+        var settingsModuleState = testContext.Services.GetRequiredService<SettingsModuleState>();
+        var controlPanelEditRegistry = testContext.Services.GetRequiredService<IControlPanelEditRegistry>();
+        var resetCounter = testContext.Services.GetRequiredService<ResetCounter>();
+
+        var parentEdit = controlPanelEditRegistry.Single();
+
+        settingsModuleState.SetActiveChild(parentItem, tabItem);
+        component.Render();
+
+        component.WaitForAssertion(() => controlPanelEditRegistry.Should().HaveCount(2));
+
+        var tabEdit = controlPanelEditRegistry.Single(e => e != parentEdit);
+        tabEdit.Begin();
+
+        // Act
+        await tabEdit.Cancel(withReset: true);
+
+        // Assert
+        resetCounter.ResetCount.Should().Be(2);
+        tabEdit.IsRunning.Should().BeFalse();
+    }
+
+    private static async Task<(IControlPanelRegistryItem Parent, IControlPanelRegistryItem Tab)> ShowParentOfTabSharingTheResetHandler(
+        BunitContext testContext, IRenderedComponent<ControlPanelCarousel> component)
+    {
+        var controlPanelRegistry = testContext.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>();
+
+        var parentItem = controlPanelRegistry.First(i => i.ComponentType == typeof(ParentSharingTheResetHandlerControlPanel));
+        var tabItem = controlPanelRegistry.First(i => i.ComponentType == typeof(TabSharingTheResetHandlerControlPanel));
+
+        var controlPanelRequest = testContext.Services.GetRequiredService<IControlPanelRequest>();
+        await controlPanelRequest.Send(parentItem);
+
+        SetActiveControlPanel<ParentSharingTheResetHandlerControlPanel>(testContext);
+
+        component.WaitForAssertion(() => component.FindComponent<ParentSharingTheResetHandlerControlPanel>().Should().NotBeNull());
+
+        return (parentItem, tabItem);
+    }
+
+    private static BunitContext SetupTestContextWithParentAndTabSharingTheResetHandler()
+    {
+        var ctx = new BunitContext();
+        ctx.SetupBlazorSharedSettings(setup =>
+        {
+            SetupCarouselModule(setup, new TaskCompletionSource<IJSVoidResult>());
+
+            setup.Services.AddSettings();
+
+            setup.Services.AddSingleton<ResetCounter>();
+
+            setup.Services.AddControlPanel<TestClientModule, ParentSharingTheResetHandlerControlPanel, ControlPanelState>()
+                .WithAutoDiscovery<ParentSharingTheResetHandlerControlPanelDescriptor>()
+                .WithSharedHandlers(handlers => handlers.WithResetHandler<CountingResetHandler>(), out var sharedHandlers);
+
+            setup.Services.AddControlPanel<TestClientModule, TabSharingTheResetHandlerControlPanel, ControlPanelState>()
+                .WithAutoDiscovery<TabSharingTheResetHandlerControlPanelDescriptor>()
+                .WithSharedHandlers(sharedHandlers);
+        });
+
+        return ctx;
+    }
+
+    private static BunitContext SetupTestContextWithParentAndChild(out TaskCompletionSource<IJSVoidResult> transitionEnd)
+    {
+        var slideEnd = new TaskCompletionSource<IJSVoidResult>();
+        transitionEnd = slideEnd;
+
+        var ctx = new BunitContext();
+        ctx.SetupBlazorSharedSettings(setup =>
+        {
+            SetupCarouselModule(setup, slideEnd);
+
+            setup.Services.AddSettings();
+
+            setup.Services.AddControlPanel<TestClientModule, ParentWithChildControlPanel, ControlPanelState>()
+                .WithAutoDiscovery<ParentWithChildControlPanelDescriptor>()
+                .WithResetHandler<SharedStateResetHandler>();
+
+            setup.Services.AddControlPanel<TestClientModule, ChildOfParentControlPanel, ControlPanelState>()
+                .WithAutoDiscovery<ChildOfParentControlPanelDescriptor>()
+                .WithResetHandler<ChildResetHandler>();
+
+            // The child shares the parent's IControlPanelState instance instead of getting its own, as the tabs of a
+            // network interface do. Only then do the tests tell an edit per control panel from an edit per state.
+            setup.Services.AddKeyedScoped<ControlPanelState>(typeof(ControlPanelServiceKey<ChildOfParentControlPanel>),
+                (sp, _) => sp.GetRequiredKeyedService<ControlPanelState>(typeof(ControlPanelServiceKey<ParentWithChildControlPanel>)));
+
+            setup.Services.AddControlPanel<TestClientModule, SecondLevelControlPanel, ControlPanelState>()
+                .WithAutoDiscovery<SecondLevelControlPanelDescriptor>();
+        });
+
+        return ctx;
+    }
+
     private static void SetActiveControlPanel<TControlPanel>(BunitContext ctx)
         where TControlPanel : ControlPanelBase<ControlPanelState>
     {
@@ -371,6 +764,17 @@ public sealed class ControlPanelCarouselTests
         where TControlPanel : ControlPanelBase<ControlPanelState>
         => ctx.Services.GetRequiredService<IControlPanelRegistry<TestClientModule>>().First(i => i.ComponentType == typeof(TControlPanel));
 
+    private static void SetupCarouselModule(ClientServiceConfigurator setup, TaskCompletionSource<IJSVoidResult> slideEnd)
+    {
+        var carouselModule = Substitute.For<IJSObjectReference>();
+#pragma warning disable CA2012 // NSubstitute only records the call here; the returned ValueTask is never consumed.
+        carouselModule.InvokeAsync<IJSVoidResult>("waitForTransitionEnd", Arg.Any<CancellationToken>(), Arg.Any<object?[]?>())
+            .Returns(_ => new ValueTask<IJSVoidResult>(slideEnd.Task));
+#pragma warning restore CA2012
+        setup.JsInterop.IncludeModuleScript<SharedClientModule>("carousel.js", Arg.Any<CancellationToken>())
+            .Returns(carouselModule);
+    }
+
     private static BunitContext SetupTestContext(out TaskCompletionSource<IJSVoidResult> transitionEnd)
     {
         var slideEnd = new TaskCompletionSource<IJSVoidResult>();
@@ -379,13 +783,7 @@ public sealed class ControlPanelCarouselTests
         var ctx = new BunitContext();
         ctx.SetupBlazorSharedSettings(setup =>
         {
-            var carouselModule = Substitute.For<IJSObjectReference>();
-#pragma warning disable CA2012 // NSubstitute only records the call here; the returned ValueTask is never consumed.
-            carouselModule.InvokeAsync<IJSVoidResult>("waitForTransitionEnd", Arg.Any<CancellationToken>(), Arg.Any<object?[]?>())
-                .Returns(_ => new ValueTask<IJSVoidResult>(slideEnd.Task));
-#pragma warning restore CA2012
-            setup.JsInterop.IncludeModuleScript<SharedClientModule>("carousel.js", Arg.Any<CancellationToken>())
-                .Returns(carouselModule);
+            SetupCarouselModule(setup, slideEnd);
 
             setup.Services.AddSettings();
 
@@ -411,9 +809,9 @@ public sealed class ControlPanelCarouselTests
             public string Title => "Test category";
         }
 
-        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
         public class TestControlPanel : ControlPanelBase<ControlPanelState>;
 
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
         public sealed class FirstLevelControlPanel : TestControlPanel
         {
             private static int _initializationCount;
@@ -437,6 +835,7 @@ public sealed class ControlPanelCarouselTests
             public Uri? IconUrl => new("icon.svg", UriKind.Relative);
         }
 
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
         public sealed class SecondLevelControlPanel : TestControlPanel
         {
             private static int _initializationCount;
@@ -476,6 +875,7 @@ public sealed class ControlPanelCarouselTests
             public bool ShowInNavigation => false;
         }
 
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
         public sealed class ThirdLevelControlPanel : TestControlPanel;
 
         public sealed class ThirdLevelControlPanelDescriptor : IControlPanelDescriptor<ThirdLevelControlPanel>
@@ -483,6 +883,148 @@ public sealed class ControlPanelCarouselTests
             public string Title => "Third level";
             public Uri? IconUrl => new("icon.svg", UriKind.Relative);
             public bool ShowInNavigation => false;
+        }
+
+        internal sealed class SharedParentDescriptor : IControlPanelParentDescriptor;
+
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
+        [ControlPanelParent<SharedParentDescriptor>]
+        public sealed class ParentWithChildControlPanel : TestControlPanel;
+
+        public sealed class ParentWithChildControlPanelDescriptor : IControlPanelDescriptor<ParentWithChildControlPanel>
+        {
+            public string Title => "Parent";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+        }
+
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
+        [ControlPanelChild<SharedParentDescriptor>]
+        public sealed class ChildOfParentControlPanel : TestControlPanel;
+
+        public sealed class ChildOfParentControlPanelDescriptor : IControlPanelDescriptor<ChildOfParentControlPanel>
+        {
+            public string Title => "Child";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public bool ShowInNavigation => false;
+        }
+
+        internal sealed class SecondSharedParentDescriptor : IControlPanelParentDescriptor;
+
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
+        [ControlPanelParent<SecondSharedParentDescriptor>]
+        public sealed class SecondParentWithChildControlPanel : TestControlPanel;
+
+        public sealed class SecondParentWithChildControlPanelDescriptor : IControlPanelDescriptor<SecondParentWithChildControlPanel>
+        {
+            public string Title => "Parent";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+        }
+
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
+        [ControlPanelChild<SecondSharedParentDescriptor>]
+        public sealed class ChildOfSecondParentControlPanel : TestControlPanel;
+
+        public sealed class ChildOfSecondParentControlPanelDescriptor : IControlPanelDescriptor<ChildOfSecondParentControlPanel>
+        {
+            public string Title => "Child";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public bool ShowInNavigation => false;
+        }
+
+        internal sealed class ParentWithoutContentDescriptor : IControlPanelParentDescriptor;
+
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
+        [ControlPanelParent<ParentWithoutContentDescriptor>]
+        public sealed class ParentWithoutContentControlPanel : TestControlPanel;
+
+        public sealed class ParentWithoutContentControlPanelDescriptor : IControlPanelDescriptor<ParentWithoutContentControlPanel>
+        {
+            public string Title => "Parent without content";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public bool HasContent => false;
+        }
+
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
+        [ControlPanelChild<ParentWithoutContentDescriptor>]
+        public sealed class ChildOfParentWithoutContentControlPanel : TestControlPanel;
+
+        public sealed class ChildOfParentWithoutContentControlPanelDescriptor : IControlPanelDescriptor<ChildOfParentWithoutContentControlPanel>
+        {
+            public string Title => "General";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public bool ShowInNavigation => false;
+        }
+
+        internal sealed class ParentSharingTheResetHandlerDescriptor : IControlPanelParentDescriptor;
+
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
+        [ControlPanelParent<ParentSharingTheResetHandlerDescriptor>]
+        public sealed class ParentSharingTheResetHandlerControlPanel : TestControlPanel;
+
+        public sealed class ParentSharingTheResetHandlerControlPanelDescriptor : IControlPanelDescriptor<ParentSharingTheResetHandlerControlPanel>
+        {
+            public string Title => "Parent sharing the reset handler";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+        }
+
+        [ControlPanelCategory<ControlPanelCategoryDescriptor>]
+        [ControlPanelChild<ParentSharingTheResetHandlerDescriptor>]
+        public sealed class TabSharingTheResetHandlerControlPanel : TestControlPanel;
+
+        public sealed class TabSharingTheResetHandlerControlPanelDescriptor : IControlPanelDescriptor<TabSharingTheResetHandlerControlPanel>
+        {
+            public string Title => "Tab sharing the reset handler";
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
+            public bool ShowInNavigation => false;
+        }
+
+        internal sealed class ResetCounter
+        {
+            public int ResetCount { get; private set; }
+
+            public void Count() => ResetCount++;
+        }
+
+        internal sealed class CountingResetHandler(ResetCounter resetCounter) : IControlPanelResetHandler<ControlPanelState>
+        {
+            public Task Reset(ControlPanelState state, CancellationToken cancellationToken)
+            {
+                resetCounter.Count();
+
+                return Task.CompletedTask;
+            }
+        }
+
+        internal sealed class SharedStateResetHandler : IControlPanelResetHandler<ControlPanelState>
+        {
+            private static int _resetCount;
+
+            public static int ResetCount => _resetCount;
+
+            public static void ResetCounter() => _resetCount = 0;
+
+            public Task Reset(ControlPanelState state, CancellationToken cancellationToken)
+            {
+                _resetCount++;
+
+                return Task.CompletedTask;
+            }
+        }
+
+        internal sealed class ChildResetHandler : IControlPanelResetHandler<ControlPanelState>
+        {
+            private static int _resetCount;
+
+            public static int ResetCount => _resetCount;
+
+            public static void ResetCounter() => _resetCount = 0;
+
+            public Task Reset(ControlPanelState state, CancellationToken cancellationToken)
+            {
+                _resetCount++;
+
+                return Task.CompletedTask;
+            }
         }
     }
 }
