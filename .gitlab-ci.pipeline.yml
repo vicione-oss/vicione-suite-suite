@@ -29,11 +29,9 @@ stages:
   - mise install
   - eval "$(mise env)"
 
+# Only for jobs that run ESLint before building; a build of Blazor.Shared runs npm ci itself.
 .install_npm_packages: &install_npm_packages
   - npm ci
-
-.run_npm_scripts: &run_npm_scripts
-  - npm run build
 
 .run_eslint: &run_eslint
   - npx eslint src samples
@@ -156,8 +154,6 @@ include:
         - *activate_mise
         - *update_nuget_source_ro
         - dotnet restore --packages packages
-        - *install_npm_packages
-        - *run_npm_scripts
       rules: *rules_common
 
   # Cache configuration component
@@ -315,15 +311,6 @@ variables:
 # Removed global before_script antipattern
 # Jobs now extend appropriate templates based on their needs
 
-# Template for jobs needing dotnet + npm (but not eslint/npm build)
-# Used by test jobs that build Blazor projects with SASS/TypeScript
-# NOTE: Explicit dotnet restore populates NuGet cache for better performance
-.dotnet-npm-build:
-  before_script:
-    - *activate_mise
-    - !reference [.update_nuget_source_ro]
-    - *install_npm_packages
-
 # Template for jobs needing mise for deployment scripts
 .mise-only:
   before_script:
@@ -432,7 +419,6 @@ Build artifacts x64:
     - !reference [.update_nuget_source_ro]
     - *patch_version
     - *install_npm_packages
-    - *run_npm_scripts
     - *run_eslint
   script:
     - ./build/deploy.sh --create-artifacts --platform 'linux-x64' --environment 'Minimal'
@@ -477,7 +463,6 @@ Build artifacts arm64:
     - !reference [.update_nuget_source_ro]
     - *patch_version
     - *install_npm_packages
-    - *run_npm_scripts
     - *run_eslint
   script:
     - ./build/deploy.sh --create-artifacts --platform 'linux-arm64' --environment 'Minimal'

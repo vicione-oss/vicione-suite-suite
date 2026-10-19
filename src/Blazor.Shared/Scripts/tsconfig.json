@@ -1,0 +1,16 @@
+{
+    "extends": "../tsconfig.json",
+    // Compiled by dotnet build for the suite.js bundle, see BundleSuiteScripts in Blazor.Shared.csproj.
+    "compilerOptions": {
+        "outDir": "../obj/scripts",
+        "inlineSourceMap": false,
+        "inlineSources": false
+    },
+    "files": [
+        "Globals.d.ts",
+        "Interop.ts",
+        "Download.ts",
+        "Location.ts",
+        "Boot.ts"
+    ]
+}

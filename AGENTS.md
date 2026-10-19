@@ -81,11 +81,9 @@ dotnet run --project src/Core.OS
 dotnet test vicione-suite.slnx --no-build --filter-query "/[(Category!=System)&(Category!=ManualDbTest)&(Category!=Integration)&(Category!=E2E)&(Category!=E2E-MasterSlave)]"
 ```
 
-Note: If the repo was fully reset (e.g. `git clean -xfd`) or files in `src/Blazor.Shared/Scripts` were changed, run `npm ci && npm run build` first.
-
 **Target framework:** net10.0
 **Runtime identifiers:** linux-x64, linux-arm64, win-x64
-**Node.js:** Required for font/asset build only (see package.json scripts)
+**Node.js:** Required on the `PATH` to build `src/Blazor.Shared` and every project referencing it; that build installs its npm packages itself
 
 ## Code Style & Conventions
 

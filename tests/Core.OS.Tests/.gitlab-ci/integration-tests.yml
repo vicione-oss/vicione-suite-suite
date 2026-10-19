@@ -64,7 +64,6 @@
   before_script:
     - !reference [.activate_mise]
     - !reference [.update_nuget_source_ro]
-    - !reference [.install_npm_packages]
   script:
     - dotnet test tests/Core.OS.Tests/Core.OS.Tests.csproj --filter-query "/[Category=Integration]"
   rules: !reference [.rules_common_manual]
