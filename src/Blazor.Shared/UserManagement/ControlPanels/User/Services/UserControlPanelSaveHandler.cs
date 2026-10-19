@@ -42,7 +42,8 @@ internal sealed class UserControlPanelSaveHandler(IUserService userService, IUse
         if (ValidatePasswordExpirationDate(state.PasswordExpirationDateString, universalDateFormat, culture, out var passwordExpirationDate))
             state.UserProfile.PasswordExpirationDate = passwordExpirationDate;
         else
-            return new SaveErrorResult(string.Format(culture, Localization.UserControlPanelSaveHandler.ThePasswordExpirationDateIsNotInTheCorrectFormat, universalDateFormat));
+            return new SaveErrorResult(string.Format(culture, Localization.UserControlPanelSaveHandler.ThePasswordExpirationDateIsNotInTheCorrectFormat,
+                User.Localization.Constants.UniversalDateFormatHint));
 
         state.UserProfile.Language = state.SelectedCulture?.Name;
         state.UserProfile.TimeZone = state.SelectedTimeZone?.Id;
