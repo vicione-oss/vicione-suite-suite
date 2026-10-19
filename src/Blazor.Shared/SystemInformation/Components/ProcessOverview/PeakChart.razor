@@ -16,7 +16,8 @@
     <div class="consumers">
         <span class="head">@Text.TopConsumers</span>
         <span class="head total-label">@Text.CpuTotal</span>
-        <span class="value total" data-now="@_nowTotal">@_nowTotal</span>
+        <span class="value total" data-now>@_nowTotal</span>
+        <span class="value total" data-hover hidden></span>
         <div class="rows" data-now>
             @foreach (var process in _nowTop)
             {
@@ -25,5 +26,6 @@
                 <span class="value">@PeakText.Percent(process.CpuPercent)</span>
             }
         </div>
+        <div class="rows" data-hover hidden></div>
     </div>
 </div>

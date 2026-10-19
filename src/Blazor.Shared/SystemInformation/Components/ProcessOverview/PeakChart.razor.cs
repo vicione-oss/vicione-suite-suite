@@ -14,7 +14,8 @@ namespace Blazor.Shared.SystemInformation.Components.ProcessOverview;
 /// the largest consumers of now or of the minute under the pointer.
 /// </summary>
 /// <remarks>
-/// The chart raises <c>chart-hover</c>; peak-chart.js shows the consumers of that slot.
+/// The chart raises <c>chart-hover</c>; peak-chart.js shows the consumers and the total of that slot in elements of its
+/// own, marked <c>data-hover</c>, in place of those of now, which stay Blazor's.
 /// </remarks>
 public sealed partial class PeakChart : IAsyncDisposable
 {
@@ -22,6 +23,7 @@ public sealed partial class PeakChart : IAsyncDisposable
     private static readonly TimeSpan s_longestSpan = TimeSpan.FromHours(24);
 
     private ElementReference _root;
+    private bool _disposed;
     private IJSObjectReference? _module;
     private (DateTimeOffset? Last, int Count, int Peaks) _rendered;
     private bool _hasChanges = true;
@@ -56,6 +58,7 @@ public sealed partial class PeakChart : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        _disposed = true;
         if (_module is null)
             return;
 
@@ -98,6 +101,14 @@ public sealed partial class PeakChart : IAsyncDisposable
             return;
 
         _module = await JsInterop.IncludeModuleScript<SharedClientModule>("peak-chart.js");
+
+        // Disposed while the script loaded; the element is gone.
+        if (_disposed)
+        {
+            await DisposeAsync();
+            return;
+        }
+
         if (_module is not null)
             await _module.InvokeVoidAsync("attach", _root);
     }
