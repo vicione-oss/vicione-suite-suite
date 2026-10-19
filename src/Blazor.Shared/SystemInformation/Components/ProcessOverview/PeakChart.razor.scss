@@ -34,13 +34,21 @@ $line: rgb(103, 183, 76);
         text-align: right;
         white-space: nowrap;
     }
+
+    .total[hidden] {
+        display: none;
+    }
+}
+
+.rows {
+    grid-column: 1 / -1;
+
+    &[hidden] {
+        display: none;
+    }
 }
 
 // Rows that peak-chart.js writes on hover.
-.rows {
-    grid-column: 1 / -1;
-}
-
 .rows ::deep {
     .value {
         text-align: right;

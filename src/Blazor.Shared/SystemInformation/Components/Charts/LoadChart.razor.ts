@@ -9,6 +9,10 @@ Shows the slot under the pointer: a cursor, a dot on each line and the time on t
 Blazor re-renders the element when the data changes; the data is read from its attribute on each move, so it is current.
 */
 export function attach(root: HTMLElement): void {
+    // A chart removed before the call arrives is handed over as null.
+    if (!(root instanceof HTMLElement))
+        return;
+
     const plot = root.querySelector<HTMLElement>('.plot');
     if (!plot)
         return;

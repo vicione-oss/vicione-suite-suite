@@ -15,6 +15,10 @@ Shows the largest consumers of the slot the chart reports under the pointer, and
 Blazor re-renders the element every minute; the data is read from its attribute on each event, so it is always current.
 */
 export function attach(root: HTMLElement): void {
+    // A chart removed before the call arrives is handed over as null.
+    if (!(root instanceof HTMLElement))
+        return;
+
     let cachedText = '';
     let cached: Array<Slot | undefined> = [];
     const data = (): Array<Slot | undefined> => {
@@ -27,20 +31,21 @@ export function attach(root: HTMLElement): void {
         return cached;
     };
 
-    const rows = (): HTMLElement | undefined => root.querySelector<HTMLElement>('.rows') ?? undefined;
-    const total = (): HTMLElement | undefined => root.querySelector<HTMLElement>('.total') ?? undefined;
-    let nowRows: string | undefined;
+    // The rows and the total of now are Blazor's, which keeps writing into the nodes it rendered; the hover has its own
+    // and only switches which are shown.
+    const hoverRows = (): HTMLElement | undefined => root.querySelector<HTMLElement>('.rows[data-hover]') ?? undefined;
+    const hoverTotal = (): HTMLElement | undefined => root.querySelector<HTMLElement>('.total[data-hover]') ?? undefined;
+
+    const showHover = (isHovering: boolean): void => {
+        for (const element of root.querySelectorAll<HTMLElement>('[data-now]'))
+            element.hidden = isHovering;
+
+        for (const element of root.querySelectorAll<HTMLElement>('[data-hover]'))
+            element.hidden = !isHovering;
+    };
 
     const reset = (): void => {
-        const list = rows();
-        if (list && nowRows !== undefined)
-            list.innerHTML = nowRows;
-
-        nowRows = undefined;
-        const sum = total();
-        if (sum)
-            sum.textContent = sum.dataset.now ?? '';
-
+        showHover(false);
     };
 
     const row = (consumer: Consumer): string => {
@@ -61,15 +66,14 @@ export function attach(root: HTMLElement): void {
             return;
         }
 
-        const list = rows();
-        if (list) {
-            nowRows ??= list.getHTML();
-            list.innerHTML = slot.top.map(consumer => row(consumer)).join('');
-        }
+        const rows = hoverRows();
+        if (rows)
+            rows.innerHTML = slot.top.map(consumer => row(consumer)).join('');
 
-        const sum = total();
-        if (sum)
-            sum.textContent = slot.cpu;
+        const total = hoverTotal();
+        if (total)
+            total.textContent = slot.cpu;
 
+        showHover(true);
     });
 }

@@ -20,6 +20,7 @@ public sealed partial class LoadChart : IAsyncDisposable
     private static readonly int[] s_gridValues = [0, 25, 50, 75, 100];
 
     private ElementReference _root;
+    private bool _disposed;
     private IJSObjectReference? _module;
     private (string CssClass, string Points)[] _lines = [];
     private (string CssClass, string Points)[] _bands = [];
@@ -107,6 +108,7 @@ public sealed partial class LoadChart : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        _disposed = true;
         if (_module is null)
             return;
 
@@ -134,6 +136,14 @@ public sealed partial class LoadChart : IAsyncDisposable
             return;
 
         _module = await JsInterop.IncludeModuleScript<SharedClientModule>("load-chart.js");
+
+        // Disposed while the script loaded; the element is gone.
+        if (_disposed)
+        {
+            await DisposeAsync();
+            return;
+        }
+
         if (_module is not null)
             await _module.InvokeVoidAsync("attach", _root);
     }
