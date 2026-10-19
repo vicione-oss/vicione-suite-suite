@@ -561,3 +561,6 @@ Release Debian to staging:
 Release Debian to public:
   needs:
     - "Release Debian to staging"
+    - "Version"
+  dependencies:
+    - "Version"
