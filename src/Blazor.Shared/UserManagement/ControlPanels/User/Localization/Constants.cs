@@ -2,5 +2,10 @@
 
 internal static class Constants
 {
-    public static string UniversalDateFormat = "yyyy-MM-dd";
+    public const string UniversalDateFormat = "yyyy-MM-dd";
+
+    /// <summary>
+    /// The <see cref="UniversalDateFormat"/> as users read it, in the ISO 8601 notation.
+    /// </summary>
+    public const string UniversalDateFormatHint = "YYYY-MM-DD";
 }

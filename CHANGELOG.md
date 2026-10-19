@@ -55,6 +55,7 @@
 - `UserControlPanel`
   - Saving a new user switches to edit mode, so saving again updates it instead of creating a duplicate
   - A failed role delete no longer removes that role from the user being edited
+  - The password expiration date shows its expected format as `YYYY-MM-DD`
 - `TagControlPanel`, the title shows whether a tag is being added or edited and switches to edit after the tag is saved
 - `ArtifactRepositoryControlPanel`, the title shows whether a source is being added or edited and switches to edit after saving
 - `ModuleDetailsControlPanel`, edited module options are saved even when another session changed the options of that module meanwhile
