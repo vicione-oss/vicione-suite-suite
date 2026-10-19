@@ -76,5 +76,4 @@
     - export PATH="$HOME/.local/bin:$PATH"
     - !reference [.activate_mise]
     - !reference [.update_nuget_source_ro]
-    - !reference [.install_npm_packages]
     - dotnet build tests/Core.OS.E2E.Tests/Core.OS.E2E.Tests.csproj -p:PlaywrightPlatform=linux-x64

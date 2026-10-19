@@ -8,7 +8,7 @@ const config = [
             '**/wwwroot/_framework/*.js',
             '**/wwwroot/js/*.js',
             '**/bin',
-            'src/Blazor.Shared/Scripts/*.js',
+            '**/obj',
             'src/Blazor.Server.Backend/**/*Passkey*.razor.js',
             'src/Blazor.Shared/**/*Passkey*.razor.js',
             'tests/**/*.js',

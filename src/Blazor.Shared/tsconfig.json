@@ -1,3 +1,13 @@
 ﻿{
-    "extends": "../../tsconfig.json"
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "types": [ "blazor__javascript-interop" ]
+    },
+    // Compiled by Scripts/tsconfig.json and bundled into wwwroot/js/suite.js instead, see BundleSuiteScripts in Blazor.Shared.csproj.
+    "exclude": [
+        "Scripts/Boot.ts",
+        "Scripts/Download.ts",
+        "Scripts/Interop.ts",
+        "Scripts/Location.ts"
+    ]
 }

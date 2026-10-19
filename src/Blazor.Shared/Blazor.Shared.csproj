@@ -942,4 +942,75 @@
     </PropertyGroup>
   </Target>
 
+  <PropertyGroup>
+    <NpmWorkspaceRoot>$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory), '..', '..'))</NpmWorkspaceRoot>
+  </PropertyGroup>
+
+  <!--
+    Installs the npm packages that Sass, the TypeScript compile, the suite.js bundle and the fonts read. npm writes
+    node_modules/.package-lock.json on every install, so a changed package-lock.json triggers a fresh install.
+  -->
+  <Target Name="InstallNpmPackages" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true'"
+          Inputs="$(NpmWorkspaceRoot)package-lock.json" Outputs="$(NpmWorkspaceRoot)node_modules/.package-lock.json">
+    <Exec Command="npm ci" WorkingDirectory="$(NpmWorkspaceRoot)" />
+  </Target>
+
+  <!-- The font files the Sass in Styles/typography/fonts points to; copied on change, so a @fontsource update arrives. -->
+  <Target Name="CopyFonts" BeforeTargets="PrepareForBuild" DependsOnTargets="InstallNpmPackages" Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_FontsourceFolder>$(NpmWorkspaceRoot)node_modules/@fontsource/</_FontsourceFolder>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_FontFile Include="$(_FontsourceFolder)noto-sans/files/noto-sans-latin-200-normal.woff*" Family="noto-sans" />
+      <_FontFile Include="$(_FontsourceFolder)noto-sans/files/noto-sans-latin-300-normal.woff*" Family="noto-sans" />
+      <_FontFile Include="$(_FontsourceFolder)noto-sans/files/noto-sans-latin-400-normal.woff*" Family="noto-sans" />
+      <_FontFile Include="$(_FontsourceFolder)noto-sans/files/noto-sans-latin-500-normal.woff*" Family="noto-sans" />
+      <_FontFile Include="$(_FontsourceFolder)noto-sans/files/noto-sans-latin-600-normal.woff*" Family="noto-sans" />
+      <_FontFile Include="$(_FontsourceFolder)roboto/files/roboto-latin-400-normal.woff*" Family="roboto" />
+      <_FontDestination Include="@(_FontFile->'wwwroot/fonts/%(Family)/%(Filename)%(Extension)')" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_FontFile)" DestinationFiles="@(_FontDestination)" SkipUnchangedFiles="true" />
+
+    <ItemGroup>
+      <!-- @(Content) is collected before this target runs, so a font copied for the first time would not be served. -->
+      <Content Include="@(_FontDestination)" Exclude="@(Content)" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <!-- Must match "outDir" of Scripts/tsconfig.json. -->
+    <SuiteScriptsOutputFolder>$(MSBuildProjectDirectory)/obj/scripts/</SuiteScriptsOutputFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Bundle order of wwwroot/js/suite.js: Boot starts Blazor and comes last, once the globals of the others exist. -->
+    <SuiteScript Include="Scripts/Interop.ts;Scripts/Download.ts;Scripts/Location.ts;Scripts/Boot.ts" />
+  </ItemGroup>
+
+  <!-- Keeps the SDK's TypeScript targets from also publishing the suite.js sources as separate files in wwwroot/js. -->
+  <Target Name="ExcludeSuiteScriptsFromTypeScriptOutput" AfterTargets="RunTscCompile" BeforeTargets="GetAbsolutePathsOfGeneratedJavaScriptFiles">
+    <ItemGroup>
+      <TypeScriptGeneratedFiles Remove="@(SuiteScript->'$(SuiteScriptsOutputFolder)%(Filename).js')" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Writes the bundle to obj/scripts and hands it to the SDK's TypeScript targets, which move it to wwwroot/js and
+    register it as a static web asset, also on a first build. The lock files are inputs because a new uglify-js or
+    TypeScript can change the output.
+  -->
+  <Target Name="BundleSuiteScripts" AfterTargets="RunTscCompile" BeforeTargets="GetAbsolutePathsOfGeneratedJavaScriptFiles"
+          DependsOnTargets="ExcludeSuiteScriptsFromTypeScriptOutput" Condition="'$(TypeScriptCompileBlocked)' != 'true'"
+          Inputs="@(SuiteScript);Scripts/tsconfig.json;$(NpmWorkspaceRoot)package-lock.json;$(NpmWorkspaceRoot)Directory.Packages.props"
+          Outputs="wwwroot/js/suite.js">
+    <Exec Command="node &quot;$(NpmWorkspaceRoot)node_modules/uglify-js/bin/uglifyjs&quot; @(SuiteScript->'&quot;$(SuiteScriptsOutputFolder)%(Filename).js&quot;', ' ') --enclose -c -m -o &quot;$(SuiteScriptsOutputFolder)suite.js&quot;" />
+
+    <ItemGroup>
+      <!-- The condition keeps a skipped run from handing over a bundle that an earlier build already moved. -->
+      <TypeScriptGeneratedFiles Include="$(SuiteScriptsOutputFolder)suite.js" Condition="Exists('$(SuiteScriptsOutputFolder)suite.js')" />
+    </ItemGroup>
+  </Target>
+
 </Project>

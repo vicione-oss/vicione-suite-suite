@@ -67,17 +67,9 @@ dotnet user-secrets set "ArtifactRepository:Sources:1:UserName" "<username>"
 dotnet user-secrets set "ArtifactRepository:Sources:1:Password" "<password>"
 ```
 
-### npm packages
-All npm packages need to be installed before starting the application.
-
-To install the npm packages you have to:
-1. Open a PowerShell and move into the `.../suite` directory (or run it from there)
-1. Run the command `npm ci`
-1. Run the command `npm run build`
-
-The installation should now run automatically.
-
-> Note: After executing commands such as git clean, this step likely needs to be repeated.
+### Node.js
+Node.js has to be on the `PATH` to build `src/Blazor.Shared` and every project referencing it, such as the solution or
+the UI host. That build installs its npm packages (`npm ci`) itself, so no manual npm step is needed.
 
 ### Local development experience
 

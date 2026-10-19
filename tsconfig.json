@@ -12,7 +12,7 @@
         "forceConsistentCasingInFileNames": true,
         "noImplicitOverride": true,
         "skipLibCheck": true,
-        "types": [ "blazor__javascript-interop" ]
+        "types": []
     },
     "exclude": [
         "node_modules"
