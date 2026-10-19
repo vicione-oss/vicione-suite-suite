@@ -67,8 +67,9 @@ public sealed partial class LogCenterComponent : IDisposable
 
     protected override void OnInitialized()
     {
-        LogCenterService.Changed += OnChanged;
         base.OnInitialized();
+
+        LogCenterService.Changed += OnChanged;
     }
 
     private void OnChanged()

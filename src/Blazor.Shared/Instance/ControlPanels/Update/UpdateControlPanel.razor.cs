@@ -80,12 +80,12 @@ public sealed partial class UpdateControlPanel : ControlPanelBase<UpdateControlP
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
+
         _subscriptionHandle.Add(Mediator.Register<RestoreBackupPrepared>(this));
         _subscriptionHandle.Add(Mediator.Register<BackupFinished>(this));
 
         _subscriptionHandle.Add(Mediator.Register<ControlSystemCompleted>(this));
-
-        base.OnInitialized();
     }
 
     protected override async ValueTask DisposeAsyncCore()

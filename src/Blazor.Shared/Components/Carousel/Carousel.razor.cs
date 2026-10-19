@@ -74,6 +74,8 @@ public sealed partial class Carousel<TItem> : ComponentBase, IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (_disposed || !_slideStarted || _renderedSlideFrom is not { } slideFrom)
             return;
 

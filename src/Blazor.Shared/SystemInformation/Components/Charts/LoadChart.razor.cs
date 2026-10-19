@@ -132,6 +132,8 @@ public sealed partial class LoadChart : IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        await base.OnAfterRenderAsync(firstRender);
+
         if (!firstRender)
             return;
 

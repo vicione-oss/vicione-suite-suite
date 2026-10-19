@@ -23,6 +23,38 @@ Groups are separated from each other by a line break.
 
   > The Test Explorer replaces underlines with spaces because of [`our configuration`](https://gitlab.com/vicione-oss/vicione/suite/suite/-/blob/6fc3db74e4f7627ead5d562436e588ef44089165/xunit.runner.json#L4) of [`methodDisplayOptions`](https://xunit.net/docs/runsettings#MethodDisplayOptions). As a result, test names like `Should_return_access_level_requirement` are displayed as formulated sentences like `Should return access level requirement`.
 
+### Calling base methods in overrides
+
+When an override of a setup or teardown method calls its base method, the order is fixed:
+
+- **Setup** (`OnInitialized`, `OnParametersSet`, `OnAfterRender` and their `Async` variants): call the base method
+  **first**, so the derived class builds on a fully initialized base.
+- **Teardown** (`Dispose`, `DisposeAsync`, `DisposeAsyncCore`): call the base method **last**, so the derived class
+  releases its own resources while the base is still intact.
+
+Async overrides `await` the base call instead of returning it as a tail call. Otherwise the base call can't be the first
+statement.
+
+```csharp
+protected override async Task OnInitializedAsync()
+{
+    await base.OnInitializedAsync();
+
+    Service.Changed += OnServiceChanged;
+}
+
+protected override async ValueTask DisposeAsyncCore()
+{
+    Service.Changed -= OnServiceChanged;
+
+    await base.DisposeAsyncCore();
+}
+```
+
+> This applies even if the base implementation is currently empty, such as `ComponentBase.OnInitialized` or
+> `ControlPanelBase<TState>.OnInitialized`. If the base class starts doing work there later, overrides that call it
+> last will silently run before that work.
+
 ## Code comments
 
 Comments are read far more often than they are written, and a redundant or stale comment costs more than no
