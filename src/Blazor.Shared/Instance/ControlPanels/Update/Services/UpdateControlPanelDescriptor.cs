@@ -3,7 +3,8 @@ using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Instance.ControlPanels.Update.Services;
 
-internal sealed class UpdateControlPanelDescriptor : IControlPanelDescriptor<UpdateControlPanel>
+internal sealed class UpdateControlPanelDescriptor
+    : IControlPanelDescriptor<UpdateControlPanel>, IControlPanelParentDescriptor
 {
     public string Title => CommonVocabulary.General;
     public Uri? IconUrl => null;

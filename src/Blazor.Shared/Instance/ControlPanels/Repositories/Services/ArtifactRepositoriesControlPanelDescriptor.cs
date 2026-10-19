@@ -10,4 +10,5 @@ internal sealed class ArtifactRepositoriesControlPanelDescriptor : IControlPanel
     public Uri? IconUrl => SvgIcon.ClusterOverview.GetPath();
 
     public string Title => CommonVocabulary.SourcePlural;
+    public int? Position => 6;
 }

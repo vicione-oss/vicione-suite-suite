@@ -41,6 +41,7 @@ internal static class IServiceCollectionExtensions
             services.AddScoped<SettingsModuleState>();
             services.AddScoped<IActiveControlPanelDescriptorProvider, ActiveControlPanelDescriptorProvider>();
             services.AddScoped<IActiveControlPanelPageProvider, ActiveControlPanelPageProvider>();
+            services.AddScoped<IActiveControlPanelChildProvider, ActiveControlPanelChildProvider>();
             services.AddScoped<IControlPanelRequest, ControlPanelRequest>();
             services.AddScoped<IControlPanelRegistryItemCache, ControlPanelRegistryItemCache>();
             services.AddScoped<IDefaultControlPanelGroupDescriptor, DefaultControlPanelGroupDescriptor>();

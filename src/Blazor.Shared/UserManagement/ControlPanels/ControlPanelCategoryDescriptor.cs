@@ -10,5 +10,5 @@ internal sealed class ControlPanelCategoryDescriptor : IControlPanelCategoryDesc
     public string Title => TechnicalTerms.UserManagement;
     public string? IconCssClass => null;
     public Uri? IconUrl => SvgIcon.User.GetPath();
-    public int? Position => null;
+    public int? Position => 3;
 }

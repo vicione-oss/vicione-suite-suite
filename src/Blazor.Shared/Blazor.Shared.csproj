@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Keeps the deprecated ControlPanelPage API buildable until the last control panel is migrated. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);CS0618</WarningsNotAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <!-- https://github.com/koenvzeijl/AspNetCore.SassCompiler/issues/160 -->
     <SassCompilerEnableWatcher>false</SassCompilerEnableWatcher>
   </PropertyGroup>
@@ -101,10 +106,15 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ModuleDetailsControlPanel.resx</DependentUpon>
     </Compile>
-    <Compile Update="Module\ControlPanels\Localization\ModuleManagementControlPanel.Designer.cs">
+    <Compile Update="Module\ControlPanels\Localization\ModuleManagementBrowseControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>ModuleManagementControlPanel.resx</DependentUpon>
+      <DependentUpon>ModuleManagementBrowseControlPanel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Module\ControlPanels\Localization\ModuleManagementInstalledControlPanel.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ModuleManagementInstalledControlPanel.resx</DependentUpon>
     </Compile>
     <Compile Update="Dialogs\Localization\ErrorDialog.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -146,18 +156,23 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\HardwareControlPanelPage.Designer.cs">
-      <DependentUpon>HardwareControlPanelPage.resx</DependentUpon>
+    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\NetworkInterfaceHardwareControlPanel.Designer.cs">
+      <DependentUpon>NetworkInterfaceHardwareControlPanel.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\TcpIpControlPanelPage.Designer.cs">
-      <DependentUpon>TcpIpControlPanelPage.resx</DependentUpon>
+    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\NetworkInterfaceTcpIpControlPanel.Designer.cs">
+      <DependentUpon>NetworkInterfaceTcpIpControlPanel.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\GeneralControlPanelPage.Designer.cs">
-      <DependentUpon>GeneralControlPanelPage.resx</DependentUpon>
+    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\NetworkInterfaceGeneralControlPanel.Designer.cs">
+      <DependentUpon>NetworkInterfaceGeneralControlPanel.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Network\ControlPanels\NetworkInterface\Components\Localization\NetworkTerms.Designer.cs">
+      <DependentUpon>NetworkTerms.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
@@ -366,8 +381,8 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
-    <Compile Update="UserInterface\ControlPanels\Theme\Components\Localization\SystemDefaultControlPanelPage.Designer.cs">
-      <DependentUpon>SystemDefaultControlPanelPage.resx</DependentUpon>
+    <Compile Update="UserInterface\ControlPanels\Theme\Components\Localization\ThemeControlPanel.Designer.cs">
+      <DependentUpon>ThemeControlPanel.resx</DependentUpon>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
@@ -479,11 +494,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>TagControlPanel.resx</DependentUpon>
     </Compile>
-    <Compile Update="Connections\ControlPanels\Tags\Localization\TagsControlPanelPageContent.Designer.cs">
+    <Compile Update="Connections\ControlPanels\Tags\Localization\ConnectionsTagsControlPanel.Designer.cs">
       <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>TagsControlPanelPageContent.resx</DependentUpon>
+      <DependentUpon>ConnectionsTagsControlPanel.resx</DependentUpon>
     </Compile>
     <Compile Update="Profile\ControlPanels\Passkeys\Components\Localization\PasskeysControlPanel.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -563,9 +578,13 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ModuleOptionDeclarationCollectionGrid.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleManagementControlPanel.resx">
+    <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleManagementBrowseControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ModuleManagementControlPanel.Designer.cs</LastGenOutput>
+      <LastGenOutput>ModuleManagementBrowseControlPanel.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Module\ControlPanels\Localization\ModuleManagementInstalledControlPanel.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ModuleManagementInstalledControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Dialogs\Localization\ErrorDialog.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -591,16 +610,20 @@
       <LastGenOutput>DnsControlPanel.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\HardwareControlPanelPage.resx">
-      <LastGenOutput>HardwareControlPanelPage.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\NetworkInterfaceHardwareControlPanel.resx">
+      <LastGenOutput>NetworkInterfaceHardwareControlPanel.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\TcpIpControlPanelPage.resx">
-      <LastGenOutput>TcpIpControlPanelPage.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\NetworkInterfaceTcpIpControlPanel.resx">
+      <LastGenOutput>NetworkInterfaceTcpIpControlPanel.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\GeneralControlPanelPage.resx">
-      <LastGenOutput>GeneralControlPanelPage.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\NetworkInterfaceGeneralControlPanel.resx">
+      <LastGenOutput>NetworkInterfaceGeneralControlPanel.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Components\Localization\NetworkTerms.resx">
+      <LastGenOutput>NetworkTerms.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Network\ControlPanels\NetworkInterface\Services\Localization\NetworkInterfaceControlPanelSaveHandler.resx">
@@ -767,8 +790,8 @@
       <LastGenOutput>LanguageControlPanelSaveHandler.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="UserInterface\ControlPanels\Theme\Components\Localization\SystemDefaultControlPanelPage.resx">
-      <LastGenOutput>SystemDefaultControlPanelPage.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="UserInterface\ControlPanels\Theme\Components\Localization\ThemeControlPanel.resx">
+      <LastGenOutput>ThemeControlPanel.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="UserManagement\Components\Localization\PermissionGrid.resx">
@@ -867,9 +890,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TagControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Connections\ControlPanels\Tags\Localization\TagsControlPanelPageContent.resx">
+    <EmbeddedResource Update="Connections\ControlPanels\Tags\Localization\ConnectionsTagsControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>TagsControlPanelPageContent.Designer.cs</LastGenOutput>
+      <LastGenOutput>ConnectionsTagsControlPanel.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Profile\ControlPanels\Passkeys\Components\Localization\PasskeysControlPanel.resx">
       <Generator>ResXFileCodeGenerator</Generator>

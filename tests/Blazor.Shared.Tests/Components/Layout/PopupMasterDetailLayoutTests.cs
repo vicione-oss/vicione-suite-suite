@@ -1,15 +1,20 @@
 using Blazor.Shared.Popup.Services;
 using Blazor.Shared.Settings.Components;
+using Blazor.Shared.Settings.Factories;
 using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
+using Sdk.Client.ControlPanels;
+using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Tests.Components.Layout;
 
 public sealed class PopupMasterDetailLayoutTests
 {
+    private sealed class TestControlPanel : ControlPanelBase<ControlPanelState>;
+
     [Theory]
     [InlineData(".detail__separator")]
     [InlineData(".detail__action-buttons")]
@@ -22,6 +27,9 @@ public sealed class PopupMasterDetailLayoutTests
             setup.Services.AddScoped<IControlPanelEditRegistry, ControlPanelEditRegistry>();
             setup.Services.AddScoped(_ => Substitute.For<IActiveControlPanelPageProvider>());
             setup.Services.AddScoped(_ => Substitute.For<IControlPanelPageRegistry>());
+            setup.Services.AddScoped<ControlPanelEditFactory>();
+            setup.Services.AddScoped(_ => Substitute.For<IActiveControlPanelChildProvider>());
+            setup.Services.AddScoped(_ => Enumerable.Empty<IControlPanelRegistry>());
             setup.Services.AddScoped(_ => Substitute.For<IControlPanelRequest>());
             setup.Services.AddScoped(_ => Substitute.For<INavigateBackRequest>());
 
@@ -32,7 +40,8 @@ public sealed class PopupMasterDetailLayoutTests
         });
 
         var controlPanelState = new ControlPanelState();
-        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, ctx.Services);
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, ctx.Services,
+            typeof(ControlPanelServiceKey<TestControlPanel>));
 
         var controlPanelEditRegistry = ctx.Services.GetRequiredService<IControlPanelEditRegistry>();
         controlPanelEditRegistry.Add(controlPanelEdit);

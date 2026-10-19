@@ -1,0 +1,33 @@
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Localization.Resources
+
+@inherits NetworkControlPanelBase<NetworkInterfaceControlPanelState>
+
+<DescriptionBanner Title="@Localization.NetworkInterfaceHardwareControlPanel.DescriptionBannerTitle"
+                   IconCssClass="@_cluster1IconCssClasses">
+    @Localization.NetworkInterfaceHardwareControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <SettingsGroup Title="@Localization.NetworkInterfaceHardwareControlPanel.MacAddressManuallySettingsGroupTitle" Expanded="@State.MacAddressManually">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.MacAddressManually" @bind-Value:after="MacAddressManuallyChanged" />
+        </Expander>
+
+        <ChildContent>
+            <SettingsField Label="@TechnicalTerms.MacAddress">
+                <SettingsFieldTextBox Placeholder="@Localization.NetworkInterfaceHardwareControlPanel.MacAddressFieldPlaceholder"
+                                      @bind-Value="State.MacAddress"
+                                      @bind-Value:after="BeginEdit" />
+            </SettingsField>
+        </ChildContent>
+    </SettingsGroup>
+
+    <SettingsGroup Title="@Localization.NetworkInterfaceHardwareControlPanel.HardwareInformationSettingsGroupTitle">
+        <SettingsField Label="@Localization.NetworkInterfaceHardwareControlPanel.PhysicalAddressMac">
+            @(State.OriginalPhysicalAddress ?? CommonVocabulary.Unknown)
+        </SettingsField>
+    </SettingsGroup>
+</SettingsLayout>

@@ -10,6 +10,7 @@ using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.Connections;
+using Sdk.Client.ControlPanels;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
 using Sdk.Connections.Requests;
@@ -68,7 +69,7 @@ public class ConnectionControlPanelTests
 
             var state = new ConnectionControlPanelState();
 
-            var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<ConnectionControlPanelState>>();
+            var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<ConnectionControlPanelState>>(typeof(ControlPanelServiceKey<ConnectionControlPanel>));
             await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);
 
             // Act
@@ -92,7 +93,7 @@ public class ConnectionControlPanelTests
 
             var state = new ConnectionControlPanelState { ConnectionId = connection.Id };
 
-            var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<ConnectionControlPanelState>>();
+            var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<ConnectionControlPanelState>>(typeof(ControlPanelServiceKey<ConnectionControlPanel>));
             await resetHandler.Reset(state, Xunit.TestContext.Current.CancellationToken);
 
             // Act

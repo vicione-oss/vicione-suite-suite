@@ -1,0 +1,109 @@
+@using Blazor.Shared.Module.ControlPanels.Extensions;
+@using Blazor.Shared.Module.ControlPanels.Services
+@using Blazor.Shared.Module.Models
+@using Blazor.Shared.Settings.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@inherits ControlPanelBase<ModuleManagementBrowseControlPanelState>
+
+<div class="module-management-browse-control-panel">
+    <DescriptionBanner Title="@Localization.ModuleManagementBrowseControlPanel.BrowseModules">
+        @Localization.ModuleManagementBrowseControlPanel.BrowseModulesBanner
+    </DescriptionBanner>
+
+    <LimitedHeightLayout>
+        <Grid Items="@FilterAvailableItems(State.Modules)" Virtualize="true" CssClass="available-modules-grid">
+            <ActionButtons>
+                <GridActionButton Text="@CommonVocabulary.InstallVerb"
+                                    OnClick="InstallSelectedAvailableModules"
+                                    IconCssClass="@_installIconCssClasses"
+                                    Enabled="@CanInstallSelectedAvailableModules()" />
+
+                <GridActionButton Text="@CommonVocabulary.ResetVerb"
+                                    OnClick="@(async () => await RevertAvailableSelectedModules())"
+                                    IconCssClass="@_uninstallIconCssClasses"
+                                    Enabled="@CanResetAvailableSelectedModules()" />
+
+                <GridActionButton Text="@CommonVocabulary.RefreshVerb"
+                                    OnClick="@(async () => await LoadAvailableModuleVersions(true))"
+                                    IconCssClass="@_reloadIconCssClasses"
+                                    Enabled="@CanRefreshAvailableModules()" />
+
+                <GridActionButton Text="@CommonVocabulary.Restart"
+                                    OnClick="@(() => _dialogVisible = true)"
+                                    IconCssClass="@_restartIconCssClasses" />
+            </ActionButtons>
+
+            <Filter>
+                <GridFilterControl @bind-Text="@State.FilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
+            </Filter>
+
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item)"
+                                  Selection="@AvailableModuleSelection" />
+
+                <PropertyColumn Title="@CommonVocabulary.Name"
+                                Property="@(i => i.Name)"
+                                Sortable="true" />
+
+                <PropertyColumn Title="@Localization.ModuleManagementBrowseControlPanel.LatestVersion"
+                                Property="@(i => i.LatestVersion)" />
+
+                <TemplateColumn Title="@CommonVocabulary.Status">
+                    <div class="status-wrapper">
+                        @if (context.PendingOperation is not null)
+                        {
+                            @if (context.PendingOperation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Install)
+                            {
+                                <div title="@context.GetInstallOrUpdateTooltip()" class="icon-wrapper">
+                                    <MonochromeIcon Name="MonochromeIconName.InstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
+                                </div>
+                            }
+                        }
+
+                        @if (context.MissingDependencies.Count > 0)
+                        {
+                            <div title="@context.GetMissingDependenciesTooltip()" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.InfoOutlined" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+                    </div>
+                </TemplateColumn>
+
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@((ModuleMetadataModel model) => ShowDetailsAsync(model))" />
+            </ChildContent>
+
+            <Footer>
+                <SelectionFooter GridSelection="@AvailableModuleSelection" />
+            </Footer>
+        </Grid>
+
+        @if (State.RequestErrorCode > 0)
+        {
+            <NonShrinkingContent>
+                <SettingsLayout>
+                    <SettingsGroup Title="@Localization.ModuleManagementBrowseControlPanel.ModuleApiError">
+                        <SettingsInformation>
+                            @State.RequestErrorMessage
+                        </SettingsInformation>
+                    </SettingsGroup>
+                </SettingsLayout>
+            </NonShrinkingContent>
+        }
+    </LimitedHeightLayout>
+</div>
+
+<ConfirmCancelDialog HeaderText="@(IsStandalone ? Blazor.Shared.Localization.RestartSuite.DialogHeader : Blazor.Shared.Localization.RestartSuite.ClusterDialogHeader)"
+                     OnConfirm="@ConfirmRestart"
+                     @bind-Visible="_dialogVisible">
+    <Body>
+        @(IsStandalone ? Blazor.Shared.Localization.RestartSuite.DialogBody : Blazor.Shared.Localization.RestartSuite.ClusterDialogBody)
+    </Body>
+</ConfirmCancelDialog>

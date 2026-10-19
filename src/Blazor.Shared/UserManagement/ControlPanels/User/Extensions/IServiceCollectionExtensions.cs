@@ -25,8 +25,21 @@ internal static class IServiceCollectionExtensions
 
         services.AddControlPanel<SharedClientModule, UserControlPanel, UserControlPanelState>()
             .WithAutoDiscovery<UserControlPanelDescriptor>()
-            .WithSaveHandler<UserControlPanelSaveHandler>()
-            .WithResetHandler<UserControlPanelResetHandler>();
+            .WithSharedState(out var userControlPanelState)
+            .WithSharedHandlers(b => b
+                    .WithSaveHandler<UserControlPanelSaveHandler>()
+                    .WithResetHandler<UserControlPanelResetHandler>(),
+                out var userControlPanelHandlers);
+
+        services.AddControlPanel<SharedClientModule, UserRolesControlPanel, UserControlPanelState>()
+            .WithAutoDiscovery<UserRolesControlPanelDescriptor>()
+            .WithSharedState(userControlPanelState)
+            .WithSharedHandlers(userControlPanelHandlers);
+
+        services.AddControlPanel<SharedClientModule, UserPermissionsControlPanel, UserControlPanelState>()
+            .WithAutoDiscovery<UserPermissionsControlPanelDescriptor>()
+            .WithSharedState(userControlPanelState)
+            .WithSharedHandlers(userControlPanelHandlers);
 
         services.AddGridItemSelectColumn();
         services.AddGridItemSelection<string>(typeof(UserControlPanelServiceKey));

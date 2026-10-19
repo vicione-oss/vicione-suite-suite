@@ -1,4 +1,5 @@
 ﻿using Blazor.Shared.Network.ControlPanels.RemoteAccess.Components;
+using Blazor.Shared.Network.Services;
 using Sdk.Client.ControlPanels.Services;
 using ViciOne.Ui.Localization.Resources;
 
@@ -8,5 +9,6 @@ internal sealed class RemoteAccessControlPanelDescriptor : IControlPanelDescript
 {
     public string Category => CommonVocabulary.Network;
     public string Title => TechnicalTerms.RemoteAccess;
+    public int? Position => ControlPanelNetworkCategoryDescriptor.FirstPositionAfterNetworkInterfaces + 3;
     public Uri? IconUrl => null;
 }

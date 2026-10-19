@@ -49,37 +49,69 @@ internal sealed class UpdateControlPanelRegistryHandler(IControlPanelRegistry<Sh
             return;
         }
 
-        var existingControlPanelRegistryItemMap = controlPanelRegistry.Where(i => i.State is NetworkInterfaceControlPanelState)
-            .ToDictionary(k => (k.State as NetworkInterfaceControlPanelState)!.NetworkInterfaceIndex);
+        // Each interface registers a parent without content of its own plus three children (General, TcpIp, Hardware),
+        // all sharing its NetworkInterfaceControlPanelState instance, so - unlike a single-item-per-index map - a lookup
+        // here must tolerate multiple registry items per NetworkInterfaceIndex.
+        var existingItemsByIndex = controlPanelRegistry.Where(i => i.State is NetworkInterfaceControlPanelState)
+            .ToLookup(k => (k.State as NetworkInterfaceControlPanelState)!.NetworkInterfaceIndex);
 
         var networkInterfaces = systemConfiguration.NetworkInterfaces
             .Select((networkInterfaceDetail, networkInterfaceIndex) => new { Detail = networkInterfaceDetail, Index = networkInterfaceIndex })
             .ToList();
 
+        var seenIndexes = new HashSet<int>();
+
         foreach (var networkInterfaceDescriptor in networkInterfaces)
         {
-            if (existingControlPanelRegistryItemMap.TryGetValue(networkInterfaceDescriptor.Index, out var existingControlPanelRegistryItem))
-            {
-                if (existingControlPanelRegistryItem.State is NetworkInterfaceControlPanelState)
-                    existingControlPanelRegistryItemMap.Remove(networkInterfaceDescriptor.Index);
-            }
-            else
-            {
-                var networkInterfaceControlPanelState = new NetworkInterfaceControlPanelState
-                {
-                    NetworkInterfaceIndex = networkInterfaceDescriptor.Index
-                };
+            seenIndexes.Add(networkInterfaceDescriptor.Index);
 
-                controlPanelRegistry.Add<NetworkInterfaceControlPanel, NetworkInterfaceControlPanelState>(
-                    new NetworkInterfaceControlPanelDescriptor(networkInterfaceControlPanelState, systemConfigurationService),
-                    networkInterfaceControlPanelState,
-                    new ControlPanelNetworkCategoryDescriptor(),
-                    authorizationRequirement: _authorizationRequirement);
-            }
+            if (existingItemsByIndex.Contains(networkInterfaceDescriptor.Index))
+                continue;
+
+            var networkInterfaceControlPanelState = new NetworkInterfaceControlPanelState
+            {
+                NetworkInterfaceIndex = networkInterfaceDescriptor.Index
+            };
+
+            var categoryDescriptor = new ControlPanelNetworkCategoryDescriptor();
+            var parentPanelDescriptor = new NetworkInterfaceControlPanelDescriptor(networkInterfaceControlPanelState, systemConfigurationService);
+
+            controlPanelRegistry.Add<NetworkInterfaceControlPanel, NetworkInterfaceControlPanelState>(
+                parentPanelDescriptor,
+                networkInterfaceControlPanelState,
+                categoryDescriptor,
+                authorizationRequirement: _authorizationRequirement,
+                asParent: parentPanelDescriptor);
+
+            controlPanelRegistry.Add<NetworkInterfaceGeneralControlPanel, NetworkInterfaceControlPanelState>(
+                new NetworkInterfaceGeneralControlPanelDescriptor(),
+                networkInterfaceControlPanelState,
+                categoryDescriptor,
+                authorizationRequirement: _authorizationRequirement,
+                childOf: parentPanelDescriptor);
+
+            controlPanelRegistry.Add<NetworkInterfaceTcpIpControlPanel, NetworkInterfaceControlPanelState>(
+                new NetworkInterfaceTcpIpControlPanelDescriptor(),
+                networkInterfaceControlPanelState,
+                categoryDescriptor,
+                authorizationRequirement: _authorizationRequirement,
+                childOf: parentPanelDescriptor);
+
+            controlPanelRegistry.Add<NetworkInterfaceHardwareControlPanel, NetworkInterfaceControlPanelState>(
+                new NetworkInterfaceHardwareControlPanelDescriptor(),
+                networkInterfaceControlPanelState,
+                categoryDescriptor,
+                authorizationRequirement: _authorizationRequirement,
+                childOf: parentPanelDescriptor);
         }
 
-        foreach (var existingControlPanelRegistryItem in existingControlPanelRegistryItemMap.Values)
-            controlPanelRegistry.Remove(existingControlPanelRegistryItem);
+        var staleItems = existingItemsByIndex
+            .Where(g => !seenIndexes.Contains(g.Key))
+            .SelectMany(g => g)
+            .ToList();
+
+        foreach (var staleItem in staleItems)
+            controlPanelRegistry.Remove(staleItem);
     }
 
     private void UpdateControlPanelRegistration<TComponent, TState, TDescriptor>(SystemConfiguration? systemConfiguration)

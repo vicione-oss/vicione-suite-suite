@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using Blazor.Shared.Settings.Models;
 using Microsoft.AspNetCore.Authorization;
 using Sdk.Client.ControlPanels.Components;
@@ -22,14 +22,16 @@ internal sealed class ControlPanelRegistry<TClientModule>(IDefaultControlPanelGr
 
     public event Action<RegistryChangedEventArgs<IControlPanelRegistryItem>>? Changed;
 
+    /// <inheritdoc/>
     public IControlPanelRegistryItem Add<TComponent, TState>(IControlPanelDescriptor descriptor, TState state,
         IControlPanelCategoryDescriptor categoryDescriptor, IControlPanelGroupDescriptor? groupDescriptor = null,
-        IAuthorizationRequirement? authorizationRequirement = null)
+        IAuthorizationRequirement? authorizationRequirement = null,
+        IControlPanelParentDescriptor? childOf = null, IControlPanelParentDescriptor? asParent = null)
             where TComponent : ControlPanelBase<TState>
             where TState : IControlPanelState
     {
         var item = new ControlPanelRegistryItem<TClientModule>(typeof(TComponent), descriptor, state, categoryDescriptor,
-            groupDescriptor ?? defaultControlPanelGroupDescriptor, authorizationRequirement);
+            groupDescriptor ?? defaultControlPanelGroupDescriptor, authorizationRequirement, childOf, asParent);
 
         lock (_concurrentLock)
         {

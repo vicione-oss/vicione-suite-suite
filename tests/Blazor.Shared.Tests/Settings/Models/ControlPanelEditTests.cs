@@ -1,6 +1,9 @@
 using Blazor.Shared.Settings.Models;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute.ExceptionExtensions;
+using Sdk.Client.ControlPanels;
+using Sdk.Client.ControlPanels.Components;
+using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 
@@ -10,6 +13,52 @@ public sealed class ControlPanelEditTests
 {
     private const int LongerRunningDelayMs = 5000;
 
+    private static readonly Type HandlerServiceKey = typeof(ControlPanelServiceKey<TestControlPanel>);
+
+    private sealed class TestControlPanel : ControlPanelBase<ControlPanelState>;
+
+    private sealed class OtherTestControlPanel : ControlPanelBase<ControlPanelState>;
+
+    private sealed class TestResetHandler : IControlPanelResetHandler<ControlPanelState>
+    {
+        public Task Reset(ControlPanelState state, CancellationToken cancellationToken) => Task.CompletedTask;
+    }
+
+    [Fact]
+    public async Task Should_tell_the_shared_reset_handler_by_which_it_resets_together_with_other_edits()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddControlPanel<SharedClientModule, TestControlPanel, ControlPanelState>()
+            .WithSharedHandlers(handlers => handlers.WithResetHandler<TestResetHandler>(), out _);
+
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        // Act
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(new ControlPanelState(), serviceProvider, HandlerServiceKey);
+
+        // Assert
+        controlPanelEdit.SharedResetGroup.Should().Be(new SharedResetGroup(HandlerServiceKey, typeof(TestResetHandler)));
+    }
+
+    [Fact]
+    public async Task Should_not_tell_a_shared_reset_handler_for_a_reset_handler_of_its_own()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddKeyedScoped<IControlPanelResetHandler<ControlPanelState>, TestResetHandler>(HandlerServiceKey);
+
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        // Act
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(new ControlPanelState(), serviceProvider, HandlerServiceKey);
+
+        // Assert
+        controlPanelEdit.SharedResetGroup.Should().BeNull();
+    }
+
     [Fact]
     public async Task Should_invoke_save_handler()
     {
@@ -18,13 +67,13 @@ public sealed class ControlPanelEditTests
         services.AddLogging();
 
         var saveHandler = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
-        services.AddScoped(_ => saveHandler);
+        services.AddKeyedScoped(HandlerServiceKey, (_, _) => saveHandler);
 
         await using var serviceProvider = services.BuildServiceProvider();
 
         var controlPanelState = new ControlPanelState();
 
-        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider);
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider, HandlerServiceKey);
         controlPanelEdit.Begin();
 
         // Act
@@ -44,11 +93,11 @@ public sealed class ControlPanelEditTests
         var saveHandler = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
         saveHandler.Save(Arg.Any<ControlPanelState>(), Arg.Any<CancellationToken>())
             .ThrowsAsync(new OperationCanceledException());
-        services.AddScoped(_ => saveHandler);
+        services.AddKeyedScoped(HandlerServiceKey, (_, _) => saveHandler);
 
         await using var serviceProvider = services.BuildServiceProvider();
 
-        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(new ControlPanelState(), serviceProvider);
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(new ControlPanelState(), serviceProvider, HandlerServiceKey);
         controlPanelEdit.Begin();
 
         // Act
@@ -65,11 +114,11 @@ public sealed class ControlPanelEditTests
         // Arrange
         var services = new ServiceCollection();
         services.AddLogging();
-        services.AddScoped(_ => Substitute.For<IControlPanelSaveHandler<ControlPanelState>>());
+        services.AddKeyedScoped(HandlerServiceKey, (_, _) => Substitute.For<IControlPanelSaveHandler<ControlPanelState>>());
 
         await using var serviceProvider = services.BuildServiceProvider();
 
-        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(new ControlPanelState(), serviceProvider);
+        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(new ControlPanelState(), serviceProvider, HandlerServiceKey);
         controlPanelEdit.Begin();
         await controlPanelEdit.DisposeAsync();
 
@@ -88,13 +137,13 @@ public sealed class ControlPanelEditTests
         services.AddLogging();
 
         var cancelHandler = Substitute.For<IControlPanelCancelHandler<ControlPanelState>>();
-        services.AddScoped(_ => cancelHandler);
+        services.AddKeyedScoped(HandlerServiceKey, (_, _) => cancelHandler);
 
         await using var serviceProvider = services.BuildServiceProvider();
 
         var controlPanelState = new ControlPanelState();
 
-        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider);
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider, HandlerServiceKey);
         controlPanelEdit.Begin();
 
         // Act
@@ -112,13 +161,13 @@ public sealed class ControlPanelEditTests
         services.AddLogging();
 
         var resetHandler = Substitute.For<IControlPanelResetHandler<ControlPanelState>>();
-        services.AddScoped(_ => resetHandler);
+        services.AddKeyedScoped(HandlerServiceKey, (_, _) => resetHandler);
 
         await using var serviceProvider = services.BuildServiceProvider();
 
         var controlPanelState = new ControlPanelState();
 
-        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider);
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider, HandlerServiceKey);
 
         // Act
         await controlPanelEdit.Reset();
@@ -128,19 +177,68 @@ public sealed class ControlPanelEditTests
     }
 
     [Fact]
+    public async Task Should_not_invoke_handlers_of_another_control_panel_of_the_same_state()
+    {
+        // Arrange
+        var otherHandlerServiceKey = typeof(ControlPanelServiceKey<OtherTestControlPanel>);
+
+        var otherSaveHandler = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
+        var otherCancelHandler = Substitute.For<IControlPanelCancelHandler<ControlPanelState>>();
+        var otherResetHandler = Substitute.For<IControlPanelResetHandler<ControlPanelState>>();
+
+        var saveHandlerWithoutKey = Substitute.For<IControlPanelSaveHandler<ControlPanelState>>();
+        var cancelHandlerWithoutKey = Substitute.For<IControlPanelCancelHandler<ControlPanelState>>();
+        var resetHandlerWithoutKey = Substitute.For<IControlPanelResetHandler<ControlPanelState>>();
+
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddKeyedScoped(otherHandlerServiceKey, (_, _) => otherSaveHandler)
+            .AddKeyedScoped(otherHandlerServiceKey, (_, _) => otherCancelHandler)
+            .AddKeyedScoped(otherHandlerServiceKey, (_, _) => otherResetHandler)
+            .AddScoped(_ => saveHandlerWithoutKey)
+            .AddScoped(_ => cancelHandlerWithoutKey)
+            .AddScoped(_ => resetHandlerWithoutKey);
+
+        await using var serviceProvider = services.BuildServiceProvider();
+
+        var controlPanelState = new ControlPanelState();
+
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider, HandlerServiceKey);
+
+        // Act
+        await controlPanelEdit.Reset();
+
+        controlPanelEdit.Begin();
+        var saveResult = await controlPanelEdit.Save();
+
+        await controlPanelEdit.Cancel();
+
+        // Assert
+        saveResult.Should().BeOfType<SaveErrorResult>();
+
+        otherResetHandler.ReceivedCalls().Should().BeEmpty();
+        otherSaveHandler.ReceivedCalls().Should().BeEmpty();
+        otherCancelHandler.ReceivedCalls().Should().BeEmpty();
+
+        resetHandlerWithoutKey.ReceivedCalls().Should().BeEmpty();
+        saveHandlerWithoutKey.ReceivedCalls().Should().BeEmpty();
+        cancelHandlerWithoutKey.ReceivedCalls().Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task Should_cancel_save_handler_on_dispose()
     {
         // Arrange
         var services = new ServiceCollection()
             .AddLogging()
-            .AddScoped<IControlPanelSaveHandler<ControlPanelState>, LongerRunningControlPanelSaveHandler>();
+            .AddKeyedScoped<IControlPanelSaveHandler<ControlPanelState>, LongerRunningControlPanelSaveHandler>(HandlerServiceKey);
 
         await using var serviceProvider = services.BuildServiceProvider();
 
-        var saveHandler = (LongerRunningControlPanelSaveHandler)serviceProvider.GetRequiredService<IControlPanelSaveHandler<ControlPanelState>>();
+        var saveHandler = (LongerRunningControlPanelSaveHandler)serviceProvider.GetRequiredKeyedService<IControlPanelSaveHandler<ControlPanelState>>(HandlerServiceKey);
         var controlPanelState = new ControlPanelState();
 
-        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider);
+        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider, HandlerServiceKey);
         controlPanelEdit.Begin();
 
         var saveTask = controlPanelEdit.Save();
@@ -159,14 +257,14 @@ public sealed class ControlPanelEditTests
         // Arrange
         var services = new ServiceCollection()
             .AddLogging()
-            .AddScoped<IControlPanelCancelHandler<ControlPanelState>, LongerRunningControlPanelCancelHandler>();
+            .AddKeyedScoped<IControlPanelCancelHandler<ControlPanelState>, LongerRunningControlPanelCancelHandler>(HandlerServiceKey);
 
         await using var serviceProvider = services.BuildServiceProvider();
 
-        var cancelHandler = (LongerRunningControlPanelCancelHandler)serviceProvider.GetRequiredService<IControlPanelCancelHandler<ControlPanelState>>();
+        var cancelHandler = (LongerRunningControlPanelCancelHandler)serviceProvider.GetRequiredKeyedService<IControlPanelCancelHandler<ControlPanelState>>(HandlerServiceKey);
         var controlPanelState = new ControlPanelState();
 
-        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider);
+        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider, HandlerServiceKey);
         controlPanelEdit.Begin();
 
         var cancelTask = controlPanelEdit.Cancel();
@@ -185,13 +283,13 @@ public sealed class ControlPanelEditTests
         // Arrange
         var services = new ServiceCollection()
             .AddLogging()
-            .AddScoped<IControlPanelResetHandler<ControlPanelState>, LongerRunningControlPanelResetHandler>();
+            .AddKeyedScoped<IControlPanelResetHandler<ControlPanelState>, LongerRunningControlPanelResetHandler>(HandlerServiceKey);
 
         await using var serviceProvider = services.BuildServiceProvider();
 
-        var resetHandler = (LongerRunningControlPanelResetHandler)serviceProvider.GetRequiredService<IControlPanelResetHandler<ControlPanelState>>();
+        var resetHandler = (LongerRunningControlPanelResetHandler)serviceProvider.GetRequiredKeyedService<IControlPanelResetHandler<ControlPanelState>>(HandlerServiceKey);
         var controlPanelState = new ControlPanelState();
-        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider);
+        var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider, HandlerServiceKey);
 
         var resetTask = controlPanelEdit.Reset();
         var disposeAsyncTask = controlPanelEdit.DisposeAsync().AsTask();
@@ -225,25 +323,25 @@ public sealed class ControlPanelEditTests
             .AddLogging();
 
         if (resetOperationKind == OperationKind.LongerRunning)
-            services.AddScoped<IControlPanelResetHandler<ControlPanelState>, LongerRunningControlPanelResetHandler>();
+            services.AddKeyedScoped<IControlPanelResetHandler<ControlPanelState>, LongerRunningControlPanelResetHandler>(HandlerServiceKey);
         else if (resetOperationKind == OperationKind.Substitute)
-            services.AddScoped(_ => Substitute.For<IControlPanelResetHandler<ControlPanelState>>());
+            services.AddKeyedScoped(HandlerServiceKey, (_, _) => Substitute.For<IControlPanelResetHandler<ControlPanelState>>());
 
         if (saveOperationKind == OperationKind.LongerRunning)
-            services.AddScoped<IControlPanelSaveHandler<ControlPanelState>, LongerRunningControlPanelSaveHandler>();
+            services.AddKeyedScoped<IControlPanelSaveHandler<ControlPanelState>, LongerRunningControlPanelSaveHandler>(HandlerServiceKey);
         else if (saveOperationKind == OperationKind.Substitute)
-            services.AddScoped(_ => Substitute.For<IControlPanelSaveHandler<ControlPanelState>>());
+            services.AddKeyedScoped(HandlerServiceKey, (_, _) => Substitute.For<IControlPanelSaveHandler<ControlPanelState>>());
 
         if (cancelOperationKind == OperationKind.LongerRunning)
-            services.AddScoped<IControlPanelCancelHandler<ControlPanelState>, LongerRunningControlPanelCancelHandler>();
+            services.AddKeyedScoped<IControlPanelCancelHandler<ControlPanelState>, LongerRunningControlPanelCancelHandler>(HandlerServiceKey);
         else if (cancelOperationKind == OperationKind.Substitute)
-            services.AddScoped(_ => Substitute.For<IControlPanelCancelHandler<ControlPanelState>>());
+            services.AddKeyedScoped(HandlerServiceKey, (_, _) => Substitute.For<IControlPanelCancelHandler<ControlPanelState>>());
 
         await using var serviceProvider = services.BuildServiceProvider();
 
         var controlPanelState = new ControlPanelState();
 
-        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider);
+        await using var controlPanelEdit = new ControlPanelEdit<ControlPanelState>(controlPanelState, serviceProvider, HandlerServiceKey);
         controlPanelEdit.Begin();
 
         ILongerRunningControlPanelHandler? longerRunningHandler = null;
@@ -251,7 +349,7 @@ public sealed class ControlPanelEditTests
 
         if (resetOperationKind == OperationKind.LongerRunning)
         {
-            longerRunningHandler = serviceProvider.GetRequiredService<IControlPanelResetHandler<ControlPanelState>>()
+            longerRunningHandler = serviceProvider.GetRequiredKeyedService<IControlPanelResetHandler<ControlPanelState>>(HandlerServiceKey)
                 as ILongerRunningControlPanelHandler;
 
             controlPanelEditTasks.Add(controlPanelEdit.Reset());
@@ -259,7 +357,7 @@ public sealed class ControlPanelEditTests
 
         if (saveOperationKind == OperationKind.LongerRunning)
         {
-            longerRunningHandler = serviceProvider.GetRequiredService<IControlPanelSaveHandler<ControlPanelState>>()
+            longerRunningHandler = serviceProvider.GetRequiredKeyedService<IControlPanelSaveHandler<ControlPanelState>>(HandlerServiceKey)
                 as ILongerRunningControlPanelHandler;
 
             controlPanelEditTasks.Add(controlPanelEdit.Save());
@@ -267,7 +365,7 @@ public sealed class ControlPanelEditTests
 
         if (cancelOperationKind == OperationKind.LongerRunning)
         {
-            longerRunningHandler = serviceProvider.GetRequiredService<IControlPanelCancelHandler<ControlPanelState>>()
+            longerRunningHandler = serviceProvider.GetRequiredKeyedService<IControlPanelCancelHandler<ControlPanelState>>(HandlerServiceKey)
                 as ILongerRunningControlPanelHandler;
 
             controlPanelEditTasks.Add(controlPanelEdit.Cancel());

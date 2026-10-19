@@ -8,5 +8,6 @@ namespace Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Services;
 internal sealed class OpenIdProviderControlPanelDescriptor : IControlPanelDescriptor<OpenIdProviderControlPanel>
 {
     public string Title => Localization.OpenIdProviderControlPanel.PanelTitle;
+    public int? Position => 1;
     public Uri IconUrl => SvgIcon.CloudConnection.GetPath();
 }

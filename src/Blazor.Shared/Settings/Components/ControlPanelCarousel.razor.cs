@@ -1,3 +1,6 @@
+using Blazor.Shared.Settings.Extensions;
+using Blazor.Shared.Settings.Factories;
+using Blazor.Shared.Settings.Models;
 using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.ControlPanels.Services;
@@ -10,6 +13,12 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
     private sealed class Item
     {
         public required IControlPanelRegistryItem ControlPanelRegistryItem { get; init; }
+
+        // One visit: switching between the tabs of a parent and its children (see the control panel parent/child
+        // mechanism) remounts ControlPanelContainer but keeps each control panel's edit and skips its reset,
+        // so in-progress edits survive. Disposed when this Item is replaced or removed; its resets are cleared
+        // when navigating back to it (see NavigateBackRequested).
+        public required ControlPanelEditScope EditScope { get; init; }
     }
 
     /// <summary>
@@ -32,6 +41,10 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
     }
 
     private readonly List<Item> _items = [];
+
+    // Replaced and removed items, whose edit scopes are disposed outside the semaphore.
+    private readonly List<Item> _removedItems = [];
+
     private int _activeIndex = -1;
     private Transition? _transition;
     private bool _shouldRender;
@@ -44,11 +57,17 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
 
     private CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
+    [Inject] private IActiveControlPanelChildProvider ActiveControlPanelChildProvider { get; set; } = default!;
+
     [Inject] private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
 
     [Inject] private INavigateBackRequest NavigateBackRequest { get; set; } = default!;
 
     [Inject] private SettingsModuleState SettingsModuleState { get; set; } = default!;
+
+    [Inject] private IControlPanelEditRegistry ControlPanelEditRegistry { get; set; } = default!;
+
+    [Inject] private ControlPanelEditFactory ControlPanelEditFactory { get; set; } = default!;
 
     protected override void OnInitialized()
     {
@@ -73,9 +92,21 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
 
         _settingsModuleStateSemaphore.Dispose();
 
-        // The commit of a slide waits for its end, which no longer comes. It runs last because it notifies subscribers, and
-        // one that throws must not skip the cleanup above.
-        EndTransition(_transition);
+        try
+        {
+            // The commit of a slide waits for its end, which no longer comes. It runs after the cleanup above because it
+            // notifies subscribers, and one that throws must not skip it.
+            EndTransition(_transition);
+        }
+        finally
+        {
+            _removedItems.AddRange(_items);
+            _items.Clear();
+
+            var removedItems = _removedItems.ToListAndClear();
+
+            await DisposeEditScopes(removedItems);
+        }
     }
 
     protected override bool ShouldRender()
@@ -105,7 +136,11 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
             }
             finally
             {
+                var removedItems = _removedItems.ToListAndClear();
+
                 _settingsModuleStateSemaphore.Release();
+
+                await DisposeEditScopes(removedItems);
             }
 
             _shouldRender = true;
@@ -166,7 +201,11 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
             }
             finally
             {
+                var removedItems = _removedItems.ToListAndClear();
+
                 _settingsModuleStateSemaphore.Release();
+
+                await DisposeEditScopes(removedItems);
             }
 
             _shouldRender = true;
@@ -202,13 +241,21 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
 
                 UpdateItems();
 
+                // The control panel navigated back to was unmounted meanwhile and has to reload on remount, e.g. to
+                // list a tag that was just added in the control panel navigated away from.
+                _items[^2].EditScope.ClearResets();
+
                 _transition = new Transition { From = _items[^1], PopWhenEnded = true, To = requestedControlPanels[^2] };
 
                 UpdateItems();
             }
             finally
             {
+                var removedItems = _removedItems.ToListAndClear();
+
                 _settingsModuleStateSemaphore.Release();
+
+                await DisposeEditScopes(removedItems);
             }
 
             _shouldRender = true;
@@ -245,6 +292,7 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
                 if (transition.PopWhenEnded)
                 {
                     transition.From.ControlPanelRegistryItem.State.ActivePageIndex = null;
+                    SettingsModuleState.SetActiveChild(transition.From.ControlPanelRegistryItem, null);
 
                     SettingsModuleState.PopRequestedControlPanelRegistryItem();
                 }
@@ -273,6 +321,16 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
                requestedControlPanelRegistryItems[^2] == belowTop;
     }
 
+    private IControlPanelRegistryItem ResolveActiveLeaf(IControlPanelRegistryItem item)
+    {
+        var current = item;
+
+        while (ActiveControlPanelChildProvider.GetActiveChild(current) is { } activeChild)
+            current = activeChild;
+
+        return current;
+    }
+
     private void UpdateItems()
     {
         var requestedControlPanelRegistryItems = SettingsModuleState.RequestedControlPanelRegistryItems;
@@ -282,13 +340,24 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
             var controlPanelRegistryItem = requestedControlPanelRegistryItems[i];
 
             if (i >= _items.Count)
-                _items.Add(new() { ControlPanelRegistryItem = controlPanelRegistryItem });
+            {
+                _items.Add(CreateItem(controlPanelRegistryItem));
+            }
             else if (_items[i].ControlPanelRegistryItem != controlPanelRegistryItem)
-                _items[i] = new() { ControlPanelRegistryItem = controlPanelRegistryItem };
+            {
+                _removedItems.Add(_items[i]);
+
+                _items[i] = CreateItem(controlPanelRegistryItem);
+            }
         }
 
         if (requestedControlPanelRegistryItems.Count < _items.Count)
-            _items.RemoveRange(requestedControlPanelRegistryItems.Count, _items.Count - requestedControlPanelRegistryItems.Count);
+        {
+            var removeCount = _items.Count - requestedControlPanelRegistryItems.Count;
+
+            _removedItems.AddRange(_items.GetRange(requestedControlPanelRegistryItems.Count, removeCount));
+            _items.RemoveRange(requestedControlPanelRegistryItems.Count, removeCount);
+        }
 
         if (_transition is not null)
         {
@@ -309,14 +378,36 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
         }
     }
 
+    private Item CreateItem(IControlPanelRegistryItem controlPanelRegistryItem)
+        => new()
+        {
+            ControlPanelRegistryItem = controlPanelRegistryItem,
+            EditScope = new ControlPanelEditScope(ControlPanelEditRegistry, ControlPanelEditFactory)
+        };
+
+    private static async Task DisposeEditScopes(IEnumerable<Item> items)
+    {
+        foreach (var item in items)
+            await item.EditScope.DisposeAsync();
+    }
+
     private async void SettingsModuleStateChanged(PropertiesChangedEventArgs args)
     {
         if (_disposed)
             return;
 
+        // SetActiveControlPanel batches the reset of the left parent's active child with the switch, so a change of the
+        // active control panel has to be checked first; otherwise leaving a parent from a child tab never updates the items.
         if (!args.PropertyNames.Contains(nameof(SettingsModuleState.ActiveControlPanelRegistryItem)) &&
             !args.PropertyNames.Contains(nameof(SettingsModuleState.RequestedControlPanelRegistryItems)))
         {
+            if (args.PropertyNames.Contains(nameof(SettingsModuleState.ActiveChildMap)))
+            {
+                _shouldRender = true;
+
+                await InvokeAsync(StateHasChanged);
+            }
+
             return;
         }
 
@@ -333,7 +424,11 @@ public sealed partial class ControlPanelCarousel : ComponentBase, IAsyncDisposab
             }
             finally
             {
+                var removedItems = _removedItems.ToListAndClear();
+
                 _settingsModuleStateSemaphore.Release();
+
+                await DisposeEditScopes(removedItems);
             }
 
             _shouldRender = true;

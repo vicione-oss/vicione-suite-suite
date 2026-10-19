@@ -11,7 +11,7 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
     {
         var settingsGroups = new HashSet<SettingsGroup>();
 
-        foreach (var controlPanelRegistryItem in controlPanelRegistryItems.Where(ShowInNavigationPredicate))
+        foreach (var controlPanelRegistryItem in GetNavigationItems(controlPanelRegistryItems))
         {
             try
             {
@@ -35,7 +35,7 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
     {
         var categoryMap = new Dictionary<string, SettingsCategory>();
 
-        foreach (var controlPanelRegistryItem in controlPanelRegistryItems.Where(ShowInNavigationPredicate))
+        foreach (var controlPanelRegistryItem in GetNavigationItems(controlPanelRegistryItems))
         {
             try
             {
@@ -65,7 +65,7 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
     {
         var result = new List<SettingsEntry>();
 
-        foreach (var controlPanelRegistryItem in controlPanelRegistryItems.Where(ShowInNavigationPredicate))
+        foreach (var controlPanelRegistryItem in GetNavigationItems(controlPanelRegistryItems))
         {
             try
             {
@@ -90,10 +90,27 @@ internal sealed partial class SettingsModuleService(ILogger<SettingsModuleServic
         return result;
     }
 
-    private bool ShowInNavigationPredicate(IControlPanelRegistryItem controlPanelRegistryItem)
+    private List<IControlPanelRegistryItem> GetNavigationItems(IEnumerable<IControlPanelRegistryItem> controlPanelRegistryItems)
+    {
+        var items = controlPanelRegistryItems.ToList();
+
+        return items.Where(i => ShowInNavigationPredicate(i, items)).ToList();
+    }
+
+    private bool ShowInNavigationPredicate(IControlPanelRegistryItem controlPanelRegistryItem, List<IControlPanelRegistryItem> items)
     {
         try
         {
+            // Children are not top-level navigation entries in their own right - they are only ever reached as
+            // tabs under their active parent, built by SettingsContainerContentHeader from IControlPanelRegistryItem.ChildOf.
+            if (controlPanelRegistryItem.ChildOf is not null)
+                return false;
+
+            // A control panel without content of its own only groups its children; without any it would open empty.
+            if (!controlPanelRegistryItem.Descriptor.HasContent
+                && (controlPanelRegistryItem.AsParent is null || !items.Any(i => i.ChildOf == controlPanelRegistryItem.AsParent)))
+                return false;
+
             return controlPanelRegistryItem.Descriptor.ShowInNavigation;
         }
         catch (Exception ex)

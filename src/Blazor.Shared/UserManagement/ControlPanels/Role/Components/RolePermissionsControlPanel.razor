@@ -1,0 +1,14 @@
+@using Blazor.Shared.UserManagement.Components
+@using Blazor.Shared.UserManagement.ControlPanels.Role.Services
+
+@inherits ControlPanelBase<RoleControlPanelState>
+
+<DescriptionBanner Title="@(string.Format(Localization.RoleControlPanel.PermissionsDescriptionBannerTitle, State.RoleName))">
+    @Localization.RoleControlPanel.PermissionsDescriptionBannerContent
+</DescriptionBanner>
+
+<PermissionGrid Items="State.FilteredGridItems"
+                @bind-Filter="@State.FilterText"
+                @bind-Filter:after="@(() => GridItemService.UpdateGridItems(State))"
+                AccessLevelChanged="@(async (i) => await AccessLevelChangedAsync(i))"
+                Disabled="@(State.Role?.Managed ?? false)" />

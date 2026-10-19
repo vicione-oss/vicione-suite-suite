@@ -198,13 +198,29 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         LoadingIndicationPlacementBehavior.PlacementChanged += LoadingIndicationPlacementChanged;
     }
 
-    private void ControlPanelEditRegistryChanged(RegistryChangedEventArgs<IControlPanelEdit> args)
+    private async void ControlPanelEditRegistryChanged(RegistryChangedEventArgs<IControlPanelEdit> args)
     {
+        var removedRunningCount = 0;
+
         foreach (var controlPanelEdit in args.ItemsRemoved)
+        {
             controlPanelEdit.Changed -= ControlPanelEditChanged;
+
+            if (controlPanelEdit.IsRunning)
+                removedRunningCount++;
+        }
 
         foreach (var controlPanelEdit in args.ItemsAdded)
             controlPanelEdit.Changed += ControlPanelEditChanged;
+
+        // A running edit removed from the registry, e.g. when the visit to its control panel ends, never reports IsRunning = false.
+        if (removedRunningCount > 0)
+        {
+            lock (_controlPanelEditRunningCountLock)
+                _controlPanelEditRunningCount = Math.Max(0, _controlPanelEditRunningCount - removedRunningCount);
+
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     private async void ControlPanelRegistryItemCacheChanged()
@@ -561,7 +577,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         {
             _lastSaveErrorResults.Clear();
 
-            var controlPanelEdits = ControlPanelEditRegistry.ToArray();
+            var controlPanelEdits = ControlPanelEditRegistry.Where(e => e.IsRunning).ToArray();
             var cancelTasks = controlPanelEdits.Select(controlPanelEdit => controlPanelEdit.Cancel(withReset: true)).ToArray();
 
             var cancelResults = await Task.WhenAll(cancelTasks);
@@ -595,12 +611,13 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
             _lastSaveErrorResults.Clear();
             _navigateBackAfterSaveRequested = false;
 
-            var controlPanelEdits = ControlPanelEditRegistry.ToArray();
+            var controlPanelEdits = ControlPanelEditRegistry.Where(e => e.IsRunning).ToArray();
             var saveTasks = controlPanelEdits.Select(controlPanelEdit => controlPanelEdit.Save()).ToArray();
 
             var saveResults = await Task.WhenAll(saveTasks);
 
-            _lastSaveErrorResults.AddRange(saveResults.OfType<SaveErrorResult>());
+            // Edits that share one save, like the tabs of a network interface, all report its failure.
+            _lastSaveErrorResults.AddRange(saveResults.OfType<SaveErrorResult>().DistinctBy(r => (r.Message, r.ErrorCode)));
             _navigateBackAfterSaveRequested = saveResults.OfType<NavigateBackOnSaveSuccessResult>().Any();
 
             var success = !saveResults.Any(saveResult => saveResult is SaveErrorResult or SaveCanceledResult);

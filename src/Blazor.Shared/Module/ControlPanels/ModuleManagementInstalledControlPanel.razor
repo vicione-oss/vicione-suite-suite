@@ -1,0 +1,119 @@
+@using Blazor.Shared.Module.ControlPanels.Extensions;
+@using Blazor.Shared.Module.ControlPanels.Services
+@using Blazor.Shared.Module.Models
+@using ViciOne.Ui.Blazor.Components.Grid.Components
+@using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Components
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+@inherits ControlPanelBase<ModuleManagementInstalledControlPanelState>
+
+<div class="module-management-installed-control-panel">
+    <DescriptionBanner Title="@Localization.ModuleManagementInstalledControlPanel.InstalledModules">
+        @Localization.ModuleManagementInstalledControlPanel.InstalledModulesBanner
+    </DescriptionBanner>
+
+    <LimitedHeightLayout>
+        <Grid Items="@FilterInstalledItems(State.Modules)" Virtualize="true" CssClass="installed-modules-grid">
+            <ActionButtons>
+                <GridActionButton Text="@CommonVocabulary.UninstallVerb"
+                                    OnClick="@(async () => await UninstallSelectedModules())"
+                                    IconCssClass="@_uninstallIconCssClasses"
+                                    Enabled="@CanUninstallSelectedModules()" />
+
+                <GridActionButton Text="@CommonVocabulary.ResetVerb"
+                                    OnClick="@(async () => await RevertInstalledSelectedModules())"
+                                    IconCssClass="@_uninstallIconCssClasses"
+                                    Enabled="@CanRevertInstalledSelectedModules()" />
+
+                <GridActionButton Text="@CommonVocabulary.UpdateVerb"
+                                    OnClick="@UpdateInstalledSelectedModules"
+                                    IconCssClass="@_updateIconCssClasses"
+                                    Enabled="@CanUpdateInstalledSelectedModules()" />
+
+                <GridActionButton Text="@CommonVocabulary.Restart"
+                                    OnClick="@(() => _dialogVisible = true)"
+                                    IconCssClass="@_restartIconCssClasses" />
+            </ActionButtons>
+
+            <Filter>
+                <GridFilterControl @bind-Text="@State.FilterText" @bind-Text:after="@(() => InvokeAsync(StateHasChanged))" />
+            </Filter>
+
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item)"
+                                  Selection="@InstalledModuleSelection" />
+
+                <PropertyColumn Title="@CommonVocabulary.Name"
+                                Property="@(i => i.Name)"
+                                Sortable="true" />
+
+                <TemplateColumn Title="@LibraryManagement.InstalledVersion">
+                    <div class="version-wrapper">
+                        <div class="version" title="@context.Version">
+                            @context.Version
+                        </div>
+                    </div>
+                </TemplateColumn>
+
+                <TemplateColumn Title="@CommonVocabulary.Status">
+                    <div class="status-wrapper">
+                        @if (context.PendingOperation is not null)
+                        {
+                            @if (context.PendingOperation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Uninstall)
+                            {
+                                <div title="@LibraryManagement.PendingUninstallation" class="icon-wrapper">
+                                    <MonochromeIcon Name="MonochromeIconName.UninstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
+                                </div>
+                            }
+                            else if (context.PendingOperation.OperationKind is Core.Shared.Modules.Contracts.ModulePackageOperationKind.Install)
+                            {
+                                <div title="@context.GetInstallOrUpdateTooltip()" class="icon-wrapper">
+                                    <MonochromeIcon Name="MonochromeIconName.InstallPendingLight" Size="MonochromeIconSize.SmallMedium" />
+                                </div>
+                            }
+                        }
+                        else if (context.CanUpdate)
+                        {
+                            <div title="@context.GetUpdateAvailableTooltip()" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.UpdateAvailableLight" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+
+                        @if (context.Bundle.IsDebugSource)
+                        {
+                            <div title="@Localization.ModuleManagementInstalledControlPanel.ModuleLoadedFromDebugPath" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.BugLight" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+
+                        @if (context.HasError)
+                        {
+                            <div title="@context.GetErrorTooltip()" class="icon-wrapper">
+                                <MonochromeIcon Name="MonochromeIconName.ErrorSolid" Size="MonochromeIconSize.SmallMedium" />
+                            </div>
+                        }
+                    </div>
+                </TemplateColumn>
+
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                  Navigate="@((ModuleMetadataModel model) => ShowDetailsAsync(model))" />
+            </ChildContent>
+
+            <Footer>
+                <SelectionFooter GridSelection="@InstalledModuleSelection" />
+            </Footer>
+        </Grid>
+    </LimitedHeightLayout>
+</div>
+
+<ConfirmCancelDialog HeaderText="@(IsStandalone ? Blazor.Shared.Localization.RestartSuite.DialogHeader : Blazor.Shared.Localization.RestartSuite.ClusterDialogHeader)"
+                     OnConfirm="@ConfirmRestart"
+                     @bind-Visible="_dialogVisible">
+    <Body>
+        @(IsStandalone ? Blazor.Shared.Localization.RestartSuite.DialogBody : Blazor.Shared.Localization.RestartSuite.ClusterDialogBody)
+    </Body>
+</ConfirmCancelDialog>

@@ -6,7 +6,8 @@ using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.UserManagement.ControlPanels.Role.Services;
 
-internal sealed class RoleControlPanelDescriptor : IControlPanelDescriptor<RoleControlPanel>
+internal sealed class RoleControlPanelDescriptor
+    : IControlPanelDescriptor<RoleControlPanel>, IControlPanelParentDescriptor
 {
     public string Title => CommonVocabulary.Role;
     public Uri? IconUrl => SvgIcon.User.GetPath();

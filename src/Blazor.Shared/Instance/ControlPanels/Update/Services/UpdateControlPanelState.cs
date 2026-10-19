@@ -22,19 +22,15 @@ public sealed class UpdateControlPanelState : ControlPanelState
 
     internal string? SelectedVersion { get; set; }
     internal bool SelectedVersionChanged { get; set; }
-    internal bool BackupGroupExpanded { get; set; } = true;
-    internal bool RestoreGroupExpanded { get; set; } = true;
 
     internal bool FlashDeviceEnabled { get; set; }
     internal string? SwuFilename { get; set; }
     internal IUploadTicket? SwuFileUploadTicket { get; set; }
+    internal bool SwuUploadRunning { get; set; }
     internal string? SwuFilenameUploaded { get; set; }
     internal bool SwuFilenameChangedBannerVisible { get; set; }
 
     internal string? SwuUploadMessage { get; set; }
-
-    internal string? RestoreFilename { get; set; }
-    internal IUploadTicket? RestoreFileUploadTicket { get; set; }
 
     internal void PreselectCurrentVersion()
     {

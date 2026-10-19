@@ -8,6 +8,7 @@ using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Bunit;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Contracts;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.Components.Settings;
 using Sdk.Client.ControlPanels.Services;
@@ -20,12 +21,9 @@ namespace Blazor.Shared.Tests.Network.ControlPanels;
 
 public sealed class NetworkInterfaceControlPanelTests
 {
-    private const int TcpIpPageIndex = 1;
-
     private static ISystemConfigurationService ConfigureServices(
         BunitContext ctx,
-        IUiMediator mediator,
-        bool selectActivePageManually = false)
+        IUiMediator mediator)
     {
         var timeProvider = Substitute.For<TimeProvider>();
         var systemConfigurationService = Substitute.For<ISystemConfigurationService>();
@@ -41,22 +39,18 @@ public sealed class NetworkInterfaceControlPanelTests
             setup.Services.AddControlPanelInfrastructure();
             setup.Services.AddNetwork();
             setup.Services.AddSingleton(mediator);
-
-            // RenderControlPanelPage drives which page is active, which needs a substitute to steer
-            if (selectActivePageManually)
-                setup.Services.AddSingleton(Substitute.For<IActiveControlPanelPageProvider>());
         });
 
         return systemConfigurationService;
     }
 
-    private static IEnumerable<IRenderedComponent<SettingsField>> FindLoadingSettingsFields(IRenderedComponent<NetworkInterfaceControlPanel> component)
+    private static IEnumerable<IRenderedComponent<SettingsField>> FindLoadingSettingsFields(IRenderedComponent<IComponent> component)
         => component.FindComponents<SettingsField>().Where(field => field.Instance.IsLoading);
 
-    private static IRenderedComponent<SettingsFieldButton> FindSettingsFieldButton(IRenderedComponent<NetworkInterfaceControlPanel> component, string text)
+    private static IRenderedComponent<SettingsFieldButton> FindSettingsFieldButton(IRenderedComponent<IComponent> component, string text)
         => component.FindComponents<SettingsFieldButton>().Single(button => button.Instance.Text == text);
 
-    private static IRenderedComponent<NetworkInterfaceControlPanel> RenderControlPanel(
+    private static IRenderedComponent<NetworkInterfaceGeneralControlPanel> RenderControlPanel(
         BunitContext ctx,
         IUiMediator mediator,
         NetworkInterfaceControlPanelState controlPanelState)
@@ -65,12 +59,12 @@ public sealed class NetworkInterfaceControlPanelTests
 
         var registry = ctx.Services.GetRequiredService<IControlPanelRegistry<SharedClientModule>>();
 
-        var registryItem = registry.Add<NetworkInterfaceControlPanel, NetworkInterfaceControlPanelState>(
+        var registryItem = registry.Add<NetworkInterfaceGeneralControlPanel, NetworkInterfaceControlPanelState>(
             new NetworkInterfaceControlPanelDescriptor(controlPanelState, systemConfigurationService),
             controlPanelState,
             new ControlPanelNetworkCategoryDescriptor());
 
-        return ctx.Render<NetworkInterfaceControlPanel>(builder => builder
+        return ctx.Render<NetworkInterfaceGeneralControlPanel>(builder => builder
             .Add(p => p.State, controlPanelState)
             .AddCascadingValue(registryItem));
     }
@@ -149,9 +143,9 @@ public sealed class NetworkInterfaceControlPanelTests
 
         await using var ctx = new BunitContext();
 
-        var systemConfigurationService = ConfigureServices(ctx, mediator, selectActivePageManually: true);
+        var systemConfigurationService = ConfigureServices(ctx, mediator);
 
-        var component = ctx.RenderControlPanelPage<NetworkInterfaceControlPanel, NetworkInterfaceControlPanelState>(controlPanelState, TcpIpPageIndex);
+        var component = ctx.Render<NetworkInterfaceTcpIpControlPanel>(builder => builder.Add(p => p.State, controlPanelState));
 
         var click = FindSettingsFieldButton(component, CommonVocabulary.Renew).Find("button").ClickAsync();
 
@@ -167,5 +161,32 @@ public sealed class NetworkInterfaceControlPanelTests
         renewing.SetResult(new RenewDHCPLeaseResponse());
 
         await click;
+    }
+
+    [Theory]
+    [InlineData(true, false, false)]
+    [InlineData(false, true, false)]
+    [InlineData(false, false, true)]
+    public async Task Should_disable_the_lease_renewal_while_any_tab_has_unsaved_changes(bool generalHasChanges, bool tcpIpHasChanges, bool hardwareHasChanges)
+    {
+        // Arrange
+        var controlPanelState = new NetworkInterfaceControlPanelState
+        {
+            IpV4ConfigurationMode = IpConfigurationMode.AutomaticDhcp,
+            GeneralHasChanges = generalHasChanges,
+            TcpIpHasChanges = tcpIpHasChanges,
+            HardwareHasChanges = hardwareHasChanges
+        };
+        var mediator = Substitute.For<IUiMediator>();
+
+        await using var ctx = new BunitContext();
+
+        ConfigureServices(ctx, mediator);
+
+        // Act
+        var component = ctx.Render<NetworkInterfaceTcpIpControlPanel>(builder => builder.Add(p => p.State, controlPanelState));
+
+        // Assert
+        FindSettingsFieldButton(component, CommonVocabulary.Renew).Instance.Enabled.Should().BeFalse();
     }
 }

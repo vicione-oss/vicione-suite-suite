@@ -1,28 +1,30 @@
 using Blazor.Shared.Popup.ContentOverlays.Models;
 using Blazor.Shared.Settings.Extensions;
-using Blazor.Shared.Settings.Factories;
 using Blazor.Shared.Settings.Models;
-using Blazor.Shared.Settings.Services;
 using Microsoft.AspNetCore.Components;
 using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Settings.Components;
 
-public sealed partial class ControlPanelContainer : ComponentBase, IAsyncDisposable
+public sealed partial class ControlPanelContainer : ComponentBase, IDisposable
 {
-    private bool _disposedAsync;
+    private bool _disposed;
 
     private readonly Dictionary<string, object> _controlPanelParameters = [];
 
     private IControlPanelState? _controlPanelState;
+
     private IControlPanelEdit? _controlPanelEdit;
 
     [Parameter, EditorRequired] public IControlPanelRegistryItem ControlPanelRegistryItem { get; set; }
     [Parameter, EditorRequired] public ContentOverlaySectionId LoadingIndicationSectionId { get; set; }
 
-    [Inject] private IControlPanelEditRegistry ControlPanelEditRegistry { get; set; } = default!;
-    [Inject] private ControlPanelEditFactory ControlPanelEditFactory { get; set; } = default!;
+    /// <summary>
+    /// Set by <see cref="ControlPanelCarousel"/> per top-level control panel visit. A tab switch remounts this container,
+    /// so the edit and the reset bookkeeping live in the scope, where the control panel finds them again on its next mount.
+    /// </summary>
+    [CascadingParameter] private ControlPanelEditScope EditScope { get; set; } = default!;
 
     protected override void OnInitialized()
     {
@@ -37,10 +39,11 @@ public sealed partial class ControlPanelContainer : ComponentBase, IAsyncDisposa
         _controlPanelParameters.Add(nameof(ControlPanelBase<IControlPanelState>.OnCancelEdit),
             EventCallback.Factory.Create(this, ControlPanelCancelEdit));
 
-        _controlPanelEdit = ControlPanelEditFactory.CreateControlPanelEdit(_controlPanelState);
-        _controlPanelEdit.Changed += ControlPanelEditChanged;
-
-        ControlPanelEditRegistry.Add(_controlPanelEdit);
+        if (EditScope.TryGetOrCreateEdit(ControlPanelRegistryItem, out var controlPanelEdit))
+        {
+            _controlPanelEdit = controlPanelEdit;
+            _controlPanelEdit.Changed += ControlPanelEditChanged;
+        }
     }
 
     private void ControlPanelEditChanged(Sdk.Client.Models.PropertiesChangedEventArgs obj)
@@ -49,32 +52,29 @@ public sealed partial class ControlPanelContainer : ComponentBase, IAsyncDisposa
 
     protected override async Task OnInitializedAsync()
     {
-        if (_disposedAsync)
+        if (_disposed)
             return;
 
-        if (_controlPanelEdit is not null)
-            await _controlPanelEdit.Reset();
+        if (_controlPanelEdit is null || _controlPanelState is null)
+            return;
+
+        if (!EditScope.TryMarkReset(_controlPanelEdit))
+            return;
+
+        await _controlPanelEdit.Reset();
     }
 
-    public async ValueTask DisposeAsync()
+    public void Dispose()
     {
-        if (Interlocked.CompareExchange(ref _disposedAsync, true, false))
+        if (Interlocked.CompareExchange(ref _disposed, true, false))
             return;
-
-        // For now, we do not call CancelEdit because it would require an await on the async behavior
-        // which could result in memory leaks when the await never returns
 
         if (_controlPanelState is not null)
             _controlPanelState.Changed -= ControlPanelStateChanged;
 
+        // The edit stays registered: EditScope owns it and ends it with the visit, not with the tab.
         if (_controlPanelEdit is not null)
-        {
             _controlPanelEdit.Changed -= ControlPanelEditChanged;
-
-            ControlPanelEditRegistry.Remove(_controlPanelEdit);
-
-            await _controlPanelEdit.DisposeAsync();
-        }
     }
 
     private async void ControlPanelStateChanged(ControlPanelStateChangedEventArgs args)

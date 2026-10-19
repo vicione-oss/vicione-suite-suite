@@ -45,7 +45,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
 
         List<ModuleMetadata>? availableMetadata = null;
 
-        if (options.IncludeAvailable)
+        if (options.IncludeAvailable || options.ResolveUpdates)
         {
             availableMetadata = await _metadataCache.GetAvailableModuleMetadata(options.ForceRefresh, cancellationToken);
         }
@@ -64,7 +64,9 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
         // and also set the flags for secrets/env vars so that the UI can handle them accordingly
         await ApplyEnvironmentOptions(bundles, cancellationToken);
 
-        return bundles;
+        return bundles
+            .Where(k => k.Installed ? options.IncludeInstalled : options.IncludeAvailable)
+            .ToList();
     }
 
     private async Task ApplyEnqueuedPackageOperations(IReadOnlyCollection<ModuleMetadataBundle> modules, CancellationToken cancellationToken = default)
@@ -117,12 +119,6 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
 
         // Already installed modules.
         result.AddRange(installed);
-
-        // Available packages of uninstalled modules drop out when they cannot be modified.
-        if (installed.Count > 0 && installed.All(k => !k.CanBeModified))
-        {
-            available.RemoveAll(k => installed.All(i => i.Metadata.Name != k.Name));
-        }
 
         // Available modules: dependencies and versions.
         foreach (var metadata in available)

@@ -31,6 +31,10 @@
 - System flyout, opening the monitor or the journal closes the flyout
 - System monitoring collects the thermal sensors by default
 - System flyout, the chart shows CPU, memory, disk and network of the last hour or day, the gauges below show the values under the pointer
+- Replaced use of deprecated `ControlPanelPage` components with actual parent-child relationships
+- Module Management's `Browse` tab is now always shown, and tab labels use the control panel's own title
+- Module Management's `Browse` tab lists the available modules read-only when module installation is disabled
+- Update control panel, leaving a tab during an upload cancels the upload and shows a warning
 
 ### Added
 
@@ -110,7 +114,7 @@
 - `Npgsql.EntityFrameworkCore.PostgreSQL`, update to version `10.0.3`
 - `OpenTelemetry` packages, update to version `1.18.0`
 - `System.IO.Abstractions` package, update version to `22.3.0`
-- `ViciOne.Suite.Sdk` packages, update to version `3.5.0`
+- `ViciOne.Suite.Sdk` packages, update to version `3.6.0`
 - `ViciOne.Ui.Blazor.Components` packages, update to version `6.6.0`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
 - `ViciOne.Ui.Localization`, update to version `3.6.0`

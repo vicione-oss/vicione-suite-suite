@@ -1,85 +1,79 @@
 @using Blazor.Shared.Connections.Contracts
-@using Blazor.Shared.Connections.ControlPanels.Tags
 @using Blazor.Shared.Connections.ControlPanels.Connections.Services
-@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
-@using ViciOne.Ui.Localization.Resources
+@using Blazor.Shared.Settings.Components
 @using ViciOne.Ui.Blazor.Components.Grid.Components
-@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
 @using ViciOne.Ui.Blazor.Components.Grid.Components.ActionButtons
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Columns
+@using ViciOne.Ui.Blazor.Components.Grid.Components.Footers
 @using ViciOne.Ui.Blazor.Components.Grid.Models
+@using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Components
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 
 @inherits ControlPanelBase<ConnectionsControlPanelState>
 
-<ControlPanelPage Title="@TechnicalTerms.ConnectionPlural">
-    <div class="connection-control-panel-page">
-        <DescriptionBanner Title="@Localization.ConnectionsControlPanel.DescriptionBannerTitle"
-                           IconCssClass="@_descriptionBannerIconCssClass">
-            @Localization.ConnectionsControlPanel.DescriptionBannerContent
-        </DescriptionBanner>
+<div class="connections-control-panel">
+    <DescriptionBanner Title="@Localization.ConnectionsControlPanel.DescriptionBannerTitle"
+                        IconCssClass="@_descriptionBannerIconCssClass">
+        @Localization.ConnectionsControlPanel.DescriptionBannerContent
+    </DescriptionBanner>
 
-        <LimitedHeightLayout>
-            <Grid Items="_connectionsQueryable" Virtualize="true" CssClass="connections-grid">
-                <ActionButtons>
-                    <AddGridActionButton OnClick="@AddNewItem" />
+    <LimitedHeightLayout>
+        <Grid Items="_connectionsQueryable" Virtualize="true" CssClass="connections-grid">
+            <ActionButtons>
+                <AddGridActionButton OnClick="@AddNewItem" />
 
-                    <EditGridActionButton Enabled="@_isSingleItemSelected" OnClick="@EditSelectedItem" />
+                <EditGridActionButton Enabled="@_isSingleItemSelected" OnClick="@EditSelectedItem" />
 
-                    <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
-                                            OnClick="@DeleteSelectedItems" />
-                </ActionButtons>
+                <DeleteGridActionButton Enabled="@_deleteGridActionButtonEnabled"
+                                        OnClick="@DeleteSelectedItems" />
+            </ActionButtons>
 
-                <Filter>
-                    <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
-                </Filter>
+            <Filter>
+                <GridFilterControl @bind-Text="@_filterText" @bind-Text:after="@ApplyFilter" />
+            </Filter>
 
-                <ChildContent>
-                    <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@GridItemSelection" />
+            <ChildContent>
+                <ItemSelectColumn KeySelector="@(item => item.Id)" Selection="@GridItemSelection" />
 
-                    <TemplateColumn Title="@CommonVocabulary.Name"
-                                    Sort="@(GridSort<EditConnectionModel>.ByAscending(m => m.Name))">
-                        <span class="connection-name-container"
-                              title="@context.Name">
+                <TemplateColumn Title="@CommonVocabulary.Name"
+                                Sort="@(GridSort<EditConnectionModel>.ByAscending(m => m.Name))">
 
-                            @context.Name
-                        </span>
-                    </TemplateColumn>
+                    <span class="connection-name-container" title="@context.Name">
 
-                    <PropertyColumn Title="@CommonVocabulary.Description"
-                                    Property="@(i => i.Description)"
-                                    Sortable="true"/>
+                        @context.Name
+                    </span>
+                </TemplateColumn>
 
-                    <TemplateColumn Title="@TechnicalTerms.Type"
-                                    Sort="@(GridSort<EditConnectionModel>.ByAscending(m => GetDisplayNameOfType(m)))">
-                        @GetDisplayNameOfType(context)
-                    </TemplateColumn>
+                <PropertyColumn Title="@CommonVocabulary.Description"
+                                Property="@(i => i.Description)"
+                                Sortable="true"/>
 
-                    <TemplateColumn Title="@TechnicalTerms.TagPlural">
-                        @string.Join(", ", GetTags(context))
-                    </TemplateColumn>
+                <TemplateColumn Title="@TechnicalTerms.Type"
+                                Sort="@(GridSort<EditConnectionModel>.ByAscending(m => GetDisplayNameOfType(m)))">
+                    @GetDisplayNameOfType(context)
+                </TemplateColumn>
+
+                <TemplateColumn Title="@TechnicalTerms.TagPlural">
+                    @string.Join(", ", GetTags(context))
+                </TemplateColumn>
                 
-                    <TemplateColumn Title="@Localization.ConnectionControlPanel.Managed">
-                        @if (context.Connection.Managed)
-                        {
-                            <div class="icon-wrapper">
-                                <MonochromeIcon Name="MonochromeIconName.Check" Size="MonochromeIconSize.Small" />
-                            </div>
-                        }
-                    </TemplateColumn>
+                <TemplateColumn Title="@Localization.ConnectionControlPanel.Managed">
+                    @if (context.Connection.Managed)
+                    {
+                        <div class="icon-wrapper">
+                            <MonochromeIcon Name="MonochromeIconName.Check" Size="MonochromeIconSize.Small" />
+                        </div>
+                    }
+                </TemplateColumn>
 
-                    <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
-                                      Navigate="@(async (EditConnectionModel item) => await EditItem(item))" />
-                </ChildContent>
+                <NavigationColumn NavigationButtonTitle="@CommonVocabulary.EditVerb"
+                                    Navigate="@(async (EditConnectionModel item) => await EditItem(item))" />
+            </ChildContent>
 
-                <Footer>
-                    <SelectionFooter GridSelection="GridItemSelection" />
-                </Footer>
-            </Grid>
-        </LimitedHeightLayout>
-    </div>
-</ControlPanelPage>
-
-<ControlPanelPage Title="@TechnicalTerms.TagPlural">
-    <TagsControlPanelPageContent State="State" BeginEdit="@(async () => await BeginEdit())" />
-</ControlPanelPage>
+            <Footer>
+                <SelectionFooter GridSelection="GridItemSelection" />
+            </Footer>
+        </Grid>
+    </LimitedHeightLayout>
+</div>

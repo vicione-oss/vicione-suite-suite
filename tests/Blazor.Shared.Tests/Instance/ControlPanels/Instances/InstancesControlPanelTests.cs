@@ -9,6 +9,7 @@ using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
 using Core.Shared.Instance.Requests;
 using Microsoft.Extensions.DependencyInjection;
+using Sdk.Client.ControlPanels;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
@@ -88,7 +89,7 @@ public class InstancesControlPanelTests
             });
             var state = new InstancesControlPanelState();
 
-            var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
+            var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<InstancesControlPanelState>>(typeof(ControlPanelServiceKey<InstancesControlPanel>));
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             // Act
@@ -118,7 +119,7 @@ public class InstancesControlPanelTests
             });
             var state = new InstancesControlPanelState();
 
-            var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
+            var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<InstancesControlPanelState>>(typeof(ControlPanelServiceKey<InstancesControlPanel>));
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             // Act
@@ -149,7 +150,7 @@ public class InstancesControlPanelTests
             });
             var state = new InstancesControlPanelState();
 
-            var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
+            var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<InstancesControlPanelState>>(typeof(ControlPanelServiceKey<InstancesControlPanel>));
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             // Act
@@ -182,7 +183,7 @@ public class InstancesControlPanelTests
             });
             var state = new InstancesControlPanelState();
 
-            var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
+            var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<InstancesControlPanelState>>(typeof(ControlPanelServiceKey<InstancesControlPanel>));
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             // Act
@@ -207,7 +208,7 @@ public class InstancesControlPanelTests
             await using var ctx = SetupTestContext([info]);
             var state = new InstancesControlPanelState();
 
-            var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
+            var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<InstancesControlPanelState>>(typeof(ControlPanelServiceKey<InstancesControlPanel>));
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));
@@ -232,7 +233,7 @@ public class InstancesControlPanelTests
             await using var ctx = SetupTestContext([info]);
             var state = new InstancesControlPanelState();
 
-            var resetHandler = ctx.Services.GetRequiredService<IControlPanelResetHandler<InstancesControlPanelState>>();
+            var resetHandler = ctx.Services.GetRequiredKeyedService<IControlPanelResetHandler<InstancesControlPanelState>>(typeof(ControlPanelServiceKey<InstancesControlPanel>));
             await resetHandler.Reset(state, TestContext.Current.CancellationToken);
 
             var component = ctx.Render<InstancesControlPanel>(b => b.Add(p => p.State, state));

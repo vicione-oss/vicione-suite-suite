@@ -166,6 +166,61 @@ public sealed class ControlPanelRegistryTests
     }
 
     [Fact]
+    public void Should_store_child_of_key_given_on_add_operation()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        services.AddControlPanelInfrastructure();
+        services.AddControlPanelCore<TestClientModuleA>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        var controlPanelRegistry = serviceProvider.GetRequiredService<IControlPanelRegistry<TestClientModuleA>>();
+
+        var parentKey = Substitute.For<IControlPanelParentDescriptor>();
+        var parentItem = controlPanelRegistry.Add<TestClientModuleA.GeneralControlPanel, TestClientModuleA.GeneralControlPanelState>(
+            new TestClientModuleA.GeneralControlPanelDescriptor(),
+            new TestClientModuleA.GeneralControlPanelState(),
+            new TestClientModuleA.ControlPanelCategoryDescriptor(),
+            asParent: parentKey);
+
+        // Act
+        var childItem = controlPanelRegistry.Add<TestClientModuleA.AppearanceControlPanel, ControlPanelState>(
+            new TestClientModuleA.AppearanceControlPanelDescriptor(),
+            new ControlPanelState(),
+            new TestClientModuleA.ControlPanelCategoryDescriptor(),
+            childOf: parentItem.AsParent);
+
+        // Assert
+        childItem.ChildOf.Should().Be(parentKey);
+    }
+
+    [Fact]
+    public void Should_have_null_child_of_and_as_parent_when_neither_is_provided_on_add_operation()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+
+        services.AddControlPanelInfrastructure();
+        services.AddControlPanelCore<TestClientModuleA>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        var controlPanelRegistry = serviceProvider.GetRequiredService<IControlPanelRegistry<TestClientModuleA>>();
+
+        // Act
+        var item = controlPanelRegistry.Add<TestClientModuleA.AppearanceControlPanel, ControlPanelState>(
+            new TestClientModuleA.AppearanceControlPanelDescriptor(),
+            new ControlPanelState(),
+            new TestClientModuleA.ControlPanelCategoryDescriptor());
+
+        // Assert
+        item.ChildOf.Should().BeNull();
+        item.AsParent.Should().BeNull();
+    }
+
+    [Fact]
     public void Should_trigger_changed_event_on_add_operation()
     {
         // Arrange
@@ -491,6 +546,12 @@ public sealed class ControlPanelRegistryTests
         public sealed class GeneralControlPanelDescriptor : IControlPanelDescriptor<GeneralControlPanel>
         {
             public Uri? IconUrl => new("icon.svg", UriKind.Relative);
+            public string Title => "General";
+        }
+
+        public sealed class GeneralControlPanelParentDescriptor : IControlPanelDescriptor<GeneralControlPanel>, IControlPanelParentDescriptor
+        {
+            public Uri IconUrl => new("icon.svg", UriKind.Relative);
             public string Title => "General";
         }
 

@@ -24,6 +24,7 @@ namespace Blazor.Shared.UserManagement.ControlPanels.User.Components;
 
 [ControlPanelCategory<ControlPanelCategoryDescriptor>]
 [ControlPanelGroup<SecondaryControlPanelGroupDescriptor>]
+[ControlPanelParent<UserControlPanelDescriptor>]
 [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
 public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanelState>,
     IEventConsumer<UserCreatedEvent>, IEventConsumer<UserUpdatedEvent>, IEventConsumer<RoleDeletedEvent>

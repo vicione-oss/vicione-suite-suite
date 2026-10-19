@@ -53,12 +53,12 @@ internal static class NetworkInterfaceControlPanelStateExtensions
             return [];
         }
 
-        internal void UpdateIPv4Mode(NetworkInterfaceDetail networkInterface)
+        internal void UpdateIpAddresses(NetworkInterfaceDetail networkInterface)
         {
+            state.IpAddresses = [];
+
             if (networkInterface.IPv4.DHCPEnabled)
             {
-                state.IpV4ConfigurationMode = IpConfigurationMode.AutomaticDhcp;
-
                 if (state.DHCPLease is not null && state.DHCPLease.IPv4Detail is not null)
                 {
                     state.IpAddresses.Add(new(IpConfigurationMode.AutomaticDhcp,
@@ -68,8 +68,7 @@ internal static class NetworkInterfaceControlPanelStateExtensions
                 }
                 else
                 {
-                    // This mode is called 'LinkLocal' by hostmanagement team - DHCP is enabld but no lease information is available,
-                    // so we show an empty IP address with the gateway if available
+                    // HostManagement calls this mode 'LinkLocal': DHCP is enabled without lease information, so only the gateway is known.
                     state.IpAddresses.Add(new(IpConfigurationMode.AutomaticDhcp,
                         IPAddress.None,
                         IPAddress.None,
@@ -78,11 +77,16 @@ internal static class NetworkInterfaceControlPanelStateExtensions
             }
             else
             {
-                state.IpV4ConfigurationMode = IpConfigurationMode.Manual;
-
                 foreach (var detail in networkInterface.IPv4.IPv4Details)
                     state.IpAddresses.Add(new(IpConfigurationMode.Manual, detail.IPAddress, detail.Netmask, networkInterface.IPv4.Gateway));
             }
+        }
+
+        internal void UpdateIPv4Settings(NetworkInterfaceDetail networkInterface)
+        {
+            state.IpV4ConfigurationMode = networkInterface.IPv4.DHCPEnabled ? IpConfigurationMode.AutomaticDhcp : IpConfigurationMode.Manual;
+
+            state.UpdateIPv4Details(networkInterface);
 
             state.DefaultGateway = networkInterface.IPv4.Gateway?.ToString();
             state.VLanEnabled = networkInterface.VLAN.Enabled;
@@ -109,13 +113,21 @@ internal static class NetworkInterfaceControlPanelStateExtensions
             state.MacAddress = userDefinedMACAddress.Enabled ? userDefinedMACAddress.Address.ToColonNotation() : string.Empty;
         }
 
-        internal void Reset()
+        internal void ResetGeneral()
         {
             state.Name = string.Empty;
+            state.DHCPLease = null;
+            state.OriginalPhysicalAddress = null;
+            state.IpAddresses = [];
+
             state.Enabled = false;
+        }
+
+        internal void ResetTcpIp()
+        {
+            state.Name = string.Empty;
             state.DHCPLease = null;
 
-            state.IpAddresses = [];
             state.IpV4ConfigurationMode = IpConfigurationMode.AutomaticDhcp;
 
             var ipV4Details = new List<NetworkInterfaceIPv4Detail>();
@@ -126,12 +138,17 @@ internal static class NetworkInterfaceControlPanelStateExtensions
 
             state.DefaultGateway = null;
 
-            state.MacAddressManually = false;
-            state.MacAddress = string.Empty;
-            state.OriginalPhysicalAddress = null;
-
             state.VLanEnabled = false;
             state.VLanId = string.Empty;
+        }
+
+        internal void ResetHardware()
+        {
+            state.Name = string.Empty;
+            state.OriginalPhysicalAddress = null;
+
+            state.MacAddressManually = false;
+            state.MacAddress = string.Empty;
         }
     }
 }

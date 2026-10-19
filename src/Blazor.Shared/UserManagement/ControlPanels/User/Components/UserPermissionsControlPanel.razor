@@ -1,0 +1,13 @@
+@using Blazor.Shared.UserManagement.Components
+@using Blazor.Shared.UserManagement.ControlPanels.User.Services
+
+@inherits ControlPanelBase<UserControlPanelState>
+
+<DescriptionBanner Title="@(string.Format(Localization.UserControlPanel.PermissionsDescriptionBannerTitle, State.UserName))">
+    @Localization.UserControlPanel.PermissionsDescriptionBannerContent
+</DescriptionBanner>
+
+<PermissionGrid Items="State.FilteredGridItems"
+                @bind-Filter="State.FilterText"
+                @bind-Filter:after="@(() => OnAfterFilter())"
+                AccessLevelChanged="@(async (i) => await AccessLevelChangedAsync(i))" />

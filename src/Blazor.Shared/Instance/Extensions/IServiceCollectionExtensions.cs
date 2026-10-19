@@ -57,6 +57,15 @@ internal static class IServiceCollectionExtensions
                 .WithCancelHandler<UpdateControlPanelCancelHandler>()
                 .WithResetHandler<UpdateControlPanelResetHandler>();
 
+            services.AddControlPanel<SharedClientModule, UpdateBackupRestoreControlPanel, UpdateBackupRestoreControlPanelState>()
+                .WithAutoDiscovery<UpdateBackupRestoreControlPanelDescriptor>();
+
+            services.AddControlPanel<SharedClientModule, UpdateResetControlPanel, UpdateResetControlPanelState>()
+                .WithAutoDiscovery<UpdateResetControlPanelDescriptor>();
+
+            services.AddScoped<UpdateBackupRestoreService>();
+            services.AddScoped<UpdateResetService>();
+
             return services;
         }
 

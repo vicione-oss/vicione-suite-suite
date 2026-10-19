@@ -9,4 +9,5 @@ internal sealed class InstanceControlPanelDescriptor : IControlPanelDescriptor<I
     public Uri? IconUrl => SvgIcon.ClusterOverview.GetPath();
     public bool ShowInNavigation { get; init; }
     public string Title => Localization.InstanceControlPanel.Title;
+    public int? Position => 3;
 }

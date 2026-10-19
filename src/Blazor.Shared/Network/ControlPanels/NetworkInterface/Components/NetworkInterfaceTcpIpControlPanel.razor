@@ -1,0 +1,116 @@
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models
+@using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services
+@using Blazor.Shared.Settings.NetworkInterface.Components
+@using Blazor.Shared.Settings.NetworkInterface.Enums
+@using Sdk.Client.Components.Settings.Expanders
+@using ViciOne.Ui.Blazor.Components.Button.Enums
+@using ViciOne.Ui.Localization.Extensions
+@using ViciOne.Ui.Localization.Resources
+
+@inherits NetworkControlPanelBase<NetworkInterfaceControlPanelState>
+
+<DescriptionBanner Title="@string.Format(Localization.NetworkInterfaceTcpIpControlPanel.DescriptionBannerTitle, State.Name)"
+                   IconCssClass="@_cluster1IconCssClasses">
+    @Localization.NetworkInterfaceTcpIpControlPanel.DescriptionBannerContent
+</DescriptionBanner>
+
+<SettingsLayout>
+    <IpV4SettingsGroup Title="@Localization.NetworkTerms.IPv4Configuration"
+                       @bind-ConfigurationMode="State.IpV4ConfigurationMode"
+                       @bind-ConfigurationMode:after="IpV4ConfigurationModeChanged"
+                       @bind-IpAddress="State.FirstIpV4Detail.IpAddress"
+                       @bind-SubnetMask="State.FirstIpV4Detail.SubnetMask"
+                       @bind-DefaultGateway="State.DefaultGateway"
+                       Changed="BeginEdit">
+
+        <AdditionalSettingsFields>
+            <SettingsStepper PlusEnabled="@(State.AdditionalIpV4Details.Count == 0)"
+                             MinusEnabled="false"
+                             OnPlus="@AddAdditionalIPv4Detail"
+                             OnPlusMinus="BeginEdit" />
+
+            @foreach (var i in State.AdditionalIpV4Details.Select((ipV4Detail, index) => new { IpV4Detail = ipV4Detail, Index = index }))
+            {
+                var ipAddressLabel = TechnicalTerms.IpAddress;
+                var ipAddressFieldKey = new NetworkInterfaceFieldKey { DetailIndex = i.Index, FieldIndex = 0 };
+
+                var subnetMaskLabel = TechnicalTerms.SubnetMask;
+                var subnetMaskFieldKey = new NetworkInterfaceFieldKey { DetailIndex = i.Index, FieldIndex = 1 };
+
+                <SettingsFieldSeparator />
+
+                <SettingsField Label="@ipAddressLabel" @key="ipAddressFieldKey">
+                    <SettingsFieldTextBox Placeholder="@ipAddressLabel" @bind-Value="i.IpV4Detail.IpAddress" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsField Label="@subnetMaskLabel" @key="subnetMaskFieldKey">
+                    <SettingsFieldTextBox Placeholder="@subnetMaskLabel" @bind-Value="i.IpV4Detail.SubnetMask" @bind-Value:after="BeginEdit" />
+                </SettingsField>
+
+                <SettingsStepper PlusEnabled="@(i.Index == State.AdditionalIpV4Details.Count - 1)"
+                                 MinusEnabled="true"
+                                 OnPlus="@AddAdditionalIPv4Detail"
+                                 OnMinus="@(() => RemoveAdditionalIPv4Detail(i.IpV4Detail))"
+                                 OnPlusMinus="BeginEdit"
+                                 @key="i.Index" />
+            }
+        </AdditionalSettingsFields>
+    </IpV4SettingsGroup>
+
+    @if (State.IpV4ConfigurationMode == IpConfigurationMode.AutomaticDhcp)
+    {
+        <SettingsGroup Title="@TechnicalTerms.DhcpLease" @bind-Expanded="State.DhcpLeaseSettingsGroupExpanded">
+            <SettingsField Label="@Localization.NetworkInterfaceTcpIpControlPanel.LeaseDuration" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @_dhcpLeaseDuration.Localize()
+            </SettingsField>
+
+            <SettingsField Label="@Localization.NetworkInterfaceTcpIpControlPanel.LeaseStart" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @_dhcpLeaseStart.LocalizeFullDateLongTime()
+            </SettingsField>
+
+            <SettingsField Label="@Localization.NetworkInterfaceTcpIpControlPanel.LeaseEnd" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @_dhcpLeaseEnd.LocalizeFullDateLongTime()
+            </SettingsField>
+
+            <SettingsField Label="@Localization.NetworkInterfaceTcpIpControlPanel.LastFetch" IsLoading="@State.DhcpLeaseFetching" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @SystemConfigurationService.LastDhcpLeaseFetchUtc.AdjustToTimeZone(TimeProvider.LocalTimeZone).LocalizeFullDateLongTime()
+            </SettingsField>
+
+            <SettingsField Label="@string.Format(UserActions.RenewSomething, TechnicalTerms.DhcpLease)">
+                <SettingsFieldButton IconCssClass="@_refreshIconCssClasses" Text="@CommonVocabulary.Renew" OnClick="@RenewDhcpLease" Enabled="@(CanRenewDhcpLease() || _renewingDhcpLease)" Busy="@_renewingDhcpLease" BusyIndication="ButtonBusyIndication.SweepAndSpinningIcon" />
+            </SettingsField>
+        </SettingsGroup>
+    }
+
+    <SettingsGroup Title="@($"{TechnicalAcronyms.VLan} 802.1Q - {Localization.NetworkInterfaceTcpIpControlPanel.NetworkSegmentation}")" Expanded="@State.VLanEnabled">
+        <Expander>
+            <SwitchExpander @bind-Value="@State.VLanEnabled" @bind-Value:after="BeginEdit" />
+        </Expander>
+
+        <ChildContent>
+            <SettingsInformation>
+                <b>@CommonVocabulary.Hint</b>: @Localization.NetworkInterfaceTcpIpControlPanel.VlanUsageHint
+            </SettingsInformation>
+
+            <SettingsField Label="@Constants.VLanIdLabel">
+                <SettingsFieldTextBox Placeholder="@Constants.VLanIdLabel" Subline="@Localization.NetworkInterfaceTcpIpControlPanel.VLanIdSettingsFieldSubline" @bind-Value="State.VLanId" @bind-Value:after="BeginEdit" />
+            </SettingsField>
+        </ChildContent>
+    </SettingsGroup>
+</SettingsLayout>
+
+<ConfirmCancelDialog HeaderText="@CommonVocabulary.Warning"
+                     OnConfirm="@OnManualConfigConfirm"
+                     OnCancel="@OnManualConfigCancel"
+                     @bind-Visible="_switchToManualConfigurationWarningDialog">
+    <Body>
+        @Localization.NetworkInterfaceTcpIpControlPanel.SwitchToManualConfigurationWarningDialogBody
+    </Body>
+</ConfirmCancelDialog>
+
+<OkDialog HeaderText="@CommonVocabulary.Error"
+          @bind-Visible="_showErrorDialog">
+    <Body>
+        @(_errorMessage is null ? CommonPhrases.AnUnknownErrorOccurred : string.Format(Localization.NetworkInterfaceTcpIpControlPanel.ErrorBody, _errorMessage))
+    </Body>
+</OkDialog>

@@ -9,5 +9,5 @@ internal sealed class DateAndTimeControlPanelDescriptor : IControlPanelDescripto
 {
     public string Title => string.Format(CultureInfo.CurrentCulture, CommonPatterns.ThisAndThat, CommonVocabulary.Date, CommonVocabulary.Time);
     public Uri? IconUrl => null;
-    public int? Position => null;
+    public int? Position => 1;
 }

@@ -8,5 +8,5 @@ internal sealed class LanguageControlPanelDescriptor : IControlPanelDescriptor<L
 {
     public string Title => CommonVocabulary.Language;
     public Uri? IconUrl => null;
-    public int? Position => null;
+    public int? Position => 2;
 }

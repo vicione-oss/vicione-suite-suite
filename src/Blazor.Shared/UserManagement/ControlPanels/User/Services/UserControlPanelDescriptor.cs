@@ -6,7 +6,8 @@ using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.UserManagement.ControlPanels.User.Services;
 
-internal sealed class UserControlPanelDescriptor : IControlPanelDescriptor<UserControlPanel>
+internal sealed class UserControlPanelDescriptor
+    : IControlPanelDescriptor<UserControlPanel>, IControlPanelParentDescriptor
 {
     public string Title => CommonVocabulary.User;
     public Uri? IconUrl => SvgIcon.User.GetPath();

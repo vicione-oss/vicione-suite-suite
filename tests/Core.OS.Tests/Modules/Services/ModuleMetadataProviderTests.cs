@@ -477,12 +477,11 @@ public class ModuleMetadataProviderTests
         }
 
         [Fact]
-        public async Task Should_return_available_metadata_assets_only_for_installed_modules_if_install_flag_is_disabled()
+        public async Task Should_return_available_modules_if_installation_is_disabled()
         {
             // Arrange
             await using var serviceProvider = SetupServiceProvider();
             var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
-            var request = new GetModuleMetadataBundlesRequest(true, true);
             var metadata = await TestFactory.GetEmbeddedModuleMetadata(true);
             var installed = metadata
                 .Select(k => new ModuleMetadataBundle
@@ -494,17 +493,114 @@ public class ModuleMetadataProviderTests
                 })
                 .First();
 
+            _loaderOptions.Value.Returns(new ModuleLoaderOptions { AllowInstallation = false });
             _moduleManager.GetManifestModules().Returns([installed]);
             _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
 
-            // Act        
-            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, true), TestContext.Current.CancellationToken);
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(false, true), TestContext.Current.CancellationToken);
 
             // Assert
-            result
-                .All(k => k.Metadata.Name == installed.Metadata.Name)
-                .Should()
-                .BeTrue("Only available metadata assets of installed module");
+            result.Should().NotBeEmpty();
+            result.Should().OnlyContain(k => !k.Installed && !k.CanBeModified);
+        }
+
+        [Fact]
+        public async Task Should_return_only_installed_modules_if_available_ones_are_not_requested()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
+            var installed = new ModuleMetadataBundle
+            {
+                ModuleId = metadata.First().Name,
+                Metadata = metadata.First(),
+                Installed = true,
+            };
+
+            _moduleManager.GetManifestModules().Returns([installed]);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
+
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, false, ResolveUpdates: true), TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().ContainSingle().Which.ModuleId.Should().Be(installed.ModuleId);
+        }
+
+        [Fact]
+        public async Task Should_return_only_available_modules_if_installed_ones_are_not_requested()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata(false);
+            var installed = new ModuleMetadataBundle
+            {
+                ModuleId = metadata.First().Name,
+                Metadata = metadata.First(),
+                Installed = true,
+            };
+
+            _moduleManager.GetManifestModules().Returns([installed]);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(metadata);
+
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(false, true), TestContext.Current.CancellationToken);
+
+            // Assert
+            result.Should().NotBeEmpty();
+            result.Should().NotContain(k => k.Installed || k.ModuleId == installed.ModuleId);
+        }
+
+        [Fact]
+        public async Task Should_not_query_the_repository_if_neither_available_modules_nor_updates_are_requested()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+
+            _moduleManager.GetManifestModules().Returns([]);
+
+            // Act
+            await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, false), TestContext.Current.CancellationToken);
+
+            // Assert
+            await _artifactCache.DidNotReceiveWithAnyArgs().GetAvailableModuleMetadata(default, TestContext.Current.CancellationToken);
+        }
+
+        [Fact]
+        public async Task Should_resolve_updates_of_installed_modules_without_returning_available_ones()
+        {
+            // Arrange
+            await using var serviceProvider = SetupServiceProvider();
+            var cache = serviceProvider.GetRequiredService<ModuleMetadataProvider>();
+            var metadata = await TestFactory.GetEmbeddedModuleMetadata();
+            var module = new ModuleMetadataBundle
+            {
+                ModuleId = metadata.First().Name,
+                Metadata = metadata.First(),
+                Installed = true
+            };
+            var moduleVersion = Version.Parse(module.Metadata.Version);
+            var newerVersion = new Version(moduleVersion.Major, moduleVersion.Minor + 1, 0).ToString(3);
+            var available = new List<ModuleMetadata>
+            {
+                new() { Name = module.ModuleId, Version = newerVersion, MinSuiteSdkVersion = module.Metadata.MinSuiteSdkVersion },
+                new() { Name = "Other.Module", Version = "1.0.0", MinSuiteSdkVersion = module.Metadata.MinSuiteSdkVersion },
+            };
+
+            _moduleManager.GetManifestModules().Returns([module]);
+            _artifactCache.GetAvailableModuleMetadata(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(available);
+
+            // Act
+            var result = await cache.GetModuleMetadata(new GetModuleMetadataOptions(true, false, ResolveUpdates: true), TestContext.Current.CancellationToken);
+
+            // Assert
+            var bundle = result.Should().ContainSingle().Subject;
+            bundle.CanUpdate.Should().BeTrue();
+            bundle.AvailableVersions.Should().Contain(newerVersion);
         }
 
         [Fact]

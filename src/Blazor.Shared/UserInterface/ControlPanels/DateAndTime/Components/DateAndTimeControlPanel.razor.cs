@@ -1,4 +1,4 @@
-﻿using Blazor.Shared.Services;
+using Blazor.Shared.Services;
 using Blazor.Shared.UserInterface.ControlPanels.DateAndTime.Services;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;

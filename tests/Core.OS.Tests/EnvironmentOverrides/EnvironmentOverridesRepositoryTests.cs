@@ -262,8 +262,9 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
         // panel renders an empty grid, and the next save truncates the file to what the admin typed.
         var fileSystem = Substitute.For<IFileSystem>();
         fileSystem.Path.Returns(_fileSystem.Path);
-        fileSystem.File.Exists(OverrideFilePath).Returns(true);
-        fileSystem.File.ReadAllTextAsync(OverrideFilePath, Arg.Any<CancellationToken>())
+        var path = EnvironmentOverridesFile.ResolvePath(_fileSystem, HomeDirectory)!;
+        fileSystem.File.Exists(path).Returns(true);
+        fileSystem.File.ReadAllTextAsync(path, Arg.Any<CancellationToken>())
             .ThrowsAsync(new UnauthorizedAccessException());
         var repository = CreateRepository(fileSystem);
 

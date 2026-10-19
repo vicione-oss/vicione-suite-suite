@@ -123,12 +123,6 @@
   <data name="BackupDescriptionBannerTitle" xml:space="preserve">
     <value>System Sicherung und Wiederherstellung</value>
   </data>
-  <data name="BackupErrorText" xml:space="preserve">
-    <value>Die hochgeladene Datei ist nicht im richtigen Format. Bitte verwenden Sie nur *.zip Dateien.</value>
-  </data>
-  <data name="BackupErrorTitle" xml:space="preserve">
-    <value>Ein Fehler ist aufgetreten</value>
-  </data>
   <data name="BackupExportConfigurationFile" xml:space="preserve">
     <value>Konfigurationsdatei exportieren:</value>
   </data>
@@ -204,5 +198,8 @@ Hinweis: Dies setzt das Betriebssystem nicht zurück. Dateien oder Änderungen, 
   </data>
   <data name="FileUploadCancelled" xml:space="preserve">
     <value>Der Datei-Upload wurde abgebrochen.</value>
+  </data>
+  <data name="FileUploadCancelledOnLeave" xml:space="preserve">
+    <value>Der Upload von {0} wurde abgebrochen, weil seine Seite verlassen wurde.</value>
   </data>
 </root>
