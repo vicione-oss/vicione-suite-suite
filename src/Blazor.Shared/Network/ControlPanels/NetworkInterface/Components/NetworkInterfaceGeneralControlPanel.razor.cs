@@ -1,3 +1,4 @@
+using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,13 @@ public sealed partial class NetworkInterfaceGeneralControlPanel : NetworkControl
 
     [Inject]
     private IUiMediator UiMediator { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await EnsureDHCPLease();
+    }
 
     protected override async ValueTask DisposeAsyncCore()
     {
@@ -102,13 +110,30 @@ public sealed partial class NetworkInterfaceGeneralControlPanel : NetworkControl
         await BeginEdit();
     }
 
-    // Live readouts of system configuration that the TcpIp/Hardware tabs edit (VLan info, MAC address), so this
-    // tab needs to re-render when it changes too, even though it does not itself own that state.
-    protected override Task SystemConfigurationChanged(CancellationToken cancellationToken)
+    // General Information shows system configuration that the TcpIp/Hardware/DNS panels edit (IP addresses, VLan info,
+    // MAC address, DNS servers), so this tab needs to refresh when it changes, even though it does not own that state.
+    protected override async Task SystemConfigurationChanged(CancellationToken cancellationToken)
     {
-        StateHasChanged();
+        await EnsureDHCPLease();
 
-        return Task.CompletedTask;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task EnsureDHCPLease()
+    {
+        try
+        {
+            await State.EnsureDHCPLease(UiMediator, SystemConfigurationService, _cancellationTokenSource.Token);
+        }
+        catch (Exception exception) when (exception is OperationCanceledException or ObjectDisposedException)
+        {
+            // The tab was closed while the lease was being fetched.
+        }
+        catch (Exception exception)
+        {
+            // The lease stays as it was, General Information then shows DHCP without an address.
+            LogGetDHCPLeaseInformationRequestFailed(Logger, exception);
+        }
     }
 
     private async Task RenderLoadingIndication()
@@ -116,4 +141,7 @@ public sealed partial class NetworkInterfaceGeneralControlPanel : NetworkControl
 
     [LoggerMessage(LogLevel.Error, "{Call} failed")]
     private static partial void LogGetNetworkStatusInformationRequestFailed(ILogger<NetworkInterfaceGeneralControlPanel> logger, Exception exception, string call);
+
+    [LoggerMessage(LogLevel.Warning, "Fetching the DHCP lease failed")]
+    private static partial void LogGetDHCPLeaseInformationRequestFailed(ILogger<NetworkInterfaceGeneralControlPanel> logger, Exception exception);
 }

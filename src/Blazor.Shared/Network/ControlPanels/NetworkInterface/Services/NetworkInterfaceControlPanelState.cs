@@ -13,8 +13,6 @@ public sealed class NetworkInterfaceControlPanelState : NetworkControlPanelState
     internal bool Enabled { get; set; }
     internal IpConfigurationMode IpV4ConfigurationMode { get; set; }
 
-    internal List<IpAddressInformation> IpAddresses { get; set; } = [];
-
     internal NetworkInterfaceIPv4Detail FirstIpV4Detail { get; set; } = new();
     internal List<NetworkInterfaceIPv4Detail> AdditionalIpV4Details { get; set; } = [];
     internal string? DefaultGateway { get; set; }

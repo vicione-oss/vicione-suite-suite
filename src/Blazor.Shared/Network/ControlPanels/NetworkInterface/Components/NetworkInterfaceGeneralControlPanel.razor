@@ -71,7 +71,7 @@
             </SettingsField>
         </div>
 
-        @foreach (var address in State.IpAddresses)
+        @foreach (var address in State.GetIpAddresses(SystemConfigurationService))
         {
             <div class="section" data-expanded="@State.GeneralInformationExpanded">
                 <SettingsField Label="@Localization.NetworkTerms.IPv4Configuration">
@@ -101,13 +101,13 @@
         <div class="section" data-expanded="@State.GeneralInformationExpanded">
             <SettingsField Label="@TechnicalTerms.DnsServer">
                 <div class="dns-server-grid">
-                    @if (!SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Addresses.Any() &&
+                    @if (!State.GetStaticDnsNameServers(SystemConfigurationService).Any() &&
                          !State.GetDhcpDnsNameServers(SystemConfigurationService).Any())
                     {
                         <div>@TechnicalTerms.Disabled</div>
                     }
 
-                    @foreach (var nameServer in SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Addresses)
+                    @foreach (var nameServer in State.GetStaticDnsNameServers(SystemConfigurationService))
                     {
                         <div>@nameServer.ToString()</div>
                     }

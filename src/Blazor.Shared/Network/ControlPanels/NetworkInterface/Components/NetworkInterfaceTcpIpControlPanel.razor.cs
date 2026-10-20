@@ -1,8 +1,10 @@
+using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Core.Shared.HostManagement.Requests;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using Sdk.Client.Infrastructure;
 using ViciOne.Ui.Localization.Extensions;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
@@ -27,6 +29,9 @@ public sealed partial class NetworkInterfaceTcpIpControlPanel : NetworkControlPa
     private TimeSpan? _dhcpLeaseDuration;
 
     [Inject]
+    private ILogger<NetworkInterfaceTcpIpControlPanel> Logger { get; set; } = default!;
+
+    [Inject]
     private IUiMediator UiMediator { get; set; } = default!;
 
     [Inject(Key = Sdk.Constants.ClientTimeProviderServiceKey)]
@@ -39,6 +44,15 @@ public sealed partial class NetworkInterfaceTcpIpControlPanel : NetworkControlPa
         SetDhcpLeaseInformation();
 
         State.DhcpLeaseFetching = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await EnsureDHCPLease();
+
+        SetDhcpLeaseInformation();
     }
 
     protected override async ValueTask DisposeAsyncCore()
@@ -72,7 +86,7 @@ public sealed partial class NetworkInterfaceTcpIpControlPanel : NetworkControlPa
     private void IpV4ConfigurationModeChanged()
     {
         if (State.IpV4ConfigurationMode is IpConfigurationMode.Manual &&
-            SystemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers.Addresses.Count == 0)
+            State.GetStaticDnsNameServers(SystemConfigurationService).Count == 0)
         {
             _switchToManualConfigurationWarningDialog = true;
             return;
@@ -133,9 +147,28 @@ public sealed partial class NetworkInterfaceTcpIpControlPanel : NetworkControlPa
 
     protected override async Task SystemConfigurationChanged(CancellationToken cancellationToken)
     {
+        await EnsureDHCPLease();
+
         SetDhcpLeaseInformation();
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task EnsureDHCPLease()
+    {
+        try
+        {
+            await State.EnsureDHCPLease(UiMediator, SystemConfigurationService, _cancellationTokenSource.Token);
+        }
+        catch (Exception exception) when (exception is OperationCanceledException or ObjectDisposedException)
+        {
+            // The tab was closed while the lease was being fetched.
+        }
+        catch (Exception exception)
+        {
+            // The lease stays as it was, the DHCP lease group then shows no lease.
+            LogGetDHCPLeaseInformationRequestFailed(Logger, exception);
+        }
     }
 
     private void SetDhcpLeaseInformation()
@@ -151,4 +184,7 @@ public sealed partial class NetworkInterfaceTcpIpControlPanel : NetworkControlPa
 
     private async Task RenderLoadingIndication()
         => await Task.Delay(1000, _cancellationTokenSource.Token); // allow browser to render loading indication
+
+    [LoggerMessage(LogLevel.Warning, "Fetching the DHCP lease failed")]
+    private static partial void LogGetDHCPLeaseInformationRequestFailed(ILogger<NetworkInterfaceTcpIpControlPanel> logger, Exception exception);
 }

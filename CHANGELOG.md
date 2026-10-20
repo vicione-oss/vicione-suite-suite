@@ -101,6 +101,7 @@
 - `DateAndTimeControlPanel`, the UTC-12 time zone (International Date Line West) shows its map image
 - Network interface settings, _Physical address (MAC)_ shows the hardware address also while a user-defined MAC address is set
 - Network interface settings, a manual MAC address equal to the physical address saves without an error and turns the manual MAC address off
+- Network interface settings, _General Information_ hides disabled DNS servers and updates when the network settings change
 
 ### Removed
 

@@ -6,7 +6,9 @@ using Blazor.Shared.Network.Extensions;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using Core.Shared.HostManagement.Extensions;
+using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Contracts.Network;
+using Sdk.Client.Infrastructure;
 using ViciOne.Ui.Localization.Resources;
 
 namespace Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions;
@@ -42,6 +44,13 @@ internal static class NetworkInterfaceControlPanelStateExtensions
                 return state.OriginalPhysicalAddress ?? CommonVocabulary.Unknown;
         }
 
+        internal List<IPAddress> GetStaticDnsNameServers(ISystemConfigurationService systemConfigurationService)
+        {
+            var nameServers = systemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers;
+
+            return nameServers.Enabled ? nameServers.Addresses : [];
+        }
+
         internal List<IPAddress> GetDhcpDnsNameServers(ISystemConfigurationService systemConfigurationService)
         {
             var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
@@ -53,33 +62,58 @@ internal static class NetworkInterfaceControlPanelStateExtensions
             return [];
         }
 
-        internal void UpdateIpAddresses(NetworkInterfaceDetail networkInterface)
+        internal List<IpAddressInformation> GetIpAddresses(ISystemConfigurationService systemConfigurationService)
         {
-            state.IpAddresses = [];
+            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
+                .ElementAtOrDefault(state.NetworkInterfaceIndex);
 
-            if (networkInterface.IPv4.DHCPEnabled)
+            if (networkInterface is null)
+                return [];
+
+            if (!networkInterface.IPv4.DHCPEnabled)
             {
-                if (state.DHCPLease is not null && state.DHCPLease.IPv4Detail is not null)
-                {
-                    state.IpAddresses.Add(new(IpConfigurationMode.AutomaticDhcp,
-                        state.DHCPLease.IPv4Detail.IPAddress,
-                        state.DHCPLease.IPv4Detail.Netmask,
-                        state.DHCPLease.Gateway));
-                }
-                else
-                {
-                    // HostManagement calls this mode 'LinkLocal': DHCP is enabled without lease information, so only the gateway is known.
-                    state.IpAddresses.Add(new(IpConfigurationMode.AutomaticDhcp,
-                        IPAddress.None,
-                        IPAddress.None,
-                        state.DHCPLease?.Gateway));
-                }
+                return [.. networkInterface.IPv4.IPv4Details
+                    .Select(detail => new IpAddressInformation(IpConfigurationMode.Manual, detail.IPAddress, detail.Netmask, networkInterface.IPv4.Gateway))];
             }
-            else
+
+            if (state.DHCPLease?.IPv4Detail is { } leaseDetail)
+                return [new(IpConfigurationMode.AutomaticDhcp, leaseDetail.IPAddress, leaseDetail.Netmask, state.DHCPLease.Gateway)];
+
+            // HostManagement calls this mode 'LinkLocal': DHCP is enabled without lease information, so only the gateway is known.
+            return [new(IpConfigurationMode.AutomaticDhcp, IPAddress.None, IPAddress.None, state.DHCPLease?.Gateway)];
+        }
+
+        internal async Task UpdateDHCPLease(IUiMediator mediator, NetworkInterfaceDetail networkInterface, CancellationToken cancellationToken)
+        {
+            if (!networkInterface.IPv4.DHCPEnabled)
             {
-                foreach (var detail in networkInterface.IPv4.IPv4Details)
-                    state.IpAddresses.Add(new(IpConfigurationMode.Manual, detail.IPAddress, detail.Netmask, networkInterface.IPv4.Gateway));
+                state.DHCPLease = null;
+                return;
             }
+
+            var response = await mediator.Request<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>(
+                new GetDHCPLeaseInformation(networkInterface.CommonInformation.Name), cancellationToken);
+
+            state.DHCPLease = response.DHCPLease;
+        }
+
+        /// <summary>
+        /// Fetches the lease when DHCP is enabled and no leased address is known, e.g. after the interface was switched to
+        /// DHCP, as no reset handler runs after a save. A running reset fetches the lease itself.
+        /// </summary>
+        internal async Task EnsureDHCPLease(IUiMediator mediator, ISystemConfigurationService systemConfigurationService,
+            CancellationToken cancellationToken)
+        {
+            if (state.IsLoading || state.DHCPLease?.IPv4Detail is not null)
+                return;
+
+            var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces
+                .ElementAtOrDefault(state.NetworkInterfaceIndex);
+
+            if (networkInterface is null || !networkInterface.IPv4.DHCPEnabled)
+                return;
+
+            await state.UpdateDHCPLease(mediator, networkInterface, cancellationToken);
         }
 
         internal void UpdateIPv4Settings(NetworkInterfaceDetail networkInterface)
@@ -118,7 +152,6 @@ internal static class NetworkInterfaceControlPanelStateExtensions
             state.Name = string.Empty;
             state.DHCPLease = null;
             state.OriginalPhysicalAddress = null;
-            state.IpAddresses = [];
 
             state.Enabled = false;
         }

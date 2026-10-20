@@ -1,3 +1,4 @@
+using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions;
 using Blazor.Shared.Services;
 using Core.Shared.HostManagement.Requests;
 using HostManagement.Shared.Contracts.Network;
@@ -44,19 +45,8 @@ internal abstract class NetworkInterfaceControlPanelResetHandlerBase(IUiMediator
 
     protected abstract void ClearChanges(NetworkInterfaceControlPanelState state);
 
-    protected async Task UpdateDHCPLease(NetworkInterfaceControlPanelState state, NetworkInterfaceDetail networkInterface, CancellationToken cancellationToken)
-    {
-        if (!networkInterface.IPv4.DHCPEnabled)
-        {
-            state.DHCPLease = null;
-            return;
-        }
-
-        var response = await mediator.Request<GetDHCPLeaseInformation, GetDHCPLeaseInformationResponse>(
-            new GetDHCPLeaseInformation(state.Name), cancellationToken);
-
-        state.DHCPLease = response.DHCPLease;
-    }
+    protected Task UpdateDHCPLease(NetworkInterfaceControlPanelState state, NetworkInterfaceDetail networkInterface, CancellationToken cancellationToken)
+        => state.UpdateDHCPLease(mediator, networkInterface, cancellationToken);
 
     protected async Task UpdateOriginalPhysicalAddress(NetworkInterfaceControlPanelState state, CancellationToken cancellationToken)
     {
