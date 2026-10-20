@@ -992,7 +992,9 @@
   <!-- Keeps the SDK's TypeScript targets from also publishing the suite.js sources as separate files in wwwroot/js. -->
   <Target Name="ExcludeSuiteScriptsFromTypeScriptOutput" AfterTargets="RunTscCompile" BeforeTargets="GetAbsolutePathsOfGeneratedJavaScriptFiles">
     <ItemGroup>
-      <TypeScriptGeneratedFiles Remove="@(SuiteScript->'$(SuiteScriptsOutputFolder)%(Filename).js')" />
+      <_SuiteScriptOutput Include="@(SuiteScript->'$(SuiteScriptsOutputFolder)%(Filename).js')" />
+      <!-- tsc reports paths with '/', $(MSBuildProjectDirectory) has '\' on Windows: compare full paths, not strings. -->
+      <TypeScriptGeneratedFiles Remove="@(_SuiteScriptOutput)" MatchOnMetadata="FullPath" MatchOnMetadataOptions="PathLike" />
     </ItemGroup>
   </Target>
 
