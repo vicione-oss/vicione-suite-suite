@@ -19,6 +19,7 @@
 - Login page, the OpenID provider and passkey buttons show an icon and sit in their own section below the divider
 - **Every dynamic response now carries a Content Security Policy and `X-Frame-Options: DENY`**. **Breaking change for modules:** the policy is relaxed for now and will be tightened in a later release. See `docs/ADRs/ADR-006-content-security-policy.md`
 - **The Suite now requires a browser with CSP Level 3 support**; in older browsers parts of the UI stop working
+- Every dynamic response carries a `Permissions-Policy` that turns off camera, microphone, geolocation, screen capture, payment, USB, serial, HID and Bluetooth. **Behaviour change:** a module that uses one of these features stops working in Chromium-based browsers
 - HostManagement requests are no longer delayed by 250 ms each, and events from HostManagement reach the Suite
 - Backups created before this version can no longer be restored, because they hold the HostManagement 1.x system configuration. **Upgrade:** create a new backup after updating
 - Restarts, flashing, module service restarts and backup restores show an error when HostManagement disables them, see `docs/hostmanagement-capabilities.md`. **Upgrade:** create `/etc/hostmanagement/SupportedCapabilities.conf` as described there, without it every capability is disabled

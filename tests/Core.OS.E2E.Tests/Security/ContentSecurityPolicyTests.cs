@@ -29,6 +29,10 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
 
     private const string ExpectedReportingEndpoints = "csp-endpoint=\"" + ViolationReportRoute + "\"";
 
+    private const string ExpectedPermissionsPolicy =
+        "camera=(), microphone=(), geolocation=(), display-capture=(), payment=(), " +
+        "usb=(), serial=(), hid=(), bluetooth=()";
+
     /// <summary>
     /// A report as Chromium actually sends it through <c>report-to</c>, captured from the wire —
     /// the Reporting API's batch, not the single legacy document.
@@ -102,6 +106,7 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
         ValuesOf(response, "content-security-policy-report-only").Should().BeEmpty();
         ValuesOf(response, "x-frame-options").Should().Equal("DENY");
         ValuesOf(response, "reporting-endpoints").Should().Equal(ExpectedReportingEndpoints);
+        ValuesOf(response, "permissions-policy").Should().Equal(ExpectedPermissionsPolicy);
     }
 
     /// <summary>

@@ -92,11 +92,16 @@ flowchart TD
 
 The Content Security Policy itself is decided in [ADR-006](ADRs/ADR-006-content-security-policy.md); this section only records which layer sends which header, and why.
 
-- **The Suite sends the policy and `X-Frame-Options`**, from `ContentSecurityPolicy` and `UseSecurityHeaders`.
+- **The Suite sends the policy, `X-Frame-Options` and `Permissions-Policy`**, from `ContentSecurityPolicy` and `UseSecurityHeaders`.
   It is the only layer present in every deployment — installations also run Kestrel directly or sit behind a customer-managed proxy — which is what decided it in the ADR.
+- **`Permissions-Policy` disables camera, microphone, geolocation, screen capture, payment, USB, serial, HID and Bluetooth.**
+  Nothing in the Suite uses them, so script injected into its origin cannot reach them either, not even where the user once granted the origin access.
+  Passkeys (`publickey-credentials-get` and `-create`) and `clipboard-write` stay unlisted: the Suite uses both, and their default allowlist `self` already keeps them from foreign frames.
+  Only Chromium-based browsers enforce the header; Firefox and Safari ignore it.
+  A module that needs a disabled feature stops working in Chromium, and enabling the feature again takes a release.
 - **The failsafe and downgrade hosts send a stricter policy of their own**, because they answer when the Suite did not come up.
   They carry no reporting directive — the app that would answer `/csp-report` is the one that failed.
-- **The packaged nginx sends HSTS, `X-Content-Type-Options` and `Referrer-Policy`**, and deliberately no CSP and no `X-Frame-Options`.
+- **The packaged nginx sends HSTS, `X-Content-Type-Options` and `Referrer-Policy`**, and deliberately no CSP, no `X-Frame-Options` and no `Permissions-Policy`.
   A duplicate `X-Frame-Options` may be ignored by the browser altogether, so exactly one sender is the point.
 - **`src/html/unavailable.html` in `deb-packaging` needs no CSP exception**, although it carries an inline `<style>` and `<script>`.
   nginx serves it only when the upstream is unreachable, so no policy of the Suite's can be on that response, and nginx sends none of its own.

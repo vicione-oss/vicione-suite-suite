@@ -7,6 +7,17 @@ namespace Core.OS.Security.Extensions;
 internal static class SecurityHeaderExtensions
 {
     private const string ReportingEndpointsHeader = "Reporting-Endpoints";
+    private const string PermissionsPolicyHeader = "Permissions-Policy";
+
+    /// <summary>
+    /// Disables the device, location and payment features nothing in the suite uses, so script
+    /// injected into its origin cannot reach them, not even where the user once granted the origin
+    /// access. Passkeys and the clipboard stay unlisted: the suite uses both, and their default
+    /// allowlist, <c>self</c>, already keeps them from foreign frames.
+    /// </summary>
+    private const string PermissionsPolicy =
+        "camera=(), microphone=(), geolocation=(), display-capture=(), payment=(), " +
+        "usb=(), serial=(), hid=(), bluetooth=()";
 
     /// <summary>
     /// What a violation report is allowed to weigh. A single report is a few hundred bytes and the
@@ -17,9 +28,9 @@ internal static class SecurityHeaderExtensions
     private const int MaxViolationReportBytes = 64 * 1024;
 
     /// <summary>
-    /// Sends <paramref name="policy"/> as the Content Security Policy of ADR-006 and the legacy
-    /// <c>X-Frame-Options</c> on every dynamic response, so both are present in deployments without
-    /// the packaged nginx as well. <paramref name="reportingEndpoints"/> addresses the policy's
+    /// Sends <paramref name="policy"/> as the Content Security Policy of ADR-006, the legacy
+    /// <c>X-Frame-Options</c> and the <c>Permissions-Policy</c> on every dynamic response, so all
+    /// three are present in deployments without the packaged nginx as well. <paramref name="reportingEndpoints"/> addresses the policy's
     /// <c>report-to</c> group and is omitted by the hosts whose policy has no such group.
     /// </summary>
     /// <remarks>
@@ -53,6 +64,7 @@ internal static class SecurityHeaderExtensions
                 response.Headers.ContentSecurityPolicy =
                     StringValues.Concat(response.Headers.ContentSecurityPolicy, policy);
                 response.Headers.XFrameOptions = "DENY";
+                response.Headers[PermissionsPolicyHeader] = PermissionsPolicy;
 
                 if (reportingEndpoints is not null)
                     response.Headers[ReportingEndpointsHeader] = reportingEndpoints;
