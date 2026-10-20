@@ -28,7 +28,7 @@ public class ConnectionsTagsControlPanelTests
         var ctx = new BunitContext();
         ctx.Services.AddSingleton(_connectionService);
         ctx.Services.AddControlPanelInfrastructure();
-        ctx.Services.AddConnectionsControlPanel();
+        ctx.Services.AddConnectionsTagsControlPanel();
 
         ctx.SetupBlazorUiComponents(setup =>
         {

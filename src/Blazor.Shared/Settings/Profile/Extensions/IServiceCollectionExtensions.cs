@@ -10,7 +10,9 @@ public static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddProfileManagement(this IServiceCollection services)
     {
-        services.AddPasskeyControlPanels();
+        services.AddPasskeysControlPanel()
+            .AddAddPasskeyControlPanel()
+            .AddEditPasskeyControlPanel();
 
         services.AddControlPanel<SharedClientModule, ExternalIdProvidersControlPanel, ExternalIdProvidersControlPanelState>()
             .WithAutoDiscovery<ExternalIdProvidersControlPanelDescriptor>();

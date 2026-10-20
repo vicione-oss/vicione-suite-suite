@@ -25,7 +25,7 @@ public sealed class ModuleManagementInstalledControlPanelTests
             setup.Services.AddScoped(_ => Substitute.For<ISuiteControlService>())
                 .AddScoped(_ => moduleManagementService)
                 .AddControlPanelInfrastructure()
-                .AddModuleManagementControlPanel();
+                .AddModuleManagementInstalledControlPanel();
         });
 
         return ctx;
