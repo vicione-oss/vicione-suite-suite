@@ -194,6 +194,77 @@ public sealed class NetworkInterfaceSaverTests
         captured!.NetworkInterfaces[0].CommonInformation.UserDefinedMACAddress.Should().Be(new UserDefinedMACAddressSettings { Enabled = true, Address = PhysicalAddress.Parse(customMac) });
     }
 
+    [Theory]
+    [InlineData("AA:BB:CC:00:11:22")]
+    [InlineData("aa-bb-cc-00-11-22")]
+    [InlineData("AABBCC001122")]
+    public async Task Should_disable_user_defined_mac_address_when_manual_mac_equals_original_physical_address(string manualMac)
+    {
+        // Arrange
+        SetupSystemConfiguration(CreateNetworkInterface());
+
+        SystemConfiguration? captured = null;
+        using var handler = CreateHandler();
+        SetupMediatorToFireSuccess(handler, cmd => captured = cmd.SystemConfiguration);
+
+        var state = CreateValidState();
+        state.OriginalPhysicalAddress = "AA:BB:CC:00:11:22";
+        state.MacAddressManually = true;
+        state.MacAddress = manualMac;
+
+        // Act
+        var result = await handler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Should().BeOfType<SaveSuccessResult>();
+        captured!.NetworkInterfaces[0].CommonInformation.UserDefinedMACAddress.Should().Be(new UserDefinedMACAddressSettings());
+    }
+
+    [Fact]
+    public async Task Should_turn_off_manual_mac_address_in_state_when_it_equals_original_physical_address()
+    {
+        // Arrange
+        SetupSystemConfiguration(CreateNetworkInterface());
+
+        using var handler = CreateHandler();
+        SetupMediatorToFireSuccess(handler);
+
+        var state = CreateValidState();
+        state.OriginalPhysicalAddress = "AA:BB:CC:00:11:22";
+        state.MacAddressManually = true;
+        state.MacAddress = "AA:BB:CC:00:11:22";
+
+        // Act
+        await handler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        state.MacAddressManually.Should().BeFalse();
+        state.MacAddress.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_use_custom_mac_address_when_original_physical_address_is_unknown()
+    {
+        // Arrange
+        const string customMac = "AA:BB:CC:00:11:22";
+        SetupSystemConfiguration(CreateNetworkInterface());
+
+        SystemConfiguration? captured = null;
+        using var handler = CreateHandler();
+        SetupMediatorToFireSuccess(handler, cmd => captured = cmd.SystemConfiguration);
+
+        var state = CreateValidState();
+        state.OriginalPhysicalAddress = null;
+        state.MacAddressManually = true;
+        state.MacAddress = customMac;
+
+        // Act
+        await handler.Save(state, TestContext.Current.CancellationToken);
+
+        // Assert
+        captured!.NetworkInterfaces[0].CommonInformation.UserDefinedMACAddress.Should().Be(new UserDefinedMACAddressSettings { Enabled = true, Address = PhysicalAddress.Parse(customMac) });
+    }
+
     [Fact]
     public async Task Should_disable_user_defined_mac_address_when_mac_not_set_manually()
     {

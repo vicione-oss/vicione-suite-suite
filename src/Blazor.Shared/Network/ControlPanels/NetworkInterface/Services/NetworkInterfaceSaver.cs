@@ -187,6 +187,17 @@ internal sealed class NetworkInterfaceSaver(
 
         if (PhysicalAddress.TryParse(state.MacAddress, out var address))
         {
+            // HostManagement 2.0 rejects a user-defined MAC equal to the factory MAC; disabled keeps that address.
+            if (PhysicalAddress.TryParse(state.OriginalPhysicalAddress, out var originalPhysicalAddress)
+                && !originalPhysicalAddress.Equals(PhysicalAddress.None)
+                && address.Equals(originalPhysicalAddress))
+            {
+                state.MacAddressManually = false;
+                state.MacAddress = string.Empty;
+                userDefinedMACAddress = new UserDefinedMACAddressSettings();
+                return true;
+            }
+
             userDefinedMACAddress = new UserDefinedMACAddressSettings { Enabled = true, Address = address };
             return true;
         }
