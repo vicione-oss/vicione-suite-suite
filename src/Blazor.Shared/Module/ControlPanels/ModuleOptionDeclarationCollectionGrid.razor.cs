@@ -233,8 +233,9 @@ public sealed partial class ModuleOptionDeclarationCollectionGrid : ComponentBas
 
         if (!string.IsNullOrWhiteSpace(_filterText))
         {
+            // A password value is shown masked, so the filter matches such an option by its key only.
             _itemsQueryable = _itemsQueryable.Where(i => i.Key.Contains(_filterText) ||
-                (i.Value != null && i.Value.Contains(_filterText)));
+                (!i.IsPassword && i.Value != null && i.Value.Contains(_filterText)));
         }
 
         _shouldRender = true;
