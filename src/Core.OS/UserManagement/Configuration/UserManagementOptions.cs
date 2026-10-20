@@ -12,7 +12,7 @@ public sealed class UserManagementOptions
     public string AdministratorName { get; set; } = "Administrator";
 
     [EmailAddress]
-    public string AdministratorEmail { get; set; } = "administrator@administrator.com";
+    public string AdministratorEmail { get; set; } = "administrator@example.com";
 
     [StringLength(32)]
     [MinLength(12)]
