@@ -65,7 +65,7 @@ internal static class IServiceCollectionExtensions
                     .AddIdentity<SuiteUser, SuiteRole>(options =>
                     {
                         options.SignIn.RequireConfirmedAccount
-                            = userManagementOptions.RequireAccountVerificationToLogIn && smtpOptions is not null;
+                            = userManagementOptions.RequireAccountVerificationToLogIn && smtpOptions?.IsConfigured() == true;
                         options.Password.RequiredLength = Constants.MinimumPasswordLength;
                         options.Password.RequireDigit = true;
                         options.Password.RequireLowercase = true;
