@@ -50,6 +50,7 @@
 
 ### Fixed
 
+- Sign-in with `UserManagement:RequireAccountVerificationToLogIn` and a partly filled `Smtp` section no longer locks unconfirmed users out without a message. **Behaviour change:** verification is only required once the `Smtp` section is complete
 - Signing in with an external OpenID provider, and linking one from the profile, were blocked by the Content Security Policy. `form-action` now also names the configured provider's origin (see `docs/ADRs/ADR-006-content-security-policy.md`)
 - Missing release date in `README.md` for version `1.3.0`
 - `RoleControlPanel`, adding a role whose name already exists shows the error and stays in create mode

@@ -1,4 +1,5 @@
-﻿using Core.Shared.Mail;
+﻿using Core.OS.Mail.Extensions;
+using Core.Shared.Mail;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -80,17 +81,5 @@ public sealed class MailkitMailSender(
     private static MailboxAddress ToFromAddress(string fromUserName, string fromAddress)
         => new(fromUserName, fromAddress);
 
-    public bool IsConfigured()
-    {
-        string[] values =
-        [
-            options.Value.FromAddress,
-            options.Value.FromUserName,
-            options.Value.Password,
-            options.Value.ServerAddress
-        ];
-
-        return options.Value.ServerPort != 0
-               && values.All(v => !string.IsNullOrWhiteSpace(v));
-    }
+    public bool IsConfigured() => options.Value.IsConfigured();
 }
