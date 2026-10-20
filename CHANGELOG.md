@@ -59,6 +59,7 @@
 - `TagControlPanel`, the title shows whether a tag is being added or edited and switches to edit after the tag is saved
 - `ArtifactRepositoryControlPanel`, the title shows whether a source is being added or edited and switches to edit after saving
 - `ModuleDetailsControlPanel`, edited module options are saved even when another session changed the options of that module meanwhile
+- `ModuleDetailsControlPanel`, the options filter no longer finds a password option by its hidden value
 - `RolesControlPanel`, a failed role create or delete no longer adds a duplicate row or hides a role that still exists
 - `ConnectionsControlPanel`
   - For tags that fail to be created or updated, the rejected tag will no longer be displayed
