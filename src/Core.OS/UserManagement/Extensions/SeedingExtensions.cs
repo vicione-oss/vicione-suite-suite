@@ -13,7 +13,7 @@ public static partial class SeedingExtensions
     //Users
     internal static SeedUser Eddy => new()
     {
-        Email = "Eddy@worlddomination24.com",
+        Email = "Eddy@example.com",
         UserName = "Eddy",
         Password = "Up2noGood!!!",
         AccessLevel = AccessLevel.Full,
@@ -23,7 +23,7 @@ public static partial class SeedingExtensions
     };
     internal static SeedUser Admin => new()
     {
-        Email = "Admin@it-masters.com",
+        Email = "Admin@example.com",
         UserName = "Admin",
         Password = "Up2noGood!!!",
         AccessLevel = AccessLevel.Full,
