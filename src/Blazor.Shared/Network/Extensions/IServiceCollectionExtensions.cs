@@ -20,7 +20,9 @@ internal static class IServiceCollectionExtensions
             services.AddScoped<IUpdateControlPanelRegistryHandler, UpdateControlPanelRegistryHandler>();
 
             services.AddDnsControlPanel()
-                .AddNetworkInterfaceControlPanel()
+                .AddNetworkInterfaceGeneralControlPanel()
+                .AddNetworkInterfaceTcpIpControlPanel()
+                .AddNetworkInterfaceHardwareControlPanel()
                 .AddNtpControlPanel()
                 .AddProxiesControlPanel()
                 .AddRemoteAccessControlPanel();

@@ -164,7 +164,7 @@ public sealed class UpdateBackupRestoreControlPanelTests
         {
             setup.Services.AddControlPanelInfrastructure();
             setup.Services.AddPopup();
-            setup.Services.AddUpdateControlPanel();
+            setup.Services.AddUpdateBackupRestoreControlPanel();
 
             setup.Services.AddSingleton(mediator);
             setup.Services.AddSingleton(Substitute.For<INavigationService>());

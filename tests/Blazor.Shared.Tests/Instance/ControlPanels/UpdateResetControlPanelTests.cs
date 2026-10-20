@@ -100,7 +100,7 @@ public sealed class UpdateResetControlPanelTests
         {
             setup.Services.AddControlPanelInfrastructure();
             setup.Services.AddPopup();
-            setup.Services.AddUpdateControlPanel();
+            setup.Services.AddUpdateResetControlPanel();
 
             setup.Services.AddSingleton(_mediator);
             setup.Services.AddSingleton(_navigationService);

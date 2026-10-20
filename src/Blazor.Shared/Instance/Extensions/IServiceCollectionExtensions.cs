@@ -5,6 +5,7 @@ using Blazor.Shared.Instance.ControlPanels.Repositories.Services;
 using Blazor.Shared.Instance.ControlPanels.Update;
 using Blazor.Shared.Instance.ControlPanels.Update.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sdk.Client.ControlPanels.Extensions;
 using ViciOne.Ui.Blazor.Components.Grid.Extensions;
 using ArtifactRepositoryControlPanel = Blazor.Shared.Instance.ControlPanels.Repositories.ArtifactRepositoryControlPanel;
@@ -23,7 +24,10 @@ internal static class IServiceCollectionExtensions
             services.AddInstancesControlPanel()
                 .AddInstanceControlPanel()
                 .AddUpdateControlPanel()
-                .AddArtifactRepositoryControlPanels();
+                .AddUpdateBackupRestoreControlPanel()
+                .AddUpdateResetControlPanel()
+                .AddArtifactRepositoryControlPanel()
+                .AddArtifactRepositoriesControlPanel();
 
             return services;
         }
@@ -57,26 +61,44 @@ internal static class IServiceCollectionExtensions
                 .WithCancelHandler<UpdateControlPanelCancelHandler>()
                 .WithResetHandler<UpdateControlPanelResetHandler>();
 
+            return services;
+        }
+
+        public IServiceCollection AddUpdateBackupRestoreControlPanel()
+        {
             services.AddControlPanel<SharedClientModule, UpdateBackupRestoreControlPanel, UpdateBackupRestoreControlPanelState>()
                 .WithAutoDiscovery<UpdateBackupRestoreControlPanelDescriptor>();
 
+            services.AddScoped<UpdateBackupRestoreService>();
+
+            return services;
+        }
+
+        public IServiceCollection AddUpdateResetControlPanel()
+        {
             services.AddControlPanel<SharedClientModule, UpdateResetControlPanel, UpdateResetControlPanelState>()
                 .WithAutoDiscovery<UpdateResetControlPanelDescriptor>();
 
-            services.AddScoped<UpdateBackupRestoreService>();
             services.AddScoped<UpdateResetService>();
 
             return services;
         }
 
-        public IServiceCollection AddArtifactRepositoryControlPanels()
+        public IServiceCollection AddArtifactRepositoryControlPanel()
         {
-            services.AddScoped<IArtifactRepositoryClientService, ArtifactRepositoryClientService>();
+            services.TryAddScoped<IArtifactRepositoryClientService, ArtifactRepositoryClientService>();
 
             services.AddControlPanel<SharedClientModule, ArtifactRepositoryControlPanel, ArtifactRepositoryControlPanelState>()
                 .WithAutoDiscovery<ArtifactRepositoryControlPanelDescriptor>()
                 .WithSaveHandler<ArtifactRepositoryControlPanelSaveHandler>()
                 .WithResetHandler<ArtifactRepositoryControlPanelResetHandler>();
+
+            return services;
+        }
+
+        public IServiceCollection AddArtifactRepositoriesControlPanel()
+        {
+            services.TryAddScoped<IArtifactRepositoryClientService, ArtifactRepositoryClientService>();
 
             services.AddControlPanel<SharedClientModule, ArtifactRepositoriesControlPanel, ArtifactRepositoriesControlPanelState>()
                 .WithAutoDiscovery<ArtifactRepositoriesControlPanelDescriptor>()

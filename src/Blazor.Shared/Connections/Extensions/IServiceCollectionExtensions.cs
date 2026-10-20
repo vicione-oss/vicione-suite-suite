@@ -20,6 +20,7 @@ public static class IServiceCollectionExtensions
             => services
                 .AddConnectionControlPanel()
                 .AddConnectionsControlPanel()
+                .AddConnectionsTagsControlPanel()
                 .AddTagControlPanel();
 
         internal IServiceCollection AddConnectionServices()
@@ -53,6 +54,16 @@ public static class IServiceCollectionExtensions
                 .WithSaveHandler<ConnectionsControlPanelSaveHandler>()
                 .WithResetHandler<ConnectionsControlPanelResetHandler>();
 
+            services.AddConnectionServices();
+
+            services.AddGridItemSelectColumn()
+                .AddGridItemSelection<Guid>(typeof(ConnectionsControlPanelServiceKey));
+
+            return services;
+        }
+
+        internal IServiceCollection AddConnectionsTagsControlPanel()
+        {
             services.AddControlPanel<SharedClientModule, ConnectionsTagsControlPanel, ConnectionsTagsControlPanelState>()
                 .WithAutoDiscovery<ConnectionsTagsControlPanelDescriptor>()
                 .WithSaveHandler<ConnectionsTagsControlPanelSaveHandler>()
@@ -61,7 +72,6 @@ public static class IServiceCollectionExtensions
             services.AddConnectionServices();
 
             services.AddGridItemSelectColumn()
-                .AddGridItemSelection<Guid>(typeof(ConnectionsControlPanelServiceKey))
                 .AddGridItemSelection<Guid>(typeof(ConnectionsTagsControlPanelServiceKey));
 
             return services;

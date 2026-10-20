@@ -9,27 +9,37 @@ namespace Blazor.Shared.Profile.ControlPanels.Passkeys.Extensions;
 
 internal static class IServiceCollectionExtensions
 {
-    public static IServiceCollection AddPasskeyControlPanels(this IServiceCollection services)
+    public static IServiceCollection AddPasskeysControlPanel(this IServiceCollection services)
     {
         services.AddControlPanel<SharedClientModule, PasskeysControlPanel, PasskeysControlPanelState>()
             .WithAutoDiscovery<PasskeysControlPanelDescriptor>()
             .WithSaveHandler<PasskeysControlPanelSaveHandler>()
             .WithResetHandler<PasskeysControlPanelResetHandler>();
 
+        services.AddGridItemSelectColumn()
+            .AddGridItemSelection<string>(typeof(PasskeysControlPanelServiceKey));
+
+        services.AddSingleton<IPasskeyHostSupport, PasskeyHostSupport>();
+
+        return services;
+    }
+
+    public static IServiceCollection AddAddPasskeyControlPanel(this IServiceCollection services)
+    {
         services.AddControlPanel<SharedClientModule, AddPasskeyControlPanel, AddPasskeyControlPanelState>()
             .WithAutoDiscovery<AddPasskeyControlPanelDescriptor>()
             .WithSaveHandler<AddPasskeyControlPanelSaveHandler>()
             .WithResetHandler<AddPasskeyControlPanelResetHandler>();
 
+        return services;
+    }
+
+    public static IServiceCollection AddEditPasskeyControlPanel(this IServiceCollection services)
+    {
         services.AddControlPanel<SharedClientModule, EditPasskeyControlPanel, EditPasskeyControlPanelState>()
             .WithAutoDiscovery<EditPasskeyControlPanelDescriptor>()
             .WithSaveHandler<EditPasskeyControlPanelSaveHandler>()
             .WithResetHandler<EditPasskeyControlPanelResetHandler>();
-
-        services.AddGridItemSelectColumn()
-            .AddGridItemSelection<string>(typeof(PasskeysControlPanelServiceKey));
-
-        services.AddSingleton<IPasskeyHostSupport, PasskeyHostSupport>();
 
         return services;
     }

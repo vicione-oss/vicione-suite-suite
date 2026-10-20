@@ -9,41 +9,45 @@ namespace Blazor.Shared.Tests.Network.ControlPanels.NetworkInterface.Extensions;
 
 public class IServiceCollectionExtensionsTests
 {
-    public sealed class AddNetworkInterfaceControlPanel
+    public static TheoryData<Action<IServiceCollection>, Type> Tabs => new()
     {
-        [Theory]
-        [InlineData(typeof(NetworkInterfaceGeneralControlPanel))]
-        [InlineData(typeof(NetworkInterfaceTcpIpControlPanel))]
-        [InlineData(typeof(NetworkInterfaceHardwareControlPanel))]
-        public void Should_configure_save_and_reset_handler_for_each_tab(Type controlPanelType)
-        {
-            // Arrange
-            var services = new ServiceCollection();
-            var handlerServiceKey = typeof(ControlPanelServiceKey<>).MakeGenericType(controlPanelType);
+        { s => s.AddNetworkInterfaceGeneralControlPanel(), typeof(NetworkInterfaceGeneralControlPanel) },
+        { s => s.AddNetworkInterfaceTcpIpControlPanel(), typeof(NetworkInterfaceTcpIpControlPanel) },
+        { s => s.AddNetworkInterfaceHardwareControlPanel(), typeof(NetworkInterfaceHardwareControlPanel) },
+    };
 
-            // Act
-            services.AddNetworkInterfaceControlPanel();
+    [Theory]
+    [MemberData(nameof(Tabs))]
+    public void Should_configure_save_and_reset_handler_for_each_tab(Action<IServiceCollection> addTab, Type controlPanelType)
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        var handlerServiceKey = typeof(ControlPanelServiceKey<>).MakeGenericType(controlPanelType);
 
-            // Assert - a tab without handlers of its own would neither load nor save
-            services.Should().Contain(d => d.IsKeyedService && (Type?)d.ServiceKey == handlerServiceKey
-                && d.ServiceType == typeof(IControlPanelSaveHandler<NetworkInterfaceControlPanelState>));
+        // Act
+        addTab(services);
 
-            services.Should().Contain(d => d.IsKeyedService && (Type?)d.ServiceKey == handlerServiceKey
-                && d.ServiceType == typeof(IControlPanelResetHandler<NetworkInterfaceControlPanelState>));
-        }
+        // Assert - a tab without handlers of its own would neither load nor save
+        services.Should().Contain(d => d.IsKeyedService && (Type?)d.ServiceKey == handlerServiceKey
+            && d.ServiceType == typeof(IControlPanelSaveHandler<NetworkInterfaceControlPanelState>));
 
-        [Fact]
-        public void Should_register_one_saver_per_scope_for_the_save_handlers_of_all_tabs()
-        {
-            // Arrange
-            var services = new ServiceCollection();
+        services.Should().Contain(d => d.IsKeyedService && (Type?)d.ServiceKey == handlerServiceKey
+            && d.ServiceType == typeof(IControlPanelResetHandler<NetworkInterfaceControlPanelState>));
+    }
 
-            // Act
-            services.AddNetworkInterfaceControlPanel();
+    [Fact]
+    public void Should_register_one_saver_per_scope_for_the_save_handlers_of_all_tabs()
+    {
+        // Arrange
+        var services = new ServiceCollection();
 
-            // Assert
-            services.Should().ContainSingle(d => d.ServiceType == typeof(NetworkInterfaceSaver))
-                .Which.Lifetime.Should().Be(ServiceLifetime.Scoped);
-        }
+        // Act
+        services.AddNetworkInterfaceGeneralControlPanel()
+            .AddNetworkInterfaceTcpIpControlPanel()
+            .AddNetworkInterfaceHardwareControlPanel();
+
+        // Assert
+        services.Should().ContainSingle(d => d.ServiceType == typeof(NetworkInterfaceSaver))
+            .Which.Lifetime.Should().Be(ServiceLifetime.Scoped);
     }
 }
