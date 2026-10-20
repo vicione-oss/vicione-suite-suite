@@ -18,6 +18,7 @@ public class SecurityHeaderExtensionsTests
     private const string ContentSecurityPolicyHeader = "Content-Security-Policy";
     private const string FrameOptionsHeader = "X-Frame-Options";
     private const string ReportingEndpointsHeader = "Reporting-Endpoints";
+    private const string PermissionsPolicyHeader = "Permissions-Policy";
 
     /// <summary>What <c>AddInteractiveServerRenderMode</c> emits on a rendered page.</summary>
     private const string FrameworkPolicy = "frame-ancestors 'self'";
@@ -81,6 +82,21 @@ public class SecurityHeaderExtensionsTests
         // A duplicated X-Frame-Options may be ignored by the browser altogether, so this one is
         // assigned rather than appended.
         response.Headers.GetValues(FrameOptionsHeader).Should().Equal("DENY");
+    }
+
+    [Fact]
+    public async Task Should_disable_the_browser_features_the_suite_does_not_use()
+    {
+        // Arrange
+        using var host = await StartHost();
+
+        // Act
+        var response = await host.GetTestClient().GetAsync("/", TestContext.Current.CancellationToken);
+
+        // Assert
+        response.Headers.GetValues(PermissionsPolicyHeader).Should().Equal(
+            "camera=(), microphone=(), geolocation=(), display-capture=(), payment=(), " +
+            "usb=(), serial=(), hid=(), bluetooth=()");
     }
 
     /// <summary>
