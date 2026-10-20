@@ -13,8 +13,6 @@ internal sealed class NetworkInterfaceGeneralControlPanelResetHandler(IUiMediato
         await UpdateDHCPLease(state, networkInterface, cancellationToken);
         await UpdateOriginalPhysicalAddress(state, cancellationToken);
 
-        state.UpdateIpAddresses(networkInterface);
-
         state.Enabled = networkInterface.CommonInformation.Enabled;
     }
 

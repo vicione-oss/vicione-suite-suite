@@ -24,7 +24,6 @@ public sealed class NetworkInterfaceGeneralControlPanelResetHandlerTests : Netwo
         state.Name.Should().BeEmpty();
         state.Enabled.Should().BeFalse();
         state.DHCPLease.Should().BeNull();
-        state.IpAddresses.Should().BeEmpty();
     }
 
     [Fact]
@@ -39,25 +38,6 @@ public sealed class NetworkInterfaceGeneralControlPanelResetHandlerTests : Netwo
 
         // Assert
         state.Enabled.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task Should_load_the_ip_addresses_of_a_static_configuration()
-    {
-        // Arrange
-        SetupSystemConfiguration(CreateNetworkInterface(new IPv4Settings
-        {
-            IPv4Details = [new IPv4Detail { IPAddress = System.Net.IPAddress.Parse("192.168.1.10"), Netmask = System.Net.IPAddress.Parse("255.255.255.0") }],
-            Gateway = System.Net.IPAddress.Parse("192.168.1.1")
-        }));
-        var state = new NetworkInterfaceControlPanelState();
-
-        // Act
-        await CreateResetHandler().Reset(state, TestContext.Current.CancellationToken);
-
-        // Assert
-        state.IpAddresses.Should().ContainSingle()
-            .Which.Configuration.Should().Be(IpConfigurationMode.Manual);
     }
 
     [Fact]

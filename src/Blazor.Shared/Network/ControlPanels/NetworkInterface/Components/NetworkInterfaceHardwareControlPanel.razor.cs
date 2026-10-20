@@ -23,11 +23,7 @@ public sealed partial class NetworkInterfaceHardwareControlPanel : NetworkContro
     }
 
     protected override Task SystemConfigurationChanged(CancellationToken cancellationToken)
-    {
-        StateHasChanged();
-
-        return Task.CompletedTask;
-    }
+        => InvokeAsync(StateHasChanged);
 
     private async Task MacAddressManuallyChanged()
     {
