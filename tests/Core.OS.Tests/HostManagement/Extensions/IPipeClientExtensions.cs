@@ -1,11 +1,9 @@
-using System.Text.Json;
-using Core.OS.HostManagement;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Capabilities;
+using HostManagement.Shared.Communication.NamedPipe.Client;
 using HostManagement.Shared.Contracts;
-using CommunicationJsonContext = HostManagement.Shared.Communication.Contracts.SourceGenerationContext;
 using CommunicationEnums = HostManagement.Shared.Communication.Enums;
 using CommunicationContracts = HostManagement.Shared.Communication.Contracts;
+using IPipeClient = Core.OS.HostManagement.IPipeClient;
 
 namespace Core.OS.Tests.HostManagement.Extensions;
 
@@ -22,8 +20,8 @@ internal static class IPipeClientExtensions
                 Configuration = TestPipeClient.GetEmbeddedSystemConfiguration()
             };
 
-            pipeClient.SendRequest(Topics.GetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.GetSystemConfigurationResult));
+            pipeClient.SendRequest(PipeRequests.GetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(result);
         }
 
         public void SetupGetSystemConfigurationResult(CommunicationEnums.OperationStatus status, SystemConfiguration configuration, string message = "OK")
@@ -35,8 +33,8 @@ internal static class IPipeClientExtensions
                 Configuration = configuration
             };
 
-            pipeClient.SendRequest(Topics.GetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.GetSystemConfigurationResult));
+            pipeClient.SendRequest(PipeRequests.GetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(result);
         }
 
         public void SetupSetSystemConfigurationResult(CommunicationEnums.OperationStatus status, string message = "OK")
@@ -47,9 +45,8 @@ internal static class IPipeClientExtensions
                 Message = message
             };
 
-            pipeClient.SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.SetSystemConfigurationResult));
-
+            pipeClient.SendRequest(PipeRequests.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(result);
         }
 
         public void SetupResetSystemResult(CommunicationEnums.OperationStatus status, string message = "OK")
@@ -60,8 +57,8 @@ internal static class IPipeClientExtensions
                 Message = message
             };
 
-            pipeClient.SendRequest(Topics.ResetSystem, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.SystemControlResult));
+            pipeClient.SendRequest(PipeRequests.ResetSystem, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(result);
         }
 
         public void SetupRestartSystemResult(CommunicationEnums.OperationStatus status, string message = "OK")
@@ -72,8 +69,8 @@ internal static class IPipeClientExtensions
                 Message = message
             };
 
-            pipeClient.SendRequest(Topics.RestartSystem, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.SystemControlResult));
+            pipeClient.SendRequest(PipeRequests.RestartSystem, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(result);
         }
 
         public void SetupRestartServiceResult(CommunicationEnums.OperationStatus status, string message = "OK")
@@ -84,11 +81,11 @@ internal static class IPipeClientExtensions
                 Message = message
             };
 
-            pipeClient.SendRequest(Topics.RestartService, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.ServiceControlResult));
+            pipeClient.SendRequest(PipeRequests.RestartService, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(result);
         }
 
-        public void SetupServiceControlResult(string topic, CommunicationEnums.OperationStatus status, string message = "OK")
+        public void SetupServiceControlResult(PipeRequest<CommunicationContracts.ServiceControlResult> request, CommunicationEnums.OperationStatus status, string message = "OK")
         {
             var result = new CommunicationContracts.ServiceControlResult
             {
@@ -96,8 +93,8 @@ internal static class IPipeClientExtensions
                 Message = message
             };
 
-            pipeClient.SendRequest(topic, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationJsonContext.Default.ServiceControlResult));
+            pipeClient.SendRequest(request, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(result);
         }
 
         public void SetupGetSupportedCapabilitiesResult(CommunicationEnums.OperationStatus status, SupportedCapabilities capabilities, string message = "OK")
@@ -109,8 +106,8 @@ internal static class IPipeClientExtensions
                 SupportedCapabilities = capabilities
             };
 
-            pipeClient.SendRequest(Topics.GetSupportedCapabilities, Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(JsonSerializer.Serialize(result, CommunicationContracts.CapabilitySourceGenerationContext.Default.GetSupportedCapabilitiesResult));
+            pipeClient.SendRequest(CapabilityPipeRequests.GetSupportedCapabilities, Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(result);
         }
     }
 }

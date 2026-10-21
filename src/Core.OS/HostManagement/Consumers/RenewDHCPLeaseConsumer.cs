@@ -12,13 +12,6 @@ public sealed partial class RenewDHCPLeaseConsumer(IPipeClient pipeClient, ILogg
     public override async Task<RenewDHCPLeaseResponse> Respond(RenewDHCPLease message, CancellationToken cancellationToken)
     {
         var dhcpLeaseResult = await pipeClient.RenewDHCPLease(message.NetworkInterfaceName, cancellationToken);
-        if (dhcpLeaseResult is null)
-        {
-            LogDeserializeReturnedNull(logger);
-
-            return new RenewDHCPLeaseResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
-        }
-
         if (dhcpLeaseResult.Status == OperationStatus.Success)
             return new RenewDHCPLeaseResponse { DHCPLease = dhcpLeaseResult.DHCPLease };
 
@@ -44,9 +37,6 @@ public sealed partial class RenewDHCPLeaseConsumer(IPipeClient pipeClient, ILogg
 
         return Task.FromResult(new RenewDHCPLeaseResponse { RequestError = new ErrorInfo(4, e.Message) });
     }
-
-    [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
-    private static partial void LogDeserializeReturnedNull(ILogger<RenewDHCPLeaseConsumer> logger);
 
     [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({Message})")]
     private static partial void LogWarningStatusReturned(ILogger<RenewDHCPLeaseConsumer> logger, string? message);

@@ -26,14 +26,14 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
             {
                 // HostManagement is queried only on a cache miss.
                 var responseConfig = await pipeClient.GetSystemConfiguration(context.CancellationToken);
-                if (responseConfig?.Status == OperationStatus.Success && responseConfig.Configuration is not null)
+                if (responseConfig.Status == OperationStatus.Success && responseConfig.Configuration is not null)
                 {
                     previousConfig = responseConfig.Configuration;
                 }
             }
 
             var result = await pipeClient.SetSystemConfiguration(context.Message.SystemConfiguration, context.CancellationToken);
-            if (result?.Status == OperationStatus.Success)
+            if (result.Status == OperationStatus.Success)
             {
                 // Invalidated before the event, because the UI reloads on it and must not get the cached previous configuration (#2933).
                 cache.Invalidate();
@@ -48,7 +48,7 @@ public sealed partial class SetSystemConfigurationConsumer(IPipeClient pipeClien
                 return;
             }
 
-            await context.Publish(new SetSystemConfigurationError(correlationId, new ErrorInfo((int?)result?.Status ?? -1, result?.Message)),
+            await context.Publish(new SetSystemConfigurationError(correlationId, new ErrorInfo((int)result.Status, result.Message)),
                 context.CancellationToken);
         }
         catch (Exception ex)

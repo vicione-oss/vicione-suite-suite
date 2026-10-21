@@ -12,7 +12,6 @@ using Core.Shared.Instance.Commands;
 using Core.Shared.Persistence.Commands;
 using Core.Shared.Persistence.Events;
 using HostManagement.Shared.Capabilities;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
@@ -22,6 +21,7 @@ using Sdk.Backend.Modules;
 using Sdk.Instance;
 using Sdk.SystemConfiguration.Commands;
 using Sdk.Testing.Backend;
+using PipeRequests = HostManagement.Shared.Communication.NamedPipe.Client.PipeRequests;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
@@ -209,7 +209,7 @@ public sealed class RestoreBackupConsumerTests
         var response = await tester.TestCommand<RestoreBackup, RestoreBackupConsumer, RestoreBackupPrepared>(command);
 
         // Assert
-        await _pipeClient.Received(1).SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _pipeClient.Received(1).SendRequest(PipeRequests.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
         response.ErrorInfo.Should().BeNull();
     }
 
@@ -236,7 +236,7 @@ public sealed class RestoreBackupConsumerTests
         var response = await tester.TestCommand<RestoreBackup, RestoreBackupConsumer, RestoreBackupPrepared>(command);
 
         // Assert
-        await _pipeClient.Received(0).SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _pipeClient.Received(0).SendRequest(PipeRequests.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
         response.ErrorInfo.Should().BeNull();
     }
 
@@ -263,7 +263,7 @@ public sealed class RestoreBackupConsumerTests
         // Assert
         response.ErrorInfo!.ErrorCode.Should().Be(RestoreBackupPrepared.BackupFormatNotSupported);
         response.ErrorInfo.Message.Should().ContainEquivalentOf("create a new backup");
-        await _pipeClient.Received(0).SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _pipeClient.Received(0).SendRequest(PipeRequests.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
         (await _fileSystem.ReadRestoreTask(_instanceOptions, TestContext.Current.CancellationToken)).Should().BeNull();
         _store.Received(0).CreateBackupFile(out Arg.Any<string>());
     }
@@ -342,7 +342,7 @@ public sealed class RestoreBackupConsumerTests
         response.ErrorInfo!.ErrorCode.Should().Be(RestoreBackupPrepared.SettingsDisabled);
         response.ErrorInfo.Message.Should().Be("Hostname");
         await AssertNothingRestored(tester);
-        await _pipeClient.Received(0).SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _pipeClient.Received(0).SendRequest(PipeRequests.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -373,7 +373,7 @@ public sealed class RestoreBackupConsumerTests
         // Assert
         response.ErrorInfo.Should().BeNull();
         await _handler1.Received(1).OnRestore(Arg.Any<CancellationToken>());
-        await _pipeClient.Received(1).SendRequest(Topics.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _pipeClient.Received(1).SendRequest(PipeRequests.SetSystemConfiguration, Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     private async Task AssertNothingRestored(MassTransitTester tester)

@@ -19,13 +19,6 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
         if (config is null)
         {
             var configurationResult = await pipeClient.GetSystemConfiguration(cancellationToken);
-            if (configurationResult == null)
-            {
-                LogDeserializeReturnedNull(logger);
-
-                return new GetSystemConfigurationResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
-            }
-
             if (configurationResult.Configuration is not null)
                 responseCache.Set(configurationResult.Configuration);
 
@@ -130,9 +123,6 @@ public sealed partial class GetSystemConfigurationRequestConsumer(IPipeClient pi
 
         return Task.FromResult(new GetSystemConfigurationResponse { RequestError = new ErrorInfo(4, e.Message) });
     }
-
-    [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
-    private static partial void LogDeserializeReturnedNull(ILogger<GetSystemConfigurationRequestConsumer> logger);
 
     [LoggerMessage(LogLevel.Warning, "System configuration with warnings returned ({Message})")]
     private static partial void LogWarningStatusReturned(ILogger<GetSystemConfigurationRequestConsumer> logger, string? message);

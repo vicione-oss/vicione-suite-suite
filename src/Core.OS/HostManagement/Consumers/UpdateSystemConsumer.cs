@@ -35,10 +35,10 @@ public sealed partial class UpdateSystemConsumer(IPipeClient pipeClient, UserMan
             await userManager.InvalidateLogins();
 
             var result = await pipeClient.UpdateSystem(filePath, context.CancellationToken);
-            if (result is null || result.Status == OperationStatus.Error)
+            if (result.Status == OperationStatus.Error)
             {
                 LogUpdateFailed(logger, correlationId, filePath);
-                await PublishUpdateFailed(context, new ErrorInfo((int?)result?.Status ?? UpdateSystemStarted.UnknownError, result?.Message));
+                await PublishUpdateFailed(context, new ErrorInfo((int)result.Status, result.Message));
                 return;
             }
 

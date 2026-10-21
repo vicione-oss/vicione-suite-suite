@@ -37,14 +37,14 @@ public sealed partial class InstallSuiteVersionConsumer(IPipeClient pipeClient,
             };
 
             var result = await pipeClient.InstallSignedDebianPackage(signedPackage, context.CancellationToken);
-            if (result is null || result.Status == OperationStatus.Error)
+            if (result.Status == OperationStatus.Error)
             {
                 LogInstalledSuiteFailed(logger, correlationId, packageName, signatureName);
 
-                var errorEvent = new InstallSuiteVersionStarted(result?.Message, result?.Status == OperationStatus.Warning)
+                var errorEvent = new InstallSuiteVersionStarted(result.Message, false)
                 {
                     CorrelationId = correlationId,
-                    ErrorInfo = new ErrorInfo((int?)result?.Status ?? -1, result?.Message)
+                    ErrorInfo = new ErrorInfo((int)result.Status, result.Message)
                 };
 
                 await context.Publish(errorEvent, context.CancellationToken);

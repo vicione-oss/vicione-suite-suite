@@ -11,13 +11,6 @@ public partial class GetNTPFallbackInformationConsumer(IPipeClient pipeClient, I
     public override async Task<GetNTPFallbackInformationResponse> Respond(GetNTPFallbackInformation message, CancellationToken cancellationToken)
     {
         var getNTPFallbackInformation = await pipeClient.GetNTPFallbackInformation(cancellationToken);
-        if (getNTPFallbackInformation is null)
-        {
-            LogDeserializeReturnedNull(logger);
-
-            return new GetNTPFallbackInformationResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
-        }
-
         if (getNTPFallbackInformation.Status == OperationStatus.Success)
             return new GetNTPFallbackInformationResponse { FallbackNTPServers = getNTPFallbackInformation.FallbackNTPServers };
 
@@ -40,9 +33,6 @@ public partial class GetNTPFallbackInformationConsumer(IPipeClient pipeClient, I
 
         return Task.FromResult(new GetNTPFallbackInformationResponse { RequestError = new ErrorInfo(4, e.Message) });
     }
-
-    [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
-    private static partial void LogDeserializeReturnedNull(ILogger<GetNTPFallbackInformationConsumer> logger);
 
     [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({Message})")]
     private static partial void LogWarningStatusReturned(ILogger<GetNTPFallbackInformationConsumer> logger, string? message);

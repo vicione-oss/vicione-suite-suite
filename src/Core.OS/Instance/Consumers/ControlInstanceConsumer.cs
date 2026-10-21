@@ -154,8 +154,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
                 var pipeClient = scope.ServiceProvider.GetRequiredService<IPipeClient>();
                 var options = scope.ServiceProvider.GetRequiredService<IOptions<InstanceOptions>>();
 
-                var result = await pipeClient.RestartService(options.Value.ServiceName)
-                    ?? throw new InvalidOperationException("Restart request result from host management is null.");
+                var result = await pipeClient.RestartService(options.Value.ServiceName);
 
                 if (result.Status == OperationStatus.Error)
                     throw new InvalidOperationException(result.Message);

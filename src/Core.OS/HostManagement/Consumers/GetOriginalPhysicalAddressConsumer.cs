@@ -19,13 +19,6 @@ public partial class GetOriginalPhysicalAddressConsumer(IPipeClient pipeClient, 
         LogPipeRequest(logger, message.NetworkInterfaceName);
 
         var getOriginalPhysicalAddressResult = await pipeClient.GetOriginalPhysicalAddress(message.NetworkInterfaceName, cancellationToken);
-        if (getOriginalPhysicalAddressResult is null)
-        {
-            LogDeserializeReturnedNull(logger);
-
-            return new GetOriginalPhysicalAddressResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
-        }
-
         if (getOriginalPhysicalAddressResult.Status == OperationStatus.Success)
             return new GetOriginalPhysicalAddressResponse { OriginalPhysicalAddress = getOriginalPhysicalAddressResult.OriginalPhysicalAddress?.ToColonNotation() };
 
@@ -54,9 +47,6 @@ public partial class GetOriginalPhysicalAddressConsumer(IPipeClient pipeClient, 
 
     [LoggerMessage(LogLevel.Information, "Sending pipe request for network interface '{NetworkInterfaceName}'")]
     private static partial void LogPipeRequest(ILogger<GetOriginalPhysicalAddressConsumer> logger, string networkInterfaceName);
-
-    [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
-    private static partial void LogDeserializeReturnedNull(ILogger<GetOriginalPhysicalAddressConsumer> logger);
 
     [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({Message})")]
     private static partial void LogWarningStatusReturned(ILogger<GetOriginalPhysicalAddressConsumer> logger, string? message);

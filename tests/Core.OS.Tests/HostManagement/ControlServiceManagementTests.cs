@@ -3,8 +3,8 @@ using Core.OS.HostManagement;
 using Core.OS.Instance;
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Enums;
+using HostManagement.Shared.Communication.NamedPipe.Client;
 using HostManagement.Shared.Contracts.Service;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,6 +13,8 @@ using Sdk.SystemConfiguration.Commands;
 using Sdk.SystemConfiguration.Contracts;
 using Sdk.SystemConfiguration.Events;
 using HostServiceState = HostManagement.Shared.Enums.ServiceState;
+using IPipeClient = Core.OS.HostManagement.IPipeClient;
+using PipeRequests = HostManagement.Shared.Communication.NamedPipe.Client.PipeRequests;
 
 namespace Core.OS.Tests.HostManagement;
 
@@ -154,7 +156,7 @@ public sealed class ControlServiceManagementTests
     {
         // Arrange
         await using var pipeClient = CreateAvailablePipeClient();
-        pipeClient.SetupServiceControlResult(Topics.RestartService, OperationStatus.Success);
+        pipeClient.SetupServiceControlResult(PipeRequests.RestartService, OperationStatus.Success);
         await using var services = CreateServices(_ => pipeClient);
         var service = services.GetRequiredService<ControlServiceManagement>();
 
@@ -163,20 +165,26 @@ public sealed class ControlServiceManagementTests
 
         // Assert
         result.Success.Should().BeTrue();
-        await pipeClient.Received(1).SendRequest(Topics.RestartService, ServiceName, Arg.Any<CancellationToken>());
-        await pipeClient.DidNotReceive().SendRequest(Topics.StopService, Arg.Any<string>(), Arg.Any<CancellationToken>());
-        await pipeClient.DidNotReceive().SendRequest(Topics.StartService, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await pipeClient.Received(1).SendRequest(PipeRequests.RestartService, ServiceName, Arg.Any<CancellationToken>());
+        await pipeClient.DidNotReceive().SendRequest(PipeRequests.StopService, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await pipeClient.DidNotReceive().SendRequest(PipeRequests.StartService, Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Theory]
-    [InlineData(ServiceCommand.Start, Topics.StartService)]
-    [InlineData(ServiceCommand.Stop, Topics.StopService)]
-    [InlineData(ServiceCommand.Restart, Topics.RestartService)]
-    public async Task Should_report_an_unknown_state_when_host_management_rejects_a_state_change(ServiceCommand command, string topic)
+    [InlineData(ServiceCommand.Start)]
+    [InlineData(ServiceCommand.Stop)]
+    [InlineData(ServiceCommand.Restart)]
+    public async Task Should_report_an_unknown_state_when_host_management_rejects_a_state_change(ServiceCommand command)
     {
         // Arrange
         await using var pipeClient = CreateAvailablePipeClient();
-        pipeClient.SetupServiceControlResult(topic, OperationStatus.Error, HostManagementRejection);
+        var request = command switch
+        {
+            ServiceCommand.Start => PipeRequests.StartService,
+            ServiceCommand.Stop => PipeRequests.StopService,
+            _ => PipeRequests.RestartService
+        };
+        pipeClient.SetupServiceControlResult(request, OperationStatus.Error, HostManagementRejection);
         await using var services = CreateServices(_ => pipeClient);
         var service = services.GetRequiredService<ControlServiceManagement>();
 
@@ -295,7 +303,7 @@ public sealed class ControlServiceManagementTests
         public Task Connect(CancellationToken cancellationToken = default)
             => throw new InvalidOperationException("Failed to connect to pipe 'test'.");
 
-        public Task<string> SendRequest(string topic, string content, CancellationToken cancellationToken = default)
+        public Task<TResponse> SendRequest<TResponse>(PipeRequest<TResponse> request, string content = "", CancellationToken cancellationToken = default)
             => throw new InvalidOperationException("Failed to connect to pipe 'test'.");
     }
 }

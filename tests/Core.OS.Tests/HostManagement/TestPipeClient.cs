@@ -1,6 +1,8 @@
 ﻿using Core.OS.HostManagement;
 using HostManagement.Shared.Communication.Enums;
+using HostManagement.Shared.Communication.NamedPipe.Client;
 using HostManagement.Shared.Contracts;
+using IPipeClient = Core.OS.HostManagement.IPipeClient;
 
 namespace Core.OS.Tests.HostManagement;
 
@@ -17,8 +19,8 @@ public sealed class TestPipeClient(MockPipeClient mockPipeClient) : IPipeClient
 
     public Task Connect(CancellationToken cancellationToken = default) => mockPipeClient.Connect(cancellationToken);
 
-    public Task<string> SendRequest(string topic, string content, CancellationToken cancellationToken = default)
-        => mockPipeClient.SendRequest(topic, content, cancellationToken);
+    public Task<TResponse> SendRequest<TResponse>(PipeRequest<TResponse> request, string content = "", CancellationToken cancellationToken = default)
+        => mockPipeClient.SendRequest(request, content, cancellationToken);
 
     public static SystemConfiguration GetEmbeddedSystemConfiguration()
         => MockPipeClient.GetEmbeddedSystemConfiguration();

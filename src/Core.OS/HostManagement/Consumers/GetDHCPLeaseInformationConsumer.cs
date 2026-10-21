@@ -18,13 +18,6 @@ public partial class GetDHCPLeaseInformationConsumer(IPipeClient pipeClient, ILo
         LogPipeRequest(logger, message.NetworkInterfaceName);
 
         var getDhcpLeaseResult = await pipeClient.GetDHCPLeaseInformation(message.NetworkInterfaceName, cancellationToken);
-        if (getDhcpLeaseResult is null)
-        {
-            LogDeserializeReturnedNull(logger);
-
-            return new GetDHCPLeaseInformationResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
-        }
-
         if (getDhcpLeaseResult.Status == OperationStatus.Success)
             return new GetDHCPLeaseInformationResponse { DHCPLease = getDhcpLeaseResult.DHCPLease };
 
@@ -53,9 +46,6 @@ public partial class GetDHCPLeaseInformationConsumer(IPipeClient pipeClient, ILo
 
     [LoggerMessage(LogLevel.Information, "Sending pipe request for network interface '{networkInterfaceName}'")]
     private static partial void LogPipeRequest(ILogger<GetDHCPLeaseInformationConsumer> logger, string networkInterfaceName);
-
-    [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
-    private static partial void LogDeserializeReturnedNull(ILogger<GetDHCPLeaseInformationConsumer> logger);
 
     [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({message})")]
     private static partial void LogWarningStatusReturned(ILogger<GetDHCPLeaseInformationConsumer> logger, string? message);

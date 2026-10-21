@@ -1,6 +1,6 @@
 ﻿using Core.Shared.HostManagement;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Enums;
+using HostManagement.Shared.Communication.NamedPipe.Client;
 
 namespace Core.OS.HostManagement;
 
@@ -22,9 +22,9 @@ public interface IPipeClient : IAsyncDisposable
     /// <summary>
     /// Sends a request and waits for its response, connecting first as <see cref="Connect"/> does if the pipe is not connected yet.
     /// </summary>
-    /// <param name="topic">One of <see cref="Topics"/>, which selects the request handler.</param>
-    /// <param name="content">The payload the handler of <paramref name="topic"/> expects, empty for topics that need none.</param>
+    /// <param name="request">One of <see cref="PipeRequests"/> or <see cref="CapabilityPipeRequests"/>, which selects the request handler.</param>
+    /// <param name="content">The payload the handler of <paramref name="request"/> expects, empty for requests that need none.</param>
     /// <param name="cancellationToken">Cancels waiting for the response.</param>
-    /// <returns>The content of the response message.</returns>
-    Task<string> SendRequest(string topic, string content, CancellationToken cancellationToken = default);
+    /// <exception cref="HostManagementRequestException">Thrown when HostManagement does not know the topic, has no handler for it, or the handler threw or was canceled.</exception>
+    Task<TResponse> SendRequest<TResponse>(PipeRequest<TResponse> request, string content = "", CancellationToken cancellationToken = default);
 }
