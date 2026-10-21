@@ -114,7 +114,7 @@
 - `AspNetCore.SassCompiler` packages, update to version `1.105.1`
 - `HostManagement` packages, update to version `2.0.0-beta1`
 - `ViciOne.SystemMonitoring` package, update to version `1.1.0`
-- `Microsoft` packages, update to version `10.0.12`
+- `Microsoft` packages, update to version `10.0.13`
 - `Microsoft.FeatureManagement` packages, update to version `4.7.0`
 - `Microsoft.TypeScript.MSBuild`, update to version `7.0.1`
 - `MailKit`, update to version `4.18.0`
