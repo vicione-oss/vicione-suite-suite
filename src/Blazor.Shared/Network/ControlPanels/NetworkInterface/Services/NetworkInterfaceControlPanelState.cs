@@ -1,14 +1,12 @@
 using Blazor.Shared.Network.ControlPanels.NetworkInterface.Models;
 using Blazor.Shared.Settings.NetworkInterface.Enums;
 using HostManagement.Shared.Contracts.Network;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 
-public sealed class NetworkInterfaceControlPanelState : NetworkControlPanelStateBase
+public sealed partial class NetworkInterfaceControlPanelState : NetworkControlPanelStateBase
 {
-    private int _networkInterfaceIndex;
-    private bool _dhcpLeaseSettingsGroupExpanded = true;
-
     internal string Name { get; set; } = string.Empty;
     internal bool Enabled { get; set; }
     internal IpConfigurationMode IpV4ConfigurationMode { get; set; }
@@ -27,33 +25,11 @@ public sealed class NetworkInterfaceControlPanelState : NetworkControlPanelState
     internal bool VLanEnabled { get; set; }
     internal string VLanId { get; set; } = string.Empty;
 
-    internal int NetworkInterfaceIndex
-    {
-        get => _networkInterfaceIndex;
-        set
-        {
-            if (value != _networkInterfaceIndex)
-            {
-                _networkInterfaceIndex = value;
+    [NotifyChanged]
+    internal partial int NetworkInterfaceIndex { get; set; }
 
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    internal bool DhcpLeaseSettingsGroupExpanded
-    {
-        get => _dhcpLeaseSettingsGroupExpanded;
-        set
-        {
-            if (value != _dhcpLeaseSettingsGroupExpanded)
-            {
-                _dhcpLeaseSettingsGroupExpanded = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    [NotifyChanged]
+    internal partial bool DhcpLeaseSettingsGroupExpanded { get; set; } = true;
 
     internal bool GeneralHasChanges { get; set; }
     internal bool TcpIpHasChanges { get; set; }

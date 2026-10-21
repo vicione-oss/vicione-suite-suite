@@ -1,25 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
 using Sdk.Client.Models;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Settings.Services;
 
-internal sealed class SettingsPopupState : ISettingsPopupState
+[NotifyChanged]
+internal sealed partial class SettingsPopupState : ISettingsPopupState
 {
-    private bool _visible;
-
-    public bool Visible
-    {
-        get => _visible;
-        set
-        {
-            if (value != _visible)
-            {
-                _visible = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial bool Visible { get; set; }
 
     /// <inheritdoc/>
     public event Action<PropertiesChangedEventArgs>? Changed;

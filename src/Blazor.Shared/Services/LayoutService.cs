@@ -6,99 +6,34 @@ using Microsoft.AspNetCore.Components;
 using Sdk.Client.Infrastructure;
 using Sdk.Client.Services;
 using Sdk.Instance;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Services;
 
-public sealed class LayoutService : ILayoutService, IEventConsumer<InstanceInformationUpdated>, IDisposable
+public sealed partial class LayoutService : ILayoutService, IEventConsumer<InstanceInformationUpdated>, IDisposable
 {
     private readonly IInstanceInformationProvider _informationProvider;
-    private string? _currentTitleBarAppName;
-    private bool _isSidebarOpen;
-    private bool _isLoadingOverlayVisible;
-    private string? _titleBarText;
-    private string? _instanceName;
-    private MarkupString _instanceTitle;
     private readonly IDisposable _subscription;
 
-    public bool IsSidebarOpen
-    {
-        get => _isSidebarOpen;
-        set
-        {
-            if (value == _isSidebarOpen)
-                return;
+    [NotifyChanged]
+    public partial bool IsSidebarOpen { get; set; }
 
-            _isSidebarOpen = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public bool IsLoadingOverlayVisible
-    {
-        get => _isLoadingOverlayVisible;
-        set
-        {
-            if (value == _isLoadingOverlayVisible)
-                return;
-
-            _isLoadingOverlayVisible = value;
-            OnPropertyChanged();
-        }
-    }
+    [NotifyChanged]
+    public partial bool IsLoadingOverlayVisible { get; set; }
 
     public Guid SelectedNotificationItem { get; set; }
 
-    public MarkupString InstanceTitle
-    {
-        get => _instanceTitle;
-        set
-        {
-            if (string.Equals(_instanceTitle.Value, value.Value, StringComparison.Ordinal))
-                return;
+    [NotifyChanged]
+    public partial MarkupString InstanceTitle { get; set; }
 
-            _instanceTitle = value;
-            OnPropertyChanged();
-        }
-    }
+    [NotifyChanged]
+    public partial string? InstanceName { get; set; }
 
-    public string? InstanceName
-    {
-        get => _instanceName;
-        set
-        {
-            if (string.Equals(_instanceName, value, StringComparison.Ordinal))
-                return;
+    [NotifyChanged]
+    public partial string? TitleBarText { get; set; }
 
-            _instanceName = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string? TitleBarText
-    {
-        get => _titleBarText;
-        set
-        {
-            if (string.Equals(_titleBarText, value, StringComparison.Ordinal))
-                return;
-
-            _titleBarText = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public string? TitleBarAppName
-    {
-        get => _currentTitleBarAppName;
-        set
-        {
-            if (string.Equals(_currentTitleBarAppName, value, StringComparison.Ordinal))
-                return;
-
-            _currentTitleBarAppName = value;
-            OnPropertyChanged();
-        }
-    }
+    [NotifyChanged]
+    public partial string? TitleBarAppName { get; set; }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -106,8 +41,8 @@ public sealed class LayoutService : ILayoutService, IEventConsumer<InstanceInfor
     {
         _informationProvider = informationProvider;
         _subscription = uiMediator.Register(this);
-        _instanceTitle = _informationProvider.GetFormatedInstanceTitle();
-        _instanceName = informationProvider.Local.Name;
+        InstanceTitle = _informationProvider.GetFormatedInstanceTitle();
+        InstanceName = informationProvider.Local.Name;
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

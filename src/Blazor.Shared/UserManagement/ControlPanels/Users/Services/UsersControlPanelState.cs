@@ -1,40 +1,16 @@
 ﻿using Core.Shared.UserManagement.Contracts;
 using Sdk.Client.ControlPanels.Services;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.UserManagement.ControlPanels.Users.Services;
 
-public sealed class UsersControlPanelState : ControlPanelState
+public sealed partial class UsersControlPanelState : ControlPanelState
 {
-    private List<UserProfile> _users = [];
-    private bool _resetSelectedUsers;
+    [NotifyChanged]
+    internal partial List<UserProfile> Users { get; set; } = [];
 
-    internal List<UserProfile> Users
-    {
-        get => _users;
-        set
-        {
-            if (value == _users)
-                return;
-
-            _users = value;
-
-            OnPropertyChanged(nameof(Users));
-        }
-    }
-
-    internal bool ResetSelectedUsers
-    {
-        get => _resetSelectedUsers;
-        set
-        {
-            if (value == _resetSelectedUsers)
-                return;
-
-            _resetSelectedUsers = value;
-
-            OnPropertyChanged(nameof(ResetSelectedUsers));
-        }
-    }
+    [NotifyChanged]
+    internal partial bool ResetSelectedUsers { get; set; }
 
     internal List<UserProfile> DeletingUsers { get; } = [];
 }

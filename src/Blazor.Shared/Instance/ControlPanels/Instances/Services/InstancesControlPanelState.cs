@@ -1,40 +1,16 @@
 using Blazor.Shared.Instance.ControlPanels.Instances.Models;
 using Sdk.Client.ControlPanels.Services;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Instance.ControlPanels.Instances.Services;
 
-public sealed class InstancesControlPanelState : ControlPanelState
+public sealed partial class InstancesControlPanelState : ControlPanelState
 {
-    private bool _resetSelectedInstances;
-    private List<InstanceInformationModel> _instances = [];
+    [NotifyChanged]
+    internal partial bool ResetSelectedInstances { get; set; }
 
-    internal bool ResetSelectedInstances
-    {
-        get => _resetSelectedInstances;
-        set
-        {
-            if (value == _resetSelectedInstances)
-                return;
-
-            _resetSelectedInstances = value;
-
-            OnPropertyChanged(nameof(ResetSelectedInstances));
-        }
-    }
-
-    internal List<InstanceInformationModel> Instances
-    {
-        get => _instances;
-        set
-        {
-            if (value == _instances)
-                return;
-
-            _instances = value;
-
-            OnPropertyChanged(nameof(Instances));
-        }
-    }
+    [NotifyChanged]
+    internal partial List<InstanceInformationModel> Instances { get; set; } = [];
 
     internal List<InstanceInformationModel> DeletingInstances { get; } = [];
 }

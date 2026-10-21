@@ -3,16 +3,15 @@ using Blazor.Shared.Settings.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Interfaces;
 using Sdk.Client.Models;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Settings.Services;
 
-internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdateLock
+internal sealed partial class SettingsModuleState : IHasChangeableProperties, IHasUpdateLock
 {
     private readonly Lock _concurrentLock = new();
     private readonly HashSet<string> _changedProperties = [];
     private int _updateLock;
-    private SettingsCategory? _expandedSettingsCategory;
-    private IControlPanelRegistryItem? _activeControlPanelRegistryItem;
 
     // A List rather than a Stack: there is no IReadOnlyStack, and a stack enumerates from the top,
     // which would invert the logic at every call site.
@@ -20,43 +19,18 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
     private readonly Dictionary<SettingsEntriesKey, IControlPanelRegistryItem> _lastActiveControlPanelRegistryItemMap = [];
     private readonly Dictionary<IControlPanelRegistryItem, IControlPanelRegistryItem> _activeChildMap = [];
 
-    private bool _showNavigateBackButton;
-    private bool _isLoadingOverlayVisible;
-
     public bool PreselectFirstSettingsEntryInFirstSettingsGroup { get; set; }
 
-    public SettingsCategory? ExpandedSettingsCategory
-    {
-        get => _expandedSettingsCategory;
-        set
-        {
-            if (value != _expandedSettingsCategory)
-            {
-                _expandedSettingsCategory = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    [NotifyChanged]
+    public partial SettingsCategory? ExpandedSettingsCategory { get; set; }
 
     /// <summary>
     /// Last active control panel per category
     /// </summary>
     public IReadOnlyDictionary<SettingsEntriesKey, IControlPanelRegistryItem> LastActiveControlPanelRegistryItemMap => _lastActiveControlPanelRegistryItemMap;
 
-    public IControlPanelRegistryItem? ActiveControlPanelRegistryItem
-    {
-        get => _activeControlPanelRegistryItem;
-        set
-        {
-            if (value != _activeControlPanelRegistryItem)
-            {
-                _activeControlPanelRegistryItem = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    [NotifyChanged(Comparer = typeof(ReferenceEqualityComparer))]
+    public partial IControlPanelRegistryItem? ActiveControlPanelRegistryItem { get; set; }
 
     /// <summary>
     /// Registry items of control panels in order they were requested either
@@ -80,33 +54,11 @@ internal sealed class SettingsModuleState : IHasChangeableProperties, IHasUpdate
     /// <inheritdoc/>
     public int UpdateLock => _updateLock;
 
-    public bool ShowNavigateBackButton
-    {
-        get => _showNavigateBackButton;
-        set
-        {
-            if (value != _showNavigateBackButton)
-            {
-                _showNavigateBackButton = value;
+    [NotifyChanged]
+    public partial bool ShowNavigateBackButton { get; set; }
 
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public bool IsLoadingOverlayVisible
-    {
-        get => _isLoadingOverlayVisible;
-        set
-        {
-            if (value != _isLoadingOverlayVisible)
-            {
-                _isLoadingOverlayVisible = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    [NotifyChanged]
+    public partial bool IsLoadingOverlayVisible { get; set; }
 
     /// <inheritdoc/>
     public event Action<PropertiesChangedEventArgs>? Changed;

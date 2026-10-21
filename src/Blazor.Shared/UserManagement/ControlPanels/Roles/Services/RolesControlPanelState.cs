@@ -1,39 +1,15 @@
 ﻿using Sdk.Client.ControlPanels.Services;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.UserManagement.ControlPanels.Roles.Services;
 
-public sealed class RolesControlPanelState : ControlPanelState
+public sealed partial class RolesControlPanelState : ControlPanelState
 {
-    private List<Sdk.UserManagement.Contracts.Role> _roles = [];
-    private bool _resetSelectedRoles;
+    [NotifyChanged]
+    internal partial List<Sdk.UserManagement.Contracts.Role> Roles { get; set; } = [];
 
-    internal List<Sdk.UserManagement.Contracts.Role> Roles
-    {
-        get => _roles;
-        set
-        {
-            if (value == _roles)
-                return;
-
-            _roles = value;
-
-            OnPropertyChanged(nameof(Roles));
-        }
-    }
-
-    internal bool ResetSelectedRoles
-    {
-        get => _resetSelectedRoles;
-        set
-        {
-            if (value == _resetSelectedRoles)
-                return;
-
-            _resetSelectedRoles = value;
-
-            OnPropertyChanged(nameof(ResetSelectedRoles));
-        }
-    }
+    [NotifyChanged]
+    internal partial bool ResetSelectedRoles { get; set; }
 
     internal List<Sdk.UserManagement.Contracts.Role> DeletingRoles { get; } = [];
 }

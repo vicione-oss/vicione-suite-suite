@@ -1,40 +1,19 @@
 using System.Globalization;
 using Core.Shared.Instance.Contracts;
 using Sdk.Client.ControlPanels.Services;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.UserInterface.ControlPanels.Language.Services;
 
-public sealed class LanguageControlPanelState : ControlPanelState
+public sealed partial class LanguageControlPanelState : ControlPanelState
 {
     internal static readonly CultureInfo _selectedCultureDefault = CultureInfo.DefaultThreadCurrentUICulture ?? CultureInfo.CurrentUICulture;
 
-    public bool ShowPageRefreshInformation
-    {
-        get;
-        set
-        {
-            if (value != field)
-            {
-                field = value;
+    [NotifyChanged]
+    public partial bool ShowPageRefreshInformation { get; set; }
 
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public bool ShowLanguageDoesNotAffectCurrentUser
-    {
-        get;
-        set
-        {
-            if (value != field)
-            {
-                field = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    [NotifyChanged]
+    public partial bool ShowLanguageDoesNotAffectCurrentUser { get; set; }
 
     public static CultureInfo SelectedCultureDefault => _selectedCultureDefault;
     internal CultureInfo SelectedCulture { get; set; } = _selectedCultureDefault;

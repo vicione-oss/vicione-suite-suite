@@ -1,28 +1,15 @@
 using Blazor.Shared.Connections.Contracts;
 using Sdk.Client.ControlPanels.Services;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Connections.ControlPanels.Connections.Services;
 
-public sealed class ConnectionsControlPanelState : ControlPanelState
+public sealed partial class ConnectionsControlPanelState : ControlPanelState
 {
-    private bool _resetSelectedConnections;
-
-    internal bool ResetSelectedConnections
-    {
-        get => _resetSelectedConnections;
-        set
-        {
-            if (value == _resetSelectedConnections)
-                return;
-
-            _resetSelectedConnections = value;
-
-            OnPropertyChanged(nameof(ResetSelectedConnections));
-        }
-    }
+    [NotifyChanged]
+    internal partial bool ResetSelectedConnections { get; set; }
 
     internal List<EditConnectionModel> Connections { get; set; } = [];
 
     internal List<EditConnectionModel> DeletingConnections { get; } = [];
-
 }
