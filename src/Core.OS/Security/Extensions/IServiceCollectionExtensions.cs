@@ -1,6 +1,10 @@
+using Core.OS.Configuration;
+using Core.OS.Extensions;
 using Core.OS.Instance;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 
 namespace Core.OS.Security.Extensions;
 
@@ -8,6 +12,19 @@ internal static class IServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
+        /// <summary>
+        /// Registers the limiters of <see cref="RequestRateLimiting"/>, configured from <see cref="RateLimitingOptions"/>.
+        /// </summary>
+        internal IServiceCollection AddRequestRateLimiting()
+        {
+            services.AddValidatedOptions<RateLimitingOptions, RateLimitingOptionsValidator>(RateLimitingOptions.ConfigSection);
+            services.AddRateLimiter(_ => { });
+            services.AddOptions<RateLimiterOptions>()
+                .Configure<IOptions<RateLimitingOptions>>((limiter, options) => RequestRateLimiting.Configure(limiter, options.Value));
+
+            return services;
+        }
+
         internal IServiceCollection AddTransportSecurity(InstanceOptions instanceOptions)
         {
             var safelist = TrustedProxySafelist.Parse(instanceOptions.TrustedProxies);

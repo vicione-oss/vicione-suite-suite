@@ -12,6 +12,8 @@ using Core.OS.Mail;
 using Core.OS.Mail.Extensions;
 using Core.OS.MessageBus.MassTransit.Configuration;
 using Core.OS.Monitoring.Extensions;
+using Core.OS.Security;
+using Core.OS.Security.Extensions;
 using Core.OS.UserManagement.Configuration;
 using Core.Shared.HostManagement;
 using Core.Shared.Monitoring;
@@ -155,6 +157,7 @@ public class SuiteOptionsValidationTests
                     services.AddValidatedOptions<MqttClientOptions, MqttClientOptionsValidator>(MqttClientOptions.ConfigSection);
                     services.AddValidatedOptions<UserManagementOptions, UserManagementOptionsValidator>(UserManagementOptions.ConfigSection);
                     services.AddValidatedOptions<ExternalIdProviderOptions, ExternalIdProviderOptionsValidator>(ExternalIdProviderOptions.ConfigSection);
+                    services.AddValidatedOptions<RateLimitingOptions, RateLimitingOptionsValidator>(RateLimitingOptions.ConfigSection);
                 },
                 []);
 
@@ -213,6 +216,7 @@ public class SuiteOptionsValidationTests
                 typeof(MessageBusOptions),
                 typeof(ModuleLoaderOptions),
                 typeof(MqttClientOptions),
+                typeof(RateLimitingOptions),
                 typeof(SmtpMailOptions),
                 typeof(SystemMonitoringOptions),
                 typeof(UserManagementOptions),
@@ -279,6 +283,7 @@ public class SuiteOptionsValidationTests
             services.AddMqttServices();
             services.AddSystemMonitoring(new ConfigurationBuilder().Build());
             services.AddCoreLogging();
+            services.AddRequestRateLimiting();
             return services;
         }
 

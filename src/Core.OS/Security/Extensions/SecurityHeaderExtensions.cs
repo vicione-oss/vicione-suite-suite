@@ -78,12 +78,14 @@ internal static class SecurityHeaderExtensions
     /// <summary>
     /// Maps the endpoint both of the policy's reporting directives point at, from the class that
     /// sends the policy, so the route a browser is told to post to and the route that answers
-    /// cannot drift apart.
+    /// cannot drift apart. It is not rate limited: a browser posts a page's reports in a burst, and
+    /// the size cap bounds each of them.
     /// </summary>
     public static IEndpointRouteBuilder MapCspViolationReports(this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapPost(CspViolationReporting.Route, CspViolationEndpoint.Receive)
-            .WithMetadata(new RequestSizeLimitAttribute(MaxViolationReportBytes));
+            .WithMetadata(new RequestSizeLimitAttribute(MaxViolationReportBytes))
+            .DisableRateLimiting();
 
         return endpoints;
     }

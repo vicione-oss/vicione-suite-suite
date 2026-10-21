@@ -17,7 +17,7 @@ ASP.NET Identity's lockout feature is enabled to slow down online password guess
   - The "change password" flow checks lockout up front and increments on a wrong current password.
   - Passkey sign-in and external (OIDC) sign-in **respect** an existing lockout but do not increment the counter — those auth paths are not credential-guessing surfaces.
 - **Out of scope:**
-  - No IP-based rate limiting upstream of Identity; lockout is the only brute-force defense.
+  - Guessing across many accounts, which a per-account counter cannot see; the per-client sign-in limit under [Rate Limiting](#rate-limiting) slows it down.
   - No protection inside the `UpdateUser` profile-change command path — that consumer calls `ChangePasswordAsync` directly without consulting the lockout state.
   - The bootstrapped system administrator is subject to lockout like any other account.
 
@@ -115,3 +115,30 @@ The Content Security Policy itself is decided in [ADR-006](ADRs/ADR-006-content-
 - **The policy does not vary by environment.** There is no Development variant, so what E2E exercises is the header a customer gets.
   It does vary per instance in one directive: `form-action` names the origin of the configured OpenID provider, without which the browser refuses the challenge redirect.
   The origin is read from the OpenID options themselves, so it follows a provider change without a restart.
+
+## Rate Limiting
+
+The suite answers requests above a client's rate with `429 Too Many Requests` and a `Retry-After` header, so excess traffic is refused before it saturates the device ([suite#2973](https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2973), found in [issue-defect-management#544](https://gitlab.com/vicione-oss/issue-defect-management/-/work_items/544)).
+
+| Limit | Default | Setting |
+|-------|---------|---------|
+| Requests per client | 10 per second, bursts up to 50 | `RateLimiting:PermitsPerSecond`, `RateLimiting:Burst` |
+| Sign-in and account form posts per client | 20 per minute | `RateLimiting:SignInPermitsPerMinute` |
+| Requests of all clients in progress at once | 45 | `RateLimiting:MaxConcurrentRequests` |
+
+`RateLimiting:Enabled=false` turns all three off; a value out of range stops the instance at startup.
+
+- **The suite limits, nginx does not**, for the reason [ADR-006](ADRs/ADR-006-content-security-policy.md) gives for the policy: the app is the only layer present in every deployment.
+  Kestrel's connection limits are not used either, because they close the connection instead of answering `429`.
+- **A client is an address**, as `UseForwardedHeaders` resolves it, so behind the packaged nginx or a proxy listed in `Instance:TrustedProxies` every client is counted on its own.
+  IPv6 clients are counted per address too, not per `/64`, because on a device's LAN every client shares one `/64`.
+- **Clients sharing an address share the limits**: everyone behind one NAT router, and everyone behind a customer proxy in front of the packaged nginx — the suite reads only the last forwarded hop, which is that proxy.
+- **The sign-in limit** counts the form posts of the anonymous account pages (sign-in, expired-password change, forgot password, resend confirmation, reset password) and the start of an external sign-in.
+  Loading the pages does not count, and neither does the passkey challenge, which the login page requests on every load.
+  Endpoints opt in with `[EnableRateLimiting(RateLimitPolicies.SignIn)]` or `RequireRateLimiting(RateLimitPolicies.SignIn)`.
+- **The global cap counts requests in progress**, not requests per second, so it follows the speed of the device; it answers with `Retry-After: 1`.
+- **Never limited:** static files, which are answered before routing; `/_blazor`, so circuits, reconnects and uploads streamed over a circuit keep working; `/_framework`, `/hc`, `/liveness` and `/csp-report`; and loopback clients, which is the suite calling itself, for example modules through `ILocalHttpClient`.
+  Cluster nodes talk over RabbitMQ and HostManagement over its pipe, so neither passes the limits.
+  A module endpoint that machines call at a high rate can opt out with `DisableRateLimiting()`.
+- **Logging:** the first rejection of a client per minute, and of the global cap per minute, is a warning.
+  Every rejection is counted in the `aspnetcore.rate_limiting.requests` metric when OpenTelemetry is configured (see [opentelemetry.md](opentelemetry.md)).
