@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <DotNetVersion>10.0.12</DotNetVersion>
+    <DotNetVersion>10.0.13</DotNetVersion>
     <HostManagementVersion>2.0.0-beta1</HostManagementVersion>
     <OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.11</MassTransitVersion>
