@@ -80,5 +80,11 @@ public sealed class EnvironmentOverridesIsolationSmokeTests(PlaywrightFixture fi
     }
 
     private async Task<EnvironmentOverridesUi> OpenPanelOn(Uri instanceUrl)
-        => await EnvironmentOverridesUi.Open(await NewPage(instanceUrl), TestUsers.UserName, TestUsers.Password);
+    {
+        var page = await NewPage(instanceUrl);
+
+        var panel = await EnvironmentOverridesUi.Open(page, TestUsers.UserName, TestUsers.Password);
+
+        return panel;
+    }
 }

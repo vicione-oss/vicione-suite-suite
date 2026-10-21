@@ -10,13 +10,17 @@ public static class UserProfileExtensions
     extension(SuiteUser user)
     {
         public async Task<UserProfile> CreateUserProfile(UserManager<SuiteUser> userManager)
-            => new()
+        {
+            var roles = await userManager.GetRolesAsync(user);
+            var claims = await userManager.GetClaimsAsync(user);
+
+            return new()
             {
                 // Required:
                 UserName = user.UserName is not null ? new UserName(user.UserName) : UserName.Empty,
                 Email = user.Email!,
-                Roles = [.. await userManager.GetRolesAsync(user)],
-                Claims = [.. (await userManager.GetClaimsAsync(user)).Select(claim => claim.ToUserManagementClaim())],
+                Roles = [.. roles],
+                Claims = [.. claims.Select(claim => claim.ToUserManagementClaim())],
 
                 // Optional:
                 Firstname = user.FirstName,
@@ -35,6 +39,7 @@ public static class UserProfileExtensions
                 Mobile = user.Mobile,
                 PasswordExpirationDate = user.PasswordExpirationDate
             };
+        }
 
         public UserInformation ToUserInformation()
         {

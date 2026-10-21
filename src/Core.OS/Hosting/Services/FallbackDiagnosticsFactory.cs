@@ -21,15 +21,22 @@ internal static class FallbackDiagnosticsFactory
     private const string UnknownVersion = "unknown";
 
     public static async Task<FallbackDiagnostics> Create(FallbackHostOptions options, CancellationToken cancellationToken = default)
-        => new FallbackDiagnostics
+    {
+        var timestamp = DateTimeOffset.UtcNow;
+        var version = await ResolveVersion(options, cancellationToken);
+        var recovery = await ResolveRecovery(options, cancellationToken);
+        var environmentOverrides = await ResolveEnvironmentOverrides(options, cancellationToken);
+
+        return new FallbackDiagnostics
         {
             Status = options.Status,
             Messages = options.Messages,
-            Timestamp = DateTimeOffset.UtcNow,
-            Version = await ResolveVersion(options, cancellationToken),
-            Recovery = await ResolveRecovery(options, cancellationToken),
-            EnvironmentOverrides = await ResolveEnvironmentOverrides(options, cancellationToken),
+            Timestamp = timestamp,
+            Version = version,
+            Recovery = recovery,
+            EnvironmentOverrides = environmentOverrides,
         };
+    }
 
     private static async Task<FallbackEnvironmentOverridesDiagnostics> ResolveEnvironmentOverrides(FallbackHostOptions options, CancellationToken cancellationToken)
     {

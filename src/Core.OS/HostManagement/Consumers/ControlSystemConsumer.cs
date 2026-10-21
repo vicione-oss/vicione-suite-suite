@@ -34,13 +34,15 @@ public sealed partial class ControlSystemConsumer(
 
         try
         {
-            var result = command switch
+            var commandTask = command switch
             {
-                SystemCommand.Reset => await ProcessResetSystem(context),
-                SystemCommand.Restart => await ProcessRestartSystem(context),
-                SystemCommand.Shutdown => await ProcessShutdownSystem(context),
+                SystemCommand.Reset => ProcessResetSystem(context),
+                SystemCommand.Restart => ProcessRestartSystem(context),
+                SystemCommand.Shutdown => ProcessShutdownSystem(context),
                 _ => throw new UnreachableException(),
             };
+
+            var result = await commandTask;
 
             if (result?.Status != OperationStatus.Success)
             {

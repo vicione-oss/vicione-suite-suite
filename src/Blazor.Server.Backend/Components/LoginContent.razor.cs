@@ -149,9 +149,10 @@ public sealed partial class LoginContent
     {
         ReturnUrl ??= "/";
 
-        var (result, isPasskeySignIn) = IsPasskeySignIn(Input)
-            ? (await ExecutePasskeyLogin(), true)
-            : (await ExecutePasswordLogin(), false);
+        var isPasskeySignIn = IsPasskeySignIn(Input);
+        var loginTask = isPasskeySignIn ? ExecutePasskeyLogin() : ExecutePasswordLogin();
+
+        var result = await loginTask;
 
         if (result is null)
         {
