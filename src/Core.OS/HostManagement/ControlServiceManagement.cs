@@ -125,13 +125,21 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
 
     private async Task<ControlServiceManagementResult> ChangeServiceState(ServiceCommand command, string serviceName, CancellationToken cancellationToken)
     {
-        var requestResult = command switch
+        ServiceControlResult? requestResult;
+        switch (command)
         {
-            ServiceCommand.Start => await pipeClient.StartService(serviceName, cancellationToken),
-            ServiceCommand.Stop => await pipeClient.StopService(serviceName, cancellationToken),
-            ServiceCommand.Restart => await pipeClient.RestartService(serviceName, cancellationToken),
-            _ => throw new UnreachableException(),
-        };
+            case ServiceCommand.Start:
+                requestResult = await pipeClient.StartService(serviceName, cancellationToken);
+                break;
+            case ServiceCommand.Stop:
+                requestResult = await pipeClient.StopService(serviceName, cancellationToken);
+                break;
+            case ServiceCommand.Restart:
+                requestResult = await pipeClient.RestartService(serviceName, cancellationToken);
+                break;
+            default:
+                throw new UnreachableException();
+        }
 
         return HandleServiceControlResult(requestResult, command, serviceName);
     }

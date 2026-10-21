@@ -76,7 +76,14 @@ public sealed partial class LoginPage(IPage page)
     /// the host is DNS-capable (the button is rendered but disabled on a non-DNS host).
     /// </summary>
     public async Task<bool> IsPasskeySignInAvailable()
-        => await PasskeySignInButton.IsVisibleAsync() && await PasskeySignInButton.IsEnabledAsync();
+    {
+        if (!await PasskeySignInButton.IsVisibleAsync())
+            return false;
+
+        var isEnabled = await PasskeySignInButton.IsEnabledAsync();
+
+        return isEnabled;
+    }
 
     /// <summary>Trigger passkey login; the virtual authenticator answers navigator.credentials.get().</summary>
     public Task LoginViaPasskey() => PasskeySignInButton.ClickAsync();

@@ -87,7 +87,7 @@ dotnet test vicione-suite.slnx --no-build --filter-query "/[(Category!=System)&(
 
 ## Code Style & Conventions
 
-- See `docs/code-style-guide.md` for member ordering and comment rules
+- Follow `docs/code-style-guide.md`
 - Prefer primary constructors over explicit constructors with `private readonly` field assignments
 - Warnings are errors in CI (`TREAT_WARNINGS_AS_ERRORS=true`)
 - Languages: en-US primary, de secondary (satellite resources)

@@ -22,7 +22,11 @@ public sealed class ResetPasswordPage(IPage page)
 
     /// <summary>Clicks the show/hide button belonging to the given password field.</summary>
     public async Task TogglePasswordVisibility(int fieldIndex)
-        => await (await PasswordToggle(fieldIndex)).ClickAsync();
+    {
+        var toggle = await PasswordToggle(fieldIndex);
+
+        await toggle.ClickAsync();
+    }
 
     /// <summary>Asserts whether the given password field reveals its value.</summary>
     public Task ExpectPasswordRevealed(int fieldIndex, bool revealed)

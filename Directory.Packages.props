@@ -10,7 +10,7 @@
     <ViciOneSuiteSdkVersion>3.6.0</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
-    <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.6.0" />
+    <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.8.0" />
     <PackageVersion Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
     <PackageVersion Include="AspNetCore.SassCompiler" Version="1.105.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />

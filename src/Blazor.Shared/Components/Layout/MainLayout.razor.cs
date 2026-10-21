@@ -33,7 +33,9 @@ public sealed partial class MainLayout : IDisposable
     {
         if (ExistingCascadedAuthenticationState is not null)
         {
-            await ModuleService.OnUserAuthenticated(ServiceProvider, (await ExistingCascadedAuthenticationState).User);
+            var authenticationState = await ExistingCascadedAuthenticationState;
+
+            await ModuleService.OnUserAuthenticated(ServiceProvider, authenticationState.User);
 
             _isLogin = NavigationManager.Uri.Contains("account/", StringComparison.OrdinalIgnoreCase);
         }

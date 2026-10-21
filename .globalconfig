@@ -11,6 +11,8 @@ dotnet_diagnostic.VO2006.severity = none # Methods should be sorted in alphabeti
 dotnet_diagnostic.VO2007.severity = error # Base implementation is not called in all possible control flow paths
 dotnet_diagnostic.VO2008.severity = none # Property assignments in the object initializer are not sorted alphabetically by property name
 dotnet_diagnostic.VO2009.severity = none # Property assignments in the constructor are not sorted alphabetically by property name
+dotnet_diagnostic.VO2010.severity = none # Generic type file name does not match naming pattern
+dotnet_diagnostic.VO2011.severity = warning # Statement contains more than one 'await' expression
 
 # TEMPORARY: obsolete members after Blazor components update. Remove once migrated.
 dotnet_diagnostic.CS0618.severity = none # Member is obsolete

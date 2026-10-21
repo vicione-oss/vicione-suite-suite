@@ -55,6 +55,27 @@ protected override async ValueTask DisposeAsyncCore()
 > `ControlPanelBase<TState>.OnInitialized`. If the base class starts doing work there later, overrides that call it
 > last will silently run before that work.
 
+### Blank lines
+
+Prefer a blank line before a `return` that follows another statement.
+
+```csharp
+var inputId = await PasswordField(fieldIndex).GetAttributeAsync("id");
+
+return page.Locator($"button[data-toggle-password='{inputId}']");
+```
+
+### Returning awaited values
+
+In a method that awaits anyway, prefer awaiting into a local and returning the local over `return await ...;` or
+`=> await ...;`. A breakpoint on the `return` then shows the awaited value.
+
+```csharp
+var isEnabled = await PasskeySignInButton.IsEnabledAsync();
+
+return isEnabled;
+```
+
 ## Code comments
 
 Comments are read far more often than they are written, and a redundant or stale comment costs more than no
