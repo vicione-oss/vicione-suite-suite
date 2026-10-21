@@ -15,13 +15,6 @@ public sealed partial class GetNetworkStatusInformationRequestConsumer(IPipeClie
         var mapper = new NetworkStatusInformationMapper();
 
         var result = await pipeClient.GetNetworkStatusInformation(message.NetworkInterfaceName, cancellationToken);
-        if (result == null)
-        {
-            LogDeserializeReturnedNull(logger);
-
-            return new GetNetworkStatusInformationResponse { RequestError = new ErrorInfo(1, "Deserialization failed") };
-        }
-
         if (result.Status == OperationStatus.Success)
             return new GetNetworkStatusInformationResponse { NetworkStatusInformation = mapper.ToSuiteFormat(result.NetworkStatusInformation) };
 
@@ -48,9 +41,6 @@ public sealed partial class GetNetworkStatusInformationRequestConsumer(IPipeClie
 
         return Task.FromResult(new GetNetworkStatusInformationResponse { RequestError = new ErrorInfo(4, e.Message) });
     }
-
-    [LoggerMessage(LogLevel.Error, "Deserialize() returned null")]
-    private static partial void LogDeserializeReturnedNull(ILogger<GetNetworkStatusInformationRequestConsumer> logger);
 
     [LoggerMessage(LogLevel.Warning, "Network status information with warnings returned ({Message})")]
     private static partial void LogWarningStatusReturned(ILogger<GetNetworkStatusInformationRequestConsumer> logger, string? message);

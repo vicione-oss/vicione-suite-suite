@@ -1,6 +1,5 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
-using System.Text.Json;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.OS.Instance;
@@ -10,7 +9,6 @@ using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.HostManagement.Commands;
 using Core.Shared.HostManagement.Events;
 using Core.Shared.UserManagement.Contracts;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +18,7 @@ using Microsoft.Extensions.Options;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
 using HostManagementPipeClientExtensions = Core.OS.HostManagement.Extensions.IPipeClientExtensions;
+using PipeRequests = HostManagement.Shared.Communication.NamedPipe.Client.PipeRequests;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 
@@ -72,7 +71,7 @@ public sealed class ControlSystemConsumerTests
 
         // Assert
         (await tester.Harness.Published.Any<ControlSystemCompleted>(TestContext.Current.CancellationToken)).Should().BeTrue();
-        await _pipeClient.Received().SendRequest(Topics.ResetSystem, string.Empty, Arg.Any<CancellationToken>());
+        await _pipeClient.Received().SendRequest(PipeRequests.ResetSystem, string.Empty, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -90,7 +89,7 @@ public sealed class ControlSystemConsumerTests
         // Assert
         var options = tester.Services.GetRequiredService<IOptions<InstanceOptions>>().Value;
         _fileSystem.ResetFileExists(options).Should().BeTrue();
-        await _pipeClient.Received().SendRequest(Topics.RestartService, _instanceOptions.ServiceName, Arg.Any<CancellationToken>());
+        await _pipeClient.Received().SendRequest(PipeRequests.RestartService, _instanceOptions.ServiceName, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -107,7 +106,7 @@ public sealed class ControlSystemConsumerTests
         // Assert
         (await tester.Harness.Published.Any<ControlSystemCompleted>(r =>
             r.Context.Message.ErrorInfo != null, TestContext.Current.CancellationToken)).Should().BeTrue();
-        await _pipeClient.Received().SendRequest(Topics.ResetSystem, string.Empty, Arg.Any<CancellationToken>());
+        await _pipeClient.Received().SendRequest(PipeRequests.ResetSystem, string.Empty, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -124,7 +123,7 @@ public sealed class ControlSystemConsumerTests
 
         // Assert
         (await tester.Harness.Published.Any<ControlSystemCompleted>(TestContext.Current.CancellationToken)).Should().BeTrue();
-        await _pipeClient.Received().SendRequest(Topics.RestartSystem, HostManagementPipeClientExtensions.SystemControlDelaySeconds, Arg.Any<CancellationToken>());
+        await _pipeClient.Received().SendRequest(PipeRequests.RestartSystem, HostManagementPipeClientExtensions.SystemControlDelaySeconds, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -141,7 +140,7 @@ public sealed class ControlSystemConsumerTests
         // Assert
         (await tester.Harness.Published.Any<ControlSystemCompleted>(r => r.Context.Message.ErrorInfo != null,
             TestContext.Current.CancellationToken)).Should().BeTrue();
-        await _pipeClient.Received().SendRequest(Topics.RestartSystem, HostManagementPipeClientExtensions.SystemControlDelaySeconds, Arg.Any<CancellationToken>());
+        await _pipeClient.Received().SendRequest(PipeRequests.RestartSystem, HostManagementPipeClientExtensions.SystemControlDelaySeconds, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -156,7 +155,7 @@ public sealed class ControlSystemConsumerTests
         await tester.TestInstanceDependentCommand<ControlSystem, ControlSystemConsumer>(command);
 
         // Assert
-        await _pipeClient.Received().SendRequest(Topics.ShutdownSystem,
+        await _pipeClient.Received().SendRequest(PipeRequests.ShutdownSystem,
                 HostManagementPipeClientExtensions.SystemControlDelaySeconds,
                 Arg.Any<CancellationToken>());
     }
@@ -199,9 +198,8 @@ public sealed class ControlSystemConsumerTests
             Message = "Message"
         };
 
-        _pipeClient.SendRequest(Topics.ShutdownSystem,
+        _pipeClient.SendRequest(PipeRequests.ShutdownSystem,
                 HostManagementPipeClientExtensions.SystemControlDelaySeconds,
-                Arg.Any<CancellationToken>()).Returns(JsonSerializer.Serialize(result, SourceGenerationContext.Default.SystemControlResult));
-
+                Arg.Any<CancellationToken>()).Returns(result);
     }
 }

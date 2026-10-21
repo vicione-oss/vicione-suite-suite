@@ -9,7 +9,6 @@ using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.Instance.Commands;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Events;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Enums;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Sdk.Backend.Persistence;
 using Sdk.Instance;
 using Sdk.Testing.Backend;
+using PipeRequests = HostManagement.Shared.Communication.NamedPipe.Client.PipeRequests;
 
 namespace Core.OS.Tests.Instance.Consumers;
 
@@ -137,7 +137,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
             // The consumer sends the request from a background task after it returns, which the test harness does not wait for.
             var restartRequested = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             _pipeClient
-                .When(x => x.SendRequest(Topics.RestartService, Arg.Any<string>(), Arg.Any<CancellationToken>()))
+                .When(x => x.SendRequest(PipeRequests.RestartService, Arg.Any<string>(), Arg.Any<CancellationToken>()))
                 .Do(_ => restartRequested.TrySetResult());
 
             var command = new ControlInstance()
@@ -151,7 +151,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
             await restartRequested.Task.WaitAsync(TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
 
             // Assert
-            await _pipeClient.Received(1).SendRequest(Topics.RestartService, _instanceOptions.ServiceName, Arg.Any<CancellationToken>());
+            await _pipeClient.Received(1).SendRequest(PipeRequests.RestartService, _instanceOptions.ServiceName, Arg.Any<CancellationToken>());
         }
 
         [Fact]
@@ -170,7 +170,7 @@ public class ControlInstanceConsumerTests : TestWithDbContextSqlite<ApplicationD
             await tester.TestInstanceDependentCommand<ControlInstance, ControlInstanceConsumer>(command);
 
             // Assert
-            await _pipeClient.Received(0).SendRequest(Topics.RestartService, _instanceOptions.ServiceName, Arg.Any<CancellationToken>());
+            await _pipeClient.Received(0).SendRequest(PipeRequests.RestartService, _instanceOptions.ServiceName, Arg.Any<CancellationToken>());
         }
 
         [Fact]

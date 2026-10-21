@@ -37,13 +37,16 @@ public sealed class PipeClient(
     }
 
     /// <inheritdoc/>
-    public async Task<string> SendRequest(string topic, string content, CancellationToken cancellationToken = default)
+    public async Task<TResponse> SendRequest<TResponse>(PipeRequest<TResponse> request, string content = "", CancellationToken cancellationToken = default)
     {
         // The HostManagement client connects without a time limit, so a stopped server would block the request until it is cancelled.
         if (State is not PipeState.Connected)
             await Connect(cancellationToken).ConfigureAwait(false);
 
-        return (await _pipeClient.SendRequestAsync(topic, content, cancellationToken: cancellationToken).ConfigureAwait(false)).Content;
+        // The typed SendRequestAsync drops the content of a plain Response, which carries the reason a handler failed.
+        var response = await _pipeClient.SendRequestAsync(request.Topic, content, cancellationToken: cancellationToken).ConfigureAwait(false);
+
+        return PipeResponse.Deserialize(request, response.Content);
     }
 
     /// <inheritdoc/>

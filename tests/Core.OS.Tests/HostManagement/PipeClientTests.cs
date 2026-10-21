@@ -1,13 +1,12 @@
 using System.Diagnostics;
-using Core.OS.HostManagement;
 using Core.Shared.HostManagement;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Communication.NamedPipe.Client;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using HostManagementPipeClient = HostManagement.Shared.Communication.NamedPipe.Client.PipeClient;
 using PipeClient = Core.OS.HostManagement.PipeClient;
+using CapabilityPipeRequests = HostManagement.Shared.Communication.NamedPipe.Client.CapabilityPipeRequests;
 
 namespace Core.OS.Tests.HostManagement;
 
@@ -23,7 +22,7 @@ public sealed class PipeClientTests
         var stopwatch = Stopwatch.StartNew();
 
         // Act
-        var act = () => pipeClient.SendRequest(Topics.GetSupportedCapabilities, string.Empty, TestContext.Current.CancellationToken);
+        var act = () => pipeClient.SendRequest(CapabilityPipeRequests.GetSupportedCapabilities, string.Empty, TestContext.Current.CancellationToken);
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>();

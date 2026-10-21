@@ -208,8 +208,8 @@ public sealed partial class RestoreBackupConsumer(
         // Applying configuration from a backup with network changes triggers a system or suite
         // restart.
         var result = await pipeClient.SetSystemConfiguration(systemConfiguration, context.CancellationToken);
-        if (result?.Status != OperationStatus.Success)
-            throw new InvalidOperationException(result?.Message);
+        if (result.Status != OperationStatus.Success)
+            throw new InvalidOperationException(result.Message);
 
         return networkChanges;
     }
@@ -218,7 +218,7 @@ public sealed partial class RestoreBackupConsumer(
     {
         var configurationResult = await pipeClient.GetSystemConfiguration(cancellationToken);
 
-        return configurationResult?.Status == OperationStatus.Success ? configurationResult.Configuration : null;
+        return configurationResult.Status == OperationStatus.Success ? configurationResult.Configuration : null;
     }
 
     private static bool HasNetworkChanges(SystemConfiguration? current, SystemConfiguration? toBeRestored)

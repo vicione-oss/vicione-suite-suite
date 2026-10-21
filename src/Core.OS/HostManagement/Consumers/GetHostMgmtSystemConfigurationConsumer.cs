@@ -31,8 +31,8 @@ public sealed class GetHostMgmtSystemConfigurationConsumer(IPipeClient pipeClien
 
         return new GetHostMgmtSystemConfigurationResponse
         {
-            Configuration = configurationResult?.Configuration,
-            RequestError = new ErrorInfo(0, configurationResult?.Message ?? "Could not fetch configuration from HostManagement")
+            Configuration = configurationResult.Configuration,
+            RequestError = new ErrorInfo(0, configurationResult.Message ?? "Could not fetch configuration from HostManagement")
         };
     }
 }

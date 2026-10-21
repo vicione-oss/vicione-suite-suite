@@ -43,13 +43,12 @@ public sealed partial class ControlSystemConsumer(
             };
 
             var result = await commandTask;
-
-            if (result?.Status != OperationStatus.Success)
+            if (result.Status != OperationStatus.Success)
             {
                 var errorResponse = new ControlSystemCompleted(command)
                 {
                     CorrelationId = correlationId,
-                    ErrorInfo = new ErrorInfo((int?)result?.Status ?? ControlSystemCompleted.UnknownError, result?.Message)
+                    ErrorInfo = new ErrorInfo((int)result.Status, result.Message)
                 };
 
                 await context.Publish(errorResponse, context.CancellationToken);
@@ -81,11 +80,11 @@ public sealed partial class ControlSystemConsumer(
         }
     }
 
-    private async Task<OperationResult?> ProcessResetSystem(ConsumeContext<ControlSystem> context)
+    private async Task<OperationResult> ProcessResetSystem(ConsumeContext<ControlSystem> context)
     {
         // Resets the system through HostManagement.
         var result = await pipeClient.ResetSystem(context.CancellationToken);
-        if (result?.Status != OperationStatus.Success)
+        if (result.Status != OperationStatus.Success)
             return result;
 
         // HM reset sent successfully so trigger reset on restart for suite
@@ -96,10 +95,10 @@ public sealed partial class ControlSystemConsumer(
         return result;
     }
 
-    private async Task<OperationResult?> ProcessShutdownSystem(ConsumeContext<ControlSystem> context)
+    private async Task<OperationResult> ProcessShutdownSystem(ConsumeContext<ControlSystem> context)
     {
         var result = await pipeClient.ShutdownSystem(context.CancellationToken);
-        if (result is not null && result.Status != OperationStatus.Error)
+        if (result.Status != OperationStatus.Error)
         {
             await userManager.InvalidateLogins();
         }
@@ -107,7 +106,7 @@ public sealed partial class ControlSystemConsumer(
         return result;
     }
 
-    private async Task<OperationResult?> ProcessRestartSystem(ConsumeContext<ControlSystem> context)
+    private async Task<OperationResult> ProcessRestartSystem(ConsumeContext<ControlSystem> context)
         => await pipeClient.RestartSystem(context.CancellationToken);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Executing command='{Command}' on system correlated by {CorrelationId}")]

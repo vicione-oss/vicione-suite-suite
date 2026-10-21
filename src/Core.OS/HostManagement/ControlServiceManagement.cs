@@ -68,7 +68,7 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
         ApplyServiceCommand(serviceToControl, command);
 
         var setResult = await pipeClient.SetSystemConfiguration(configuration, cancellationToken);
-        if (setResult?.Status == OperationStatus.Success)
+        if (setResult.Status == OperationStatus.Success)
         {
             // Invalidated before the caller publishes SystemConfigurationChanged, on which the UI reloads (#2933).
             responseCache.Invalidate();
@@ -76,9 +76,9 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
             return new ControlServiceManagementResult(serviceName, ToSuiteState(command));
         }
 
-        var errorCode = (int?)setResult?.Status ?? ControlServiceErrorCodes.UnknownError;
-        var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
-        LogServiceCommandFailed(logger, command, serviceName, errorCode, setResult?.Message);
+        var errorCode = (int)setResult.Status;
+        var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult.Message}");
+        LogServiceCommandFailed(logger, command, serviceName, errorCode, setResult.Message);
 
         return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
     }
@@ -144,13 +144,13 @@ public sealed partial class ControlServiceManagement(IPipeClient pipeClient, Sys
         return HandleServiceControlResult(requestResult, command, serviceName);
     }
 
-    private ControlServiceManagementResult HandleServiceControlResult(ServiceControlResult? setResult, ServiceCommand command, string serviceName)
+    private ControlServiceManagementResult HandleServiceControlResult(ServiceControlResult setResult, ServiceCommand command, string serviceName)
     {
-        if (setResult?.Status != OperationStatus.Success)
+        if (setResult.Status != OperationStatus.Success)
         {
-            var errorCode = (int?)setResult?.Status ?? ControlServiceErrorCodes.UnknownError;
-            var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult?.Message}");
-            LogServiceCommandFailed(logger, command, serviceName, errorCode, setResult?.Message);
+            var errorCode = (int)setResult.Status;
+            var errorInfo = new ErrorInfo(errorCode, $"{command} service '{serviceName}' failed with {errorCode}. {setResult.Message}");
+            LogServiceCommandFailed(logger, command, serviceName, errorCode, setResult.Message);
 
             return new ControlServiceManagementResult(serviceName, SdkServiceState.Unknown, errorInfo);
         }

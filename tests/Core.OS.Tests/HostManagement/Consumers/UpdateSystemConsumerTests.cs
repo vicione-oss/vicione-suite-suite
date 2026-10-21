@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Consumers;
 using Core.Shared.HostManagement.Commands;
@@ -6,7 +5,6 @@ using Core.Shared.HostManagement.Events;
 using Core.OS.Tests.HostManagement.Extensions;
 using Core.Shared.UserManagement.Contracts;
 using HostManagement.Shared.Capabilities;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
@@ -16,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sdk.Testing.Backend;
+using PipeRequests = HostManagement.Shared.Communication.NamedPipe.Client.PipeRequests;
 
 namespace Core.OS.Tests.HostManagement.Consumers;
 
@@ -63,7 +62,7 @@ public sealed class UpdateSystemConsumerTests
         await tester.TestInstanceDependentCommand<UpdateSystem, UpdateSystemConsumer>(command);
 
         // Assert
-        await _pipeClient.Received().SendRequest(Topics.UpdateSystem,
+        await _pipeClient.Received().SendRequest(PipeRequests.UpdateSystem,
                 command.FilePath,
                 Arg.Any<CancellationToken>());
     }
@@ -119,7 +118,7 @@ public sealed class UpdateSystemConsumerTests
         (await tester.Harness.Published.Any<UpdateSystemStarted>(r =>
             r.Context.Message.ErrorInfo?.ErrorCode == UpdateSystemStarted.UpdateSystemDisabled, TestContext.Current.CancellationToken)).Should().BeTrue();
         _ = _userStore.DidNotReceive().Users;
-        await _pipeClient.DidNotReceive().SendRequest(Topics.UpdateSystem, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _pipeClient.DidNotReceive().SendRequest(PipeRequests.UpdateSystem, Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     private void SetupUpdateSystemRequestSuccess(UpdateSystem command)
@@ -129,9 +128,8 @@ public sealed class UpdateSystemConsumerTests
             Status = OperationStatus.Success,
             Message = "Message"
         };
-        _pipeClient.SendRequest(Topics.UpdateSystem,
+        _pipeClient.SendRequest(PipeRequests.UpdateSystem,
                 command.FilePath,
-                Arg.Any<CancellationToken>()).Returns(JsonSerializer.Serialize<SystemControlResult>(result, SourceGenerationContext.Default.SystemControlResult));
-
+                Arg.Any<CancellationToken>()).Returns(result);
     }
 }

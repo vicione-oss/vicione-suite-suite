@@ -1,11 +1,10 @@
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 using Core.OS.Instance;
 using HostManagement.Shared.Capabilities;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
+using HostManagement.Shared.Communication.NamedPipe.Client;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.System;
 using CommunicationJsonContext = HostManagement.Shared.Communication.Contracts.SourceGenerationContext;
@@ -22,48 +21,32 @@ internal static partial class IPipeClientExtensions
 
     extension(IPipeClient pipeClient)
     {
-        public async Task<SystemControlResult?> InstallSignedDebianPackage(SignedDebianPackage debianPackage, CancellationToken cancellationToken = default)
-        {
-            var requestJson = JsonSerializer.Serialize(debianPackage, SharedJsonContext.Default.SignedDebianPackage);
+        public Task<SystemControlResult> InstallSignedDebianPackage(SignedDebianPackage debianPackage, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(
+                PipeRequests.InstallSignedDebianPackage,
+                JsonSerializer.Serialize(debianPackage, SharedJsonContext.Default.SignedDebianPackage),
+                cancellationToken);
 
-            return await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.InstallSignedDebianPackage, requestJson, cancellationToken),
-                CommunicationJsonContext.Default.SystemControlResult);
-        }
+        public Task<SetSystemConfigurationResult> SetSystemConfiguration(SystemConfiguration systemConfiguration, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(
+                PipeRequests.SetSystemConfiguration,
+                JsonSerializer.Serialize(systemConfiguration, CommunicationJsonContext.Default.SystemConfiguration),
+                cancellationToken);
 
-        public async Task<SetSystemConfigurationResult?> SetSystemConfiguration(SystemConfiguration systemConfiguration, CancellationToken cancellationToken = default)
-        {
-            var configJson = JsonSerializer.Serialize(systemConfiguration, CommunicationJsonContext.Default.SystemConfiguration);
+        public Task<GetSystemConfigurationResult> GetSystemConfiguration(CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.GetSystemConfiguration, cancellationToken: cancellationToken);
 
-            return await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.SetSystemConfiguration, configJson, cancellationToken),
-                CommunicationJsonContext.Default.SetSystemConfigurationResult);
-        }
+        public Task<GetDHCPLeaseInformationResult> GetDHCPLeaseInformation(string networkInterfaceName, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.GetDHCPLeaseInformation, networkInterfaceName, cancellationToken);
 
-        public async Task<GetSystemConfigurationResult?> GetSystemConfiguration(CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.GetSystemConfiguration, string.Empty, cancellationToken),
-                CommunicationJsonContext.Default.GetSystemConfigurationResult);
+        public Task<GetNetworkStatusInformationResult> GetNetworkStatusInformation(string networkInterfaceName, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.GetNetworkStatusInformation, networkInterfaceName, cancellationToken);
 
-        public async Task<GetDHCPLeaseInformationResult?> GetDHCPLeaseInformation(string networkInterfaceName, CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.GetDHCPLeaseInformation, networkInterfaceName, cancellationToken),
-                CommunicationJsonContext.Default.GetDHCPLeaseInformationResult);
+        public Task<GetNTPFallbackInformationResult> GetNTPFallbackInformation(CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.GetNTPFallbackInformation, cancellationToken: cancellationToken);
 
-        public async Task<GetNetworkStatusInformationResult?> GetNetworkStatusInformation(string networkInterfaceName, CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.GetNetworkStatusInformation, networkInterfaceName, cancellationToken),
-                CommunicationJsonContext.Default.GetNetworkStatusInformationResult);
-
-        public async Task<GetNTPFallbackInformationResult?> GetNTPFallbackInformation(CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.GetNTPFallbackInformation, string.Empty, cancellationToken),
-                CommunicationJsonContext.Default.GetNTPFallbackInformationResult);
-
-        public async Task<GetSupportedCapabilitiesResult?> GetSupportedCapabilities(CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.GetSupportedCapabilities, string.Empty, cancellationToken),
-                CapabilitySourceGenerationContext.Default.GetSupportedCapabilitiesResult);
+        public Task<GetSupportedCapabilitiesResult> GetSupportedCapabilities(CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(CapabilityPipeRequests.GetSupportedCapabilities, cancellationToken: cancellationToken);
 
         /// <returns>
         /// The capabilities, or <see langword="null"/> when they cannot be read.
@@ -74,10 +57,10 @@ internal static partial class IPipeClientExtensions
             try
             {
                 var result = await pipeClient.GetSupportedCapabilities(cancellationToken);
-                if (result?.Status == OperationStatus.Success)
+                if (result.Status == OperationStatus.Success)
                     return result.SupportedCapabilities;
 
-                LogSupportedCapabilitiesNotReturned(logger, result?.Status, result?.Message);
+                LogSupportedCapabilitiesNotReturned(logger, result.Status, result.Message);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -97,71 +80,35 @@ internal static partial class IPipeClientExtensions
             return capabilities is not null && topic(capabilities.Topics) is CapabilityStatus.Disabled;
         }
 
-        public async Task<GetOriginalPhysicalAddressResult?> GetOriginalPhysicalAddress(string networkInterfaceName, CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.GetOriginalPhysicalAddress, networkInterfaceName, cancellationToken),
-                CommunicationJsonContext.Default.GetOriginalPhysicalAddressResult);
+        public Task<GetOriginalPhysicalAddressResult> GetOriginalPhysicalAddress(string networkInterfaceName, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.GetOriginalPhysicalAddress, networkInterfaceName, cancellationToken);
 
-        public async Task<GetDHCPLeaseInformationResult?> RenewDHCPLease(string networkInterfaceName, CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.RenewDHCPLease, networkInterfaceName, cancellationToken),
-                CommunicationJsonContext.Default.GetDHCPLeaseInformationResult);
+        public Task<GetDHCPLeaseInformationResult> RenewDHCPLease(string networkInterfaceName, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.RenewDHCPLease, networkInterfaceName, cancellationToken);
 
-        public async Task<SystemControlResult?> UpdateSystem(string filePath, CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.UpdateSystem, filePath, cancellationToken),
-                CommunicationJsonContext.Default.SystemControlResult);
+        public Task<SystemControlResult> UpdateSystem(string filePath, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.UpdateSystem, filePath, cancellationToken);
 
-        public async Task<SystemControlResult?> ResetSystem(CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.ResetSystem, string.Empty, cancellationToken),
-                CommunicationJsonContext.Default.SystemControlResult);
+        public Task<SystemControlResult> ResetSystem(CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.ResetSystem, cancellationToken: cancellationToken);
 
-        public async Task<SystemControlResult?> RestartSystem(CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.RestartSystem, SystemControlDelaySeconds, cancellationToken),
-                CommunicationJsonContext.Default.SystemControlResult);
+        public Task<SystemControlResult> RestartSystem(CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.RestartSystem, SystemControlDelaySeconds, cancellationToken);
 
-        public async Task<ServiceControlResult> RestartService(string serviceName, CancellationToken cancellationToken = default)
-            => (await GetRequestResult(
-                   () => pipeClient.SendRequest(Topics.RestartService, serviceName, cancellationToken),
-                   CommunicationJsonContext.Default.ServiceControlResult))
-               ?? throw new InvalidOperationException($"Send restart service='{serviceName}' request returned null");
+        public Task<ServiceControlResult> RestartService(string serviceName, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.RestartService, serviceName, cancellationToken);
 
         public Task<ServiceControlResult> RestartSuite(InstanceOptions options, CancellationToken cancellationToken = default)
             => pipeClient.RestartService(options.ServiceName, cancellationToken);
 
-        public async Task<SystemControlResult?> ShutdownSystem(CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.ShutdownSystem, SystemControlDelaySeconds, cancellationToken),
-                CommunicationJsonContext.Default.SystemControlResult);
+        public Task<SystemControlResult> ShutdownSystem(CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.ShutdownSystem, SystemControlDelaySeconds, cancellationToken);
 
-        public async Task<ServiceControlResult?> StartService(string serviceName, CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.StartService, serviceName, cancellationToken),
-                CommunicationJsonContext.Default.ServiceControlResult);
+        public Task<ServiceControlResult> StartService(string serviceName, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.StartService, serviceName, cancellationToken);
 
-        public async Task<ServiceControlResult?> StopService(string serviceName, CancellationToken cancellationToken = default)
-            => await GetRequestResult(
-                () => pipeClient.SendRequest(Topics.StopService, serviceName, cancellationToken),
-                CommunicationJsonContext.Default.ServiceControlResult);
-    }
-
-    private static async Task<TResult?> GetRequestResult<TResult>(Func<Task<string>> pipeRequest, JsonTypeInfo<TResult> typeInfo)
-        where TResult : class
-    {
-        var settingsJson = await pipeRequest();
-
-        try
-        {
-            return JsonSerializer.Deserialize(settingsJson, typeInfo);
-        }
-        catch (JsonException jsonEx)
-        {
-            // HostManagement answers a rejected request, such as one for a disabled topic, with a plain Response carrying the reason.
-            var error = JsonSerializer.Deserialize(settingsJson, CommunicationJsonContext.Default.Response);
-            throw new InvalidOperationException($"Pipe request failed with error: {error?.Message}", jsonEx);
-        }
+        public Task<ServiceControlResult> StopService(string serviceName, CancellationToken cancellationToken = default)
+            => pipeClient.SendRequest(PipeRequests.StopService, serviceName, cancellationToken);
     }
 
     [LoggerMessage(LogLevel.Warning, "HostManagement returned no supported capabilities ({Status}: {Message}), skipping the capability check")]

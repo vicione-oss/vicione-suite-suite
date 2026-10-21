@@ -2,11 +2,11 @@ using Core.OS.HostManagement;
 using Core.OS.HostManagement.Extensions;
 using Core.OS.Tests.HostManagement.Extensions;
 using HostManagement.Shared.Capabilities;
-using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Enums;
 using Microsoft.Extensions.Logging;
 using NSubstitute.ExceptionExtensions;
+using CapabilityPipeRequests = HostManagement.Shared.Communication.NamedPipe.Client.CapabilityPipeRequests;
 
 namespace Core.OS.Tests.HostManagement;
 
@@ -57,7 +57,7 @@ public sealed class GetSupportedCapabilitiesOrNullTests
     public async Task Should_return_null_and_log_a_warning_when_the_request_throws()
     {
         // Arrange
-        _pipeClient.SendRequest(Topics.GetSupportedCapabilities, Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _pipeClient.SendRequest(CapabilityPipeRequests.GetSupportedCapabilities, Arg.Any<string>(), Arg.Any<CancellationToken>())
             .ThrowsAsync(new InvalidOperationException("Failed to connect to pipe 'test'."));
 
         // Act
@@ -72,7 +72,7 @@ public sealed class GetSupportedCapabilitiesOrNullTests
     public async Task Should_not_swallow_a_cancellation()
     {
         // Arrange
-        _pipeClient.SendRequest(Topics.GetSupportedCapabilities, Arg.Any<string>(), Arg.Any<CancellationToken>())
+        _pipeClient.SendRequest(CapabilityPipeRequests.GetSupportedCapabilities, Arg.Any<string>(), Arg.Any<CancellationToken>())
             .ThrowsAsync(new OperationCanceledException());
 
         // Act

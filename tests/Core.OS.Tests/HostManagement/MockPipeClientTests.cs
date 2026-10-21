@@ -27,7 +27,7 @@ public sealed class MockPipeClientTests
         var result = await pipeClient.GetSupportedCapabilities(TestContext.Current.CancellationToken);
 
         // Assert
-        result!.Status.Should().Be(OperationStatus.Success);
+        result.Status.Should().Be(OperationStatus.Success);
         JsonSerializer.Serialize(result.SupportedCapabilities, CapabilitySourceGenerationContext.Default.SupportedCapabilities)
             .Should().NotContain(nameof(CapabilityStatus.Disabled));
     }
@@ -48,7 +48,7 @@ public sealed class MockPipeClientTests
         var result = await pipeClient.GetSupportedCapabilities(TestContext.Current.CancellationToken);
 
         // Assert
-        var capabilities = result!.SupportedCapabilities;
+        var capabilities = result.SupportedCapabilities;
         capabilities.Topics.RestartSystem.Should().Be(CapabilityStatus.Disabled);
         capabilities.Settings.DNS.Hostname.Capability.Should().Be(CapabilityStatus.Disabled);
         capabilities.Topics.RestartService.Should().Be(CapabilityStatus.Enabled);
@@ -63,6 +63,19 @@ public sealed class MockPipeClientTests
 
         // Assert
         act.Should().Throw<FileNotFoundException>();
+    }
+
+    [Fact]
+    public async Task Should_throw_with_the_reason_when_the_dhcp_lease_is_requested_without_an_interface_name()
+    {
+        // Arrange
+        var pipeClient = CreateMockPipeClient(supportedCapabilitiesJsonFile: null);
+
+        // Act
+        var act = () => pipeClient.GetDHCPLeaseInformation(string.Empty, TestContext.Current.CancellationToken);
+
+        // Assert
+        (await act.Should().ThrowAsync<HostManagementRequestException>()).Which.Reason.Should().Be("Network interface name is empty");
     }
 
     private MockPipeClient CreateMockPipeClient(string? supportedCapabilitiesJsonFile)

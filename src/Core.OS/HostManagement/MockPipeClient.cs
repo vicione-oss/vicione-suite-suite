@@ -10,6 +10,7 @@ using HostManagement.Shared.Communication;
 using HostManagement.Shared.Communication.Capabilities;
 using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
+using HostManagement.Shared.Communication.NamedPipe.Client;
 using HostManagement.Shared.Contracts;
 using HostManagement.Shared.Contracts.NetworkStatus;
 using Microsoft.Extensions.Options;
@@ -90,7 +91,10 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
         return Task.CompletedTask;
     }
 
-    public async Task<string> SendRequest(string topic, string content, CancellationToken cancellationToken = default)
+    public Task<TResponse> SendRequest<TResponse>(PipeRequest<TResponse> request, string content = "", CancellationToken cancellationToken = default)
+        => Task.FromResult(PipeResponse.Deserialize(request, HandleRequest(request.Topic, content)));
+
+    private string HandleRequest(string topic, string content)
     {
         switch (topic)
         {
@@ -98,10 +102,7 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                 return HandleSetSystemConfiguration(content);
 
             case Topics.GetSystemConfiguration:
-                return await HandleGetSystemConfiguration();
-
-            case Topics.Echo:
-                return content;
+                return HandleGetSystemConfiguration();
 
             case Topics.InstallSignedDebianPackage:
                 return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
@@ -180,7 +181,8 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                 SourceGenerationContext.Default.GetOriginalPhysicalAddressResult);
 
             default:
-                return "Ok";
+                return JsonSerializer.Serialize(new Response { Message = $"The mock has no handler for topic '{topic}'" },
+                    SourceGenerationContext.Default.Response);
         }
     }
 
@@ -229,15 +231,15 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
                     SourceGenerationContext.Default.SystemControlResult);
     }
 
-    private Task<string> HandleGetSystemConfiguration()
-        => Task.FromResult(JsonSerializer.Serialize(
+    private string HandleGetSystemConfiguration()
+        => JsonSerializer.Serialize(
             new GetSystemConfigurationResult
             {
                 Status = OperationStatus.Success,
                 Message = null,
                 Configuration = _systemConfiguration ?? new SystemConfiguration()
             },
-            SourceGenerationContext.Default.GetSystemConfigurationResult));
+            SourceGenerationContext.Default.GetSystemConfigurationResult);
 
     private static string HandleGetDCHPLease(string networkInterfaceName)
     {
