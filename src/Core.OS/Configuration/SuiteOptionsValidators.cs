@@ -2,6 +2,7 @@ using Core.OS.Connections.Mqtt;
 using Core.OS.Instance;
 using Core.OS.Logging;
 using Core.OS.MessageBus.MassTransit.Configuration;
+using Core.OS.Security;
 using Core.OS.UserManagement.Configuration;
 using Core.Shared.UserManagement.Configuration;
 using Microsoft.Extensions.Options;
@@ -43,3 +44,6 @@ internal sealed partial class ExternalIdProviderOptionsValidator : IValidateOpti
 
 [OptionsValidator]
 internal sealed partial class MqttClientOptionsValidator : IValidateOptions<MqttClientOptions>;
+
+[OptionsValidator]
+internal sealed partial class RateLimitingOptionsValidator : IValidateOptions<RateLimitingOptions>;

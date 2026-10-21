@@ -86,6 +86,7 @@ internal static class IServiceCollectionExtensions
                 .AddConnectionServices();
 
             services.AddTransportSecurity(instanceOptions);
+            services.AddRequestRateLimiting();
 
             services.AddIdentityAndExternalAuth(config, moduleHost);
 

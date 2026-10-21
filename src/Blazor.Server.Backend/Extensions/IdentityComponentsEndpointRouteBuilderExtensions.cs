@@ -1,6 +1,7 @@
 using Blazor.Server.Backend.Endpoints;
 using Blazor.Shared;
 using Blazor.Shared.Profile.Models;
+using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
@@ -164,7 +165,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
     private static void MapLoginWithExternalProviderEndpoints(RouteGroupBuilder accountGroup)
     {
         accountGroup.MapPost(ExternalLogin.LoginFlow.InitiateLoginRoute,
-            ExternalLogin.InitiateExternalLogin);
+            ExternalLogin.InitiateExternalLogin).RequireRateLimiting(RateLimitPolicies.SignIn);
 
         accountGroup.MapGet(ExternalLogin.LoginFlow.LoginCallbackRoute,
             ExternalLogin.HandleLoginCallback);

@@ -164,8 +164,9 @@ Create the dev certificate once (`dotnet dev-certs https --trust`), start a stan
 (e.g. `dotnet run --project src/Core.OS --launch-profile Standalone-Ui`, adding
 `UserManagement__SeedTestUsers=true` so the accounts the tests sign in with exist and
 `FeatureManagement__FirstRunWizard=false` so a fresh instance is not redirected to the wizard),
-install browsers (`pwsh tests/Core.OS.E2E.Tests/bin/Debug/net10.0/playwright.ps1 install
-chromium-headless-shell`),
+install the browser the tests launch — the full Chromium, not Playwright's default headless shell, see
+`PlaywrightFixture` (`pwsh tests/Core.OS.E2E.Tests/bin/Debug/net10.0/playwright.ps1 install chromium`; without
+PowerShell 7, `powershell -ExecutionPolicy Bypass -File` with the same script and arguments),
 provide the seeded-user credentials (see [Credentials](#credentials)), then:
 
 ```bash

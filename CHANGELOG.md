@@ -47,6 +47,7 @@
 - `Dialogs` and `Popups` keep the focus inside their boundaries while open
 - Process overview, a snapshot button copies all values and processes as text for a support ticket
 - System monitoring collects swap, disk I/O, CPU frequency and thermal zones, switchable under `SystemMonitoring:Collectors`
+- Too many requests from one client, or in total, get `429 Too Many Requests`; see `RateLimiting` in `docs/security-and-identity.md`. **Behaviour change:** clients sharing one address share the limit
 
 ### Fixed
 

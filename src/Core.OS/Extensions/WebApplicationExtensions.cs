@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Core.OS.Instance.Extensions;
 using Core.OS.Modules;
 using Core.OS.Security;
 using Core.OS.Security.Extensions;
@@ -57,6 +58,9 @@ internal static class WebApplicationExtensions
                 ContentSecurityPolicy.ReportingEndpoints);
 
             host.UseRouting();
+            // After routing, so endpoint policies and DisableRateLimiting apply; before authentication, so a rejected
+            // request costs nothing more. Static files are answered above and never counted.
+            host.UseRateLimiter();
             host.UseSerilogRequestLogging(options =>
             {
                 options.GetLevel = (_, _, _) => Serilog.Events.LogEventLevel.Verbose;
@@ -70,8 +74,7 @@ internal static class WebApplicationExtensions
 #pragma warning restore ASP0014
 
             host.MapCspViolationReports();
-            host.MapHealthChecks("/hc");
-            host.MapGet("/liveness", () => StatusCodes.Status200OK);
+            host.MapHealthEndpoints();
 
             await host.RunAsync();
         }
