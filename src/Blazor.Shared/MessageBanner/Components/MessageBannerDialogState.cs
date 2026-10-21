@@ -1,42 +1,18 @@
 ﻿using Blazor.Shared.MessageBanner.Models;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.MessageBanner.Components;
 
-public sealed class MessageBannerDialogState
+[NotifyChanged]
+public sealed partial class MessageBannerDialogState
 {
     private readonly Lock _concurrentLock = new();
-    private bool _visible;
-    private IMessage _message = new Message();
     private int _updateLock;
     private int _changeCount;
 
-    public IMessage Message
-    {
-        get => _message;
-        set
-        {
-            if (value != _message)
-            {
-                _message = value;
+    public partial IMessage Message { get; set; } = new Message();
 
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public bool Visible
-    {
-        get => _visible;
-        set
-        {
-            if (value != _visible)
-            {
-                _visible = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial bool Visible { get; set; }
 
     public event Action? Changed;
 

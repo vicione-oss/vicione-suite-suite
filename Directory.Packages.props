@@ -5,9 +5,9 @@
     <HostManagementVersion>2.0.0-beta1</HostManagementVersion>
     <OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.11</MassTransitVersion>
-    <ViciOneUiBlazorComponentsVersion>6.6.0</ViciOneUiBlazorComponentsVersion>
+    <ViciOneUiBlazorComponentsVersion>6.6.1</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.18.0</ViciOneUiMonochromeIconsVersion>
-    <ViciOneSuiteSdkVersion>3.6.0</ViciOneSuiteSdkVersion>
+    <ViciOneSuiteSdkVersion>3.7.0</ViciOneSuiteSdkVersion>
   </PropertyGroup>
   <ItemGroup>
     <GlobalPackageReference Include="ViciOne.CodeAnalysis" Version="1.8.0" />
@@ -57,6 +57,7 @@
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(DotNetVersion)" />
     <PackageVersion Include="TimeZoneNames" Version="7.0.0" />
     <PackageVersion Include="ViciOne.Journal" Version="1.2.0" />
+    <PackageVersion Include="ViciOne.SourceGenerators.NotifyChanged" Version="1.0.0" />
     <PackageVersion Include="ViciOne.Suite.Sdk" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Backend" Version="$(ViciOneSuiteSdkVersion)" />
     <PackageVersion Include="ViciOne.Suite.Sdk.Client" Version="$(ViciOneSuiteSdkVersion)" />

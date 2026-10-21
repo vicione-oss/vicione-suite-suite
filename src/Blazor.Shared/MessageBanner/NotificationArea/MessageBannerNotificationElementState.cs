@@ -1,22 +1,10 @@
 ﻿using Sdk.Client.NotificationArea.Services;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.MessageBanner.NotificationArea;
 
-public sealed class MessageBannerNotificationElementState : NotificationElementState
+[NotifyChanged]
+public sealed partial class MessageBannerNotificationElementState : NotificationElementState
 {
-    private string _title = string.Empty;
-
-    public string Title
-    {
-        get => _title;
-        set
-        {
-            if (value != _title)
-            {
-                _title = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial string Title { get; set; } = string.Empty;
 }

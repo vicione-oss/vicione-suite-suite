@@ -2,130 +2,41 @@
 using Blazor.Shared.Wizards.Models;
 using Sdk.Client.Models;
 using Sdk.Client.Wizards.Models;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Wizards.Services;
 
-internal sealed class WizardState : IWizardState
+[NotifyChanged]
+internal sealed partial class WizardState : IWizardState
 {
     private readonly Lock _concurrentLock = new();
     private readonly HashSet<string> _changedProperties = [];
     private int _updateLock;
 
-    private bool _loadingOverlayVisible;
-    private IReadOnlyList<WizardStep> _steps = [];
-    private WizardStep? _activeStep;
-    private bool _backButtonEnabled;
-    private bool _nextButtonEnabled;
-    private bool _finishButtonEnabled;
-    private List<SaveErrorResult> _lastSaveErrorResults = [];
 
     /// <inheritdoc/>
     public int UpdateLock => _updateLock;
 
     /// <inheritdoc/>
-    public bool LoadingOverlayVisible
-    {
-        get => _loadingOverlayVisible;
-        set
-        {
-            if (value != _loadingOverlayVisible)
-            {
-                _loadingOverlayVisible = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial bool LoadingOverlayVisible { get; set; }
 
     /// <inheritdoc/>
-    public IReadOnlyList<WizardStep> Steps
-    {
-        get => _steps;
-        set
-        {
-            if (value != _steps)
-            {
-                _steps = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial IReadOnlyList<WizardStep> Steps { get; set; } = [];
 
     /// <inheritdoc/>
-    public WizardStep? ActiveStep
-    {
-        get => _activeStep;
-        set
-        {
-            if (value != _activeStep)
-            {
-                _activeStep = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial WizardStep? ActiveStep { get; set; }
 
     /// <inheritdoc/>
-    public bool BackButtonEnabled
-    {
-        get => _backButtonEnabled;
-        set
-        {
-            if (value != _backButtonEnabled)
-            {
-                _backButtonEnabled = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial bool BackButtonEnabled { get; set; }
 
     /// <inheritdoc/>
-    public bool NextButtonEnabled
-    {
-        get => _nextButtonEnabled;
-        set
-        {
-            if (value != _nextButtonEnabled)
-            {
-                _nextButtonEnabled = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial bool NextButtonEnabled { get; set; }
 
     /// <inheritdoc/>
-    public bool FinishButtonEnabled
-    {
-        get => _finishButtonEnabled;
-        set
-        {
-            if (value != _finishButtonEnabled)
-            {
-                _finishButtonEnabled = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial bool FinishButtonEnabled { get; set; }
 
     /// <inheritdoc/>
-    public List<SaveErrorResult> LastSaveErrorResults
-    {
-        get => _lastSaveErrorResults;
-        set
-        {
-            if (value != _lastSaveErrorResults)
-            {
-                _lastSaveErrorResults = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial List<SaveErrorResult> LastSaveErrorResults { get; set; } = [];
 
     /// <inheritdoc/>
     public event Action<PropertiesChangedEventArgs>? Changed;

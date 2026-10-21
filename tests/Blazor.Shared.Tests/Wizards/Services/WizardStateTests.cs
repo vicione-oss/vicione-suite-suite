@@ -1,5 +1,6 @@
 using Blazor.Shared.Wizards.Models;
 using Blazor.Shared.Wizards.Services;
+using Sdk.Client.Wizards.Models;
 using Sdk.Client.Wizards.Services;
 using Sdk.Testing.Client.Interfaces;
 
@@ -73,6 +74,18 @@ public sealed class WizardStateTests
     [InlineData(true, true, false)]
     public void Should_trigger_changed_event_when_finish_button_enabled_is_set(bool initialValue, bool value, bool shouldTriggerChangedEvent)
         => _tests.AssertChangedEventHandlingWhenPropertyIsSet(state => state.FinishButtonEnabled, initialValue, value, shouldTriggerChangedEvent);
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
+    public void Should_trigger_changed_event_when_last_save_error_results_is_set(bool sameInstance, bool shouldTriggerChangedEvent)
+    {
+        var initialLastSaveErrorResults = new List<SaveErrorResult>();
+        var lastSaveErrorResults = sameInstance ? initialLastSaveErrorResults : [];
+
+        _tests.AssertChangedEventHandlingWhenPropertyIsSet(state => state.LastSaveErrorResults, initialLastSaveErrorResults,
+            lastSaveErrorResults, shouldTriggerChangedEvent);
+    }
 
     [Fact]
     public void Should_not_trigger_changed_event_after_begin_update()

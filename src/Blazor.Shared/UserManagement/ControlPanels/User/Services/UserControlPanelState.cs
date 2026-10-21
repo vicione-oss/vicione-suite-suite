@@ -4,13 +4,12 @@ using Core.Shared.UserManagement.Contracts;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.UserManagement.Contracts;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.UserManagement.ControlPanels.User.Services;
 
-public sealed class UserControlPanelState : ControlPanelState
+public sealed partial class UserControlPanelState : ControlPanelState
 {
-    private UserName? _userName;
-
     internal UserProfile? UserProfile { get; set; }
     internal CultureInfo? SelectedCulture { get; set; }
     internal TimeZoneInfo? SelectedTimeZone { get; set; }
@@ -33,19 +32,8 @@ public sealed class UserControlPanelState : ControlPanelState
     /// <remarks>
     /// <see cref="UserControlPanel"/> will use this property to decide whether a user should be edited (value is set) or created (value is null)
     /// </remarks>
-    public UserName? UserName
-    {
-        get => _userName;
-        set
-        {
-            if (value != _userName)
-            {
-                _userName = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    [NotifyChanged]
+    public partial UserName? UserName { get; set; }
 
     public bool UserSettingsGroupExpanded { get; set; } = true;
     public bool ContactSettingsGroupExpanded { get; set; } = true;

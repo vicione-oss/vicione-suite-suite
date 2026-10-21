@@ -123,8 +123,8 @@
 - `OpenTelemetry` packages, update to version `1.18.0`
 - `System.IO.Abstractions` package, update version to `22.3.0`
 - `ViciOne.CodeAnalysis` package, update to version `1.8.0`
-- `ViciOne.Suite.Sdk` packages, update to version `3.6.0`
-- `ViciOne.Ui.Blazor.Components` packages, update to version `6.6.0`
+- `ViciOne.Suite.Sdk` packages, update to version `3.7.0`
+- `ViciOne.Ui.Blazor.Components` packages, update to version `6.6.1`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
 - `ViciOne.Ui.Localization`, update to version `3.6.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`

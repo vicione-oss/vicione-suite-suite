@@ -1,28 +1,16 @@
 ﻿using Blazor.Shared.Connections.Contracts;
 using Sdk.Client.ControlPanels.Services;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Connections.ControlPanels.Tags.Services;
 
-public sealed class TagControlPanelState : ControlPanelState
+public sealed partial class TagControlPanelState : ControlPanelState
 {
-    private Guid? _tagId;
-
     /// <remarks>
     /// <see cref="TagControlPanel"/> will use this property to decide whether a tag should be edited (value is set) or created (value is null)
     /// </remarks>
-    public Guid? TagId
-    {
-        get => _tagId;
-        set
-        {
-            if (value != _tagId)
-            {
-                _tagId = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    [NotifyChanged]
+    public partial Guid? TagId { get; set; }
 
     internal EditTagModel? Tag { get; set; }
     internal bool IsEditMode => TagId.HasValue;

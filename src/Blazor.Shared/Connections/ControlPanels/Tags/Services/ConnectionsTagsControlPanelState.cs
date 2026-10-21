@@ -1,40 +1,16 @@
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Connections.Contracts;
+using ViciOne.SourceGenerators.NotifyChanged;
 
 namespace Blazor.Shared.Connections.ControlPanels.Tags.Services;
 
-public sealed class ConnectionsTagsControlPanelState : ControlPanelState
+public sealed partial class ConnectionsTagsControlPanelState : ControlPanelState
 {
-    private bool _resetSelectedTags;
-    private Dictionary<Guid, Tag> _tags = [];
+    [NotifyChanged]
+    internal partial bool ResetSelectedTags { get; set; }
 
-    internal bool ResetSelectedTags
-    {
-        get => _resetSelectedTags;
-        set
-        {
-            if (value == _resetSelectedTags)
-                return;
-
-            _resetSelectedTags = value;
-
-            OnPropertyChanged(nameof(ResetSelectedTags));
-        }
-    }
-
-    internal Dictionary<Guid, Tag> Tags
-    {
-        get => _tags;
-        set
-        {
-            if (value == _tags)
-                return;
-
-            _tags = value;
-
-            OnPropertyChanged(nameof(Tags));
-        }
-    }
+    [NotifyChanged]
+    internal partial Dictionary<Guid, Tag> Tags { get; set; } = [];
 
     internal List<Tag> DeletingTags { get; } = [];
 }

@@ -1,44 +1,19 @@
 using Sdk.MessageBanner.Contracts;
+using ViciOne.SourceGenerators.NotifyChanged;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 
 namespace Blazor.Shared.MessageBanner.NotificationArea;
 
-public sealed class MessageBannerNotificationElementIconState
+[NotifyChanged]
+public sealed partial class MessageBannerNotificationElementIconState
 {
     private readonly Lock _concurrentLock = new();
     private int _updateLock;
     private int _changeCount;
 
-    private MonochromeIconName _icon;
-    private MessageType _messageType;
+    public partial MonochromeIconName Icon { get; set; }
 
-    public MonochromeIconName Icon
-    {
-        get => _icon;
-        set
-        {
-            if (value != _icon)
-            {
-                _icon = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
-
-    public MessageType MessageType
-    {
-        get => _messageType;
-        set
-        {
-            if (value != _messageType)
-            {
-                _messageType = value;
-
-                OnPropertyChanged();
-            }
-        }
-    }
+    public partial MessageType MessageType { get; set; }
 
     public event Action? Changed;
 
