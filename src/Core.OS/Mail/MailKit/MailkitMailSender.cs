@@ -15,6 +15,7 @@ public sealed class MailkitMailSender(
     : IMailSender, IEmailSender, IMailSenderStatus
 {
     private const TextFormat SupportedFormat = TextFormat.Html;
+    private const int SmtpTimeoutMilliseconds = 10_000;
 
     public async Task SendMail(Message message, CancellationToken cancellationToken = default)
     {
@@ -33,7 +34,8 @@ public sealed class MailkitMailSender(
 
     private async Task SendMimeMessage(MimeMessage email, CancellationToken cancellationToken)
     {
-        using var smtpClient = new SmtpClient();
+        // No DisconnectAsync: a failing QUIT after delivery would retry and send the mail twice.
+        using var smtpClient = new SmtpClient { Timeout = SmtpTimeoutMilliseconds };
         mailClientConfigurator.ConfigureSmtpClient(smtpClient);
 
         await ConnectToConfiguredSmtpServer(smtpClient,

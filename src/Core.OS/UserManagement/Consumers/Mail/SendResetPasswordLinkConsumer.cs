@@ -29,16 +29,29 @@ public sealed partial class SendResetPasswordLinkConsumer(
 
         LogConsume(logger, correlationId, userId);
 
-        // ADR-002: do not swallow exceptions; let MassTransit retry then dead-letter.
-        // Duplicate-email risk on redelivery is acceptable — recipient uses the first valid link.
-        var user = await userManager.GetUserById(userId);
+        try
+        {
+            // Duplicate-email risk on redelivery is acceptable — recipient uses the first valid link.
+            var user = await userManager.GetUserById(userId);
 
-        var instanceConfiguration = await dbContext.CrossInstanceConfiguration.AsNoTracking()
-            .SingleOrDefaultAsync(context.CancellationToken);
-        var culture = EmailCulture.Resolve(user.Language, instanceConfiguration?.CultureName);
-        var message = await CreateMessage(context, user, culture);
+            var instanceConfiguration = await dbContext.CrossInstanceConfiguration.AsNoTracking()
+                .SingleOrDefaultAsync(context.CancellationToken);
+            var culture = EmailCulture.Resolve(user.Language, instanceConfiguration?.CultureName);
+            var message = await CreateMessage(context, user, culture);
 
-        await mailSender.SendMail(message);
+            await mailSender.SendMail(message, context.CancellationToken);
+        }
+        // Shutdown, not a send failure.
+        catch (OperationCanceledException) when (context.CancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        // ADR-004 D6: log, then rethrow into the retry ladder.
+        catch (Exception ex)
+        {
+            LogSendFailed(logger, ex, correlationId, userId);
+            throw;
+        }
 
         LogMailSent(logger, correlationId, userId);
     }
@@ -82,4 +95,8 @@ public sealed partial class SendResetPasswordLinkConsumer(
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Reset email to '{Name}' correlated by {CorrelationId} was sent.")]
     private static partial void LogMailSent(ILogger<SendResetPasswordLinkConsumer> logger, Guid correlationId, string name);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Reset email to '{Name}' correlated by {CorrelationId} could not be sent.")]
+    private static partial void LogSendFailed(ILogger<SendResetPasswordLinkConsumer> logger, Exception error, Guid correlationId,
+        string name);
 }
