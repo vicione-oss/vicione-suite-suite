@@ -19,7 +19,7 @@ namespace Blazor.Shared.Localization {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ValidationTerms {
@@ -61,6 +61,42 @@ namespace Blazor.Shared.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The address uses port {0}, but the port setting is {1}..
+        /// </summary>
+        internal static string MqttAddressPortMustMatchPort {
+            get {
+                return ResourceManager.GetString("MqttAddressPortMustMatchPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The client certificate and the client key must both be file paths or both PEM content..
+        /// </summary>
+        internal static string MqttCertificateAndKeyMustHaveTheSameForm {
+            get {
+                return ResourceManager.GetString("MqttCertificateAndKeyMustHaveTheSameForm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} must be between {1} and {2}..
+        /// </summary>
+        internal static string MqttValueMustBeBetween {
+            get {
+                return ResourceManager.GetString("MqttValueMustBeBetween", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The will topic must not contain the wildcards + or #..
+        /// </summary>
+        internal static string MqttWillTopicMustNotContainWildcards {
+            get {
+                return ResourceManager.GetString("MqttWillTopicMustNotContainWildcards", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Please provide a valid HTTP address..
         /// </summary>
         internal static string ProvideHttpAddress {
@@ -75,6 +111,24 @@ namespace Blazor.Shared.Localization {
         internal static string ProvideMqttBrokerAddress {
             get {
                 return ResourceManager.GetString("ProvideMqttBrokerAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please provide the host name or IP address of the MQTT broker, without scheme or port..
+        /// </summary>
+        internal static string ProvideMqttBrokerHostName {
+            get {
+                return ResourceManager.GetString("ProvideMqttBrokerHostName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please provide a host name or a ws, wss, http or https address of the MQTT broker..
+        /// </summary>
+        internal static string ProvideMqttWebSocketAddress {
+            get {
+                return ResourceManager.GetString("ProvideMqttWebSocketAddress", resourceCulture);
             }
         }
         
