@@ -29,6 +29,11 @@ public sealed partial class LanguageCookieUpdater : ComponentBase, IDisposable, 
     {
         await base.OnInitializedAsync();
 
+        // A redirect during static rendering can crash the process (#2982, dotnet/aspnetcore#69035),
+        // so the cookie is corrected on the next interactive page.
+        if (!RendererInfo.IsInteractive)
+            return;
+
         var userName = await AuthenticationStateProvider.GetUserName();
 
         // The user may not be present on this instance (an anonymous request, or a slave whose

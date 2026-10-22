@@ -110,6 +110,7 @@
 - Network interface settings, _General Information_ hides disabled DNS servers and updates when the network settings change
 - MQTT connections, keep-alive, connect timeout, TLS settings and the WebSocket port are saved and applied as configured. **Behaviour change:** existing connections now use their keep-alive (default 60 s) and connect timeout (default 30 s)
 - MQTT connections, an invalid port, address, will topic, credentials or client certificate is rejected on save
+- Account pages, a language cookie that differs from the signed-in user's language no longer crashes the Suite. **Behaviour change:** the cookie is corrected on the next page outside the account pages
 
 ### Removed
 
