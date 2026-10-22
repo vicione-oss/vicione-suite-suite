@@ -168,4 +168,7 @@
   <data name="ExternalLoginAlreadyInUse" xml:space="preserve">
     <value>The external account is already associated with a local user.</value>
   </data>
+  <data name="ExternalUserMissingEmail" xml:space="preserve">
+    <value>This account cannot be registered. The ID provider did not send an email address for it.</value>
+  </data>
 </root>

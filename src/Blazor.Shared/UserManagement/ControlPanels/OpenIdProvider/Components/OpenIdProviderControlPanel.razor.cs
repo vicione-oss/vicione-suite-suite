@@ -1,5 +1,7 @@
 using Blazor.Shared.Services;
 using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Services;
+using Core.Shared.Security;
+using Microsoft.AspNetCore.Components;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
@@ -11,6 +13,11 @@ namespace Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Components;
 [ModuleAuthorize(SharedClientModule.ModuleId, AccessLevel.Full)]
 public sealed partial class OpenIdProviderControlPanel : ControlPanelBase<OpenIdProviderControlPanelState>
 {
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+
+    private string RedirectUri => Navigation.ToAbsoluteUri(ExternalLoginPaths.Callback).AbsoluteUri;
+
     private bool RemoveStoredClientSecretAvailable
         => State.ClientSecretStored && !State.RemoveStoredClientSecret && State.ClientSecret.Length == 0;
 
@@ -26,6 +33,8 @@ public sealed partial class OpenIdProviderControlPanel : ControlPanelBase<OpenId
                 : Localization.OpenIdProviderControlPanel.ClientSecretNotStoredHint;
         }
     }
+
+    private Task<string> GetRedirectUri() => Task.FromResult(RedirectUri);
 
     private async Task RemoveStoredClientSecret()
     {

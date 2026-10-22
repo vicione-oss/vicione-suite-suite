@@ -44,6 +44,7 @@
 - Admin-only "Environment variables" settings panel (Settings → System) for editing the runtime overrides, offered where `VICIONE_SUITE_ENV_OVERRIDES` is on; entries are validated on save and take effect after a restart (see `docs/suite-startup.md`)
 - `FirstRunWizard` feature flag, enabled by default, gating the redirect to the first-run wizard
 - Admin-only "OpenID provider" settings panel (Settings → User Management) for external sign-in (see `docs/oidc.md`)
+  - Shows the redirect URI to register at the provider, with a copy button
 - CSP violation reporting: browsers report violations to `POST /csp-report`, and the Suite logs each one as a warning. Requires HTTPS
 - `Dialogs` and `Popups` keep the focus inside their boundaries while open
 - Process overview, a snapshot button copies all values and processes as text for a support ticket
@@ -55,6 +56,9 @@
 - Sign-in with `UserManagement:RequireAccountVerificationToLogIn` and a partly filled `Smtp` section no longer locks unconfirmed users out without a message. **Behaviour change:** verification is only required once the `Smtp` section is complete
 - Default administrator and seed users use `example.com` email addresses. **Upgrade:** existing installations keep theirs until changed by hand
 - Signing in with an external OpenID provider, and linking one from the profile, were blocked by the Content Security Policy. `form-action` now also names the configured provider's origin (see `docs/ADRs/ADR-006-content-security-policy.md`)
+- The first sign-in through an OpenID provider that sends no `preferred_username`, such as Google, uses the email as the username
+- Login page, a sign-up through an OpenID provider that sends no email address says so
+- Profile, *Add external login* opens its own page and reaches the provider even when it changed after the Suite was opened
 - Missing release date in `README.md` for version `1.3.0`
 - `RoleControlPanel`, adding a role whose name already exists shows the error and stays in create mode
 - `UserControlPanel`

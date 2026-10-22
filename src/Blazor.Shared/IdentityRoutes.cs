@@ -2,6 +2,7 @@ namespace Blazor.Shared;
 
 public static class IdentityRoutes
 {
+    public const string AddExternalLoginRoute = "/account/manage/add-external-login";
     public const string ChangePasswordRoute = "/account/change-password";
     public const string ConfirmMailRoute = "/account/confirm-email";
     public const string EmailConfirmationRoute = "/account/email-confirmation";

@@ -1,21 +1,8 @@
 @using Blazor.Shared.UserManagement.Localization
-@using Microsoft.AspNetCore.Components.Forms
 @using Sdk.Client.Components.LinkButton
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 
-@code {
-
-    [Parameter, EditorRequired]
-    public string ExternalIdProvider { get; set; }
-
-}
-@* `LinkButton` cannot set the button type, so it cannot act as a form submit button and the form is
-   submitted from `OnClick` instead. *@
 <LinkButton IconName="@MonochromeIconName.ExternalIdProviderLight"
             CssClass="add-external-login-button"
             Text="@Labels.AddExternalLogin"
-            OnClick="@OnExternalLoginSubmitAsync"/>
-<form @ref="_form" action="@IdentityRoutes.LinkExternalLoginRoute" method="post">
-    <AntiforgeryToken />
-    <input type="hidden" name="provider" value="@ExternalIdProvider"/>
-</form>
+            OnClick="@OpenLinkingPage"/>

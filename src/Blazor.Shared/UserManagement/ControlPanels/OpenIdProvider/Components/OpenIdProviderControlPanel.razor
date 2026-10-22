@@ -1,4 +1,7 @@
 @using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Services
+@using ViciOne.Ui.Blazor.Components.CopyToClipboardButton.Components
+@using ViciOne.Ui.Blazor.Components.CopyToClipboardButton.Enums
+@using ViciOne.Ui.Localization.Resources
 @using ViciOne.Ui.MonochromeIcons.Core.Enums
 @using ViciOne.Ui.MonochromeIcons.Core.Extensions
 
@@ -52,6 +55,18 @@ else
                                          OnClick="@RemoveStoredClientSecret" />
                 </SettingsField>
             }
+
+            <SettingsField Label="@Localization.OpenIdProviderControlPanel.RedirectUri">
+                <div class="redirect-uri">
+                    <SettingsFieldTextBox Placeholder="@Localization.OpenIdProviderControlPanel.RedirectUri"
+                                          Subline="@Localization.OpenIdProviderControlPanel.RedirectUriHint"
+                                          ReadOnly="true"
+                                          Value="@RedirectUri" />
+                    <CopyToClipboardButton TextToCopy="GetRedirectUri"
+                                           Title="@CommonVocabulary.CopyVerb"
+                                           Size="CopyToClipboardButtonSize.Small" />
+                </div>
+            </SettingsField>
         </SettingsGroup>
     </SettingsLayout>
 }

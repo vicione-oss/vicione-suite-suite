@@ -100,4 +100,10 @@
   <data name="SaveBlockedByLoadFailureError" xml:space="preserve">
     <value>Speichern ist nicht möglich, solange der gespeicherte OpenID-Provider nicht gelesen werden kann.</value>
   </data>
+  <data name="RedirectUri" xml:space="preserve">
+    <value>Redirect-URI</value>
+  </data>
+  <data name="RedirectUriHint" xml:space="preserve">
+    <value>Registrieren Sie diese Adresse beim Provider. Sie wird aus der Adresse gebildet, unter der dieser Browser die Suite geöffnet hat.</value>
+  </data>
 </root>

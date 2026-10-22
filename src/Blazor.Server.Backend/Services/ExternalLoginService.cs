@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Blazor.Shared.UserManagement.Services.Validators;
+using Core.Shared.Security;
 using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
@@ -17,23 +18,23 @@ public sealed partial class ExternalLoginService(
     private const string PreferredUsernameClaim = "preferred_username";
     private const string EmailClaim = "email";
 
-    public async Task<SuiteUser?> CreateNewUserFromExternalLogin(ExternalLoginInfo info)
+    public async Task<ExternalUserCreationResult> CreateNewUserFromExternalLogin(ExternalLoginInfo info)
     {
         try
         {
             var email = ReadEmail(info);
-            var userName = ReadUserName(info);
-
-            if (string.IsNullOrWhiteSpace(userName) || string.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(email))
             {
-                LogUsernameOrEmailNullOrEmpty();
-                return null;
+                LogEmailNullOrEmpty();
+                return ExternalUserCreationResult.Failed(ExternalLoginError.MissingEmail);
             }
+
+            var userName = ReadUserName(info) ?? UseEmailAsUserName(email);
 
             if (!usernameValidator.Validate(userName, out var errorMessage))
             {
                 LogUsernameDoesNotMeetRequirementsError(userName, errorMessage);
-                return null;
+                return ExternalUserCreationResult.Failed(ExternalLoginError.NewUserCreationFailed);
             }
 
             return await CreateNewUser(info, userName, email);
@@ -41,7 +42,7 @@ public sealed partial class ExternalLoginService(
         catch (Exception e)
         {
             LogFailedToCreateNewUserFromExternalLogin(e);
-            return null;
+            return ExternalUserCreationResult.Failed(ExternalLoginError.NewUserCreationFailed);
         }
     }
 
@@ -57,9 +58,19 @@ public sealed partial class ExternalLoginService(
      * Yet it is the best information we have for registering a new user currently.
      */
     private static string? ReadUserName(ExternalLoginInfo info)
-        => info.Principal.FindFirstValue(PreferredUsernameClaim);
+    {
+        var preferredUsername = info.Principal.FindFirstValue(PreferredUsernameClaim);
 
-    private async Task<SuiteUser?> CreateNewUser(ExternalLoginInfo info, string userName, string email)
+        return string.IsNullOrWhiteSpace(preferredUsername) ? null : preferredUsername;
+    }
+
+    private string UseEmailAsUserName(string email)
+    {
+        LogUsingEmailAsUsername(email);
+        return email;
+    }
+
+    private async Task<ExternalUserCreationResult> CreateNewUser(ExternalLoginInfo info, string userName, string email)
     {
         LogCreatingNewUserFromExternalLoginForUsernameAndEmail(logger, userName, email);
         _ = bool.TryParse(info.Principal.FindFirstValue(EmailVerifiedClaim), out bool emailConfirmed);
@@ -75,7 +86,7 @@ public sealed partial class ExternalLoginService(
         if (!result.Succeeded)
         {
             logger.LogWarning("Failed to create new user from external login: {@Errors}", result.Errors);
-            return null;
+            return ExternalUserCreationResult.Failed(ExternalLoginError.NewUserCreationFailed);
         }
 
         var addLoginResult = await userManager.AddLoginAsync(suiteUser, info);
@@ -83,11 +94,11 @@ public sealed partial class ExternalLoginService(
         {
             logger.LogWarning("Failed to add external login to new user: {@Errors}", addLoginResult.Errors);
             await userManager.DeleteAsync(suiteUser);
-            return null;
+            return ExternalUserCreationResult.Failed(ExternalLoginError.NewUserCreationFailed);
         }
 
         await AssignAdminRoleIfApplicable(info, suiteUser);
-        return suiteUser;
+        return ExternalUserCreationResult.Success(suiteUser);
     }
 
     private async Task AssignAdminRoleIfApplicable(ExternalLoginInfo info, SuiteUser suiteUser)
@@ -117,8 +128,11 @@ public sealed partial class ExternalLoginService(
     [LoggerMessage(LogLevel.Information, "User {Username} will be promoted to admin role")]
     static partial void LogUserWillBePromotedToAdminRole(ILogger<ExternalLoginService> logger, string Username);
 
-    [LoggerMessage(LogLevel.Warning, "Username or email null or empty")]
-    partial void LogUsernameOrEmailNullOrEmpty();
+    [LoggerMessage(LogLevel.Warning, "Email null or empty")]
+    partial void LogEmailNullOrEmpty();
+
+    [LoggerMessage(LogLevel.Information, "No preferred_username claim, using the email {Email} as the username")]
+    partial void LogUsingEmailAsUsername(string email);
 
     [LoggerMessage(LogLevel.Warning, "Username {Username} does not meet requirements: {Error}")]
     partial void LogUsernameDoesNotMeetRequirementsError(string username, string error);
