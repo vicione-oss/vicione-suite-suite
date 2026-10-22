@@ -50,20 +50,24 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
             if (existingSuiteUser.Email != desiredProfile.Email)
                 existingSuiteUser.Email = desiredProfile.Email;
 
-            await userManager.UpdateAsync(existingSuiteUser);
-
-            var errorInfo = await AssignNewPassword(desiredProfile, existingSuiteUser, context.Message.RequestingUserName);
+            var errorInfo = await ValidateUser(desiredProfile, existingSuiteUser);
             if (errorInfo is not null)
             {
-                LogFailedPassword(logger, correlationId, desiredProfile.UserName.Value, errorInfo.Message);
+                await PublishRejected(context, profileBefore, errorInfo);
+                return;
+            }
 
-                var errorResponse = new UserUpdatedEvent(desiredProfile, profileBefore)
-                {
-                    CorrelationId = correlationId,
-                    ErrorInfo = errorInfo
-                };
+            errorInfo = await AssignNewPassword(desiredProfile, existingSuiteUser, context.Message.RequestingUserName);
+            if (errorInfo is not null)
+            {
+                await PublishRejected(context, profileBefore, errorInfo);
+                return;
+            }
 
-                await context.Publish(errorResponse, context.CancellationToken);
+            errorInfo = await SaveProfile(desiredProfile, existingSuiteUser);
+            if (errorInfo is not null)
+            {
+                await PublishRejected(context, profileBefore, errorInfo);
                 return;
             }
 
@@ -93,6 +97,40 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
 
             await context.Publish(errorResponse, context.CancellationToken);
         }
+    }
+
+    private async Task PublishRejected(ConsumeContext<UpdateUser> context, UserProfile profileBefore, ErrorInfo errorInfo)
+    {
+        var desiredProfile = context.Message.UserProfile;
+        LogUpdateRejected(logger, context.Message.CorrelationId, desiredProfile.UserName.Value, errorInfo.Message);
+
+        var errorResponse = new UserUpdatedEvent(desiredProfile, profileBefore)
+        {
+            CorrelationId = context.Message.CorrelationId,
+            ErrorInfo = errorInfo
+        };
+
+        await context.Publish(errorResponse, context.CancellationToken);
+    }
+
+    /// <summary>
+    /// Runs Identity's user validators up front, so a rejected profile is not reported as a password error by the
+    /// password step, whose save validates the user too.
+    /// </summary>
+    private async Task<ErrorInfo?> ValidateUser(UserProfile desiredProfile, SuiteUser existingSuiteUser)
+    {
+        List<IdentityError> errors = [];
+        foreach (var validator in userManager.UserValidators)
+            errors.AddRange((await validator.ValidateAsync(userManager, existingSuiteUser)).Errors);
+
+        return errors.Count == 0 ? null : ToErrorInfo(UserErrorCodes.UpdateFailed, desiredProfile, errors);
+    }
+
+    private async Task<ErrorInfo?> SaveProfile(UserProfile desiredProfile, SuiteUser existingSuiteUser)
+    {
+        var result = await userManager.UpdateAsync(existingSuiteUser);
+
+        return result.Succeeded ? null : ToErrorInfo(UserErrorCodes.UpdateFailed, desiredProfile, result.Errors);
     }
 
     private async Task<ErrorInfo?> AssignNewPassword(UserProfile desiredProfile, SuiteUser existingSuiteUser, string requestingUserName)
@@ -130,17 +168,16 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
             if (!hasClaim)
                 return new ErrorInfo(UserErrorCodes.UpdateFailed, "Only administrators may change another user's password.");
 
-            result = await userManager.RemovePasswordAsync(existingSuiteUser);
-            if (result.Succeeded)
-                result = await userManager.AddPasswordAsync(existingSuiteUser, desiredProfile.NewPassword);
+            var token = await userManager.GeneratePasswordResetTokenAsync(existingSuiteUser);
+            result = await userManager.ResetPasswordAsync(existingSuiteUser, token, desiredProfile.NewPassword);
         }
 
-        if (result.Succeeded)
-            return null;
-
-        return new ErrorInfo(UserErrorCodes.UpdateFailedPassword,
-                    $"Could not update user '{desiredProfile.UserName}'. Error: {string.Join(Environment.NewLine, result.Errors.Select(e => e.Description))}");
+        return result.Succeeded ? null : ToErrorInfo(UserErrorCodes.UpdateFailedPassword, desiredProfile, result.Errors);
     }
+
+    private static ErrorInfo ToErrorInfo(int errorCode, UserProfile desiredProfile, IEnumerable<IdentityError> errors)
+        => new(errorCode,
+            $"Could not update user '{desiredProfile.UserName}'. Error: {string.Join(Environment.NewLine, errors.Select(e => e.Description))}");
 
     private async Task AssignRoles(UserProfile desiredProfile, SuiteUser existingSuiteUser, Guid correlationId)
     {
@@ -230,7 +267,7 @@ public sealed partial class UpdateUserConsumer(UserManager<SuiteUser> userManage
     private static partial void LogUserNotFound(ILogger<UpdateUserConsumer> logger, Guid correlationId, string name);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Failed to update user '{Name}' correlated by {CorrelationId} with {Error}.")]
-    private static partial void LogFailedPassword(ILogger<UpdateUserConsumer> logger, Guid correlationId, string name, string? error);
+    private static partial void LogUpdateRejected(ILogger<UpdateUserConsumer> logger, Guid correlationId, string name, string? error);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Update user '{Name}' correlated by {CorrelationId} skip removal of sys admin role.")]
     private static partial void LogSysAdminRemoveSkip(ILogger<UpdateUserConsumer> logger, Guid correlationId, string? name);
