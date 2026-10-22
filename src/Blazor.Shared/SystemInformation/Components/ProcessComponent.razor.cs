@@ -529,13 +529,21 @@ public sealed partial class ProcessComponent : IDisposable
         return new(CommonVocabulary.Network, subtitle, throughput, max, null, $"{Number(throughput.Latest)} Mbit/s", null);
     }
 
+    private double ObservedNetworkMax()
+    {
+        var samples = Metrics.NetworkReceived.Samples.Concat(Metrics.NetworkSent.Samples);
+        var observedMax = samples.DefaultIfEmpty(0).Max();
+
+        return Math.Max(1, observedMax);
+    }
+
     private IEnumerable<SystemRow> NetworkDetailRows()
     {
         if (Metrics.NetworkInterface is null)
             yield break;
 
         var speed = Metrics.NetworkSpeedMbit is > 0 and var linkSpeed ? linkSpeed : (double?)null;
-        var max = speed ?? Math.Max(1, Metrics.NetworkReceived.Samples.Concat(Metrics.NetworkSent.Samples).DefaultIfEmpty(0).Max());
+        var max = speed ?? ObservedNetworkMax();
         var ranges = DailyRanges.Current;
         foreach (var (title, history, total) in new[]
                  {

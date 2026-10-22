@@ -71,9 +71,10 @@ internal sealed class BusOutboxReplicationPublisher(IServiceProvider services) :
 #pragma warning disable CA2000
         public static async Task<PendingDelivery> Enlist(IServiceProvider services, EfDbContext moduleContext, CancellationToken cancellationToken)
         {
-            var ownsTransaction = moduleContext.Database.CurrentTransaction is null;
-            var transaction = moduleContext.Database.CurrentTransaction
-                ?? await moduleContext.Database.BeginTransactionAsync(cancellationToken);
+            var transaction = moduleContext.Database.CurrentTransaction;
+            var ownsTransaction = transaction is null;
+            if (transaction is null)
+                transaction = await moduleContext.Database.BeginTransactionAsync(cancellationToken);
 
             var outboxContext = new OutboxDbContext(new DbContextOptionsBuilder<OutboxDbContext>()
                 .UseNpgsql(moduleContext.Database.GetDbConnection())

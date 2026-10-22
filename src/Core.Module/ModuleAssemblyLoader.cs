@@ -54,13 +54,20 @@ internal static class ModuleAssemblyLoader
         {
             // The context records load errors, and is what identifies dependency issues before the
             // assembly is loaded.
-            var moduleContext = (suiteContext.UiHost?.AssemblyPath == moduleDllFile ? suiteContext.UiHost : null)
-                                ?? suiteContext.Modules.FirstOrDefault(k => k.AssemblyPath == moduleDllFile);
+            var moduleContext = FindModuleContext(suiteContext, moduleDllFile);
 
             if (moduleContext is not null)
                 moduleContext.StartupErrors.Add(e);
             else
                 throw;
         }
+    }
+
+    private static ModuleDependencyContext? FindModuleContext(SuiteDependencyContext suiteContext, string moduleDllFile)
+    {
+        if (suiteContext.UiHost?.AssemblyPath == moduleDllFile)
+            return suiteContext.UiHost;
+
+        return suiteContext.Modules.FirstOrDefault(k => k.AssemblyPath == moduleDllFile);
     }
 }

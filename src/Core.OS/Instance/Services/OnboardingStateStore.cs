@@ -24,16 +24,18 @@ internal sealed class OnboardingStateStore(IApplicationDbContext dbContext) : IO
 
     public IOnboardingState GetOnboardingState(Guid instanceId)
     {
-        var onboardingState = dbContext.OnboardingStates.Where(i => i.InstanceId == instanceId).SingleOrDefault()
-            ?? new OnboardingState { InstanceId = instanceId };
+        var onboardingState = dbContext.OnboardingStates.Where(i => i.InstanceId == instanceId).SingleOrDefault();
+        if (onboardingState is null)
+            return new OnboardingState { InstanceId = instanceId };
 
         return onboardingState;
     }
 
     public async Task<IOnboardingState> GetOnboardingStateAsync(Guid instanceId, CancellationToken cancellationToken = default)
     {
-        var onboardingState = await dbContext.OnboardingStates.Where(i => i.InstanceId == instanceId).SingleOrDefaultAsync(cancellationToken)
-            ?? new OnboardingState { InstanceId = instanceId };
+        var onboardingState = await dbContext.OnboardingStates.Where(i => i.InstanceId == instanceId).SingleOrDefaultAsync(cancellationToken);
+        if (onboardingState is null)
+            return new OnboardingState { InstanceId = instanceId };
 
         return onboardingState;
     }
