@@ -10,7 +10,7 @@ using Sdk.Instance;
 
 namespace Blazor.Shared.Services;
 
-internal sealed class SuiteControlService(IUiMediator mediator,
+internal sealed partial class SuiteControlService(IUiMediator mediator,
     IInstanceInformationProvider informationProvider,
     IMessageBannerService bannerService,
     ILogger<SuiteControlService> logger) : ISuiteControlService
@@ -37,7 +37,7 @@ internal sealed class SuiteControlService(IUiMediator mediator,
             CorrelationId = Guid.NewGuid()
         };
 
-        logger.LogInformation("Requesting application restart for instance {InstanceId}", informationProvider.Local.Id);
+        LogRequestingApplicationRestart(logger, informationProvider.Local.Id);
 
         await mediator.Send(command, informationProvider.Local.Id);
     }
@@ -56,7 +56,7 @@ internal sealed class SuiteControlService(IUiMediator mediator,
         var message = string.Format(CultureInfo.InvariantCulture, Localization.RestartSuite.ClusterRestartInXSeconds, delay);
         bannerService.ShowMessageBanner(Sdk.MessageBanner.Contracts.MessageType.Information, message);
 
-        logger.LogInformation("Requesting cluster-wide restart");
+        LogRequestingClusterRestart(logger);
 
         await mediator.Send(new RestartAllInstances { Delay = TimeSpan.FromSeconds(delay) });
     }
@@ -66,7 +66,7 @@ internal sealed class SuiteControlService(IUiMediator mediator,
         if (!await EnsureEnabled(capabilities => capabilities.RestartSystem))
             return;
 
-        logger.LogInformation("Requesting system restart for instance {InstanceId}", informationProvider.Local.Id);
+        LogRequestingSystemRestart(logger, informationProvider.Local.Id);
 
         await mediator.Send(new ControlSystem(SystemCommand.Restart), informationProvider.Local.Id);
     }
@@ -76,7 +76,7 @@ internal sealed class SuiteControlService(IUiMediator mediator,
         if (!await EnsureEnabled(capabilities => capabilities.ShutdownSystem))
             return;
 
-        logger.LogInformation("Requesting system shutdown for instance {InstanceId}", informationProvider.Local.Id);
+        LogRequestingSystemShutdown(logger, informationProvider.Local.Id);
 
         await mediator.Send(new ControlSystem(SystemCommand.Shutdown), informationProvider.Local.Id);
     }
@@ -91,4 +91,16 @@ internal sealed class SuiteControlService(IUiMediator mediator,
         bannerService.ShowMessageBanner(Sdk.MessageBanner.Contracts.MessageType.Error, Localization.HostManagementCapabilities.FunctionDisabled);
         return false;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Requesting application restart for instance {InstanceId}")]
+    private static partial void LogRequestingApplicationRestart(ILogger logger, Guid instanceId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Requesting cluster-wide restart")]
+    private static partial void LogRequestingClusterRestart(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Requesting system restart for instance {InstanceId}")]
+    private static partial void LogRequestingSystemRestart(ILogger logger, Guid instanceId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Requesting system shutdown for instance {InstanceId}")]
+    private static partial void LogRequestingSystemShutdown(ILogger logger, Guid instanceId);
 }

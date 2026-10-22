@@ -85,14 +85,14 @@ public sealed partial class ExternalLoginService(
         var result = await userManager.CreateAsync(suiteUser);
         if (!result.Succeeded)
         {
-            logger.LogWarning("Failed to create new user from external login: {@Errors}", result.Errors);
+            LogFailedToCreateNewUserErrors(result.Errors);
             return ExternalUserCreationResult.Failed(ExternalLoginError.NewUserCreationFailed);
         }
 
         var addLoginResult = await userManager.AddLoginAsync(suiteUser, info);
         if (!addLoginResult.Succeeded)
         {
-            logger.LogWarning("Failed to add external login to new user: {@Errors}", addLoginResult.Errors);
+            LogFailedToAddExternalLoginErrors(addLoginResult.Errors);
             await userManager.DeleteAsync(suiteUser);
             return ExternalUserCreationResult.Failed(ExternalLoginError.NewUserCreationFailed);
         }
@@ -139,4 +139,10 @@ public sealed partial class ExternalLoginService(
 
     [LoggerMessage(LogLevel.Error, "Failed to create new user from external login")]
     partial void LogFailedToCreateNewUserFromExternalLogin(Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Failed to create new user from external login: {@Errors}")]
+    partial void LogFailedToCreateNewUserErrors(IEnumerable<IdentityError> errors);
+
+    [LoggerMessage(LogLevel.Warning, "Failed to add external login to new user: {@Errors}")]
+    partial void LogFailedToAddExternalLoginErrors(IEnumerable<IdentityError> errors);
 }

@@ -9,7 +9,7 @@ namespace Core.OS.Instance.HealthCheck;
 /// from master to evaluate if it is alive - in case of master health changed a notification is sent to
 /// frontend
 /// </summary>
-internal sealed class InstanceHealthCheckPublisher(ILocalInstanceInformationProvider instanceInfo,
+internal sealed partial class InstanceHealthCheckPublisher(ILocalInstanceInformationProvider instanceInfo,
     IServiceProvider services,
     ILogger<InstanceHealthCheckPublisher> logger) : IHealthCheckPublisher
 {
@@ -21,7 +21,7 @@ internal sealed class InstanceHealthCheckPublisher(ILocalInstanceInformationProv
 
     public async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
     {
-        _logger.LogTrace("HealthStatus {Status} took {Duration}", report.Status, report.TotalDuration);
+        LogHealthStatus(_logger, report.Status, report.TotalDuration);
 
         using var scope = _services.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<ISuiteMediator>();
@@ -32,4 +32,7 @@ internal sealed class InstanceHealthCheckPublisher(ILocalInstanceInformationProv
 
         _lastStatus = report.Status;
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "HealthStatus {Status} took {Duration}")]
+    private static partial void LogHealthStatus(ILogger logger, HealthStatus status, TimeSpan duration);
 }

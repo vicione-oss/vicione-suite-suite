@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Burger.Backend.Activities;
 
-public sealed class DressBurgerActivity(ILogger<DressBurgerActivity> logger) : IExecuteActivity<DressBurgerArguments>
+public sealed partial class DressBurgerActivity(ILogger<DressBurgerActivity> logger) : IExecuteActivity<DressBurgerArguments>
 {
     private readonly ILogger<DressBurgerActivity> _logger = logger;
 
@@ -20,8 +20,7 @@ public sealed class DressBurgerActivity(ILogger<DressBurgerActivity> logger) : I
 
         var arguments = context.Arguments;
 
-        _logger.LogDebug("Dressing burger for order:{OrderId} paddy:{Weight} lettuce:{Lettuce}", arguments.OrderId, patty.Weight,
-            arguments.Lettuce);
+        LogDressingBurger(_logger, arguments.OrderId, patty.Weight, arguments.Lettuce);
 
         if (arguments.Lettuce)
             throw new InvalidOperationException("No lettuce available");
@@ -52,4 +51,7 @@ public sealed class DressBurgerActivity(ILogger<DressBurgerActivity> logger) : I
 
         return context.CompletedWithVariables(new { context.Arguments.OrderId, burger });
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Dressing burger for order:{OrderId} paddy:{Weight} lettuce:{Lettuce}")]
+    private static partial void LogDressingBurger(ILogger logger, Guid orderId, decimal weight, bool lettuce);
 }

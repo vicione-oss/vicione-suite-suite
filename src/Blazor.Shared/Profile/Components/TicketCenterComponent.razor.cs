@@ -17,5 +17,8 @@ public partial class TicketCenterComponent
     [Parameter, EditorRequired]
     public TicketCenterEntry Soon { get; set; }
 
-    private void OpenTicketCenter() => Logger.LogDebug("Open Ticket Center...todo");
+    private void OpenTicketCenter() => LogOpenTicketCenter(Logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Open Ticket Center...todo")]
+    private static partial void LogOpenTicketCenter(ILogger logger);
 }

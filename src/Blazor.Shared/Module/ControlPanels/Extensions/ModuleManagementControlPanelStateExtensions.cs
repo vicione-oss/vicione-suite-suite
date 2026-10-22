@@ -9,7 +9,7 @@ using Sdk.Client.ControlPanels.Models;
 
 namespace Blazor.Shared.Module.ControlPanels.Extensions;
 
-internal static class ModuleManagementControlPanelStateExtensions
+internal static partial class ModuleManagementControlPanelStateExtensions
 {
     extension(ModuleManagementControlPanelStateBase state)
     {
@@ -113,7 +113,7 @@ internal static class ModuleManagementControlPanelStateExtensions
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                logger.LogError(ex, "Failed to load module metadata");
+                LogLoadModuleMetadataFailed(logger, ex);
 
                 state.RequestErrorCode = 1;
                 state.RequestErrorMessage = Localization.ModuleManagementBrowseControlPanel.ModuleMetadataLoadFailed;
@@ -124,4 +124,7 @@ internal static class ModuleManagementControlPanelStateExtensions
             }
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to load module metadata")]
+    private static partial void LogLoadModuleMetadataFailed(ILogger logger, Exception exception);
 }

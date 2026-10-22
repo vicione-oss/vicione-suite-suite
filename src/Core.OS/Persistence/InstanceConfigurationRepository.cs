@@ -10,7 +10,7 @@ namespace Core.OS.Persistence;
 /// only available on master!
 /// todo: extend ApplicationDbContext and implement the repository against the db
 /// </summary>
-internal sealed class InstanceConfigurationRepository(IWorkspaceProvider<SystemBackendModule> workspaceService,
+internal sealed partial class InstanceConfigurationRepository(IWorkspaceProvider<SystemBackendModule> workspaceService,
                                                       IFileSystem fileSystem,
                                                       ILogger<InstanceConfigurationRepository> logger) : IInstanceConfigurationRepository
 {
@@ -43,7 +43,7 @@ internal sealed class InstanceConfigurationRepository(IWorkspaceProvider<SystemB
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to store config for instance {InstanceId}", instanceId);
+            LogStoreConfigFailed(_logger, e, instanceId);
         }
 
         return builder.Build();
@@ -72,7 +72,7 @@ internal sealed class InstanceConfigurationRepository(IWorkspaceProvider<SystemB
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to get config for instance {InstanceId}", instanceId);
+            LogGetConfigFailed(_logger, e, instanceId);
         }
 
         return null;
@@ -80,4 +80,10 @@ internal sealed class InstanceConfigurationRepository(IWorkspaceProvider<SystemB
 
     private string GetInstanceConfigDirectory() => Path.Combine(_workspaceService.Home, "instances");
     private string GetInstanceConfigFileName(Guid instanceId) => Path.Combine(GetInstanceConfigDirectory(), $"{instanceId}.json");
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to store config for instance {InstanceId}")]
+    private static partial void LogStoreConfigFailed(ILogger logger, Exception exception, Guid instanceId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to get config for instance {InstanceId}")]
+    private static partial void LogGetConfigFailed(ILogger logger, Exception exception, Guid instanceId);
 }

@@ -292,7 +292,7 @@ public sealed partial class LoginContent
 
     private string LogMissingErrorMessageMapping(ExternalLoginError externalError)
     {
-        Logger.LogWarning("Missing error message mapping for ExternalLoginError: {Error}", externalError);
+        LogErrorMessageMappingMissing(Logger, externalError);
         return Login.ExternalLoginFailed;
     }
 
@@ -324,4 +324,7 @@ public sealed partial class LoginContent
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "User account locked out")]
     private static partial void LogUserLockedOut(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Missing error message mapping for ExternalLoginError: {Error}")]
+    private static partial void LogErrorMessageMappingMissing(ILogger logger, ExternalLoginError error);
 }

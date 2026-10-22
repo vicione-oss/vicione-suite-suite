@@ -9,7 +9,7 @@ using Timer = System.Timers.Timer;
 
 namespace Core.OS.Instance.HealthCheck;
 
-public sealed class MasterHealthService(MasterHealthInfo masterHealthInfo, IServiceProvider services, IOptions<InstanceOptions> options, ILogger<MasterHealthService> logger) :
+public sealed partial class MasterHealthService(MasterHealthInfo masterHealthInfo, IServiceProvider services, IOptions<InstanceOptions> options, ILogger<MasterHealthService> logger) :
     IMasterHealthService, IDisposable
 {
     private readonly InstanceHealthCheckOptions _options = options.Value.HealthChecks ?? new();
@@ -74,7 +74,7 @@ public sealed class MasterHealthService(MasterHealthInfo masterHealthInfo, IServ
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "An error occurred while checking health status.");
+            LogHealthCheckFailed(logger, ex);
         }
     }
 
@@ -100,4 +100,7 @@ public sealed class MasterHealthService(MasterHealthInfo masterHealthInfo, IServ
             await mediator.Publish(new MasterHealthInfoChanged(masterHealthInfo.IsMasterReachable), token);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "An error occurred while checking health status.")]
+    private static partial void LogHealthCheckFailed(ILogger logger, Exception exception);
 }

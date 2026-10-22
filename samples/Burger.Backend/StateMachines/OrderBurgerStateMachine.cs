@@ -1,6 +1,7 @@
 ﻿using Burger.Backend.Consumers;
 using Burger.Internal.Events;
 using Burger.Public.Commands;
+using Burger.Public.Contracts;
 using Burger.Public.Events;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,7 @@ namespace Burger.Backend.StateMachines;
 /// </summary>
 // ReSharper disable UnassignedGetOnlyAutoProperty
 // ReSharper disable MemberCanBePrivate.Global
-public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurgerState>
+public sealed partial class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurgerState>
 {
     private readonly ILogger<OrderBurgerStateMachine> _logger;
 
@@ -55,7 +56,7 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
             When(BurgerOrdered)
                 .Then(context =>
                 {
-                    logger.LogWarning("OrderBurgerStateMachine OrderId: {OrderId} (duplicate request)", context.Message.OrderId);
+                    LogDuplicateRequest(logger, context.Message.OrderId);
                 }),
             // The kitchen has grilled a patty and dressed the burger.
             When(BurgerCompleted)
@@ -78,9 +79,7 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
 
     private void InitiallyWhenBurgerOrdered(BehaviorContext<OrderBurgerState, OrderBurger> context)
     {
-        _logger.LogInformation(
-            "Starting burger production for order {OrderId}",
-            context.Message.OrderId);
+        LogStartingBurgerProduction(_logger, context.Message.OrderId);
 
         context.Saga.CorrelationId = context.Message.OrderId;
         context.Saga.OrderId = context.Message.OrderId;
@@ -90,7 +89,7 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
 
     private void CookingWhenBurgerCompleted(BehaviorContext<OrderBurgerState, BurgerCompleted> context)
     {
-        _logger.LogInformation("Delivered order:{Id} {Burger}", context.Saga.CorrelationId, context.Saga.Burgers);
+        LogDeliveredOrder(_logger, context.Saga.CorrelationId, context.Saga.Burgers);
 
         // Updates the saga with the burgers from the kitchen.
         context.Saga.Burgers.Clear();
@@ -99,7 +98,7 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
 
     private void DeliveryWhenBurgerDelivered(BehaviorContext<OrderBurgerState> context)
     {
-        _logger.LogInformation("Delivered order:{Id} {Burger}", context.Saga.CorrelationId, context.Saga.Burgers);
+        LogDeliveredOrder(_logger, context.Saga.CorrelationId, context.Saga.Burgers);
     }
 
     private DeliveryCommand CreateDeliveryCommand(BehaviorContext<OrderBurgerState, BurgerCompleted> ctx)
@@ -109,10 +108,10 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
         => new(ctx.Saga.OrderId, string.Join(", ", ctx.Saga.Burgers.Select(b => b.ToString())));
 
     private void LogTransition<TMessage>(BehaviorContext<OrderBurgerState, TMessage> ctx, string targetTransition) where TMessage : class
-        => _logger.LogInformation("Saga[{CorrelationId}] transition from {OldState} to {State}",
-            ctx.Saga.CorrelationId,
-            GetState(ctx.Saga.CurrentState),
-            targetTransition);
+    {
+        var oldState = GetState(ctx.Saga.CurrentState);
+        LogSagaTransition(_logger, ctx.Saga.CorrelationId, oldState, targetTransition);
+    }
 
     private static string GetState(int sagaState)
     {
@@ -127,4 +126,16 @@ public sealed class OrderBurgerStateMachine : MassTransitStateMachine<OrderBurge
             _ => "Unknown"
         };
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "OrderBurgerStateMachine OrderId: {OrderId} (duplicate request)")]
+    private static partial void LogDuplicateRequest(ILogger logger, Guid orderId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Starting burger production for order {OrderId}")]
+    private static partial void LogStartingBurgerProduction(ILogger logger, Guid orderId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Delivered order:{Id} {Burger}")]
+    private static partial void LogDeliveredOrder(ILogger logger, Guid id, List<SuiteBurger> burger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Saga[{CorrelationId}] transition from {OldState} to {State}")]
+    private static partial void LogSagaTransition(ILogger logger, Guid correlationId, string oldState, string state);
 }

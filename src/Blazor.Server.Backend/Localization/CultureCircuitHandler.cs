@@ -14,7 +14,7 @@ using Sdk.Backend.Messaging;
 
 namespace Blazor.Server.Backend.Localization;
 
-public sealed class CultureCircuitHandler(IServiceProvider serviceProvider) : CircuitHandler
+public sealed partial class CultureCircuitHandler(IServiceProvider serviceProvider) : CircuitHandler
 {
     public override async Task OnConnectionUpAsync(Circuit circuit, CancellationToken cancellationToken)
     {
@@ -71,8 +71,12 @@ public sealed class CultureCircuitHandler(IServiceProvider serviceProvider) : Ci
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex, "Failed to set culture on circuit connection up.");
+            if (logger is not null)
+                LogSetCultureFailed(logger, ex);
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to set culture on circuit connection up.")]
+    private static partial void LogSetCultureFailed(ILogger logger, Exception exception);
 }
 

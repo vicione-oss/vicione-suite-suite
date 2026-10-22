@@ -2,7 +2,7 @@ using Sdk.Backend.Persistence;
 
 namespace Core.OS.DbContext.Extensions;
 
-internal static class IServiceProviderExtensions
+internal static partial class IServiceProviderExtensions
 {
     public static async Task MigrateContext<TDbContext>(this IServiceProvider scopedServices,
         CancellationToken cancellationToken = default)
@@ -11,10 +11,16 @@ internal static class IServiceProviderExtensions
         var context = scopedServices.GetRequiredService<TDbContext>();
         var logger = scopedServices.GetRequiredService<ILogger<TDbContext>>();
 
-        logger.LogTrace("Migration of database started");
+        LogMigrationStarted(logger);
 
         await context.MigrateAsync(cancellationToken);
 
-        logger.LogTrace("Migrating database finished");
+        LogMigrationFinished(logger);
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Migration of database started")]
+    private static partial void LogMigrationStarted(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Migrating database finished")]
+    private static partial void LogMigrationFinished(ILogger logger);
 }

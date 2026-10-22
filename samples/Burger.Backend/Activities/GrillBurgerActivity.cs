@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Burger.Backend.Activities;
 
-public sealed class GrillBurgerActivity(ILogger<GrillBurgerActivity> logger, IGrill grill) :
+public sealed partial class GrillBurgerActivity(ILogger<GrillBurgerActivity> logger, IGrill grill) :
     IActivity<GrillBurgerArguments, IGrillBurgerLog>
 {
     private readonly IGrill _grill = grill;
@@ -21,10 +21,13 @@ public sealed class GrillBurgerActivity(ILogger<GrillBurgerActivity> logger, IGr
     {
         var patty = context.Log.Patty;
 
-        _logger.LogDebug("Putting Burger back in inventory: {Weight} {Cheese}", patty.Weight, patty.Cheese);
+        LogPuttingBurgerBackInInventory(_logger, patty.Weight, patty.Cheese);
 
         _grill.Add(patty);
 
         return Task.FromResult(context.Compensated());
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Putting Burger back in inventory: {Weight} {Cheese}")]
+    private static partial void LogPuttingBurgerBackInInventory(ILogger logger, decimal weight, bool cheese);
 }

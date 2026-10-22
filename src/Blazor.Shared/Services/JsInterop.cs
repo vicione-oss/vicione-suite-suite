@@ -8,7 +8,7 @@ using Sdk.Modules;
 
 namespace Blazor.Shared.Services;
 
-public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) : IJsInterop
+public sealed partial class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) : IJsInterop
 {
     public async Task SetCookie(string name, string value, int days, CancellationToken token = default)
     {
@@ -20,7 +20,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(SetCookie));
+            LogJsCallFailed(logger, ex, nameof(SetCookie));
         }
     }
 
@@ -48,7 +48,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(UpdateTitle));
+            LogJsCallFailed(logger, ex, nameof(UpdateTitle));
         }
     }
 
@@ -62,7 +62,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(IncludeMeta));
+            LogJsCallFailed(logger, ex, nameof(IncludeMeta));
         }
     }
 
@@ -76,7 +76,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(IncludeLink));
+            LogJsCallFailed(logger, ex, nameof(IncludeLink));
         }
     }
 
@@ -90,7 +90,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(IncludeLinks));
+            LogJsCallFailed(logger, ex, nameof(IncludeLinks));
         }
     }
 
@@ -104,7 +104,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(IncludeScript));
+            LogJsCallFailed(logger, ex, nameof(IncludeScript));
         }
     }
 
@@ -118,7 +118,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(IncludeModuleScript));
+            LogJsCallFailed(logger, ex, nameof(IncludeModuleScript));
 
             return null;
         }
@@ -138,7 +138,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(IncludeScripts));
+            LogJsCallFailed(logger, ex, nameof(IncludeScripts));
         }
     }
 
@@ -153,7 +153,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         catch (Exception ex)
         {
             // Happens when ModuleComponentBase cleans up.
-            logger.LogDebug(ex, nameof(RemoveElementsById));
+            LogJsCleanupCallFailed(logger, ex, nameof(RemoveElementsById));
         }
     }
 
@@ -168,7 +168,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         catch (Exception ex)
         {
             // Happens when ModuleComponentBase cleans up.
-            logger.LogDebug(ex, nameof(RemoveScriptsBySource));
+            LogJsCleanupCallFailed(logger, ex, nameof(RemoveScriptsBySource));
         }
     }
 
@@ -195,14 +195,19 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
                 token,
                 path, fields);
         }
-        catch (Exception ex) when (ex is OperationCanceledException or JSDisconnectedException)
+        catch (OperationCanceledException ex)
         {
             // The full-page form submit tears down the circuit, cancelling this in-flight interop call.
-            logger.LogDebug(ex, nameof(SubmitForm));
+            LogJsCallInterrupted(logger, ex, nameof(SubmitForm));
+        }
+        catch (JSDisconnectedException ex)
+        {
+            // The full-page form submit disconnects the circuit before the interop call returns.
+            LogJsCallInterrupted(logger, ex, nameof(SubmitForm));
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(SubmitForm));
+            LogJsCallFailed(logger, ex, nameof(SubmitForm));
         }
     }
 
@@ -230,7 +235,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(UploadFiles));
+            LogJsCallFailed(logger, ex, nameof(UploadFiles));
         }
     }
 
@@ -244,7 +249,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(RefreshBrowser));
+            LogJsCallFailed(logger, ex, nameof(RefreshBrowser));
         }
     }
 
@@ -258,7 +263,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(RedirectBrowser));
+            LogJsCallFailed(logger, ex, nameof(RedirectBrowser));
         }
     }
 
@@ -286,7 +291,7 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(SetElementAttribute));
+            LogJsCallFailed(logger, ex, nameof(SetElementAttribute));
         }
     }
 
@@ -307,7 +312,16 @@ public sealed class JsInterop(IJSRuntime jsRuntime, ILogger<JsInterop> logger) :
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, nameof(SetElementAttribute));
+            LogJsCallFailed(logger, ex, nameof(DownloadAs));
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "JS interop call {Method} failed")]
+    private static partial void LogJsCallFailed(ILogger logger, Exception exception, string method);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "JS interop call {Method} was interrupted")]
+    private static partial void LogJsCallInterrupted(ILogger logger, Exception exception, string method);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "JS interop call {Method} failed during cleanup")]
+    private static partial void LogJsCleanupCallFailed(ILogger logger, Exception exception, string method);
 }

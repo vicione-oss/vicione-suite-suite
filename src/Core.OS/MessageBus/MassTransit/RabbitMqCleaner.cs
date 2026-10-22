@@ -15,7 +15,7 @@ using RabbitMQ.Client;
 
 namespace Core.OS.MessageBus.MassTransit;
 
-internal static class RabbitMqCleaner
+internal static partial class RabbitMqCleaner
 {
     public static async Task CleanVirtualHost(IServiceProvider provider, ILogger logger,
         CancellationToken cancellationToken)
@@ -81,9 +81,7 @@ internal static class RabbitMqCleaner
             await channel.CloseAsync(cancellationToken);
 
             if (exchangeCount > 0 || queueCount > 0)
-                logger.LogInformation("Removed {QueueCount} queue(s), {ExchangeCount} exchange(s)",
-                    queueCount,
-                    exchangeCount);
+                LogRemoved(logger, queueCount, exchangeCount);
             activity?
                 .AddTag("messaging.rabbitmq.cleaned.queues", $"{queueCount}")
                 .AddTag("messaging.rabbitmq.cleaned.exchanges", $"{exchangeCount}");
@@ -150,6 +148,9 @@ internal static class RabbitMqCleaner
 
     private static string GetCleanedNodesVersionFilePath(IFileSystem fileSystem, InstanceOptions options)
         => fileSystem.Path.Combine(fileSystem.GetRootedHomeDirectory(options), "CleanedBrokerVersion.info");
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Removed {QueueCount} queue(s), {ExchangeCount} exchange(s)")]
+    private static partial void LogRemoved(ILogger logger, int queueCount, int exchangeCount);
 }
 
 internal static partial class LoggingExtensions

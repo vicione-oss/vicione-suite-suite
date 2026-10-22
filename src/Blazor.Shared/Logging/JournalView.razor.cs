@@ -62,7 +62,7 @@ public sealed partial class JournalView : ComponentBase, IDisposable
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Failed to set filter '{Filter}'.", Filter);
+                LogSetFilterFailed(Logger, ex, Filter);
 
                 _lookBehind.Dispose();
                 _lookBehind = null;
@@ -88,4 +88,6 @@ public sealed partial class JournalView : ComponentBase, IDisposable
     public void Dispose()
         => _lookBehind?.Dispose();
 
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to set filter '{Filter}'.")]
+    private static partial void LogSetFilterFailed(ILogger logger, Exception exception, string filter);
 }

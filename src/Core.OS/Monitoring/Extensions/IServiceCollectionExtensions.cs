@@ -11,7 +11,7 @@ using ViciOne.SystemMonitoring.Configuration;
 
 namespace Core.OS.Monitoring.Extensions;
 
-internal static class IServiceCollectionExtensions
+internal static partial class IServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
@@ -94,12 +94,12 @@ internal static class IServiceCollectionExtensions
 
         if (mqttOptions is null)
         {
-            logger.LogError("Failed to configure SystemMonitoring, no MQTT options found.");
+            LogNoMqttOptions(logger);
             return;
         }
         if (string.IsNullOrEmpty(mqttOptions.Endpoint))
         {
-            logger.LogError("Failed to configure SystemMonitoring, no endpoint found.");
+            LogNoEndpoint(logger);
             return;
         }
 
@@ -108,4 +108,10 @@ internal static class IServiceCollectionExtensions
         config.Mqtt.Username = mqttOptions.UserName;
         config.Mqtt.Password = mqttOptions.Password;
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to configure SystemMonitoring, no MQTT options found.")]
+    private static partial void LogNoMqttOptions(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to configure SystemMonitoring, no endpoint found.")]
+    private static partial void LogNoEndpoint(ILogger logger);
 }

@@ -9,7 +9,7 @@ using Sdk.Backend.Persistence;
 
 namespace Core.OS.Instance.Initialization;
 
-public sealed class SyncDataActivity(IServiceProvider services, ILogger<SyncDataActivity> logger) : IExecuteActivity<SyncDataArguments>
+public sealed partial class SyncDataActivity(IServiceProvider services, ILogger<SyncDataActivity> logger) : IExecuteActivity<SyncDataArguments>
 {
     private readonly IServiceProvider _services = services;
     private readonly ILogger<SyncDataActivity> _logger = logger;
@@ -18,7 +18,7 @@ public sealed class SyncDataActivity(IServiceProvider services, ILogger<SyncData
     {
         if (context.Arguments.SyncCompleted)
         {
-            _logger.LogDebug("Initial Sync finished. Allowing regular message processing");
+            LogInitialSyncFinished(_logger);
             _services.GetRequiredService<ReplicationSequenceTracker>().Reset();
             _services.GetRequiredService<SyncRetryState>().Reset();
             _services.NotifyReplicationObservers(_logger, observer => observer.Resynchronized());
@@ -45,8 +45,7 @@ public sealed class SyncDataActivity(IServiceProvider services, ILogger<SyncData
             .FirstOrDefault(c => (c.AssemblyQualifiedName ?? c.Name) == context.Arguments.DbContextTypeName) ??
             throw new TypeLoadException($"Context type '{context.Arguments.DbContextTypeName}' is not loaded");
 
-        _logger.LogDebug("Executing context operations for {Module}.{Table} (rows:{Count})",
-            context.Arguments.ModuleId, context.Arguments.Table, context.Arguments.ValuesCsv.Count);
+        LogExecutingContextOperations(_logger, context.Arguments.ModuleId, context.Arguments.Table, context.Arguments.ValuesCsv.Count);
 
         using var scope = _services.CreateScope();
         var dbContext = (IModuleDbContext)scope.ServiceProvider.GetRequiredService(contextType);
@@ -85,4 +84,10 @@ public sealed class SyncDataActivity(IServiceProvider services, ILogger<SyncData
 
         return sb.ToString();
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Initial Sync finished. Allowing regular message processing")]
+    private static partial void LogInitialSyncFinished(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Executing context operations for {Module}.{Table} (rows:{Count})")]
+    private static partial void LogExecutingContextOperations(ILogger logger, string module, string table, int count);
 }

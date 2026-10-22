@@ -162,7 +162,7 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
         {
             // We log the exception as warning because obsolete OnSave implementations in control panels
             // rely on exception flow to transport errors like validation errors to the UI.
-            _logger.LogWarning(e, "Exception was thrown");
+            LogSaveExceptionThrown(_logger, e);
 
             return new SaveErrorResult(e.Message);
         }
@@ -244,4 +244,7 @@ internal sealed partial class ControlPanelEdit<TControlPanelState>(TControlPanel
 
     [LoggerMessage(LogLevel.Debug, "Cancel handler invoked for state '{StateType}'")]
     internal static partial void LogCancelHandlerInvoked(ILogger<ControlPanelEdit<TControlPanelState>> logger, string stateType);
+
+    [LoggerMessage(LogLevel.Warning, "Exception was thrown")]
+    private static partial void LogSaveExceptionThrown(ILogger logger, Exception exception);
 }

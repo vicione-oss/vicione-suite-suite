@@ -12,18 +12,14 @@ namespace Burger.Backend.Consumers;
 /// <summary>
 /// The kitchen: consumes a kitchen command and produces burgers.
 /// </summary>
-public sealed class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<KitchenConsumer> logger) :
+public sealed partial class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<KitchenConsumer> logger) :
     TrackingConsumerBase, IConsumer<KitchenCommand>
 {
     private readonly Random _random = new();
 
     public async Task Consume(ConsumeContext<KitchenCommand> context)
     {
-        logger.LogDebug("Consume {Command} CorrelationId:{CorrelationId} OrderId:{OrderId} Burgers.Count:{Count}",
-            nameof(KitchenCommand),
-            context.CorrelationId,
-            context.Message.OrderId,
-            context.Message.Burgers.Count);
+        LogConsume(logger, nameof(KitchenCommand), context.CorrelationId, context.Message.OrderId, context.Message.Burgers.Count);
 
         // todo: there's a list of burgers to be parallelized
         if (context.Message.Burgers.Count == 0)
@@ -46,7 +42,7 @@ public sealed class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<
         var orderId = context.GetVariable<Guid>(nameof(KitchenCommand.OrderId));
         if (!orderId.HasValue)
         {
-            logger.LogWarning("Missing order id - what to do?!");
+            LogMissingOrderId(logger);
             return;
         }
 
@@ -54,7 +50,7 @@ public sealed class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<
         var burger = context.GetVariable<SuiteBurger>("Burger");
         if (burger is null)
         {
-            logger.LogWarning("Kitchen activities completed but no burger is available - what to do?!");
+            LogNoBurgerAvailable(logger);
             return;
         }
 
@@ -66,17 +62,13 @@ public sealed class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<
         })
             .ConfigureAwait(false);
 
-        logger.LogInformation("KitchenActivities completed. OrderId:{OrderId} TrackingId: {TrackingId}",
-            orderId.Value,
-            context.Message.TrackingNumber);
+        LogKitchenActivitiesCompleted(logger, orderId.Value, context.Message.TrackingNumber);
     }
 
     protected override Task ConsumeFaulted(ConsumeContext<RoutingSlipFaulted> context)
     {
-        logger.LogError("Consume {Command} CorrelationId:{CorrelationId} failed with {}",
-            nameof(KitchenCommand),
-            context.CorrelationId,
-            string.Join(", ", context.Message.ActivityExceptions.Select(k => k.ExceptionInfo.Message)));
+        var errors = context.Message.ActivityExceptions.Select(k => k.ExceptionInfo.Message);
+        LogConsumeFailed(logger, nameof(KitchenCommand), context.CorrelationId, errors);
 
         return Task.CompletedTask;
     }
@@ -103,4 +95,19 @@ public sealed class KitchenConsumer(IRoutingSlipBuilderFactory factory, ILogger<
             OnionRing = burger.OnionRing,
             Lettuce = burger.Lettuce
         };
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Consume {Command} CorrelationId:{CorrelationId} OrderId:{OrderId} Burgers.Count:{Count}")]
+    private static partial void LogConsume(ILogger logger, string command, Guid? correlationId, Guid orderId, int count);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Missing order id - what to do?!")]
+    private static partial void LogMissingOrderId(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Kitchen activities completed but no burger is available - what to do?!")]
+    private static partial void LogNoBurgerAvailable(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "KitchenActivities completed. OrderId:{OrderId} TrackingId: {TrackingId}")]
+    private static partial void LogKitchenActivitiesCompleted(ILogger logger, Guid orderId, Guid trackingId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Consume {Command} CorrelationId:{CorrelationId} failed with {Errors}")]
+    private static partial void LogConsumeFailed(ILogger logger, string command, Guid? correlationId, IEnumerable<string> errors);
 }

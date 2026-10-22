@@ -5,7 +5,7 @@ using Sdk.Client.ControlPanels.Services;
 
 namespace Blazor.Shared.Settings.Extensions;
 
-internal static class SettingsModuleStateExtensions
+internal static partial class SettingsModuleStateExtensions
 {
     extension(SettingsModuleState settingsModuleState)
     {
@@ -62,7 +62,7 @@ internal static class SettingsModuleStateExtensions
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred why trying to adopt to control panel request.");
+                LogAdoptControlPanelRequestFailed(logger, ex);
             }
             finally
             {
@@ -70,4 +70,7 @@ internal static class SettingsModuleStateExtensions
             }
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred why trying to adopt to control panel request.")]
+    private static partial void LogAdoptControlPanelRequestFailed(ILogger logger, Exception exception);
 }

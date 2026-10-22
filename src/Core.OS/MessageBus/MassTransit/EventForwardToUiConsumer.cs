@@ -30,7 +30,7 @@ public sealed class EventForwardToUiConsumerDefinition<T> : ConsumerDefinition<E
             : $"{MessagingHelper.InstanceQueueNamePrefix}_{instanceId}";
 }
 
-public sealed class EventForwardToUiConsumer<T>(IEnumerable<IUiEventPublisher<T>> publisherList, ILogger<EventForwardToUiConsumer<T>> logger) :
+public sealed partial class EventForwardToUiConsumer<T>(IEnumerable<IUiEventPublisher<T>> publisherList, ILogger<EventForwardToUiConsumer<T>> logger) :
     IConsumer<T> where T : class
 {
     public async Task Consume(ConsumeContext<T> context)
@@ -50,9 +50,12 @@ public sealed class EventForwardToUiConsumer<T>(IEnumerable<IUiEventPublisher<T>
                 }
                 catch (Exception e)
                 {
-                    logger.LogWarning(e, "Error forwarding a {MessageName}-Event to the UI using {PublisherName}", messageType.Name, publisher.GetType().Name);
+                    LogForwardToUiFailed(logger, e, messageType.Name, publisher.GetType().Name);
                 }
             }
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Error forwarding a {MessageName}-Event to the UI using {PublisherName}")]
+    private static partial void LogForwardToUiFailed(ILogger logger, Exception exception, string messageName, string publisherName);
 }

@@ -46,7 +46,7 @@ public static partial class ExternalLogin
         var info = await signInManager.GetExternalLoginInfoAsync();
         if (info == null)
         {
-            logger.LogWarning("external login failed: no info. Returning to login.");
+            LogExternalLoginFailedNoInfo(logger);
             return Results.LocalRedirect(
                 IdentityRoutes.LoginRoute);
         }
@@ -66,7 +66,7 @@ public static partial class ExternalLogin
 
         if (signInResult.IsLockedOut)
         {
-            logger.LogWarning("external login failed: user is locked out. Returning to login.");
+            LogExternalLoginFailedLockedOut(logger);
 
             return Results.LocalRedirect(
                 IdentityRoutes.LoginRoute);
@@ -85,7 +85,7 @@ public static partial class ExternalLogin
         var newUser = await externalLoginService.CreateNewUserFromExternalLogin(info);
         if (!newUser.Succeeded)
         {
-            logger.LogError("external login failed: new user creation failed. Returning to login.");
+            LogExternalLoginFailedUserCreation(logger);
             tempDataFactory.AddExternalError(context, newUser.Error);
 
             return Results.LocalRedirect(
@@ -121,4 +121,13 @@ public static partial class ExternalLogin
     [LoggerMessage(LogLevel.Warning, "external login failed: user already exists. Returning to login. {Result}")]
     static partial void LogExternalLoginFailedUserAlreadyExists(this ILogger<ExternalLoginService> logger,
         SignInResult result);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "external login failed: no info. Returning to login.")]
+    private static partial void LogExternalLoginFailedNoInfo(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "external login failed: user is locked out. Returning to login.")]
+    private static partial void LogExternalLoginFailedLockedOut(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "external login failed: new user creation failed. Returning to login.")]
+    private static partial void LogExternalLoginFailedUserCreation(ILogger logger);
 }
