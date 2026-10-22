@@ -100,4 +100,10 @@
   <data name="SaveBlockedByLoadFailureError" xml:space="preserve">
     <value>Saving is not possible while the stored OpenID provider cannot be read.</value>
   </data>
+  <data name="RedirectUri" xml:space="preserve">
+    <value>Redirect URI</value>
+  </data>
+  <data name="RedirectUriHint" xml:space="preserve">
+    <value>Register this address at the provider. It is built from the address under which this browser opened the Suite.</value>
+  </data>
 </root>

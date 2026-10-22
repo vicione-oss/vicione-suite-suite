@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.JSInterop;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using System.Security.Claims;
@@ -97,6 +96,28 @@ public sealed class ExternalIdProvidersControlPanelTests
 
         // Assert
         component.Markup.Should().Contain(loginProvider);
+    }
+
+    [Fact]
+    public async Task Should_load_the_linking_page_from_the_server_when_adding_an_external_login()
+    {
+        // Arrange
+        _externalAuthenticationSettings.IsExternalAuthenticationProviderConfigured().Returns(true);
+        _externalAccountService.GetExternalUserAccount(Arg.Any<SuiteUser>()).Returns((ExternalUserAccount?)null);
+
+        var capturingNavManager = new CapturingNavigationManager();
+
+        await using var ctx = SetupTestContext();
+        ctx.Services.AddSingleton<NavigationManager>(capturingNavManager);
+
+        var component = RenderControlPanel(ctx, new ExternalIdProvidersControlPanelState());
+
+        // Act
+        await component.Find("button.add-external-login-button").ClickAsync();
+
+        // Assert
+        capturingNavManager.LastNavigatedUri.Should().Be(IdentityRoutes.AddExternalLoginRoute);
+        capturingNavManager.LastForceLoad.Should().BeTrue();
     }
 
     [Fact]
@@ -192,9 +213,7 @@ public sealed class ExternalIdProvidersControlPanelTests
         ctx.Services
             .AddSingleton(_externalAuthenticationSettings)
             .AddSingleton(_externalAccountService)
-            .AddSingleton(_navigationService)
-            .AddSingleton(Substitute.For<ILogger<AddExternalIdProviderButton>>())
-            .AddSingleton(Substitute.For<IJSRuntime>());
+            .AddSingleton(_navigationService);
 
         var userManager = Substitute.For<UserManager<SuiteUser>>(
             Substitute.For<IUserStore<SuiteUser>>(),

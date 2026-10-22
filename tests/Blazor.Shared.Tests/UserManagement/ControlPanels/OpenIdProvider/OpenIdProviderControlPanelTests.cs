@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.Components.Settings;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.CopyToClipboardButton.Extensions;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
 using Xunit;
 using OpenIdProviderControlPanelStrings
@@ -25,6 +26,7 @@ public sealed class OpenIdProviderControlPanelTests
         var ctx = new BunitContext();
 
         ctx.JSInterop.SetupForTextBox();
+        ctx.JSInterop.SetupForCopyToClipboardButton();
 
         ctx.SetupSuiteServices(setup =>
         {
@@ -77,13 +79,34 @@ public sealed class OpenIdProviderControlPanelTests
 
         // Assert
         var inputs = FindTextBoxes(component);
-        inputs.Should().HaveCount(3);
+        inputs.Should().HaveCount(4);
         inputs[0].GetAttribute("value").Should().Be("https://idp.example.com");
         inputs[1].GetAttribute("value").Should().Be("client-id");
         inputs[2].GetAttribute("value").Should().BeNullOrEmpty();
         inputs[2].GetAttribute("type").Should().Be("password");
 
         component.Markup.Should().Contain(OpenIdProviderControlPanelStrings.ClientSecretStoredHint);
+    }
+
+    [Fact]
+    public async Task Should_show_the_redirect_uri_to_register_at_the_provider()
+    {
+        // Arrange
+        var state = new OpenIdProviderControlPanelState();
+
+        await using var ctx = SetupTestContext();
+
+        var baseUri = ctx.Services.GetRequiredService<NavigationManager>().BaseUri;
+
+        // Act
+        var component = RenderPanel(ctx, state);
+
+        // Assert
+        var redirectUri = component.Find(".redirect-uri input");
+        redirectUri.GetAttribute("value").Should().Be($"{baseUri}signin-oidc");
+        redirectUri.HasAttribute("readonly").Should().BeTrue();
+
+        component.FindAll(".redirect-uri .copy-to-clipboard-button").Should().ContainSingle();
     }
 
     [Fact]

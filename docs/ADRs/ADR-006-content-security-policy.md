@@ -148,11 +148,15 @@ A browser enforces `form-action` on every hop of a form submission, redirects in
 The external sign-in and account-linking endpoints answer with a redirect to the provider, so `'self'` alone refuses them.
 The directive therefore also names the origin of the configured provider's authority, read from the same `OpenIdConnectOptions` the challenge is built from, so it follows a provider change without a restart.
 Without a configured provider it is exactly `'self'`.
-A policy for just these endpoints would not help, because `form-action` is checked against the document that holds the form, and the account-linking button sits in the settings dialog, which opens over any page.
+A policy for just these endpoints would not help, because `form-action` is checked against the document that holds the form: the login page, and the page that starts linking an account.
 
 - **What it costs:** injected script can post a form to the provider's origin, an exfiltration channel to one host the administrator chose.
+- **It is sent on every page, not only on the two that hold these forms.**
+  Narrowing it would not close the channel, because injected script can leave through a navigation anyway, and a page reached without a reload would keep a policy without the provider.
 - **What it does not cover:** the redirect goes to the discovery document's `authorization_endpoint`, which every provider we know of serves from the authority's origin; a provider that does not stays blocked.
 - **A blocked hop is hard to diagnose**, because the browser reports the URL before the redirect, so `/csp-report` does not name the provider.
+- **A page that is already open keeps the policy it was loaded with.**
+  Linking an account therefore starts on its own page, `/account/manage/add-external-login`, which the profile panel opens with a full page load, so the form always carries the current provider.
 
 ### Embedding
 

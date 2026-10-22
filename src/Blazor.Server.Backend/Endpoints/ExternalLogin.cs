@@ -1,7 +1,6 @@
 using Blazor.Server.Backend.Extensions;
 using Blazor.Server.Backend.Services;
 using Blazor.Shared;
-using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -84,18 +83,17 @@ public static partial class ExternalLogin
         }
 
         var newUser = await externalLoginService.CreateNewUserFromExternalLogin(info);
-        if (newUser is null)
+        if (!newUser.Succeeded)
         {
             logger.LogError("external login failed: new user creation failed. Returning to login.");
-            tempDataFactory.AddExternalError(context,
-                ExternalLoginError.NewUserCreationFailed);
+            tempDataFactory.AddExternalError(context, newUser.Error);
 
             return Results.LocalRedirect(
                 IdentityRoutes.LoginRoute);
         }
 
         await context.SignOutAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
-        await signInManager.SignInAsync(newUser, isPersistent: false);
+        await signInManager.SignInAsync(newUser.User, isPersistent: false);
 
         return Results.LocalRedirect(returnUrl.ToString());
     }

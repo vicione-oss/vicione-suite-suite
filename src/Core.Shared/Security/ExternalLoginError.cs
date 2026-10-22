@@ -13,5 +13,6 @@ public enum ExternalLoginError
     UnknownExternalUser,
     NewUserCreationFailed,
     ExternalAccountAlreadyAssociated,
-    SignInCancelled
+    SignInCancelled,
+    MissingEmail
 }

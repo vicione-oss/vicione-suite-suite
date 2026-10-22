@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Blazor.Server.Backend.Services;
 using Blazor.Shared.UserManagement.Services.Validators;
+using Core.Shared.Security;
 using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
@@ -21,7 +22,7 @@ public sealed class ExternalLoginServiceTests
     };
 
     [Fact]
-    public async Task Should_return_null_when_email_claim_is_missing()
+    public async Task Should_report_a_missing_email_when_the_email_claim_is_missing()
     {
         // Arrange
         var info = CreateExternalLoginInfo(
@@ -32,26 +33,34 @@ public sealed class ExternalLoginServiceTests
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        result.Should().BeNull();
+        result.Error.Should().Be(ExternalLoginError.MissingEmail);
     }
 
-    [Fact]
-    public async Task Should_return_null_when_preferred_username_claim_is_missing()
+    [Theory]
+    [InlineData(null)]
+    [InlineData(" ")]
+    public async Task Should_use_the_email_as_username_when_preferred_username_claim_is_missing(
+        string? preferredUsername)
     {
         // Arrange
-        var info = CreateExternalLoginInfo(
-            new Claim(ClaimTypes.Email, "john.doe@example.com"));
+        List<Claim> claims = [new(ClaimTypes.Email, "john.doe@example.com")];
+        if (preferredUsername is not null)
+            claims.Add(new Claim("preferred_username", preferredUsername));
+
+        var info = CreateExternalLoginInfo([.. claims]);
         var (sut, _) = CreateSubjectUnderTest(usernameValidatorResult: true, createAsyncResult: null, ExistingUser);
 
         // Act
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        result.Should().BeNull();
+        result.User.Should().NotBeNull();
+        result.User.UserName.Should().Be("john.doe@example.com");
+        result.User.Email.Should().Be("john.doe@example.com");
     }
 
     [Fact]
-    public async Task Should_return_null_when_username_fails_validation()
+    public async Task Should_fail_when_username_fails_validation()
     {
         // Arrange
         var info = CreateExternalLoginInfo(
@@ -63,7 +72,7 @@ public sealed class ExternalLoginServiceTests
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        result.Should().BeNull();
+        result.Error.Should().Be(ExternalLoginError.NewUserCreationFailed);
     }
 
     [Fact]
@@ -81,11 +90,11 @@ public sealed class ExternalLoginServiceTests
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        result.Should().NotBeNull();
-        result.UserName.Should().Be("john.doe");
-        result.Email.Should().Be("john.doe@example.com");
-        result.EmailConfirmed.Should().BeTrue();
-        result.PasswordExpirationDate.Should().Be(DateTimeOffset.MinValue);
+        result.User.Should().NotBeNull();
+        result.User.UserName.Should().Be("john.doe");
+        result.User.Email.Should().Be("john.doe@example.com");
+        result.User.EmailConfirmed.Should().BeTrue();
+        result.User.PasswordExpirationDate.Should().Be(DateTimeOffset.MinValue);
         await userManager.DidNotReceive().AddToRoleAsync(Arg.Any<SuiteUser>(), AuthorizationConstants.AdminRoleName);
     }
 
@@ -103,12 +112,12 @@ public sealed class ExternalLoginServiceTests
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        result.Should().NotBeNull();
-        await userManager.Received(1).AddToRoleAsync(result, AuthorizationConstants.AdminRoleName);
+        result.User.Should().NotBeNull();
+        await userManager.Received(1).AddToRoleAsync(result.User, AuthorizationConstants.AdminRoleName);
     }
 
     [Fact]
-    public async Task Should_return_null_when_email_is_malformed()
+    public async Task Should_fail_when_email_is_malformed()
     {
         // Arrange
         var info = CreateExternalLoginInfo(
@@ -123,7 +132,7 @@ public sealed class ExternalLoginServiceTests
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        result.Should().BeNull();
+        result.Error.Should().Be(ExternalLoginError.NewUserCreationFailed);
         await userManager.Received(1).CreateAsync(Arg.Any<SuiteUser>());
         await userManager.DidNotReceive().AddLoginAsync(Arg.Any<SuiteUser>(), Arg.Any<UserLoginInfo>());
     }
@@ -141,8 +150,8 @@ public sealed class ExternalLoginServiceTests
         var result = await sut.CreateNewUserFromExternalLogin(info);
 
         // Assert
-        result.Should().NotBeNull();
-        await userManager.Received(1).AddToRoleAsync(result, AuthorizationConstants.AdminRoleName);
+        result.User.Should().NotBeNull();
+        await userManager.Received(1).AddToRoleAsync(result.User, AuthorizationConstants.AdminRoleName);
     }
 
     private static ExternalLoginInfo CreateExternalLoginInfo(params Claim[] claims)

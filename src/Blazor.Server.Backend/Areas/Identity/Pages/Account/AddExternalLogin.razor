@@ -1,0 +1,29 @@
+@attribute [Route(IdentityRoutes.AddExternalLoginRoute)]
+
+@using Blazor.Server.Backend.Components
+@using Blazor.Shared.Components
+@using Core.Shared.Instance.Contracts
+
+<PageTitle>@Backend.Localization.AddExternalLogin.Title</PageTitle>
+
+@if (LoginDesignService.Design == LoginDesign.BuildingAutomation)
+{
+    <div class="building-layout">
+        <BuildingAutomationLayout Heading="@Backend.Localization.AddExternalLogin.Title">
+            <ChildContent>
+                <AddExternalLoginContent BuildingLayout="true" />
+            </ChildContent>
+        </BuildingAutomationLayout>
+    </div>
+}
+else
+{
+    <div class="account-layout">
+        <AccountLayout>
+            <Heading>@Backend.Localization.AddExternalLogin.Title</Heading>
+            <LeftSideContent>
+                <AddExternalLoginContent />
+            </LeftSideContent>
+        </AccountLayout>
+    </div>
+}

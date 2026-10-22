@@ -168,4 +168,7 @@
   <data name="ExternalLoginAlreadyInUse" xml:space="preserve">
     <value>Der externe Zugang ist bereits mit einem lokalen Benutzer verknüpft.</value>
   </data>
+  <data name="ExternalUserMissingEmail" xml:space="preserve">
+    <value>Registrierung fehlgeschlagen. Der ID-Anbieter hat keine E-Mail-Adresse für das Konto übermittelt.</value>
+  </data>
 </root>

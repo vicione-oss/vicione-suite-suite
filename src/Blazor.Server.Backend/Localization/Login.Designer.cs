@@ -146,5 +146,11 @@ namespace Blazor.Server.Backend.Localization {
                 return ResourceManager.GetString("ExternalLoginAlreadyInUse", resourceCulture);
             }
         }
+        
+        public static string ExternalUserMissingEmail {
+            get {
+                return ResourceManager.GetString("ExternalUserMissingEmail", resourceCulture);
+            }
+        }
     }
 }

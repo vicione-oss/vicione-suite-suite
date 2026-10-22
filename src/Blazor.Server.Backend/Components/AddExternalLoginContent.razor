@@ -1,0 +1,35 @@
+@using Blazor.Server.Backend.Enums
+@using Blazor.Shared.Profile.Localization
+@using Core.Shared.UserManagement.Configuration
+@using ViciOne.Ui.Localization.Resources
+@using ViciOne.Ui.MonochromeIcons.Core.Enums
+
+<form id="@CancelFormId" method="get" action="/"></form>
+
+@if (_isExternalIdProviderConfigured)
+{
+    <form id="@LinkFormId" method="post" action="@IdentityRoutes.LinkExternalLoginRoute">
+        <AntiforgeryToken />
+        <input type="hidden" name="provider" value="@ProviderConstants.DefaultProviderName" />
+    </form>
+}
+
+<div class="add-external-login @(BuildingLayout ? "building" : "account")">
+    <p class="description">
+        @(_isExternalIdProviderConfigured ? Description : ExternalIdProviders.NoProviderConfigured)
+    </p>
+
+    <div class="button-section">
+        @if (_isExternalIdProviderConfigured)
+        {
+            <AccountButton Text="@LinkButtonText"
+                           IconName="@MonochromeIconName.ExternalIdProviderLight"
+                           Form="@LinkFormId"
+                           ButtonType="@(BuildingLayout ? AccountButtonType.Outline : AccountButtonType.Active)" />
+        }
+
+        <AccountButton Text="@CommonVocabulary.Cancel"
+                       Form="@CancelFormId"
+                       ButtonType="@(BuildingLayout ? AccountButtonType.Outline : AccountButtonType.Default)" />
+    </div>
+</div>

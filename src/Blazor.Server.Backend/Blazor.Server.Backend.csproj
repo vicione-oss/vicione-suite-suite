@@ -74,6 +74,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>EmailConfirmation.resx</DependentUpon>
     </Compile>
+    <Compile Update="Localization\AddExternalLogin.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AddExternalLogin.resx</DependentUpon>
+    </Compile>
     <Compile Update="Localization\ChangePassword.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -140,6 +145,10 @@
     <EmbeddedResource Update="Areas\Identity\Pages\Account\Localization\EmailConfirmation.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>EmailConfirmation.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\AddExternalLogin.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AddExternalLogin.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Localization\ChangePassword.resx">
       <Generator>ResXFileCodeGenerator</Generator>

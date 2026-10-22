@@ -1,0 +1,10 @@
+// The copy button sits in the column's right padding, so the box lines up with the editable boxes above.
+.redirect-uri {
+    position: relative;
+
+    ::deep .copy-to-clipboard-button {
+        position: absolute;
+        top: 0;
+        left: calc(100% + 8px);
+    }
+}

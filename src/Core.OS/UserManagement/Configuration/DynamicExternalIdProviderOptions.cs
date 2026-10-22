@@ -1,5 +1,6 @@
 using Core.OS.DbContext;
 using Core.Shared.Extensions;
+using Core.Shared.Security;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -89,7 +90,7 @@ public sealed class DynamicExternalIdProviderOptions(
         connectOptions.Scope.Add(OpenIdConnectScope.Profile); // Request basic user profile claims
         connectOptions.Scope.Add(OpenIdConnectScope.Email); // Request email claim
 
-        connectOptions.CallbackPath = "/signin-oidc";
+        connectOptions.CallbackPath = ExternalLoginPaths.Callback;
         connectOptions.SignedOutCallbackPath = "/signout-callback-oidc";
 
         // Extended user information is optional; not every IdP sends it by default.

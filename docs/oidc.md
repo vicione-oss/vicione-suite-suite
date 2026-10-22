@@ -24,6 +24,7 @@ What the panel does beyond storing the values:
   The saved provider is published as `ExternalIdProviderChanged`, and every node clears its cached `OpenIdConnectOptions`.
   A slave clears them again once replication has written the stored provider, since the event can arrive before the row.
   A sign-in that was already in flight fails and has to be retried.
+  Pages that are already open keep their content security policy, so linking an account starts on a page of its own, which is always loaded from the server, see [ADR-006](ADRs/ADR-006-content-security-policy.md#form-action-and-the-external-identity-provider).
 - **Changing the authority or the client id clears every external login.**
   The links pointed at the old provider.
   Rotating only the client secret leaves them alone.
@@ -33,6 +34,7 @@ What the panel does beyond storing the values:
 - **The stored client secret never leaves the server.**
   The field always renders empty; leaving it empty keeps the stored secret, and *Remove stored secret* clears it — needed to switch to a public PKCE client.
 - **The secret is stored unencrypted**, like the file-based path below.
+- **It shows the redirect URI** to register at the provider, see [Redirect URI](#redirect-uri).
 
 ### Configuration files
 
@@ -85,6 +87,10 @@ provider, using the exact URL under which the suite is reached:
 https://<host>/signin-oidc
 ```
 
+The OpenID provider panel shows this address, with a copy button.
+It builds the address from the one under which the browser opened the Suite, so open the panel under the address the users sign in with.
+In a cluster, register the address of every node users sign in on; the panel shows only the address of the node it was opened on.
+
 The provider matches this value exactly — scheme, host, port and path must all match the URL the suite generates.
 Most providers (including GitLab) require `https` for any non-loopback host, so the suite must be served over `https`.
 
@@ -135,6 +141,8 @@ we handle the backend part not in razor files, but in MinimalAPI handlers.
 
 Other than the default Microsoft template, which uses the email as the username, we use the username itself.
 While we can get the email address of the user from the claims from OIDC, we rely on `preferred_username` as the username.
+`preferred_username` is optional in OpenID Connect, and some providers, such as Google, do not send it; then the email is used as the username.
+An email is required: without one, no user is created, and the login page says that the ID provider sent no email address.
 
 `preferred_username` is _not_ constant and even discouraged by Microsoft for login:
 https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference#use-claims-to-reliably-identify-a-user

@@ -186,5 +186,17 @@ namespace Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Localization
                 return ResourceManager.GetString("SaveBlockedByLoadFailureError", resourceCulture);
             }
         }
+
+        internal static string RedirectUri {
+            get {
+                return ResourceManager.GetString("RedirectUri", resourceCulture);
+            }
+        }
+
+        internal static string RedirectUriHint {
+            get {
+                return ResourceManager.GetString("RedirectUriHint", resourceCulture);
+            }
+        }
     }
 }
