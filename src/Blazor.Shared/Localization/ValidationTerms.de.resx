@@ -123,6 +123,24 @@
   <data name="ProvideMqttBrokerAddress" xml:space="preserve">
     <value>Die Adresse des MQTT-Brokers muss ausgefüllt werden.</value>
   </data>
+  <data name="MqttValueMustBeBetween" xml:space="preserve">
+    <value>{0} muss zwischen {1} und {2} liegen.</value>
+  </data>
+  <data name="ProvideMqttBrokerHostName" xml:space="preserve">
+    <value>Der Hostname oder die IP-Adresse des MQTT-Brokers muss ohne Schema und Port angegeben werden.</value>
+  </data>
+  <data name="ProvideMqttWebSocketAddress" xml:space="preserve">
+    <value>Ein Hostname oder eine ws-, wss-, http- oder https-Adresse des MQTT-Brokers muss angegeben werden.</value>
+  </data>
+  <data name="MqttWillTopicMustNotContainWildcards" xml:space="preserve">
+    <value>Das Will-Topic darf die Platzhalter + und # nicht enthalten.</value>
+  </data>
+  <data name="MqttCertificateAndKeyMustHaveTheSameForm" xml:space="preserve">
+    <value>Client-Zertifikat und Client-Schlüssel müssen beide Dateipfade oder beide PEM-Inhalte sein.</value>
+  </data>
+  <data name="MqttAddressPortMustMatchPort" xml:space="preserve">
+    <value>Die Adresse verwendet Port {0}, eingestellt ist aber Port {1}.</value>
+  </data>
   <data name="ProvideSQLiteConnectionString" xml:space="preserve">
     <value>Bitte geben Sie eine gültige SQLite Verbindung an.</value>
   </data>

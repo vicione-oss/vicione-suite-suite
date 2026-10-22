@@ -104,6 +104,8 @@
 - Network interface settings, _Physical address (MAC)_ shows the hardware address also while a user-defined MAC address is set
 - Network interface settings, a manual MAC address equal to the physical address saves without an error and turns the manual MAC address off
 - Network interface settings, _General Information_ hides disabled DNS servers and updates when the network settings change
+- MQTT connections, keep-alive, connect timeout, TLS settings and the WebSocket port are saved and applied as configured. **Behaviour change:** existing connections now use their keep-alive (default 60 s) and connect timeout (default 30 s)
+- MQTT connections, an invalid port, address, will topic, credentials or client certificate is rejected on save
 
 ### Removed
 
