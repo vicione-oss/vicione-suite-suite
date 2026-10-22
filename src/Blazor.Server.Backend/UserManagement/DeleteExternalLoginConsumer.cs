@@ -43,7 +43,7 @@ public sealed partial class DeleteExternalLoginConsumer(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error removing external login");
+            LogRemovingExternalLoginFailed(e);
             await PublishError(context, ExternalLoginError.Failed, "Deletion failed");
         }
     }
@@ -69,4 +69,7 @@ public sealed partial class DeleteExternalLoginConsumer(
 
     [LoggerMessage(LogLevel.Error, "RemoveLoginAsync failed for user {UserId}: {Errors}")]
     partial void LogRemoveLoginFailedForUser(string userId, string errors);
+
+    [LoggerMessage(LogLevel.Error, "Error removing external login")]
+    partial void LogRemovingExternalLoginFailed(Exception exception);
 }

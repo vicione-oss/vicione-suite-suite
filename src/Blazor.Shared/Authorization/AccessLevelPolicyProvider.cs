@@ -5,7 +5,7 @@ using Sdk.Authorization;
 
 namespace Blazor.Shared.Authorization;
 
-public sealed class AccessLevelPolicyProvider(IOptions<AuthorizationOptions> options, ILogger<AccessLevelPolicyProvider> logger)
+public sealed partial class AccessLevelPolicyProvider(IOptions<AuthorizationOptions> options, ILogger<AccessLevelPolicyProvider> logger)
     : IAuthorizationPolicyProvider
 {
     private DefaultAuthorizationPolicyProvider BackupPolicyProvider { get; } = new(options);
@@ -22,8 +22,7 @@ public sealed class AccessLevelPolicyProvider(IOptions<AuthorizationOptions> opt
     {
         if (!AccessLevelPolicyParser.TryParse(policyName, out var accessLevelAuthorizationRequirement))
         {
-            logger.LogWarning("Invalid policy: {PolicyName}, expected '{AuthorizationPolicyPrefix}_<ModuleId>_<AccessLevel>?_<Feature>', executing fallback to backup policy",
-                policyName, Sdk.Constants.AuthorizationPolicyPrefix);
+            LogInvalidPolicy(logger, policyName, Sdk.Constants.AuthorizationPolicyPrefix);
 
             return BackupPolicyProvider.GetPolicyAsync(policyName);
         }
@@ -32,4 +31,8 @@ public sealed class AccessLevelPolicyProvider(IOptions<AuthorizationOptions> opt
         policy.AddRequirements(accessLevelAuthorizationRequirement);
         return Task.FromResult<AuthorizationPolicy?>(policy.Build());
     }
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "Invalid policy: {PolicyName}, expected '{AuthorizationPolicyPrefix}_<ModuleId>_<AccessLevel>?_<Feature>', executing fallback to backup policy")]
+    private static partial void LogInvalidPolicy(ILogger logger, string policyName, string authorizationPolicyPrefix);
 }

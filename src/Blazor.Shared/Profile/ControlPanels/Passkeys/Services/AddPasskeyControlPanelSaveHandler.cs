@@ -11,7 +11,7 @@ using PasskeyConstants = Core.Shared.Passkeys.Constants;
 
 namespace Blazor.Shared.Profile.ControlPanels.Passkeys.Services;
 
-public class AddPasskeyControlPanelSaveHandler(
+public partial class AddPasskeyControlPanelSaveHandler(
     AntiforgeryStateProvider antiforgeryStateProvider,
     IOptions<AntiforgeryOptions> antiforgeryOptions,
     IJSRuntime jsRuntime,
@@ -40,7 +40,7 @@ public class AddPasskeyControlPanelSaveHandler(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error saving passkey");
+            LogSavingPasskeyFailed(logger, e);
             return new SaveErrorResult(Localization.AddPasskeyControlPanelSaveHandler.ErrorSavingPasskey);
         }
 
@@ -64,4 +64,7 @@ public class AddPasskeyControlPanelSaveHandler(
             headerName,
             token);
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error saving passkey")]
+    private static partial void LogSavingPasskeyFailed(ILogger logger, Exception exception);
 }

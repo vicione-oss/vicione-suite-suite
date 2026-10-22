@@ -15,7 +15,7 @@ using Sdk.Modules;
 
 namespace Core.OS.Modules.Extensions;
 
-internal static class IFileSystemExtensions
+internal static partial class IFileSystemExtensions
 {
     private const string PipelineVersionKey = "##VERSION_REF##";
 
@@ -26,7 +26,7 @@ internal static class IFileSystemExtensions
             var modulesFilePath = GetModuleVersionsFilePath(fileSystem, instanceOptions);
             if (fileSystem.File.Exists(modulesFilePath))
             {
-                logger.LogInformation("Use existing module version file from '{FilePath}'", modulesFilePath);
+                LogUseExistingModuleVersionFile(logger, modulesFilePath);
                 return;
             }
 
@@ -36,24 +36,24 @@ internal static class IFileSystemExtensions
                 {
                     await CopyModuleManifestSeedTo(fileSystem, manifestSeedingPath, modulesFilePath, cancellationToken);
 
-                    logger.LogInformation("Use module version seeding file '{FilePath}'", manifestSeedingPath);
+                    LogUseModuleVersionSeedingFile(logger, manifestSeedingPath);
                     return;
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed on module versions from seeding file '{FilePath}'", modulesFilePath);
+                LogSeedingFileFailed(logger, ex, modulesFilePath);
             }
 
             try
             {
                 await CopyInitialModuleManifestTo(fileSystem, modulesFilePath, cancellationToken);
 
-                logger.LogInformation("Use empty initial module versions file");
+                LogUseEmptyModuleVersionFile(logger);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to create initial module versions file '{FilePath}'", modulesFilePath);
+                LogCreateInitialModuleVersionFileFailed(logger, ex, modulesFilePath);
             }
         }
 
@@ -343,4 +343,19 @@ internal static class IFileSystemExtensions
             return result;
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Use existing module version file from '{FilePath}'")]
+    private static partial void LogUseExistingModuleVersionFile(ILogger logger, string filePath);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Use module version seeding file '{FilePath}'")]
+    private static partial void LogUseModuleVersionSeedingFile(ILogger logger, string filePath);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed on module versions from seeding file '{FilePath}'")]
+    private static partial void LogSeedingFileFailed(ILogger logger, Exception exception, string filePath);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Use empty initial module versions file")]
+    private static partial void LogUseEmptyModuleVersionFile(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to create initial module versions file '{FilePath}'")]
+    private static partial void LogCreateInitialModuleVersionFileFailed(ILogger logger, Exception exception, string filePath);
 }

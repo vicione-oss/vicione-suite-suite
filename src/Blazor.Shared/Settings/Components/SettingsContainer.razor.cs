@@ -233,7 +233,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         }
         catch (ObjectDisposedException)
         {
-            Logger.LogWarning("Update control panel registry caused ObjectDisposedException");
+            LogUpdateRegistryDisposed(Logger);
         }
     }
 
@@ -570,7 +570,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
 
     private async Task<bool> CancelControlPanelEdits()
     {
-        Logger.LogDebug("CancelControlPanelEdits called");
+        LogCancelEditsCalled(Logger);
 
         State.IsLoadingOverlayVisible = true;
         try
@@ -588,7 +588,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Unexpected error occurred while cancelling edits");
+            LogCancelEditsFailed(Logger, e);
 
             _lastSaveErrorResults.Add(new SaveErrorResult(string.Format(CultureInfo.CurrentCulture,
                 Localization.SettingsContainer.UnexpectedErrorWhileCancellingEdits, e.Message)));
@@ -603,7 +603,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
 
     private async Task<bool> SaveControlPanelEdits()
     {
-        Logger.LogDebug("SaveControlPanelEdits called");
+        LogSaveEditsCalled(Logger);
 
         State.IsLoadingOverlayVisible = true;
         try
@@ -626,7 +626,7 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Unexpected error occurred while saving edits");
+            LogSaveEditsFailed(Logger, e);
 
             _lastSaveErrorResults.Add(new SaveErrorResult(string.Format(CultureInfo.CurrentCulture,
                 Localization.SettingsContainer.UnexpectedErrorWhileSavingEdits, e.Message)));
@@ -678,4 +678,19 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         lock (_controlPanelEditRunningCountLock)
             return _controlPanelEditRunningCount > 0;
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Update control panel registry caused ObjectDisposedException")]
+    private static partial void LogUpdateRegistryDisposed(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "CancelControlPanelEdits called")]
+    private static partial void LogCancelEditsCalled(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occurred while cancelling edits")]
+    private static partial void LogCancelEditsFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "SaveControlPanelEdits called")]
+    private static partial void LogSaveEditsCalled(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occurred while saving edits")]
+    private static partial void LogSaveEditsFailed(ILogger logger, Exception exception);
 }

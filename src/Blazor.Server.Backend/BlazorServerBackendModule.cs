@@ -42,7 +42,7 @@ using ViciOne.Ui.MonochromeIcons.Assets.Extensions;
 
 namespace Blazor.Server.Backend;
 
-public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
+public sealed partial class BlazorServerBackendModule : BackendModule, IUiHostModule
 {
     private readonly UiModuleManager _moduleHost = new();
     private readonly Lock _lock = new();
@@ -202,7 +202,8 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
         // Adds the authentication pages under /Account/*.
         endpoints.MapRazorPages();
 
-        logger.LogInformation("Mapping endpoints for {Modules}", string.Join(", ", _moduleHost.UiModules.Select(k => k.ModuleId)));
+        var modules = _moduleHost.UiModules.Select(k => k.ModuleId);
+        Log.MappingEndpoints(logger, modules);
 
         // Maps the blazor endpoints: blazor.web.js, / and the rest.
         endpoints.MapRazorComponents<App>()
@@ -214,6 +215,12 @@ public sealed class BlazorServerBackendModule : BackendModule, IUiHostModule
 
     private static ILogger GetLogger(IServiceProvider provider)
         => provider.GetRequiredService<ILogger<BlazorServerBackendModule>>();
+
+    private static partial class Log
+    {
+        [LoggerMessage(Level = LogLevel.Information, Message = "Mapping endpoints for {Modules}")]
+        internal static partial void MappingEndpoints(ILogger logger, IEnumerable<string> modules);
+    }
 
     /// <inheritdoc/>
     public void SetDefaultRequestCulture(string? cultureName)

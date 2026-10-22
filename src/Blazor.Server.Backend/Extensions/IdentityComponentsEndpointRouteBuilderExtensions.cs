@@ -14,7 +14,7 @@ using Microsoft.FeatureManagement.AspNetCore;
 
 namespace Blazor.Server.Backend.Extensions;
 
-internal static class IdentityComponentsEndpointRouteBuilderExtensions
+internal static partial class IdentityComponentsEndpointRouteBuilderExtensions
 {
     extension(IEndpointRouteBuilder endpoints)
     {
@@ -98,7 +98,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                             = await signInManager.PerformPasskeyAttestationAsync(Input.CredentialJson);
                         if (!attestationResult.Succeeded)
                         {
-                            logger.LogError("Passkey attestation failed: {Error}", attestationResult.Failure.Message);
+                            LogPasskeyAttestationFailed(logger, attestationResult.Failure.Message);
                             return Results.BadRequest(attestationResult.Failure.Message);
                         }
 
@@ -111,9 +111,7 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
 
                         foreach (var identityError in addPasskeyResult.Errors)
                         {
-                            logger.LogError("Passkey addition failed: {Code} {Description}",
-                                identityError.Code,
-                                identityError.Description);
+                            LogPasskeyAdditionFailed(logger, identityError.Code, identityError.Description);
                         }
 
                         return Results.BadRequest();
@@ -171,4 +169,10 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
         accountGroup.MapGet(ExternalLogin.LoginFlow.LoginCallbackRoute,
             ExternalLogin.HandleLoginCallback);
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Passkey attestation failed: {Error}")]
+    private static partial void LogPasskeyAttestationFailed(ILogger logger, string error);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Passkey addition failed: {Code} {Description}")]
+    private static partial void LogPasskeyAdditionFailed(ILogger logger, string code, string description);
 }

@@ -3,7 +3,7 @@ using MassTransit.Context;
 
 namespace Core.OS.MessageBus.MassTransit;
 
-public sealed class ExecuteActivityFilter<T>(ILogger<ExecuteActivityFilter<T>> logger) : IFilter<ExecuteContext<T>>
+public sealed partial class ExecuteActivityFilter<T>(ILogger<ExecuteActivityFilter<T>> logger) : IFilter<ExecuteContext<T>>
     where T : class
 {
     private readonly ILogger _logger = logger;
@@ -13,8 +13,8 @@ public sealed class ExecuteActivityFilter<T>(ILogger<ExecuteActivityFilter<T>> l
         if (_logger.IsEnabled(LogLevel.Debug))
         {
             // TrackingNumber == CorrelationId
-            _logger.LogDebug("ExecuteActivity {Name} with {Args}. TrackingNumber:{TrackingNumber} RequestId:{RequestId} (Attempt:{Attempt})",
-                context.ActivityName, context.Arguments.GetType().Name, context.TrackingNumber, context.RequestId, context.GetRetryAttempt());
+            var attempt = context.GetRetryAttempt();
+            LogExecuteActivity(_logger, context.ActivityName, context.Arguments.GetType().Name, context.TrackingNumber, context.RequestId, attempt);
         }
 
         try
@@ -26,14 +26,14 @@ public sealed class ExecuteActivityFilter<T>(ILogger<ExecuteActivityFilter<T>> l
             // MassTransit logs the first activity exception as a warning.
             if (context is RetryExecuteContext<T> { RetryAttempt: >= 1 })
             {
-                _logger.LogDebug(ex, "Faulted activity {ActivityName}. Retry...", context.ActivityName);
+                LogFaultedActivityRetry(_logger, ex, context.ActivityName);
                 throw; // let the calling pipe catch it
             }
 
             // A failed final retry yields a FaultedActivityResult.
             if (context.Result.IsFaulted(out var error))
             {
-                _logger.LogError(error, "Faulted activity {ActivityName}", context.ActivityName);
+                LogFaultedActivity(_logger, error, context.ActivityName);
                 return;
             }
 
@@ -42,4 +42,13 @@ public sealed class ExecuteActivityFilter<T>(ILogger<ExecuteActivityFilter<T>> l
     }
 
     public void Probe(ProbeContext context) { }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "ExecuteActivity {Name} with {Args}. TrackingNumber:{TrackingNumber} RequestId:{RequestId} (Attempt:{Attempt})")]
+    private static partial void LogExecuteActivity(ILogger logger, string name, string args, Guid trackingNumber, Guid? requestId, int attempt);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Faulted activity {ActivityName}. Retry...")]
+    private static partial void LogFaultedActivityRetry(ILogger logger, Exception exception, string activityName);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Faulted activity {ActivityName}")]
+    private static partial void LogFaultedActivity(ILogger logger, Exception exception, string activityName);
 }

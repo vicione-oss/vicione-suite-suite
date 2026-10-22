@@ -30,7 +30,7 @@ public sealed partial class DeletePasskeysConsumer(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error during deletion of passkeys");
+            LogPasskeyDeletionFailed(e);
             await PublishPasskeyError(context, 400, "Deletion failed");
         }
     }
@@ -59,4 +59,7 @@ public sealed partial class DeletePasskeysConsumer(
 
     [LoggerMessage(LogLevel.Debug, "Deleting passkey with id {Id}")]
     partial void LogDeletingPasskeyWithId(byte[] id);
+
+    [LoggerMessage(LogLevel.Error, "Error during deletion of passkeys")]
+    partial void LogPasskeyDeletionFailed(Exception exception);
 }

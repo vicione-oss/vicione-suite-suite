@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace Core.OS.Instance.Services;
 
-internal sealed class InstanceRecoveryService(IFileSystem fileSystem, IOptions<InstanceOptions> options, ILogger<InstanceRecoveryService> logger) :
+internal sealed partial class InstanceRecoveryService(IFileSystem fileSystem, IOptions<InstanceOptions> options, ILogger<InstanceRecoveryService> logger) :
     IHostedService
 {
     /// <summary>
@@ -25,13 +25,19 @@ internal sealed class InstanceRecoveryService(IFileSystem fileSystem, IOptions<I
             var recoveryFilePath = fileSystem.GetLocalRecoveryFilePath(options.Value);
             fileSystem.File.Delete(recoveryFilePath);
 
-            logger.LogInformation("Graceful shutdown - reset startup recovery counter");
+            LogRecoveryCounterReset(logger);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to reset startup recovery counter");
+            LogRecoveryCounterResetFailed(logger, ex);
         }
 
         return Task.CompletedTask;
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Graceful shutdown - reset startup recovery counter")]
+    private static partial void LogRecoveryCounterReset(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to reset startup recovery counter")]
+    private static partial void LogRecoveryCounterResetFailed(ILogger logger, Exception exception);
 }

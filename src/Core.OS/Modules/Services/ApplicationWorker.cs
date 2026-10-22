@@ -265,7 +265,7 @@ internal sealed partial class ApplicationWorker(
         if (cancellationToken.IsCancellationRequested)
             return;
 
-        logger.LogTrace("Migrating application databases");
+        LogMigratingApplicationDatabases(logger);
         await scope.ServiceProvider.MigrateContext<UserDbContext>(cancellationToken);
         await scope.ServiceProvider.MigrateContext<IApplicationDbContext>(cancellationToken);
         await scope.ServiceProvider.MigrateContext<IConnectionDbContext>(cancellationToken);
@@ -430,4 +430,7 @@ internal sealed partial class ApplicationWorker(
         var hostAppService = services.GetRequiredService<IHostApplicationLifetime>();
         hostAppService.StopApplication();
     }
+
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Migrating application databases")]
+    private static partial void LogMigratingApplicationDatabases(ILogger logger);
 }

@@ -8,7 +8,7 @@ using Sdk.Client.Infrastructure;
 
 namespace Blazor.Shared.Instance.ControlPanels.Instances.Services;
 
-internal sealed class InstanceControlPanelSaveHandler : ControlPanelSaveHandlerBase<InstanceControlPanelState>,
+internal sealed partial class InstanceControlPanelSaveHandler : ControlPanelSaveHandlerBase<InstanceControlPanelState>,
     IEventConsumer<InstanceInformationUpdated>
 {
     private readonly IBackendLogService _logService;
@@ -34,7 +34,7 @@ internal sealed class InstanceControlPanelSaveHandler : ControlPanelSaveHandlerB
             if (state.LogLevel.HasValue)
             {
                 await _logService.SetLogLevel(state.LogLevel.Value);
-                _logger.LogDebug("Log level changed to '{LogLevel}'", state.LogLevel.Value);
+                LogLogLevelChanged(_logger, state.LogLevel.Value);
             }
         }, cancellationToken);
     }
@@ -52,4 +52,7 @@ internal sealed class InstanceControlPanelSaveHandler : ControlPanelSaveHandlerB
 
         return Task.CompletedTask;
     }
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Log level changed to '{LogLevel}'")]
+    private static partial void LogLogLevelChanged(ILogger logger, LogLevel logLevel);
 }

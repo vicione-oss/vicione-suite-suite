@@ -76,8 +76,12 @@ public sealed partial class CreateBackupConsumer(IBackupFactory backupFactory, I
             sb.AppendLine("System: no configuration data");
         }
 
-        logger.LogInformation("{BackupSummary}", sb.ToString());
+        var backupSummary = sb.ToString();
+        LogBackupSummary(logger, backupSummary);
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "{BackupSummary}")]
+    private static partial void LogBackupSummary(ILogger<CreateBackupConsumer> logger, string backupSummary);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Consume create backup correlated by {CorrelationId}. Keep on error={KeepBackupOnError}")]
     private static partial void LogConsume(ILogger<CreateBackupConsumer> logger, Guid correlationId, bool keepBackupOnError);

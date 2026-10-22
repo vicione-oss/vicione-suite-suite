@@ -9,7 +9,7 @@ using Sdk.Utils;
 
 namespace Burger.Client.Services;
 
-public sealed class OrderBurgerService : IDisposable,
+public sealed partial class OrderBurgerService : IDisposable,
     IEventConsumer<OrderBurgerReceived>,
     IEventConsumer<OrderBurgerSucceeded>,
     IEventConsumer<OrderBurgerFailed>,
@@ -48,7 +48,7 @@ public sealed class OrderBurgerService : IDisposable,
 
     public Task Consume(ClientContext<OrderBurgerReceived> context, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Consuming<{Event}> for order {OrderId}", nameof(OrderBurgerReceived), context.Message.OrderId);
+        LogConsuming(_logger, nameof(OrderBurgerReceived), context.Message.OrderId);
 
         var order = Orders.FirstOrDefault(k => k.OrderId == context.Message.OrderId);
         if (order is not null)
@@ -63,7 +63,7 @@ public sealed class OrderBurgerService : IDisposable,
 
     public Task Consume(ClientContext<OrderBurgerSucceeded> context, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Consuming<{Event}> for order {OrderId}", nameof(OrderBurgerSucceeded), context.Message.OrderId);
+        LogConsuming(_logger, nameof(OrderBurgerSucceeded), context.Message.OrderId);
 
         var order = Orders.FirstOrDefault(k => k.OrderId == context.Message.OrderId);
         if (order is not null)
@@ -79,7 +79,7 @@ public sealed class OrderBurgerService : IDisposable,
 
     public Task Consume(ClientContext<OrderBurgerFailed> context, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Consuming<{Event}> for order {OrderId}", nameof(OrderBurgerFailed), context.Message.OrderId);
+        LogConsuming(_logger, nameof(OrderBurgerFailed), context.Message.OrderId);
 
         var order = Orders.FirstOrDefault(k => k.OrderId == context.Message.OrderId);
         if (order is not null)
@@ -93,4 +93,7 @@ public sealed class OrderBurgerService : IDisposable,
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Consuming<{Event}> for order {OrderId}")]
+    private static partial void LogConsuming(ILogger logger, string @event, Guid orderId);
 }

@@ -11,7 +11,7 @@ using Sdk.Utils;
 
 namespace Blazor.Shared.Services;
 
-public sealed class ClientTimeProvider : TimeProvider,
+public sealed partial class ClientTimeProvider : TimeProvider,
         IEventConsumer<CrossInstanceConfigurationChanged>,
         IEventConsumer<UserUpdatedEvent>,
         IClientTimeProvider,
@@ -112,7 +112,7 @@ public sealed class ClientTimeProvider : TimeProvider,
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Authentication state changed failed");
+            LogAuthenticationStateChangedFailed(_logger, ex);
         }
     }
 
@@ -128,7 +128,7 @@ public sealed class ClientTimeProvider : TimeProvider,
         if (!TimeZoneInfo.TryFindSystemTimeZoneById(timeZoneId, out var tz))
         {
             _userTimeZone = null;
-            _logger.LogWarning("'{TimeZoneId}' is not a known time zone", timeZoneId);
+            LogUnknownTimeZone(_logger, timeZoneId);
         }
         else
         {
@@ -140,7 +140,7 @@ public sealed class ClientTimeProvider : TimeProvider,
     {
         var timeZoneId = crossConfig.TimeZoneId;
         if (!TimeZoneInfo.TryFindSystemTimeZoneById(timeZoneId, out var tz))
-            _logger.LogWarning("'{TimeZoneId}' is not a known time zone", timeZoneId);
+            LogUnknownTimeZone(_logger, timeZoneId);
         else
             _systemTimeZone = tz;
     }
@@ -158,4 +158,10 @@ public sealed class ClientTimeProvider : TimeProvider,
         SetUserTimeZone(context.Message.UserProfile);
         return Task.CompletedTask;
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Authentication state changed failed")]
+    private static partial void LogAuthenticationStateChangedFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "'{TimeZoneId}' is not a known time zone")]
+    private static partial void LogUnknownTimeZone(ILogger logger, string timeZoneId);
 }

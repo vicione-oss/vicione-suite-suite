@@ -7,7 +7,7 @@ using Sdk.Instance;
 
 namespace Core.OS.Instance.Services;
 
-public sealed class InMemoryClusterInformationProvider(ILogger<InMemoryClusterInformationProvider> logger) : IClusterInformationProvider
+public sealed partial class InMemoryClusterInformationProvider(ILogger<InMemoryClusterInformationProvider> logger) : IClusterInformationProvider
 {
     private readonly ConcurrentDictionary<Guid, ClusterInstanceInformation> _instances = new();
 
@@ -29,7 +29,7 @@ public sealed class InMemoryClusterInformationProvider(ILogger<InMemoryClusterIn
     {
         var result = await mediator.Request<GetInstances, GetInstancesResponse>(new GetInstances(), token);
 
-        logger.LogInformation("Initialize in memory information provider with {Count} instance(s)", result.Instances.Count);
+        LogInitialize(logger, result.Instances.Count);
 
         foreach (var instance in result.Instances)
             _instances.TryAdd(instance.Id, new(instance));
@@ -83,4 +83,7 @@ public sealed class InMemoryClusterInformationProvider(ILogger<InMemoryClusterIn
         if (!_instances.TryUpdate(instanceInformation.Id, clusterInfo, instance))
             throw new InvalidOperationException($"Failed to update instance with id '{instanceInformation.Id}'.");
     }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Initialize in memory information provider with {Count} instance(s)")]
+    private static partial void LogInitialize(ILogger logger, int count);
 }

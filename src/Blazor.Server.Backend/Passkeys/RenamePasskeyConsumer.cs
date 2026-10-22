@@ -60,7 +60,7 @@ public sealed partial class RenamePasskeyConsumer(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error renaming passkey");
+            LogPasskeyRenamingFailed(e);
             await PublishError(context, PasskeyError.RenameFailed);
         }
     }
@@ -102,4 +102,7 @@ public sealed partial class RenamePasskeyConsumer(
 
     [LoggerMessage(LogLevel.Error, "Failed to rename passkey: ({Errors})")]
     partial void LogFailedToRenamePasskeyErrors(string Errors);
+
+    [LoggerMessage(LogLevel.Error, "Error renaming passkey")]
+    partial void LogPasskeyRenamingFailed(Exception exception);
 }

@@ -101,12 +101,12 @@ public sealed partial class Carousel<TItem> : ComponentBase, IAsyncDisposable
             catch (JSException ex)
             {
                 // A failed wait ends the slide anyway, so the item sliding out does not stay mounted off-screen.
-                Logger.LogWarning(ex, "Waiting for the carousel slide to end failed.");
+                LogSlideEndWaitFailed(Logger, ex);
             }
             catch (OperationCanceledException ex) when (!_disposed)
             {
                 // The JS interop call timed out; the slide ends anyway, so the item sliding out does not stay mounted off-screen.
-                Logger.LogWarning(ex, "Waiting for the carousel slide to end timed out.");
+                LogSlideEndWaitTimedOut(Logger, ex);
             }
 
             if (_disposed || SlideFrom != slideFrom)
@@ -127,4 +127,10 @@ public sealed partial class Carousel<TItem> : ComponentBase, IAsyncDisposable
             // The circuit is gone mid-slide; nothing left to clean up.
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Waiting for the carousel slide to end failed.")]
+    private static partial void LogSlideEndWaitFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Warning, Message = "Waiting for the carousel slide to end timed out.")]
+    private static partial void LogSlideEndWaitTimedOut(ILogger logger, Exception exception);
 }

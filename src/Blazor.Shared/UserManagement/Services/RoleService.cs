@@ -9,7 +9,7 @@ using Sdk.UserManagement.Requests;
 
 namespace Blazor.Shared.UserManagement.Services;
 
-internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementServiceResult>, IRoleService,
+internal sealed partial class RoleService : CompletionSourceHandlerBase<IUserManagementServiceResult>, IRoleService,
     IEventConsumer<RoleCreatedEvent>,
     IEventConsumer<RoleUpdatedEvent>,
     IEventConsumer<RoleDeletedEvent>
@@ -44,7 +44,7 @@ internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementS
         var rolesResponse = await Mediator.Request<GetRoles, GetRolesResponse>(new(), cancellationToken);
         if (rolesResponse.RequestError is not null)
         {
-            _logger.LogError("Could not load available Roles - {ErrorMessage}", rolesResponse.RequestError.Message);
+            LogLoadRolesFailed(_logger, rolesResponse.RequestError.Message);
             return [];
         }
 
@@ -102,4 +102,7 @@ internal sealed class RoleService : CompletionSourceHandlerBase<IUserManagementS
 
     protected override IUserManagementServiceResult CreateErrorResult(string errorMessage, int? errorCode = null)
         => new UserManagementServiceErrorResult(errorMessage, errorCode);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Could not load available Roles - {ErrorMessage}")]
+    private static partial void LogLoadRolesFailed(ILogger logger, string? errorMessage);
 }

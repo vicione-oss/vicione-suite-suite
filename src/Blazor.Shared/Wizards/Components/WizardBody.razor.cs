@@ -488,7 +488,7 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
 
     private async Task<bool> SaveWizardPageEdits()
     {
-        Logger.LogDebug("SaveWizardPageEdits called");
+        LogSaveEditsCalled(Logger);
 
         BeginFinishOrCancelPageEdit();
 
@@ -522,7 +522,7 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Unexpected error occurred while saving edits");
+            LogSaveEditsFailed(Logger, e);
 
             State.LastSaveErrorResults = [ new SaveErrorResult(string.Format(CultureInfo.CurrentCulture,
                 Localization.WizardBody.UnexpectedErrorWhileSavingEdits, e.Message)) ];
@@ -539,7 +539,7 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
 
     private async Task<bool> CancelWizardPageEdits()
     {
-        Logger.LogDebug("CancelWizardPageEdits called");
+        LogCancelEditsCalled(Logger);
 
         BeginFinishOrCancelPageEdit();
 
@@ -559,7 +559,7 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "Unexpected error occurred while cancelling edits");
+            LogCancelEditsFailed(Logger, e);
 
             State.LastSaveErrorResults = [ new SaveErrorResult(string.Format(CultureInfo.CurrentCulture,
                 Localization.WizardBody.UnexpectedErrorWhileCancellingEdits, e.Message)) ];
@@ -628,4 +628,16 @@ public sealed partial class WizardBody<TContext> : ComponentBase, IDisposable
 
     [LoggerMessage(1, LogLevel.Error, "Unexpected error occurred while cancel page edit")]
     private static partial void UnexpectedErrorOnCancelPageEdit(ILogger<WizardBody<TContext>> logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "SaveWizardPageEdits called")]
+    private static partial void LogSaveEditsCalled(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occurred while saving edits")]
+    private static partial void LogSaveEditsFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "CancelWizardPageEdits called")]
+    private static partial void LogCancelEditsCalled(ILogger logger);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error occurred while cancelling edits")]
+    private static partial void LogCancelEditsFailed(ILogger logger, Exception exception);
 }

@@ -84,7 +84,7 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
         }
         else
         {
-            Logger.LogError("Unable to get profile for user, identity is null or no name provided");
+            LogProfileUnavailable(Logger);
         }
 
         _canEditUserData = true;
@@ -218,4 +218,7 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
 
         _userProfile.TimeZone = _selectedTimeZone;
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Unable to get profile for user, identity is null or no name provided")]
+    private static partial void LogProfileUnavailable(ILogger logger);
 }

@@ -10,7 +10,7 @@ using Sdk.Modules;
 
 namespace Blazor.Server.Backend.Services;
 
-public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, IUiHostEnvironment hostEnvironment) : IClientModuleService
+public sealed partial class BlazorServerModuleService(IUiModuleManager uiModuleManager, IUiHostEnvironment hostEnvironment) : IClientModuleService
 {
     private List<ClientModule> Modules => [.. uiModuleManager.UiModules];
 
@@ -60,7 +60,7 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to initialize shared services");
+            LogInitializeSharedServicesFailed(logger, e);
         }
 
         foreach (var clientModule in Modules)
@@ -72,7 +72,7 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
             }
             catch (Exception e)
             {
-                logger.LogError(e, "{MethodName} {ClientModule} failed", nameof(ClientModule.InitializeServices), clientModule);
+                LogClientModuleCallFailed(logger, e, nameof(ClientModule.InitializeServices), clientModule);
             }
         }
     }
@@ -89,7 +89,7 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
             }
             catch (Exception e)
             {
-                logger.LogError(e, "{MethodName} {ClientModule} failed", nameof(ClientModule.OnUserAuthenticated), clientModule);
+                LogClientModuleCallFailed(logger, e, nameof(ClientModule.OnUserAuthenticated), clientModule);
             }
         }
     }
@@ -99,4 +99,10 @@ public sealed class BlazorServerModuleService(IUiModuleManager uiModuleManager, 
     /// </summary>
     private static string GetRelativeModuleBundleStylesheetPath(string assemblyName)
         => $"/{ModuleAssetHelper.ContentPrefix}/{assemblyName}/{assemblyName}.styles.css";
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to initialize shared services")]
+    private static partial void LogInitializeSharedServicesFailed(ILogger logger, Exception exception);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "{MethodName} {ClientModule} failed")]
+    private static partial void LogClientModuleCallFailed(ILogger logger, Exception exception, string methodName, ClientModule clientModule);
 }

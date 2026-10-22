@@ -148,7 +148,7 @@ internal sealed partial class WizardPageEdit<TWizardPageState>(TWizardPageState 
         {
             // We log the exception as warning because obsolete OnSave implementations in control panels
             // rely on exception flow to transport errors like validation errors to the UI.
-            _logger.LogWarning(e, "Exception was thrown");
+            LogSaveExceptionThrown(_logger, e);
 
             return new SaveErrorResult(e.Message);
         }
@@ -210,4 +210,7 @@ internal sealed partial class WizardPageEdit<TWizardPageState>(TWizardPageState 
     [LoggerMessage(1, LogLevel.Warning, "Unexpected error while requesting cancellation of possible ongoing handler execution")]
     internal static partial void UnexpectedErrorWhileRequestingCancellation(ILogger<WizardPageEdit<TWizardPageState>> logger,
         Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Exception was thrown")]
+    private static partial void LogSaveExceptionThrown(ILogger logger, Exception exception);
 }

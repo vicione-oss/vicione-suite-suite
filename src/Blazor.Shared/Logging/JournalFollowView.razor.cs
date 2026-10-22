@@ -41,7 +41,7 @@ public sealed partial class JournalFollowView : ComponentBase, IDisposable
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex, "Failed to set filter '{Filter}'.", Filter);
+                LogSetFilterFailed(Logger, ex, Filter);
 
                 _follower.Dispose();
                 _follower = null;
@@ -80,4 +80,7 @@ public sealed partial class JournalFollowView : ComponentBase, IDisposable
             _follower = null;
         }
     }
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Failed to set filter '{Filter}'.")]
+    private static partial void LogSetFilterFailed(ILogger logger, Exception exception, string filter);
 }

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Core.OS.UserManagement.Security;
 
-public class ExternalAuthenticationSettings(
+public partial class ExternalAuthenticationSettings(
     IOptions<ExternalIdProviderOptions> options,
     ApplicationDbContext applicationDbContext,
     ILogger<ExternalAuthenticationSettings> logger)
@@ -29,9 +29,10 @@ public class ExternalAuthenticationSettings(
         var providers = options.Value.Providers;
 
         if (providers.Count > 1)
-            logger.LogWarning(
-                "Multiple external ids are configured {@Providers}. Only one is currently supported. Picking the first one.",
-                providers.Select(x => x.Name));
+        {
+            var providerNames = providers.Select(x => x.Name);
+            LogMultipleProvidersConfigured(logger, providerNames);
+        }
 
         return providers.FirstOrDefault();
     }
@@ -45,4 +46,8 @@ public class ExternalAuthenticationSettings(
                 ClientSecret = externalIdProvider.ClientSecret,
                 Name = externalIdProvider.Name
             };
+
+    [LoggerMessage(Level = LogLevel.Warning,
+        Message = "Multiple external ids are configured {@Providers}. Only one is currently supported. Picking the first one.")]
+    private static partial void LogMultipleProvidersConfigured(ILogger logger, IEnumerable<string> providers);
 }

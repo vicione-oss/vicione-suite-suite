@@ -40,9 +40,8 @@ internal partial class ArtifactRepositoryOptionsCache(IConfiguration configurati
                     TokenEndpoint = source.TokenEndpoint,
                 }).ToList();
 
-        logger.LogDebug("Reloaded {Count} artifactory sources: {SourceEndpoints}",
-            repositoryOptions.Sources.Count,
-            string.Join(", ", repositoryOptions.Sources.Select(FormatSourceOption)));
+        var sourceEndpoints = repositoryOptions.Sources.Select(FormatSourceOption);
+        LogReloadedSources(logger, repositoryOptions.Sources.Count, sourceEndpoints);
 
         lock (_lock) { _options = repositoryOptions; }
 
@@ -57,4 +56,7 @@ internal partial class ArtifactRepositoryOptionsCache(IConfiguration configurati
 
     [LoggerMessage(LogLevel.Error, "Failed to update repository tokens on reloading source options")]
     static partial void LogFailedToUpdateRepositoryTokens(ILogger logger, Exception ex);
+
+    [LoggerMessage(LogLevel.Debug, "Reloaded {Count} artifactory sources: {SourceEndpoints}")]
+    static partial void LogReloadedSources(ILogger logger, int count, IEnumerable<string> sourceEndpoints);
 }

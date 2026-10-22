@@ -8,19 +8,19 @@ namespace Core.OS.Diagnostics.MassTransit;
 /// Logs the bus lifecycle events.
 /// Is intended to provide startup information, as the tracing might not be working during the bus initialization.
 /// </summary>
-internal sealed class BusObserver(ILogger<BusObserver> logger) : IBusObserver
+internal sealed partial class BusObserver(ILogger<BusObserver> logger) : IBusObserver
 {
     public void PostCreate(IBus bus)
     {
         using var activity = StartActivity(bus, "post-create");
-        logger.LogDebug("{PostCreateName} {BusAddress}", nameof(PostCreate), bus.Address);
+        LogPostCreate(logger, nameof(PostCreate), bus.Address);
     }
 
     public Task PreStart(IBus bus)
     {
         using var activity = StartActivity(bus, "pre-start");
 
-        logger.LogDebug(nameof(PreStart));
+        LogBusEvent(logger, nameof(PreStart));
         return Task.CompletedTask;
     }
 
@@ -28,7 +28,7 @@ internal sealed class BusObserver(ILogger<BusObserver> logger) : IBusObserver
     {
         using var activity = StartActivity(bus, "post-start");
 
-        logger.LogDebug(nameof(PostStart));
+        LogBusEvent(logger, nameof(PostStart));
         return Task.CompletedTask;
     }
 
@@ -38,19 +38,19 @@ internal sealed class BusObserver(ILogger<BusObserver> logger) : IBusObserver
         activity?.AddException(exception);
         activity?.SetStatus(ActivityStatusCode.Error, exception.Message);
 
-        logger.LogError(exception: exception, nameof(StartFaulted));
+        LogBusEventFaulted(logger, exception, nameof(StartFaulted));
         return Task.CompletedTask;
     }
 
     public Task PreStop(IBus bus)
     {
-        logger.LogDebug(nameof(PreStop));
+        LogBusEvent(logger, nameof(PreStop));
         return Task.CompletedTask;
     }
 
     public Task PostStop(IBus bus)
     {
-        logger.LogDebug(nameof(PostStop));
+        LogBusEvent(logger, nameof(PostStop));
         return Task.CompletedTask;
     }
 
@@ -60,11 +60,20 @@ internal sealed class BusObserver(ILogger<BusObserver> logger) : IBusObserver
         activity?.AddException(exception);
         activity?.SetStatus(ActivityStatusCode.Error, exception.Message);
 
-        logger.LogError(exception: exception, nameof(StopFaulted));
+        LogBusEventFaulted(logger, exception, nameof(StopFaulted));
         return Task.CompletedTask;
     }
 
-    public void CreateFaulted(Exception exception) => logger.LogError(exception: exception, nameof(CreateFaulted));
+    public void CreateFaulted(Exception exception) => LogBusEventFaulted(logger, exception, nameof(CreateFaulted));
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Bus lifecycle event {BusEvent} {BusAddress}")]
+    private static partial void LogPostCreate(ILogger logger, string busEvent, Uri busAddress);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Bus lifecycle event {BusEvent}")]
+    private static partial void LogBusEvent(ILogger logger, string busEvent);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Bus lifecycle event {BusEvent}")]
+    private static partial void LogBusEventFaulted(ILogger logger, Exception exception, string busEvent);
 
     private static Activity? StartActivity(IBus bus, string operation, [CallerMemberName] string activityName = "")
     {
