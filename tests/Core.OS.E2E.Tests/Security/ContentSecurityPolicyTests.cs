@@ -21,10 +21,11 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
     private const string ExpectedPolicy =
         "default-src 'self'; base-uri 'self'; script-src 'self' 'unsafe-eval'; " +
         "script-src-elem 'self' 'unsafe-inline'; script-src-attr 'unsafe-inline'; " +
-        "style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com; style-src-attr 'unsafe-inline'; " +
+        "style-src 'self'; style-src-elem 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com; " +
+        "style-src-attr 'unsafe-inline'; " +
         "img-src 'self' data: https:; font-src 'self' https://maxcdn.bootstrapcdn.com; " +
         "connect-src 'self' wss:; form-action 'self'; " +
-        "frame-src 'none'; worker-src 'none'; object-src 'none'; frame-ancestors 'none'; " +
+        "frame-src blob:; worker-src blob:; object-src 'none'; frame-ancestors 'none'; " +
         "upgrade-insecure-requests; report-uri " + ViolationReportRoute + "; report-to csp-endpoint";
 
     private const string ExpectedReportingEndpoints = "csp-endpoint=\"" + ViolationReportRoute + "\"";
@@ -66,6 +67,34 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
             image.src = URL.createObjectURL(new Blob(['entries']));
             document.body.append(image);
         }
+        """;
+
+    /// <summary>
+    /// Resolves to the text of the framed document, or to nothing when the browser shows its error
+    /// page instead, whose document the page cannot read.
+    /// </summary>
+    private const string DocumentFromABlobUrlInAFrame =
+        """
+        () => new Promise(resolve => {
+            const frame = document.createElement('iframe');
+            frame.onload = () => resolve(frame.contentDocument?.body?.textContent ?? '');
+            frame.src = URL.createObjectURL(new Blob(['entries'], { type: 'text/html' }));
+            document.body.append(frame);
+        })
+        """;
+
+    private const string WorkerFromABlobUrl =
+        """
+        () => new Promise(resolve => {
+            try {
+                const script = new Blob(['postMessage("entries")'], { type: 'text/javascript' });
+                const worker = new Worker(URL.createObjectURL(script));
+                worker.onmessage = message => resolve(message.data);
+                worker.onerror = () => resolve('');
+            } catch {
+                resolve('');
+            }
+        })
         """;
 
     /// <summary>
@@ -147,9 +176,9 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
 
     /// <summary>
     /// The download path of ADR-006: every export the Suite offers goes through this helper, which
-    /// builds a <c>Blob</c>, makes a <c>blob:</c> URL and clicks an <c>&lt;a download&gt;</c>. No
-    /// directive of the baseline names <c>blob:</c>, so the claim that a download is not a fetch
-    /// the policy governs has to be shown rather than assumed.
+    /// builds a <c>Blob</c>, makes a <c>blob:</c> URL and clicks an <c>&lt;a download&gt;</c>. Only
+    /// <c>frame-src</c> and <c>worker-src</c> name <c>blob:</c>, and neither governs a download, so
+    /// the claim that a download is not a fetch the policy governs has to be shown rather than assumed.
     /// </summary>
     [Fact]
     public async Task A_download_of_a_blob_url_is_not_refused()
@@ -168,8 +197,8 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
     /// <summary>
     /// The same <c>blob:</c> URL as a resource, which <c>img-src</c> refuses, since it lists no
     /// <c>blob:</c>. It says the download above passes because a download is not a fetch the policy
-    /// governs rather than because <c>blob:</c> is allowed somewhere, and it is why no export may
-    /// preview off one.
+    /// governs rather than because <c>blob:</c> is allowed for any resource, and it is why no export
+    /// may preview off one.
     /// </summary>
     [Fact]
     public async Task A_blob_url_rendered_as_an_image_is_refused()
@@ -183,6 +212,36 @@ public sealed class ContentSecurityPolicyTests(PlaywrightFixture fixture) : E2ET
             new PageRunAndWaitForConsoleMessageOptions { Predicate = CspViolationLog.IsRefusal });
 
         policy.Refusals.Should().ContainMatch("*blob:*");
+    }
+
+    /// <summary>
+    /// A framed <c>blob:</c> document inherits the page's policy, <c>frame-ancestors 'none'</c>
+    /// included, so that it still loads has to be shown rather than assumed.
+    /// </summary>
+    [Fact]
+    public async Task A_blob_document_in_a_frame_is_not_refused()
+    {
+        var policy = CspViolationLog.Watch(Page);
+
+        await new LoginPage(Page).Goto();
+
+        var framedText = await Page.EvaluateAsync<string>(DocumentFromABlobUrlInAFrame);
+
+        framedText.Should().Be("entries");
+        policy.Refusals.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task A_worker_from_a_blob_url_is_not_refused()
+    {
+        var policy = CspViolationLog.Watch(Page);
+
+        await new LoginPage(Page).Goto();
+
+        var workerMessage = await Page.EvaluateAsync<string>(WorkerFromABlobUrl);
+
+        workerMessage.Should().Be("entries");
+        policy.Refusals.Should().BeEmpty();
     }
 
     /// <summary>

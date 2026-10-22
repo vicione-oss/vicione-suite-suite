@@ -24,14 +24,15 @@ internal static class ContentSecurityPolicy
         "script-src 'self' 'unsafe-eval'; " +
         "script-src-elem 'self' 'unsafe-inline'; " +
         "script-src-attr 'unsafe-inline'; " +
-        "style-src 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com; " +
+        "style-src 'self'; " +
+        "style-src-elem 'self' 'unsafe-inline' https://maxcdn.bootstrapcdn.com; " +
         "style-src-attr 'unsafe-inline'; " +
         "img-src 'self' data: https:; " +
         "font-src 'self' https://maxcdn.bootstrapcdn.com; " +
         "connect-src 'self' wss:; " +
         $"form-action {GetFormAction(externalFormActionOrigin)}; " +
-        "frame-src 'none'; " +
-        "worker-src 'none'; " +
+        "frame-src blob:; " +
+        "worker-src blob:; " +
         "object-src 'none'; " +
         "frame-ancestors 'none'; " +
         "upgrade-insecure-requests; " +
