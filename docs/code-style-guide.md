@@ -76,6 +76,36 @@ var isEnabled = await PasskeySignInButton.IsEnabledAsync();
 return isEnabled;
 ```
 
+### Null-coalescing operator
+
+Prefer separate statements with early returns over `??` when an operand is a complex expression, such as an
+`await` call, a method invocation with side effects, nested calls, or logic that is hard to read on one line.
+This applies to a single `??` as well as to a chain. A breakpoint cannot stop on an individual operand, so its
+intermediate results stay hidden while debugging.
+
+```csharp
+// avoid: each step is hidden inside the expression
+var error = await ValidateAsync(foo)
+    ?? await SaveAsync(foo);
+
+// prefer: one statement per step
+var error = await ValidateAsync(foo);
+if (error is not null)
+    return error;
+
+error = await SaveAsync(foo);
+
+return error;
+```
+
+Reserve `??` for simple value selection, where no operand needs a breakpoint of its own.
+
+```csharp
+// still fine: simple value selection
+var foo = bar ?? baz ?? qux;
+var name = foo.Name ?? throw new InvalidOperationException("Foo has no name.");
+```
+
 ## Code comments
 
 Comments are read far more often than they are written, and a redundant or stale comment costs more than no

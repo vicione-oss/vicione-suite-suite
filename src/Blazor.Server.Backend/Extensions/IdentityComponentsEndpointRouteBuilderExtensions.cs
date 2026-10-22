@@ -38,7 +38,8 @@ internal static class IdentityComponentsEndpointRouteBuilderExtensions
                         }
 
                         var userId = await userManager.GetUserIdAsync(user);
-                        var userName = await userManager.GetUserNameAsync(user) ?? "User";
+                        var userName = await userManager.GetUserNameAsync(user);
+                        userName ??= "User";
                         var optionsJson = await signInManager.MakePasskeyCreationOptionsAsync(new()
                         {
                             Id = userId,

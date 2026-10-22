@@ -27,13 +27,7 @@ internal static class IServiceCollectionExtensions
             {
                 // AddressFeature is empty until kestrel is running, so the address is read lazily.
                 var server = provider.GetRequiredService<IServer>();
-                var addressFeature = server.Features.Get<IServerAddressesFeature>();
-                var baseAddress = addressFeature?.Addresses.FirstOrDefault(k => k.StartsWith("https", StringComparison.OrdinalIgnoreCase))
-                    ?? addressFeature?.Addresses.FirstOrDefault(k => k.StartsWith("http", StringComparison.OrdinalIgnoreCase));
-                if (baseAddress is null)
-                {
-                    throw new InvalidOperationException("Kestrel server is not yet running or no addresses are configured.");
-                }
+                var baseAddress = FindBaseAddress(server);
 
                 client.BaseAddress = new Uri(baseAddress);
             });
@@ -71,5 +65,20 @@ internal static class IServiceCollectionExtensions
 
             return services;
         }
+    }
+
+    private static string FindBaseAddress(IServer server)
+    {
+        var addresses = server.Features.Get<IServerAddressesFeature>()?.Addresses ?? [];
+
+        var httpsAddress = addresses.FirstOrDefault(k => k.StartsWith("https", StringComparison.OrdinalIgnoreCase));
+        if (httpsAddress is not null)
+            return httpsAddress;
+
+        var httpAddress = addresses.FirstOrDefault(k => k.StartsWith("http", StringComparison.OrdinalIgnoreCase));
+        if (httpAddress is not null)
+            return httpAddress;
+
+        throw new InvalidOperationException("Kestrel server is not yet running or no addresses are configured.");
     }
 }
