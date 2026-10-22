@@ -53,6 +53,7 @@
 
 ### Fixed
 
+- Standalone, UI updates no longer wait until a long-running operation such as a deployment has finished. **Upgrade:** a standalone instance on RabbitMQ sets `MessageBus__CleanVirtualHost=true` for this upgrade and removes it afterwards; this also deletes the `_error` queues
 - Sign-in with `UserManagement:RequireAccountVerificationToLogIn` and a partly filled `Smtp` section no longer locks unconfirmed users out without a message. **Behaviour change:** verification is only required once the `Smtp` section is complete
 - Default administrator and seed users use `example.com` email addresses. **Upgrade:** existing installations keep theirs until changed by hand
 - Signing in with an external OpenID provider, and linking one from the profile, were blocked by the Content Security Policy. `form-action` now also names the configured provider's origin (see `docs/ADRs/ADR-006-content-security-policy.md`)

@@ -7,8 +7,9 @@ internal enum MessageRetryClass
 {
     /// <summary>
     /// Instance-independent commands, events and activities, plus anything unrecognized. These share the
-    /// <c>Commands</c> and <c>Events</c> queues rather than owning an endpoint each, so a retry here stalls every
-    /// other message type on the same queue and the ladder has to stay short.
+    /// <c>Commands</c> and <c>Events</c> queues rather than owning an endpoint each, and on a standalone instance the
+    /// UI forwarding consumers share <c>ForwardToUi_&lt;id&gt;</c> the same way, so a retry here stalls every other
+    /// message type on the same queue and the ladder has to stay short.
     /// </summary>
     Default,
 
