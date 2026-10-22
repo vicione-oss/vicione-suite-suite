@@ -29,7 +29,8 @@ No inline `<script>` block and no inline event handler attribute exists in the S
 **Inline style attributes cannot be avoided.**
 The component library passes runtime values into CSS custom properties through 8 inline `style` attributes, and the framework's [`Virtualize`](https://learn.microsoft.com/en-us/aspnet/core/blazor/components/virtualization?view=aspnetcore-10.0) spacers render `style="height: …px; flex-shrink: 0;"` until .NET 11 ([suite#2887](https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2887)).
 The values change per render, so hashes cannot cover them, and [`style-src-attr`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src-attr) needs `'unsafe-inline'`.
-Inline `<style>` blocks exist only on the failsafe and the downgrade page; their CSS is fixed, so a hash covers it and `style-src` can stay `'self'`.
+The Suite's own inline `<style>` blocks exist only on the failsafe and the downgrade page; their CSS is fixed, so a hash covers it.
+Third-party components write `<style>` elements at runtime, see *`<style>` elements*.
 
 **Nothing in the browser connects to a foreign host.**
 Even the MQTT viewer connects to its broker on the server, through MQTTnet, where no browser policy applies.
@@ -82,14 +83,15 @@ Each relaxation is removed once its blockers are fixed and released ([suite#2897
 | `script-src` | `'self'` | fallback for browsers without CSP Level 3, and it governs `eval` |
 | `script-src-elem` | `'self'` | no inline script block exists |
 | `script-src-attr` | `'none'` | no inline event handler attribute exists (#514) |
-| `style-src` | `'self'` | no inline `<style>` block on the main host (#515) |
+| `style-src` | `'self'` | fallback for browsers without CSP Level 3 |
+| `style-src-elem` | `'self' 'unsafe-inline'` | permanent, see *`<style>` elements* (#515) |
 | `style-src-attr` | `'unsafe-inline'` | permanent, see *Context* |
 | `img-src` | `'self' data:` | images are same-origin or `data:`, see *`data:` images* |
 | `font-src` | `'self'` | local woff2 fonts only |
 | [`connect-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/connect-src) | `'self'` | the SignalR circuit and chunked upload are same-origin; in CSP Level 3, `'self'` also matches the `wss:` URL of the page's own origin |
 | `form-action` | `'self'` **plus the configured OpenID provider** | see *`form-action` and the external identity provider* |
-| `frame-src` | `'none'` | no iframes |
-| `worker-src` | `'none'` | no web workers |
+| `frame-src` | `blob:` | printing, see *Printing* |
+| `worker-src` | `blob:` | printing, see *Printing* |
 | `object-src` | `'none'` | no `<object>` / `<embed>` |
 | `frame-ancestors` | `'none'` | **the Suite is never embedded in another site** (#531) |
 | `upgrade-insecure-requests` | set | the Suite is reached over HTTPS only (`UseHttpsRedirection`, `UseHsts`) |
@@ -103,15 +105,14 @@ The fallbacks `script-src` and `style-src` carry no `'unsafe-inline'`, so the po
 
 This is the policy the Suite sends today, from `ContentSecurityPolicy.GetBaseline`.
 It is the target policy with these relaxations.
-The finding ids (CE-…, CM-…, DCW-…, DX-…) refer to [suite#2899](https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2899).
+The finding ids (CE-…, CM-…, DCW-…) refer to [suite#2899](https://gitlab.com/vicione-oss/vicione/suite/suite/-/work_items/2899).
 
 | Relaxation | Keeps working | Blocked by |
 |------------|---------------|------------|
 | `script-src 'unsafe-eval'` | tree node tooltips in cluster-editor | CE-1 |
 | `script-src-elem 'unsafe-inline'` | package upload in cluster-mgmt | CM-1 |
 | `script-src-attr 'unsafe-inline'` | drag and drop in every TreeEditor, the Suite's MQTT filter included, and onto cluster-editor connectors | [tree-editor#247](https://gitlab.com/vicione-oss/vicione/ui-libs/tree-editor/-/work_items/247), CE-2 |
-| `style-src 'unsafe-inline'` | data-collection-wizard dialog layout, `<style>` in cluster-editor labels | DCW-1, CE-5, CE-6, a browser check of DX-B1 |
-| `https://maxcdn.bootstrapcdn.com` in `style-src` and `font-src` | toolbar icons of the cluster-editor label editor | CE-4 |
+| `https://maxcdn.bootstrapcdn.com` in `style-src-elem` and `font-src` | toolbar icons of the cluster-editor label editor | CE-4 |
 | `img-src https:` | outside images in cluster-editor labels | CE-5, CE-6 |
 | `connect-src wss:` | nothing known | the browser checks in suite#2897 |
 
@@ -123,6 +124,23 @@ No other directive lists `data:`, because there it would act like inline code.
 
 - **What it costs:** injected markup can show any picture, such as a convincing fake dialog, and can feed crafted bytes to the browser's image decoder.
 - **What it does not open:** a way to send data out; that takes `https:`, which the target policy does not carry. ZAP's wildcard check (#513) probes for a random `http:` or `https:` host, so `data:` does not trigger it.
+
+### `<style>` elements
+
+Third-party components write `<style>` elements at runtime, and nonces are deferred (see *Option D*).
+`style-src-elem` therefore allows `'unsafe-inline'`, and `style-src` stays `'self'` as the fallback for browsers without CSP Level 3.
+This accepts the risk of #515 for `<style>` elements.
+It also covers the `<style>` elements of the data-collection-wizard and the cluster-editor labels (DCW-1, CE-5, CE-6).
+
+- **What it costs:** injected markup can restyle the whole page, for example to fake or hide parts of the UI.
+- **What it does not open:** a way to send data out. CSS reaches the network only through URLs, and the target policy's `img-src`, `font-src` and `style-src-elem` keep those on the Suite's origin or in `data:`.
+
+### Printing
+
+A third-party report viewer prints from a `blob:` worker and a `blob:` PDF in a hidden frame, and printing stops without either.
+`frame-src` and `worker-src` therefore allow `blob:`, and nothing else.
+A `blob:` document or worker inherits the policy of the page that creates it, so this adds little.
+That includes `frame-ancestors 'none'`, and E2E shows that a `blob:` document still loads in a frame.
 
 ### `form-action` and the external identity provider
 
@@ -161,7 +179,7 @@ The details per layer are in [Security Headers](../security-and-identity.md#secu
 
 The policy requires a CSP Level 3 browser: Firefox 108, Safari and iOS Safari 15.4, Chrome 75, Edge 79.
 Older browsers ignore the split directives and apply the `script-src` and `style-src` fallbacks instead, and parts of the UI break.
-Under the target policy this hits the component library's inline style attributes; under the interim policy it hits inline event handlers, such as TreeEditor drag and drop.
+Under both policies this hits the component library's inline style attributes and every `<style>` element; under the interim policy it also hits inline event handlers, such as TreeEditor drag and drop.
 So the floor decides whether the Suite works, not how much protection it gets.
 This ADR does not set a product-wide browser policy.
 
@@ -186,7 +204,7 @@ This ADR does not set a product-wide browser policy.
 
 ### Negative
 
-- `style-src-attr 'unsafe-inline'` stays for the foreseeable future. CSS injection is the narrower risk, so this is accepted.
+- `style-src-attr 'unsafe-inline'` stays for the foreseeable future, and `style-src-elem 'unsafe-inline'` for as long as third-party components write `<style>` elements. CSS injection is the narrower risk, so this is accepted.
 - The policy is a constant with no switch to relax or disable it. When a module with wanted functionality breaks, the directive for that resource is relaxed in the policy itself, as the interim policy does; a configurable policy is considered only if that turns out not to be good enough.
 - `connect-src 'self'` rests on an assumption about modules that the Suite does not enforce; a module that needs more requires an ADR change and a release.
 - `form-action` varies per instance: with a configured provider it permits form posts to that one host.
@@ -194,7 +212,7 @@ This ADR does not set a product-wide browser policy.
 
 ### Risks
 
-- **The interim policy is much weaker than the target.** It allows inline scripts, inline styles and scheme-wide sources, so it leaves #513, #514 and #515 open: every place that renders unescaped text as HTML is a working script injection, and injected script can open a WebSocket to any host. suite#2899 lists the known places and rates the threats.
+- **The interim policy is much weaker than the target.** It allows inline scripts and scheme-wide sources, so it leaves #513 and #514 open: every place that renders unescaped text as HTML is a working script injection, and injected script can open a WebSocket to any host. suite#2899 lists the known places and rates the threats.
 - **Every relaxation that is removed is a breaking change** for a module that started to rely on it.
 - **The policy is a breaking change for modules.** Under the target policy, a module stops working if it loads from a CDN (`IClientModuleResourceProvider`'s `Resource.Url` is an unrestricted `Uri` carrying `Integrity` and `CrossOrigin`), posts via `SubmitForm` to a foreign action, uploads via `UploadFiles` to a foreign URL, opens a WebSocket from the browser, or embeds an iframe. The interim policy still allows some of these. We cannot tell from the outside which installed modules are affected — the violation log turns that into evidence.
 - Keeping `IncludeScript`'s inline-content path and arbitrary resource origins as SDK capabilities means eventually taking Option D and giving up origin control for scripts. Dropping them is what makes `script-src-elem 'self'` permanent. That decision, and whether dropping off-origin support is a breaking SDK change, are module governance and are **not decided here**.
@@ -205,9 +223,9 @@ This ADR does not set a product-wide browser policy.
 
 - The header, the failsafe and downgrade policies with their runtime hashes, the violation endpoint and the `blob:` download are asserted by integration tests and by E2E, with the policy enforcing. E2E pins the exact policy the Suite sends, which is the interim one today.
 - `deb-packaging` runs no tests and no E2E job serves the Suite through nginx, so a change to `src/nginx/header` is verified by review and on an installed package.
-- The number of inline `style` attributes is not policed, because `style-src-attr 'unsafe-inline'` is permanent.
+- The number of inline `style` attributes and `<style>` elements is not policed, because `style-src-attr` and `style-src-elem` keep `'unsafe-inline'`.
 - No new inline event handler and no new inline `<script>` block: the target policy refuses them, so one added now breaks when its relaxation is removed.
-- MRs adding an inline `<style>`, a `blob:` consumer, a `data:` consumer other than an image, a WebSocket opened from the browser, or a new off-origin fetch must state the directive they need under the target policy.
+- MRs adding a `blob:` consumer, a `data:` consumer other than an image, a WebSocket opened from the browser, or a new off-origin fetch must state the directive they need under the target policy.
 - The `form-action` origin is unit-tested, including a provider change without a restart. E2E pins the policy without a provider.
 - A value rendered as raw HTML (`MarkupString`, `innerHTML`) is either encoded before it becomes markup, as the instance title is, or trusted by its origin — the `TopBar` icon and the failsafe page's own stylesheet are the only trusted cases, and request, database or module input never joins them.
 - New SDK client APIs that reach the DOM or the network are reviewed against this ADR before they become public.
