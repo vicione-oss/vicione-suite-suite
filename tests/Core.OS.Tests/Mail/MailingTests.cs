@@ -84,14 +84,14 @@ public class MailingTests
         return sender;
     }
 
-    private static SmtpMailOptions CreateSmtpOptions(string fromUserName,
+    private static SmtpMailOptions CreateSmtpOptions(string userName,
         string password,
         string? serverAddress = null)
     {
         var smtpMailOptions = new SmtpMailOptions
         {
             FromAddress = "Integration@localhost",
-            FromUserName = fromUserName,
+            UserName = userName,
             Password = password,
             ServerAddress = serverAddress ?? TestServer,
             ServerPort = ServerPort

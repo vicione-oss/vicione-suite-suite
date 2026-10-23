@@ -11,7 +11,7 @@ internal static class IHasNetworkInterfaceNumberExtensions
             => $"lan{networkInterface.Number}";
 
         public string GetFriendlyName()
-            => $"{TechnicalAcronyms.LAN} {networkInterface.Number}";
+            => $"{TechnicalAcronyms.Lan} {networkInterface.Number}";
 
         public string GetFriendlyNameVerbose()
             => $"{networkInterface.GetFriendlyName()} ({networkInterface.GetNetworkDescription()})";

@@ -144,4 +144,34 @@
   <data name="LogLevel" xml:space="preserve">
     <value>Log-Stufe</value>
   </data>
+  <data name="SmtpSettingsTitle" xml:space="preserve">
+    <value>SMTP-Einstellungen</value>
+  </data>
+  <data name="SmtpSettingsDescriptionBannerContent" xml:space="preserve">
+    <value>SMTP-Einstellungen dieser Instanz, schreibgeschützt. Das Passwort wird nie angezeigt. Änderungen erfolgen in der Konfiguration der Instanz und werden nach einem Neustart wirksam. Mails werden immer mit STARTTLS und TLS 1.2 oder neuer versendet, daher funktioniert Port 465 (implizites TLS) nicht.</value>
+  </data>
+  <data name="SmtpSettingsNotConfigured" xml:space="preserve">
+    <value>Auf dieser Instanz sind keine SMTP-Einstellungen konfiguriert.</value>
+  </data>
+  <data name="SmtpSettingsFetchError" xml:space="preserve">
+    <value>Die SMTP-Einstellungen dieser Instanz konnten nicht geladen werden.</value>
+  </data>
+  <data name="SmtpSenderAddress" xml:space="preserve">
+    <value>Absenderadresse</value>
+  </data>
+  <data name="SmtpPasswordSet" xml:space="preserve">
+    <value>Gesetzt</value>
+  </data>
+  <data name="SmtpPasswordNotSet" xml:space="preserve">
+    <value>Nicht gesetzt</value>
+  </data>
+  <data name="SmtpMailSendingEnabled" xml:space="preserve">
+    <value>Mailversand aktiviert</value>
+  </data>
+  <data name="SmtpMailSendingDisabled" xml:space="preserve">
+    <value>Mailversand deaktiviert</value>
+  </data>
+  <data name="SmtpSenderName" xml:space="preserve">
+    <value>Absendername</value>
+  </data>
 </root>

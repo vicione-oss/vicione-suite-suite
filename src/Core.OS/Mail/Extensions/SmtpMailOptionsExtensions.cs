@@ -10,7 +10,7 @@ internal static class SmtpMailOptionsExtensions
         /// </summary>
         public bool IsConfigured()
             => options.ServerPort != 0
-               && new[] { options.ServerAddress, options.FromUserName, options.FromAddress, options.Password }
+               && new[] { options.ServerAddress, options.UserName, options.FromAddress, options.Password }
                    .All(value => !string.IsNullOrWhiteSpace(value));
     }
 }

@@ -37,6 +37,7 @@
 - Module Management's `Browse` tab is now always shown, and tab labels use the control panel's own title
 - Module Management's `Browse` tab lists the available modules read-only when module installation is disabled
 - Update control panel, leaving a tab during an upload cancels the upload and shows a warning
+- SMTP settings, `Smtp:FromUserName` is renamed to `Smtp:UserName`, and the optional `Smtp:FromName` sets the sender name. **Upgrade:** rename `Smtp:FromUserName` to `Smtp:UserName` on every instance, otherwise no mail is sent
 
 ### Added
 
@@ -53,6 +54,7 @@
 - Process overview, a snapshot button copies all values and processes as text for a support ticket
 - System monitoring collects swap, disk I/O, CPU frequency and thermal zones, switchable under `SystemMonitoring:Collectors`
 - Too many requests from one client, or in total, get `429 Too Many Requests`; see `RateLimiting` in `docs/security-and-identity.md`. **Behaviour change:** clients sharing one address share the limit
+- Settings → Instance, a read-only "SMTP" tab shows the instance's SMTP settings and whether mail sending is enabled
 
 ### Fixed
 
@@ -143,7 +145,7 @@
 - `ViciOne.Suite.Sdk` packages, update to version `3.7.0`
 - `ViciOne.Ui.Blazor.Components` packages, update to version `6.6.1`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
-- `ViciOne.Ui.Localization`, update to version `3.6.0`
+- `ViciOne.Ui.Localization`, update to version `3.7.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`
 - `npm`
   - `@fontsource-utils/scss`, update to `0.2.4`

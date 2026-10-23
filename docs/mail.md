@@ -18,10 +18,17 @@ To enable and configure the mailing subsystem, you need to adjust the following 
 Configure the connection to your SMTP provider.
 
 * **ServerAddress**: The network DNS or IP address of the SMTP server.
-* **ServerPort**: The port to connect to (e.g., 587, 465, or 25).
-* **FromUserName**: The username used to authenticate with the server.
+* **ServerPort**: The port to connect to, usually 587. The server must support STARTTLS; port 465 (implicit TLS) is not supported.
+* **UserName**: The name used to log in to the server, often but not always an email address. It never appears in
+  the mails.
 * **FromAddress**: The email address that will appear in the "From" field.
+* **FromName** (optional): The display name in front of `FromAddress`, e.g. `ViciOne Suite`. Without it, mails show
+  the bare address.
 * **Password**: The password for the sender's account.
+
+To check the values an instance uses, open the **SMTP** tab of the instance in Settings: Settings → Instance on a
+standalone instance, Settings → Instances → the instance in a cluster. The tab is read-only and shows only whether a
+password is set, never the password itself.
 
 ### 2. User Management Settings (`UserManagementOptions`, Section "UserManagement")
 
