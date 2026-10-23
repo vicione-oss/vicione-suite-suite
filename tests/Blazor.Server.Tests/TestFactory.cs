@@ -1,4 +1,6 @@
 using Core.Shared.UserManagement.Contracts;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -19,4 +21,14 @@ internal class TestFactory
             Substitute.For<IServiceProvider>(),                               // services
             Substitute.For<ILogger<UserManager<SuiteUser>>>()
             );
+
+    public static SignInManager<SuiteUser> CreateSignInManager(UserManager<SuiteUser> userManager)
+        => Substitute.For<SignInManager<SuiteUser>>(
+            userManager,
+            Substitute.For<IHttpContextAccessor>(),
+            Substitute.For<IUserClaimsPrincipalFactory<SuiteUser>>(),
+            Substitute.For<IOptions<IdentityOptions>>(),
+            Substitute.For<ILogger<SignInManager<SuiteUser>>>(),
+            Substitute.For<IAuthenticationSchemeProvider>(),
+            Substitute.For<IUserConfirmation<SuiteUser>>());
 }

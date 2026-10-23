@@ -94,7 +94,7 @@ public sealed class ExternalLoginServiceTests
         result.User.UserName.Should().Be("john.doe");
         result.User.Email.Should().Be("john.doe@example.com");
         result.User.EmailConfirmed.Should().BeTrue();
-        result.User.PasswordExpirationDate.Should().Be(DateTimeOffset.MinValue);
+        result.User.PasswordExpirationDate.Should().BeNull();
         await userManager.DidNotReceive().AddToRoleAsync(Arg.Any<SuiteUser>(), AuthorizationConstants.AdminRoleName);
     }
 

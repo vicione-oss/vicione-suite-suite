@@ -78,7 +78,6 @@ public sealed partial class ExternalLoginService(
         {
             UserName = userName,
             Email = email,
-            PasswordExpirationDate = DateTimeOffset.MinValue,
             EmailConfirmed = emailConfirmed
         };
 

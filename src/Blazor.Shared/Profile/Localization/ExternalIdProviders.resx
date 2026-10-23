@@ -45,4 +45,7 @@
   <data name="UnlinkFailed" xml:space="preserve">
     <value>The external account link could not be removed.</value>
   </data>
+  <data name="AddPasskey" xml:space="preserve">
+    <value>Add passkey</value>
+  </data>
 </root>

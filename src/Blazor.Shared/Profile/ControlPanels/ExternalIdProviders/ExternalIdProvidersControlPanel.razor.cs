@@ -1,3 +1,4 @@
+using Blazor.Shared.Profile.ControlPanels.Passkeys.Components;
 using Blazor.Shared.Services;
 using Blazor.Shared.UserManagement.Contracts;
 using Blazor.Shared.UserManagement.Services;
@@ -6,8 +7,11 @@ using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.FeatureManagement;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
+using Sdk.Client.ControlPanels.Services;
+using UnlinkError = Core.Shared.UserManagement.Events.ExternalLoginError;
 
 namespace Blazor.Shared.Profile.ControlPanels.ExternalIdProviders;
 
@@ -17,6 +21,7 @@ namespace Blazor.Shared.Profile.ControlPanels.ExternalIdProviders;
 public partial class ExternalIdProvidersControlPanel
 {
     private bool _unlinkDialogVisible;
+    private bool _isPasskeyFeatureEnabled;
     private SuiteUser? _currentUser;
 
     [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
@@ -25,6 +30,8 @@ public partial class ExternalIdProvidersControlPanel
     [Inject] private IExternalAccountService ExternalAccountService { get; set; } = default!;
     [Inject] private UserManager<SuiteUser> UserManager { get; set; } = default!;
     [Inject] private INavigationService NavigationService { get; set; } = default!;
+    [Inject] private IFeatureManager FeatureManager { get; set; } = default!;
+    [Inject] private IControlPanelRequest ControlPanelRequest { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -32,6 +39,7 @@ public partial class ExternalIdProvidersControlPanel
 
         State.IsExternalAuthenticationProviderConfigured =
             await ExternalAuthenticationSettings.IsExternalAuthenticationProviderConfigured();
+        _isPasskeyFeatureEnabled = await FeatureManager.IsEnabledAsync(Core.Shared.Features.Constants.PasskeyFeatureName);
 
         var authenticationState = AuthState is null ? null : await AuthState;
         if (authenticationState is null)
@@ -47,6 +55,7 @@ public partial class ExternalIdProvidersControlPanel
     private void OpenUnlinkConfirmation()
     {
         State.RemovalError = null;
+        State.IsLastSignInMethod = false;
         _unlinkDialogVisible = true;
     }
 
@@ -65,6 +74,7 @@ public partial class ExternalIdProvidersControlPanel
         if (result is UserManagementServiceErrorResult errorResult)
         {
             State.RemovalError = errorResult.ErrorMessage;
+            State.IsLastSignInMethod = errorResult.ErrorCode == (int)UnlinkError.LastCredential;
             return;
         }
 
@@ -73,4 +83,7 @@ public partial class ExternalIdProvidersControlPanel
             $"{IdentityRoutes.LoginRoute}?returnUrl={Uri.EscapeDataString("/")}",
             forceLoad: true);
     }
+
+    private Task OpenPasskeys()
+        => ControlPanelRequest.Send<PasskeysControlPanel>();
 }

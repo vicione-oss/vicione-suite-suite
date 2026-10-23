@@ -1,3 +1,4 @@
+@using Blazor.Shared.Components
 @using Blazor.Shared.UserManagement.ControlPanels.User.Services
 @using ViciOne.Ui.Localization.Resources
 @using Labels = Blazor.Shared.UserManagement.Localization.Labels;
@@ -48,20 +49,29 @@
             </SettingsGroup>
 
             <SettingsGroup Title="@CommonVocabulary.Password" @bind-Expanded="@State.PasswordSettingsGroupExpanded">
-                @if (_selfEdit)
+                @if (_selfEdit && !State.UserProfile.HasPassword)
                 {
-                    <SettingsField Label="@Labels.CurrentPassword">
-                        <SettingsFieldTextBox Placeholder="@Labels.CurrentPassword" Password="true" @bind-Value="@State.CurrentPassword" @bind-Value:after="BeginEdit" />
+                    <SettingsField>
+                        <SetPasswordLinkButton />
                     </SettingsField>
                 }
+                else
+                {
+                    @if (_selfEdit)
+                    {
+                        <SettingsField Label="@Labels.CurrentPassword">
+                            <SettingsFieldTextBox Placeholder="@Labels.CurrentPassword" Password="true" @bind-Value="@State.CurrentPassword" @bind-Value:after="BeginEdit" />
+                        </SettingsField>
+                    }
 
-                <SettingsField Label="@Labels.NewPassword">
-                    <SettingsFieldTextBox Placeholder="@Labels.NewPassword" Password="true" @bind-Value="@State.NewPassword" @bind-Value:after="BeginEdit" />
-                </SettingsField>
+                    <SettingsField Label="@Labels.NewPassword">
+                        <SettingsFieldTextBox Placeholder="@Labels.NewPassword" Password="true" @bind-Value="@State.NewPassword" @bind-Value:after="BeginEdit" />
+                    </SettingsField>
 
-                <SettingsField Label="@Labels.RepeatNewPassword">
-                    <SettingsFieldTextBox Placeholder="@Labels.RepeatNewPassword" Password="true" @bind-Value="@State.RepeatNewPassword" @bind-Value:after="BeginEdit" />
-                </SettingsField>
+                    <SettingsField Label="@Labels.RepeatNewPassword">
+                        <SettingsFieldTextBox Placeholder="@Labels.RepeatNewPassword" Password="true" @bind-Value="@State.RepeatNewPassword" @bind-Value:after="BeginEdit" />
+                    </SettingsField>
+                }
             </SettingsGroup>
 
             <SettingsGroup Title="@CommonVocabulary.Company" @bind-Expanded="@State.CompanySettingsGroupExpanded">

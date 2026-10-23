@@ -1,6 +1,7 @@
 using Blazor.Shared.Dialogs;
 using Blazor.Shared.Profile.ControlPanels;
 using Blazor.Shared.Profile.ControlPanels.ExternalIdProviders;
+using Blazor.Shared.Profile.ControlPanels.Passkeys.Components;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.UserManagement.Contracts;
@@ -14,22 +15,27 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.FeatureManagement;
 using Sdk.Client.ControlPanels.Extensions;
 using Sdk.Client.ControlPanels.Services;
 using System.Security.Claims;
 using ViciOne.Ui.Blazor.Components.Dialog.Extensions;
+using UnlinkError = Core.Shared.UserManagement.Events.ExternalLoginError;
 
 namespace Blazor.Shared.Tests.Profile.ControlPanels.ExternalIdProviders;
 
 public sealed class ExternalIdProvidersControlPanelTests
 {
     private const string UserName = "TestUser";
+    private const string PasskeyFeatureName = Core.Shared.Features.Constants.PasskeyFeatureName;
 
     private readonly IExternalAuthenticationSettings _externalAuthenticationSettings =
         Substitute.For<IExternalAuthenticationSettings>();
 
     private readonly IExternalAccountService _externalAccountService = Substitute.For<IExternalAccountService>();
     private readonly INavigationService _navigationService = Substitute.For<INavigationService>();
+    private readonly IFeatureManager _featureManager = Substitute.For<IFeatureManager>();
+    private readonly IControlPanelRequest _controlPanelRequest = Substitute.For<IControlPanelRequest>();
 
     [Fact]
     public async Task Should_render_no_provider_configured_when_no_provider_is_configured()
@@ -181,6 +187,99 @@ public sealed class ExternalIdProvidersControlPanelTests
         component.Markup.Should().Contain(errorMessage);
     }
 
+    [Fact]
+    public async Task Should_offer_setting_a_password_when_the_link_is_the_last_sign_in_method()
+    {
+        // Arrange
+        RefuseUnlinkingWith(UnlinkError.LastCredential);
+        var capturingNavManager = new CapturingNavigationManager();
+
+        await using var ctx = SetupTestContext();
+        ctx.Services.AddSingleton<NavigationManager>(capturingNavManager);
+        var component = await RenderAndConfirmUnlinking(ctx);
+
+        // Act
+        await component.Find("button.set-password-button").ClickAsync();
+
+        // Assert
+        capturingNavManager.LastNavigatedUri.Should().Be(IdentityRoutes.SetPasswordRoute);
+        capturingNavManager.LastForceLoad.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_offer_adding_a_passkey_when_the_link_is_the_last_sign_in_method()
+    {
+        // Arrange
+        RefuseUnlinkingWith(UnlinkError.LastCredential);
+        _featureManager.IsEnabledAsync(PasskeyFeatureName).Returns(true);
+
+        await using var ctx = SetupTestContext();
+        var component = await RenderAndConfirmUnlinking(ctx);
+
+        // Act
+        await component.Find("button.add-passkey-button").ClickAsync();
+
+        // Assert
+        await _controlPanelRequest.Received(1).Send<PasskeysControlPanel>();
+    }
+
+    [Fact]
+    public async Task Should_not_offer_a_passkey_when_passkeys_are_disabled()
+    {
+        // Arrange
+        RefuseUnlinkingWith(UnlinkError.LastCredential);
+        _featureManager.IsEnabledAsync(PasskeyFeatureName).Returns(false);
+
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = await RenderAndConfirmUnlinking(ctx);
+
+        // Assert
+        component.FindAll("button.add-passkey-button").Should().BeEmpty();
+        component.FindAll("button.set-password-button").Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task Should_offer_no_sign_in_method_when_unlinking_fails_for_another_reason()
+    {
+        // Arrange
+        RefuseUnlinkingWith(UnlinkError.Failed);
+        _featureManager.IsEnabledAsync(PasskeyFeatureName).Returns(true);
+
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = await RenderAndConfirmUnlinking(ctx);
+
+        // Assert
+        component.FindAll("button.set-password-button, button.add-passkey-button").Should().BeEmpty();
+    }
+
+    private void RefuseUnlinkingWith(UnlinkError error)
+    {
+        _externalAuthenticationSettings.IsExternalAuthenticationProviderConfigured().Returns(true);
+        _externalAccountService.GetExternalUserAccount(Arg.Any<SuiteUser>())
+            .Returns(new ExternalUserAccount("OpenIdConnect", "Test User", "external-key"));
+        _externalAccountService
+            .RemoveExternalAccount(Arg.Any<SuiteUser>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IUserManagementServiceResult>(
+                new UserManagementServiceErrorResult("Unlinking refused", (int)error)));
+    }
+
+    private static async Task<IRenderedComponent<ExternalIdProvidersControlPanel>> RenderAndConfirmUnlinking(
+        BunitContext ctx)
+    {
+        var component = RenderControlPanel(ctx, new ExternalIdProvidersControlPanelState());
+        var dialog = component.FindComponent<ConfirmCancelDialog>();
+        await component.InvokeAsync(async () => await dialog.Instance.OnConfirm.InvokeAsync());
+
+        return component;
+    }
+
     private static IRenderedComponent<ExternalIdProvidersControlPanel> RenderControlPanel(
         BunitContext ctx,
         ExternalIdProvidersControlPanelState state)
@@ -213,7 +312,9 @@ public sealed class ExternalIdProvidersControlPanelTests
         ctx.Services
             .AddSingleton(_externalAuthenticationSettings)
             .AddSingleton(_externalAccountService)
-            .AddSingleton(_navigationService);
+            .AddSingleton(_navigationService)
+            .AddSingleton(_featureManager)
+            .AddSingleton(_controlPanelRequest);
 
         var userManager = Substitute.For<UserManager<SuiteUser>>(
             Substitute.For<IUserStore<SuiteUser>>(),

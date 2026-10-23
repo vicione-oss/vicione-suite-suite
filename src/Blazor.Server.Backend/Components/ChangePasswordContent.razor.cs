@@ -1,5 +1,6 @@
 using System.Globalization;
 using Blazor.Server.Backend.Areas.Identity.Pages.Models;
+using Blazor.Server.Backend.Extensions;
 using Blazor.Server.Backend.Localization;
 using Blazor.Shared;
 using Blazor.Shared.Services;
@@ -67,6 +68,13 @@ public sealed partial class ChangePasswordContent
         editContext = new EditContext(Input);
         editContext.OnValidationRequested += HandleValidationRequested;
         messageStore = new(editContext);
+
+        if (await IsSignedInWithoutPassword())
+        {
+            NavigationService.RedirectTo(IdentityRoutes.SetPasswordRoute);
+
+            return;
+        }
 
         var user = await UserManager.FindByNameAsync(Input.Username);
         if (user is not null)
@@ -147,24 +155,19 @@ public sealed partial class ChangePasswordContent
         {
             foreach (var error in result.Errors)
             {
-                switch (error.Code)
+                if (error.Code == nameof(IdentityErrorDescriber.PasswordMismatch))
                 {
-                    case nameof(IdentityErrorDescriber.PasswordMismatch):
-                        await UserManager.AccessFailedAsync(user);
-                        messageStore?.Add(() => Input.Password, error.Description);
-                        break;
-                    case nameof(IdentityErrorDescriber.PasswordRequiresDigit):
-                    case nameof(IdentityErrorDescriber.PasswordRequiresLower):
-                    case nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric):
-                    case nameof(IdentityErrorDescriber.PasswordRequiresUniqueChars):
-                    case nameof(IdentityErrorDescriber.PasswordRequiresUpper):
-                    case nameof(IdentityErrorDescriber.PasswordTooShort):
-                        messageStore?.Add(() => Input.NewPassword, error.Description);
-                        messageStore?.Add(() => Input.ConfirmNewPassword, error.Description);
-                        break;
-                    default:
-                        messageStore?.Add(() => Input.Username, error.Description);
-                        break;
+                    await UserManager.AccessFailedAsync(user);
+                    messageStore?.Add(() => Input.Password, error.Description);
+                }
+                else if (error.IsPasswordPolicyError())
+                {
+                    messageStore?.Add(() => Input.NewPassword, error.Description);
+                    messageStore?.Add(() => Input.ConfirmNewPassword, error.Description);
+                }
+                else
+                {
+                    messageStore?.Add(() => Input.Username, error.Description);
                 }
             }
 
@@ -179,6 +182,21 @@ public sealed partial class ChangePasswordContent
             await SignInManager.PasswordSignInAsync(Input.Username, Input.NewPassword, IsPersistent, lockoutOnFailure: true);
 
         NavigationService.RedirectTo(ReturnRoute);
+    }
+
+    private async Task<bool> IsSignedInWithoutPassword()
+    {
+        var principal = SignInManager.Context.User;
+        if (!SignInManager.IsSignedIn(principal))
+            return false;
+
+        var user = await UserManager.GetUserAsync(principal);
+        if (user is null)
+            return false;
+
+        var hasPassword = await UserManager.HasPasswordAsync(user);
+
+        return !hasPassword;
     }
 
     public void OnCancel()

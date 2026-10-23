@@ -98,5 +98,11 @@ namespace Blazor.Shared.Profile.Localization {
                 return ResourceManager.GetString("UnlinkFailed", resourceCulture);
             }
         }
+
+        public static string AddPasskey {
+            get {
+                return ResourceManager.GetString("AddPasskey", resourceCulture);
+            }
+        }
     }
 }

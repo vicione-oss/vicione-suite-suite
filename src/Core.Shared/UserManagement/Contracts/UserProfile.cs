@@ -24,6 +24,7 @@ public sealed class UserProfile
     public string? Language { get; set; }
     public string? TimeZone { get; set; }
     public DateTimeOffset? PasswordExpirationDate { get; set; }
+    public bool HasPassword { get; set; }
     public List<string> Roles { get; set; } = [];
     public List<UserManagementClaim> Claims { get; set; } = [];
 }

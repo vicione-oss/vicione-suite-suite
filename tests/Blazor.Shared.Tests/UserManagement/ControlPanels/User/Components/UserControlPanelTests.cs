@@ -12,6 +12,7 @@ using Bunit;
 using Core.Shared.Instance.Contracts;
 using Core.Shared.Instance.Requests;
 using Core.Shared.UserManagement.Contracts;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using Sdk.Authorization;
@@ -25,11 +26,13 @@ using ViciOne.Ui.Blazor.Components.ComboBox;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
 using ViciOne.Ui.Localization.Resources;
 using Xunit;
+using Labels = Blazor.Shared.UserManagement.Localization.Labels;
 
 namespace Blazor.Shared.Tests.UserManagement.ControlPanels.User.Components;
 
 public sealed class UserControlPanelTests
 {
+    private const string SignedInUserName = "admin";
     private const string BerlinTimeZoneId = "Europe/Berlin";
     private const string NewYorkTimeZoneId = "America/New_York";
 
@@ -44,7 +47,7 @@ public sealed class UserControlPanelTests
 
         ctx.JSInterop.SetupForTextBox();
         ctx.JSInterop.ConfigureQuickGridJSInterop();
-        ctx.AddAuthorization().SetAuthorized("admin");
+        ctx.AddAuthorization().SetAuthorized(SignedInUserName);
 
         _roleService.GetAvailableRoles(Arg.Any<CancellationToken>())
             .Returns([new Sdk.UserManagement.Contracts.Role { Name = "Operator" }, new Sdk.UserManagement.Contracts.Role { Name = "Maintenance" }]);
@@ -60,6 +63,8 @@ public sealed class UserControlPanelTests
 
         ctx.SetupSuiteServices(setup =>
         {
+            setup.UseNavigationManager = false;
+            setup.FakeAuthenticationStateProvider = false;
             setup.Services.AddControlPanelInfrastructure()
                 .AddUserControlPanel()
                 .AddTransient(_ => _roleService)
@@ -99,6 +104,13 @@ public sealed class UserControlPanelTests
         {
             UserName = new UserName("operator"),
             UserProfile = new UserProfile { UserName = new UserName("operator"), Roles = [.. roles] }
+        };
+
+    private static UserControlPanelState CreateStateForEditing(string userName, bool hasPassword)
+        => new()
+        {
+            UserName = new UserName(userName),
+            UserProfile = new UserProfile { UserName = new UserName(userName), HasPassword = hasPassword }
         };
 
     private static UserControlPanelState CreateState(CultureInfo? selectedCulture = null, TimeZoneInfo? selectedTimeZone = null)
@@ -279,5 +291,49 @@ public sealed class UserControlPanelTests
         // Assert
         state.SelectedTimeZone.Should().Be(berlin);
         beginEditRaised.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Should_link_to_set_password_instead_of_the_password_fields_for_own_account_without_password()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+        var component = RenderPanel(ctx, CreateStateForEditing(SignedInUserName, hasPassword: false));
+
+        // Act
+        await component.Find("button.set-password-button").ClickAsync();
+
+        // Assert
+        component.Markup.Should().NotContain(Labels.CurrentPassword).And.NotContain(Labels.NewPassword);
+        new Uri(ctx.Services.GetRequiredService<NavigationManager>().Uri).AbsolutePath
+            .Should().Be(IdentityRoutes.SetPasswordRoute);
+    }
+
+    [Fact]
+    public async Task Should_ask_for_the_current_password_for_own_account_with_password()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = RenderPanel(ctx, CreateStateForEditing(SignedInUserName, hasPassword: true));
+
+        // Assert
+        component.Markup.Should().Contain(Labels.CurrentPassword);
+        component.FindAll("button.set-password-button").Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Should_let_an_admin_set_the_password_of_another_user_without_password()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+
+        // Act
+        var component = RenderPanel(ctx, CreateStateForEditing("operator", hasPassword: false));
+
+        // Assert
+        component.Markup.Should().Contain(Labels.NewPassword).And.NotContain(Labels.CurrentPassword);
+        component.FindAll("button.set-password-button").Should().BeEmpty();
     }
 }
