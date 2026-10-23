@@ -53,6 +53,8 @@
                                             iconCssClass = "empty-icon";
                                     }
 
+                                    var settingsCategoryKey = settingsEntriesKey.ToSettingsCategoryKey();
+
                                     <AccordionItem Title="@settingsCategory.Title"
                                                    Text="@settingsCategory.Title"
                                                    Expanded="@isExpanded"
@@ -61,6 +63,7 @@
                                                    IconUrl="@iconUrl"
                                                    OnBeforeExpand="@(async args => await OnBeforeExpandAccordionItem(args, settingsEntriesKey))"
                                                    OnBeforeCollapse="@(args => OnBeforeCollapseAccordionItem(args, settingsEntriesKey))"
+                                                   @ref="_accordionItems[settingsCategoryKey]"
                                                    @key="@settingsCategory.Title">
 
                                         @foreach (var settingsEntry in settingsEntries)

@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Blazor.Shared.Authorization.Extensions;
 using Blazor.Shared.Popup.Factories;
@@ -14,11 +15,14 @@ using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Models;
 using Sdk.Client.Services;
+using ViciOne.Ui.Blazor.Components.Accordion.Components;
 using ViciOne.Ui.Blazor.Components.Accordion.Models;
 using ViciOne.Ui.Blazor.Components.LoadingSpinner.Models;
 
 namespace Blazor.Shared.Settings.Components;
 
+[SuppressMessage("Maintainability", "CA1506:Avoid excessive class coupling",
+    Justification = "Too much things are glued together, no chance to resolve this quickly")]
 public sealed partial class SettingsContainer : ComponentBase, IDisposable
 {
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -36,6 +40,11 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
     private List<TimedMessage>? _loadingSpinnerTimedMessages;
 
     private bool _initialized;
+
+    /// <summary>Keyed like the rendered <see cref="AccordionItem"/>, because Blazor only assigns <c>@ref</c> to newly created instances.</summary>
+    private readonly Dictionary<SettingsCategoryKey, AccordionItem> _accordionItems = [];
+
+    private bool _scrollActiveSettingsCategoryIntoViewPending;
     private readonly List<SaveErrorResult> _lastSaveErrorResults = [];
     private bool _navigateBackAfterSaveRequested;
     private int _controlPanelEditRunningCount;
@@ -196,6 +205,24 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         ControlPanelRegistryItemCache.Changed += ControlPanelRegistryItemCacheChanged;
 
         LoadingIndicationPlacementBehavior.PlacementChanged += LoadingIndicationPlacementChanged;
+
+        _scrollActiveSettingsCategoryIntoViewPending = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_scrollActiveSettingsCategoryIntoViewPending)
+            return;
+
+        _scrollActiveSettingsCategoryIntoViewPending = false;
+
+        if (_activeSettingsEntry is null)
+            return;
+
+        var settingsEntriesKey = GetSettingsEntriesKey(_activeSettingsEntry.ControlPanelRegistryItem);
+
+        if (settingsEntriesKey is not null && _accordionItems.TryGetValue(settingsEntriesKey.ToSettingsCategoryKey(), out var accordionItem))
+            await accordionItem.ScrollIntoViewAsync();
     }
 
     private async void ControlPanelEditRegistryChanged(RegistryChangedEventArgs<IControlPanelEdit> args)
@@ -439,6 +466,8 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
                 settingsEntriesKey => CreateSettingsEntries(controlPanelRegistryItems, settingsEntriesKey.SettingsGroup.Position, settingsEntriesKey.SettingsCategory.Title)
             );
 
+        RemoveStaleAccordionItems();
+
         if (preselectFirstSettingsEntryInFirstSettingsGroup)
         {
             if (_settingsGroups.Count < 1)
@@ -501,6 +530,16 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
         {
             AdoptToCategoryExpand(settingsEntriesKey);
         }
+    }
+
+    private void RemoveStaleAccordionItems()
+    {
+        var renderedAccordionItemKeys = _settingsEntriesMap.Keys
+            .Select(settingsEntriesKey => settingsEntriesKey.ToSettingsCategoryKey())
+            .ToHashSet();
+
+        foreach (var accordionItemKey in _accordionItems.Keys.Where(key => !renderedAccordionItemKeys.Contains(key)).ToList())
+            _accordionItems.Remove(accordionItemKey);
     }
 
     private void AdoptToCategoryExpand(SettingsEntriesKey settingsEntriesKey)
@@ -657,6 +696,11 @@ public sealed partial class SettingsContainer : ComponentBase, IDisposable
                 _deferredAction = new ControlPanelRequestAction(args);
 
             await OnShowUnsavedChangesPopup.InvokeAsync();
+        }
+        else
+        {
+            // Scrolls on the render that follows the state change the request causes.
+            _scrollActiveSettingsCategoryIntoViewPending = true;
         }
     }
 

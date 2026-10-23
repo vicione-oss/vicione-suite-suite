@@ -17,11 +17,14 @@ using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Modules;
 using Sdk.Modules;
+using ViciOne.Ui.Blazor.Components.TestingHelpers.Accordion.Extensions;
 
 namespace Blazor.Shared.Tests.Settings.Components;
 
 public sealed class SettingsContainerTests
 {
+    private const string ScrollIntoViewIdentifier = "scrollIntoView";
+
     public sealed class DummyClientModule : IClientModule
     {
         public ModuleKey ModuleKey => new();
@@ -162,6 +165,39 @@ public sealed class SettingsContainerTests
 
         component.Find(".control-panel-container").Should().NotBeNull();
         component.FindComponent<DummyClientModule.CloudControlPanel>().Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Should_scroll_active_settings_category_into_view_when_opened()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+        var accordionItemModule = ctx.JSInterop.SetupForAccordionItem();
+
+        // Act
+        var component = ctx.Render<SettingsContainer>();
+
+        // Assert
+        component.WaitForAssertion(() => accordionItemModule.Invocations[ScrollIntoViewIdentifier].Should().ContainSingle());
+    }
+
+    [Fact]
+    public async Task Should_scroll_active_settings_category_into_view_on_control_panel_request()
+    {
+        // Arrange
+        await using var ctx = SetupTestContext();
+        var accordionItemModule = ctx.JSInterop.SetupForAccordionItem();
+
+        var component = ctx.Render<SettingsContainer>();
+        component.WaitForAssertion(() => accordionItemModule.Invocations[ScrollIntoViewIdentifier].Should().ContainSingle());
+
+        var controlPanelRequest = ctx.Services.GetRequiredService<IControlPanelRequest>();
+
+        // Act
+        await component.InvokeAsync(() => controlPanelRequest.Send<DummyClientModule.CloudControlPanel>());
+
+        // Assert
+        component.WaitForAssertion(() => accordionItemModule.Invocations[ScrollIntoViewIdentifier].Should().HaveCount(2));
     }
 
     [Fact]
