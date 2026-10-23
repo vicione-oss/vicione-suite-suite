@@ -144,4 +144,34 @@
   <data name="LogLevel" xml:space="preserve">
     <value>Log-Level</value>
   </data>
+  <data name="SmtpSettingsTitle" xml:space="preserve">
+    <value>SMTP settings</value>
+  </data>
+  <data name="SmtpSettingsDescriptionBannerContent" xml:space="preserve">
+    <value>SMTP settings of this instance, read-only. The password is never shown. Changes are made in the instance's configuration and take effect after a restart. Mail is always sent with STARTTLS and TLS 1.2 or newer, so port 465 (implicit TLS) doesn't work.</value>
+  </data>
+  <data name="SmtpSettingsNotConfigured" xml:space="preserve">
+    <value>No SMTP settings are configured on this instance.</value>
+  </data>
+  <data name="SmtpSettingsFetchError" xml:space="preserve">
+    <value>The SMTP settings of this instance could not be loaded.</value>
+  </data>
+  <data name="SmtpSenderAddress" xml:space="preserve">
+    <value>Sender address</value>
+  </data>
+  <data name="SmtpPasswordSet" xml:space="preserve">
+    <value>Set</value>
+  </data>
+  <data name="SmtpPasswordNotSet" xml:space="preserve">
+    <value>Not set</value>
+  </data>
+  <data name="SmtpMailSendingEnabled" xml:space="preserve">
+    <value>Mail sending enabled</value>
+  </data>
+  <data name="SmtpMailSendingDisabled" xml:space="preserve">
+    <value>Mail sending disabled</value>
+  </data>
+  <data name="SmtpSenderName" xml:space="preserve">
+    <value>Sender name</value>
+  </data>
 </root>

@@ -17,4 +17,30 @@ public class MailkitMailSenderTests
         // Assert
         sender.Should().BeAssignableTo<IEmailSender>();
     }
+
+    public sealed class ToFromAddress
+    {
+        [Fact]
+        public void Should_put_the_from_name_in_front_of_the_address()
+        {
+            // Act
+            var fromAddress = MailkitMailSender.ToFromAddress("ViciOne Suite", "noreply@corp.example");
+
+            // Assert
+            fromAddress.ToString().Should().Be("\"ViciOne Suite\" <noreply@corp.example>");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void Should_leave_out_the_display_name_when_no_from_name_is_set(string? fromName)
+        {
+            // Act
+            var fromAddress = MailkitMailSender.ToFromAddress(fromName, "noreply@corp.example");
+
+            // Assert
+            fromAddress.ToString().Should().Be("noreply@corp.example");
+        }
+    }
 }

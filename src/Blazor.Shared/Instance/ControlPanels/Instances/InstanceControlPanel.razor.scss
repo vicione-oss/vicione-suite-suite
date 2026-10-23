@@ -1,0 +1,10 @@
+@use "../../../Styles/design/colors";
+@use "../../../../../shared/styles/colors-staged";
+
+.mail-sending-enabled {
+    color: colors-staged.$color-green;
+}
+
+.mail-sending-disabled {
+    color: colors.$error;
+}

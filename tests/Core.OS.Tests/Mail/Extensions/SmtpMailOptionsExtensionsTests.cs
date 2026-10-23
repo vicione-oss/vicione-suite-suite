@@ -9,7 +9,7 @@ public class SmtpMailOptionsExtensionsTests
     {
         ServerAddress = "mail.example.com",
         ServerPort = 587,
-        FromUserName = "Suite",
+        UserName = "Suite",
         FromAddress = "suite@example.com",
         Password = "secret"
     };
@@ -18,7 +18,7 @@ public class SmtpMailOptionsExtensionsTests
     [
         CompleteOptions with { ServerAddress = null! },
         CompleteOptions with { ServerPort = 0 },
-        CompleteOptions with { FromUserName = "" },
+        CompleteOptions with { UserName = "" },
         CompleteOptions with { FromAddress = " " },
         CompleteOptions with { Password = null! }
     ];

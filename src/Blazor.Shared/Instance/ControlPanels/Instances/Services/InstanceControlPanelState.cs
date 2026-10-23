@@ -1,4 +1,5 @@
 ﻿using Blazor.Shared.Instance.ControlPanels.Instances.Models;
+using Core.Shared.Mail.Contracts;
 using Microsoft.Extensions.Logging;
 using Sdk.Client.ControlPanels.Services;
 using ViciOne.SourceGenerators.NotifyChanged;
@@ -19,4 +20,27 @@ public sealed partial class InstanceControlPanelState : ControlPanelState
     public bool CommonSettingsGroupExpanded { get; set; } = true;
     public bool DisplaySettingsGroupExpanded { get; set; } = true;
     public bool StatusSettingsGroupExpanded { get; set; } = true;
+
+    internal SmtpSettings? SmtpSettings { get; private set; }
+    internal bool SmtpSettingsLoading { get; private set; }
+    internal bool SmtpSettingsLoadFailed { get; private set; }
+
+    /// <summary>
+    /// Clears the SMTP settings and marks them as loading.
+    /// </summary>
+    internal void BeginSmtpSettingsLoad()
+    {
+        SmtpSettings = null;
+        SmtpSettingsLoading = true;
+        SmtpSettingsLoadFailed = false;
+        OnPropertyChanged(nameof(SmtpSettingsLoading));
+    }
+
+    internal void CompleteSmtpSettingsLoad(SmtpSettings? smtpSettings, bool failed)
+    {
+        SmtpSettings = smtpSettings;
+        SmtpSettingsLoading = false;
+        SmtpSettingsLoadFailed = failed;
+        OnPropertyChanged(nameof(SmtpSettingsLoading));
+    }
 }

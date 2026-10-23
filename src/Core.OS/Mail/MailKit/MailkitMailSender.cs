@@ -43,7 +43,7 @@ public sealed class MailkitMailSender(
             options.Value.ServerPort,
             cancellationToken);
         await AuthenticateConfiguredUser(smtpClient,
-            options.Value.FromUserName,
+            options.Value.UserName,
             options.Value.Password,
             cancellationToken);
 
@@ -62,17 +62,17 @@ public sealed class MailkitMailSender(
     }
 
     private static async Task AuthenticateConfiguredUser(SmtpClient smtpClient,
-        string fromUserName,
+        string userName,
         string password,
         CancellationToken cancellationToken)
-        => await smtpClient.AuthenticateAsync(fromUserName,
+        => await smtpClient.AuthenticateAsync(userName,
             password,
             cancellationToken);
 
     private MimeMessage CreateMimeMessage(Message message)
     {
         var email = new MimeMessage();
-        email.From.Add(ToFromAddress(options.Value.FromUserName,
+        email.From.Add(ToFromAddress(options.Value.FromName,
             options.Value.FromAddress));
         email.To.Add(MailboxAddress.Parse(message.RecipientAddress));
         email.Subject = message.Subject;
@@ -80,8 +80,10 @@ public sealed class MailkitMailSender(
         return email;
     }
 
-    private static MailboxAddress ToFromAddress(string fromUserName, string fromAddress)
-        => new(fromUserName, fromAddress);
+    internal static MailboxAddress ToFromAddress(string? fromName, string fromAddress)
+        => string.IsNullOrWhiteSpace(fromName)
+            ? new MailboxAddress(string.Empty, fromAddress)
+            : new MailboxAddress(fromName, fromAddress);
 
     public bool IsConfigured() => options.Value.IsConfigured();
 }

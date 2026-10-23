@@ -8,104 +8,177 @@
 
 @inject IClientTimeProvider TimeProvider
 
-<DescriptionBanner Title="@Localization.InstanceControlPanel.DescriptionBannerTitle">
-    @Localization.InstanceControlPanel.DescriptionBannerContent
-</DescriptionBanner>
+<ControlPanelPage Title="@CommonVocabulary.General">
+    <DescriptionBanner Title="@Localization.InstanceControlPanel.DescriptionBannerTitle">
+        @Localization.InstanceControlPanel.DescriptionBannerContent
+    </DescriptionBanner>
 
-<SettingsLayout>
-    @if (State.InstanceInformation is not null)
-    {
-        <SettingsGroup Title="@CommonVocabulary.Display" @bind-Expanded="@State.DisplaySettingsGroupExpanded">
-            <SettingsField Label="@CommonVocabulary.Name">
-                <SettingsFieldTextBox Placeholder="@CommonVocabulary.Name"
-                                      @bind-Value="@State.InstanceInformation.Name"
-                                      @bind-Value:after="BeginEdit" />
-            </SettingsField>
-
-            <SettingsField Label="@Localization.InstanceControlPanel.FormattedName">
-                <SettingsFieldTextBox Placeholder="@Localization.InstanceControlPanel.FormattedName"
-                                      @bind-Value="@State.InstanceInformation.FormattedName"
-                                      @bind-Value:after="BeginEdit" />
-            </SettingsField>
-
-            <SettingsField Label="@CommonVocabulary.Description">
-                <SettingsFieldTextBox Placeholder="@CommonVocabulary.Description"
-                                      @bind-Value="@State.InstanceInformation.Description"
-                                      @bind-Value:after="BeginEdit" />
-            </SettingsField>
-        </SettingsGroup>
-
-        <SettingsGroup Title="@CommonVocabulary.Information" @bind-Expanded="@State.CommonSettingsGroupExpanded">
-            <SettingsField Label="Id">
-                @State.InstanceInformation.Id
-            </SettingsField>
-
-            <SettingsField Label="@TechnicalTerms.SerialNumber">
-                @State.InstanceInformation.SerialNumber
-            </SettingsField>
-
-            <SettingsField Label="@TechnicalTerms.SystemType">
-                @State.InstanceInformation.SystemType
-            </SettingsField>
-
-            <SettingsField Label="@TechnicalTerms.Type">
-                @State.InstanceInformation.Type
-            </SettingsField>
-
-            <SettingsField Label="@TechnicalTerms.Version">
-                @State.InstanceInformation.Version
-            </SettingsField>
-
-            <SettingsField Label="@TechnicalAcronyms.Sdk">
-                @State.InstanceInformation.SdkVersion
-            </SettingsField>
-
-            <SettingsField Label="@Localization.InstanceControlPanel.LogLevel">
-                <SettingsFieldComboBox Items="@(Enum.GetValues<LogLevel>())"
-                                       @bind-Value="@State.LogLevel"
-                                       @bind-Value:after="BeginEdit" />
-            </SettingsField>
-        </SettingsGroup>
-
-        @if (State.InstanceInformation.Type == Sdk.Instance.InstanceType.Slave)
+    <SettingsLayout>
+        @if (State.InstanceInformation is not null)
         {
-            <SettingsGroup Title="@CommonVocabulary.Status" @bind-Expanded="@State.StatusSettingsGroupExpanded">
-                <SettingsField Label="@Localization.InstanceControlPanel.FirstTimeRegistered">
-                    @State.InstanceInformation.FirstTimeRegistered.AdjustToTimeZone(TimeProvider.LocalTimeZone)
+            <SettingsGroup Title="@CommonVocabulary.Display" @bind-Expanded="@State.DisplaySettingsGroupExpanded">
+                <SettingsField Label="@CommonVocabulary.Name">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Name"
+                                          @bind-Value="@State.InstanceInformation.Name"
+                                          @bind-Value:after="BeginEdit" />
                 </SettingsField>
 
-                <SettingsField Label="@Localization.InstanceControlPanel.LastTimeRegistered">
-                    @State.InstanceInformation.LastRegistered.AdjustToTimeZone(TimeProvider.LocalTimeZone)
+                <SettingsField Label="@Localization.InstanceControlPanel.FormattedName">
+                    <SettingsFieldTextBox Placeholder="@Localization.InstanceControlPanel.FormattedName"
+                                          @bind-Value="@State.InstanceInformation.FormattedName"
+                                          @bind-Value:after="BeginEdit" />
                 </SettingsField>
 
-                <SettingsField Label="@CommonVocabulary.Status">
-                    @if (State.InstanceInformation.HealthStatus is null)
-                    {
-                        @CommonVocabulary.Unknown
-                    }
-                    else
-                    {
-                        @State.InstanceInformation.HealthStatus
-                    }
-                </SettingsField>
-
-                <SettingsField Label="@Localization.InstanceControlPanel.LastHealthCheck">
-                    @if (State.InstanceInformation.LastSent is null)
-                    {
-                        @CommonVocabulary.Pending
-                    }
-                    else
-                    {
-                        @State.InstanceInformation.LastSent.AdjustToTimeZone(TimeProvider.LocalTimeZone)
-                    }
+                <SettingsField Label="@CommonVocabulary.Description">
+                    <SettingsFieldTextBox Placeholder="@CommonVocabulary.Description"
+                                          @bind-Value="@State.InstanceInformation.Description"
+                                          @bind-Value:after="BeginEdit" />
                 </SettingsField>
             </SettingsGroup>
+
+            <SettingsGroup Title="@CommonVocabulary.Information" @bind-Expanded="@State.CommonSettingsGroupExpanded">
+                <SettingsField Label="Id">
+                    @State.InstanceInformation.Id
+                </SettingsField>
+
+                <SettingsField Label="@TechnicalTerms.SerialNumber">
+                    @State.InstanceInformation.SerialNumber
+                </SettingsField>
+
+                <SettingsField Label="@TechnicalTerms.SystemType">
+                    @State.InstanceInformation.SystemType
+                </SettingsField>
+
+                <SettingsField Label="@TechnicalTerms.Type">
+                    @State.InstanceInformation.Type
+                </SettingsField>
+
+                <SettingsField Label="@TechnicalTerms.Version">
+                    @State.InstanceInformation.Version
+                </SettingsField>
+
+                <SettingsField Label="@TechnicalAcronyms.Sdk">
+                    @State.InstanceInformation.SdkVersion
+                </SettingsField>
+
+                <SettingsField Label="@Localization.InstanceControlPanel.LogLevel">
+                    <SettingsFieldComboBox Items="@(Enum.GetValues<LogLevel>())"
+                                           @bind-Value="@State.LogLevel"
+                                           @bind-Value:after="BeginEdit" />
+                </SettingsField>
+            </SettingsGroup>
+
+            @if (State.InstanceInformation.Type == Sdk.Instance.InstanceType.Slave)
+            {
+                <SettingsGroup Title="@CommonVocabulary.Status" @bind-Expanded="@State.StatusSettingsGroupExpanded">
+                    <SettingsField Label="@Localization.InstanceControlPanel.FirstTimeRegistered">
+                        @State.InstanceInformation.FirstTimeRegistered.AdjustToTimeZone(TimeProvider.LocalTimeZone)
+                    </SettingsField>
+
+                    <SettingsField Label="@Localization.InstanceControlPanel.LastTimeRegistered">
+                        @State.InstanceInformation.LastRegistered.AdjustToTimeZone(TimeProvider.LocalTimeZone)
+                    </SettingsField>
+
+                    <SettingsField Label="@CommonVocabulary.Status">
+                        @if (State.InstanceInformation.HealthStatus is null)
+                        {
+                            @CommonVocabulary.Unknown
+                        }
+                        else
+                        {
+                            @State.InstanceInformation.HealthStatus
+                        }
+                    </SettingsField>
+
+                    <SettingsField Label="@Localization.InstanceControlPanel.LastHealthCheck">
+                        @if (State.InstanceInformation.LastSent is null)
+                        {
+                            @CommonVocabulary.Pending
+                        }
+                        else
+                        {
+                            @State.InstanceInformation.LastSent.AdjustToTimeZone(TimeProvider.LocalTimeZone)
+                        }
+                    </SettingsField>
+                </SettingsGroup>
+            }
         }
-    }
-    else
-    {
-        <SettingsInformation>
-            @Localization.InstanceControlPanel.FetchErrorContent
-        </SettingsInformation>
-    }
-</SettingsLayout>
+        else
+        {
+            <SettingsInformation>
+                @Localization.InstanceControlPanel.FetchErrorContent
+            </SettingsInformation>
+        }
+    </SettingsLayout>
+</ControlPanelPage>
+
+<ControlPanelPage Title="@TechnicalAcronyms.Smtp">
+    <DescriptionBanner Title="@Localization.InstanceControlPanel.SmtpSettingsTitle">
+        @Localization.InstanceControlPanel.SmtpSettingsDescriptionBannerContent
+    </DescriptionBanner>
+
+    <SettingsLayout>
+        @if (State.SmtpSettingsLoadFailed)
+        {
+            <SettingsInformation>
+                @Localization.InstanceControlPanel.SmtpSettingsFetchError
+            </SettingsInformation>
+        }
+        else if (State.SmtpSettingsLoading || State.SmtpSettings is not null)
+        {
+            var smtpSettings = State.SmtpSettings;
+
+            <SettingsField Label="@TechnicalTerms.Server" IsLoading="@State.SmtpSettingsLoading" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @smtpSettings?.ServerAddress
+            </SettingsField>
+
+            <SettingsField Label="@TechnicalTerms.Port" IsLoading="@State.SmtpSettingsLoading" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @if (smtpSettings?.ServerPort is > 0)
+                {
+                    @smtpSettings.ServerPort
+                }
+            </SettingsField>
+
+            <SettingsField Label="@TechnicalTerms.Username" IsLoading="@State.SmtpSettingsLoading" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @smtpSettings?.UserName
+            </SettingsField>
+
+            <SettingsField Label="@Localization.InstanceControlPanel.SmtpSenderName" IsLoading="@State.SmtpSettingsLoading" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @smtpSettings?.FromName
+            </SettingsField>
+
+            <SettingsField Label="@Localization.InstanceControlPanel.SmtpSenderAddress" IsLoading="@State.SmtpSettingsLoading" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @smtpSettings?.FromAddress
+            </SettingsField>
+
+            <SettingsField Label="@CommonVocabulary.Password" IsLoading="@State.SmtpSettingsLoading" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @if (smtpSettings is not null)
+                {
+                    @(smtpSettings.PasswordSet
+                        ? Localization.InstanceControlPanel.SmtpPasswordSet
+                        : Localization.InstanceControlPanel.SmtpPasswordNotSet)
+                }
+            </SettingsField>
+
+            <SettingsField Label="@CommonVocabulary.Status" IsLoading="@State.SmtpSettingsLoading" LoadingIndication="SettingsFieldLoadingIndication.Opacity">
+                @if (smtpSettings is not null)
+                {
+                    @if (smtpSettings.MailSendingEnabled)
+                    {
+                        <span class="mail-sending-enabled">@Localization.InstanceControlPanel.SmtpMailSendingEnabled</span>
+                    }
+                    else
+                    {
+                        <span class="mail-sending-disabled">@Localization.InstanceControlPanel.SmtpMailSendingDisabled</span>
+                    }
+                }
+            </SettingsField>
+        }
+        else
+        {
+            <SettingsInformation>
+                @Localization.InstanceControlPanel.SmtpSettingsNotConfigured
+            </SettingsInformation>
+        }
+    </SettingsLayout>
+</ControlPanelPage>
