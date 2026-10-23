@@ -9,24 +9,20 @@ using ViciOne.Ui.TreeEditor.Builder.Interface.Nodes;
 
 namespace Blazor.Shared.Mqtt.Services;
 
-internal sealed class MqttTopicTreeAdapter : TreeAdapter
+internal sealed class MqttTopicTreeAdapter(MqttViewerComponentService viewerService) : TreeAdapter
 {
     private static readonly SvgIcon s_searchIcon = new(string.Empty)
     {
         CssClasses = MonochromeIconName.Search.GetCssClasses(MonochromeIconSize.Small),
     };
 
-    private readonly MqttViewerComponentService _viewerService;
     private Action<ITreeNode>? _dblClickAction;
-
-    public MqttTopicTreeAdapter(MqttViewerComponentService viewerService)
-        => _viewerService = viewerService;
 
     public override void Setup()
         => Builder.Guidelines.Show = true;
 
     public override IEnumerable<ITreeNode> GetRootNodes()
-        => _viewerService.TopicGroups;
+        => viewerService.TopicGroups;
 
     public override IEnumerable<ITreeNode> GetChildren(ITreeNode treeNode)
         => treeNode is TopicGroup topicGroup ? topicGroup.SubTopics : [];
@@ -63,7 +59,7 @@ internal sealed class MqttTopicTreeAdapter : TreeAdapter
     private void OnSearchButtonClicked(NodeButton button, VisibleActionArguments args)
     {
         if (args.Node is TopicGroup topicGroup)
-            _viewerService.SetNodeTopicFilter(topicGroup);
+            viewerService.SetNodeTopicFilter(topicGroup);
     }
 
     private void OnDoubleClick(ITreeNode treeNode)

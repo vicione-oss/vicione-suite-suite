@@ -164,7 +164,7 @@ public sealed partial class RolesControlPanel : ControlPanelBase<RolesControlPan
                     .Where(r => r.Name == selectedRoleName && !r.Managed)
                     .ToArray();
 
-                if (!roles.Any())
+                if (roles.Length == 0)
                     continue;
 
                 State.DeletingRoles.AddRange(roles);

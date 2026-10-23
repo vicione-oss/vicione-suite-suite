@@ -5,7 +5,6 @@ using Core.OS.Hosting.Extensions;
 using Core.OS.Hosting.Pages;
 using Core.OS.Hosting.Services;
 using Core.OS.Instance;
-using Core.OS.HostManagement;
 using Core.OS.Instance.Extensions;
 using Core.OS.Security;
 using Core.OS.Tests.EnvironmentOverrides;
@@ -13,7 +12,6 @@ using Core.OS.Tests.Security;
 using Core.Shared.EnvironmentOverrides;
 using Core.Shared.HostManagement;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Core.OS.Tests.Hosting.Services;

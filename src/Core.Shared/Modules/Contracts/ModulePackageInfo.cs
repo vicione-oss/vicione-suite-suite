@@ -7,5 +7,5 @@ public class ModulePackageInfo
 {
     public required string PackageName { get; set; }
 
-    public List<ModulePackageVersion> Versions { get; set; } = [];
+    public List<ModulePackageVersion> Versions { get; init; } = [];
 }

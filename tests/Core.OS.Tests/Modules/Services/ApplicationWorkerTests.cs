@@ -77,12 +77,8 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
     private ApplicationWorker CreateApplicationWorker()
         => new(_appFactory.Services, _loggerMock);
 
-    public sealed class Starting : ApplicationWorkerTests
+    public sealed class Starting(TestApplicationFactory<EmptyTestStartup> appFactory) : ApplicationWorkerTests(appFactory)
     {
-        public Starting(TestApplicationFactory<EmptyTestStartup> appFactory) : base(appFactory)
-        {
-        }
-
         [Fact]
         public async Task Should_send_register_command_on_master_or_slave()
         {
@@ -220,12 +216,8 @@ public class ApplicationWorkerTests : IClassFixture<TestApplicationFactory<Empty
         }
     }
 
-    public sealed class Stopping : ApplicationWorkerTests
+    public sealed class Stopping(TestApplicationFactory<EmptyTestStartup> appFactory) : ApplicationWorkerTests(appFactory)
     {
-        public Stopping(TestApplicationFactory<EmptyTestStartup> appFactory) : base(appFactory)
-        {
-        }
-
         [Fact]
         public async Task Should_stop_bus_depot()
         {

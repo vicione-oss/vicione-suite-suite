@@ -44,13 +44,6 @@ internal static class NetworkInterfaceControlPanelStateExtensions
                 return state.OriginalPhysicalAddress ?? CommonVocabulary.Unknown;
         }
 
-        internal List<IPAddress> GetStaticDnsNameServers(ISystemConfigurationService systemConfigurationService)
-        {
-            var nameServers = systemConfigurationService.SystemConfiguration.NetworkDNSSettings.NameServers;
-
-            return nameServers.Enabled ? nameServers.Addresses : [];
-        }
-
         internal List<IPAddress> GetDhcpDnsNameServers(ISystemConfigurationService systemConfigurationService)
         {
             var networkInterface = systemConfigurationService.SystemConfiguration.NetworkInterfaces

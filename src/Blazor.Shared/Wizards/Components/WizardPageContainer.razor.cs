@@ -64,8 +64,7 @@ public sealed partial class WizardPageContainer : ComponentBase, IAsyncDisposabl
         // For now, we do not call CancelEdit because it would require an await on the async behavior
         // which could result in memory leaks when the await never returns
 
-        if (_wizardPageState is not null)
-            _wizardPageState.Changed -= WizardPageStateChanged;
+        _wizardPageState?.Changed -= WizardPageStateChanged;
 
         if (_wizardPageEdit is not null)
         {

@@ -184,16 +184,6 @@ public sealed partial class ProfileNotificationElementFlyoutContent : ComponentB
         _editUserDataStarted = false;
     }
 
-    private void ChangeStateAbsence(bool value)
-    {
-        // The toggle is display-only; absence has no backing state yet.
-    }
-
-    private void ChangeStateNotification(bool value)
-    {
-        // The toggle is display-only; notifications have no backing state yet.
-    }
-
     private void CultureChanged()
     {
         if (_userProfile is null)

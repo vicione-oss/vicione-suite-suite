@@ -1,4 +1,4 @@
-﻿using Core.OS.DbContext;
+using Core.OS.DbContext;
 using Core.OS.UserManagement.Configuration;
 using Core.Shared.Security;
 using Core.Shared.UserManagement.Configuration;
@@ -39,13 +39,13 @@ public partial class ExternalAuthenticationSettings(
 
     private IQueryable<ExternalIdProvider> GetProvidersInDatabase()
         => from externalIdProvider in applicationDbContext.ExternalIdProviders
-            select new ExternalIdProvider
-            {
-                Authority = externalIdProvider.Authority,
-                ClientId = externalIdProvider.ClientId,
-                ClientSecret = externalIdProvider.ClientSecret,
-                Name = externalIdProvider.Name
-            };
+           select new ExternalIdProvider
+           {
+               Authority = externalIdProvider.Authority,
+               ClientId = externalIdProvider.ClientId,
+               ClientSecret = externalIdProvider.ClientSecret,
+               Name = externalIdProvider.Name
+           };
 
     [LoggerMessage(Level = LogLevel.Warning,
         Message = "Multiple external ids are configured {@Providers}. Only one is currently supported. Picking the first one.")]

@@ -9,7 +9,6 @@ namespace Blazor.Shared.Network.ControlPanels.Dns.Services;
 
 internal sealed class DnsControlPanelDescriptor : IControlPanelDescriptor<DnsControlPanel>
 {
-    public string Category => CommonVocabulary.Network;
     public string Title => TechnicalAcronyms.Dns;
     public int? Position => ControlPanelNetworkCategoryDescriptor.FirstPositionAfterNetworkInterfaces;
     public Uri? IconUrl => SvgIcon.HostConfig.GetPath();

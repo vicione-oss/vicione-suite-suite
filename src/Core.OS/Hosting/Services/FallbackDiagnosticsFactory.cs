@@ -27,7 +27,7 @@ internal static class FallbackDiagnosticsFactory
         var recovery = await ResolveRecovery(options, cancellationToken);
         var environmentOverrides = await ResolveEnvironmentOverrides(options, cancellationToken);
 
-        return new FallbackDiagnostics
+        return new()
         {
             Status = options.Status,
             Messages = options.Messages,

@@ -79,8 +79,8 @@ public class ModuleArtifactCacheTests
         return [.. moduleArtifacts];
     }
 
-    private static IArtifact CreateMetadataArtifact(string moduleName, string fileName, DateTimeOffset modified, string sourceKey = "source-1")
-        => new TestFactory.Artifact
+    private static TestFactory.Artifact CreateMetadataArtifact(string moduleName, string fileName, DateTimeOffset modified, string sourceKey = "source-1")
+        => new()
         {
             Repository = "vicione-suite",
             Path = $"modules/{moduleName}",

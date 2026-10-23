@@ -108,8 +108,7 @@
             </div>
 
             <div class="main-column">
-                <ProcessTable @ref="_table"
-                              Processes="@snapshot.Processes"
+                <ProcessTable Processes="@snapshot.Processes"
                               TotalMemoryKb="@TotalMemoryKb"
                               CpuPercent="@Metrics.Cpu.Latest"
                               MemoryPercent="@Metrics.Memory.Latest"

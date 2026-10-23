@@ -30,7 +30,7 @@ public sealed class DisabledSettingsTests
     };
 
     [Theory]
-    [MemberData(nameof(LeafChanges))]
+    [MemberData(nameof(LeafChanges), DisableDiscoveryEnumeration = true)]
     public void Should_report_a_changed_disabled_setting(string settingName, Action<SystemConfiguration> change)
     {
         // Arrange

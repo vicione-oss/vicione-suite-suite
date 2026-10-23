@@ -12,12 +12,16 @@ namespace Blazor.Shared.Logging;
 public sealed partial class JournalListView : ComponentBase, IDisposable
 {
     private bool _isRunningOnLinux;
+    private ObservableCollection<JournalEntry>? _entries;
 
     [Inject(Key = Sdk.Constants.ClientTimeProviderServiceKey)] private TimeProvider TimeProvider { get; set; } = default!;
     [Inject] private IJsInterop JsInterop { get; set; } = default!;
     [Inject] public IInstanceInformationProvider InformationProvider { get; set; } = default!;
 
-    [Parameter] public ObservableCollection<JournalEntry> Entries { get; set; } = [];
+#pragma warning disable CA2227 // The Blazor renderer assigns parameters on every parent render.
+    [Parameter, EditorRequired] public ObservableCollection<JournalEntry>? Entries { get; set; }
+#pragma warning restore CA2227
+
     [Parameter] public Action? LoadMore { get; set; }
     [Parameter] public string ErrorMessage { get; set; } = string.Empty;
 
@@ -26,9 +30,22 @@ public sealed partial class JournalListView : ComponentBase, IDisposable
         await base.OnInitializedAsync();
 
         _isRunningOnLinux = OperatingSystem.IsLinux();
+    }
 
-        Entries.CollectionChanged -= CollectionChanged;
-        Entries.CollectionChanged += CollectionChanged;
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (ReferenceEquals(_entries, Entries))
+            return;
+
+        if (_entries is not null)
+            _entries.CollectionChanged -= CollectionChanged;
+
+        if (Entries is not null)
+            Entries.CollectionChanged += CollectionChanged;
+
+        _entries = Entries;
     }
 
     private void CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -63,22 +80,22 @@ public sealed partial class JournalListView : ComponentBase, IDisposable
 
     private async Task DownloadEntriesAsync()
     {
-        if (Entries.Count == 0)
+        if (Entries is not { Count: > 0 } entries)
             return;
 
-        var content = await FormatAsTxt();
+        var content = await FormatAsTxt(entries);
         var fileName = $"{InformationProvider.Local.SerialNumber}-{DateTime.UtcNow:yyyyMMdd-HHmmss}.txt";
 
         await JsInterop.DownloadAs(content, fileName);
     }
 
-    private async Task<string> FormatAsTxt()
+    private async Task<string> FormatAsTxt(IEnumerable<JournalEntry> entries)
     {
         var sb = new StringBuilder();
 
         sb.AppendLine(await InformationProvider.GetSystemInformationMarkdown());
 
-        foreach (var entry in Entries)
+        foreach (var entry in entries)
         {
             var timestamp = TimeZoneInfo.ConvertTime(entry.Timestamp, TimeProvider.LocalTimeZone);
             sb.Append(CultureInfo.InvariantCulture, $"{timestamp:yyyy-MM-dd HH:mm:ss} ");
@@ -95,8 +112,10 @@ public sealed partial class JournalListView : ComponentBase, IDisposable
 
     public void Dispose()
     {
-        Entries.CollectionChanged -= CollectionChanged;
-        Entries.Clear();
+        if (_entries is not null)
+            _entries.CollectionChanged -= CollectionChanged;
+
+        Entries?.Clear();
         LoadMore = null;
     }
 }

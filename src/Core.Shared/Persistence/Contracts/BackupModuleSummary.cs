@@ -2,5 +2,5 @@
 
 public class BackupModuleSummary : BackupEntrySummary
 {
-    public List<BackupEntrySummary>? Databases { get; set; }
+    public List<BackupEntrySummary> Databases { get; init; } = [];
 }

@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Blazor.Shared.UserManagement.ControlPanels.User.Services;
 using Blazor.Shared.UserManagement.Contracts;
 using Blazor.Shared.UserManagement.Services;
 using Blazor.Shared.UserManagement.Services.Validators;
 using Blazor.Shared.Validation.Services.Validators;
 using Core.Shared.UserManagement.Contracts;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Models;
-using Xunit;
 
 namespace Blazor.Shared.Tests.UserManagement.ControlPanels.User.Services;
 

@@ -16,8 +16,8 @@ internal sealed partial class HostnameWizardPageSaveHandler(IHostnameValidator h
         if (string.IsNullOrWhiteSpace(state.Hostname))
             return new SaveErrorResult(string.Format(ValidationMessages.Culture, ValidationMessages.FieldIsRequired, field));
 
-        if (state.Hostname.Length > state.HostnameMaximumLength)
-            return new SaveErrorResult(string.Format(ValidationMessages.Culture, ValidationMessages.FieldMustNotHaveMoreThanXCharacters, field, state.HostnameMaximumLength));
+        if (state.Hostname.Length > HostnameWizardPageState.HostnameMaximumLength)
+            return new SaveErrorResult(string.Format(ValidationMessages.Culture, ValidationMessages.FieldMustNotHaveMoreThanXCharacters, field, HostnameWizardPageState.HostnameMaximumLength));
 
         if (!hostnameValidator.Validate(state.Hostname, field, out var errorMessage))
             return new SaveErrorResult(errorMessage);

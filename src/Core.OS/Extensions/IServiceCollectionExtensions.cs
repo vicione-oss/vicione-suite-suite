@@ -152,6 +152,7 @@ internal static class IServiceCollectionExtensions
         /// <see cref="AddValidatedOptions{TOptions, TValidator}"/> is the better answer wherever a bound value has a
         /// range the suite can state.
         /// </remarks>
+        /// <param name="sectionName">The configuration section bound to <typeparamref name="TOptions"/>.</param>
         /// <param name="justification">Why this options type has nothing to validate.</param>
         public void AddUnvalidatedSuiteOptions<TOptions>(string sectionName, string justification)
             where TOptions : class

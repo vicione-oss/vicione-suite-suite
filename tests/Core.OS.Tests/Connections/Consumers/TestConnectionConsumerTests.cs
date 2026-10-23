@@ -30,7 +30,7 @@ public sealed class TestConnectionConsumerTests
         => new(Guid.NewGuid(),
             ConnectionFactory.CreateSQLiteConnection(connectionString));
 
-    private void SetupTestServiceForError(Guid connectionId)
+    private void SetupTestServiceForError()
     {
         var connectionTest = Substitute.For<IConnectionTest>();
         connectionTest.Test(Arg.Any<IConnection>(), Arg.Any<CancellationToken>())
@@ -50,7 +50,7 @@ public sealed class TestConnectionConsumerTests
             });
     }
 
-    private void SetupTestServiceForSuccess(Guid connectionId)
+    private void SetupTestServiceForSuccess()
     {
         var connectionTest = Substitute.For<IConnectionTest>();
         connectionTest.Test(Arg.Any<IConnection>(), Arg.Any<CancellationToken>())
@@ -77,7 +77,7 @@ public sealed class TestConnectionConsumerTests
         await using var tester = new MassTransitTester(_configureServices);
         var command = new TestConnection(Guid.NewGuid(), new Connection { Type = ConnectionType.Mqtt });
 
-        SetupTestServiceForError(command.Connection.Id);
+        SetupTestServiceForError();
 
         // Act
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
@@ -94,7 +94,7 @@ public sealed class TestConnectionConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         var command = SetupCommandWithMqtt(MqttConnectionType.TCP);
-        SetupTestServiceForSuccess(command.Connection.Id);
+        SetupTestServiceForSuccess();
 
         // Act
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
@@ -113,7 +113,7 @@ public sealed class TestConnectionConsumerTests
         await using var tester = new MassTransitTester(_configureServices);
         var command = SetupCommandWithMqtt(MqttConnectionType.TCP);
 
-        SetupTestServiceForSuccess(command.Connection.Id);
+        SetupTestServiceForSuccess();
 
         // Act
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
@@ -133,7 +133,7 @@ public sealed class TestConnectionConsumerTests
         await using var tester = new MassTransitTester(_configureServices);
         var command = SetupCommandWithMqtt(MqttConnectionType.WebSocket);
 
-        SetupTestServiceForSuccess(command.Connection.Id);
+        SetupTestServiceForSuccess();
 
         // Act
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
@@ -162,7 +162,7 @@ public sealed class TestConnectionConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         var command = new TestConnection(Guid.NewGuid(), new Connection { Type = ConnectionType.SQLite });
-        SetupTestServiceForError(command.Connection.Id);
+        SetupTestServiceForError();
 
         // Act
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
@@ -180,7 +180,7 @@ public sealed class TestConnectionConsumerTests
         await using var tester = new MassTransitTester(_configureServices);
         await using var context = TestDbContextFactory.CreateSqliteContext<ConnectionDbContextSqlite>();
         var command = SetupCommandWithSqliteDatabase();
-        SetupTestServiceForSuccess(command.Connection.Id);
+        SetupTestServiceForSuccess();
 
         // Act
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);
@@ -197,7 +197,7 @@ public sealed class TestConnectionConsumerTests
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         var command = SetupCommandWithSqliteDatabase("DataSource=/Appdata/test.db");
-        SetupTestServiceForError(command.Connection.Id);
+        SetupTestServiceForError();
 
         // Act
         var doneEvent = await tester.TestCommand<TestConnection, TestConnectionConsumer, TestConnectionDoneEvent>(command);

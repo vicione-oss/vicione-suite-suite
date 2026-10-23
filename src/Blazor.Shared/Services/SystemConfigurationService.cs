@@ -43,7 +43,7 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
     public async Task SetSystemConfiguration(SystemConfiguration newSystemConfiguration, CancellationToken cancellationToken)
     {
         var networkInterfaces = newSystemConfiguration.NetworkInterfaces.Select(k => k.CommonInformation.Name);
-        LogSetSystemConfiguration(_logger, string.Join(", ", networkInterfaces));
+        LogSetSystemConfiguration(_logger, networkInterfaces);
 
         lock (_lock)
         {
@@ -95,7 +95,7 @@ public sealed partial class SystemConfigurationService : ISystemConfigurationSer
     }
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "SetSystemConfiguration with network {Interfaces}")]
-    private static partial void LogSetSystemConfiguration(ILogger logger, string interfaces);
+    private static partial void LogSetSystemConfiguration(ILogger logger, IEnumerable<string> interfaces);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Initializing system configuration")]
     private static partial void LogInitializing(ILogger logger);

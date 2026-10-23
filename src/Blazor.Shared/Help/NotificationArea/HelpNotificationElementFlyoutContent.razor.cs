@@ -72,9 +72,6 @@ public sealed partial class HelpNotificationElementFlyoutContent : ComponentBase
         });
     }
 
-    private async Task OnExecuteSearch()
-        => await Reload();
-
     private async Task Reload()
         => await InvokeAsync(StateHasChanged);
 

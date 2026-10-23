@@ -25,32 +25,25 @@ public class StreamUploadHandlerFactory(IUiHostEnvironment uiHostEnvironment, IS
 
     private IStreamUploadHandler<TMarker> CreateStreamUploadHandler<TMarker>(StreamUploadHandlerOptions options, Type moduleType)
     {
-        var result = GetType().GetMethod(nameof(CreateStreamUploadHandlerBackendModule), BindingFlags.NonPublic | BindingFlags.Instance)!.MakeGenericMethod(typeof(TMarker), moduleType)
-                    .Invoke(this, [options]);
-
-        if (result is null)
-        {
-            throw new InvalidOperationException("Failed to create stream upload handler.");
-        }
+        var method = GetType().GetMethod(nameof(CreateStreamUploadHandlerBackendModule), BindingFlags.NonPublic | BindingFlags.Instance)!
+            .MakeGenericMethod(typeof(TMarker), moduleType);
+        var result = method.Invoke(this, [options])
+            ?? throw new InvalidOperationException("Failed to create stream upload handler.");
 
         return (IStreamUploadHandler<TMarker>)result;
     }
 
     public IStreamUploadHandler<TMarker> CreateStreamUploadHandlerFromModuleId<TMarker>(StreamUploadHandlerOptions options, string moduleId)
     {
-        var module = uiHostEnvironment.GetBackendModule(moduleId);
-
-        if (module is null)
-        {
-            throw new ArgumentException($"No BackendModule with id {moduleId} has been found.", nameof(moduleId));
-        }
+        var module = uiHostEnvironment.GetBackendModule(moduleId)
+            ?? throw new ArgumentException($"No BackendModule with id {moduleId} has been found.", nameof(moduleId));
 
         return CreateStreamUploadHandler<TMarker>(options, module.GetType());
     }
 
-    private IStreamUploadHandler<TMarker> CreateStreamUploadHandlerBackendModule<TMarker, TModule>(StreamUploadHandlerOptions options) where TModule : BackendModule
-        => new StreamUploadHandler<TModule, TMarker>(serviceProvider.GetRequiredService<IWorkspaceProvider<TModule>>(),
-                                                     serviceProvider.GetRequiredService<IFileSystem>(),
-                                                     options,
-                                                     serviceProvider.GetRequiredService<ILogger<StreamUploadHandler<TModule, TMarker>>>());
+    private StreamUploadHandler<TModule, TMarker> CreateStreamUploadHandlerBackendModule<TMarker, TModule>(StreamUploadHandlerOptions options) where TModule : BackendModule
+        => new(serviceProvider.GetRequiredService<IWorkspaceProvider<TModule>>(),
+            serviceProvider.GetRequiredService<IFileSystem>(),
+            options,
+            serviceProvider.GetRequiredService<ILogger<StreamUploadHandler<TModule, TMarker>>>());
 }

@@ -88,7 +88,7 @@ internal partial class BackupBuilder
         }
 
         // Database files get their own treatment.
-        summary.Databases = await BackupSqliteDatabases(moduleArchive, fileSystem, databaseFiles, logger, cancellationToken);
+        summary.Databases.AddRange(await BackupSqliteDatabases(moduleArchive, fileSystem, databaseFiles, logger, cancellationToken));
 
         // If no entries create an empty root directory entry:
         if (directoryIsEmpty)

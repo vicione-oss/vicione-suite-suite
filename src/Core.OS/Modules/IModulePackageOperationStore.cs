@@ -5,7 +5,7 @@ namespace Core.OS.Modules;
 public interface IModulePackageOperationStore
 {
     /// <summary>
-    /// Queues cluster dependency operations that will be merged into storage on the next call of <see cref="ProcessQueuedOperations(CancellationToken)"/>.
+    /// Queues cluster dependency operations that will be merged into storage on the next call of <see cref="Services.ModulePackageOperationProcessor.ApplyEnqueuedOperations"/>.
     /// </summary>
     Task<IReadOnlyList<ModulePackageChange>> EnqueueOperations(List<ModulePackageOperation> operations, CancellationToken cancellationToken);
 

@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Sockets;
 using Core.Shared.HostManagement.Extensions;
 using HostManagement.Shared.Contracts.Network;
@@ -179,10 +179,10 @@ public static class SystemConfigurationMapper
         => services is null
             ? []
             : services.Select(s => new ServiceInfo
-                {
-                    Name = s.Name,
-                    State = MapServiceState(s.State),
-                })
+            {
+                Name = s.Name,
+                State = MapServiceState(s.State),
+            })
                 .ToList();
 
     private static SdkServiceState MapServiceState(HmServiceState state)

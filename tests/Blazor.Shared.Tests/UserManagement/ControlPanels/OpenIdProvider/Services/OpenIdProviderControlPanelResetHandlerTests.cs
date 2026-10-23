@@ -1,13 +1,10 @@
-using AwesomeAssertions;
 using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Services;
 using Core.Shared.UserManagement.Requests;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
 using ViciOne.Ui.Localization.Resources;
-using Xunit;
 
 namespace Blazor.Shared.Tests.UserManagement.ControlPanels.OpenIdProvider.Services;
 

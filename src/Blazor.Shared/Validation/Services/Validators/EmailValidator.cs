@@ -17,7 +17,7 @@ internal sealed partial class EmailValidator : IEmailValidator
             return false;
         }
 
-        if (!IsEmail().Match(email).Success)
+        if (!IsEmail().IsMatch(email))
         {
             errorMessage = string.Format(ValidationMessages.Culture, ValidationMessages.FieldMustBeEmailAddress, field);
 

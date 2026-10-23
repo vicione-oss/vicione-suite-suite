@@ -147,7 +147,8 @@ public sealed partial class UserControlPanel : ControlPanelBase<UserControlPanel
 
         if (State.UserProfile is not null)
         {
-            State.UserProfile.Roles = userProfile.Roles;
+            State.UserProfile.Roles.Clear();
+            State.UserProfile.Roles.AddRange(userProfile.Roles);
             State.UpdateAvailableUserRoles();
         }
 

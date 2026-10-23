@@ -1,11 +1,8 @@
-using AwesomeAssertions;
 using Blazor.Shared.MessageBanner.Components;
 using Blazor.Shared.MessageBanner.Models;
 using Blazor.Shared.MessageBanner.Services;
 using Core.Shared.HostManagement.Events;
-using NSubstitute;
 using Sdk.Client.Infrastructure;
-using Xunit;
 using MessageBannerStrings = Blazor.Shared.MessageBanner.Localization.MessageBanner;
 
 namespace Blazor.Shared.Tests.MessageBanner;

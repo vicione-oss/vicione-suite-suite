@@ -113,23 +113,8 @@ public sealed partial class ChangePasswordContent
         if (user is not null && user.PasswordExpirationDate <= DateTimeOffset.UtcNow)
             _passwordExpired = true;
 
-        if (!editContext.Validate())
+        if (!editContext.Validate() || !ValidateNewPassword())
             return;
-
-        if (Input.Password == Input.NewPassword)
-        {
-            messageStore?.Add(() => Input.Password, string.Format(CultureInfo.CurrentCulture, ChangePassword.ErrorInputsMustNotBeTheSame, CommonVocabulary.Password, Common.NewPassword));
-            messageStore?.Add(() => Input.NewPassword, string.Format(CultureInfo.CurrentCulture, ChangePassword.ErrorInputsMustNotBeTheSame, CommonVocabulary.Password, Common.NewPassword));
-
-            return;
-        }
-        else if (Input.NewPassword != Input.ConfirmNewPassword)
-        {
-            messageStore?.Add(() => Input.NewPassword, string.Format(CultureInfo.CurrentCulture, Common.ErrorInputsDoNotMatch, Common.NewPassword, Common.ConfirmNewPassword));
-            messageStore?.Add(() => Input.ConfirmNewPassword, string.Format(CultureInfo.CurrentCulture, Common.ErrorInputsDoNotMatch, Common.NewPassword, Common.ConfirmNewPassword));
-
-            return;
-        }
 
         if (user is null)
         {
@@ -153,24 +138,7 @@ public sealed partial class ChangePasswordContent
 
         if (!result.Succeeded)
         {
-            foreach (var error in result.Errors)
-            {
-                if (error.Code == nameof(IdentityErrorDescriber.PasswordMismatch))
-                {
-                    await UserManager.AccessFailedAsync(user);
-                    messageStore?.Add(() => Input.Password, error.Description);
-                }
-                else if (error.IsPasswordPolicyError())
-                {
-                    messageStore?.Add(() => Input.NewPassword, error.Description);
-                    messageStore?.Add(() => Input.ConfirmNewPassword, error.Description);
-                }
-                else
-                {
-                    messageStore?.Add(() => Input.Username, error.Description);
-                }
-            }
-
+            await AddChangePasswordErrors(user, result.Errors);
             return;
         }
 
@@ -201,6 +169,48 @@ public sealed partial class ChangePasswordContent
 
     public void OnCancel()
         => NavigationService.RedirectTo(ReturnRoute ?? "/");
+
+    private bool ValidateNewPassword()
+    {
+        if (Input.Password == Input.NewPassword)
+        {
+            messageStore?.Add(() => Input.Password, string.Format(CultureInfo.CurrentCulture, ChangePassword.ErrorInputsMustNotBeTheSame, CommonVocabulary.Password, Common.NewPassword));
+            messageStore?.Add(() => Input.NewPassword, string.Format(CultureInfo.CurrentCulture, ChangePassword.ErrorInputsMustNotBeTheSame, CommonVocabulary.Password, Common.NewPassword));
+
+            return false;
+        }
+
+        if (Input.NewPassword != Input.ConfirmNewPassword)
+        {
+            messageStore?.Add(() => Input.NewPassword, string.Format(CultureInfo.CurrentCulture, Common.ErrorInputsDoNotMatch, Common.NewPassword, Common.ConfirmNewPassword));
+            messageStore?.Add(() => Input.ConfirmNewPassword, string.Format(CultureInfo.CurrentCulture, Common.ErrorInputsDoNotMatch, Common.NewPassword, Common.ConfirmNewPassword));
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task AddChangePasswordErrors(SuiteUser user, IEnumerable<IdentityError> errors)
+    {
+        foreach (var error in errors)
+        {
+            if (error.Code == nameof(IdentityErrorDescriber.PasswordMismatch))
+            {
+                await UserManager.AccessFailedAsync(user);
+                messageStore?.Add(() => Input.Password, error.Description);
+            }
+            else if (error.IsPasswordPolicyError())
+            {
+                messageStore?.Add(() => Input.NewPassword, error.Description);
+                messageStore?.Add(() => Input.ConfirmNewPassword, error.Description);
+            }
+            else
+            {
+                messageStore?.Add(() => Input.Username, error.Description);
+            }
+        }
+    }
 
     private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
         => messageStore?.Clear();

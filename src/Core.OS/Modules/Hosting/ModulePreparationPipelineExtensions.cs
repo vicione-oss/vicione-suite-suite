@@ -82,8 +82,8 @@ internal static partial class ModulePreparationPipelineExtensions
 
     /// <summary>
     /// Builds the module host and load module assemblies via <see cref="ModuleHostBuilder"/>.
-    /// It sets <see cref="SuitePreparationContext.ModuleHost"/> and <see cref="SuitePreparationContext.ModuleOptionsStore"/>.
-    /// It calls <see cref="MvcServiceCollectionExtensions.AddControllersWithViews"/> on process of building the module host.
+    /// It sets <see cref="ModulePreparationContext.ModuleHost"/> and <see cref="ModulePreparationContext.ModuleOptionsStore"/>.
+    /// It calls <see cref="MvcServiceCollectionExtensions.AddControllersWithViews(IServiceCollection)"/> on process of building the module host.
     /// </summary>
     public static ModulePreparationPipeline UseModuleHost(this ModulePreparationPipeline pipeline)
         => pipeline.Use(async (ctx, ct) =>

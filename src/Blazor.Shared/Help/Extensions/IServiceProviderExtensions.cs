@@ -1,6 +1,8 @@
-﻿using Blazor.Shared.Help.NotificationArea;
+﻿#if DEBUG
+using Blazor.Shared.Help.NotificationArea;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.NotificationArea.Services;
+#endif
 
 namespace Blazor.Shared.Help.Extensions;
 

@@ -31,7 +31,7 @@ public sealed class ModuleMetadataModel
 
     public bool Installed { get; set; }
 
-    public required Dictionary<string, ModuleOptionDeclaration> EditOptions { get; set; }
+    public required Dictionary<string, ModuleOptionDeclaration> EditOptions { get; init; }
 
     public List<ModuleDependencyPackage> Dependencies => Bundle.Metadata.Dependencies ?? [];
 

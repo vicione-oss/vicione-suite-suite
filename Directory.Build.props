@@ -37,6 +37,14 @@
         <!-- Code quality -->
         <TreatWarningsAsErrors Condition="'$(CI)' != '' Or '$(TREAT_WARNINGS_AS_ERRORS)' == 'true'">true</TreatWarningsAsErrors>
         <NoWarn Condition="'$(CI)' == ''">$(NoWarn);NU1507</NoWarn>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+        <!-- EnforceCodeStyleInBuild needs the documentation file to report IDE0005, see https://github.com/dotnet/roslyn/issues/41640. -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591</NoWarn>
+        <!-- Edge-S flash is limited, so XML docs stay out of the published output. -->
+        <PublishDocumentationFile>false</PublishDocumentationFile>
+        <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
 
         <!-- NuGet security -->
         <NuGetAuditMode>all</NuGetAuditMode>

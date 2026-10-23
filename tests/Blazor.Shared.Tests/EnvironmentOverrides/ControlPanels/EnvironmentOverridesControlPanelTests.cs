@@ -1,5 +1,4 @@
 using AngleSharp.Dom;
-using AwesomeAssertions;
 using Blazor.Shared.EnvironmentOverrides.ControlPanels.Components;
 using Blazor.Shared.EnvironmentOverrides.ControlPanels.Extensions;
 using Blazor.Shared.EnvironmentOverrides.ControlPanels.Models;
@@ -10,11 +9,9 @@ using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
 using ViciOne.Ui.Localization.Resources;
-using Xunit;
 
 namespace Blazor.Shared.Tests.EnvironmentOverrides.ControlPanels;
 
@@ -241,12 +238,14 @@ public sealed class EnvironmentOverridesControlPanelTests
     {
         // Arrange — seeded past Initialize on purpose: the stored overrides cannot hold a name
         // twice, but the grid has to until the duplicate is either edited or refused on save.
-        var state = new EnvironmentOverridesControlPanelState();
-        state.Entries =
-        [
-            new EnvironmentOverrideEntry { Name = "MY_KEY", Value = "value" },
-            new EnvironmentOverrideEntry { Name = "MY_KEY", Value = "value" },
-        ];
+        var state = new EnvironmentOverridesControlPanelState
+        {
+            Entries =
+            [
+                new EnvironmentOverrideEntry { Name = "MY_KEY", Value = "value" },
+                new EnvironmentOverrideEntry { Name = "MY_KEY", Value = "value" },
+            ],
+        };
 
         var firstEntry = state.Entries[0];
 
@@ -354,7 +353,7 @@ public sealed class EnvironmentOverridesControlPanelTests
         await FindButtonByTitle(component, CommonVocabulary.Save).ClickAsync();
 
         // Assert
-        
+
         // The state must not update for an invalid name.
         state.Entries.Should().ContainSingle().Which.Name.Should().Be("MY_KEY");
         // The input is still present, so edit mode held and the update was not committed.

@@ -9,7 +9,6 @@ using Sdk.Client.ControlPanels.Components;
 using Sdk.Client.Models;
 using Sdk.Client.Services;
 using Sdk.MessageBanner.Contracts;
-using Sdk.Utils;
 using ViciOne.Ui.MonochromeIcons.Core.Enums;
 using ViciOne.Ui.MonochromeIcons.Core.Extensions;
 

@@ -30,7 +30,7 @@ public class IServiceCollectionExtensionsTests
     };
 
     [Theory]
-    [MemberData(nameof(Tabs))]
+    [MemberData(nameof(Tabs), DisableDiscoveryEnumeration = true)]
     public void Should_configure_save_and_reset_handler_for_each_tab(Action<IServiceCollection> addTab, Type controlPanelType,
         Type stateType)
     {
@@ -50,7 +50,7 @@ public class IServiceCollectionExtensionsTests
     }
 
     [Theory]
-    [MemberData(nameof(Tabs))]
+    [MemberData(nameof(Tabs), DisableDiscoveryEnumeration = true)]
     public void Should_resolve_each_tab_state_with_its_dependencies(Action<IServiceCollection> addTab, Type controlPanelType,
         Type stateType)
     {
@@ -71,7 +71,7 @@ public class IServiceCollectionExtensionsTests
     }
 
     [Theory]
-    [MemberData(nameof(ManagementServiceConsumers))]
+    [MemberData(nameof(ManagementServiceConsumers), DisableDiscoveryEnumeration = true)]
     public void Should_register_the_management_service_for_each_control_panel_using_it(Action<IServiceCollection> addControlPanel)
     {
         // Arrange

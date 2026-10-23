@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
 
@@ -41,6 +42,7 @@ internal sealed class MailpitClient(Uri baseUri)
 }
 
 /// <summary>A message as returned by the mailpit API (only the fields the tests assert on).</summary>
+[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated by JSON deserialization")]
 internal sealed record MailpitMessage
 {
     public MailpitAddress? From { get; init; }
@@ -54,6 +56,7 @@ internal sealed record MailpitMessage
     [JsonPropertyName("HTML")] public string? Html { get; init; }
 }
 
+[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated by JSON deserialization")]
 internal sealed record MailpitAddress
 {
     public string? Name { get; init; }
@@ -62,6 +65,7 @@ internal sealed record MailpitAddress
 }
 
 /// <summary>The result of a mailpit search query (the matching messages).</summary>
+[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated by JSON deserialization")]
 internal sealed record MailpitSearchResult
 {
     public IReadOnlyList<MailpitMessage> Messages { get; init; } = [];

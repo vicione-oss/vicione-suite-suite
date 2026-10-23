@@ -11,6 +11,6 @@ public class ModulePackageVersion
 
     public DateTimeOffset LastModified { get; set; }
 
-    public List<ModulePackagePlatformInfo> Platforms { get; set; } = [];
+    public List<ModulePackagePlatformInfo> Platforms { get; init; } = [];
 
 }

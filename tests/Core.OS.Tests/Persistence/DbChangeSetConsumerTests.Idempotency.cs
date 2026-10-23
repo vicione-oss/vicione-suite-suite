@@ -41,7 +41,7 @@ public partial class DbChangeSetConsumerTests
             instanceInfo.Type.Returns(InstanceType.Slave);
             instanceInfo.Name.Returns("TestSlave");
             _localInstanceInfo.Local.Returns(instanceInfo);
-            _localInstanceInfo.LoadedModules.Returns(new List<string> { "TestModule" });
+            _localInstanceInfo.LoadedModules.Returns(["TestModule"]);
 
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();

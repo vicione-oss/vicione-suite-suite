@@ -16,11 +16,8 @@ public interface IArtifactRepositoryStore
     Task MigrateConfiguredRepositories(IConfiguration config, ILogger logger, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves all persisted repositories, optionally filtered by their identifiers provided by repositoryIds usage.
+    /// Retrieves the persisted repositories listed in <paramref name="repositoryIds"/>, or all of them when it is <see langword="null"/>.
     /// </summary>
-    /// <param name="repositoryIds">
-    /// An optional set of identifiers to filter by. When <see langword="null"/>, all sources are returned.
-    /// </param>
     Task<List<ArtifactRepository>> GetRepositories(IReadOnlyCollection<Guid>? repositoryIds, CancellationToken cancellationToken = default);
 
     /// <summary>

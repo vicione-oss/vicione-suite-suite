@@ -35,7 +35,7 @@ public class UserManagerExtensionsTests
             // Arrange
             var user = new SuiteUser { UserName = "bob" };
             using var userManager = TestFactory.CreateUserManager();
-            userManager.GetRolesAsync(user).Returns(new List<string> { "OtherRole" });
+            userManager.GetRolesAsync(user).Returns(["OtherRole"]);
 
             // Act
             var result = await userManager.IsLastSystemAdministrator(user);
@@ -51,8 +51,8 @@ public class UserManagerExtensionsTests
             var user = new SuiteUser { UserName = "admin" };
             using var userManager = TestFactory.CreateUserManager();
 
-            userManager.GetRolesAsync(user).Returns(new List<string> { AuthorizationConstants.AdminRoleName });
-            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns(new List<SuiteUser> { user });
+            userManager.GetRolesAsync(user).Returns([AuthorizationConstants.AdminRoleName]);
+            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns([user]);
 
             // Act
             var result = await userManager.IsLastSystemAdministrator(user);
@@ -69,8 +69,8 @@ public class UserManagerExtensionsTests
             var other = new SuiteUser { UserName = "admin2" };
             using var userManager = TestFactory.CreateUserManager();
 
-            userManager.GetRolesAsync(user).Returns(new List<string> { AuthorizationConstants.AdminRoleName });
-            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns(new List<SuiteUser> { user, other });
+            userManager.GetRolesAsync(user).Returns([AuthorizationConstants.AdminRoleName]);
+            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns([user, other]);
 
             // Act
             var result = await userManager.IsLastSystemAdministrator(user);
@@ -86,8 +86,8 @@ public class UserManagerExtensionsTests
             var user = new SuiteUser { UserName = "admin" };
             using var userManager = TestFactory.CreateUserManager();
 
-            userManager.GetRolesAsync(user).Returns(new List<string> { AuthorizationConstants.AdminRoleName });
-            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns(new List<SuiteUser>());
+            userManager.GetRolesAsync(user).Returns([AuthorizationConstants.AdminRoleName]);
+            userManager.GetUsersInRoleAsync(AuthorizationConstants.AdminRoleName).Returns([]);
 
             // Act
             var act = async () => await userManager.IsLastSystemAdministrator(user);

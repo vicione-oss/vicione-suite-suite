@@ -1,3 +1,36 @@
 [*.cs]
+dotnet_diagnostic.IDE0017.severity = warning # Use object initializers
+dotnet_diagnostic.IDE0028.severity = warning # Use collection initializers
+dotnet_diagnostic.IDE0031.severity = warning # Use null propagation
+dotnet_diagnostic.IDE0039.severity = warning # Use local function instead of lambda
+dotnet_diagnostic.IDE0042.severity = warning # Deconstruct variable declaration
+dotnet_diagnostic.IDE0055.severity = warning # Fix formatting
+dotnet_diagnostic.IDE0057.severity = warning # Use range operator
+dotnet_diagnostic.IDE0062.severity = warning # Make local function static
+dotnet_diagnostic.IDE0066.severity = warning # Use switch expression
+dotnet_diagnostic.IDE0078.severity = warning # Use pattern matching
+dotnet_diagnostic.IDE0090.severity = warning # Simplify `new` expression
+dotnet_diagnostic.IDE0270.severity = warning # Use coalesce expression - null check can be simplified
+dotnet_diagnostic.IDE0290.severity = warning # Use primary constructor
+
+dotnet_diagnostic.CA1307.severity = warning # Specify StringComparison for clarity
+dotnet_diagnostic.CA1502.severity = warning # Avoid excessive complexity
+dotnet_diagnostic.CA1507.severity = warning # Use nameof in place of string
+dotnet_diagnostic.CA1802.severity = warning # Use Literals Where Appropriate
+dotnet_diagnostic.CA1812.severity = warning # Avoid uninstantiated internal classes
+dotnet_diagnostic.CA1815.severity = warning # Override equals and operator equals on value types
+dotnet_diagnostic.CA1822.severity = warning # Mark members as static
+dotnet_diagnostic.CA1826.severity = warning # Use property instead of Linq Enumerable method
+dotnet_diagnostic.CA1829.severity = warning # Use Length/Count property instead of Enumerable.Count method
 dotnet_diagnostic.CA1848.severity = warning # Use the LoggerMessage delegates
 dotnet_diagnostic.CA1849.severity = warning # Call async methods when in an async method
+dotnet_diagnostic.CA1859.severity = warning # Use concrete types when possible for improved performance
+dotnet_diagnostic.CA1860.severity = warning # Avoid using 'Enumerable.Any()' extension method
+dotnet_diagnostic.CA1861.severity = warning # Avoid constant arrays as arguments
+dotnet_diagnostic.CA1862.severity = warning # Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+dotnet_diagnostic.CA1873.severity = warning # Avoid potentially expensive logging
+dotnet_diagnostic.CA1874.severity = warning # Use 'Regex.IsMatch'
+dotnet_diagnostic.CA2227.severity = warning # Collection properties should be read only
+dotnet_diagnostic.CA2251.severity = warning # Use `String.Equals` over `String.Compare`
+
+dotnet_diagnostic.SYSLIB1006.severity = warning # Multiple logging methods should not use the same event id

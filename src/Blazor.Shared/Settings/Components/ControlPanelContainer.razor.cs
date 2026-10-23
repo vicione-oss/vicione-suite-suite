@@ -69,12 +69,10 @@ public sealed partial class ControlPanelContainer : ComponentBase, IDisposable
         if (Interlocked.CompareExchange(ref _disposed, true, false))
             return;
 
-        if (_controlPanelState is not null)
-            _controlPanelState.Changed -= ControlPanelStateChanged;
+        _controlPanelState?.Changed -= ControlPanelStateChanged;
 
         // The edit stays registered: EditScope owns it and ends it with the visit, not with the tab.
-        if (_controlPanelEdit is not null)
-            _controlPanelEdit.Changed -= ControlPanelEditChanged;
+        _controlPanelEdit?.Changed -= ControlPanelEditChanged;
     }
 
     private async void ControlPanelStateChanged(ControlPanelStateChangedEventArgs args)

@@ -7,10 +7,10 @@ namespace Core.OS.Instance.Services;
 
 internal partial class BackupBuilder
 {
-    private static async Task<List<BackupEntrySummary>?> BackupSqliteDatabases(ZipArchive moduleArchive, IFileSystem fileSystem, Dictionary<string, string> databaseFiles, ILogger logger, CancellationToken cancellationToken = default)
+    private static async Task<List<BackupEntrySummary>> BackupSqliteDatabases(ZipArchive moduleArchive, IFileSystem fileSystem, Dictionary<string, string> databaseFiles, ILogger logger, CancellationToken cancellationToken = default)
     {
         if (databaseFiles.Count == 0)
-            return null;
+            return [];
 
         var result = new List<BackupEntrySummary>();
 

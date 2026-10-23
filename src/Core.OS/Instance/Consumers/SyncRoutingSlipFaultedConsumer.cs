@@ -58,10 +58,11 @@ public sealed partial class SyncRoutingSlipFaultedConsumer(
             var endpoint = await sendEndpointProvider.GetSendEndpoint(
                 MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
 
-            await endpoint.Send(localInstanceInformationProvider.Local.ToRegisterInstanceCommand(
+            var command = localInstanceInformationProvider.Local.ToRegisterInstanceCommand(
                 [.. localInstanceInformationProvider.LoadedModules],
                 [],
-                []) with { ForceSync = true }, stopping);
+                []);
+            await endpoint.Send(command with { ForceSync = true }, stopping);
 
             LogReregistrationSent(logger, instanceId);
         }

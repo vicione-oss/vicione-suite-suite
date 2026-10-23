@@ -31,7 +31,7 @@ public sealed class SuiteVersionUtilsTests
 
     public sealed class IsVersionCompatible
     {
-        [Theory]        
+        [Theory]
         [InlineData("0.10.1", "0.10.1-ci1632286")]
         [InlineData("0.10.1", "0.10.0")]
         [InlineData("0.10.1", "1.10.1")]

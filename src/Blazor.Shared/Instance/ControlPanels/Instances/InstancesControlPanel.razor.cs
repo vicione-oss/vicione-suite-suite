@@ -140,8 +140,7 @@ public sealed partial class InstancesControlPanel : ControlPanelBase<InstancesCo
         foreach (var command in commands)
         {
             var instance = State.Instances.FirstOrDefault(k => k.Id == command.InstanceId);
-            if (instance != null)
-                instance.IsSynchronizing = true;
+            instance?.IsSynchronizing = true;
         }
 
         await Task.WhenAll(commands.Select(c => Mediator.Send(c, c.InstanceId)));

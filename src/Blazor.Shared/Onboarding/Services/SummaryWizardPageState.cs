@@ -26,6 +26,6 @@ public sealed class SummaryWizardPageState : WizardPageState
 
     internal SystemConfiguration? NewSystemConfiguration { get; set; }
 
-    internal bool AutomaticRestartAnticipated => false; // Feature is actually not used
+    internal static bool AutomaticRestartAnticipated => false; // Feature is actually not used
     internal bool AutomaticRestartExpanded { get; set; } = true;
 }

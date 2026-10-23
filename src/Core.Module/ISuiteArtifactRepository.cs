@@ -10,13 +10,13 @@ public interface ISuiteArtifactRepository
 {
     /// <summary>
     /// Downloads the suite and signature package and validates it against
-    /// <see cref="Options.ArtifactRepositoryOptions.PublicKeys"/>; one matching key is enough.
+    /// <see cref="Core.Artifacts.ArtifactRepositoryOptions.PublicKeys"/>; one matching key is enough.
     /// </summary>
     Task<SuitePackageDownloadResult> DownloadAndValidate(string downloadPath, string suiteArtifactName, string signatureArtifactName, CancellationToken cancellationToken);
 
     /// <summary>
     /// Downloads the suite and signature package of the bundle and validates it against
-    /// <see cref="Options.ArtifactRepositoryOptions.PublicKeys"/>; one matching key is enough.
+    /// <see cref="Core.Artifacts.ArtifactRepositoryOptions.PublicKeys"/>; one matching key is enough.
     /// </summary>
     Task<SuitePackageDownloadResult> DownloadAndValidate(string downloadPath, SuiteArtifactBundle suiteBundle, CancellationToken cancellationToken);
 

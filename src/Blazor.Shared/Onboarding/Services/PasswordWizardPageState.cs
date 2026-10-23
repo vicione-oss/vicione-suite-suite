@@ -6,9 +6,9 @@ namespace Blazor.Shared.Onboarding.Services;
 public sealed class PasswordWizardPageState(IAdministratorNameProvider administratorNameProvider)
     : WizardPageState
 {
-    private readonly string _userName = administratorNameProvider.GetAdministratorName();
+    internal const int PasswordMinimumLength = 12;
 
-    internal int PasswordMinimumLength => 12;
+    private readonly string _userName = administratorNameProvider.GetAdministratorName();
 
     internal bool RulesAndGuidelinesExpanded { get; set; }
 

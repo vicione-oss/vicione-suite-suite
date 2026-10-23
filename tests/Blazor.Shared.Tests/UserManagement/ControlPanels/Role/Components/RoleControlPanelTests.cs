@@ -1,18 +1,15 @@
-using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.Role.Components;
 using Blazor.Shared.UserManagement.ControlPanels.Role.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.Role.Services;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Services;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
 using Sdk.Testing.Client;
 using Sdk.UserManagement.Events;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.UserManagement.ControlPanels.Role.Components;
 

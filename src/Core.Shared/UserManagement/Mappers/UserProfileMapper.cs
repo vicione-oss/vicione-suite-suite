@@ -10,7 +10,4 @@ public partial class UserProfileMapper
 
     private static UserName Map(UserName source)
         => source;
-
-    private static SuiteRole Map(SuiteRole source)
-        => source;
 }

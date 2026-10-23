@@ -17,13 +17,13 @@ public sealed class AddPasskeyControlPanelSaveHandlerTests
     {
         // Arrange
         var sut = CreateSut();
+        var state = new AddPasskeyControlPanelState
+        {
+            Name = string.Empty,
+        };
 
         // Act
-        var result = await sut.Save(new AddPasskeyControlPanelState()
-            {
-                Name = string.Empty,
-            },
-            TestContext.Current.CancellationToken);
+        var result = await sut.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
         result.Message.Should().NotBeNullOrEmpty();
@@ -34,17 +34,17 @@ public sealed class AddPasskeyControlPanelSaveHandlerTests
     {
         // Arrange
         var sut = CreateSut();
+        var state = new AddPasskeyControlPanelState
+        {
+            ExistingUserPasskeys =
+            [
+                new PasskeyInfo("id-1", "test")
+            ],
+            Name = "TesT",
+        };
 
         // Act
-        var result = await sut.Save(new AddPasskeyControlPanelState()
-            {
-                ExistingUserPasskeys =
-                [
-                    new PasskeyInfo("id-1", "test")
-                ],
-                Name = "TesT",
-            },
-            TestContext.Current.CancellationToken);
+        var result = await sut.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
         result.Message.Should().NotBeNullOrEmpty()
@@ -56,13 +56,13 @@ public sealed class AddPasskeyControlPanelSaveHandlerTests
     {
         // Arrange
         var sut = CreateSut();
+        var state = new AddPasskeyControlPanelState
+        {
+            Name = new string('a', PasskeyConstants.MaxPasskeyNameLength + 1),
+        };
 
         // Act
-        var result = await sut.Save(new AddPasskeyControlPanelState()
-            {
-                Name = new string('a', PasskeyConstants.MaxPasskeyNameLength + 1),
-            },
-            TestContext.Current.CancellationToken);
+        var result = await sut.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
         result.Message.Should().NotBeNullOrEmpty()
@@ -74,13 +74,13 @@ public sealed class AddPasskeyControlPanelSaveHandlerTests
     {
         // Arrange
         var sut = CreateSut(Options.Create(new AntiforgeryOptions()));
+        var state = new AddPasskeyControlPanelState
+        {
+            Name = "test",
+        };
 
         // Act
-        var result = await sut.Save(new AddPasskeyControlPanelState()
-            {
-                Name = "test",
-            },
-            TestContext.Current.CancellationToken);
+        var result = await sut.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().BeOfType<NavigateBackOnSaveSuccessResult>();

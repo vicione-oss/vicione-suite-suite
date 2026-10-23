@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Diagnostics;
+using System.IO.Abstractions;
 using System.Reflection;
 using Core.Module.Extensions;
 using Core.Module.Options;
@@ -158,11 +159,7 @@ public class SuiteDependencyContextBuilder
     {
         fileSystem ??= new FileSystem();
 
-#if DEBUG
-        // On deployment the path is configured, so a missing folder is an error.
-        if (!string.IsNullOrEmpty(_options.BackendLoaderOptions?.ModulesPath))
-            EnsureModuleFolderExists(fileSystem, _options.BackendLoaderOptions?.ModulesPath);
-#endif
+        EnsureModuleFolderExists(fileSystem, _options.BackendLoaderOptions?.ModulesPath);
         ResolveBackendModulePathInfos(fileSystem, _options.BackendLoaderOptions, _options.BackendModuleOptions);
         ResolveUiHostPathInfo(fileSystem, _options.UiHostOptions);
         ResolveUiModules(fileSystem, _options.ClientLoaderOptions, _options.ClientModuleOptions);
@@ -272,8 +269,7 @@ public class SuiteDependencyContextBuilder
 
         infos.UnionWith(CreateModulePathInfos(debugUis, true));
 
-        var uiHostDepsJson = ModuleHelpers.DllToDepsJson(_options.UiHostPathInfo.AssemblyPath);
-        var deployedUis = fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath, uiHostDepsJson)
+        var deployedUis = fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath)
             .Where(p => loaderOptions.AllowInclude(p))
             .Where(k => IsEnabled(moduleOptions, k));
 
@@ -361,6 +357,10 @@ public class SuiteDependencyContextBuilder
         return false;
     }
 
+    /// <summary>
+    /// Creates a missing module folder in DEBUG builds only; on deployment the path is configured, so a missing folder is an error.
+    /// </summary>
+    [Conditional("DEBUG")]
     private static void EnsureModuleFolderExists(IFileSystem fileSystem, string? modulesPath)
     {
         if (string.IsNullOrEmpty(modulesPath))

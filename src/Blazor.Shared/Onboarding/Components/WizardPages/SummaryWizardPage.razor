@@ -77,7 +77,7 @@
         </SettingsInformation>
     </SettingsGroup>
 
-    @if (State.AutomaticRestartAnticipated)
+    @if (SummaryWizardPageState.AutomaticRestartAnticipated)
     {
         <SettingsGroup Title="@Localization.SummaryWizardPage.AutomaticRestartTitle" @bind-Expanded="State.AutomaticRestartExpanded">
             <SettingsInformation>

@@ -153,8 +153,7 @@ public sealed partial class SettingsContainerContentHeader : ComponentBase, IDis
 
         _activeControlPanelRegistryItem = activeControlPanelRegistryItem;
 
-        if (_activeControlPanelRegistryItem is not null)
-            _activeControlPanelRegistryItem.State.Changed += ActiveControlPanelRegistryItemStateChanged;
+        _activeControlPanelRegistryItem?.State.Changed += ActiveControlPanelRegistryItemStateChanged;
     }
 
     private async void ActiveControlPanelRegistryItemStateChanged(ControlPanelStateChangedEventArgs args)

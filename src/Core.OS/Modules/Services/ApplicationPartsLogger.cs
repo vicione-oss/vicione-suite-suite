@@ -15,7 +15,7 @@ internal sealed partial class ApplicationPartsLogger(ILogger<ApplicationPartsLog
 
         // Get the names of all the application parts. This is the short assembly name for AssemblyParts
         var applicationParts = partManager.ApplicationParts.Select(x => x.Name);
-        LogApplicationParts(logger, string.Join(", ", applicationParts));
+        LogApplicationParts(logger, applicationParts);
 
         // Create a controller feature, and populate it from the application parts
         var controllerFeature = new ControllerFeature();
@@ -23,7 +23,7 @@ internal sealed partial class ApplicationPartsLogger(ILogger<ApplicationPartsLog
 
         // Get the names of all controllers
         var controllers = controllerFeature.Controllers.Select(x => x.Name);
-        LogRegisteredControllers(logger, string.Join(", ", controllers));
+        LogRegisteredControllers(logger, controllers);
 
         return Task.CompletedTask;
     }
@@ -32,8 +32,8 @@ internal sealed partial class ApplicationPartsLogger(ILogger<ApplicationPartsLog
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Use application parts: '{ApplicationParts}'")]
-    private static partial void LogApplicationParts(ILogger<ApplicationPartsLogger> logger, string applicationParts);
+    private static partial void LogApplicationParts(ILogger<ApplicationPartsLogger> logger, IEnumerable<string> applicationParts);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Use registered controllers: '{Controllers}'")]
-    private static partial void LogRegisteredControllers(ILogger<ApplicationPartsLogger> logger, string controllers);
+    private static partial void LogRegisteredControllers(ILogger<ApplicationPartsLogger> logger, IEnumerable<string> controllers);
 }

@@ -39,7 +39,7 @@ public sealed class GetPasskeysConsumerTests
         { Name = "phone" };
 
         _userManager.FindByIdAsync(userId).Returns(user);
-        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
+        _userManager.GetPasskeysAsync(user).Returns([passkey]);
 
         await using var tester = new MassTransitTester(cfg =>
         {
@@ -70,7 +70,7 @@ public sealed class GetPasskeysConsumerTests
         };
 
         _userManager.FindByIdAsync(userId).Returns(user);
-        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo>());
+        _userManager.GetPasskeysAsync(user).Returns([]);
 
         await using var tester = new MassTransitTester(cfg =>
         {

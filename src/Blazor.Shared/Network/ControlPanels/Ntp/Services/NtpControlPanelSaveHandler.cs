@@ -14,9 +14,7 @@ internal sealed class NtpControlPanelSaveHandler(IUiMediator mediator, ISystemCo
 {
     protected override Task<ISaveInternalResult> SaveInternal(NtpControlPanelState state)
     {
-        var networkNtpSettings = new NetworkNTPSettings();
-
-        networkNtpSettings.Enabled = state.NtpServersEnabled;
+        var networkNtpSettings = new NetworkNTPSettings { Enabled = state.NtpServersEnabled };
         state.NtpServerDetails.Save(networkNtpSettings.Servers);
 
         var systemConfiguration = new SystemConfiguration

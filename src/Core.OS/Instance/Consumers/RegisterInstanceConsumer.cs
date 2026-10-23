@@ -247,12 +247,14 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
         if (connection is null)
             return null;
 
+        // Formatted by the logger only when the level is enabled.
+        var metadata = connection.Metadata.Select(k => $"{k.Key}:{k.Value}");
+        var tags = connection.Tags.Select(k => k.Text);
+
         var existing = connections.FirstOrDefaultInstanceMqttConnection(instanceId, connectionType);
         if (existing is null)
         {
-            LogAddInstanceConnection(logger, instanceId, connection.Name, connection.Id,
-                string.Join(", ", connection.Metadata.Select(k => $"{k.Key}:{k.Value}")),
-                string.Join(", ", connection.Tags.Select(k => k.Text)));
+            LogAddInstanceConnection(logger, instanceId, connection.Name, connection.Id, metadata, tags);
 
             return connection;
         }
@@ -266,9 +268,7 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
         // The id is kept; everything else is overwritten.
         existing.Assign(connection);
 
-        LogUpdateInstanceConnection(logger, instanceId, connection.Name, connection.Id,
-            string.Join(", ", connection.Metadata.Select(k => $"{k.Key}:{k.Value}")),
-            string.Join(", ", connection.Tags.Select(k => k.Text)));
+        LogUpdateInstanceConnection(logger, instanceId, connection.Name, connection.Id, metadata, tags);
 
         return existing;
     }
@@ -388,10 +388,10 @@ public sealed partial class RegisterInstanceConsumer(IServiceProvider services, 
     private static partial void LogStoredInstanceConfiguration(ILogger<RegisterInstanceConsumer> logger, Guid correlationId, Guid instanceId);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Add instance {InstanceId} connection {Name} Id:{ConnectionId} Meta:{MetaData} Tags:{Tags}")]
-    private static partial void LogAddInstanceConnection(ILogger<RegisterInstanceConsumer> logger, Guid instanceId, string? name, Guid connectionId, string metaData, string tags);
+    private static partial void LogAddInstanceConnection(ILogger<RegisterInstanceConsumer> logger, Guid instanceId, string? name, Guid connectionId, IEnumerable<string> metaData, IEnumerable<string> tags);
 
     [LoggerMessage(Level = LogLevel.Debug, Message = "Update instance {InstanceId} connection {Name} Id:{ConnectionId} Meta:{MetaData} Tags:{Tags}")]
-    private static partial void LogUpdateInstanceConnection(ILogger<RegisterInstanceConsumer> logger, Guid instanceId, string? name, Guid connectionId, string metaData, string tags);
+    private static partial void LogUpdateInstanceConnection(ILogger<RegisterInstanceConsumer> logger, Guid instanceId, string? name, Guid connectionId, IEnumerable<string> metaData, IEnumerable<string> tags);
 
     [LoggerMessage(Level = LogLevel.Information, Message = "Instance{newInstance} '{Instance}' successfully synchronized")]
     private static partial void LogInstanceSynchronized(ILogger<RegisterInstanceConsumer> logger, string newInstance, Guid instance);

@@ -83,14 +83,14 @@ internal static class IServiceCollectionExtensions
                     .AddEntityFrameworkStores<UserDbContext>()
                     .AddDefaultTokenProviders();
 
-                AddExternalAuthentication(services, config);
+                AddExternalAuthentication(services);
                 return identityBuilder;
             });
 
         return services;
     }
 
-    private static void AddExternalAuthentication(IServiceCollection services, ConfigurationManager config)
+    private static void AddExternalAuthentication(IServiceCollection services)
     {
         services.AddTransient<IExternalAuthenticationSettings, ExternalAuthenticationSettings>();
         services.AddSingleton<IAuthenticationSchemeProvider, DynamicAuthenticationSchemeProvider>();

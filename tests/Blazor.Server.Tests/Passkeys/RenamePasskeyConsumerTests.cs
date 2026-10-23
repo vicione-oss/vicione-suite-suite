@@ -68,7 +68,7 @@ public sealed class RenamePasskeyConsumerTests
         };
 
         _userManager.FindByIdAsync(userId).Returns(user);
-        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo>());
+        _userManager.GetPasskeysAsync(user).Returns([]);
 
         await using var tester = new MassTransitTester(cfg =>
         {
@@ -119,7 +119,7 @@ public sealed class RenamePasskeyConsumerTests
         };
 
         _userManager.FindByIdAsync(userId).Returns(user);
-        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
+        _userManager.GetPasskeysAsync(user).Returns([passkey]);
         _userManager.AddOrUpdatePasskeyAsync(user, Arg.Any<UserPasskeyInfo>()).Returns(IdentityResult.Success);
 
         await using var tester = new MassTransitTester(cfg =>
@@ -174,7 +174,7 @@ public sealed class RenamePasskeyConsumerTests
         };
 
         _userManager.FindByIdAsync(userId).Returns(user);
-        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
+        _userManager.GetPasskeysAsync(user).Returns([passkey]);
 
         await using var tester = new MassTransitTester(cfg =>
         {
@@ -227,7 +227,7 @@ public sealed class RenamePasskeyConsumerTests
         };
 
         _userManager.FindByIdAsync(userId).Returns(user);
-        _userManager.GetPasskeysAsync(user).Returns(new List<UserPasskeyInfo> { passkey });
+        _userManager.GetPasskeysAsync(user).Returns([passkey]);
         _userManager.AddOrUpdatePasskeyAsync(user, Arg.Any<UserPasskeyInfo>()).Returns(IdentityResult.Success);
 
         await using var tester = new MassTransitTester(cfg =>
@@ -248,7 +248,7 @@ public sealed class RenamePasskeyConsumerTests
         message.Context.Message.ErrorInfo.Should().BeNull();
         await _userManager.Received(1)
             .AddOrUpdatePasskeyAsync(user,
-                Arg.Is<UserPasskeyInfo>(p => p!.Name == existingName.ToUpperInvariant()));
+                Arg.Is<UserPasskeyInfo>(p => p!.Name == request.NewName));
     }
 
     [Theory]
@@ -337,7 +337,7 @@ public sealed class RenamePasskeyConsumerTests
 
         _userManager.FindByIdAsync(userId).Returns(user);
         _userManager.GetPasskeysAsync(user)
-            .Returns(new List<UserPasskeyInfo> { targetPasskey, otherPasskey });
+            .Returns([targetPasskey, otherPasskey]);
 
         await using var tester = new MassTransitTester(cfg =>
         {

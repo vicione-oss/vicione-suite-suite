@@ -3,7 +3,6 @@ using Core.OS.UserManagement.Security;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
-using NSubstitute;
 
 namespace Core.OS.Tests.UserManagement.Security;
 
@@ -113,7 +112,7 @@ public class ExternalLoginFormActionOriginTests
         return new ExternalLoginFormActionOrigin(options).Resolve(Request());
     }
 
-    private static HttpContext Request()
+    private static DefaultHttpContext Request()
     {
         var context = new DefaultHttpContext();
         context.Request.Scheme = "https";

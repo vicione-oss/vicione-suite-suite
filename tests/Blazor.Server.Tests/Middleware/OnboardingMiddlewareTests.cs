@@ -164,13 +164,13 @@ public sealed class OnboardingMiddlewareTests
     {
         var state = new OnboardingState { InstanceId = _instanceId, Completed = false, ShowWizardWhenNotCompleted = true };
 
-        var landing = await Invoke("/", state);
-        landing.NextCalled.Should().BeFalse();
-        landing.Context.Response.StatusCode.Should().Be(StatusCodes.Status302Found);
-        landing.Context.Response.Headers.Location.ToString().Should().Be(Shared.Onboarding.Constants.Route);
+        var (landingContext, landingNextCalled) = await Invoke("/", state);
+        landingNextCalled.Should().BeFalse();
+        landingContext.Response.StatusCode.Should().Be(StatusCodes.Status302Found);
+        landingContext.Response.Headers.Location.ToString().Should().Be(Shared.Onboarding.Constants.Route);
 
-        var wizard = await Invoke(Shared.Onboarding.Constants.Route, state);
-        wizard.NextCalled.Should().BeTrue();
+        var (_, wizardNextCalled) = await Invoke(Shared.Onboarding.Constants.Route, state);
+        wizardNextCalled.Should().BeTrue();
 
         // What the user's click on the wizard's exit button leaves behind.
         state.ShowWizardWhenNotCompleted = false;

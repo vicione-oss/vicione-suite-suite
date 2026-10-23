@@ -1,8 +1,11 @@
 namespace Blazor.Shared.Module.ControlPanels.Services;
 
 /// <summary>
-/// Class type that is used as service key in registrations of services used in <see cref="ConnectionsControlPanel"/>.
+/// Service key of the grid item selection in <see cref="ModuleManagementInstalledControlPanel"/>.
 /// </summary>
 internal class InstalledModuleManagementControlPanelServiceKey;
 
+/// <summary>
+/// Service key of the grid item selection in <see cref="ModuleManagementBrowseControlPanel"/>.
+/// </summary>
 internal class AvailableModuleManagementControlPanelServiceKey;

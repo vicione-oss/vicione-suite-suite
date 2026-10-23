@@ -217,7 +217,7 @@ public sealed class NetworkInterfaceControlPanelTests
         // Assert
         var dnsServers = FindDnsServers(component);
 
-        dnsServers.Contains("8.8.8.8").Should().Be(nameServersEnabled);
+        dnsServers.Contains("8.8.8.8", StringComparison.Ordinal).Should().Be(nameServersEnabled);
         dnsServers.Should().Contain("1.1.1.1");
     }
 

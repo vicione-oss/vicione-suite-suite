@@ -4,7 +4,6 @@ using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Pages;
 using Core.OS.HostManagement;
 using Core.OS.HostManagement.Extensions;
-using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Security;
 using Core.OS.Security.Extensions;

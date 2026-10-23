@@ -27,14 +27,14 @@ public sealed class GetTagsConsumerTests : TestWithDbContextSqlite<ConnectionDbC
     {
         // Arrange
         var db = Substitute.For<IConnectionDbContext>();
-        Action<IBusRegistrationConfigurator> configureServices = cfg =>
+        void ConfigureServices(IBusRegistrationConfigurator cfg)
         {
             cfg.AddConsumer<GetTagsConsumer>();
             cfg.AddSingleton(db);
             cfg.AddSingleton(Substitute.For<ILogger<GetTagsConsumer>>());
-        };
+        }
 
-        await using var tester = new MassTransitTester(configureServices);
+        await using var tester = new MassTransitTester(ConfigureServices);
 
         db.Tags.Throws(new ArgumentException("Test"));
 

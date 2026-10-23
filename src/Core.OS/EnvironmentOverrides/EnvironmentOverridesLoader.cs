@@ -10,6 +10,7 @@ namespace Core.OS.EnvironmentOverrides;
 /// </summary>
 internal static class EnvironmentOverridesLoader
 {
+    /// <param name="fileSystem">The file system the file is read from.</param>
     /// <param name="path">
     /// The file resolved by <see cref="EnvironmentOverridesFile.ResolvePath"/>, or <c>null</c> if
     /// the deployment did not switch the feature on. Passed in rather than resolved here so the

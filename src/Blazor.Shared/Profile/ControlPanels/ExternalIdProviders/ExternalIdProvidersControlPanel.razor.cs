@@ -84,6 +84,6 @@ public partial class ExternalIdProvidersControlPanel
             forceLoad: true);
     }
 
-    private Task OpenPasskeys()
-        => ControlPanelRequest.Send<PasskeysControlPanel>();
+    private async Task OpenPasskeys()
+        => await ControlPanelRequest.Send<PasskeysControlPanel>();
 }

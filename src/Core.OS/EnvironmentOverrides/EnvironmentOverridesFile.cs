@@ -31,6 +31,7 @@ internal static partial class EnvironmentOverridesFile
     /// </summary>
     private const string DisabledFileName = FileName + ".disabled";
 
+    /// <param name="fileSystem">The file system the path is resolved on.</param>
     /// <param name="homeDirectory">
     /// <see cref="Instance.InstanceOptions.HomeDirectory"/> as configured for this instance.
     /// </param>
@@ -91,7 +92,7 @@ internal static partial class EnvironmentOverridesFile
     /// <see cref="Environment.SetEnvironmentVariable(string,string)"/> truncates the value there
     /// without reporting anything, so the applied override would differ from the stored one.
     /// </summary>
-    public static bool IsValidValue(string value) => !value.Contains('\0');
+    public static bool IsValidValue(string value) => !value.Contains('\0', StringComparison.Ordinal);
 
     [GeneratedRegex(Shared.EnvironmentOverrides.Constants.KeyPattern)]
     private static partial Regex ValidKey();

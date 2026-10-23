@@ -135,7 +135,7 @@ public sealed class NotificationElementGridTests
         activeNotificationElements.Should().NotBeNull().And.HaveCount(1);
 
         var firstActiveNotificationElement = activeNotificationElements[0];
-        firstActiveNotificationElement.Children.First().GetAttribute("title").Should().Be(NotificationElementA.Title);
+        firstActiveNotificationElement.Children[0].GetAttribute("title").Should().Be(NotificationElementA.Title);
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public sealed class NotificationElementGridTests
                 _ => "?",
             };
 
-            firstActiveNotificationElement.Children.First().GetAttribute("title").Should().Be(requiredTitle);
+            firstActiveNotificationElement.Children[0].GetAttribute("title").Should().Be(requiredTitle);
         }
     }
 
@@ -195,7 +195,7 @@ public sealed class NotificationElementGridTests
         // Assert
         var notificationElements = renderedComponent.FindAll(".notification-element");
         notificationElements.Should().Contain(
-            notificationElement => notificationElement.Children.First().GetAttribute("title") == NotificationElementD.Title);
+            notificationElement => notificationElement.Children[0].GetAttribute("title") == NotificationElementD.Title);
     }
 
     [Fact]
@@ -219,7 +219,7 @@ public sealed class NotificationElementGridTests
         // Assert
         var notificationElements = renderedComponent.FindAll(".notification-element");
         notificationElements.Should().NotContain(
-            notificationElement => notificationElement.Children.First().GetAttribute("title") == NotificationElementA.Title);
+            notificationElement => notificationElement.Children[0].GetAttribute("title") == NotificationElementA.Title);
     }
 
     [Theory]

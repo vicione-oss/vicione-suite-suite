@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Components;
 using Sdk.Authorization;
 using Sdk.Client.ControlPanels.Attributes;
 using Sdk.Client.ControlPanels.Components;
-using Sdk.Utils;
 using ViciOne.Ui.Blazor.Components.Grid.Services;
 
 namespace Blazor.Shared.UserManagement.ControlPanels.Role.Components;

@@ -59,7 +59,7 @@ internal class ModuleHostBuilder(IFileSystem fileSystem, IConfiguration configur
 
     /// <summary>
     /// Add validation for module options provided by metadata, environment settings or user secrets.
-    /// Add <see cref="IModuleOptionsStore"/> to service collection. Depends on <see cref="WithSuiteDependencyContext"/>
+    /// Add <see cref="IModuleOptionsStore"/> to service collection. Depends on <see cref="WithSuiteDependencyContext()"/>
     /// </summary>
     internal ModuleHostBuilder WithOptionsSupport(IConfigurationManager configurationManager, IModuleOptionsStore optionsStore)
     {

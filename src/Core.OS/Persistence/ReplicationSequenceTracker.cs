@@ -119,7 +119,7 @@ public sealed class ReplicationSequenceTracker(TimeProvider timeProvider)
     private sealed class ContextState
     {
         public long LastApplied;
-        public SortedDictionary<long, DbChangeSet> Pending = new();
+        public SortedDictionary<long, DbChangeSet> Pending = [];
         public DateTimeOffset? FirstBufferedAt;
     }
 }

@@ -1,11 +1,9 @@
-using AwesomeAssertions;
 using Blazor.Shared.EnvironmentOverrides.ControlPanels.Components;
 using Blazor.Shared.EnvironmentOverrides.ControlPanels.Extensions;
 using Blazor.Shared.Settings.Extensions;
 using Core.Shared.EnvironmentOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.ControlPanels.Services;
-using Xunit;
 
 namespace Blazor.Shared.Tests.EnvironmentOverrides.ControlPanels.Services;
 

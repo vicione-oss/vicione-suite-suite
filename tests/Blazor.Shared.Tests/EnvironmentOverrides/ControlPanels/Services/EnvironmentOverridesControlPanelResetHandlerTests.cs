@@ -1,14 +1,11 @@
-using AwesomeAssertions;
 using Blazor.Shared.EnvironmentOverrides.ControlPanels.Services;
 using Core.Shared.EnvironmentOverrides.Requests;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Sdk.Client.Infrastructure;
 using Sdk.Instance;
 using Sdk.Messaging;
 using ViciOne.Ui.Localization.Resources;
-using Xunit;
 
 namespace Blazor.Shared.Tests.EnvironmentOverrides.ControlPanels.Services;
 
@@ -38,7 +35,7 @@ public sealed class EnvironmentOverridesControlPanelResetHandlerTests
         // Arrange
         var mediator = Substitute.For<IUiMediator>();
         mediator.Request<GetEnvironmentOverrides, GetEnvironmentOverridesResponse>(Arg.Any<GetEnvironmentOverrides>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(new GetEnvironmentOverridesResponse(new Dictionary<string, string>()));
+            .Returns(new GetEnvironmentOverridesResponse([]));
 
         var resetHandler = new EnvironmentOverridesControlPanelResetHandler(mediator, _instanceInformationProvider, _logger);
         var state = new EnvironmentOverridesControlPanelState();
@@ -97,7 +94,7 @@ public sealed class EnvironmentOverridesControlPanelResetHandlerTests
         // Arrange
         var mediator = Substitute.For<IUiMediator>();
         mediator.Request<GetEnvironmentOverrides, GetEnvironmentOverridesResponse>(Arg.Any<GetEnvironmentOverrides>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(new GetEnvironmentOverridesResponse(new Dictionary<string, string>()));
+            .Returns(new GetEnvironmentOverridesResponse([]));
 
         var resetHandler = new EnvironmentOverridesControlPanelResetHandler(mediator, _instanceInformationProvider, _logger);
         var state = new EnvironmentOverridesControlPanelState();
@@ -115,7 +112,7 @@ public sealed class EnvironmentOverridesControlPanelResetHandlerTests
         // Arrange
         var mediator = Substitute.For<IUiMediator>();
         mediator.Request<GetEnvironmentOverrides, GetEnvironmentOverridesResponse>(Arg.Any<GetEnvironmentOverrides>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(new GetEnvironmentOverridesResponse(new Dictionary<string, string>(),
+            .Returns(new GetEnvironmentOverridesResponse([],
                 new ErrorInfo(0, "The override file cannot be parsed.")));
 
         var resetHandler = new EnvironmentOverridesControlPanelResetHandler(mediator, _instanceInformationProvider, _logger);
@@ -136,7 +133,7 @@ public sealed class EnvironmentOverridesControlPanelResetHandlerTests
         // Arrange
         var mediator = Substitute.For<IUiMediator>();
         mediator.Request<GetEnvironmentOverrides, GetEnvironmentOverridesResponse>(Arg.Any<GetEnvironmentOverrides>(), Arg.Any<Guid>(), Arg.Any<CancellationToken>())
-            .Returns(new GetEnvironmentOverridesResponse(new Dictionary<string, string>(), new ErrorInfo(0, null)));
+            .Returns(new GetEnvironmentOverridesResponse([], new ErrorInfo(0, null)));
 
         var resetHandler = new EnvironmentOverridesControlPanelResetHandler(mediator, _instanceInformationProvider, _logger);
         var state = new EnvironmentOverridesControlPanelState();

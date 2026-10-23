@@ -1,10 +1,8 @@
 using AngleSharp.Dom;
-using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Components;
 using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Services;
-using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +11,6 @@ using Sdk.Client.ControlPanels.Services;
 using Sdk.Testing.Client;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.CopyToClipboardButton.Extensions;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
-using Xunit;
 using OpenIdProviderControlPanelStrings
     = Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Localization.OpenIdProviderControlPanel;
 

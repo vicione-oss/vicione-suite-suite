@@ -40,7 +40,7 @@ public sealed partial class JiTChatNotificationElementFlyoutContent : ComponentB
 
     [CascadingParameter]
     public required Task<AuthenticationState> AuthState { get; set; }
-    
+
     internal string MessageText { get; set; } = string.Empty;
     private string Username { get; set; } = "Anonymous";
 

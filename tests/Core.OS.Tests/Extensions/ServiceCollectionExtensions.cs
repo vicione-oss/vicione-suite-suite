@@ -1,4 +1,4 @@
-using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IMvcBuilder AddTestSetupMvc(Assembly[] assemblies)
+        public IMvcBuilder AddTestSetupMvc()
         {
             var mvcBuilder = services.AddMvc();
 
@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
 
             return mvcBuilder;
         }
-        
+
         private IServiceCollection AddTestPersistence()
         {
             // Add ApplicationDbContext using an in-memory database for testing.
@@ -72,6 +72,7 @@ public static class ServiceCollectionExtensions
         }
     }
 
+    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Instantiated by DI container")]
     private sealed class TestDbContext(
         DbContextOptions<TestDbContext> options) : IdentityDbContext<IdentityUser>(options);
 }

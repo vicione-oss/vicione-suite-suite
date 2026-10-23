@@ -106,7 +106,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             // Act
-            component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more")).Click();
+            component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.Ordinal)).Click();
             component.Find(".arrow-back").Click();
 
             // Assert
@@ -206,7 +206,7 @@ public sealed class HelpNotificationElementFlyoutContentTests
             var component = ctx.Render<HelpNotificationElementFlyoutContent>();
 
             // Act
-            component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more")).Click();
+            component.FindAll(".link-button--small").First(b => b.InnerHtml.Contains("read more", StringComparison.Ordinal)).Click();
 
             // Assert
             component.Markup.Should().Contain("text-container");

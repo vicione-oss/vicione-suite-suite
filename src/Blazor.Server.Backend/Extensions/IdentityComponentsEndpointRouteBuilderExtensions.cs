@@ -123,21 +123,21 @@ internal static partial class IdentityComponentsEndpointRouteBuilderExtensions
         }
 
 
-    public IEndpointRouteBuilder MapExternalIdentityEndpoints()
-    {
-        var accountGroup = endpoints.MapGroup(ExternalLogin.BaseRoute);
+        public IEndpointRouteBuilder MapExternalIdentityEndpoints()
+        {
+            var accountGroup = endpoints.MapGroup(ExternalLogin.BaseRoute);
 
-        MapLoginWithExternalProviderEndpoints(accountGroup);
+            MapLoginWithExternalProviderEndpoints(accountGroup);
 
-        var manageGroup = accountGroup.MapGroup("/manage");
+            var manageGroup = accountGroup.MapGroup("/manage");
 
-        MapAddingOfExternalLoginsEndpoints(manageGroup);
+            MapAddingOfExternalLoginsEndpoints(manageGroup);
 
-        return accountGroup;
-    }
+            return accountGroup;
+        }
 
-    public IEndpointConventionBuilder MapAdditionalIdentityEndpoints()
-    {
+        public IEndpointConventionBuilder MapAdditionalIdentityEndpoints()
+        {
             var accountGroup = endpoints.MapGroup("/account");
 
             accountGroup.MapPost("/logout",

@@ -43,7 +43,7 @@ public partial class DbChangeSetConsumerTests
             instanceInfo.SdkVersion.Returns("1.0.0");
             instanceInfo.Version.Returns("1.0.0");
             _localInstanceInfo.Local.Returns(instanceInfo);
-            _localInstanceInfo.LoadedModules.Returns(new List<string> { "TestModule" });
+            _localInstanceInfo.LoadedModules.Returns(["TestModule"]);
 
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();

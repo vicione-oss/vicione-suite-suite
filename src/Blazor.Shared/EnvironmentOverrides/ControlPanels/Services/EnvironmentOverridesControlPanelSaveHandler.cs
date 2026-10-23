@@ -108,7 +108,7 @@ internal sealed partial class EnvironmentOverridesControlPanelSaveHandler :
 
     private static string? FindPotentialOverrideWithNullCharacter(IReadOnlyList<EnvironmentOverrideEntry> candidates) =>
             candidates
-                .Where(e => e.Value.Contains('\0'))
+                .Where(e => e.Value.Contains('\0', StringComparison.Ordinal))
                 .Select(e => e.Name)
                 .FirstOrDefault();
 

@@ -20,5 +20,5 @@ public class BackupMetadata
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
-    public List<ModuleBackupMetadata> Modules { get; set; } = [];
+    public List<ModuleBackupMetadata> Modules { get; init; } = [];
 }

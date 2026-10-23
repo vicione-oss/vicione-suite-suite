@@ -1,4 +1,4 @@
-﻿using Core.OS.Modules.Services;
+using Core.OS.Modules.Services;
 using Core.OS.UserManagement.Configuration;
 using Core.Shared.UserManagement;
 using Core.Shared.UserManagement.Contracts;
@@ -96,7 +96,7 @@ public static partial class SeedingExtensions
                     Managed = true
                 };
                 var resultRole = await roleManager.CreateAsync(adminRole).ConfigureAwait(false);
-                if(!resultRole.Succeeded)
+                if (!resultRole.Succeeded)
                     throw new InvalidOperationException($"Failed to create role '{AuthorizationConstants.AdminRoleName}': " + resultRole.Errors.First().Description);
             }
 
@@ -112,7 +112,7 @@ public static partial class SeedingExtensions
                     LogSeedRolesCreateClaimModuleIdNamePath(logger, feature.ModuleId, feature.Name, feature.Path);
                     var newClaim = ModuleAuthorizationClaimFactory.CreateClaim(feature.ModuleId, AccessLevel.Full, feature.Name);
                     var resultAddClaim = await roleManager.AddClaimAsync(adminRole, newClaim);
-                    if(!resultAddClaim.Succeeded)
+                    if (!resultAddClaim.Succeeded)
                         throw new InvalidOperationException($"Failed to add claim {newClaim} to role '{AuthorizationConstants.AdminRoleName}': " + resultAddClaim.Errors.First().Description);
                 }
             }
@@ -135,7 +135,7 @@ public static partial class SeedingExtensions
                     LogCreatingTestSuiteUser(logger, suiteUser.UserName);
 
                     var resultUser = await userManager.CreateAsync(suiteUser, user.Password);
-                    if(!resultUser.Succeeded)
+                    if (!resultUser.Succeeded)
                         throw new InvalidOperationException($"Failed to create user {suiteUser.UserName}: {resultUser.Errors.First().Description}");
                 }
 
@@ -180,7 +180,7 @@ public static partial class SeedingExtensions
                 };
 
                 var resultUser = await userManager.CreateAsync(suiteUser, options.InitialAdministratorPassword);
-                if(!resultUser.Succeeded)
+                if (!resultUser.Succeeded)
                     throw new InvalidOperationException("Failed to create initial system user: " + resultUser.Errors.First().Description);
             }
 

@@ -44,7 +44,7 @@ public sealed class GetCrossInstanceConfigurationConsumerTests : TestWithDbConte
         // Arrange
         await using var tester = new MassTransitTester(_configureServices);
         var request = new GetCrossInstanceConfiguration();
-        var config = new CrossInstanceConfiguration() {  Id = Guid.NewGuid() };
+        var config = new CrossInstanceConfiguration() { Id = Guid.NewGuid() };
 
         TestDbContext.CrossInstanceConfiguration.Add(config);
         await TestDbContext.SaveChangesAsync(TestContext.Current.CancellationToken);

@@ -71,7 +71,7 @@ public class UiModuleManagerTests
             var uiModuleAssemblies = uiModuleManager.GetAdditionalAssemblies();
 
             // Assert
-            uiModuleAssemblies.Count().Should().Be(2, "Client + Blazor.Server.Backend assemblies");
+            uiModuleAssemblies.Should().HaveCount(2, "Client + Blazor.Server.Backend assemblies");
         }
 
         [Fact]

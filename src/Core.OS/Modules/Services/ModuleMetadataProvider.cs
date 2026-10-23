@@ -10,44 +10,28 @@ using Semver;
 
 namespace Core.OS.Modules.Services;
 
-public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
+public sealed partial class ModuleMetadataProvider(
+    IModuleHost moduleHost,
+    IModuleArtifactCache metadataCache,
+    IModuleOptionsStore optionsStore,
+    IModulePackageOperationStore packageOperationStore,
+    IOptions<ModuleLoaderOptions> loaderOptions,
+    ILogger<ModuleMetadataProvider> logger) : IModuleMetadataProvider
 {
-    private readonly IModuleOptionsStore _optionsStore;
-    private readonly IModulePackageOperationStore _packageOperationStore;
-    private readonly IOptions<ModuleLoaderOptions> _loaderOptions;
-    private readonly IConfiguration _environmentConfig;
-    private readonly ILogger<ModuleMetadataProvider> _logger;
-    private readonly IModuleHost _moduleHost;
-    private readonly IModuleArtifactCache _metadataCache;
-
-    public ModuleMetadataProvider(IModuleHost moduleHost,
-        IModuleArtifactCache metadataCache,
-        IModuleOptionsStore optionsStore,
-        IModulePackageOperationStore packageOperationStore,
-        IOptions<ModuleLoaderOptions> loaderOptions,
-        ILogger<ModuleMetadataProvider> logger)
-    {
-        _moduleHost = moduleHost;
-        _metadataCache = metadataCache;
-        _optionsStore = optionsStore;
-        _packageOperationStore = packageOperationStore;
-        _loaderOptions = loaderOptions;
-        _logger = logger;
-        _environmentConfig = new ConfigurationBuilder()
-            .AddEnvironmentVariables()
-            .AddUserSecrets<Program>()
-            .Build();
-    }
+    private readonly IConfiguration _environmentConfig = new ConfigurationBuilder()
+        .AddEnvironmentVariables()
+        .AddUserSecrets<Program>()
+        .Build();
 
     public async Task<List<ModuleMetadataBundle>> GetModuleMetadata(GetModuleMetadataOptions options, CancellationToken cancellationToken = default)
     {
-        var installedBundles = _moduleHost.GetManifestModules();
+        var installedBundles = moduleHost.GetManifestModules();
 
         List<ModuleMetadata>? availableMetadata = null;
 
         if (options.IncludeAvailable || options.ResolveUpdates)
         {
-            availableMetadata = await _metadataCache.GetAvailableModuleMetadata(options.ForceRefresh, cancellationToken);
+            availableMetadata = await metadataCache.GetAvailableModuleMetadata(options.ForceRefresh, cancellationToken);
         }
 
         // Metadata versions are merged into bundles, ordered by their published date.
@@ -71,7 +55,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
 
     private async Task ApplyEnqueuedPackageOperations(IReadOnlyCollection<ModuleMetadataBundle> modules, CancellationToken cancellationToken = default)
     {
-        var operations = await _packageOperationStore.GetEnqueuedOperations(cancellationToken);
+        var operations = await packageOperationStore.GetEnqueuedOperations(cancellationToken);
         if (operations.Count == 0)
             return;
 
@@ -89,7 +73,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
         foreach (var module in modules)
         {
             // With installation disabled by config, installed modules cannot be modified.
-            module.CanBeModified = _loaderOptions.Value.AllowInstallation;
+            module.CanBeModified = loaderOptions.Value.AllowInstallation;
 
             if (!module.Installed)
                 continue;
@@ -99,7 +83,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
                 // The metadata now carries the current option declarations.
                 // we can't mix up env, secrets here!!! we need to flag them later
                 // !! options might change between requests so we need to enrich them again
-                await _optionsStore.ApplyStoredOptions(module.Metadata, _environmentConfig, cancellationToken);
+                await optionsStore.ApplyStoredOptions(module.Metadata, _environmentConfig, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -108,7 +92,7 @@ public sealed partial class ModuleMetadataProvider : IModuleMetadataProvider
             }
             catch (Exception ex)
             {
-                LogFailedToEnrichOptions(_logger, ex, module.Metadata.Name);
+                LogFailedToEnrichOptions(logger, ex, module.Metadata.Name);
             }
         }
     }

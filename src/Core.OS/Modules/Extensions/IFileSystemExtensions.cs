@@ -161,9 +161,8 @@ internal static partial class IFileSystemExtensions
         /// target's. An existing target's unix permissions are captured and re-applied, keeping a custom
         /// mode such as <c>0600</c>; a new file keeps the defaults. Ownership and windows ACLs are not
         /// preserved. On failure the temp file is removed best-effort and the original is left untouched.
+        /// Missing parent directories of <paramref name="filePath"/> are created.
         /// </remarks>
-        /// <param name="filePath">Target file path. Missing parent directories are created.</param>
-        /// <param name="writeContent">Callback receiving the writable stream of the temporary file.</param>
         public async Task WriteFileAtomic(string filePath, Func<Stream, Task> writeContent, CancellationToken cancellationToken = default)
         {
             var directory = fileSystem.Path.GetDirectoryName(filePath);

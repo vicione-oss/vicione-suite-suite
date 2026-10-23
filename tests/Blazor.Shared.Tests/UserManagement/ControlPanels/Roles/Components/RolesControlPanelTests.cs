@@ -1,4 +1,3 @@
-using AwesomeAssertions;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.UserManagement.ControlPanels.Roles.Components;
 using Blazor.Shared.UserManagement.ControlPanels.Roles.Extensions;
@@ -12,7 +11,6 @@ using Sdk.Messaging;
 using Sdk.Testing.Client;
 using Sdk.UserManagement.Events;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
-using Xunit;
 
 namespace Blazor.Shared.Tests.UserManagement.ControlPanels.Roles.Components;
 

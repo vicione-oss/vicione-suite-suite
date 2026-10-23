@@ -7,7 +7,6 @@ namespace Blazor.Shared.Network.ControlPanels.Ntp.Services;
 
 internal sealed class NtpControlPanelDescriptor : IControlPanelDescriptor<NtpControlPanel>
 {
-    public string Category => CommonVocabulary.Network;
     public string Title => TechnicalAcronyms.Ntp;
     public int? Position => ControlPanelNetworkCategoryDescriptor.FirstPositionAfterNetworkInterfaces + 1;
     public Uri? IconUrl => null;

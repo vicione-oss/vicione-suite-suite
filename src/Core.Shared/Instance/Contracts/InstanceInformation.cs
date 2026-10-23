@@ -15,7 +15,9 @@ public sealed class InstanceInformation : IInstanceInformation
     public string? Description { get; set; }
     public string SerialNumber { get; set; } = string.Empty;
     public string SystemType { get; set; } = string.Empty;
+#pragma warning disable CA2227 // The mappers overwrite the persisted, replicated row in place.
     public List<string> InstalledModules { get; set; } = [];
+#pragma warning restore CA2227
     IReadOnlyCollection<string> IInstanceInformation.InstalledModules => InstalledModules;
     public DateTimeOffset? FirstTimeRegistered { get; set; }
     public DateTimeOffset? LastRegistered { get; set; }

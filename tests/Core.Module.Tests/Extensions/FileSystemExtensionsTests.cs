@@ -51,7 +51,7 @@ public class FileSystemExtensionsTests
                 .SetupTestClientModule(loaderOptions.ModulesPath!);
 
             // Act
-            var clientPaths = fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath, string.Empty);
+            var clientPaths = fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath);
 
             // Assert
             var expected = TestClientModule.GetAssemblyName();
@@ -66,7 +66,7 @@ public class FileSystemExtensionsTests
             var loaderOptions = new ModuleLoaderOptions();
 
             // Act + Assert
-            Assert.Throws<InvalidOperationException>(() => fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath, string.Empty));
+            Assert.Throws<InvalidOperationException>(() => fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath));
         }
 
         [Fact]
@@ -83,7 +83,7 @@ public class FileSystemExtensionsTests
             // Act + Assert
 
 #if !DEBUG // Would never throw in DEBUG due to condition in IFileSystemExtensions.GetModuleDlls
-            Assert.Throws<DirectoryNotFoundException>(() => fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath, string.Empty));
+            Assert.Throws<DirectoryNotFoundException>(() => fileSystem.GetUiModuleAssemblyPaths(loaderOptions.ModulesPath));
 #endif
         }
     }

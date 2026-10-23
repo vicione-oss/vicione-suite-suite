@@ -11,7 +11,7 @@ namespace Core.OS.Modules.Services;
 public partial class ModulePackageManifestStore(IFileSystem fileSystem, IOptions<InstanceOptions> instanceOptions, ILogger<ModulePackageManifestStore> logger) : IModulePackageManifestStore
 {
     /// <summary>
-    /// Static version of <see cref="ModulePackageManifestStore.Load"/> method, used in scenarios where dependency injection is not available (e.g. during instance initialization before the service container is built)
+    /// Static version of <see cref="Load(CancellationToken)"/> method, used in scenarios where dependency injection is not available (e.g. during instance initialization before the service container is built)
     /// </summary>
     public static async Task<ModulePackageManifest> Load(IFileSystem fileSystem, InstanceOptions options, ILogger logger, CancellationToken cancellationToken)
     {

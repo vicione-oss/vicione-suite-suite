@@ -24,7 +24,7 @@ internal sealed class PasswordWizardPageSaveHandler(IUsernameValidator usernameV
         var field = CommonVocabulary.Password;
         var currentPassword = administratorInitialPasswordProvider.GetAdministratorInitialPassword();
 
-        if (string.CompareOrdinal(state.Password, currentPassword) == 0)
+        if (string.Equals(state.Password, currentPassword, StringComparison.Ordinal))
             return new SaveErrorResult(string.Format(culture, Localization.PasswordWizardPageSaveHandler.FieldMustNotBeEqualToCurrentPassword, field));
 
         if (!passwordValidator.Validate(state.Password, field, out errorMessage))
