@@ -44,7 +44,7 @@ public sealed class ControlServiceManagementTests
         // Assert
         service.IsAvailable.Should().BeTrue();
     }
-    
+
     [Fact]
     public async Task Should_not_be_available_when_host_management_is_mocked()
     {

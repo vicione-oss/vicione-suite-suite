@@ -31,11 +31,11 @@ internal static class ArtifactPlatformTheoryData
         { Architecture.Arm64, "arm64" },
     };
 
-    public static TheoryData<Architecture> UnsupportedSuitePlatforms => new()
-    {
+    public static TheoryData<Architecture> UnsupportedSuitePlatforms =>
+    [
         Architecture.X86,
         Architecture.Arm,
-    };
+    ];
 
     public static ArtifactPlatform Create(string osPlatform, Architecture osArchitecture)
         => new(OSPlatform.Create(osPlatform), osArchitecture);

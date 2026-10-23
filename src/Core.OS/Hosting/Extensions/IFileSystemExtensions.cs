@@ -35,7 +35,7 @@ internal static partial class IFileSystemExtensions
         /// <summary>
         /// Compares the running suite version against the data version persisted on disk.
         /// </summary>
-        /// </list>
+        /// <remarks>
         /// An <see cref="InvalidOperationException"/> is thrown if the persisted version file exists but is empty,
         /// after restoring the file to the current version.
         /// </remarks>

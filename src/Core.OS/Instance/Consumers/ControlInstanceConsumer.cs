@@ -19,33 +19,23 @@ using Sdk.Messaging;
 namespace Core.OS.Instance.Consumers;
 
 [ReadOnlyConsumer]
-public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, IConsumer<ControlInstance>
+public sealed partial class ControlInstanceConsumer(IServiceProvider services, IFileSystem fileSystem, ILogger<ControlInstanceConsumer> logger)
+    : TrackingConsumerBase, IConsumer<ControlInstance>
 {
-    private readonly IServiceProvider _services;
-    private readonly ILogger<ControlInstanceConsumer> _logger;
-    private readonly IFileSystem _fileSystem;
-
-    public ControlInstanceConsumer(IServiceProvider services, IFileSystem fileSystem, ILogger<ControlInstanceConsumer> logger)
-    {
-        _services = services;
-        _fileSystem = fileSystem;
-        _logger = logger;
-    }
-
     public async Task Consume(ConsumeContext<ControlInstance> context)
     {
         var correlationId = context.Message.CorrelationId;
         var instanceId = context.Message.InstanceId;
 
-        LogConsumingControlInstance(_logger, correlationId, context.Message.Action, instanceId);
+        LogConsumingControlInstance(logger, correlationId, context.Message.Action, instanceId);
 
-        var localProvider = _services.GetRequiredService<ILocalInstanceInformationProvider>();
-        var applicationDb = _services.GetRequiredService<IApplicationDbContext>();
+        var localProvider = services.GetRequiredService<ILocalInstanceInformationProvider>();
+        var applicationDb = services.GetRequiredService<IApplicationDbContext>();
 
         var targetInstance = await applicationDb.InstanceInfo.SingleOrDefaultAsync(k => k.Id == instanceId);
         if (targetInstance is null)
         {
-            LogInstanceNotPartOfSystem(_logger, correlationId, instanceId);
+            LogInstanceNotPartOfSystem(logger, correlationId, instanceId);
 
             // Publish completion for Delete to unblock orchestrators waiting on the event
             if (context.Message.Action == InstanceCommand.Delete)
@@ -76,7 +66,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         }
         catch (Exception e)
         {
-            LogFailedToProcessCommand(_logger, e, correlationId, context.Message.Action, instanceId);
+            LogFailedToProcessCommand(logger, e, correlationId, context.Message.Action, instanceId);
 
             var message = new ControlInstanceCompleted(instanceId, context.Message.Action, new ErrorInfo(100, e.Message))
             {
@@ -91,24 +81,24 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
     {
         if (localInstance.Type != InstanceType.Master)
         {
-            LogLocalInstanceNotValidSyncOrchestrator(_logger, context.Message.InstanceId);
+            LogLocalInstanceNotValidSyncOrchestrator(logger, context.Message.InstanceId);
             return;
         }
 
         if (instanceInfo.Type != InstanceType.Slave)
         {
-            LogInstanceNotValidSyncTarget(_logger, context.Message.InstanceId);
+            LogInstanceNotValidSyncTarget(logger, context.Message.InstanceId);
             return;
         }
 
-        var factory = _services.GetRequiredService<IRoutingSlipBuilderFactory>();
+        var factory = services.GetRequiredService<IRoutingSlipBuilderFactory>();
         var builder = factory.Create(context.CorrelationId ?? Guid.NewGuid());
 
-        var arguments = await SyncDataHelpers.CreateSyncDataArgumentsPg(_services, instanceInfo.InstalledModules, context.CancellationToken);
+        var arguments = await SyncDataHelpers.CreateSyncDataArgumentsPg(services, instanceInfo.InstalledModules, context.CancellationToken);
         foreach (var argument in arguments)
         {
             builder.AddActivity<SyncDataActivity, SyncDataArguments>(argument, instanceInfo.Id);
-            LogAddedSyncActivity(_logger, instanceInfo.Id, argument.DbContextTypeName, argument.Table);
+            LogAddedSyncActivity(logger, instanceInfo.Id, argument.DbContextTypeName, argument.Table);
         }
 
         builder.AddVariable(SyncDataHelpers.InstanceIdVariableKey, context.Message.InstanceId);
@@ -119,7 +109,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
     {
         if (localInstance.Type != InstanceType.Master)
         {
-            LogInstanceCanOnlyBeRemovedByMaster(_logger, context.Message.InstanceId);
+            LogInstanceCanOnlyBeRemovedByMaster(logger, context.Message.InstanceId);
             return;
         }
 
@@ -139,7 +129,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         var correlationId = context.Message.CorrelationId;
 
         // Capture a root/long-lived service provider to create a fresh scope after the delay
-        var rootServices = _services.GetRequiredService<IServiceScopeFactory>();
+        var rootServices = services.GetRequiredService<IServiceScopeFactory>();
 
         _ = Task.Run(async () =>
         {
@@ -169,7 +159,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
             }
             catch (Exception e)
             {
-                LogFailedToProcessCommand(_logger, e, correlationId, InstanceCommand.Restart, instanceId);
+                LogFailedToProcessCommand(logger, e, correlationId, InstanceCommand.Restart, instanceId);
             }
         });
 
@@ -179,18 +169,18 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
     private void EnsureSuiteRestartFile()
     {
         var runtimeDirectory = Environment.GetEnvironmentVariable("RUNTIME_DIRECTORY") ?? "/run/vicione-suite";
-        _fileSystem.Directory.CreateDirectory(runtimeDirectory);
+        fileSystem.Directory.CreateDirectory(runtimeDirectory);
 
-        var filePath = _fileSystem.Path.Combine(runtimeDirectory, "suite-ui-restart");
+        var filePath = fileSystem.Path.Combine(runtimeDirectory, "suite-ui-restart");
 
-        if (!_fileSystem.File.Exists(filePath))
-            _fileSystem.File.Create(filePath, 0, FileOptions.None).Dispose();
+        if (!fileSystem.File.Exists(filePath))
+            fileSystem.File.Create(filePath, 0, FileOptions.None).Dispose();
     }
 
     protected override Task ConsumeCompleted(ConsumeContext<RoutingSlipCompleted> context)
     {
         var instanceId = context.Message.GetVariable<Guid>(SyncDataHelpers.InstanceIdVariableKey);
-        LogInstanceSuccessfullySynchronized(_logger, instanceId);
+        LogInstanceSuccessfullySynchronized(logger, instanceId);
 
         return context.Publish(new ControlInstanceCompleted(instanceId, InstanceCommand.Synchronize),
             context.CancellationToken);
@@ -202,7 +192,7 @@ public sealed partial class ControlInstanceConsumer : TrackingConsumerBase, ICon
         var errorList = context.Message.ActivityExceptions.Select(ex => ex.ExceptionInfo.Message).ToList();
         var errors = string.Join(Environment.NewLine, errorList);
 
-        LogSynchronizationErrors(_logger, instanceId, Environment.NewLine, errors);
+        LogSynchronizationErrors(logger, instanceId, Environment.NewLine, errors);
 
         var message = new ControlInstanceCompleted(instanceId, InstanceCommand.Synchronize, new ErrorInfo(2, errors))
         {

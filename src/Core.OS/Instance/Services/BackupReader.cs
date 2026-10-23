@@ -27,9 +27,8 @@ public static class BackupReader
 
     public static async Task<BackupMetadata> GetBackupMetadata(ZipArchive archive, CancellationToken cancellationToken = default)
     {
-        var entry = archive.Entries.FirstOrDefault(k => k.Name == BackupBuilder.MetadataEntryName);
-        if (entry is null)
-            throw new InvalidOperationException("Could not find system configuration within backup.");
+        var entry = archive.Entries.FirstOrDefault(k => k.Name == BackupBuilder.MetadataEntryName)
+            ?? throw new InvalidOperationException("Could not find system configuration within backup.");
 
         return await entry.DeserializeEntry<BackupMetadata?>(cancellationToken)
             ?? throw new InvalidOperationException("Could not deserialize metadata from backup.");
@@ -60,7 +59,7 @@ public static class BackupReader
 
     /// <summary>
     /// Uses <see cref="ZipFile.ExtractToDirectory(System.IO.Stream,string)" /> to extract system module archive
-    /// to <see cref="destinationPath"/>. It does not support IO.Abstractions and will extract the entries into
+    /// to <paramref name="destinationPath"/>. It does not support IO.Abstractions and will extract the entries into
     /// the real filesystem.
     /// </summary>
     public static async Task ExtractSystemModuleTo(ZipArchive archive, string destinationPath, CancellationToken cancellationToken)
@@ -85,9 +84,8 @@ public static class BackupReader
 
     public static async Task<SystemConfiguration?> GetSystemConfiguration(ZipArchive archive, CancellationToken cancellationToken = default)
     {
-        var entry = archive.Entries.FirstOrDefault(k => k.Name == nameof(SystemConfiguration));
-        if (entry is null)
-            throw new InvalidOperationException("Could not find system configuration within backup.");
+        var entry = archive.Entries.FirstOrDefault(k => k.Name == nameof(SystemConfiguration))
+            ?? throw new InvalidOperationException("Could not find system configuration within backup.");
 
         // Without HostManagement installed, SystemConfiguration is null.
         var configuration = await entry.DeserializeEntry<JsonObject?>(cancellationToken);
@@ -137,7 +135,7 @@ public static class BackupReader
 
     /// <summary>
     /// Uses <see cref="ZipFile.ExtractToDirectory(System.IO.Stream,string)" /> to extract module archive entries
-    /// to <see cref="destinationPath"/>. It does not support IO.Abstractions and will extract the entries into
+    /// to <paramref name="destinationPath"/>. It does not support IO.Abstractions and will extract the entries into
     /// the real filesystem.
     /// </summary>
     private static async Task ExtractModulesTo(ZipArchive archive, string destinationPath, IReadOnlyCollection<string>? moduleNames = null, CancellationToken cancellationToken = default)

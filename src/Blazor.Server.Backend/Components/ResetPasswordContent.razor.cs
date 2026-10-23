@@ -20,9 +20,6 @@ public sealed partial class ResetPasswordContent
     private string _code = string.Empty;
 
     [Inject]
-    private SignInManager<SuiteUser> SignInManager { get; set; } = default!;
-
-    [Inject]
     private UserManager<SuiteUser> UserManager { get; set; } = default!;
 
     [Inject]

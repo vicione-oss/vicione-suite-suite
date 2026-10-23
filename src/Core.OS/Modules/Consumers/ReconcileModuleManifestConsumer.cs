@@ -7,7 +7,6 @@ using Core.Shared.Modules.Commands;
 using Core.Shared.Modules.Contracts;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Sdk.Backend.Messaging;
 using Sdk.Instance;
 using Sdk.Messaging;
 using Sdk.Modules;

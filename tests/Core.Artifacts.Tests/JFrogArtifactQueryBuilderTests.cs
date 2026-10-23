@@ -21,11 +21,11 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains($"\"repo\":\"{JFrogArtifactQueryBuilder.RepositoryPlaceholder}\"", result);
-            Assert.Contains("\"path\":{\"$match\":\"some/path\"}", result);
-            Assert.Contains("\"name\":{\"$match\":\"file.txt\"}", result);
-            Assert.Contains(".include(\"name\",\"size\")", result);
-            Assert.Contains(".sort({\"$asc\":[\"name\"]})", result);
+            Assert.Contains($"\"repo\":\"{JFrogArtifactQueryBuilder.RepositoryPlaceholder}\"", result, StringComparison.Ordinal);
+            Assert.Contains("\"path\":{\"$match\":\"some/path\"}", result, StringComparison.Ordinal);
+            Assert.Contains("\"name\":{\"$match\":\"file.txt\"}", result, StringComparison.Ordinal);
+            Assert.Contains(".include(\"name\",\"size\")", result, StringComparison.Ordinal);
+            Assert.Contains(".sort({\"$asc\":[\"name\"]})", result, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -38,8 +38,8 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains($"\"repo\":\"{JFrogArtifactQueryBuilder.RepositoryPlaceholder}\"", result);
-            Assert.Contains("items.find", result);
+            Assert.Contains($"\"repo\":\"{JFrogArtifactQueryBuilder.RepositoryPlaceholder}\"", result, StringComparison.Ordinal);
+            Assert.Contains("items.find", result, StringComparison.Ordinal);
         }
     }
 
@@ -56,7 +56,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains("\"path\":{\"$match\":\"some/path\"}", result);
+            Assert.Contains("\"path\":{\"$match\":\"some/path\"}", result, StringComparison.Ordinal);
         }
     }
 
@@ -73,7 +73,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains("\"name\":{\"$match\":\"file.txt\"}", result);
+            Assert.Contains("\"name\":{\"$match\":\"file.txt\"}", result, StringComparison.Ordinal);
         }
     }
 
@@ -91,7 +91,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains("{\"modified\":{\"$gt\":\"2012-07-16T18:20:30.0450000Z\"}}", result);
+            Assert.Contains("{\"modified\":{\"$gt\":\"2012-07-16T18:20:30.0450000Z\"}}", result, StringComparison.Ordinal);
         }
     }
 
@@ -108,7 +108,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains("\"name\":{\"$nmatch\":\"file.txt\"}", result);
+            Assert.Contains("\"name\":{\"$nmatch\":\"file.txt\"}", result, StringComparison.Ordinal);
         }
     }
 
@@ -125,7 +125,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains(".include(\"name\",\"size\")", result);
+            Assert.Contains(".include(\"name\",\"size\")", result, StringComparison.Ordinal);
         }
     }
 
@@ -142,7 +142,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains(".sort({\"$asc\":[\"name\",\"size\"]})", result);
+            Assert.Contains(".sort({\"$asc\":[\"name\",\"size\"]})", result, StringComparison.Ordinal);
         }
     }
 
@@ -159,7 +159,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains(".sort({\"$desc\":[\"created\",\"modified\"]})", result);
+            Assert.Contains(".sort({\"$desc\":[\"created\",\"modified\"]})", result, StringComparison.Ordinal);
         }
     }
 
@@ -176,7 +176,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains("{\"type\":\"folder\"},", result);
+            Assert.Contains("{\"type\":\"folder\"},", result, StringComparison.Ordinal);
         }
     }
 
@@ -193,8 +193,8 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.DoesNotContain(".order(50)", result);
-            Assert.Contains(".limit(100)", result);
+            Assert.DoesNotContain(".order(50)", result, StringComparison.Ordinal);
+            Assert.Contains(".limit(100)", result, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -208,7 +208,7 @@ public class JFrogArtifactQueryBuilderTests
             var result = builder.Build();
 
             // Assert
-            Assert.Contains(".offset(50).limit(100)", result);
+            Assert.Contains(".offset(50).limit(100)", result, StringComparison.Ordinal);
         }
     }
 }

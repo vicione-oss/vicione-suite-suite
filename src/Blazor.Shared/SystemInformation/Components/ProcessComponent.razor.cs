@@ -24,7 +24,6 @@ public sealed partial class ProcessComponent : IDisposable
     private readonly HashSet<string> _expandedGroups = [];
 
     private ProcessOverviewSnapshot? _snapshot;
-    private ProcessTable? _table;
     private IDisposable? _subscription;
     private CultureInfo _culture = CultureInfo.CurrentCulture;
     private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
@@ -116,7 +115,7 @@ public sealed partial class ProcessComponent : IDisposable
             var atStart = highest.Time - DailyRanges.Started < TimeSpan.FromMinutes(3);
             if (atStart)
                 tail.Append(' ').Append(Text.AtSuiteStart);
-            if (highest.TopByCpu.FirstOrDefault() is { } top && !(atStart && top.Role == SuiteProcessRole.Suite))
+            if (highest.TopByCpu is [{ } top, ..] && !(atStart && top.Role == SuiteProcessRole.Suite))
                 tail.Append(", ").Append(string.Format(CultureInfo.CurrentCulture, Text.MostlyBy, PeakText.Process(top)));
             return ($"{calm} {Text.HighestCpu} ", value, tail.Append('.').ToString());
         }
@@ -332,8 +331,9 @@ public sealed partial class ProcessComponent : IDisposable
     /// </summary>
     private Tile DiskTile(ValueRange? range)
     {
-        var tile = RangeTile(Number(Metrics.Disk.Latest), "%", Text.Disk, Metrics.Disk, 0, 100, ProcessOverviewThresholds.DiskPercent,
-            range, Percent) with { Caption = DiskCaption };
+        var rangeTile = RangeTile(Number(Metrics.Disk.Latest), "%", Text.Disk, Metrics.Disk, 0, 100, ProcessOverviewThresholds.DiskPercent,
+            range, Percent);
+        var tile = rangeTile with { Caption = DiskCaption };
         return TotalDiskGb is { } total && Metrics.DiskFreeGb is { } free
             ? tile with { Value = Gigabytes(Math.Max(total - free, 0)), Unit = $"/ {Gigabytes(total)} GB" }
             : tile;
@@ -386,11 +386,14 @@ public sealed partial class ProcessComponent : IDisposable
         };
 
         var coreClocks = Metrics.Clock?.CoreMhz ?? [];
-        rows.AddRange(Metrics.CoreCpu.Select((core, i) => PercentRow(
-            string.Format(CultureInfo.CurrentCulture, Text.CoreNumber, i + 1),
-            i < coreClocks.Count ? $"{Gigahertz(coreClocks[i])} GHz" : null,
-            core, ProcessOverviewThresholds.CpuPercent)
-            with { Parent = TechnicalAcronyms.Cpu, Bar = core.Latest }));
+        rows.AddRange(Metrics.CoreCpu.Select((core, i) =>
+        {
+            var row = PercentRow(
+                string.Format(CultureInfo.CurrentCulture, Text.CoreNumber, i + 1),
+                i < coreClocks.Count ? $"{Gigahertz(coreClocks[i])} GHz" : null,
+                core, ProcessOverviewThresholds.CpuPercent);
+            return row with { Parent = TechnicalAcronyms.Cpu, Bar = core.Latest };
+        }));
 
         if (Metrics.IoWait.Samples.Count > 0)
             rows.Add(PercentRow(Text.IoWait, null, Metrics.IoWait, ProcessOverviewThresholds.IoWaitPercent) with { Parent = TechnicalAcronyms.Cpu });
@@ -429,7 +432,10 @@ public sealed partial class ProcessComponent : IDisposable
             if (Metrics.SecondTemperature.Latest is { } second)
             {
                 rows.Add(new(SensorName(Metrics.SecondTemperatureSensor), Metrics.SecondTemperatureSensor, Metrics.SecondTemperature, 100,
-                    limit, $"{Number(second)} °C", Threshold($"{Number(limit)} °C")) { Parent = Text.Temperature });
+                    limit, $"{Number(second)} °C", Threshold($"{Number(limit)} °C"))
+                {
+                    Parent = Text.Temperature,
+                });
             }
         }
 
@@ -446,7 +452,7 @@ public sealed partial class ProcessComponent : IDisposable
         var caption = new TileCaption(
             new(null, $"↓ {Number(Metrics.NetworkReceivedMbit)} ↑ {Number(Metrics.NetworkSentMbit)}", "Mbit/s"),
             new(null, string.Empty, null));
-        string Mbit(double value) => $"{Number(value)} Mbit/s";
+        static string Mbit(double value) => $"{Number(value)} Mbit/s";
 
         var tile = HasNetworkUsage
             ? RangeTile(Number(Metrics.Network.Latest), "%", CommonVocabulary.Network, Metrics.Network, 0, 100,

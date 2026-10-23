@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
-using System.Runtime.Loader;
 using Core.UiHosting;
 using Sdk.Modules;
+#if DEBUG
+using System.Runtime.Loader;
+#endif
 
 namespace Core.Module.Extensions;
 

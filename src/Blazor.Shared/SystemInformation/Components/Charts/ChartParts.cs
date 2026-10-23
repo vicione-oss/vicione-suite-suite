@@ -12,6 +12,7 @@ public enum ChartEmphasis
 /// </summary>
 /// <param name="CssClass">Names the series, such as <c>cpu</c>, and so its color.</param>
 /// <param name="Values">One value per slot on the chart's scale; <c>null</c> leaves a gap.</param>
+/// <param name="Emphasis">Whether the line stands out, recedes or neither.</param>
 public sealed record ChartLine(string CssClass, IReadOnlyList<double?> Values, ChartEmphasis Emphasis = ChartEmphasis.Normal);
 
 /// <summary>

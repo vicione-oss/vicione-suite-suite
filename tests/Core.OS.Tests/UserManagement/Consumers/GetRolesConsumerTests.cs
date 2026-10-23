@@ -4,7 +4,6 @@ using Core.OS.UserManagement.Extensions;
 using Core.Shared.UserManagement;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using Sdk.Authorization;
 using Sdk.Testing.Backend;
 using Sdk.UserManagement.Requests;
 

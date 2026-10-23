@@ -681,9 +681,8 @@ public class ModuleHostTests
         // Fake loaded modules
         var bundles = modules.Select(m =>
         {
-            var assembly = Assembly.GetAssembly(m.GetType());
-            if (assembly is null)
-                throw new InvalidOperationException($"Could not find assembly for module {m.GetType().FullName}");
+            var assembly = Assembly.GetAssembly(m.GetType())
+                ?? throw new InvalidOperationException($"Could not find assembly for module {m.GetType().FullName}");
 
             return new ModuleBundle<BackendModule>(m, assembly, assembly.Location);
         });

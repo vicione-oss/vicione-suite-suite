@@ -15,7 +15,7 @@ public sealed partial class HelpDetail
 
     private RenderFragment GetFragment(IComponent owner, string link) => builder =>
     {
-        var attributes = link.Remove(0, 5);
+        var attributes = link[5..];
         var splittedAttributes = attributes.Split(' ');
         var text = splittedAttributes[0].Split("text:").Last();
         var id = splittedAttributes[1].Split("helpId:").Last();

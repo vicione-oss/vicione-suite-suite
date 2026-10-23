@@ -38,7 +38,8 @@ public sealed partial class ArtifactRepositoryChangeConsumer(
 
             if (logger.IsEnabled(LogLevel.Information))
             {
-                LogReloadedOptions(logger, action, source, optionsCache.GetOptions().Sources.Count);
+                var sourcesCount = optionsCache.GetOptions().Sources.Count;
+                LogReloadedOptions(logger, action, source, sourcesCount);
             }
         }
         catch (Exception ex)

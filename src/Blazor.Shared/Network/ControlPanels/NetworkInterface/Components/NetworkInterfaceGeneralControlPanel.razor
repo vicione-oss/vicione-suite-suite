@@ -1,5 +1,6 @@
 @using Blazor.Shared.Network.ControlPanels.NetworkInterface.Extensions
 @using Blazor.Shared.Network.ControlPanels.NetworkInterface.Services
+@using Blazor.Shared.Network.Extensions
 @using Blazor.Shared.Settings.NetworkInterface.Enums
 @using Blazor.Shared.Settings.NetworkInterface.Enums.Extensions
 @using Sdk.Client.Components.Settings.Expanders
@@ -101,13 +102,13 @@
         <div class="section" data-expanded="@State.GeneralInformationExpanded">
             <SettingsField Label="@TechnicalTerms.DnsServer">
                 <div class="dns-server-grid">
-                    @if (!State.GetStaticDnsNameServers(SystemConfigurationService).Any() &&
+                    @if (!SystemConfigurationService.GetStaticDnsNameServers().Any() &&
                          !State.GetDhcpDnsNameServers(SystemConfigurationService).Any())
                     {
                         <div>@TechnicalTerms.Disabled</div>
                     }
 
-                    @foreach (var nameServer in State.GetStaticDnsNameServers(SystemConfigurationService))
+                    @foreach (var nameServer in SystemConfigurationService.GetStaticDnsNameServers())
                     {
                         <div>@nameServer.ToString()</div>
                     }

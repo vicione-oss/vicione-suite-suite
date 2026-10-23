@@ -8,7 +8,6 @@ using Core.Shared.UserManagement.Commands;
 using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using MassTransit;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

@@ -9,7 +9,6 @@ namespace Blazor.Shared.Network.ControlPanels.NetworkInterface.Services;
 internal sealed class NetworkInterfaceControlPanelDescriptor(NetworkInterfaceControlPanelState controlPanelState, ISystemConfigurationService systemConfigurationService)
     : IControlPanelDescriptor, IControlPanelParentDescriptor
 {
-    public string Category => CommonVocabulary.Network;
     public string Title => GetTitle();
     public Uri? IconUrl => SvgIcon.HostConfig.GetPath();
     public int? Position => controlPanelState.NetworkInterfaceIndex;

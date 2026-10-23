@@ -81,7 +81,7 @@ public class InstanceInformationMapperTests
             target.InRecoveryMode = true;
 
             // Act
-            ((IInstanceInformation)source).ApplyTo(target);
+            source.ApplyTo(target);
 
             // Assert
             target.Should().BeEquivalentTo(source, o => o.Excluding(i => i.InRecoveryMode));

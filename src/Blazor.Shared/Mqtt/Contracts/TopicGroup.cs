@@ -8,7 +8,7 @@ public sealed class TopicGroup : ITreeNode
     private GuidNodeIdentifier? _id;
 
     public string Topic { get; set; } = string.Empty;
-    public List<TopicGroup> SubTopics { get; set; } = [];
+    public List<TopicGroup> SubTopics { get; init; } = [];
     public TopicGroup? Parent { get; set; }
     public bool Expanded { get; set; }
 

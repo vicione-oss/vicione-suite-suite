@@ -37,7 +37,7 @@ public sealed class SyncRoutingSlipFaultedConsumerTests
             SdkVersion = "1.0.0",
             Version = "1.0.0"
         });
-        _localInstanceInfoProvider.LoadedModules.Returns(new List<string> { "TestModule" });
+        _localInstanceInfoProvider.LoadedModules.Returns(["TestModule"]);
 
         var sendEndpoint = Substitute.For<ISendEndpoint>();
         _sendEndpointProvider.GetSendEndpoint(Arg.Any<Uri>()).Returns(Task.FromResult(sendEndpoint));
@@ -91,7 +91,7 @@ public sealed class SyncRoutingSlipFaultedConsumerTests
     {
         // Arrange
         var state = new SyncRetryState { RetryDelay = TimeSpan.Zero };
-        var configureServices = (IBusRegistrationConfigurator cfg) =>
+        void ConfigureServices(IBusRegistrationConfigurator cfg)
         {
             cfg.AddConsumer<SyncRoutingSlipFaultedConsumer>();
             cfg.AddSingleton(_synchronizationState);
@@ -100,9 +100,9 @@ public sealed class SyncRoutingSlipFaultedConsumerTests
             cfg.AddSingleton(_sendEndpointProvider);
             cfg.AddSingleton(_applicationLifetime);
             cfg.AddSingleton(Substitute.For<ILogger<SyncRoutingSlipFaultedConsumer>>());
-        };
+        }
 
-        await using var tester = new MassTransitTester(configureServices);
+        await using var tester = new MassTransitTester(ConfigureServices);
         var @event = new InstanceSynchronizationFailed(_localInstanceId, ["TypeLoadException"]);
 
         // Act

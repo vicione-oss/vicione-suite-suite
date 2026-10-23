@@ -25,7 +25,7 @@ public class DynamicExternalIdProviderOptionsTests
         dbContext.SaveChanges();
 
         var configuration = CreateConfiguration(new ExternalIdProviderOptions { Providers = [] });
-        var serviceProvider = CreateServiceProvider(dbContext);
+        using var serviceProvider = CreateServiceProvider(dbContext);
         var sut = new DynamicExternalIdProviderOptions(serviceProvider, configuration);
         var options = new OpenIdConnectOptions();
         var originalAuthority = options.Authority;
@@ -45,7 +45,7 @@ public class DynamicExternalIdProviderOptionsTests
         // Arrange
         using var dbContext = TestDbContextFactory.CreateSqliteContext<ApplicationDbContextSqlite>();
         var configuration = CreateConfiguration(new ExternalIdProviderOptions { Providers = [] });
-        var serviceProvider = CreateServiceProvider(dbContext);
+        using var serviceProvider = CreateServiceProvider(dbContext);
         var sut = new DynamicExternalIdProviderOptions(serviceProvider, configuration);
         var options = new OpenIdConnectOptions();
 
@@ -80,7 +80,7 @@ public class DynamicExternalIdProviderOptionsTests
         var firstProviderInDb = dbContext.ExternalIdProviders.First();
 
         var configuration = CreateConfiguration(new ExternalIdProviderOptions { Providers = [] });
-        var serviceProvider = CreateServiceProvider(dbContext);
+        using var serviceProvider = CreateServiceProvider(dbContext);
         var sut = new DynamicExternalIdProviderOptions(serviceProvider, configuration);
         var options = new OpenIdConnectOptions();
 
@@ -110,7 +110,7 @@ public class DynamicExternalIdProviderOptionsTests
                 }
             ]
         });
-        var serviceProvider = CreateServiceProvider(dbContext);
+        using var serviceProvider = CreateServiceProvider(dbContext);
         var sut = new DynamicExternalIdProviderOptions(serviceProvider, configuration);
         var options = new OpenIdConnectOptions();
 
@@ -149,7 +149,7 @@ public class DynamicExternalIdProviderOptionsTests
                 }
             ]
         });
-        var serviceProvider = CreateServiceProvider(dbContext);
+        using var serviceProvider = CreateServiceProvider(dbContext);
         var sut = new DynamicExternalIdProviderOptions(serviceProvider, configuration);
         var options = new OpenIdConnectOptions();
 
@@ -180,7 +180,7 @@ public class DynamicExternalIdProviderOptionsTests
             .Build();
     }
 
-    private static IServiceProvider CreateServiceProvider(ApplicationDbContext dbContext)
+    private static ServiceProvider CreateServiceProvider(ApplicationDbContext dbContext)
     {
         var services = new ServiceCollection();
         services.AddSingleton(dbContext);

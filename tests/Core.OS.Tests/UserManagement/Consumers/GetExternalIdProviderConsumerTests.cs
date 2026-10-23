@@ -2,7 +2,6 @@ using Core.OS.DbContext;
 using Core.OS.UserManagement.Consumers;
 using Core.Shared.UserManagement.Configuration;
 using Core.Shared.UserManagement.Requests;
-using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Testing.Backend;
 using ExternalIdProviderEntity = Core.Shared.UserManagement.Contracts.ExternalIdProvider;

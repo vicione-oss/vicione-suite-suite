@@ -36,7 +36,7 @@ public sealed class MessageBannerNotificationElementTests
     public async Task Should_not_be_visible_by_default()
     {
         // Arrange
-       await using var ctx = new BunitContext();
+        await using var ctx = new BunitContext();
 
         ctx.Services
             .AddMessageBanner()

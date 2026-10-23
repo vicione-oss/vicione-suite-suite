@@ -1,5 +1,4 @@
 using Blazor.Shared.Connections.Contracts;
-using Blazor.Shared.Connections.ControlPanels.Connections.Extensions;
 using Blazor.Shared.Connections.ControlPanels.Connections.Services;
 using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Services;

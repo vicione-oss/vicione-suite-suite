@@ -1,5 +1,4 @@
 using System.Globalization;
-using AwesomeAssertions;
 using Blazor.Shared.Settings.DateAndTime.Services;
 using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.UserInterface.ControlPanels.DateAndTime.Models;
@@ -14,7 +13,6 @@ using Core.Shared.Instance.Requests;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 using Sdk.Authorization;
 using Sdk.Client.Components.Settings;
 using Sdk.Client.ControlPanels.Services;
@@ -25,7 +23,6 @@ using Sdk.UserManagement.Events;
 using ViciOne.Ui.Blazor.Components.ComboBox;
 using ViciOne.Ui.Blazor.Components.TestingHelpers.TextBox.Extensions;
 using ViciOne.Ui.Localization.Resources;
-using Xunit;
 using Labels = Blazor.Shared.UserManagement.Localization.Labels;
 
 namespace Blazor.Shared.Tests.UserManagement.ControlPanels.User.Components;

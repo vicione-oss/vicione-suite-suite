@@ -106,12 +106,12 @@ internal sealed partial class BackupBuilder(IFileSystem fileSystem, ILocalInstan
 
                 var moduleSummaries = await AddModuleBackupEntries(zipArchive, _metadataProvider!, _workspaceManagement!, [.. _addModuleIds], cancellationToken);
                 summary.Modules.AddRange(moduleSummaries);
-                metadata.Modules = [.. moduleSummaries.Select(k => new ModuleBackupMetadata
+                metadata.Modules.AddRange(moduleSummaries.Select(k => new ModuleBackupMetadata
                 {
                     Name = k.Name,
                     Version = k.Version,
                     EntryName = k.EntryName,
-                })];
+                }));
             }
 
             // System configuration comes from HostManagement.

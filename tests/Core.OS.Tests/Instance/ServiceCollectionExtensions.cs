@@ -51,7 +51,7 @@ public static class ServiceCollectionExtensions
                     Installed = true,
                 })
                 .ToList();
-            
+
             metadataProvider
                 .GetModuleMetadata(Arg.Any<GetModuleMetadataOptions>(), Arg.Any<CancellationToken>())
                 .Returns(installedModules);

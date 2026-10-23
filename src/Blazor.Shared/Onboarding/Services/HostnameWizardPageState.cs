@@ -4,7 +4,7 @@ namespace Blazor.Shared.Onboarding.Services;
 
 public sealed class HostnameWizardPageState : WizardPageState
 {
-    internal int HostnameMaximumLength => 63;
+    internal const int HostnameMaximumLength = 63;
 
     internal bool RulesAndGuidelinesExpanded { get; set; } = true;
 

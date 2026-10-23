@@ -9,7 +9,4 @@ public sealed partial class NavigationField
 
     [Parameter, EditorRequired]
     public RenderFragment Content { get; set; } = default!;
-
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = default!;
 }

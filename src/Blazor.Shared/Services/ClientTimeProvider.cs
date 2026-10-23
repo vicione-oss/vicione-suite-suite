@@ -22,7 +22,7 @@ public sealed partial class ClientTimeProvider : TimeProvider,
 
     private readonly SemaphoreSlim _semaphore = new(1);
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly AutoDisposeList<IDisposable> _disposables = new();
+    private readonly AutoDisposeList<IDisposable> _disposables = [];
     private readonly IUserService _userService;
     private readonly IUiMediator _uiMediator;
     private readonly AuthenticationStateProvider _authenticationStateProvider;

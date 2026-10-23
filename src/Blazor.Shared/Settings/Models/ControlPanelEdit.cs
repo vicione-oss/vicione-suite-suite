@@ -6,6 +6,8 @@ using Sdk.Client.Models;
 
 namespace Blazor.Shared.Settings.Models;
 
+/// <param name="controlPanelState">The state of the edited control panel.</param>
+/// <param name="serviceProvider">Resolves the logger and the keyed handlers.</param>
 /// <param name="handlerServiceKey">
 /// The <see cref="Sdk.Client.ControlPanels.ControlPanelServiceKey{TControlPanel}"/> type of the edited control panel, under
 /// which its handlers are registered. A control panel without a handler of its own has none, even when another control

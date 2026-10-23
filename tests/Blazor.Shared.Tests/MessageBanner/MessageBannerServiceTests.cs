@@ -9,7 +9,7 @@ namespace Blazor.Shared.Tests.MessageBanner;
 
 public sealed class MessageBannerServiceTests
 {
-    public static readonly TheoryData<MessageType> MessageTypes = new(Enum.GetValues<MessageType>());
+    public static readonly TheoryData<MessageType> MessageTypes = [.. Enum.GetValues<MessageType>()];
 
     [Fact]
     public void Should_be_resolvable()

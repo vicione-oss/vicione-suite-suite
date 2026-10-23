@@ -1,6 +1,8 @@
 using System.IO.Abstractions;
 using System.Text.Json;
+#if DEBUG
 using MassTransit.Metadata;
+#endif
 
 namespace Blazor.DevAssets;
 
@@ -11,6 +13,11 @@ namespace Blazor.DevAssets;
 internal sealed class StaticWebAssetContent(IFileSystem fileSystem, string webassetJsonPath)
 {
     private const string ManifestSuffix = ".staticwebassets.runtime.json";
+
+    /// <summary>
+    /// Manifest key; kept as a literal so renaming <see cref="ContentRoots"/> does not change the file format.
+    /// </summary>
+    private const string ContentRootsKey = "ContentRoots";
 
     /// <summary>
     /// Matches route segments the way the framework's own development file provider does.
@@ -56,9 +63,8 @@ internal sealed class StaticWebAssetContent(IFileSystem fileSystem, string webas
     /// </summary>
     public static IEnumerable<string> FixDockerDebugContentRootPaths(IEnumerable<string>? contentRoots)
     {
-
 #if !DEBUG
-            return contentRoots ?? new string[0];
+        return contentRoots ?? [];
 #else
         if (contentRoots is null)
             return [];
@@ -118,7 +124,7 @@ internal sealed class StaticWebAssetContent(IFileSystem fileSystem, string webas
         using var doc = JsonDocument.Parse(fileSystem.File.ReadAllText(_jsonPath));
 
         // Indexed by asset.rootindex to build an absolute path.
-        if (doc.RootElement.TryGetProperty("ContentRoots", out var contentRoots))
+        if (doc.RootElement.TryGetProperty(ContentRootsKey, out var contentRoots))
             _contentRoots.AddRange(FixDockerDebugContentRootPaths(contentRoots.EnumerateArray().Select(contentRoot => contentRoot.GetString()!)));
 
         // Each segment of a route names a child node; Patterns, which match files added after the build, are skipped.

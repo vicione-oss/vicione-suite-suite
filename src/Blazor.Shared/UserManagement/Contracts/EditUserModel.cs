@@ -9,6 +9,6 @@ public sealed class EditUserModel
     public string NewPassword { get; set; } = string.Empty;
     public string CurrentPassword { get; set; } = string.Empty;
 
-    public List<string> Roles { get; set; } = [];
+    public List<string> Roles { get; init; } = [];
     public bool IsPasswordRequired { get; set; }
 }

@@ -28,7 +28,7 @@ public sealed class ExternalAccountServiceTests
     {
         // Arrange
         var user = new SuiteUser { UserName = "test" };
-        using var sut = CreateSubjectUnderTest(new UserLoginInfo("test", "test",  "test"));
+        using var sut = CreateSubjectUnderTest(new UserLoginInfo("test", "test", "test"));
 
         // Act
         var externalAccount = await sut.GetExternalUserAccount(user);
@@ -42,8 +42,8 @@ public sealed class ExternalAccountServiceTests
     {
         // Arrange
         var user = new SuiteUser { UserName = "test" };
-        using var sut = CreateSubjectUnderTest(new UserLoginInfo("test", "test",  "test"),
-            new UserLoginInfo("test2", "test2",  "test2"));
+        using var sut = CreateSubjectUnderTest(new UserLoginInfo("test", "test", "test"),
+            new UserLoginInfo("test2", "test2", "test2"));
 
         // Act
         var act = async () => await sut.GetExternalUserAccount(user);

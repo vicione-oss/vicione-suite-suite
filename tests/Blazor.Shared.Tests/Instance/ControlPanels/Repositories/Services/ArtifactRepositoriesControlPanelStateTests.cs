@@ -13,9 +13,10 @@ public sealed class ArtifactRepositoriesControlPanelStateTests
 
     private static ArtifactRepositoriesControlPanelState StateWithRepositories(params ArtifactRepository[] repositories)
     {
-        var state = new ArtifactRepositoriesControlPanelState();
-        state.Repositories = [.. repositories.Select(r => new ArtifactRepositoryModel(r))];
-        return state;
+        return new ArtifactRepositoriesControlPanelState
+        {
+            Repositories = [.. repositories.Select(r => new ArtifactRepositoryModel(r))],
+        };
     }
 
     public sealed class UpdateRepositoryTests

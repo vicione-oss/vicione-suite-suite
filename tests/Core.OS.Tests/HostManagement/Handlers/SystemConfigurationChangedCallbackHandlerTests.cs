@@ -8,7 +8,6 @@ using HostManagement.Shared.Communication.Contracts;
 using HostManagement.Shared.Communication.Enums;
 using HostManagement.Shared.Communication.NamedPipe.Client;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Core.OS.Tests.HostManagement.Handlers;
@@ -36,7 +35,7 @@ public class SystemConfigurationChangedCallbackHandlerTests
         return services.BuildServiceProvider();
     }
 
-    private SystemConfigurationCache GetCacheWithConfiguration(ServiceProvider serviceProvider)
+    private static SystemConfigurationCache GetCacheWithConfiguration(ServiceProvider serviceProvider)
     {
         var cache = serviceProvider.GetRequiredService<SystemConfigurationCache>();
         cache.Set(TestPipeClient.GetEmbeddedSystemConfiguration());

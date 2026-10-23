@@ -30,7 +30,7 @@ public sealed partial class UserControlPanelState : ControlPanelState
     internal string RoleToAdd { get; set; } = string.Empty;
 
     /// <remarks>
-    /// <see cref="UserControlPanel"/> will use this property to decide whether a user should be edited (value is set) or created (value is null)
+    /// <see cref="Components.UserControlPanel"/> will use this property to decide whether a user should be edited (value is set) or created (value is null)
     /// </remarks>
     [NotifyChanged]
     public partial UserName? UserName { get; set; }

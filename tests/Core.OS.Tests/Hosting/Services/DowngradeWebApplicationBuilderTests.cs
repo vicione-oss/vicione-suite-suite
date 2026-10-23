@@ -2,7 +2,6 @@ using System.IO.Abstractions.TestingHelpers;
 using Core.OS.Hosting.Contracts;
 using Core.OS.Hosting.Pages;
 using Core.OS.Hosting.Services;
-using Core.OS.HostManagement;
 using Core.OS.Instance;
 using Core.OS.Instance.Extensions;
 using Core.OS.Tests.Security;

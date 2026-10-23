@@ -19,7 +19,7 @@ public sealed class ModuleMetadataBundle
     /// </summary>
     public bool Installed { get; set; }
 
-    public List<ModuleDependencyPackage> MissingDependencies { get; set; } = [];
+    public List<ModuleDependencyPackage> MissingDependencies { get; init; } = [];
 
     /// <summary>
     /// When false, the UI cannot install or uninstall the module.
@@ -34,14 +34,14 @@ public sealed class ModuleMetadataBundle
     /// <summary>
     /// Installable versions; empty when the repository has no compatible version.
     /// </summary>
-    public List<string> AvailableVersions { get; set; } = [];
+    public List<string> AvailableVersions { get; init; } = [];
 
     public ModulePackageOperation? PendingOperation { get; set; }
 
     /// <summary>
     /// Errors from the module init process, e.g. missing options.
     /// </summary>
-    public List<ErrorInfo> Errors { get; set; } = [];
+    public List<ErrorInfo> Errors { get; init; } = [];
 
     /// <summary>
     /// The module has a valid *.Backend part.

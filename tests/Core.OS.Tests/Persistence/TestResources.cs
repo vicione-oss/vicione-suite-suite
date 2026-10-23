@@ -38,9 +38,8 @@ internal static class TestResources
         var resourceAssembly = Assembly.GetExecutingAssembly();
         ArgumentNullException.ThrowIfNull(resourceAssembly);
 
-        using var embeddedResourceStream = resourceAssembly.GetManifestResourceStream(embeddedResourcePath);
-        if (embeddedResourceStream == null)
-            throw new ArgumentException("Resource not found in assembly", nameof(embeddedResourcePath));
+        using var embeddedResourceStream = resourceAssembly.GetManifestResourceStream(embeddedResourcePath)
+            ?? throw new ArgumentException("Resource not found in assembly", nameof(embeddedResourcePath));
 
         using var streamReader = new BinaryReader(embeddedResourceStream);
         return streamReader.ReadBytes((int)embeddedResourceStream.Length);

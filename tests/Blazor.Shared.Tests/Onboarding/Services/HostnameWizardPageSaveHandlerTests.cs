@@ -64,8 +64,7 @@ public sealed class HostnameWizardPageSaveHandlerTests
     {
         // Arrange
         var handler = CreateHandler();
-        var state = new HostnameWizardPageState();
-        state.Hostname = new string('a', state.HostnameMaximumLength);
+        var state = new HostnameWizardPageState { Hostname = new string('a', HostnameWizardPageState.HostnameMaximumLength) };
 
         // Act
         var result = await handler.Save(state, TestContext.Current.CancellationToken);
@@ -79,8 +78,7 @@ public sealed class HostnameWizardPageSaveHandlerTests
     {
         // Arrange
         var handler = CreateHandler();
-        var state = new HostnameWizardPageState();
-        state.Hostname = new string('a', state.HostnameMaximumLength + 1);
+        var state = new HostnameWizardPageState { Hostname = new string('a', HostnameWizardPageState.HostnameMaximumLength + 1) };
 
         // Act
         var result = await handler.Save(state, TestContext.Current.CancellationToken);

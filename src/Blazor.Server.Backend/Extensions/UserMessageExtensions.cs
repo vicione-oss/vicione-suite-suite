@@ -27,8 +27,8 @@ public static class UserMessageExtensions
         public void AddExternalError(HttpContext context,
             object message)
         {
-            tempDataFactory.AddUserMessage(context, 
-                ExternalLoginErrorConstants.ExternalLoginErrorKey, 
+            tempDataFactory.AddUserMessage(context,
+                ExternalLoginErrorConstants.ExternalLoginErrorKey,
                 message);
         }
     }

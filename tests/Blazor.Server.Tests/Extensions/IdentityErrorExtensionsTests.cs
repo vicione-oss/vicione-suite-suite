@@ -25,7 +25,7 @@ public sealed class IdentityErrorExtensionsTests
     ];
 
     [Theory]
-    [MemberData(nameof(PasswordPolicyErrors))]
+    [MemberData(nameof(PasswordPolicyErrors), DisableDiscoveryEnumeration = true)]
     public void Should_recognize_a_password_policy_error(IdentityError error)
     {
         // Act
@@ -36,7 +36,7 @@ public sealed class IdentityErrorExtensionsTests
     }
 
     [Theory]
-    [MemberData(nameof(OtherErrors))]
+    [MemberData(nameof(OtherErrors), DisableDiscoveryEnumeration = true)]
     public void Should_not_take_other_errors_for_a_password_policy_error(IdentityError error)
     {
         // Act

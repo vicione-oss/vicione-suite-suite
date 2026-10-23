@@ -1,9 +1,8 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Data;
 using System.Text.Json;
 using Core.OS.Instance;
 using Core.OS.Instance.Commands;
-using Core.OS.Instance.Contracts;
 using Core.OS.Instance.Mappers;
 using Core.OS.Instance.Services;
 using Core.OS.Persistence.Extensions;
@@ -117,24 +116,24 @@ public sealed partial class DbChangeSetConsumer(
                 break;
 
             case EntityState.Deleted:
-            {
-                var existing = dbContext.Find(entityType, GetPrimaryKeyValues(dbContext, entity, entityType));
-                if (existing is not null)
-                    dbContext.Remove(existing);
-                break;
-            }
+                {
+                    var existing = dbContext.Find(entityType, GetPrimaryKeyValues(dbContext, entity, entityType));
+                    if (existing is not null)
+                        dbContext.Remove(existing);
+                    break;
+                }
 
             case EntityState.Modified:
             case EntityState.Added:
-            {
-                var existing = dbContext.Find(entityType, GetPrimaryKeyValues(dbContext, entity, entityType));
-                if (existing is not null)
-                    dbContext.Entry(existing).CurrentValues.SetValues(entity);
-                else
-                    dbContext.Add(entity);
-                FixConnectionRelation(dbContext);
-                break;
-            }
+                {
+                    var existing = dbContext.Find(entityType, GetPrimaryKeyValues(dbContext, entity, entityType));
+                    if (existing is not null)
+                        dbContext.Entry(existing).CurrentValues.SetValues(entity);
+                    else
+                        dbContext.Add(entity);
+                    FixConnectionRelation(dbContext);
+                    break;
+                }
 
             default:
                 throw new InvalidEnumArgumentException(nameof(change.State), (int)change.State, typeof(EntityState));
@@ -240,11 +239,11 @@ public sealed partial class DbChangeSetConsumer(
 
         var instanceInfo = localInstanceInfo.Local;
         var endPoint = await context.GetSendEndpoint(MessagingHelper.GetCommandEndpointAddress<RegisterInstance>());
-        await endPoint.Send(instanceInfo.ToRegisterInstanceCommand(
+        var command = instanceInfo.ToRegisterInstanceCommand(
             [.. localInstanceInfo.LoadedModules],
             [],
-            sequenceTracker.GetAllLastApplied()
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)) with { ForceSync = true }, context.CancellationToken);
+            sequenceTracker.GetAllLastApplied().ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+        await endPoint.Send(command with { ForceSync = true }, context.CancellationToken);
 
         // Reset tracker so the next message after full-sync completes is accepted
         sequenceTracker.Reset();

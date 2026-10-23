@@ -290,7 +290,7 @@ internal static class LoggingConfiguration
         return loggerConfig.MinimumLevel.Override(key, logSwitch.WrappedBaseLoggingLevelSwitch.MinimumLevel);
     }
 
-    private static IEnumerable<LogTarget> GetLogTargets(this ILogOptions logOptions)
+    private static IEnumerable<LogTarget> GetLogTargets(this LoggingOptions logOptions)
     {
         var targetStrings = logOptions.LogTargets;
         if (targetStrings is null || targetStrings.Length == 0)

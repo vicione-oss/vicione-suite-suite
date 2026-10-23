@@ -17,7 +17,7 @@ public sealed class ExternalAuthenticationSettingsTests : IAsyncDisposable
     public async Task Should_return_false_if_no_providers_are_configured()
     {
         // Arrange
-        var options = new ExternalIdProviderOptions { Providers = new List<ExternalIdProvider>() };
+        var options = new ExternalIdProviderOptions { Providers = [] };
         var sut = CreateSut(options);
 
         // Act
@@ -59,8 +59,8 @@ public sealed class ExternalAuthenticationSettingsTests : IAsyncDisposable
         // Arrange
         var options = new ExternalIdProviderOptions
         {
-            Providers = new List<ExternalIdProvider>
-            {
+            Providers =
+            [
                 new()
                 {
                     Name = "Provider1",
@@ -68,7 +68,7 @@ public sealed class ExternalAuthenticationSettingsTests : IAsyncDisposable
                     ClientId = "ClientId1",
                     ClientSecret = "ClientSecret1"
                 }
-            }
+            ]
         };
         var sut = CreateSut(options);
 
@@ -83,7 +83,7 @@ public sealed class ExternalAuthenticationSettingsTests : IAsyncDisposable
     public async Task Should_return_true_if_db_providers_are_configured()
     {
         // Arrange
-        var options = new ExternalIdProviderOptions { Providers = new List<ExternalIdProvider>() };
+        var options = new ExternalIdProviderOptions { Providers = [] };
         var sut = CreateSut(options,
             context =>
             {
@@ -110,8 +110,8 @@ public sealed class ExternalAuthenticationSettingsTests : IAsyncDisposable
         // Arrange
         var options = new ExternalIdProviderOptions
         {
-            Providers = new List<ExternalIdProvider>
-            {
+            Providers =
+            [
                 new()
                 {
                     Name = "ProviderThatShouldBeFound",
@@ -126,7 +126,7 @@ public sealed class ExternalAuthenticationSettingsTests : IAsyncDisposable
                     ClientId = "ClientId2",
                     ClientSecret = "ClientSecret2"
                 }
-            }
+            ]
         };
         var sut = CreateSut(options,
             context =>

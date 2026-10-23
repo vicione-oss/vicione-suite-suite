@@ -90,28 +90,6 @@ public sealed class NetworkInterfaceControlPanelStateExtensionsTests
         macAddress.Should().Be(CommonVocabulary.Unknown);
     }
 
-    [Theory]
-    [InlineData(true, 1)]
-    [InlineData(false, 0)]
-    public void Should_return_the_static_dns_name_servers_only_while_they_are_enabled(bool enabled, int expectedCount)
-    {
-        // Arrange
-        _systemConfigurationService.SystemConfiguration.Returns(new SystemConfiguration
-        {
-            NetworkDNSSettings = new NetworkDNSSettings
-            {
-                NameServers = new() { Enabled = enabled, Addresses = [IPAddress.Parse("8.8.8.8")] }
-            }
-        });
-        var state = new NetworkInterfaceControlPanelState();
-
-        // Act
-        var nameServers = state.GetStaticDnsNameServers(_systemConfigurationService);
-
-        // Assert
-        nameServers.Should().HaveCount(expectedCount);
-    }
-
     [Fact]
     public void Should_return_the_configured_addresses_of_a_static_configuration()
     {

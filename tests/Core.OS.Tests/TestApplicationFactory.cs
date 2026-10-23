@@ -1,4 +1,3 @@
-using System.Reflection;
 using Core.OS.Tests.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -42,16 +41,11 @@ public class TestApplicationFactory<TStartup> : WebApplicationFactory<TStartup> 
         // Called before the test web host extension.
         builder.ConfigureServices(services =>
         {
-            var assemblies = new[]
-            {
-                Assembly.GetExecutingAssembly()
-            };
-
             ConfigureInstanceInformation();
 
             services.AddScoped(_ => InstanceInformationProviderMock);
 
-            MvcBuilder = services.AddTestSetupMvc(assemblies);
+            MvcBuilder = services.AddTestSetupMvc();
         });
 
         // Called only when the test does not configure itself.

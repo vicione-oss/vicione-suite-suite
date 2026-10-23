@@ -49,7 +49,7 @@ public sealed partial class TimeZoneSettingsGroup : ComponentBase, IDisposable
     {
         await base.OnParametersSetAsync();
 
-        if (string.CompareOrdinal(SelectedTimeZoneId, _selectedTimeZoneId) != 0)
+        if (!string.Equals(SelectedTimeZoneId, _selectedTimeZoneId, StringComparison.Ordinal))
         {
             _selectedTimeZoneId = SelectedTimeZoneId;
 

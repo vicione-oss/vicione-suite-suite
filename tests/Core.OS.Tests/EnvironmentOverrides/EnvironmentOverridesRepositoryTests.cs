@@ -95,7 +95,7 @@ public sealed class EnvironmentOverridesRepositoryTests : IDisposable
 
     // Every C0 character except NUL, which cannot be stored at all — see
     // Should_reject_value_containing_nul.
-    public static TheoryData<int> GetControlCharacterCodes() => new(Enumerable.Range(1, 0x1F).Append(0x7F));
+    public static TheoryData<int> GetControlCharacterCodes() => [.. Enumerable.Range(1, 0x1F).Append(0x7F)];
 
     [Theory]
     [InlineData('5')]

@@ -10,7 +10,7 @@ public sealed class MetricSelection_SelectSecondTemperature
     [Fact]
     public void Should_return_nothing_with_a_single_sensor()
         => MetricSelection.SelectSecondTemperature([Temperature("cpu_thermal_temp", 54.2)], "cpu_thermal_temp")
-            .Should().Be(((string?)null, (double?)null));
+            .Should().Be((null, null));
 
     [Fact]
     public void Should_return_the_other_sensor()
@@ -94,11 +94,11 @@ public sealed class MetricSelection_Throttling
                 Zone("gpu-thermal", "passive_trip", 90), Zone("gpu-thermal", "throttling", 50),
                 Zone("cpu-thermal", "passive_trip", 85), Zone("cpu-thermal", "throttling", 0),
             ])
-            .Should().Be(((double?)85, (double?)50));
+            .Should().Be((85, 50));
 
     [Fact]
     public void Should_report_nothing_without_thermal_zones()
-        => MetricSelection.Throttling([]).Should().Be(((double?)null, (double?)null));
+        => MetricSelection.Throttling([]).Should().Be((null, null));
 
     private static Metric Zone(string zone, string name, double value)
         => new() { Group = "thermal_zones", SubGroup = zone, Name = name, IntervalInMinutes = 0, Value = value, Unit = MetricUnit.None };

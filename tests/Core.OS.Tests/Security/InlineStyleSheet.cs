@@ -18,7 +18,7 @@ internal static partial class InlineStyleSheet
         var match = StyleBlock().Match(html);
         match.Success.Should().BeTrue("the page carries an inline stylesheet");
 
-        var css = Encoding.UTF8.GetBytes(match.Groups["css"].Value.Replace("\r\n", "\n").Replace('\r', '\n'));
+        var css = Encoding.UTF8.GetBytes(match.Groups["css"].Value.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n'));
 
         return $"'sha256-{Convert.ToBase64String(SHA256.HashData(css))}'";
     }

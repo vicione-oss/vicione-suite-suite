@@ -1,12 +1,14 @@
 using Blazor.Shared.Connections.Services;
 using Blazor.Shared.Help.Extensions;
 using Blazor.Shared.Instance.Extensions;
-using Blazor.Shared.Mqtt.Extensions;
 using Blazor.Shared.Onboarding.Extensions;
 using Blazor.Shared.Services;
 using Blazor.Shared.Settings.DateAndTime.Services;
-using Blazor.Shared.UserManagement.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+#if DEBUG
+using Blazor.Shared.Mqtt.Extensions;
+using Blazor.Shared.UserManagement.Extensions;
+#endif
 
 namespace Blazor.Shared.Extensions;
 

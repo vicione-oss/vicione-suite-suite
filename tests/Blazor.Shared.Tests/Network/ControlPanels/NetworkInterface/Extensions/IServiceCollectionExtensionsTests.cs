@@ -17,7 +17,7 @@ public class IServiceCollectionExtensionsTests
     };
 
     [Theory]
-    [MemberData(nameof(Tabs))]
+    [MemberData(nameof(Tabs), DisableDiscoveryEnumeration = true)]
     public void Should_configure_save_and_reset_handler_for_each_tab(Action<IServiceCollection> addTab, Type controlPanelType)
     {
         // Arrange

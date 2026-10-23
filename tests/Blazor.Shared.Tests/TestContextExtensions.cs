@@ -49,8 +49,7 @@ internal static class TestContextExtensions
             return ctx;
         }
 
-        public BunitContext SetupControlPanelServices(Action<IControlPanelRequest>? controlPanelRequestSetup = null,
-            Action<IActiveControlPanelPageProvider>? activeControlPanelPageProviderSetup = null)
+        public BunitContext SetupControlPanelServices(Action<IControlPanelRequest>? controlPanelRequestSetup = null)
         {
             var controlPanelRequest = Substitute.For<IControlPanelRequest>();
             ctx.Services.AddSingleton(controlPanelRequest);

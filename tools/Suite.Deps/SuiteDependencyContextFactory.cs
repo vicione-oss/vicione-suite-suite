@@ -19,9 +19,8 @@ internal static class SuiteDependencyContextFactory
         if (string.IsNullOrEmpty(loaderOptions.UiHost))
             throw new InvalidOperationException("UiHost is not defined in the section ModuleLoader");
 
-        var uiHostOptions = config.GetUiHostOptions(loaderOptions.UiHost);
-        if (uiHostOptions is null)
-            throw new InvalidOperationException($"No UiHost options found for {loaderOptions.UiHost}");
+        var uiHostOptions = config.GetUiHostOptions(loaderOptions.UiHost)
+            ?? throw new InvalidOperationException($"No UiHost options found for {loaderOptions.UiHost}");
 
         // The modules that should get loaded.
         var moduleOptions = manifest.ToDictionary(k => k, k => new ModuleOptions());

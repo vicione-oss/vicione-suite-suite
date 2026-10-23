@@ -7,7 +7,6 @@ namespace Blazor.Shared.Network.ControlPanels.RemoteAccess.Services;
 
 internal sealed class RemoteAccessControlPanelDescriptor : IControlPanelDescriptor<RemoteAccessControlPanel>
 {
-    public string Category => CommonVocabulary.Network;
     public string Title => TechnicalTerms.RemoteAccess;
     public int? Position => ControlPanelNetworkCategoryDescriptor.FirstPositionAfterNetworkInterfaces + 3;
     public Uri? IconUrl => null;

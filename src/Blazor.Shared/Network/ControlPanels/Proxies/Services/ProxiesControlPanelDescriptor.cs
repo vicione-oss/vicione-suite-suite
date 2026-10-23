@@ -9,7 +9,6 @@ namespace Blazor.Shared.Network.ControlPanels.Proxies.Services;
 
 internal sealed class ProxiesControlPanelDescriptor : IControlPanelDescriptor<ProxiesControlPanel>
 {
-    public string Category => CommonVocabulary.Network;
     public string Title => TechnicalTerms.ProxyPlural;
     public int? Position => ControlPanelNetworkCategoryDescriptor.FirstPositionAfterNetworkInterfaces + 2;
     public Uri? IconUrl => SvgIcon.HostConfig.GetPath();

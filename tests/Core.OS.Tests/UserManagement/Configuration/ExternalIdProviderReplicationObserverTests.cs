@@ -11,7 +11,7 @@ public sealed class ExternalIdProviderReplicationObserverTests
 {
     private static readonly string ApplicationContextType = typeof(IApplicationDbContext).FullName!;
 
-    private readonly IOptionsMonitorCache<OpenIdConnectOptions> _optionsCache = new OptionsCache<OpenIdConnectOptions>();
+    private readonly OptionsCache<OpenIdConnectOptions> _optionsCache = new();
     private readonly OpenIdConnectOptions _cachedOptions = new() { Authority = "https://stale.example.com" };
 
     [Fact]

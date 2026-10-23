@@ -9,5 +9,5 @@ public static class MessageModelExtensions
     public static string GetRowTopic(this MessageModel messageModel, MqttViewerComponentService viewerService)
         => viewerService.NodeTopic == MqttViewerConstants.AllTopicSubscription
             ? messageModel.Topic
-            : messageModel.Topic.Remove(0, viewerService.NodeTopic.Length + 1);
+            : messageModel.Topic[(viewerService.NodeTopic.Length + 1)..];
 }

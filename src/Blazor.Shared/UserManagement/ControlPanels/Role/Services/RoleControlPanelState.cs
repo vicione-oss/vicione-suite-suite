@@ -19,7 +19,7 @@ public sealed partial class RoleControlPanelState : ControlPanelState
     internal bool IsEditMode => !string.IsNullOrEmpty(RoleName);
 
     /// <remarks>
-    /// <see cref="RoleControlPanel"/> will use this property to decide whether a role should be edited (value is set) or created (value is null)
+    /// <see cref="Components.RoleControlPanel"/> will use this property to decide whether a role should be edited (value is set) or created (value is null)
     /// </remarks>
     [NotifyChanged]
     public partial string? RoleName { get; set; }

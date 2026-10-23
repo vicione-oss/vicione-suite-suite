@@ -114,7 +114,7 @@ public sealed partial class UsersControlPanel : ControlPanelBase<UsersControlPan
             {
                 var users = State.Users.Where(u => u.UserName == userName && u.UserName.Value != _identityName).ToArray();
 
-                if (!users.Any())
+                if (users.Length == 0)
                     continue;
 
                 State.DeletingUsers.AddRange(users);

@@ -9,7 +9,7 @@ namespace Core.OS.Tests.Instance.Services;
 
 public class BackupReaderTests
 {
-    private ServiceProvider CreateServices()
+    private static ServiceProvider CreateServices()
     {
         var fs = new MockFileSystem();
         fs.AddEmbeddedBackupFile();
@@ -219,7 +219,7 @@ public class BackupReaderTests
         }
     }
 
-    private static Stream CreateZipStream(IFileSystem fileSystem)
+    private static FileSystemStream CreateZipStream(IFileSystem fileSystem)
         => fileSystem.FileStream.New(TestResources.BackupZip, FileMode.Open, FileAccess.Read);
 
     private static ZipArchive CreateZipArchive(IFileSystem fileSystem)

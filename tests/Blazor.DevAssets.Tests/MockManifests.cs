@@ -15,7 +15,7 @@ internal sealed class MockManifests
     /// <summary>
     /// The folder that holds the manifests.
     /// </summary>
-    public string Folder => Root;
+    public static string Folder => Root;
 
     /// <summary>
     /// Writes {name}.staticwebassets.runtime.json with one content root that holds each file, served at its route.

@@ -1,4 +1,4 @@
-﻿using Core.OS.UserManagement.Entities;
+using Core.OS.UserManagement.Entities;
 using Core.Shared.UserManagement.Contracts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -49,8 +49,8 @@ public sealed class InternalSecurityDbContextSqliteFactory : IDesignTimeDbContex
 
         var optionsBuilder = new DbContextOptionsBuilder<UserDbContextSqlite>();
         optionsBuilder.UseApplicationServiceProvider(serviceProvider);
-        optionsBuilder.UseSqlite(); 
-        
+        optionsBuilder.UseSqlite();
+
         return new UserDbContextSqlite(optionsBuilder.Options);
     }
 }

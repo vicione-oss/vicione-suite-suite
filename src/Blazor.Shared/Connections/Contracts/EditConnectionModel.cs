@@ -49,7 +49,6 @@ public class EditConnectionModel
     public HashSet<Tag> Tags
     {
         get => Connection.Tags;
-        set => Connection.Tags = value;
     }
 
     public TestConnectionResult? TestResult { get; set; }

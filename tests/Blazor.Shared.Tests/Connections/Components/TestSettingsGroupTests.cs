@@ -1,9 +1,7 @@
 using Blazor.Shared.Connections.Components;
 using Blazor.Shared.Connections.Factories;
 using Blazor.Shared.Connections.Services;
-using Blazor.Shared.Settings.Extensions;
 using Blazor.Shared.Tests.Connections.Extensions;
-using Blazor.Tests.Tools;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Sdk.Client.Components.Settings;

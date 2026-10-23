@@ -22,7 +22,7 @@ public static class IFileSystemExtensions
         public IEnumerable<string> GetDebugBackendModuleAssemblyPaths(List<string>? searchPaths)
             => fileSystem.GetDebugModuleAssemblyPaths(searchPaths, false);
 
-        public IEnumerable<string> GetUiModuleAssemblyPaths(string? searchPath, string uiHostDepsJsonPath)
+        public IEnumerable<string> GetUiModuleAssemblyPaths(string? searchPath)
             => fileSystem.GetModuleDlls(searchPath).Where(path => fileSystem.DoesNotContain(path, Constants.ModuleSuffixBackend));
 
         public IEnumerable<string> GetDebugClientModuleAssemblyPaths(List<string>? searchPaths)
@@ -74,10 +74,10 @@ public static class IFileSystemExtensions
                 throw new InvalidOperationException("Modules directory is not configured");
 
             var moduleDirectory = fileSystem.GetRootedPath(searchPath);
-    #if DEBUG
+#if DEBUG
             if (!fileSystem.Directory.Exists(moduleDirectory))
                 fileSystem.Directory.CreateDirectory(moduleDirectory);
-    #endif
+#endif
 
             return !fileSystem.Directory.Exists(moduleDirectory)
                 ? throw new DirectoryNotFoundException($"Can't load modules from {moduleDirectory}")

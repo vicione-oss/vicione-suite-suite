@@ -162,7 +162,7 @@ public partial class DevelopmentFileProviderTests
             var provider = new DevelopmentFileProvider(_manifests.FileSystem);
 
             // Act
-            provider.AddStaticWebAssetJsonsFromPath(_manifests.Folder);
+            provider.AddStaticWebAssetJsonsFromPath(MockManifests.Folder);
 
             // Assert
             Assert.True(provider.GetFileInfo("/_content/ModuleA/js/module-a.js").Exists);

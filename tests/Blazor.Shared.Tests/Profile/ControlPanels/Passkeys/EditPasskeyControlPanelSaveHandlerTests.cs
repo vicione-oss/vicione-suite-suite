@@ -11,15 +11,15 @@ public class EditPasskeyControlPanelSaveHandlerTests
     {
         // Arrange
         using var sut = CreateSut();
+        var state = new EditPasskeyControlPanelState
+        {
+            UserId = null,
+            PasskeyId = "some-id",
+            NewName = "new name"
+        };
 
         // Act
-        var result = await sut.Save(new EditPasskeyControlPanelState
-            {
-                UserId = null,
-                PasskeyId = "some-id",
-                NewName = "new name"
-            },
-            TestContext.Current.CancellationToken);
+        var result = await sut.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
         result.Message.Should().NotBeNullOrEmpty();
@@ -30,15 +30,15 @@ public class EditPasskeyControlPanelSaveHandlerTests
     {
         // Arrange
         using var sut = CreateSut();
+        var state = new EditPasskeyControlPanelState
+        {
+            UserId = "user-id",
+            PasskeyId = "some-id",
+            NewName = string.Empty
+        };
 
         // Act
-        var result = await sut.Save(new EditPasskeyControlPanelState
-            {
-                UserId = "user-id",
-                PasskeyId = "some-id",
-                NewName = string.Empty
-            },
-            TestContext.Current.CancellationToken);
+        var result = await sut.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
         result.Message.Should().NotBeNullOrEmpty();
@@ -49,17 +49,17 @@ public class EditPasskeyControlPanelSaveHandlerTests
     {
         // Arrange
         using var sut = CreateSut();
+        var state = new EditPasskeyControlPanelState
+        {
+            UserId = "user-id",
+            PasskeyId = "some-id",
+            CurrentName = "my phone",
+            NewName = "MyTablet",
+            ExistingNames = ["my phone", "MyTablet"]
+        };
 
         // Act
-        var result = await sut.Save(new EditPasskeyControlPanelState
-            {
-                UserId = "user-id",
-                PasskeyId = "some-id",
-                CurrentName = "my phone",
-                NewName = "MyTablet",
-                ExistingNames = ["my phone", "MyTablet"]
-            },
-            TestContext.Current.CancellationToken);
+        var result = await sut.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
         result.Message.Should().NotBeNullOrEmpty()
@@ -92,15 +92,15 @@ public class EditPasskeyControlPanelSaveHandlerTests
     {
         // Arrange
         using var sut = CreateSut();
+        var state = new EditPasskeyControlPanelState
+        {
+            UserId = "user-id",
+            PasskeyId = "some-id",
+            NewName = new string('a', PasskeyConstants.MaxPasskeyNameLength + 1)
+        };
 
         // Act
-        var result = await sut.Save(new EditPasskeyControlPanelState
-            {
-                UserId = "user-id",
-                PasskeyId = "some-id",
-                NewName = new string('a', PasskeyConstants.MaxPasskeyNameLength + 1)
-            },
-            TestContext.Current.CancellationToken);
+        var result = await sut.Save(state, TestContext.Current.CancellationToken);
 
         // Assert
         result.Message.Should().NotBeNullOrEmpty()

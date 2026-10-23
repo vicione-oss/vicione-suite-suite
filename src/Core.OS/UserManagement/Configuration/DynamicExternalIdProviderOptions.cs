@@ -34,7 +34,7 @@ public sealed class DynamicExternalIdProviderOptions(
     }
 
     /// <summary>
-    /// When using <see cref="Microsoft.Extensions.DependencyInjection.OpenIdConnectExtensions.AddOpenIdConnect"/>,
+    /// When using <see cref="Microsoft.Extensions.DependencyInjection.OpenIdConnectExtensions.AddOpenIdConnect(Microsoft.AspNetCore.Authentication.AuthenticationBuilder, string, Action{OpenIdConnectOptions})"/>,
     /// it strictly validates the <see cref="OpenIdConnectOptions"/> instance and requires, for example, a client id.
     /// As our configuration of the external id provider is optional, we cannot provide that information if none is
     /// configured. Hence, we use sentinel information to mark that unconfigured case.

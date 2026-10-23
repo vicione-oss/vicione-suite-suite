@@ -1,4 +1,4 @@
-﻿using Core.OS.MessageBus.MassTransit;
+using Core.OS.MessageBus.MassTransit;
 using Core.Shared.Instance.HealthCheck;
 using MassTransit;
 using Sdk.Backend.Messaging;
@@ -147,7 +147,7 @@ internal sealed partial class BackEndMediator(IPublishEndpoint publishEndpoint,
             return await handleException(consumer, e, cancellationToken);
         }
     }
-    
+
     private RequestHandle<TRequest> GetRequestHandle<TRequest, TResponse>(TRequest request,
         TimeSpan? timeOut,
         CancellationToken cancellationToken)

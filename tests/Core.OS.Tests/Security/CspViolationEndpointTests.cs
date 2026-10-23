@@ -30,6 +30,17 @@ public class CspViolationEndpointTests
     private const int ColumnNumber = 9;
     private const string ErrorRoute = "/Error";
 
+    private const string ReportWithoutSource =
+        $$"""
+        {
+            "csp-report": {
+                "document-uri": "{{DocumentUri}}",
+                "blocked-uri": "{{BlockedUri}}",
+                "effective-directive": "script-src-elem"
+            }
+        }
+        """;
+
     private static readonly string SingleReport =
         $$"""
         {
@@ -64,17 +75,6 @@ public class CspViolationEndpointTests
                 "body": { "id": "AnythingElseTheGroupCollects" }
             }
         ]
-        """;
-
-    private static readonly string ReportWithoutSource =
-        $$"""
-        {
-            "csp-report": {
-                "document-uri": "{{DocumentUri}}",
-                "blocked-uri": "{{BlockedUri}}",
-                "effective-directive": "script-src-elem"
-            }
-        }
         """;
 
     private static string LocatedViolation =>
@@ -237,7 +237,7 @@ public class CspViolationEndpointTests
         return new KestrelHost(app);
     }
 
-    private static HttpContext RequestOf(string body)
+    private static DefaultHttpContext RequestOf(string body)
     {
         var context = new DefaultHttpContext();
         context.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));

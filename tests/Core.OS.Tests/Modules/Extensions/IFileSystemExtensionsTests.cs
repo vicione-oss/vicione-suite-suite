@@ -169,7 +169,7 @@ public class IFileSystemExtensionsTests
     {
         private const string SkipReason = "Unix file permissions are only available on linux.";
 
-        private readonly IFileSystem _fileSystem = new FileSystem();
+        private readonly FileSystem _fileSystem = new();
         private readonly string _rootPath = Path.Combine(Path.GetTempPath(), $"atomic-write-{Guid.NewGuid():N}");
 
         public static bool IsLinux => OperatingSystem.IsLinux();

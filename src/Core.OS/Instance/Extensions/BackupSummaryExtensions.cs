@@ -16,12 +16,9 @@ internal static class BackupSummaryExtensions
             if (!string.IsNullOrEmpty(summary.SystemModule.Error))
                 errors.Add(summary.SystemModule.Error);
 
-            if (summary.SystemModule.Databases is not null)
-            {
-                errors.AddRange(summary.SystemModule.Databases
-                    .Where(db => !string.IsNullOrEmpty(db.Error))
-                    .Select(k => k.Error!));
-            }
+            errors.AddRange(summary.SystemModule.Databases
+                .Where(db => !string.IsNullOrEmpty(db.Error))
+                .Select(k => k.Error!));
         }
 
         if (summary.SystemConfiguration is not null && !string.IsNullOrEmpty(summary.SystemConfiguration.Error))
@@ -30,7 +27,7 @@ internal static class BackupSummaryExtensions
         // Errors from the module backup.
         errors.AddRange(summary.Modules.Where(k => !string.IsNullOrEmpty(k.Error)).Select(k => k.Error!));
 
-        errors.AddRange(summary.Modules.SelectMany(k => k.Databases ?? [])
+        errors.AddRange(summary.Modules.SelectMany(k => k.Databases)
             .Where(db => !string.IsNullOrEmpty(db.Error))
             .Select(k => k.Error!));
 

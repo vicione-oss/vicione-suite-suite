@@ -1,12 +1,9 @@
-using AwesomeAssertions;
 using Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Services;
 using Core.Shared.UserManagement.Commands;
 using Core.Shared.UserManagement.Events;
-using NSubstitute;
 using Sdk.Client.ControlPanels.Models;
 using Sdk.Client.Infrastructure;
 using Sdk.Messaging;
-using Xunit;
 using OpenIdProviderControlPanelStrings
     = Blazor.Shared.UserManagement.ControlPanels.OpenIdProvider.Localization.OpenIdProviderControlPanel;
 

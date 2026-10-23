@@ -362,7 +362,7 @@ public sealed class ControlPanelRegistryItemCacheTests
     {
         // Arrange
         var serviceProvider = SetupServiceProvider();
-        var controlPanelRegistryItemCache = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
+        _ = serviceProvider.GetRequiredService<IControlPanelRegistryItemCache>();
 
         // Act & Assert — disposing multiple times should not throw
         await serviceProvider.DisposeAsync();

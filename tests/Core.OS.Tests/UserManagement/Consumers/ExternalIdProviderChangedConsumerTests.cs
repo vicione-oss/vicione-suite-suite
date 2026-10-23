@@ -1,7 +1,6 @@
 using Core.OS.UserManagement.Configuration;
 using Core.OS.UserManagement.Consumers;
 using Core.Shared.UserManagement.Events;
-using MassTransit;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -11,14 +10,13 @@ namespace Core.OS.Tests.UserManagement.Consumers;
 
 public sealed class ExternalIdProviderChangedConsumerTests
 {
-    private readonly IOptionsMonitorCache<OpenIdConnectOptions> _optionsCache
-        = new OptionsCache<OpenIdConnectOptions>();
+    private readonly OptionsCache<OpenIdConnectOptions> _optionsCache = new();
 
     private MassTransitTester CreateTester()
         => new(cfg =>
         {
             cfg.AddConsumer<ExternalIdProviderChangedConsumer>();
-            cfg.AddSingleton(_optionsCache);
+            cfg.AddSingleton<IOptionsMonitorCache<OpenIdConnectOptions>>(_optionsCache);
         });
 
     [Fact]

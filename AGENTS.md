@@ -91,6 +91,16 @@ dotnet test vicione-suite.slnx --no-build --filter-query "/[(Category!=System)&(
 - Prefer primary constructors over explicit constructors with `private readonly` field assignments
 - Warnings are errors in CI (`TREAT_WARNINGS_AS_ERRORS=true`)
 - Languages: en-US primary, de secondary (satellite resources)
+- Analyzer severities come from three layers:
+  - `.globalconfig`: the ViciOne analyzers (`VO*`) and repo-wide overrides. It also applies to generated code; an
+    `.editorconfig` entry for the same rule takes precedence.
+  - Root `.editorconfig`: the defaults for all rules. It is copied from a shared template, so it is not edited here;
+    rule changes go into the scoped files and, once settled, into the template.
+  - Scoped files like `.editorconfig` in `src/`, `samples/`, `tests/`, `tools/`: area-specific configuration. The
+    closer file wins for every rule it lists. They differ on purpose, since not every area needs the same rules.
+- A scoped `[*.cs]` rule also overrides the root's path-specific sections (`Contracts/`, `Migrations/`, test files), so
+  an exclusion that must stay is restated in a scoped file as close to the affected folder as possible, such as
+  `Migrations/.editorconfig`.
 
 ## Comment Rules (*.cs, *.razor)
 

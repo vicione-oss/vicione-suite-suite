@@ -79,7 +79,7 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
     private static SupportedCapabilities CreateAllEnabledCapabilities()
     {
         var allDisabledJson = JsonSerializer.Serialize(new SupportedCapabilities(), CapabilitySourceGenerationContext.Default.SupportedCapabilities);
-        var allEnabledJson = allDisabledJson.Replace($"\"{CapabilityStatus.Disabled}\"", $"\"{CapabilityStatus.Enabled}\"");
+        var allEnabledJson = allDisabledJson.Replace($"\"{CapabilityStatus.Disabled}\"", $"\"{CapabilityStatus.Enabled}\"", StringComparison.Ordinal);
 
         return JsonSerializer.Deserialize(allEnabledJson, CapabilitySourceGenerationContext.Default.SupportedCapabilities)
             ?? throw new InvalidOperationException($"{nameof(JsonSerializer.Deserialize)} returned null");
@@ -95,96 +95,74 @@ public sealed class MockPipeClient(IFileSystem fileSystem,
         => Task.FromResult(PipeResponse.Deserialize(request, HandleRequest(request.Topic, content)));
 
     private string HandleRequest(string topic, string content)
-    {
-        switch (topic)
+        => topic switch
         {
-            case Topics.SetSystemConfiguration:
-                return HandleSetSystemConfiguration(content);
+            Topics.SetSystemConfiguration => HandleSetSystemConfiguration(content),
+            Topics.GetSystemConfiguration => HandleGetSystemConfiguration(),
+            Topics.InstallSignedDebianPackage or Topics.ResetSystem or Topics.UpdateSystem or Topics.ShutdownSystem => SystemControlSuccess(),
+            Topics.GetNetworkStatusInformation => HandleGetGetNetworkStatusInformationNet(content),
+            Topics.RestartService => HandleRestartService(content),
+            Topics.RestartSystem => HandleRestartSystem(),
+            Topics.StartService or Topics.StopService => ServiceControlSuccess(),
+            Topics.RenewDHCPLease => HandleRenewDhcpLease(),
+            Topics.GetDHCPLeaseInformation => HandleGetDCHPLease(content),
+            Topics.GetNTPFallbackInformation => HandleGetNtpFallbackInformation(),
+            Topics.GetSupportedCapabilities => HandleGetSupportedCapabilities(),
+            Topics.GetOriginalPhysicalAddress => HandleGetOriginalPhysicalAddress(),
+            _ => JsonSerializer.Serialize(new Response { Message = $"The mock has no handler for topic '{topic}'" },
+                SourceGenerationContext.Default.Response),
+        };
 
-            case Topics.GetSystemConfiguration:
-                return HandleGetSystemConfiguration();
+    private static string SystemControlSuccess()
+        => JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
+            SourceGenerationContext.Default.SystemControlResult);
 
-            case Topics.InstallSignedDebianPackage:
-                return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.SystemControlResult);
+    private static string ServiceControlSuccess()
+        => JsonSerializer.Serialize(new ServiceControlResult { Status = OperationStatus.Success, Message = null },
+            SourceGenerationContext.Default.ServiceControlResult);
 
-            case Topics.GetNetworkStatusInformation:
-                return HandleGetGetNetworkStatusInformationNet(content);
+    private static string HandleRenewDhcpLease()
+        => JsonSerializer.Serialize(new GetDHCPLeaseInformationResult
+        {
+            Status = OperationStatus.Success,
+            DHCPLease = new()
+            {
+                Gateway = new([192, 168, 14, 1]),
+                LeaseExpires = DateTimeOffset.UtcNow.AddYears(2),
+                LeaseObtained = DateTimeOffset.UtcNow.AddHours(-1),
+                IPv4Detail = new() { IPAddress = new([192, 168, 14, 32]), Netmask = new([192, 168, 255, 255]) },
+                NetworkDNSSettings = new() { NameServers = new() { Addresses = [new([8, 8, 8, 8]), new([10, 10, 10, 10])] } }
+            },
+            Message = null
+        },
+            SourceGenerationContext.Default.GetDHCPLeaseInformationResult);
 
-            case Topics.RestartService:
-                return HandleRestartService(content);
+    private static string HandleGetNtpFallbackInformation()
+        => JsonSerializer.Serialize(new GetNTPFallbackInformationResult
+        {
+            Status = OperationStatus.Success,
+            FallbackNTPServers = ["time.google.com", "time.windows.com"],
+            Message = null
+        },
+            SourceGenerationContext.Default.GetNTPFallbackInformationResult);
 
-            case Topics.RestartSystem:
-                return HandleRestartSystem();
+    private string HandleGetSupportedCapabilities()
+        => JsonSerializer.Serialize(new GetSupportedCapabilitiesResult
+        {
+            Status = OperationStatus.Success,
+            SupportedCapabilities = _supportedCapabilities,
+            Message = null
+        },
+            CapabilitySourceGenerationContext.Default.GetSupportedCapabilitiesResult);
 
-            case Topics.ResetSystem:
-                return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.SystemControlResult);
-
-            case Topics.StartService:
-            case Topics.StopService:
-                return JsonSerializer.Serialize(new ServiceControlResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.ServiceControlResult);
-
-            case Topics.UpdateSystem:
-                return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.SystemControlResult);
-
-            case Topics.ShutdownSystem:
-                return JsonSerializer.Serialize(new SystemControlResult { Status = OperationStatus.Success, Message = null },
-                    SourceGenerationContext.Default.SystemControlResult);
-
-            case Topics.RenewDHCPLease:
-                return JsonSerializer.Serialize(new GetDHCPLeaseInformationResult()
-                {
-                    Status = OperationStatus.Success,
-                    DHCPLease = new()
-                    {
-                        Gateway = new([192, 168, 14, 1]),
-                        LeaseExpires = DateTimeOffset.UtcNow.AddYears(2),
-                        LeaseObtained = DateTimeOffset.UtcNow.AddHours(-1),
-                        IPv4Detail = new() { IPAddress = new([192, 168, 14, 32]), Netmask = new([192, 168, 255, 255]) },
-                        NetworkDNSSettings = new() { NameServers = new() { Addresses = [new([8, 8, 8, 8]), new([10, 10, 10, 10])] } }
-                    },
-                    Message = null
-                },
-                SourceGenerationContext.Default.GetDHCPLeaseInformationResult);
-
-            case Topics.GetDHCPLeaseInformation:
-                return HandleGetDCHPLease(content);
-
-            case Topics.GetNTPFallbackInformation:
-                return JsonSerializer.Serialize(new GetNTPFallbackInformationResult
-                {
-                    Status = OperationStatus.Success,
-                    FallbackNTPServers = ["time.google.com", "time.windows.com"],
-                    Message = null
-                },
-                    SourceGenerationContext.Default.GetNTPFallbackInformationResult);
-
-            case Topics.GetSupportedCapabilities:
-                return JsonSerializer.Serialize(new GetSupportedCapabilitiesResult
-                {
-                    Status = OperationStatus.Success,
-                    SupportedCapabilities = _supportedCapabilities,
-                    Message = null
-                },
-                    CapabilitySourceGenerationContext.Default.GetSupportedCapabilitiesResult);
-
-            case Topics.GetOriginalPhysicalAddress:
-                return JsonSerializer.Serialize(new GetOriginalPhysicalAddressResult()
-                {
-                    Status = OperationStatus.Success,
-                    OriginalPhysicalAddress = PhysicalAddress.Parse("00:02:01:10:53:25"),
-                    Message = null
-                },
-                SourceGenerationContext.Default.GetOriginalPhysicalAddressResult);
-
-            default:
-                return JsonSerializer.Serialize(new Response { Message = $"The mock has no handler for topic '{topic}'" },
-                    SourceGenerationContext.Default.Response);
-        }
-    }
+    private static string HandleGetOriginalPhysicalAddress()
+        => JsonSerializer.Serialize(new GetOriginalPhysicalAddressResult
+        {
+            Status = OperationStatus.Success,
+            OriginalPhysicalAddress = PhysicalAddress.Parse("00:02:01:10:53:25"),
+            Message = null
+        },
+            SourceGenerationContext.Default.GetOriginalPhysicalAddressResult);
 
     private string HandleSetSystemConfiguration(string content)
     {

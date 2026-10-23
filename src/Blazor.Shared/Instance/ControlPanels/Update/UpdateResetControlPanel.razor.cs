@@ -1,6 +1,5 @@
 using Blazor.Shared.Instance.ControlPanels.Update.Services;
 using Blazor.Shared.Services;
-using Core.Shared;
 using Core.Shared.HostManagement.Events;
 using Microsoft.AspNetCore.Components;
 using Sdk.Authorization;

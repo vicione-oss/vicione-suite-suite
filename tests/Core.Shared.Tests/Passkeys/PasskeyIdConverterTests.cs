@@ -14,7 +14,7 @@ public class PasskeyIdConverterTests
         // Act
         var decoded = PasskeyIdConverter.DecodePasskeyId(someString);
         var encoded = PasskeyIdConverter.EncodePasskeyId(decoded);
-        
+
         // Assert
         Assert.Equal(someString, encoded);
     }

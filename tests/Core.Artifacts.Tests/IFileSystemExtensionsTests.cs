@@ -7,7 +7,7 @@ public class IFileSystemExtensionsTests
 {
     public sealed class EnsureContainedPath : IFileSystemExtensionsTests
     {
-        private readonly IFileSystem _fileSystem = new FileSystem();
+        private readonly FileSystem _fileSystem = new();
         private readonly string _root;
 
         public EnsureContainedPath()

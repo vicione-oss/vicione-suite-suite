@@ -16,8 +16,8 @@ namespace Core.OS.UserManagement.Configuration;
 /// <para>
 /// <b>How to extend:</b> Override <see cref="AuthenticationSchemeProvider.GetSchemeAsync"/> and, after the
 /// <c>base.GetSchemeAsync</c> call returns <c>null</c>, query the database for a provider matching
-/// <paramref name="name"/>. If found, return a new <see cref="AuthenticationScheme"/> using that
-/// <paramref name="name"/> and <see cref="OpenIdConnectHandler"/> as the handler type. The name must
+/// <c>name</c>. If found, return a new <see cref="AuthenticationScheme"/> using that
+/// <c>name</c> and <see cref="OpenIdConnectHandler"/> as the handler type. The name must
 /// match the name used when configuring <see cref="Microsoft.AspNetCore.Authentication.OpenIdConnect.OpenIdConnectOptions"/>
 /// via <see cref="IConfigureNamedOptions{TOptions}"/>, so the options framework can resolve the
 /// correct settings for that provider.

@@ -1,6 +1,6 @@
 namespace Core.OS.Persistence;
 
-public readonly struct ReplicationSequenceResult
+public readonly record struct ReplicationSequenceResult
 {
     public static readonly ReplicationSequenceResult None = new([], false, false);
     public static readonly ReplicationSequenceResult Buffered = new([], false, true);

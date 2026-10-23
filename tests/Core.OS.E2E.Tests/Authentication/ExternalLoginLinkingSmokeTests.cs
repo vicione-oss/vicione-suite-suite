@@ -4,7 +4,6 @@ using Core.OS.E2E.Tests.Infrastructure;
 using Core.OS.E2E.Tests.Pages;
 using Core.Tests.Tools;
 using Microsoft.Playwright;
-using Xunit;
 using static Microsoft.Playwright.Assertions;
 
 namespace Core.OS.E2E.Tests.Authentication;

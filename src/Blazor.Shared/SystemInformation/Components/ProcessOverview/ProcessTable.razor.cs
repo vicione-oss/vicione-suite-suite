@@ -65,7 +65,7 @@ public sealed partial class ProcessTable
 
     [Parameter] public double? MemoryFreePercent { get; set; }
 
-    private Column[] Columns =>
+    private static Column[] Columns =>
     [
         new(SortKey.Status, string.Empty, CommonVocabulary.State, "state"),
         new(SortKey.Pid, Text.Pid, Text.Pid, "pid"),

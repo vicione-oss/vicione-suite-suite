@@ -188,10 +188,10 @@ public sealed partial class SystemMonitoringComponent : IAsyncDisposable
             return (GaugeCenter + GaugeRadius * Math.Cos(angle), GaugeCenter + GaugeRadius * Math.Sin(angle));
         }
 
-        var start = Point(from);
-        var end = Point(to);
+        var (startX, startY) = Point(from);
+        var (endX, endY) = Point(to);
         var large = (to - from) * 270 > 180 ? 1 : 0;
-        return $"M{Svg(start.X)} {Svg(start.Y)} A{Svg(GaugeRadius)} {Svg(GaugeRadius)} 0 {large} 1 {Svg(end.X)} {Svg(end.Y)}";
+        return $"M{Svg(startX)} {Svg(startY)} A{Svg(GaugeRadius)} {Svg(GaugeRadius)} 0 {large} 1 {Svg(endX)} {Svg(endY)}";
     }
 
     private bool IsOver(SystemMonitoringSeries series)

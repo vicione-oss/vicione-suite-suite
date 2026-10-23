@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿#if DEBUG
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
@@ -7,8 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Sdk.Messaging;
 
 namespace Core.OS.Modules.Controllers;
-
-#if DEBUG
 
 [ApiController]
 [Route("api/[controller]")]

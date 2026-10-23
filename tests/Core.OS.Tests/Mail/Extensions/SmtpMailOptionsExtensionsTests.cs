@@ -28,7 +28,7 @@ public class SmtpMailOptionsExtensionsTests
         => CompleteOptions.IsConfigured().Should().BeTrue();
 
     [Theory]
-    [MemberData(nameof(IncompleteOptions))]
+    [MemberData(nameof(IncompleteOptions), DisableDiscoveryEnumeration = true)]
     public void Should_not_be_configured_when_a_value_is_missing(SmtpMailOptions options)
         => options.IsConfigured().Should().BeFalse();
 }

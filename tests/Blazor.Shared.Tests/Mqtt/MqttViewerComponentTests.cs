@@ -55,7 +55,7 @@ public class MqttViewerComponentTests
         => component.Find(ConnectButtonSelector);
 
     private static IRenderedComponent<LibraryButton> FindToggleConnectionButton(IRenderedComponent<MqttViewerComponent> component)
-        => component.FindComponents<LibraryButton>().Single(button => button.Instance.CssClass?.Contains("toggle-connection-button") == true);
+        => component.FindComponents<LibraryButton>().Single(button => button.Instance.CssClass?.Contains("toggle-connection-button", StringComparison.Ordinal) == true);
 
     private static void ConfigureTestServices(BunitContext ctx, List<Connection>? connections = null, List<MessageModel>? messages = null)
     {

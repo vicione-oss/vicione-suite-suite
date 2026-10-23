@@ -35,12 +35,15 @@
 
     <div class="journal-background">
         <ul class="journal-list">
-            @foreach (var entry in Entries)
+            @if (Entries is not null)
             {
-                <li>
-                    @ComposeHeader(entry)
-                    <span class="@GetClassFromPriority(entry.Priority)">@entry.Message</span>
-                </li>
+                foreach (var entry in Entries)
+                {
+                    <li>
+                        @ComposeHeader(entry)
+                        <span class="@GetClassFromPriority(entry.Priority)">@entry.Message</span>
+                    </li>
+                }
             }
         </ul>
         @if (ErrorMessage is not null)
