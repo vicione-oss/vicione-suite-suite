@@ -34,3 +34,20 @@ dotnet_diagnostic.CA2227.severity = warning # Collection properties should be re
 dotnet_diagnostic.CA2251.severity = warning # Use `String.Equals` over `String.Compare`
 
 dotnet_diagnostic.SYSLIB1006.severity = warning # Multiple logging methods should not use the same event id
+
+# ReSharper / Rider formatting
+[*.{cs,razor}]
+resharper_keep_existing_embedded_block_arrangement = true
+resharper_keep_existing_expr_member_arrangement = false
+resharper_max_enum_members_on_line = 1
+resharper_max_initializer_elements_on_line = 1
+resharper_place_linq_into_on_new_line = false
+resharper_place_simple_embedded_statement_on_same_line = never
+resharper_space_within_single_line_array_initializer_braces = true
+resharper_wrap_arguments_style = chop_if_long
+resharper_wrap_array_initializer_style = chop_if_long
+resharper_wrap_before_arrow_with_expressions = true
+resharper_wrap_before_binary_opsign = true
+resharper_wrap_before_first_type_parameter_constraint = true
+resharper_wrap_chained_method_calls = chop_if_long
+resharper_wrap_parameters_style = chop_if_long
