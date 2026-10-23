@@ -285,7 +285,7 @@ include:
       source_repository: "vicione-suite-staging"
       destination_repository: "vicione-suite"
       remote_path: "suites"
-      remote_pattern: "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}*"
+      remote_pattern: "${ARTIFACT_PREFIX}_${ARTIFACT_VERSION}_*"
       rules:
         - <<: *rules_tag_manual
 
