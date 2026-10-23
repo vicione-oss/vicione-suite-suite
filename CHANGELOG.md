@@ -26,6 +26,7 @@
 - Restarts, flashing, module service restarts and backup restores show an error when HostManagement disables them, see `docs/hostmanagement-capabilities.md`. **Upgrade:** create `/etc/hostmanagement/SupportedCapabilities.conf` as described there, without it every capability is disabled
 - `UserControlPanel`, language and time zone are editable again
 - Settings, the slide between control panels runs in the browser
+- Settings dialog, the category of a requested control panel is scrolled into view
 - `modules.json`, `latest` and `x.*` also resolve to `beta` and `rc` versions, so modules that only have a beta install after a reset. **Behaviour change:** a newer `beta` or `rc` wins over the last release
 - Wizards, the page slides sideways when moving to the next or previous step
 - System information, the copy button confirms the copy with a check mark and a tooltip
@@ -131,6 +132,7 @@
 ### Updated
 
 - `AspNetCore.SassCompiler` packages, update to version `1.105.1`
+- `bunit` package, update to version `2.12.5`
 - `HostManagement` packages, update to version `2.0.0-beta1`
 - `ViciOne.SystemMonitoring` package, update to version `1.1.0`
 - `Microsoft` packages, update to version `10.0.13`
@@ -143,7 +145,7 @@
 - `System.IO.Abstractions` package, update version to `22.3.0`
 - `ViciOne.CodeAnalysis` package, update to version `1.8.0`
 - `ViciOne.Suite.Sdk` packages, update to version `3.7.0`
-- `ViciOne.Ui.Blazor.Components` packages, update to version `6.6.1`
+- `ViciOne.Ui.Blazor.Components` packages, update to version `6.7.0`
 - `ViciOne.Ui.Design`, update to version `2.5.0`
 - `ViciOne.Ui.Localization`, update to version `3.7.0`
 - `ViciOne.Ui.MonochromeIcons` packages, update to version `4.18.0`

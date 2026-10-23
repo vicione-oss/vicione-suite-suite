@@ -5,7 +5,7 @@
     <HostManagementVersion>2.0.0-beta1</HostManagementVersion>
     <OpenTelemetryVersion>1.18.0</OpenTelemetryVersion>
     <MassTransitVersion>8.5.11</MassTransitVersion>
-    <ViciOneUiBlazorComponentsVersion>6.6.1</ViciOneUiBlazorComponentsVersion>
+    <ViciOneUiBlazorComponentsVersion>6.7.0</ViciOneUiBlazorComponentsVersion>
     <ViciOneUiMonochromeIconsVersion>4.18.0</ViciOneUiMonochromeIconsVersion>
     <ViciOneSuiteSdkVersion>3.7.0</ViciOneSuiteSdkVersion>
   </PropertyGroup>
@@ -72,7 +72,7 @@
     <!--Used for tests only:-->
     <PackageVersion Include="AutoFixture" Version="4.18.1" />
     <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
-    <PackageVersion Include="bunit" Version="2.11.3" />
+    <PackageVersion Include="bunit" Version="2.12.5" />
     <PackageVersion Include="Extensions.Logging.NSubstitute" Version="1.0.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="$(DotNetVersion)" />
