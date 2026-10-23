@@ -12,4 +12,5 @@ public static class IdentityRoutes
     public const string ResendEmailConfirmationRoute = "/account/resend-email-confirmation";
     public const string ResetPasswordRoute = "/account/reset-password";
     public const string ResetPasswordConfirmationRoute = "/account/reset-password-confirmation";
+    public const string SetPasswordRoute = "/account/manage/set-password";
 }

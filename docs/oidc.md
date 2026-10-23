@@ -31,6 +31,7 @@ What the panel does beyond storing the values:
 - **Clearing both `Authority` and `Client ID` removes the provider** and, with it, every external login.
   Leaving one of the two filled is a validation error, not a removal.
 - **Users created through the provider have no password** and lose access when their external login is cleared.
+  They can set one with *Set password* in the profile flyout, which asks for no current password.
 - **The stored client secret never leaves the server.**
   The field always renders empty; leaving it empty keeps the stored secret, and *Remove stored secret* clears it — needed to switch to a public PKCE client.
 - **The secret is stored unencrypted**, like the file-based path below.

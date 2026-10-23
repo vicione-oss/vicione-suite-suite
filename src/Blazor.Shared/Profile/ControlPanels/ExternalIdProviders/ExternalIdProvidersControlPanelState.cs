@@ -10,4 +10,6 @@ public sealed class ExternalIdProvidersControlPanelState : ControlPanelState
     public ExternalUserAccount? LinkedExternalAccount { get; set; }
 
     public string? RemovalError { get; set; }
+
+    public bool IsLastSignInMethod { get; set; }
 }

@@ -45,6 +45,9 @@
 - `FirstRunWizard` feature flag, enabled by default, gating the redirect to the first-run wizard
 - Admin-only "OpenID provider" settings panel (Settings → User Management) for external sign-in (see `docs/oidc.md`)
   - Shows the redirect URI to register at the provider, with a copy button
+- Users without a password, such as those created through an OpenID provider, can set one without a current password
+  - Offered in the profile flyout, in User management for one's own user, and when unlinking the external account is refused
+  - A refused unlink also offers *Add passkey* when passkeys are enabled
 - CSP violation reporting: browsers report violations to `POST /csp-report`, and the Suite logs each one as a warning. Requires HTTPS
 - `Dialogs` and `Popups` keep the focus inside their boundaries while open
 - Process overview, a snapshot button copies all values and processes as text for a support ticket
@@ -60,6 +63,7 @@
 - The first sign-in through an OpenID provider that sends no `preferred_username`, such as Google, uses the email as the username
 - Login page, a sign-up through an OpenID provider that sends no email address says so
 - Profile, *Add external login* opens its own page and reaches the provider even when it changed after the Suite was opened
+- Users created through an OpenID provider, existing ones included, have no password expiry date
 - Missing release date in `README.md` for version `1.3.0`
 - `RoleControlPanel`, adding a role whose name already exists shows the error and stays in create mode
 - `UserControlPanel`

@@ -37,7 +37,8 @@ public static class UserProfileExtensions
                 Country = user.Country,
                 PhoneNumber = user.PhoneNumber,
                 Mobile = user.Mobile,
-                PasswordExpirationDate = user.PasswordExpirationDate
+                PasswordExpirationDate = user.PasswordExpirationDate,
+                HasPassword = await userManager.HasPasswordAsync(user)
             };
         }
 

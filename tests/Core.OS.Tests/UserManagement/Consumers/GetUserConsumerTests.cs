@@ -6,6 +6,7 @@ using Core.Shared.UserManagement.Contracts;
 using Core.Shared.UserManagement.Events;
 using Core.Shared.UserManagement.Requests;
 using MassTransit;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sdk.Testing.Backend;
@@ -67,6 +68,23 @@ public class GetUserConsumerTests
         // Act/Assert
         var response = await tester.TestRequest<GetUsersResponse, GetUsers>(request);
         response.Should().BeEquivalentTo(new GetUsersResponse([SeedingExtensions.Bob.ToUserProfile()]));
+    }
+
+    [Fact]
+    public async Task Should_report_that_a_user_created_without_password_has_none()
+    {
+        // Arrange
+        await using var tester = new MassTransitTester(_configureServices);
+        await using var scope = tester.Services.CreateAsyncScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<SuiteUser>>();
+        await userManager.CreateAsync(new SuiteUser { UserName = "oidc.user", Email = "oidc.user@example.com" });
+        var request = new GetUsers(new UserName("oidc.user"));
+
+        // Act
+        var response = await tester.TestRequest<GetUsersResponse, GetUsers>(request);
+
+        // Assert
+        response.Users.Should().ContainSingle().Which.HasPassword.Should().BeFalse();
     }
 
     [Fact]

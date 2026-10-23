@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using Blazor.Server.Backend.Areas.Identity.Pages.Models;
+using Blazor.Server.Backend.Extensions;
 using Blazor.Server.Backend.Localization;
 using Blazor.Shared;
 using Blazor.Shared.Services;
@@ -79,21 +80,9 @@ public sealed partial class ResetPasswordContent
 
         foreach (var error in result.Errors)
         {
-            switch (error.Code)
-            {
-                case nameof(IdentityErrorDescriber.PasswordRequiresDigit):
-                case nameof(IdentityErrorDescriber.PasswordRequiresLower):
-                case nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric):
-                case nameof(IdentityErrorDescriber.PasswordRequiresUniqueChars):
-                case nameof(IdentityErrorDescriber.PasswordRequiresUpper):
-                case nameof(IdentityErrorDescriber.PasswordTooShort):
-                    messageStore?.Add(() => Input.NewPassword, error.Description);
-                    messageStore?.Add(() => Input.ConfirmNewPassword, error.Description);
-                    break;
-                default:
-                    messageStore?.Add(() => Input.NewPassword, error.Description);
-                    break;
-            }
+            messageStore?.Add(() => Input.NewPassword, error.Description);
+            if (error.IsPasswordPolicyError())
+                messageStore?.Add(() => Input.ConfirmNewPassword, error.Description);
         }
     }
 

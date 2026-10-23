@@ -132,6 +132,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
     </Compile>
+    <Compile Update="Localization\PasswordTerms.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>PasswordTerms.resx</DependentUpon>
+    </Compile>
     <Compile Update="Localization\App.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -598,6 +603,10 @@
     <EmbeddedResource Update="Localization\ValidationTerms.resx">
       <LastGenOutput>ValidationTerms.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Localization\PasswordTerms.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PasswordTerms.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Localization\App.resx">
       <Generator>ResXFileCodeGenerator</Generator>

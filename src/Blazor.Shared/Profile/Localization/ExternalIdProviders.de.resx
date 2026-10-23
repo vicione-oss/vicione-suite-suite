@@ -38,4 +38,7 @@
   <data name="UnlinkFailed" xml:space="preserve">
     <value>Die Verknüpfung des externen Kontos konnte nicht entfernt werden.</value>
   </data>
+  <data name="AddPasskey" xml:space="preserve">
+    <value>Passkey hinzufügen</value>
+  </data>
 </root>

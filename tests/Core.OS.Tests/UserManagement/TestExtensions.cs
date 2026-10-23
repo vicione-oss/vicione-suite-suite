@@ -41,6 +41,7 @@ internal static class TestExtensions
                 Country = suiteUser.Country,
                 PhoneNumber = suiteUser.PhoneNumber,
                 Mobile = suiteUser.Mobile,
+                HasPassword = true,
                 CurrentPassword = setCurrentPassword ? seedUser.Password : null
             };
         }
